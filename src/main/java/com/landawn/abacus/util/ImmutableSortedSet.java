@@ -416,8 +416,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      *         {@code fromElement}, inclusive, to {@code toElement}, exclusive
      * @throws ClassCastException if {@code fromElement} and {@code toElement}
      *         cannot be compared to one another using this set's comparator
-     *         is {@code null} and this set uses natural ordering, or its comparator
-     *         does not permit {@code null} elements
+     *         (or, if the set has no comparator, using natural ordering)
      * @throws IllegalArgumentException if {@code fromElement} is greater than
      *         {@code toElement}; or if this set itself has a restricted range,
      *         and {@code fromElement} or {@code toElement} lies outside the
@@ -443,8 +442,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @return a view of the portion of this set whose elements are strictly
      *         less than {@code toElement}
      * @throws ClassCastException if {@code toElement} is not compatible with
-     *         this set's comparator
-     *         natural ordering, or its comparator does not permit {@code null} elements
+     *         this set's comparator (or, if the set has no comparator, using natural ordering)
      * @throws IllegalArgumentException if this set itself has a restricted range,
      *         and {@code toElement} lies outside the bounds of the range
      */
@@ -468,8 +466,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @return a view of the portion of this set whose elements are greater
      *         than or equal to {@code fromElement}
      * @throws ClassCastException if {@code fromElement} is not compatible with
-     *         this set's comparator
-     *         natural ordering, or its comparator does not permit {@code null} elements
+     *         this set's comparator (or, if the set has no comparator, using natural ordering)
      * @throws IllegalArgumentException if this set itself has a restricted range,
      *         and {@code fromElement} lies outside the bounds of the range
      */

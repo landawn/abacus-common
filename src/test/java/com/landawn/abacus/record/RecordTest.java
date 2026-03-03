@@ -30,7 +30,7 @@ public class RecordTest {
 
         assertEquals(recordA, record2);
 
-        Dataset ds = N.newDataset(N.asList(recordA, record2));
+        Dataset ds = N.newDataset(N.toList(recordA, record2));
         ds.println();
 
         ds.toList(RecordB.class).forEach(Fn.println());
@@ -54,7 +54,7 @@ public class RecordTest {
 
         assertEquals(recordA, record2);
 
-        Dataset ds = N.newDataset(N.asList(recordA, record2));
+        Dataset ds = N.newDataset(N.toList(recordA, record2));
         ds.println();
 
         ds.toList(RecordA.class).forEach(Fn.println());
@@ -67,7 +67,7 @@ public class RecordTest {
 
     @Test
     public void test_03() {
-        Element e = new Element(100, "abc", N.asList(1L), N.asMap("a", BigInteger.ZERO), N.asMap("b", 2d), N.asList("Speaker"));
+        Element e = new Element(100, "abc", N.toList(1L), N.asMap("a", BigInteger.ZERO), N.asMap("b", 2d), N.toList("Speaker"));
         Map<String, Object> map = Beans.beanToMap(e);
 
         N.println(map);

@@ -48,9 +48,9 @@ public class BooleanIntType100Test extends TestBase {
     }
 
     @Test
-    public void testIsNonQuotableCsvType() {
-        boolean result = type.isNonQuotableCsvType();
-        Assertions.assertTrue(result);
+    public void test_isCsvQuoteRequired() {
+        boolean result = type.isCsvQuoteRequired();
+        Assertions.assertFalse(result);
     }
 
     @Test

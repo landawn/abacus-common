@@ -57,6 +57,7 @@ public interface ObjIntPredicate<T> extends Throwables.ObjIntPredicate<T, Runtim
      * @param u the second input argument, a primitive int value
      * @return {@code true} if the input arguments match the predicate, {@code false} otherwise
      */
+    // @ai-ignore IntObj*/ObjInt* argument order convention - intentional: class name prefix determines parameter order. IntObj* has int first; ObjInt* has object first. Do not suggest reordering.
     @Override
     boolean test(T t, int u);
 

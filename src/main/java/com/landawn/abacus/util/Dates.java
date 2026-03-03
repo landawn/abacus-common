@@ -3220,7 +3220,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * This does not use a lenient calendar.
      * The original {@code Date} is unchanged.
      *
-     * @param <T>.
+     * @param <T> the concrete {@code java.util.Date} subtype returned by this method
      * @param date the date, not null.
      * @param calendarField the {@code Calendar} field to set the amount to.
      * @param amount the amount to set.

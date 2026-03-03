@@ -159,8 +159,8 @@ public class LongPredicate2025Test extends TestBase {
     }
 
     @Test
-    public void testGreaterEqual() {
-        final LongPredicate predicate = LongPredicate.greaterEqual(10L);
+    public void testGreaterThanOrEqual() {
+        final LongPredicate predicate = LongPredicate.greaterThanOrEqual(10L);
         assertTrue(predicate.test(11L));
         assertTrue(predicate.test(10L));
         assertFalse(predicate.test(9L));
@@ -175,8 +175,8 @@ public class LongPredicate2025Test extends TestBase {
     }
 
     @Test
-    public void testLessEqual() {
-        final LongPredicate predicate = LongPredicate.lessEqual(10L);
+    public void testLessThanOrEqual() {
+        final LongPredicate predicate = LongPredicate.lessThanOrEqual(10L);
         assertTrue(predicate.test(9L));
         assertTrue(predicate.test(10L));
         assertFalse(predicate.test(11L));

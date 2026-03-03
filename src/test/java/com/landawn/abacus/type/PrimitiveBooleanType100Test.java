@@ -128,8 +128,8 @@ public class PrimitiveBooleanType100Test extends TestBase {
     }
 
     @Test
-    public void testIsNonQuotableCsvType() {
-        assertTrue(primitiveBooleanType.isNonQuotableCsvType());
+    public void test_isCsvQuoteRequired() {
+        assertFalse(primitiveBooleanType.isCsvQuoteRequired());
     }
 
     @Test

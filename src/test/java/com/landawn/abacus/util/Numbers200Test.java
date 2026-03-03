@@ -504,23 +504,23 @@ public class Numbers200Test extends TestBase {
 
     @Test
     public void testIsCreatableAndIsNumber() {
-        assertTrue(Numbers.isCreatable("123"));
+        assertTrue(Numbers.isConvertibleToNumber("123"));
         assertTrue(Numbers.isNumber("123"));
-        assertTrue(Numbers.isCreatable("123.45"));
-        assertTrue(Numbers.isCreatable("-1.2e-5"));
-        assertTrue(Numbers.isCreatable("0xFF"));
-        assertTrue(Numbers.isCreatable("077"));
-        assertTrue(Numbers.isCreatable("123L"));
-        assertTrue(Numbers.isCreatable("1.2f"));
-        assertTrue(Numbers.isCreatable("1.2d"));
+        assertTrue(Numbers.isConvertibleToNumber("123.45"));
+        assertTrue(Numbers.isConvertibleToNumber("-1.2e-5"));
+        assertTrue(Numbers.isConvertibleToNumber("0xFF"));
+        assertTrue(Numbers.isConvertibleToNumber("077"));
+        assertTrue(Numbers.isConvertibleToNumber("123L"));
+        assertTrue(Numbers.isConvertibleToNumber("1.2f"));
+        assertTrue(Numbers.isConvertibleToNumber("1.2d"));
 
-        assertFalse(Numbers.isCreatable("abc"));
-        assertFalse(Numbers.isCreatable(""));
-        assertFalse(Numbers.isCreatable(null));
-        assertFalse(Numbers.isCreatable("1.2.3"));
-        assertFalse(Numbers.isCreatable("--1"));
-        assertFalse(Numbers.isCreatable("09"));
-        assertTrue(Numbers.isCreatable("0.9"));
+        assertFalse(Numbers.isConvertibleToNumber("abc"));
+        assertFalse(Numbers.isConvertibleToNumber(""));
+        assertFalse(Numbers.isConvertibleToNumber(null));
+        assertFalse(Numbers.isConvertibleToNumber("1.2.3"));
+        assertFalse(Numbers.isConvertibleToNumber("--1"));
+        assertFalse(Numbers.isConvertibleToNumber("09"));
+        assertTrue(Numbers.isConvertibleToNumber("0.9"));
     }
 
     @Test

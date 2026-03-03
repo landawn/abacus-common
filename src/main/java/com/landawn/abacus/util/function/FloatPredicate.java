@@ -177,7 +177,7 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      * @param targetFloat the value to compare against
      * @return a predicate that tests if the input is greater than or equal to {@code targetFloat}
      */
-    static FloatPredicate greaterEqual(final float targetFloat) {
+    static FloatPredicate greaterThanOrEqual(final float targetFloat) {
         return value -> N.compare(value, targetFloat) >= 0;
     }
 
@@ -199,7 +199,7 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      * @param targetFloat the value to compare against
      * @return a predicate that tests if the input is less than or equal to {@code targetFloat}
      */
-    static FloatPredicate lessEqual(final float targetFloat) {
+    static FloatPredicate lessThanOrEqual(final float targetFloat) {
         return value -> N.compare(value, targetFloat) <= 0;
     }
 

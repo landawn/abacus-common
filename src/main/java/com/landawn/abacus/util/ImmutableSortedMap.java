@@ -565,8 +565,9 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      *         {@code fromKey}, inclusive, to {@code toKey}, exclusive
      * @throws ClassCastException if {@code fromKey} and {@code toKey}
      *         cannot be compared to one another using this map's comparator
-     *         (or, if the map has no comparator, using natural ordering)
-     *         and this map uses natural ordering, or its comparator does not permit {@code null} keys
+     *         (or, if the map has no comparator, using natural ordering).
+     *         Implementations may, but are not required to, throw this
+     *         exception if {@code fromKey} or {@code toKey} cannot be compared to keys currently in the map
      * @throws IllegalArgumentException if {@code fromKey} is greater than
      *         {@code toKey}; or if this map itself has a restricted range,
      *         and {@code fromKey} or {@code toKey} lies outside the bounds of the range
@@ -593,7 +594,6 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @return a view of the portion of this map whose keys are strictly less than {@code toKey}
      * @throws ClassCastException if {@code toKey} is not compatible with
      *         this map's comparator (or, if the map has no comparator, using natural ordering)
-     *         natural ordering, or its comparator does not permit {@code null} keys
      * @throws IllegalArgumentException if this map itself has a restricted range,
      *         and {@code toKey} lies outside the bounds of the range
      */
@@ -619,7 +619,6 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @return a view of the portion of this map whose keys are greater than or equal to {@code fromKey}
      * @throws ClassCastException if {@code fromKey} is not compatible with
      *         this map's comparator (or, if the map has no comparator, using natural ordering)
-     *         natural ordering, or its comparator does not permit {@code null} keys
      * @throws IllegalArgumentException if this map itself has a restricted range,
      *         and {@code fromKey} lies outside the bounds of the range
      */

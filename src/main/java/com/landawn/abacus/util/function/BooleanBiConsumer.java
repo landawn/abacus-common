@@ -34,11 +34,11 @@ public interface BooleanBiConsumer extends Throwables.BooleanBiConsumer<RuntimeE
      * logger.accept(true, false);   // Prints: AND: false
      * }</pre>
      *
-     * @param t the first input argument (boolean value)
-     * @param u the second input argument (boolean value)
+     * @param a the first input argument (boolean value)
+     * @param b the second input argument (boolean value)
      */
     @Override
-    void accept(boolean t, boolean u);
+    void accept(boolean a, boolean b);
 
     /**
      * Returns a composed {@code BooleanBiConsumer} that performs, in sequence, this operation followed by the {@code after} operation.
@@ -56,9 +56,9 @@ public interface BooleanBiConsumer extends Throwables.BooleanBiConsumer<RuntimeE
      * @return a composed {@code BooleanBiConsumer} that performs in sequence this operation followed by the {@code after} operation
      */
     default BooleanBiConsumer andThen(final BooleanBiConsumer after) {
-        return (t, u) -> {
-            accept(t, u);
-            after.accept(t, u);
+        return (a, b) -> {
+            accept(a, b);
+            after.accept(a, b);
         };
     }
 }

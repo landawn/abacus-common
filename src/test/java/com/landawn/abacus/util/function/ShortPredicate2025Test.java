@@ -231,14 +231,14 @@ public class ShortPredicate2025Test extends TestBase {
     }
 
     @Test
-    public void test_greaterEqual() {
-        ShortPredicate greaterEqualToTen = ShortPredicate.greaterEqual((short) 10);
+    public void test_greaterThanOrEqual() {
+        ShortPredicate greaterThanOrEqualToTen = ShortPredicate.greaterThanOrEqual((short) 10);
 
-        assertTrue(greaterEqualToTen.test((short) 11));
-        assertTrue(greaterEqualToTen.test((short) 10));
-        assertTrue(greaterEqualToTen.test((short) 100));
-        assertFalse(greaterEqualToTen.test((short) 9));
-        assertFalse(greaterEqualToTen.test((short) -10));
+        assertTrue(greaterThanOrEqualToTen.test((short) 11));
+        assertTrue(greaterThanOrEqualToTen.test((short) 10));
+        assertTrue(greaterThanOrEqualToTen.test((short) 100));
+        assertFalse(greaterThanOrEqualToTen.test((short) 9));
+        assertFalse(greaterThanOrEqualToTen.test((short) -10));
     }
 
     @Test
@@ -253,14 +253,14 @@ public class ShortPredicate2025Test extends TestBase {
     }
 
     @Test
-    public void test_lessEqual() {
-        ShortPredicate lessEqualToTen = ShortPredicate.lessEqual((short) 10);
+    public void test_lessThanOrEqual() {
+        ShortPredicate lessThanOrEqualToTen = ShortPredicate.lessThanOrEqual((short) 10);
 
-        assertTrue(lessEqualToTen.test((short) 9));
-        assertTrue(lessEqualToTen.test((short) 10));
-        assertTrue(lessEqualToTen.test((short) -100));
-        assertFalse(lessEqualToTen.test((short) 11));
-        assertFalse(lessEqualToTen.test((short) 100));
+        assertTrue(lessThanOrEqualToTen.test((short) 9));
+        assertTrue(lessThanOrEqualToTen.test((short) 10));
+        assertTrue(lessThanOrEqualToTen.test((short) -100));
+        assertFalse(lessThanOrEqualToTen.test((short) 11));
+        assertFalse(lessThanOrEqualToTen.test((short) 100));
     }
 
     @Test

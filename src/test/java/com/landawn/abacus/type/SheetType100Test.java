@@ -61,7 +61,7 @@ public class SheetType100Test extends TestBase {
     public void testStringOf() {
         assertNull(sheetType.stringOf(null));
 
-        Sheet<String, String, Object> sheet = Sheet.rows(N.asList("r1", "r2", "r3"), N.asList("c1", "c2"),
+        Sheet<String, String, Object> sheet = Sheet.rows(N.toList("r1", "r2", "r3"), N.toList("c1", "c2"),
                 new Object[][] { { 1, "a" }, { null, "b" }, { 5, "c" } });
 
         String result = sheetType.stringOf(sheet);

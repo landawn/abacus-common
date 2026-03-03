@@ -58,6 +58,7 @@ public interface ObjLongConsumer<T> extends Throwables.ObjLongConsumer<T, Runtim
      * @param t the first input argument of type T
      * @param value the second input argument, a primitive long value
      */
+    // @ai-ignore LongObj*/ObjLong* argument order convention - intentional: class name prefix determines parameter order. LongObj* has long first; ObjLong* has object first. Do not suggest reordering.
     @Override
     void accept(T t, long value);
 

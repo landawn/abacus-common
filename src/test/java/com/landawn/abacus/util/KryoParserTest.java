@@ -72,7 +72,7 @@ public class KryoParserTest extends AbstractParserTest {
     @Test
     public void testSerialize1() {
         Bean bean = new Bean();
-        bean.setTypeList(CommonUtil.asList(
+        bean.setTypeList(CommonUtil.toList(
                 "‰β,『�?★业€ > \n sfd \r ds \' f d // \\  \\\\ /// /////// \\\\\\\\  \\\\\\\\n \\\\\\\\r  \t sd \" fe stri‰β,『�?★业€ ng黎< > </ <//、\n", '★', '\n',
                 '\r', '\t', '\"', '\'', ' ', new char[] { '\r', '\t', '\"', '\'', ' ' },
                 new String[] {
@@ -170,8 +170,8 @@ public class KryoParserTest extends AbstractParserTest {
         xBean.setTypeChar('<');
         xBean.setTypeChar2('>');
         xBean.setTypeGenericList(
-                CommonUtil.asList(Dates.createDate(System.currentTimeMillis() / 1000 * 1000), Dates.createDate(System.currentTimeMillis() / 1000 * 1000)));
-        xBean.setTypeGenericSet(CommonUtil.asSet(1L, 2L));
+                CommonUtil.toList(Dates.createDate(System.currentTimeMillis() / 1000 * 1000), Dates.createDate(System.currentTimeMillis() / 1000 * 1000)));
+        xBean.setTypeGenericSet(CommonUtil.toSet(1L, 2L));
 
         String jsonStr = kryoParser.serialize(xBean);
         println(jsonStr);
@@ -232,7 +232,7 @@ public class KryoParserTest extends AbstractParserTest {
         typeGenericList.add(null);
         xBean.setTypeGenericList(typeGenericList);
 
-        Set<Long> typeGenericSet = CommonUtil.asSortedSet();
+        Set<Long> typeGenericSet = CommonUtil.toSortedSet();
         typeGenericSet.add(1332333L);
         typeGenericSet.add(Long.MAX_VALUE);
         typeGenericSet.add(Long.MIN_VALUE);
@@ -279,14 +279,14 @@ public class KryoParserTest extends AbstractParserTest {
         typeGenericMap2.put(account.getFirstName(), createAccount(Account.class));
         typeGenericMap2.put(account.getLastName(), createAccount(Account.class));
         typeGenericMap2.put("null", null);
-        typeGenericMap2.put("bookList", CommonUtil.asList(createAccount(Account.class)));
+        typeGenericMap2.put("bookList", CommonUtil.toList(createAccount(Account.class)));
         xBean.setTypeGenericMap2(typeGenericMap2);
 
         Map<Object, Object> typeGenericMap4 = new ConcurrentHashMap<>();
         typeGenericMap4.put(createAccount(Account.class), createAccount(Account.class));
         typeGenericMap4.put(createAccount(Account.class), createAccount(Account.class));
         typeGenericMap4.put("aaabbbccc", "");
-        typeGenericMap4.put("bookList", CommonUtil.asList(createAccount(Account.class)));
+        typeGenericMap4.put("bookList", CommonUtil.toList(createAccount(Account.class)));
         typeGenericMap4.put("edse", " ");
         typeGenericMap4.put(new HashMap<>(), " ");
         typeGenericMap4.put(new ArrayList<>(), new HashSet<>());
@@ -300,7 +300,7 @@ public class KryoParserTest extends AbstractParserTest {
         }
 
         typeMap.put("null", null);
-        typeMap.put("bookList", CommonUtil.asList(createAccount(Account.class)));
+        typeMap.put("bookList", CommonUtil.toList(createAccount(Account.class)));
         typeMap.put(" ", " ");
         typeMap.put(new HashMap<>(), " ");
         typeMap.put(new ArrayList<>(), new HashSet<>());
@@ -417,11 +417,11 @@ public class KryoParserTest extends AbstractParserTest {
             this.shortList = shortList;
         }
 
-        public XMLGregorianCalendar getXmlGregorianCalendar() {
+        public XMLGregorianCalendar getXMLGregorianCalendar() {
             return xmlGregorianCalendar;
         }
 
-        public void setXmlGregorianCalendar(XMLGregorianCalendar xmlGregorianCalendar) {
+        public void setXMLGregorianCalendar(XMLGregorianCalendar xmlGregorianCalendar) {
             this.xmlGregorianCalendar = xmlGregorianCalendar;
         }
 

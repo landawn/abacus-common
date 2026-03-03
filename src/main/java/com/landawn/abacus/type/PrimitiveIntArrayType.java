@@ -23,6 +23,9 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
+/**
+ * Type handler for primitive {@code int[]} arrays, providing serialization and deserialization support.
+ */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[]> {
 
@@ -306,7 +309,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      *
      * @param x the int array to convert
      * @param output the Collection to add the array elements to
-     * @param <E> the type parameter of the output collection
+     * @param <E> the element type accepted by the output collection
      * @throws ClassCastException if the output collection cannot accept Integer objects
      */
     @Override

@@ -29,7 +29,7 @@ public enum EnumType {
      * to enum reordering. The only concern is renaming enum constants, which would
      * require data migration.</p>
      *
-     * <p><b>Example:</b> For enum {@code Status { PENDING, ACTIVE, CLOSED }},
+     * <p><b>Usage Examples:</b> For enum {@code Status { PENDING, ACTIVE, CLOSED }},
      * values are stored as "PENDING", "ACTIVE", "CLOSED". You can safely reorder
      * or add new values without breaking existing data.</p>
      *
@@ -50,7 +50,7 @@ public enum EnumType {
      * of enum constants. Adding, removing, or reordering enum values will break
      * compatibility with existing persisted data.</p>
      *
-     * <p><b>Example:</b> For enum {@code Status { PENDING, ACTIVE, CLOSED }},
+     * <p><b>Usage Examples:</b> For enum {@code Status { PENDING, ACTIVE, CLOSED }},
      * values are stored as 0, 1, 2 respectively. If you later change it to
      * {@code Status { ACTIVE, PENDING, CLOSED }}, all existing data will be incorrect.</p>
      *

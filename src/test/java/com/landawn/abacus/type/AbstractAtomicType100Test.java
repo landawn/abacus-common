@@ -1,6 +1,6 @@
 package com.landawn.abacus.type;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -23,8 +23,8 @@ public class AbstractAtomicType100Test extends TestBase {
     }
 
     @Test
-    public void testIsNonQuotableCsvType() {
-        assertTrue(type.isNonQuotableCsvType());
+    public void test_isCsvQuoteRequired() {
+        assertFalse(type.isCsvQuoteRequired());
     }
 
 }

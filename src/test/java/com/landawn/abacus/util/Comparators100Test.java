@@ -489,7 +489,7 @@ public class Comparators100Test extends TestBase {
         Person p3 = new Person("Charlie", 35);
         p3.rating = 4.9f;
 
-        List<Person> list = CommonUtil.asList(p1, p2, p3);
+        List<Person> list = CommonUtil.toList(p1, p2, p3);
         list.sort(comp);
 
         assertEquals(3.8f, list.get(0).rating);

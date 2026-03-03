@@ -102,14 +102,14 @@ public class FractionType extends AbstractType<Fraction> {
     }
 
     /**
-     * Indicates whether this type should be written without quotes in CSV format.
-     * Numeric types like Fraction are typically not quoted in CSV files.
+     * Indicates whether values of this type require quoting in CSV format.
+     * Fraction values are numeric and do not require quotes.
      *
-     * @return {@code true}, indicating that Fraction values should not be quoted in CSV output
+     * @return {@code false}, as fraction values do not require quoting in CSV format
      */
     @Override
-    public boolean isNonQuotableCsvType() {
-        return true;
+    public boolean isCsvQuoteRequired() {
+        return false;
     }
 
     /**

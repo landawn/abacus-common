@@ -246,7 +246,7 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  *   <li><b>Length Limits:</b> Consider implementing parameter length limits for DoS prevention</li>
  * </ul>
  *
- * <p><b>Example: REST API Client</b>
+ * <p><b>Usage Examples: REST API Client</b>
  * <pre>{@code
  * public class ApiClient {
  *     private static final String BASE_URL = "https://api.example.com";

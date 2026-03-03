@@ -64,14 +64,14 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
     }
 
     /**
-     * Indicates whether values of this type should be quoted when written to CSV format.
-     * Numeric values typically don't require quotes in CSV.
+     * Indicates whether values of this type require quoting in CSV format.
+     * OptionalFloat values are numeric and do not require quotes in CSV.
      *
-     * @return {@code true}, indicating float values don't need quotes in CSV
+     * @return {@code false}, as OptionalFloat values do not require quoting in CSV format
      */
     @Override
-    public boolean isNonQuotableCsvType() {
-        return true;
+    public boolean isCsvQuoteRequired() {
+        return false;
     }
 
     /**

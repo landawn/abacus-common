@@ -1723,8 +1723,8 @@ public class Fn103Test extends TestBase {
             }
 
             @Test
-            public void testGreaterEqual() {
-                CharBiPredicate predicate = Fn.FC.greaterEqual();
+            public void testGreaterThanOrEqual() {
+                CharBiPredicate predicate = Fn.FC.greaterThanOrEqual();
                 assertTrue(predicate.test('b', 'a'));
                 assertFalse(predicate.test('a', 'b'));
                 assertTrue(predicate.test('a', 'a'));
@@ -1739,8 +1739,8 @@ public class Fn103Test extends TestBase {
             }
 
             @Test
-            public void testLessEqual() {
-                CharBiPredicate predicate = Fn.FC.lessEqual();
+            public void testLessThanOrEqual() {
+                CharBiPredicate predicate = Fn.FC.lessThanOrEqual();
                 assertFalse(predicate.test('b', 'a'));
                 assertTrue(predicate.test('a', 'b'));
                 assertTrue(predicate.test('a', 'a'));
@@ -1839,14 +1839,14 @@ public class Fn103Test extends TestBase {
                 assertTrue(Fn.FB.greaterThan().test((byte) 6, (byte) 5));
                 assertFalse(Fn.FB.greaterThan().test((byte) 5, (byte) 5));
 
-                assertTrue(Fn.FB.greaterEqual().test((byte) 5, (byte) 5));
-                assertTrue(Fn.FB.greaterEqual().test((byte) 6, (byte) 5));
+                assertTrue(Fn.FB.greaterThanOrEqual().test((byte) 5, (byte) 5));
+                assertTrue(Fn.FB.greaterThanOrEqual().test((byte) 6, (byte) 5));
 
                 assertTrue(Fn.FB.lessThan().test((byte) 5, (byte) 6));
                 assertFalse(Fn.FB.lessThan().test((byte) 5, (byte) 5));
 
-                assertTrue(Fn.FB.lessEqual().test((byte) 5, (byte) 5));
-                assertTrue(Fn.FB.lessEqual().test((byte) 5, (byte) 6));
+                assertTrue(Fn.FB.lessThanOrEqual().test((byte) 5, (byte) 5));
+                assertTrue(Fn.FB.lessThanOrEqual().test((byte) 5, (byte) 6));
             }
 
             @Test

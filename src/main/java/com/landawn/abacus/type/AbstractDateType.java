@@ -63,14 +63,14 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
     }
 
     /**
-     * Checks if this type represents values that should not be quoted in CSV format.
-     * Date values are typically formatted as date strings that don't require quotes.
+     * Indicates whether values of this type require quoting in CSV format.
+     * Date values are typically formatted as date strings that do not require quotes.
      *
-     * @return {@code true}, indicating that Date values should not be quoted in CSV format
+     * @return {@code false}, as date values do not require quoting in CSV format
      */
     @Override
-    public boolean isNonQuotableCsvType() {
-        return true;
+    public boolean isCsvQuoteRequired() {
+        return false;
     }
 
     /**

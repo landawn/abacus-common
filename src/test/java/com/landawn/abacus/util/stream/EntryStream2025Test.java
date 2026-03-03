@@ -1071,14 +1071,14 @@ public class EntryStream2025Test extends TestBase {
 
     @Test
     public void testNMatch_Predicate() {
-        assertTrue(EntryStream.of(testMap).countMatchBetween(2, 3, e -> e.getValue() > 3));
-        assertFalse(EntryStream.of(testMap).countMatchBetween(5, 10, e -> e.getValue() > 3));
+        assertTrue(EntryStream.of(testMap).isMatchCountBetween(2, 3, e -> e.getValue() > 3));
+        assertFalse(EntryStream.of(testMap).isMatchCountBetween(5, 10, e -> e.getValue() > 3));
     }
 
     @Test
     public void testNMatch_BiPredicate() {
-        assertTrue(EntryStream.of(testMap).countMatchBetween(2, 3, (k, v) -> v > 3));
-        assertFalse(EntryStream.of(testMap).countMatchBetween(5, 10, (k, v) -> v > 3));
+        assertTrue(EntryStream.of(testMap).isMatchCountBetween(2, 3, (k, v) -> v > 3));
+        assertFalse(EntryStream.of(testMap).isMatchCountBetween(5, 10, (k, v) -> v > 3));
     }
 
     @Test

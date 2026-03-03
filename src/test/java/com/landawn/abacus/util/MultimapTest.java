@@ -36,7 +36,7 @@ public class MultimapTest extends AbstractTest {
 
         N.println(list);
 
-        assertEquals(CommonUtil.asList(1, 2, 3), list);
+        assertEquals(CommonUtil.toList(1, 2, 3), list);
 
         N.println(map.keySet());
 

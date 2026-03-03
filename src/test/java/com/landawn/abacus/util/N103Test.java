@@ -720,21 +720,21 @@ public class N103Test extends TestBase {
 
     @Test
     public void testNMatch() {
-        assertTrue(N.countMatchBetween(integerArray, 2, 3, i -> i % 2 == 0));
-        assertFalse(N.countMatchBetween(integerArray, 3, 4, i -> i % 2 == 0));
-        assertTrue(N.countMatchBetween(new Integer[0], 0, 0, i -> true));
+        assertTrue(N.isMatchCountBetween(integerArray, 2, 3, i -> i % 2 == 0));
+        assertFalse(N.isMatchCountBetween(integerArray, 3, 4, i -> i % 2 == 0));
+        assertTrue(N.isMatchCountBetween(new Integer[0], 0, 0, i -> true));
     }
 
     @Test
     public void testNMatchIterable() {
-        assertTrue(N.countMatchBetween(integerList, 1, 2, i -> i > 3));
-        assertFalse(N.countMatchBetween(integerList, 0, 1, i -> i > 3));
+        assertTrue(N.isMatchCountBetween(integerList, 1, 2, i -> i > 3));
+        assertFalse(N.isMatchCountBetween(integerList, 0, 1, i -> i > 3));
     }
 
     @Test
     public void testNMatchIterator() {
-        assertTrue(N.countMatchBetween(integerList.iterator(), 2, 2, i -> i % 2 == 0));
-        assertFalse(N.countMatchBetween(integerList.iterator(), 3, 5, i -> i % 2 == 0));
+        assertTrue(N.isMatchCountBetween(integerList.iterator(), 2, 2, i -> i % 2 == 0));
+        assertFalse(N.isMatchCountBetween(integerList.iterator(), 3, 5, i -> i % 2 == 0));
     }
 
     @Test
@@ -1115,17 +1115,17 @@ public class N103Test extends TestBase {
 
     @Test
     public void testNMatchNegativeAtLeast() {
-        assertThrows(IllegalArgumentException.class, () -> N.countMatchBetween(integerArray, -1, 2, i -> true));
+        assertThrows(IllegalArgumentException.class, () -> N.isMatchCountBetween(integerArray, -1, 2, i -> true));
     }
 
     @Test
     public void testNMatchNegativeAtMost() {
-        assertThrows(IllegalArgumentException.class, () -> N.countMatchBetween(integerArray, 1, -1, i -> true));
+        assertThrows(IllegalArgumentException.class, () -> N.isMatchCountBetween(integerArray, 1, -1, i -> true));
     }
 
     @Test
     public void testNMatchAtLeastGreaterThanAtMost() {
-        assertThrows(IllegalArgumentException.class, () -> N.countMatchBetween(integerArray, 3, 2, i -> true));
+        assertThrows(IllegalArgumentException.class, () -> N.isMatchCountBetween(integerArray, 3, 2, i -> true));
     }
 
     @Test
@@ -1310,11 +1310,11 @@ public class N103Test extends TestBase {
     public void testNMatchEdgeCases() {
         Integer[] arr = { 1, 2, 3, 4, 5 };
 
-        assertTrue(N.countMatchBetween(arr, 2, 2, i -> i % 2 == 0));
+        assertTrue(N.isMatchCountBetween(arr, 2, 2, i -> i % 2 == 0));
 
-        assertTrue(N.countMatchBetween(arr, 0, 5, i -> false));
+        assertTrue(N.isMatchCountBetween(arr, 0, 5, i -> false));
 
-        assertFalse(N.countMatchBetween(arr, 10, 10, i -> true));
+        assertFalse(N.isMatchCountBetween(arr, 10, 10, i -> true));
     }
 
     @Test

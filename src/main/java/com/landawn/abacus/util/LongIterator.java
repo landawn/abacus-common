@@ -539,7 +539,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      */
     @SuppressWarnings("deprecation")
     public long[] toArray() {
-        return toList().trimToSize().array();
+        return toList().trimToSize().internalArray();
     }
 
     /**

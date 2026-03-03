@@ -53,14 +53,14 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
     }
 
     /**
-     * Indicates whether this type should be written without quotes in CSV format.
-     * Integer values are numeric and should not be quoted.
+     * Indicates whether values of this type require quoting in CSV format.
+     * OptionalInt values are numeric and do not require quotes.
      *
-     * @return {@code true}, indicating that OptionalInt values should not be quoted in CSV output
+     * @return {@code false}, as OptionalInt values do not require quoting in CSV format
      */
     @Override
-    public boolean isNonQuotableCsvType() {
-        return true;
+    public boolean isCsvQuoteRequired() {
+        return false;
     }
 
     /**

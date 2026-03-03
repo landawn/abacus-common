@@ -35,7 +35,7 @@ import com.landawn.abacus.util.stream.Stream;
 /**
  * The BiIterator class is an abstract class that extends ImmutableIterator.
  * It represents an iterator over a pair of values of type A and B.
- * This class provides a blueprint for classes that need to implement a bidirectional iterator.
+ * This class provides a blueprint for classes that need to iterate over pairs of values.
  *
  * @param <A> the first type of elements returned by this iterator
  * @param <B> the second type of elements returned by this iterator
@@ -185,7 +185,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public Pair<K, V> next() {
-                return Pair.create(iter.next());
+                return Pair.from(iter.next());
             }
 
             @Override

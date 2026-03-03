@@ -262,7 +262,7 @@ public final class Joiner implements Closeable {
 
     private String latestToStringValue;
 
-    private boolean isClosed;
+    private volatile boolean isClosed;
 
     Joiner(final CharSequence separator) {
         this(separator, DEFAULT_KEY_VALUE_DELIMITER);
@@ -1339,7 +1339,7 @@ public final class Joiner implements Closeable {
     @SuppressWarnings("deprecation")
     public Joiner appendAll(final BooleanList c) {
         if (N.notEmpty(c)) {
-            return appendAll(c.array(), 0, c.size());
+            return appendAll(c.internalArray(), 0, c.size());
         }
 
         return this;
@@ -1369,7 +1369,7 @@ public final class Joiner implements Closeable {
             return this;
         }
 
-        return appendAll(c.array(), fromIndex, toIndex);
+        return appendAll(c.internalArray(), fromIndex, toIndex);
     }
 
     /**
@@ -1388,7 +1388,7 @@ public final class Joiner implements Closeable {
     @SuppressWarnings("deprecation")
     public Joiner appendAll(final CharList c) {
         if (N.notEmpty(c)) {
-            return appendAll(c.array(), 0, c.size());
+            return appendAll(c.internalArray(), 0, c.size());
         }
 
         return this;
@@ -1418,7 +1418,7 @@ public final class Joiner implements Closeable {
             return this;
         }
 
-        return appendAll(c.array(), fromIndex, toIndex);
+        return appendAll(c.internalArray(), fromIndex, toIndex);
     }
 
     /**
@@ -1437,7 +1437,7 @@ public final class Joiner implements Closeable {
     @SuppressWarnings("deprecation")
     public Joiner appendAll(final ByteList c) {
         if (N.notEmpty(c)) {
-            return appendAll(c.array(), 0, c.size());
+            return appendAll(c.internalArray(), 0, c.size());
         }
 
         return this;
@@ -1467,7 +1467,7 @@ public final class Joiner implements Closeable {
             return this;
         }
 
-        return appendAll(c.array(), fromIndex, toIndex);
+        return appendAll(c.internalArray(), fromIndex, toIndex);
     }
 
     /**
@@ -1486,7 +1486,7 @@ public final class Joiner implements Closeable {
     @SuppressWarnings("deprecation")
     public Joiner appendAll(final ShortList c) {
         if (N.notEmpty(c)) {
-            return appendAll(c.array(), 0, c.size());
+            return appendAll(c.internalArray(), 0, c.size());
         }
 
         return this;
@@ -1516,7 +1516,7 @@ public final class Joiner implements Closeable {
             return this;
         }
 
-        return appendAll(c.array(), fromIndex, toIndex);
+        return appendAll(c.internalArray(), fromIndex, toIndex);
     }
 
     /**
@@ -1535,7 +1535,7 @@ public final class Joiner implements Closeable {
     @SuppressWarnings("deprecation")
     public Joiner appendAll(final IntList c) {
         if (N.notEmpty(c)) {
-            return appendAll(c.array(), 0, c.size());
+            return appendAll(c.internalArray(), 0, c.size());
         }
 
         return this;
@@ -1565,7 +1565,7 @@ public final class Joiner implements Closeable {
             return this;
         }
 
-        return appendAll(c.array(), fromIndex, toIndex);
+        return appendAll(c.internalArray(), fromIndex, toIndex);
     }
 
     /**
@@ -1584,7 +1584,7 @@ public final class Joiner implements Closeable {
     @SuppressWarnings("deprecation")
     public Joiner appendAll(final LongList c) {
         if (N.notEmpty(c)) {
-            return appendAll(c.array(), 0, c.size());
+            return appendAll(c.internalArray(), 0, c.size());
         }
 
         return this;
@@ -1614,7 +1614,7 @@ public final class Joiner implements Closeable {
             return this;
         }
 
-        return appendAll(c.array(), fromIndex, toIndex);
+        return appendAll(c.internalArray(), fromIndex, toIndex);
     }
 
     /**
@@ -1634,7 +1634,7 @@ public final class Joiner implements Closeable {
     @SuppressWarnings("deprecation")
     public Joiner appendAll(final FloatList c) {
         if (N.notEmpty(c)) {
-            return appendAll(c.array(), 0, c.size());
+            return appendAll(c.internalArray(), 0, c.size());
         }
 
         return this;
@@ -1665,7 +1665,7 @@ public final class Joiner implements Closeable {
             return this;
         }
 
-        return appendAll(c.array(), fromIndex, toIndex);
+        return appendAll(c.internalArray(), fromIndex, toIndex);
     }
 
     /**
@@ -1685,7 +1685,7 @@ public final class Joiner implements Closeable {
     @SuppressWarnings("deprecation")
     public Joiner appendAll(final DoubleList c) {
         if (N.notEmpty(c)) {
-            return appendAll(c.array(), 0, c.size());
+            return appendAll(c.internalArray(), 0, c.size());
         }
 
         return this;
@@ -1716,7 +1716,7 @@ public final class Joiner implements Closeable {
             return this;
         }
 
-        return appendAll(c.array(), fromIndex, toIndex);
+        return appendAll(c.internalArray(), fromIndex, toIndex);
     }
 
     /**

@@ -2246,7 +2246,7 @@ public final class Fn {
      * @return a Predicate that tests if input &gt;= target
      * @see N#compare(Comparable, Comparable)
      */
-    public static <T extends Comparable<? super T>> Predicate<T> greaterEqual(final T target) {
+    public static <T extends Comparable<? super T>> Predicate<T> greaterThanOrEqual(final T target) {
         return value -> N.compare(value, target) >= 0;
     }
 
@@ -2270,7 +2270,7 @@ public final class Fn {
      * @return a Predicate that tests if input &lt;= target
      * @see N#compare(Comparable, Comparable)
      */
-    public static <T extends Comparable<? super T>> Predicate<T> lessEqual(final T target) {
+    public static <T extends Comparable<? super T>> Predicate<T> lessThanOrEqual(final T target) {
         return value -> N.compare(value, target) <= 0;
     }
 
@@ -2550,8 +2550,8 @@ public final class Fn {
      * @return a BiPredicate that tests if first &gt;= second
      * @see N#compare(Comparable, Comparable)
      */
-    public static <T extends Comparable<? super T>> BiPredicate<T, T> greaterEqual() {
-        return (BiPredicate<T, T>) BiPredicates.GREATER_EQUAL;
+    public static <T extends Comparable<? super T>> BiPredicate<T, T> greaterThanOrEqual() {
+        return (BiPredicate<T, T>) BiPredicates.GREATER_THAN_OR_EQUAL;
     }
 
     /**
@@ -2572,8 +2572,8 @@ public final class Fn {
      * @return a BiPredicate that tests if first &lt;= second
      * @see N#compare(Comparable, Comparable)
      */
-    public static <T extends Comparable<? super T>> BiPredicate<T, T> lessEqual() {
-        return (BiPredicate<T, T>) BiPredicates.LESS_EQUAL;
+    public static <T extends Comparable<? super T>> BiPredicate<T, T> lessThanOrEqual() {
+        return (BiPredicate<T, T>) BiPredicates.LESS_THAN_OR_EQUAL;
     }
 
     /**
@@ -4084,14 +4084,14 @@ public final class Fn {
 
             @Override
             public boolean test(final T t) {
-                return counter.getAndDecrement() > 0 && predicate.test(t);
+                return counter.getAndUpdate(i -> i > 0 ? i - 1 : i) > 0 && predicate.test(t);
             }
         };
     }
 
     /**
      * Returns a stateful {@code BiPredicate}. Don't save or cache for reuse, but it can be used in parallel stream.
-     * 
+     *
      * <p>The bi-predicate limits the number of element pairs that can pass through. Once the limit is reached,
      * all subsequent pairs will fail the test.
      *
@@ -4114,14 +4114,14 @@ public final class Fn {
 
             @Override
             public boolean test(final T t, final U u) {
-                return counter.getAndDecrement() > 0 && predicate.test(t, u);
+                return counter.getAndUpdate(i -> i > 0 ? i - 1 : i) > 0 && predicate.test(t, u);
             }
         };
     }
 
     /**
      * Returns a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
-     * 
+     *
      * <p>The predicate first tests elements with the given predicate, and only allows a limited number
      * of elements that pass the predicate to return {@code true}.
      *
@@ -4142,14 +4142,14 @@ public final class Fn {
 
             @Override
             public boolean test(final T t) {
-                return predicate.test(t) && counter.getAndDecrement() > 0;
+                return predicate.test(t) && counter.getAndUpdate(i -> i > 0 ? i - 1 : i) > 0;
             }
         };
     }
 
     /**
      * Returns a stateful {@code BiPredicate}. Don't save or cache for reuse, but it can be used in parallel stream.
-     * 
+     *
      * <p>The bi-predicate first tests element pairs with the given bi-predicate, and only allows a limited number
      * of pairs that pass the bi-predicate to return {@code true}.
      *
@@ -4172,14 +4172,14 @@ public final class Fn {
 
             @Override
             public boolean test(final T t, final U u) {
-                return predicate.test(t, u) && counter.getAndDecrement() > 0;
+                return predicate.test(t, u) && counter.getAndUpdate(i -> i > 0 ? i - 1 : i) > 0;
             }
         };
     }
 
     /**
      * Returns a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
-     * 
+     *
      * <p>The predicate allows elements to pass for a specified duration in milliseconds.
      * After the time limit expires, all subsequent elements will fail the test.
      *
@@ -7256,17 +7256,17 @@ public final class Fn {
         @SuppressWarnings("rawtypes")
         private static final BiPredicate<? extends Comparable, ? extends Comparable> GREATER_THAN = (t, u) -> N.compare(t, u) > 0;
 
-        /** The Constant GREATER_EQUAL. */
+        /** The Constant GREATER_THAN_OR_EQUAL. */
         @SuppressWarnings("rawtypes")
-        private static final BiPredicate<? extends Comparable, ? extends Comparable> GREATER_EQUAL = (t, u) -> N.compare(t, u) >= 0;
+        private static final BiPredicate<? extends Comparable, ? extends Comparable> GREATER_THAN_OR_EQUAL = (t, u) -> N.compare(t, u) >= 0;
 
         /** The Constant LESS_THAN. */
         @SuppressWarnings("rawtypes")
         private static final BiPredicate<? extends Comparable, ? extends Comparable> LESS_THAN = (t, u) -> N.compare(t, u) < 0;
 
-        /** The Constant LESS_EQUAL. */
+        /** The Constant LESS_THAN_OR_EQUAL. */
         @SuppressWarnings("rawtypes")
-        private static final BiPredicate<? extends Comparable, ? extends Comparable> LESS_EQUAL = (t, u) -> N.compare(t, u) <= 0;
+        private static final BiPredicate<? extends Comparable, ? extends Comparable> LESS_THAN_OR_EQUAL = (t, u) -> N.compare(t, u) <= 0;
 
         private BiPredicates() {
         }
@@ -8679,14 +8679,14 @@ public final class Fn {
         /** The Constant GREATER_THAN. */
         private static final CharBiPredicate GREATER_THAN = (t, u) -> t > u;
 
-        /** The Constant GREATER_EQUAL. */
-        private static final CharBiPredicate GREATER_EQUAL = (t, u) -> t >= u;
+        /** The Constant GREATER_THAN_OR_EQUAL. */
+        private static final CharBiPredicate GREATER_THAN_OR_EQUAL = (t, u) -> t >= u;
 
         /** The Constant LESS_THAN. */
         private static final CharBiPredicate LESS_THAN = (t, u) -> t < u;
 
-        /** The Constant LESS_EQUAL. */
-        private static final CharBiPredicate LESS_EQUAL = (t, u) -> t <= u;
+        /** The Constant LESS_THAN_OR_EQUAL. */
+        private static final CharBiPredicate LESS_THAN_OR_EQUAL = (t, u) -> t <= u;
 
         /** The Constant LEN. */
         private static final Function<char[], Integer> LEN = t -> t == null ? 0 : t.length;
@@ -8745,8 +8745,8 @@ public final class Fn {
          *
          * @return a CharBiPredicate that returns {@code true} if the first character is greater than or equal to the second
          */
-        public static CharBiPredicate greaterEqual() {
-            return GREATER_EQUAL;
+        public static CharBiPredicate greaterThanOrEqual() {
+            return GREATER_THAN_OR_EQUAL;
         }
 
         /**
@@ -8763,8 +8763,8 @@ public final class Fn {
          *
          * @return a CharBiPredicate that returns {@code true} if the first character is less than or equal to the second
          */
-        public static CharBiPredicate lessEqual() {
-            return LESS_EQUAL;
+        public static CharBiPredicate lessThanOrEqual() {
+            return LESS_THAN_OR_EQUAL;
         }
 
         /**
@@ -8893,14 +8893,14 @@ public final class Fn {
         /** The Constant GREATER_THAN. */
         private static final ByteBiPredicate GREATER_THAN = (t, u) -> t > u;
 
-        /** The Constant GREATER_EQUAL. */
-        private static final ByteBiPredicate GREATER_EQUAL = (t, u) -> t >= u;
+        /** The Constant GREATER_THAN_OR_EQUAL. */
+        private static final ByteBiPredicate GREATER_THAN_OR_EQUAL = (t, u) -> t >= u;
 
         /** The Constant LESS_THAN. */
         private static final ByteBiPredicate LESS_THAN = (t, u) -> t < u;
 
-        /** The Constant LESS_EQUAL. */
-        private static final ByteBiPredicate LESS_EQUAL = (t, u) -> t <= u;
+        /** The Constant LESS_THAN_OR_EQUAL. */
+        private static final ByteBiPredicate LESS_THAN_OR_EQUAL = (t, u) -> t <= u;
 
         /** The Constant LEN. */
         private static final Function<byte[], Integer> LEN = t -> t == null ? 0 : t.length;
@@ -8958,8 +8958,8 @@ public final class Fn {
          *
          * @return a ByteBiPredicate that returns {@code true} if the first byte is greater than or equal to the second
          */
-        public static ByteBiPredicate greaterEqual() {
-            return GREATER_EQUAL;
+        public static ByteBiPredicate greaterThanOrEqual() {
+            return GREATER_THAN_OR_EQUAL;
         }
 
         /**
@@ -8976,8 +8976,8 @@ public final class Fn {
          *
          * @return a ByteBiPredicate that returns {@code true} if the first byte is less than or equal to the second
          */
-        public static ByteBiPredicate lessEqual() {
-            return LESS_EQUAL;
+        public static ByteBiPredicate lessThanOrEqual() {
+            return LESS_THAN_OR_EQUAL;
         }
 
         /**
@@ -9132,14 +9132,14 @@ public final class Fn {
         /** The Constant GREATER_THAN. */
         private static final ShortBiPredicate GREATER_THAN = (t, u) -> t > u;
 
-        /** The Constant GREATER_EQUAL. */
-        private static final ShortBiPredicate GREATER_EQUAL = (t, u) -> t >= u;
+        /** The Constant GREATER_THAN_OR_EQUAL. */
+        private static final ShortBiPredicate GREATER_THAN_OR_EQUAL = (t, u) -> t >= u;
 
         /** The Constant LESS_THAN. */
         private static final ShortBiPredicate LESS_THAN = (t, u) -> t < u;
 
-        /** The Constant LESS_EQUAL. */
-        private static final ShortBiPredicate LESS_EQUAL = (t, u) -> t <= u;
+        /** The Constant LESS_THAN_OR_EQUAL. */
+        private static final ShortBiPredicate LESS_THAN_OR_EQUAL = (t, u) -> t <= u;
 
         /** The Constant LEN. */
         private static final Function<short[], Integer> LEN = t -> t == null ? 0 : t.length;
@@ -9197,8 +9197,8 @@ public final class Fn {
          *
          * @return a ShortBiPredicate that returns {@code true} if the first short is greater than or equal to the second
          */
-        public static ShortBiPredicate greaterEqual() {
-            return GREATER_EQUAL;
+        public static ShortBiPredicate greaterThanOrEqual() {
+            return GREATER_THAN_OR_EQUAL;
         }
 
         /**
@@ -9215,8 +9215,8 @@ public final class Fn {
          *
          * @return a ShortBiPredicate that returns {@code true} if the first short is less than or equal to the second
          */
-        public static ShortBiPredicate lessEqual() {
-            return LESS_EQUAL;
+        public static ShortBiPredicate lessThanOrEqual() {
+            return LESS_THAN_OR_EQUAL;
         }
 
         /**
@@ -9371,14 +9371,14 @@ public final class Fn {
         /** The Constant GREATER_THAN. */
         private static final IntBiPredicate GREATER_THAN = (t, u) -> t > u;
 
-        /** The Constant GREATER_EQUAL. */
-        private static final IntBiPredicate GREATER_EQUAL = (t, u) -> t >= u;
+        /** The Constant GREATER_THAN_OR_EQUAL. */
+        private static final IntBiPredicate GREATER_THAN_OR_EQUAL = (t, u) -> t >= u;
 
         /** The Constant LESS_THAN. */
         private static final IntBiPredicate LESS_THAN = (t, u) -> t < u;
 
-        /** The Constant LESS_EQUAL. */
-        private static final IntBiPredicate LESS_EQUAL = (t, u) -> t <= u;
+        /** The Constant LESS_THAN_OR_EQUAL. */
+        private static final IntBiPredicate LESS_THAN_OR_EQUAL = (t, u) -> t <= u;
 
         /** The Constant LEN. */
         private static final Function<int[], Integer> LEN = t -> t == null ? 0 : t.length;
@@ -9436,8 +9436,8 @@ public final class Fn {
          *
          * @return an IntBiPredicate that returns {@code true} if the first int is greater than or equal to the second
          */
-        public static IntBiPredicate greaterEqual() {
-            return GREATER_EQUAL;
+        public static IntBiPredicate greaterThanOrEqual() {
+            return GREATER_THAN_OR_EQUAL;
         }
 
         /**
@@ -9454,8 +9454,8 @@ public final class Fn {
          *
          * @return an IntBiPredicate that returns {@code true} if the first int is less than or equal to the second
          */
-        public static IntBiPredicate lessEqual() {
-            return LESS_EQUAL;
+        public static IntBiPredicate lessThanOrEqual() {
+            return LESS_THAN_OR_EQUAL;
         }
 
         /**
@@ -9609,14 +9609,14 @@ public final class Fn {
         /** The Constant GREATER_THAN. */
         private static final LongBiPredicate GREATER_THAN = (t, u) -> t > u;
 
-        /** The Constant GREATER_EQUAL. */
-        private static final LongBiPredicate GREATER_EQUAL = (t, u) -> t >= u;
+        /** The Constant GREATER_THAN_OR_EQUAL. */
+        private static final LongBiPredicate GREATER_THAN_OR_EQUAL = (t, u) -> t >= u;
 
         /** The Constant LESS_THAN. */
         private static final LongBiPredicate LESS_THAN = (t, u) -> t < u;
 
-        /** The Constant LESS_EQUAL. */
-        private static final LongBiPredicate LESS_EQUAL = (t, u) -> t <= u;
+        /** The Constant LESS_THAN_OR_EQUAL. */
+        private static final LongBiPredicate LESS_THAN_OR_EQUAL = (t, u) -> t <= u;
 
         /** The Constant LEN. */
         private static final Function<long[], Integer> LEN = t -> t == null ? 0 : t.length;
@@ -9674,8 +9674,8 @@ public final class Fn {
          *
          * @return a LongBiPredicate that returns {@code true} if the first long is greater than or equal to the second
          */
-        public static LongBiPredicate greaterEqual() {
-            return GREATER_EQUAL;
+        public static LongBiPredicate greaterThanOrEqual() {
+            return GREATER_THAN_OR_EQUAL;
         }
 
         /**
@@ -9692,8 +9692,8 @@ public final class Fn {
          *
          * @return a LongBiPredicate that returns {@code true} if the first long is less than or equal to the second
          */
-        public static LongBiPredicate lessEqual() {
-            return LESS_EQUAL;
+        public static LongBiPredicate lessThanOrEqual() {
+            return LESS_THAN_OR_EQUAL;
         }
 
         /**
@@ -9847,14 +9847,14 @@ public final class Fn {
         /** The Constant GREATER_THAN. */
         private static final FloatBiPredicate GREATER_THAN = (t, u) -> N.compare(t, u) > 0;
 
-        /** The Constant GREATER_EQUAL. */
-        private static final FloatBiPredicate GREATER_EQUAL = (t, u) -> N.compare(t, u) >= 0;
+        /** The Constant GREATER_THAN_OR_EQUAL. */
+        private static final FloatBiPredicate GREATER_THAN_OR_EQUAL = (t, u) -> N.compare(t, u) >= 0;
 
         /** The Constant LESS_THAN. */
         private static final FloatBiPredicate LESS_THAN = (t, u) -> N.compare(t, u) < 0;
 
-        /** The Constant LESS_EQUAL. */
-        private static final FloatBiPredicate LESS_EQUAL = (t, u) -> N.compare(t, u) <= 0;
+        /** The Constant LESS_THAN_OR_EQUAL. */
+        private static final FloatBiPredicate LESS_THAN_OR_EQUAL = (t, u) -> N.compare(t, u) <= 0;
 
         /** The Constant LEN. */
         private static final Function<float[], Integer> LEN = t -> t == null ? 0 : t.length;
@@ -9916,8 +9916,8 @@ public final class Fn {
          *
          * @return a FloatBiPredicate that returns {@code true} if the first float is greater than or equal to the second
          */
-        public static FloatBiPredicate greaterEqual() {
-            return GREATER_EQUAL;
+        public static FloatBiPredicate greaterThanOrEqual() {
+            return GREATER_THAN_OR_EQUAL;
         }
 
         /**
@@ -9936,8 +9936,8 @@ public final class Fn {
          *
          * @return a FloatBiPredicate that returns {@code true} if the first float is less than or equal to the second
          */
-        public static FloatBiPredicate lessEqual() {
-            return LESS_EQUAL;
+        public static FloatBiPredicate lessThanOrEqual() {
+            return LESS_THAN_OR_EQUAL;
         }
 
         /**
@@ -10091,14 +10091,14 @@ public final class Fn {
         /** The Constant GREATER_THAN. */
         private static final DoubleBiPredicate GREATER_THAN = (t, u) -> N.compare(t, u) > 0;
 
-        /** The Constant GREATER_EQUAL. */
-        private static final DoubleBiPredicate GREATER_EQUAL = (t, u) -> N.compare(t, u) >= 0;
+        /** The Constant GREATER_THAN_OR_EQUAL. */
+        private static final DoubleBiPredicate GREATER_THAN_OR_EQUAL = (t, u) -> N.compare(t, u) >= 0;
 
         /** The Constant LESS_THAN. */
         private static final DoubleBiPredicate LESS_THAN = (t, u) -> N.compare(t, u) < 0;
 
-        /** The Constant LESS_EQUAL. */
-        private static final DoubleBiPredicate LESS_EQUAL = (t, u) -> N.compare(t, u) <= 0;
+        /** The Constant LESS_THAN_OR_EQUAL. */
+        private static final DoubleBiPredicate LESS_THAN_OR_EQUAL = (t, u) -> N.compare(t, u) <= 0;
 
         /** The Constant LEN. */
         private static final Function<double[], Integer> LEN = t -> t == null ? 0 : t.length;
@@ -10160,8 +10160,8 @@ public final class Fn {
          *
          * @return a DoubleBiPredicate that returns {@code true} if the first double is greater than or equal to the second
          */
-        public static DoubleBiPredicate greaterEqual() {
-            return GREATER_EQUAL;
+        public static DoubleBiPredicate greaterThanOrEqual() {
+            return GREATER_THAN_OR_EQUAL;
         }
 
         /**
@@ -10180,8 +10180,8 @@ public final class Fn {
          *
          * @return a DoubleBiPredicate that returns {@code true} if the first double is less than or equal to the second
          */
-        public static DoubleBiPredicate lessEqual() {
-            return LESS_EQUAL;
+        public static DoubleBiPredicate lessThanOrEqual() {
+            return LESS_THAN_OR_EQUAL;
         }
 
         /**

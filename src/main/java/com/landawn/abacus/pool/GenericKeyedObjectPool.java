@@ -272,11 +272,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             }
 
             if (memoryMeasure != null) {
-                if (keyValueMemorySize > maxMemorySize - totalDataSize.get()) {
+                if (maxMemorySize > 0 && keyValueMemorySize > maxMemorySize - totalDataSize.get()) {
                     if (autoBalance) {
                         evict();
 
-                        if (keyValueMemorySize > maxMemorySize - totalDataSize.get()) {
+                        if (maxMemorySize > 0 && keyValueMemorySize > maxMemorySize - totalDataSize.get()) {
                             // ignore.
                             return false;
                         }
@@ -686,7 +686,12 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     public int size() throws IllegalStateException {
         assertNotClosed();
 
-        return pool.size();
+        lock.lock();
+        try {
+            return pool.size();
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -697,7 +702,12 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      */
     @Override
     public int hashCode() {
-        return pool.hashCode();
+        lock.lock();
+        try {
+            return pool.hashCode();
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -710,7 +720,20 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     @SuppressWarnings("unchecked")
     @Override
     public boolean equals(final Object obj) {
-        return this == obj || (obj instanceof GenericKeyedObjectPool && N.equals(((GenericKeyedObjectPool<K, E>) obj).pool, pool));
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof GenericKeyedObjectPool)) {
+            return false;
+        }
+
+        lock.lock();
+        try {
+            return N.equals(((GenericKeyedObjectPool<K, E>) obj).pool, pool);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -754,8 +777,10 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             final Map<K, E> removingObjects = N.newHashMap(heap.size());
 
             for (final Map.Entry<K, E> entry : heap) {
-                pool.remove(entry.getKey());
-                removingObjects.put(entry.getKey(), entry.getValue());
+                final K key = entry.getKey();
+                final E value = entry.getValue();
+                pool.remove(key);
+                removingObjects.put(key, value);
             }
 
             destroyAll(removingObjects, Caller.VACATE);

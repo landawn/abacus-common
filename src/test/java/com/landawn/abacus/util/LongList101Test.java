@@ -723,13 +723,13 @@ public class LongList101Test extends TestBase {
     @Test
     public void testArrayModification() {
         list.addAll(new long[] { 1L, 2L, 3L });
-        long[] array = list.array();
+        long[] array = list.internalArray();
 
         array[1] = 20L;
         assertEquals(20L, list.get(1));
 
         list.clear();
-        long[] newArray = list.array();
+        long[] newArray = list.internalArray();
         assertSame(array, newArray);
     }
 

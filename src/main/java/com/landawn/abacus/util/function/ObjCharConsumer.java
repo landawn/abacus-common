@@ -42,10 +42,9 @@ import com.landawn.abacus.util.Throwables;
  * putCharBuffer.accept(buffer, 'A');
  * }</pre>
  *
- * @param <T> the type of the object argument to the operation
- *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @param <T> the type of the object argument to the operation
  *
  * @see java.util.function.Consumer
  * @see java.util.function.BiConsumer
@@ -60,6 +59,7 @@ public interface ObjCharConsumer<T> extends Throwables.ObjCharConsumer<T, Runtim
      * @param t the first input argument
      * @param value the second input argument
      */
+    // @ai-ignore Obj* argument order convention - intentional: class name prefix determines parameter order. ObjChar* has object first, char second. Do not suggest reordering.
     @Override
     void accept(T t, char value);
 }

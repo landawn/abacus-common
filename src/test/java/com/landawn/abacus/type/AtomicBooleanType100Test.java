@@ -115,7 +115,7 @@ public class AtomicBooleanType100Test extends TestBase {
         verify(stmt).setBoolean(2, false);
 
         atomicBooleanType.set(stmt, 3, null);
-        verify(stmt).setBoolean(3, false);
+        verify(stmt).setNull(3, java.sql.Types.BOOLEAN);
     }
 
     @Test
@@ -129,7 +129,7 @@ public class AtomicBooleanType100Test extends TestBase {
         verify(stmt).setBoolean("param2", false);
 
         atomicBooleanType.set(stmt, "param3", null);
-        verify(stmt).setBoolean("param3", false);
+        verify(stmt).setNull("param3", java.sql.Types.BOOLEAN);
     }
 
     @Test

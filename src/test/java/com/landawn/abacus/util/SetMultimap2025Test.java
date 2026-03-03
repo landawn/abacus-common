@@ -139,7 +139,7 @@ public class SetMultimap2025Test extends TestBase {
 
     @Test
     public void test_create_withKeyExtractor() {
-        List<String> words = CommonUtil.asList("apple", "ant", "banana", "bear");
+        List<String> words = CommonUtil.toList("apple", "ant", "banana", "bear");
         SetMultimap<Character, String> map = SetMultimap.fromCollection(words, s -> s.charAt(0));
 
         assertEquals(4, map.totalValueCount());
@@ -155,7 +155,7 @@ public class SetMultimap2025Test extends TestBase {
 
     @Test
     public void test_create_withKeyExtractor_nullExtractor() {
-        List<String> words = CommonUtil.asList("apple");
+        List<String> words = CommonUtil.toList("apple");
         assertThrows(IllegalArgumentException.class, () -> {
             SetMultimap.fromCollection(words, null);
         });
@@ -170,7 +170,7 @@ public class SetMultimap2025Test extends TestBase {
 
     @Test
     public void test_create_withKeyAndValueExtractor() {
-        List<String> words = CommonUtil.asList("apple", "ant", "banana");
+        List<String> words = CommonUtil.toList("apple", "ant", "banana");
         SetMultimap<Character, Integer> map = SetMultimap.fromCollection(words, s -> s.charAt(0), String::length);
 
         assertEquals(3, map.totalValueCount());
@@ -279,8 +279,8 @@ public class SetMultimap2025Test extends TestBase {
     @Test
     public void test_wrap_map() {
         Map<String, Set<Integer>> map = new HashMap<>();
-        map.put("a", new HashSet<>(CommonUtil.asList(1, 2)));
-        map.put("b", new HashSet<>(CommonUtil.asList(3, 4)));
+        map.put("a", new HashSet<>(CommonUtil.toList(1, 2)));
+        map.put("b", new HashSet<>(CommonUtil.toList(3, 4)));
 
         SetMultimap<String, Integer> wrapped = SetMultimap.wrap(map);
         assertEquals(4, wrapped.totalValueCount());
@@ -302,7 +302,7 @@ public class SetMultimap2025Test extends TestBase {
     @Test
     public void test_wrap_map_withNullValue() {
         Map<String, Set<Integer>> map = new HashMap<>();
-        map.put("a", new HashSet<>(CommonUtil.asList(1, 2)));
+        map.put("a", new HashSet<>(CommonUtil.toList(1, 2)));
         map.put("b", null);
 
         assertThrows(IllegalArgumentException.class, () -> {
@@ -320,7 +320,7 @@ public class SetMultimap2025Test extends TestBase {
     @Test
     public void test_wrap_withSupplier() {
         Map<String, TreeSet<Integer>> map = new HashMap<>();
-        map.put("a", new TreeSet<>(CommonUtil.asList(1, 2)));
+        map.put("a", new TreeSet<>(CommonUtil.toList(1, 2)));
 
         SetMultimap<String, Integer> wrapped = SetMultimap.wrap(map, TreeSet::new);
         assertEquals(2, wrapped.totalValueCount());
@@ -539,7 +539,7 @@ public class SetMultimap2025Test extends TestBase {
         assertEquals(1, map.get("a").size());
         assertFalse(map.get("a").contains(1));
 
-        map.putValues("c", CommonUtil.asList(4, 5, 6));
+        map.putValues("c", CommonUtil.toList(4, 5, 6));
         assertEquals(3, map.get("c").size());
     }
 
@@ -720,10 +720,10 @@ public class SetMultimap2025Test extends TestBase {
     public void test_putManyIfKeyAbsent() {
         SetMultimap<String, Integer> map = CommonUtil.newSetMultimap();
 
-        assertTrue(map.putValuesIfKeyAbsent("a", CommonUtil.asList(1, 2, 3)));
+        assertTrue(map.putValuesIfKeyAbsent("a", CommonUtil.toList(1, 2, 3)));
         assertEquals(3, map.get("a").size());
 
-        assertFalse(map.putValuesIfKeyAbsent("a", CommonUtil.asList(4, 5)));
+        assertFalse(map.putValuesIfKeyAbsent("a", CommonUtil.toList(4, 5)));
         assertEquals(3, map.get("a").size());
     }
 
@@ -743,7 +743,7 @@ public class SetMultimap2025Test extends TestBase {
     public void test_removeMany() {
         SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "a", 2, "a", 3);
 
-        assertTrue(map.removeValues("a", CommonUtil.asList(1, 2)));
+        assertTrue(map.removeValues("a", CommonUtil.toList(1, 2)));
         assertEquals(1, map.get("a").size());
         assertTrue(map.get("a").contains(3));
     }
@@ -762,10 +762,10 @@ public class SetMultimap2025Test extends TestBase {
     //    public void test_containsAll() {
     //        SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "a", 2, "a", 3);
     //
-    //        assertTrue(map.containsAllValues("a", CommonUtil.asList(1, 2)));
-    //        assertTrue(map.containsAllValues("a", CommonUtil.asList(1, 2, 3)));
-    //        assertFalse(map.containsAllValues("a", CommonUtil.asList(1, 2, 3, 4)));
-    //        assertFalse(map.containsAllValues("b", CommonUtil.asList(1)));
+    //        assertTrue(map.containsAllValues("a", CommonUtil.toList(1, 2)));
+    //        assertTrue(map.containsAllValues("a", CommonUtil.toList(1, 2, 3)));
+    //        assertFalse(map.containsAllValues("a", CommonUtil.toList(1, 2, 3, 4)));
+    //        assertFalse(map.containsAllValues("b", CommonUtil.toList(1)));
     //    }
     //
     //    @Test
@@ -915,9 +915,9 @@ public class SetMultimap2025Test extends TestBase {
     @Test
     public void test_filter_complexPredicate() {
         SetMultimap<String, Integer> map = CommonUtil.newSetMultimap();
-        map.putValues("a", CommonUtil.asList(1, 2, 3));
-        map.putValues("b", CommonUtil.asList(4));
-        map.putValues("c", CommonUtil.asList(5, 6));
+        map.putValues("a", CommonUtil.toList(1, 2, 3));
+        map.putValues("b", CommonUtil.toList(4));
+        map.putValues("c", CommonUtil.toList(5, 6));
 
         //    SetMultimap<String, Integer> filtered = map.filter((k, v) -> k.compareTo("b") < 0 && v.size() > 2);
         //

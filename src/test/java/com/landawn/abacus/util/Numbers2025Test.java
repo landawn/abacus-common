@@ -643,15 +643,15 @@ public class Numbers2025Test extends TestBase {
     }
 
     @Test
-    public void test_isCreatable() {
-        assertTrue(Numbers.isCreatable("123"));
-        assertTrue(Numbers.isCreatable("-123"));
-        assertTrue(Numbers.isCreatable("12.3"));
-        assertTrue(Numbers.isCreatable("1.23e10"));
-        assertTrue(Numbers.isCreatable("0x1F"));
-        assertFalse(Numbers.isCreatable("abc"));
-        assertFalse(Numbers.isCreatable(""));
-        assertFalse(Numbers.isCreatable(null));
+    public void test_isConvertibleToNumber() {
+        assertTrue(Numbers.isConvertibleToNumber("123"));
+        assertTrue(Numbers.isConvertibleToNumber("-123"));
+        assertTrue(Numbers.isConvertibleToNumber("12.3"));
+        assertTrue(Numbers.isConvertibleToNumber("1.23e10"));
+        assertTrue(Numbers.isConvertibleToNumber("0x1F"));
+        assertFalse(Numbers.isConvertibleToNumber("abc"));
+        assertFalse(Numbers.isConvertibleToNumber(""));
+        assertFalse(Numbers.isConvertibleToNumber(null));
     }
 
     @Test

@@ -611,13 +611,13 @@ public class ShortList100Test extends TestBase {
         list.add((short) 3);
         list.add((short) 1);
 
-        assertEquals(3, list.occurrencesOf((short) 1));
-        assertEquals(1, list.occurrencesOf((short) 2));
-        assertEquals(1, list.occurrencesOf((short) 3));
-        assertEquals(0, list.occurrencesOf((short) 4));
+        assertEquals(3, list.frequency((short) 1));
+        assertEquals(1, list.frequency((short) 2));
+        assertEquals(1, list.frequency((short) 3));
+        assertEquals(0, list.frequency((short) 4));
 
         list.clear();
-        assertEquals(0, list.occurrencesOf((short) 1));
+        assertEquals(0, list.frequency((short) 1));
     }
 
     @Test
@@ -1253,7 +1253,7 @@ public class ShortList100Test extends TestBase {
         list.add((short) 2);
         list.add((short) 3);
 
-        short[] array = list.array();
+        short[] array = list.internalArray();
         assertEquals((short) 1, array[0]);
         assertEquals((short) 2, array[1]);
         assertEquals((short) 3, array[2]);

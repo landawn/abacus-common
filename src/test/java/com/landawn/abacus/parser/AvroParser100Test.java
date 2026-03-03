@@ -2,6 +2,7 @@ package com.landawn.abacus.parser;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -71,6 +72,21 @@ public class AvroParser100Test extends TestBase {
     }
 
     @Test
+    public void testSerializeToOutputStreamDoesNotCloseCallerStream() throws IOException {
+        Map<String, Object> data = new HashMap<>();
+        data.put("name", "NoClose");
+        data.put("age", 26);
+
+        AvroSerializationConfig config = ASC.create().setSchema(schema);
+        CloseTrackingOutputStream os = new CloseTrackingOutputStream();
+
+        parser.serialize(data, config, os);
+
+        Assertions.assertFalse(os.isClosed());
+        os.write(1);
+    }
+
+    @Test
     public void testSerializeToOutputStreamWithoutSchema() {
         Map<String, Object> data = new HashMap<>();
         data.put("test", "value");
@@ -125,6 +141,25 @@ public class AvroParser100Test extends TestBase {
         Assertions.assertNotNull(result);
         Assertions.assertEquals("Stream Test", result.get("name").toString());
         Assertions.assertEquals(40, result.get("age"));
+    }
+
+    @Test
+    public void testDeserializeFromInputStreamDoesNotCloseCallerStream() {
+        Map<String, Object> data = new HashMap<>();
+        data.put("name", "InputNoClose");
+        data.put("age", 41);
+
+        AvroSerializationConfig serConfig = ASC.create().setSchema(schema);
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        parser.serialize(data, serConfig, os);
+
+        CloseTrackingInputStream is = new CloseTrackingInputStream(os.toByteArray());
+        AvroDeserializationConfig desConfig = ADC.create().setSchema(schema);
+        GenericRecord result = parser.deserialize(is, desConfig, GenericRecord.class);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("InputNoClose", result.get("name").toString());
+        Assertions.assertFalse(is.isClosed());
     }
 
     @Test
@@ -183,5 +218,37 @@ public class AvroParser100Test extends TestBase {
         Assertions.assertNotNull(result);
         Assertions.assertEquals("MapTest", result.get("name").toString());
         Assertions.assertEquals(50, result.get("age"));
+    }
+
+    private static final class CloseTrackingOutputStream extends ByteArrayOutputStream {
+        private boolean closed = false;
+
+        @Override
+        public void close() throws IOException {
+            closed = true;
+            super.close();
+        }
+
+        boolean isClosed() {
+            return closed;
+        }
+    }
+
+    private static final class CloseTrackingInputStream extends ByteArrayInputStream {
+        private boolean closed = false;
+
+        CloseTrackingInputStream(byte[] buf) {
+            super(buf);
+        }
+
+        @Override
+        public void close() throws IOException {
+            closed = true;
+            super.close();
+        }
+
+        boolean isClosed() {
+            return closed;
+        }
     }
 }

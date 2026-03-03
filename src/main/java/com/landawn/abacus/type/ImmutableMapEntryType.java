@@ -163,6 +163,10 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
             return null; // NOSONAR
         }
 
+        if (map.size() != 1) {
+            throw new IllegalArgumentException("Map.ImmutableEntry JSON must contain exactly one entry, but got: " + map.size());
+        }
+
         return ImmutableEntry.copyOf(map.entrySet().iterator().next());
     }
 

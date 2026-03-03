@@ -81,16 +81,16 @@ public class SplitterTest extends AbstractTest {
         String source = "aaaaa";
         N.println(Splitter.with("aa").split(source));
         assertTrue(CommonUtil.equals(Array.of("", "", "", "", "", ""), Splitter.with("a").splitToArray(source)));
-        assertTrue(CommonUtil.equals(CommonUtil.asList("", "", "", "", "", ""), com.google.common.base.Splitter.on("a").splitToList(source)));
+        assertTrue(CommonUtil.equals(CommonUtil.toList("", "", "", "", "", ""), com.google.common.base.Splitter.on("a").splitToList(source)));
 
         assertTrue(CommonUtil.equals(Array.of("", "", "a"), Splitter.with("aa").splitToArray(source)));
-        assertTrue(CommonUtil.equals(CommonUtil.asList("", "", "a"), com.google.common.base.Splitter.on("aa").splitToList(source)));
+        assertTrue(CommonUtil.equals(CommonUtil.toList("", "", "a"), com.google.common.base.Splitter.on("aa").splitToList(source)));
 
         assertTrue(CommonUtil.equals(Array.of("", "", "", "", "", ""), Splitter.pattern("a").splitToArray(source)));
-        assertTrue(CommonUtil.equals(CommonUtil.asList("", "", "", "", "", ""), com.google.common.base.Splitter.onPattern("a").splitToList(source)));
+        assertTrue(CommonUtil.equals(CommonUtil.toList("", "", "", "", "", ""), com.google.common.base.Splitter.onPattern("a").splitToList(source)));
 
         assertTrue(CommonUtil.equals(Array.of("", "", "a"), Splitter.pattern("aa").splitToArray(source)));
-        assertTrue(CommonUtil.equals(CommonUtil.asList("", "", "a"), com.google.common.base.Splitter.onPattern("aa").splitToList(source)));
+        assertTrue(CommonUtil.equals(CommonUtil.toList("", "", "a"), com.google.common.base.Splitter.onPattern("aa").splitToList(source)));
 
         source = "a   b \t \n c \n \t \r d " + '\u0009' + '\u000B' + '\u000C' + " \re";
         N.println(source);

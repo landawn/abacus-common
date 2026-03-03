@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.type;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Tag;
@@ -27,8 +28,8 @@ public class PrimitiveLongType2025Test extends TestBase {
     private final PrimitiveLongType type = new PrimitiveLongType();
 
     @Test
-    public void test_isNonQuotableCsvType() {
-        assertTrue(type.isNonQuotableCsvType());
+    public void test_isCsvQuoteRequired() {
+        assertFalse(type.isCsvQuoteRequired());
     }
 
     @Test

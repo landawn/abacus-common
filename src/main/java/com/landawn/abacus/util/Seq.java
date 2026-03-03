@@ -10339,7 +10339,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5, 6);
-     * boolean has2to4Even = seq.countMatchBetween(2, 4, n -> n % 2 == 0);
+     * boolean has2to4Even = seq.isMatchCountBetween(2, 4, n -> n % 2 == 0);
      * // has2to4Even == true (there are 3 even numbers)
      * }</pre>
      * 
@@ -10355,7 +10355,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws E2 if the predicate throws an exception
      */
     @TerminalOp
-    public <E2 extends Exception> boolean countMatchBetween(final long atLeast, final long atMost, final Throwables.Predicate<? super T, E2> predicate)
+    public <E2 extends Exception> boolean isMatchCountBetween(final long atLeast, final long atMost, final Throwables.Predicate<? super T, E2> predicate)
             throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
         checkArgNotNegative(atLeast, cs.atLeast);
@@ -10539,7 +10539,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     }
                 }).distinct().limit(2).count() == 2;
             } else {
-                return containsAll(N.asSet(a));
+                return containsAll(N.toSet(a));
             }
         } finally {
             close();
@@ -10632,7 +10632,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     }
                 });
             } else {
-                final Set<T> set = N.asSet(a);
+                final Set<T> set = N.toSet(a);
 
                 return anyMatch(set::contains);
             }

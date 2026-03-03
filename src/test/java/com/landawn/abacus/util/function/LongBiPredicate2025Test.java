@@ -106,10 +106,10 @@ public class LongBiPredicate2025Test extends TestBase {
     }
 
     @Test
-    public void testConstant_GREATER_EQUAL() {
-        assertTrue(LongBiPredicate.GREATER_EQUAL.test(10L, 5L));
-        assertTrue(LongBiPredicate.GREATER_EQUAL.test(5L, 5L));
-        assertFalse(LongBiPredicate.GREATER_EQUAL.test(5L, 10L));
+    public void testConstant_GREATER_THAN_OR_EQUAL() {
+        assertTrue(LongBiPredicate.GREATER_THAN_OR_EQUAL.test(10L, 5L));
+        assertTrue(LongBiPredicate.GREATER_THAN_OR_EQUAL.test(5L, 5L));
+        assertFalse(LongBiPredicate.GREATER_THAN_OR_EQUAL.test(5L, 10L));
     }
 
     @Test
@@ -120,10 +120,10 @@ public class LongBiPredicate2025Test extends TestBase {
     }
 
     @Test
-    public void testConstant_LESS_EQUAL() {
-        assertTrue(LongBiPredicate.LESS_EQUAL.test(5L, 10L));
-        assertTrue(LongBiPredicate.LESS_EQUAL.test(5L, 5L));
-        assertFalse(LongBiPredicate.LESS_EQUAL.test(10L, 5L));
+    public void testConstant_LESS_THAN_OR_EQUAL() {
+        assertTrue(LongBiPredicate.LESS_THAN_OR_EQUAL.test(5L, 10L));
+        assertTrue(LongBiPredicate.LESS_THAN_OR_EQUAL.test(5L, 5L));
+        assertFalse(LongBiPredicate.LESS_THAN_OR_EQUAL.test(10L, 5L));
     }
 
     @Test

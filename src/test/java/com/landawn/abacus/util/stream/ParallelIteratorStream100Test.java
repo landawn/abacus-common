@@ -339,7 +339,7 @@ public class ParallelIteratorStream100Test extends TestBase {
 
         short[] result = stream.limit(2).flatMapToShort(mapper).sorted().toArray();
 
-        assertHaveSameElements(N.asList((short) 1, (short) 2, (short) 10, (short) 20), N.toList(result));
+        assertHaveSameElements(N.toList((short) 1, (short) 2, (short) 10, (short) 20), N.toList(result));
     }
 
     @Test
@@ -602,7 +602,7 @@ public class ParallelIteratorStream100Test extends TestBase {
 
     @Test
     public void testNMatch() throws Exception {
-        boolean result = stream.countMatchBetween(3, 5, n -> n % 2 == 0);
+        boolean result = stream.isMatchCountBetween(3, 5, n -> n % 2 == 0);
 
         assertTrue(result);
     }
@@ -644,7 +644,7 @@ public class ParallelIteratorStream100Test extends TestBase {
 
         assertEquals(9, result.size());
         N.println(result);
-        assertTrue(N.asList(3, 6, 9).containsAll(N.difference(TEST_DATA, result)));
+        assertTrue(N.toList(3, 6, 9).containsAll(N.difference(TEST_DATA, result)));
     }
 
     @Test
@@ -841,14 +841,14 @@ public class ParallelIteratorStream100Test extends TestBase {
             {
                 List<Integer> results = new ArrayList<>();
 
-                createStream(TEST_DATA).parallel(PS.create(Splitor.ITERATOR)).forEach(it -> N.asList(it * 2, it * 2), Fn.sc(results, (a, b) -> results.add(a)));
+                createStream(TEST_DATA).parallel(PS.create(Splitor.ITERATOR)).forEach(it -> N.toList(it * 2, it * 2), Fn.sc(results, (a, b) -> results.add(a)));
 
                 assertHaveSameElements(N.cycle(TEST_DATA, 2), results);
             }
             {
                 List<Integer> results = new ArrayList<>();
 
-                createStream(TEST_DATA).parallel(PS.create(Splitor.ARRAY)).forEach(it -> N.asList(it * 2, it * 2), Fn.sc(results, (a, b) -> results.add(a)));
+                createStream(TEST_DATA).parallel(PS.create(Splitor.ARRAY)).forEach(it -> N.toList(it * 2, it * 2), Fn.sc(results, (a, b) -> results.add(a)));
 
                 assertHaveSameElements(N.cycle(TEST_DATA, 2), results);
 
@@ -858,7 +858,7 @@ public class ParallelIteratorStream100Test extends TestBase {
                 List<Integer> results = new ArrayList<>();
 
                 createStream(TEST_DATA).parallel(PS.create(Splitor.ITERATOR))
-                        .forEach(it -> N.asList(it * 2, it * 2), it -> N.asList(it * 3, it * 3), Fn.sc(results, (a, b, c) -> results.add(a)));
+                        .forEach(it -> N.toList(it * 2, it * 2), it -> N.toList(it * 3, it * 3), Fn.sc(results, (a, b, c) -> results.add(a)));
 
                 assertHaveSameElements(N.cycle(TEST_DATA, 4), results);
             }
@@ -867,7 +867,7 @@ public class ParallelIteratorStream100Test extends TestBase {
                 List<Integer> results = new ArrayList<>();
 
                 createStream(TEST_DATA).parallel(PS.create(Splitor.ARRAY))
-                        .forEach(it -> N.asList(it * 2, it * 2), it -> N.asList(it * 3, it * 3), Fn.sc(results, (a, b, c) -> results.add(a)));
+                        .forEach(it -> N.toList(it * 2, it * 2), it -> N.toList(it * 3, it * 3), Fn.sc(results, (a, b, c) -> results.add(a)));
 
                 assertHaveSameElements(N.cycle(TEST_DATA, 4), results);
             }
@@ -881,21 +881,21 @@ public class ParallelIteratorStream100Test extends TestBase {
 
                 createStream(TEST_DATA).limit(5).parallel(PS.create(Splitor.ITERATOR)).forEachPair(Fn.sc(results, (a, b) -> results.add(a + "->" + b)));
 
-                assertHaveSameElements(N.asList("1->2", "2->3", "3->4", "4->5"), results);
+                assertHaveSameElements(N.toList("1->2", "2->3", "3->4", "4->5"), results);
             }
             {
                 List<String> results = new ArrayList<>();
 
                 createStream(TEST_DATA).limit(5).parallel(PS.create(Splitor.ARRAY)).forEachPair(Fn.sc(results, (a, b) -> results.add(a + "->" + b)));
 
-                assertHaveSameElements(N.asList("1->2", "2->3", "3->4", "4->5"), results);
+                assertHaveSameElements(N.toList("1->2", "2->3", "3->4", "4->5"), results);
             }
             {
                 List<String> results = new ArrayList<>();
 
                 createStream(TEST_DATA).limit(5).parallel(PS.create(Splitor.ITERATOR)).forEachPair(2, Fn.sc(results, (a, b) -> results.add(a + "->" + b)));
 
-                assertHaveSameElements(N.asList("1->2", "3->4", "5->null"), results);
+                assertHaveSameElements(N.toList("1->2", "3->4", "5->null"), results);
             }
         }
 
@@ -909,7 +909,7 @@ public class ParallelIteratorStream100Test extends TestBase {
                         .parallel(PS.create(Splitor.ITERATOR))
                         .forEachTriple(Fn.sc(results, (a, b, c) -> results.add(a + "->" + b + "->" + c)));
 
-                assertHaveSameElements(N.asList("1->2->3", "2->3->4", "3->4->5"), results);
+                assertHaveSameElements(N.toList("1->2->3", "2->3->4", "3->4->5"), results);
             }
             {
                 List<String> results = new ArrayList<>();
@@ -918,7 +918,7 @@ public class ParallelIteratorStream100Test extends TestBase {
                         .parallel(PS.create(Splitor.ARRAY))
                         .forEachTriple(Fn.sc(results, (a, b, c) -> results.add(a + "->" + b + "->" + c)));
 
-                assertHaveSameElements(N.asList("1->2->3", "2->3->4", "3->4->5"), results);
+                assertHaveSameElements(N.toList("1->2->3", "2->3->4", "3->4->5"), results);
             }
             {
                 List<String> results = new ArrayList<>();
@@ -927,7 +927,7 @@ public class ParallelIteratorStream100Test extends TestBase {
                         .parallel(PS.create(Splitor.ARRAY))
                         .forEachTriple(2, Fn.sc(results, (a, b, c) -> results.add(a + "->" + b + "->" + c)));
 
-                assertHaveSameElements(N.asList("1->2->3", "3->4->5"), results);
+                assertHaveSameElements(N.toList("1->2->3", "3->4->5"), results);
             }
         }
     }

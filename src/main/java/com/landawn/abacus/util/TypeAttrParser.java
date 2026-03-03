@@ -206,7 +206,7 @@ public final class TypeAttrParser {
 
         if (beginIndex >= 0) {
             if (className == null) {
-                className = attr.substring(0, beginIndex);
+                className = attr.substring(0, beginIndex).trim();
             }
 
             final String str = attr.substring(beginIndex + 1, attr.lastIndexOf(_PARENTHESES_R)).trim();
@@ -273,8 +273,8 @@ public final class TypeAttrParser {
 
             Constructor<?> constructor = ClassUtil.getDeclaredConstructor(cls, parameterTypes);
 
-            if (constructor == null) {
-                parameterLength = attrTypeParameters.length + ((attrParameters.length > 1) ? 1 : 0);
+            if (constructor == null && attrParameters.length > 0) {
+                parameterLength = attrTypeParameters.length + 1;
 
                 if (parameterLength > 0) {
                     parameterTypes = new Class[parameterLength];
@@ -285,7 +285,7 @@ public final class TypeAttrParser {
                         parameters[i] = attrTypeParameters[i];
                     }
 
-                    if (attrParameters.length > 1) {
+                    if (attrParameters.length > 0) {
                         parameterTypes[parameterTypes.length - 1] = String[].class;
                         parameters[parameters.length - 1] = attrParameters;
                     }
@@ -374,8 +374,8 @@ public final class TypeAttrParser {
 
             Constructor<?> constructor = ClassUtil.getDeclaredConstructor(cls, parameterTypes);
 
-            if (constructor == null) {
-                parameterLength = attrTypeParameters.length + ((attrParameters.length > 1) ? 1 : 0) + (args.length / 2);
+            if (constructor == null && attrParameters.length > 0) {
+                parameterLength = attrTypeParameters.length + 1 + (args.length / 2);
 
                 if (parameterLength > 0) {
                     parameterTypes = new Class[parameterLength];
@@ -391,7 +391,7 @@ public final class TypeAttrParser {
                         parameters[i + (args.length / 2)] = attrTypeParameters[i];
                     }
 
-                    if (attrParameters.length > 1) {
+                    if (attrParameters.length > 0) {
                         parameterTypes[parameterTypes.length - 1] = String[].class;
                         parameters[parameters.length - 1] = attrParameters;
                     }

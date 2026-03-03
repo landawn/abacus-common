@@ -59,7 +59,7 @@ public class N105Test extends TestBase {
     public void testSumInt_Collection() {
         assertEquals(5, N.sumInt(Arrays.asList(1, 2, 3, 4), 1, 3));
         assertEquals(10, N.sumInt(Arrays.asList(1, 2, 3, 4), 1, 3, x -> x * 2));
-        assertEquals(10, N.sumInt(CommonUtil.asLinkedHashSet(1, 2, 3, 4), 1, 3, x -> x * 2));
+        assertEquals(10, N.sumInt(CommonUtil.toLinkedHashSet(1, 2, 3, 4), 1, 3, x -> x * 2));
     }
 
     @Test
@@ -89,7 +89,7 @@ public class N105Test extends TestBase {
     public void testSumLong_Collection() {
         assertEquals(5L, N.sumLong(Arrays.asList(1L, 2L, 3L, 4L), 1, 3));
         assertEquals(10L, N.sumLong(Arrays.asList(1L, 2L, 3L, 4L), 1, 3, x -> x * 2));
-        assertEquals(10L, N.sumLong(CommonUtil.asLinkedHashSet(1L, 2L, 3L, 4L), 1, 3, x -> x * 2));
+        assertEquals(10L, N.sumLong(CommonUtil.toLinkedHashSet(1L, 2L, 3L, 4L), 1, 3, x -> x * 2));
     }
 
     @Test
@@ -112,7 +112,7 @@ public class N105Test extends TestBase {
     public void testSumDouble_Collection() {
         assertEquals(5.0, N.sumDouble(Arrays.asList(1.0, 2.0, 3.0, 4.0), 1, 3), 0.001);
         assertEquals(10.0, N.sumDouble(Arrays.asList(1.0, 2.0, 3.0, 4.0), 1, 3, x -> x * 2), 0.001);
-        assertEquals(10.0, N.sumDouble(CommonUtil.asLinkedHashSet(1.0, 2.0, 3.0, 4.0), 1, 3, x -> x * 2), 0.001);
+        assertEquals(10.0, N.sumDouble(CommonUtil.toLinkedHashSet(1.0, 2.0, 3.0, 4.0), 1, 3, x -> x * 2), 0.001);
     }
 
     @Test
@@ -149,7 +149,7 @@ public class N105Test extends TestBase {
     public void testAverageInt_Collection() {
         assertEquals(2.5, N.averageInt(Arrays.asList(1, 2, 3, 4), 1, 3), 0.001);
         assertEquals(5.0, N.averageInt(Arrays.asList(1, 2, 3, 4), 1, 3, x -> x * 2), 0.001);
-        assertEquals(5.0, N.averageInt(CommonUtil.asLinkedHashSet(1, 2, 3, 4), 1, 3, x -> x * 2), 0.001);
+        assertEquals(5.0, N.averageInt(CommonUtil.toLinkedHashSet(1, 2, 3, 4), 1, 3, x -> x * 2), 0.001);
     }
 
     @Test
@@ -172,7 +172,7 @@ public class N105Test extends TestBase {
     public void testAverageLong_Collection() {
         assertEquals(2.5, N.averageLong(Arrays.asList(1L, 2L, 3L, 4L), 1, 3), 0.001);
         assertEquals(5.0, N.averageLong(Arrays.asList(1L, 2L, 3L, 4L), 1, 3, x -> x * 2), 0.001);
-        assertEquals(5.0, N.averageLong(CommonUtil.asLinkedHashSet(1L, 2L, 3L, 4L), 1, 3, x -> x * 2), 0.001);
+        assertEquals(5.0, N.averageLong(CommonUtil.toLinkedHashSet(1L, 2L, 3L, 4L), 1, 3, x -> x * 2), 0.001);
     }
 
     @Test
@@ -732,7 +732,7 @@ public class N105Test extends TestBase {
         assertEquals(Arrays.asList(3, 2), N.top(Arrays.asList(1, 2, 3, 4, 5), 1, 4, 2, Comparator.reverseOrder()));
 
         assertEquals(Arrays.asList(3, 4, 5), N.top(Arrays.asList(1, 2, 3, null, 4, 5), 3));
-        assertEquals(Arrays.asList(3, 4, 5), N.top(CommonUtil.asLinkedHashSet(1, 2, 3, null, 4, 5), 3));
+        assertEquals(Arrays.asList(3, 4, 5), N.top(CommonUtil.toLinkedHashSet(1, 2, 3, null, 4, 5), 3));
 
         assertEquals(Arrays.asList(1, 2, 3, 4, 5), N.top(Arrays.asList(1, 2, 3, 4, 5), 0, 5, 6, Comparator.reverseOrder()));
         assertEquals(Arrays.asList(2, 3, 4), N.top(Arrays.asList(1, 2, 3, 4, 5), 1, 4, 6, Comparator.reverseOrder()));
@@ -1327,7 +1327,7 @@ public class N105Test extends TestBase {
     @Test
     public void testFlatMapCollectionWithRangeAndSupplier() {
         List<String> list = Arrays.asList("key", "lock", "lol");
-        Set<Character> expected = CommonUtil.asSet('l', 'o', 'c', 'k');
+        Set<Character> expected = CommonUtil.toSet('l', 'o', 'c', 'k');
         assertEquals(expected, N.flatMap(list, 1, 3, s -> CommonUtil.toList(s.toCharArray()), HashSet::new));
         assertEquals(expected, N.flatMap(CommonUtil.newLinkedHashSet(list), 1, 3, s -> CommonUtil.toList(s.toCharArray()), HashSet::new));
     }
@@ -1335,24 +1335,24 @@ public class N105Test extends TestBase {
     @Test
     public void test_distinct() {
         Iterable<String> iter = createIterable("hello", "world", "hello");
-        List<String> expected = CommonUtil.asList("hello", "world");
+        List<String> expected = CommonUtil.toList("hello", "world");
         assertEquals(expected, N.distinct(iter));
-        expected = CommonUtil.asList("hello", "world");
-        assertEquals(expected, N.distinctBy(CommonUtil.asLinkedList("hello", "hello", "world", "hello"), 0, 3, Fn.identity()));
+        expected = CommonUtil.toList("hello", "world");
+        assertEquals(expected, N.distinctBy(CommonUtil.toLinkedList("hello", "hello", "world", "hello"), 0, 3, Fn.identity()));
     }
 
     @Test
     public void testZipIterablesWithDefaults() {
 
         {
-            Iterable<String> a = CommonUtil.asList("x", "y", "z");
-            Iterable<String> b = CommonUtil.asList("a", "b");
+            Iterable<String> a = CommonUtil.toList("x", "y", "z");
+            Iterable<String> b = CommonUtil.toList("a", "b");
             List<String> result = N.zip(a, b, "X", "A", (s, i) -> s + i);
             assertEquals(List.of("xa", "yb", "zA"), result);
         }
 
         {
-            Iterable<String> a = CommonUtil.asList("x", "y", "z");
+            Iterable<String> a = CommonUtil.toList("x", "y", "z");
             Iterable<String> b = createIterable("a", "b");
             List<String> result = N.zip(a, b, "X", "A", (s, i) -> s + i);
             assertEquals(List.of("xa", "yb", "zA"), result);
@@ -1360,7 +1360,7 @@ public class N105Test extends TestBase {
 
         {
             Iterable<String> a = createIterable("x", "y", "z");
-            Iterable<String> b = CommonUtil.asList("a", "b");
+            Iterable<String> b = CommonUtil.toList("a", "b");
             List<String> result = N.zip(a, b, "X", "A", (s, i) -> s + i);
             assertEquals(List.of("xa", "yb", "zA"), result);
         }
@@ -1377,17 +1377,17 @@ public class N105Test extends TestBase {
     public void testZipIterablesWithDefaults3() {
 
         {
-            Iterable<String> a = CommonUtil.asList("x", "y", "z");
-            Iterable<String> b = CommonUtil.asList("a", "b");
-            Iterable<String> c = CommonUtil.asList("1");
+            Iterable<String> a = CommonUtil.toList("x", "y", "z");
+            Iterable<String> b = CommonUtil.toList("a", "b");
+            Iterable<String> c = CommonUtil.toList("1");
             List<String> result = N.zip(a, b, c, "X", "A", "0", (s, i, j) -> s + i + j);
             assertEquals(List.of("xa1", "yb0", "zA0"), result);
         }
 
         {
             Iterable<String> a = createIterable("x", "y", "z");
-            Iterable<String> b = CommonUtil.asList("a", "b");
-            Iterable<String> c = CommonUtil.asList("1");
+            Iterable<String> b = CommonUtil.toList("a", "b");
+            Iterable<String> c = CommonUtil.toList("1");
             List<String> result = N.zip(a, b, c, "X", "A", "0", (s, i, j) -> s + i + j);
             assertEquals(List.of("xa1", "yb0", "zA0"), result);
         }
@@ -1395,7 +1395,7 @@ public class N105Test extends TestBase {
         {
             Iterable<String> a = createIterable("x", "y", "z");
             Iterable<String> b = createIterable("a", "b");
-            Iterable<String> c = CommonUtil.asList("1");
+            Iterable<String> c = CommonUtil.toList("1");
             List<String> result = N.zip(a, b, c, "X", "A", "0", (s, i, j) -> s + i + j);
             assertEquals(List.of("xa1", "yb0", "zA0"), result);
         }
@@ -1410,15 +1410,15 @@ public class N105Test extends TestBase {
 
         {
             Iterable<String> a = createIterable("x", "y", "z");
-            Iterable<String> b = CommonUtil.asList("a", "b");
+            Iterable<String> b = CommonUtil.toList("a", "b");
             Iterable<String> c = createIterable("1");
             List<String> result = N.zip(a, b, c, "X", "A", "0", (s, i, j) -> s + i + j);
             assertEquals(List.of("xa1", "yb0", "zA0"), result);
         }
 
         {
-            Iterable<String> a = CommonUtil.asList("x", "y", "z");
-            Iterable<String> b = CommonUtil.asList("a", "b");
+            Iterable<String> a = CommonUtil.toList("x", "y", "z");
+            Iterable<String> b = CommonUtil.toList("a", "b");
             Iterable<String> c = createIterable("1");
             List<String> result = N.zip(a, b, c, "X", "A", "0", (s, i, j) -> s + i + j);
             assertEquals(List.of("xa1", "yb0", "zA0"), result);
@@ -1435,7 +1435,7 @@ public class N105Test extends TestBase {
             assertEquals(List.of("two", "three"), result.get('t'));
         }
         {
-            List<String> list = CommonUtil.asLinkedList("one", "two", "three", "four", "five");
+            List<String> list = CommonUtil.toLinkedList("one", "two", "three", "four", "five");
             TreeMap<Character, List<String>> result = N.groupBy(list, 1, 4, s -> s.charAt(0), TreeMap::new);
             assertEquals(List.of("four"), result.get('f'));
             assertEquals(List.of("two", "three"), result.get('t'));
@@ -1493,7 +1493,7 @@ public class N105Test extends TestBase {
         {
             List<String> a = Arrays.asList("a", "b", "c");
             List<String> b = Arrays.asList("1", "2", "3", "4");
-            List<Boolean> c = CommonUtil.asList(true, false);
+            List<Boolean> c = CommonUtil.toList(true, false);
             List<String> result = new ArrayList<>();
             N.forEach(a, b, c, "X", "0", false, (s, i, j) -> result.add(s + i + j));
 
@@ -1503,7 +1503,7 @@ public class N105Test extends TestBase {
         {
             List<String> a = Arrays.asList("a", "b", "c");
             List<String> b = Arrays.asList("1", "2", "3", "4");
-            List<Boolean> c = CommonUtil.asList(true, false);
+            List<Boolean> c = CommonUtil.toList(true, false);
             List<String> result = new ArrayList<>();
             N.forEach(a.iterator(), b.iterator(), c.iterator(), "X", "0", false, (s, i, j) -> result.add(s + i + j));
 
@@ -1523,56 +1523,56 @@ public class N105Test extends TestBase {
         {
             String[] a = CommonUtil.asArray("a", null, "b", null, "c");
             List<String> result = new ArrayList<>();
-            N.forEachNonNull(a, e -> CommonUtil.asList(e, e), (s, i) -> result.add(s + i));
+            N.forEachNonNull(a, e -> CommonUtil.toList(e, e), (s, i) -> result.add(s + i));
 
             assertEquals(Arrays.asList("aa", "aa", "bb", "bb", "cc", "cc"), result);
         }
         {
             String[] a = CommonUtil.asArray("a", null, "b", null, "c");
             List<String> result = new ArrayList<>();
-            N.forEachNonNull(a, e -> CommonUtil.asList(e, e), e -> CommonUtil.asList(e), (s, i, j) -> result.add(s + i + j));
+            N.forEachNonNull(a, e -> CommonUtil.toList(e, e), e -> CommonUtil.toList(e), (s, i, j) -> result.add(s + i + j));
 
             assertEquals(Arrays.asList("aaa", "aaa", "bbb", "bbb", "ccc", "ccc"), result);
         }
         {
-            List<String> a = CommonUtil.asList("a", null, "b", null, "c");
+            List<String> a = CommonUtil.toList("a", null, "b", null, "c");
             List<String> result = new ArrayList<>();
             N.forEachNonNull(a, e -> result.add(e));
 
             assertEquals(Arrays.asList("a", "b", "c"), result);
         }
         {
-            List<String> a = CommonUtil.asList("a", null, "b", null, "c");
+            List<String> a = CommonUtil.toList("a", null, "b", null, "c");
             List<String> result = new ArrayList<>();
-            N.forEachNonNull(a, e -> CommonUtil.asList(e, e), (s, i) -> result.add(s + i));
+            N.forEachNonNull(a, e -> CommonUtil.toList(e, e), (s, i) -> result.add(s + i));
 
             assertEquals(Arrays.asList("aa", "aa", "bb", "bb", "cc", "cc"), result);
         }
         {
-            List<String> a = CommonUtil.asList("a", null, "b", null, "c");
+            List<String> a = CommonUtil.toList("a", null, "b", null, "c");
             List<String> result = new ArrayList<>();
-            N.forEachNonNull(a, e -> CommonUtil.asList(e, e), e -> CommonUtil.asList(e), (s, i, j) -> result.add(s + i + j));
+            N.forEachNonNull(a, e -> CommonUtil.toList(e, e), e -> CommonUtil.toList(e), (s, i, j) -> result.add(s + i + j));
 
             assertEquals(Arrays.asList("aaa", "aaa", "bbb", "bbb", "ccc", "ccc"), result);
         }
         {
-            List<String> a = CommonUtil.asList("a", null, "b", null, "c");
+            List<String> a = CommonUtil.toList("a", null, "b", null, "c");
             List<String> result = new ArrayList<>();
             N.forEachNonNull(a.iterator(), e -> result.add(e));
 
             assertEquals(Arrays.asList("a", "b", "c"), result);
         }
         {
-            List<String> a = CommonUtil.asList("a", null, "b", null, "c");
+            List<String> a = CommonUtil.toList("a", null, "b", null, "c");
             List<String> result = new ArrayList<>();
-            N.forEachNonNull(a.iterator(), e -> CommonUtil.asList(e, e), (s, i) -> result.add(s + i));
+            N.forEachNonNull(a.iterator(), e -> CommonUtil.toList(e, e), (s, i) -> result.add(s + i));
 
             assertEquals(Arrays.asList("aa", "aa", "bb", "bb", "cc", "cc"), result);
         }
         {
-            List<String> a = CommonUtil.asList("a", null, "b", null, "c");
+            List<String> a = CommonUtil.toList("a", null, "b", null, "c");
             List<String> result = new ArrayList<>();
-            N.forEachNonNull(a.iterator(), e -> CommonUtil.asList(e, e), e -> CommonUtil.asList(e), (s, i, j) -> result.add(s + i + j));
+            N.forEachNonNull(a.iterator(), e -> CommonUtil.toList(e, e), e -> CommonUtil.toList(e), (s, i, j) -> result.add(s + i + j));
 
             assertEquals(Arrays.asList("aaa", "aaa", "bbb", "bbb", "ccc", "ccc"), result);
         }

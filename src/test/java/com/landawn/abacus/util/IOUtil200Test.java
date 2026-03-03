@@ -1661,14 +1661,14 @@ public class IOUtil200Test extends TestBase {
     @Test
     public void testToFileToURL() throws IOException {
         File testFile = createTempFileWithContent("toUrlTest", ".txt", "data");
-        URL url = IOUtil.toURL(testFile);
+        URL url = IOUtil.toUrl(testFile);
         assertNotNull(url);
         assertEquals("file", url.getProtocol());
 
         File convertedFile = IOUtil.toFile(url);
         assertEquals(testFile.getCanonicalPath(), convertedFile.getCanonicalPath());
 
-        URL[] urls = IOUtil.toURLs(new File[] { testFile });
+        URL[] urls = IOUtil.toUrls(new File[] { testFile });
         assertEquals(1, urls.length);
         assertEquals(url.toString(), urls[0].toString());
 
@@ -2205,8 +2205,8 @@ public class IOUtil200Test extends TestBase {
     @Test
     public void testToURL_fileDoesNotExist() {
         File nonExistentFile = new File(tempDir.toFile(), "nonExistentForUrl.txt");
-        assertDoesNotThrow(() -> IOUtil.toURL(nonExistentFile));
-        URL url = IOUtil.toURL(nonExistentFile);
+        assertDoesNotThrow(() -> IOUtil.toUrl(nonExistentFile));
+        URL url = IOUtil.toUrl(nonExistentFile);
         assertTrue(url.toString().startsWith("file:/"));
         assertTrue(url.toString().endsWith("nonExistentForUrl.txt"));
     }
@@ -2291,15 +2291,15 @@ public class IOUtil200Test extends TestBase {
 
     @Test
     public void testToURLs_emptyAndNullFiles() {
-        assertEquals(0, IOUtil.toURLs(new File[0]).length);
+        assertEquals(0, IOUtil.toUrls(new File[0]).length);
         List<File> fileList = new ArrayList<>();
-        assertTrue(IOUtil.toURLs(fileList).isEmpty());
+        assertTrue(IOUtil.toUrls(fileList).isEmpty());
 
         fileList.add(null);
-        assertThrows(NullPointerException.class, () -> IOUtil.toURLs(fileList));
+        assertThrows(NullPointerException.class, () -> IOUtil.toUrls(fileList));
 
         File[] fileArrayWithNull = new File[] { null };
-        assertThrows(NullPointerException.class, () -> IOUtil.toURLs(fileArrayWithNull));
+        assertThrows(NullPointerException.class, () -> IOUtil.toUrls(fileArrayWithNull));
     }
 
     @Test
@@ -2575,7 +2575,7 @@ public class IOUtil200Test extends TestBase {
         File corruptedZip = createTempFileWithContent("corrupted", ".zip", "This is not a valid zip file content".getBytes());
         File unzipDir = createTempDirectory("unzipCorrupted");
 
-        assertThrows(UncheckedIOException.class, () -> IOUtil.unzip(corruptedZip, unzipDir));
+        assertThrows(IOException.class, () -> IOUtil.unzip(corruptedZip, unzipDir));
     }
 
     @Test

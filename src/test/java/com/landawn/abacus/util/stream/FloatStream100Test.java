@@ -259,10 +259,10 @@ public class FloatStream100Test extends TestBase {
             float[] result = FloatStream.concat(a, b).toArray();
             assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f }, result);
 
-            result = FloatStream.concat(N.asList(a, b)).toArray();
+            result = FloatStream.concat(N.toList(a, b)).toArray();
             assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f }, result);
 
-            result = FloatStream.concatIterators(N.asList(FloatIterator.of(a), FloatIterator.of(b))).toArray();
+            result = FloatStream.concatIterators(N.toList(FloatIterator.of(a), FloatIterator.of(b))).toArray();
             assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f }, result);
         }
 
@@ -280,15 +280,15 @@ public class FloatStream100Test extends TestBase {
             float[] a = { 1.0f, 2.0f, 3.0f };
             float[] b = { 4.0f, 5.0f, 6.0f };
             float[] c = { 7.0f, 8.0f, 9.0f };
-            float[] result = FloatStream.merge(N.asList(FloatStream.of(a)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray();
+            float[] result = FloatStream.merge(N.toList(FloatStream.of(a)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray();
             assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f }, result);
 
-            result = FloatStream.merge(N.asList(FloatStream.of(a), FloatStream.of(b)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+            result = FloatStream.merge(N.toList(FloatStream.of(a), FloatStream.of(b)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
                     .toArray();
             assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f }, result);
 
             result = FloatStream
-                    .merge(N.asList(FloatStream.of(a), FloatStream.of(b), FloatStream.of(c)),
+                    .merge(N.toList(FloatStream.of(a), FloatStream.of(b), FloatStream.of(c)),
                             (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
                     .toArray();
             assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f }, result);

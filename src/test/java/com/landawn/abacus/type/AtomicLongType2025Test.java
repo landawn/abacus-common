@@ -100,9 +100,9 @@ public class AtomicLongType2025Test extends TestBase {
         type.set(stmt, 1, new AtomicLong(888888888L));
         verify(stmt).setLong(1, 888888888L);
 
-        // Test with null (defaults to 0)
+        // Test with null (sets SQL NULL)
         type.set(stmt, 2, null);
-        verify(stmt).setLong(2, 0L);
+        verify(stmt).setNull(2, java.sql.Types.BIGINT);
     }
 
     @Test
@@ -115,7 +115,7 @@ public class AtomicLongType2025Test extends TestBase {
 
         // Test with null
         type.set(stmt, "param2", null);
-        verify(stmt).setLong("param2", 0L);
+        verify(stmt).setNull("param2", java.sql.Types.BIGINT);
     }
 
     @Test

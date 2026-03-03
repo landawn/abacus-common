@@ -132,12 +132,12 @@ import com.landawn.abacus.util.u.Optional;
  * // Working with collections and maps
  * Map<String, Integer> map = Map.of("key1", 1, "key2", 2);
  * List<Tuple2<String, Integer>> entries = map.entrySet().stream()
- *     .map(Tuple::create)
+ *     .map(Tuple::from)
  *     .collect(Collectors.toList());
  *
  * // Beta feature: Creating from arrays
  * Object[] array = {"hello", 42, true};
- * Tuple3<String, Integer, Boolean> fromArray = Tuple.create(array);
+ * Tuple3<String, Integer, Boolean> fromArray = Tuple.from(array);
  * }</pre>
  *
  * <p><b>Nested Tuple Operations (Beta):</b>
@@ -236,7 +236,7 @@ import com.landawn.abacus.util.u.Optional;
  *   <li><b>Large Tuples:</b> Become difficult to understand and maintain without field names</li>
  * </ul>
  *
- * <p><b>Example: Data Processing Pipeline</b>
+ * <p><b>Usage Examples: Data Processing Pipeline</b>
  * <pre>{@code
  * public class DataProcessor {
  *     // Using tuples for intermediate processing results
@@ -777,7 +777,7 @@ public abstract class Tuple<TP> implements Immutable {
      * <pre>{@code
      * Map<String, Integer> map = Map.of("Alice", 25, "Bob", 30);
      * map.entrySet().stream()
-     *     .map(Tuple::create)
+     *     .map(Tuple::from)
      *     .forEach(t -> System.out.println(t._1 + ": " + t._2));
      * }</pre>
      * 
@@ -789,7 +789,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @return a new Tuple2 containing the key and value from the entry.
      */
     @Beta
-    public static <K, V> Tuple2<K, V> create(final Map.Entry<K, V> entry) {
+    public static <K, V> Tuple2<K, V> from(final Map.Entry<K, V> entry) {
         return new Tuple2<>(entry.getKey(), entry.getValue());
     }
 
@@ -802,7 +802,7 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Object[] data = {"hello", 42, true};
-     * Tuple3<String, Integer, Boolean> t = Tuple.create(data);
+     * Tuple3<String, Integer, Boolean> t = Tuple.from(data);
      * }</pre>
      * 
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
@@ -813,7 +813,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @throws IllegalArgumentException if the array contains more than 9 elements.
      */
     @Beta
-    public static <TP extends Tuple<TP>> TP create(final Object[] a) {
+    public static <TP extends Tuple<TP>> TP from(final Object[] a) {
         final int len = a == null ? 0 : a.length;
 
         if (len == 0) {
@@ -876,7 +876,7 @@ public abstract class Tuple<TP> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Object> list = Arrays.asList("a", 1, true);
-     * Tuple3<String, Integer, Boolean> t = Tuple.create(list);
+     * Tuple3<String, Integer, Boolean> t = Tuple.from(list);
      * }</pre>
      * 
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
@@ -887,7 +887,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @throws IllegalArgumentException if the collection contains more than 9 elements.
      */
     @Beta
-    public static <TP extends Tuple<TP>> TP create(final Collection<?> c) {
+    public static <TP extends Tuple<TP>> TP from(final Collection<?> c) {
         final int len = c == null ? 0 : c.size();
 
         if (len == 0) {
@@ -1529,7 +1529,7 @@ public abstract class Tuple<TP> implements Immutable {
      *     System.out.println(name + " scored " + points));
      * 
      * // Converting to Map.Entry
-     * Map.Entry<String, Integer> entry = score.toEntry();
+     * Map.Entry<String, Integer> entry = score.toImmutableEntry();
      * 
      * // Reversing elements
      * Tuple2<Integer, String> reversed = score.reverse();   // (95, "Alice")
@@ -1663,14 +1663,14 @@ public abstract class Tuple<TP> implements Immutable {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Tuple2<String, Integer> tuple = Tuple.of("age", 25);
-         * Map.Entry<String, Integer> entry = tuple.toEntry();
+         * Map.Entry<String, Integer> entry = tuple.toImmutableEntry();
          * Map<String, Integer> map = new HashMap<>();
          * map.put(entry.getKey(), entry.getValue());
          * }</pre>
          *
          * @return a new ImmutableEntry containing the same elements as this tuple.
          */
-        public ImmutableEntry<T1, T2> toEntry() {
+        public ImmutableEntry<T1, T2> toImmutableEntry() {
             return ImmutableEntry.of(_1, _2);
         }
 

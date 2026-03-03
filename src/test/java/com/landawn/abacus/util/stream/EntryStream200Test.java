@@ -935,7 +935,7 @@ public class EntryStream200Test extends TestBase {
     public void testOfEntries() {
         Map.Entry<String, Integer> entry1 = new AbstractMap.SimpleEntry<>("a", 1);
         Map.Entry<String, Integer> entry2 = new AbstractMap.SimpleEntry<>("b", 2);
-        assertEquals(2, EntryStream.of(N.asList(entry1, entry2)).count());
+        assertEquals(2, EntryStream.of(N.toList(entry1, entry2)).count());
     }
 
     @Test
@@ -990,7 +990,7 @@ public class EntryStream200Test extends TestBase {
 
     @Test
     public void testFlatmapToEntry() {
-        final List<String> list = N.asList("a", "b");
+        final List<String> list = N.toList("a", "b");
         final Map<String, Integer> map = Stream.of(list).flatmapToEntry(s -> N.asMap(s, s.hashCode())).toMap();
 
         assertNotEquals(0, map.size());
@@ -1217,9 +1217,9 @@ public class EntryStream200Test extends TestBase {
     @Test
     public void testNMatch() {
         Map<String, Integer> map = N.asMap("a", 1, "b", 2, "c", 3, "d", 4);
-        assertTrue(EntryStream.of(map).countMatchBetween(2, 2, e -> e.getValue() % 2 == 0));
-        assertFalse(EntryStream.of(map).countMatchBetween(3, 3, e -> e.getValue() % 2 == 0));
-        assertTrue(EntryStream.of(map).countMatchBetween(1, 3, e -> e.getValue() % 2 == 0));
+        assertTrue(EntryStream.of(map).isMatchCountBetween(2, 2, e -> e.getValue() % 2 == 0));
+        assertFalse(EntryStream.of(map).isMatchCountBetween(3, 3, e -> e.getValue() % 2 == 0));
+        assertTrue(EntryStream.of(map).isMatchCountBetween(1, 3, e -> e.getValue() % 2 == 0));
     }
 
     @Test

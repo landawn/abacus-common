@@ -290,7 +290,7 @@ public class PoolTest extends AbstractTest {
         final PoolableWrapper<Seid> wrapper2 = Poolable.wrap(Seid.of(AccountPNL.ID, 1));
 
         assertTrue(wrapper.equals(wrapper2));
-        assertTrue(N.asSet(wrapper).contains(wrapper2));
+        assertTrue(N.toSet(wrapper).contains(wrapper2));
 
         N.println(wrapper.value());
 
@@ -307,7 +307,7 @@ public class PoolTest extends AbstractTest {
         final ActivityPrint activityPrint2 = new ActivityPrint(100, 100);
 
         assertTrue(activityPrint.equals(activityPrint.clone()));
-        assertTrue(N.asSet(activityPrint).contains(activityPrint.clone()));
+        assertTrue(N.toSet(activityPrint).contains(activityPrint.clone()));
 
         activityPrint2.setLiveTime(1);
         activityPrint2.setMaxIdleTime(100);

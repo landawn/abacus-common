@@ -88,7 +88,7 @@ public final class HttpRequest {
      * This method is useful when you want to use an existing HttpClient with specific configuration.
      *
      * @param httpClient The HttpClient to use for the request. Must not be {@code null}.
-     * @return A new HttpRequest instance
+     * @return a new HttpRequest instance
      */
     public static HttpRequest create(final HttpClient httpClient) {
         return new HttpRequest(httpClient);
@@ -104,7 +104,7 @@ public final class HttpRequest {
      * }</pre>
      *
      * @param url The target URL for the request
-     * @return A new HttpRequest instance
+     * @return a new HttpRequest instance
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
     public static HttpRequest url(final String url) {
@@ -123,7 +123,7 @@ public final class HttpRequest {
      * @param url The target URL for the request
      * @param connectTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
-     * @return A new HttpRequest instance
+     * @return a new HttpRequest instance
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
     public static HttpRequest url(final String url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
@@ -135,7 +135,7 @@ public final class HttpRequest {
      * A new HttpClient will be created internally and closed after the request execution.
      *
      * @param url The target URL for the request
-     * @return A new HttpRequest instance
+     * @return a new HttpRequest instance
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
     public static HttpRequest url(final URL url) {
@@ -149,7 +149,7 @@ public final class HttpRequest {
      * @param url The target URL for the request
      * @param connectTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
-     * @return A new HttpRequest instance
+     * @return a new HttpRequest instance
      */
     public static HttpRequest url(final URL url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
         return new HttpRequest(HttpClient.create(url, 1, connectTimeoutInMillis, readTimeoutInMillis)).closeHttpClientAfterExecution(true);

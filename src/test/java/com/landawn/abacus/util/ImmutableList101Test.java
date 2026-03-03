@@ -96,13 +96,6 @@ public class ImmutableList101Test extends TestBase {
         Assertions.assertEquals(9, list.get(8));
     }
 
-    @Test
-    public void testOf_TenElements() {
-        ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d", "e", "f", "g", "h", "i", "j");
-        Assertions.assertEquals(10, list.size());
-        Assertions.assertEquals("j", list.get(9));
-    }
-
     //    @Test
     //    public void testOf_VarArgs() {
     //        String[] array = { "one", "two", "three" };

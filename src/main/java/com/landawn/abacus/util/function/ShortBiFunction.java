@@ -57,12 +57,12 @@ public interface ShortBiFunction<R> extends Throwables.ShortBiFunction<R, Runtim
      * Boolean valid = inRange.apply((short) 50, (short) 100);   // Returns true
      * }</pre>
      *
-     * @param t the first function argument
-     * @param u the second function argument
+     * @param a the first function argument
+     * @param b the second function argument
      * @return the function result
      */
     @Override
-    R apply(short t, short u);
+    R apply(short a, short b);
 
     /**
      * Returns a composed function that first applies this function to its input,
@@ -105,6 +105,6 @@ public interface ShortBiFunction<R> extends Throwables.ShortBiFunction<R, Runtim
      *         applies the {@code after} function
      */
     default <V> ShortBiFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        return (t, u) -> after.apply(apply(t, u));
+        return (a, b) -> after.apply(apply(a, b));
     }
 }

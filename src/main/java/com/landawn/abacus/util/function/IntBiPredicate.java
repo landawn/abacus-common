@@ -32,35 +32,35 @@ public interface IntBiPredicate extends Throwables.IntBiPredicate<RuntimeExcepti
     /**
      * A predicate that always evaluates to {@code true}.
      */
-    IntBiPredicate ALWAYS_TRUE = (t, u) -> true;
+    IntBiPredicate ALWAYS_TRUE = (a, b) -> true;
     /**
      * A predicate that always evaluates to {@code false}.
      */
-    IntBiPredicate ALWAYS_FALSE = (t, u) -> false;
+    IntBiPredicate ALWAYS_FALSE = (a, b) -> false;
     /**
      * A predicate that tests if two {@code int} values are equal.
      */
-    IntBiPredicate EQUAL = (t, u) -> t == u;
+    IntBiPredicate EQUAL = (a, b) -> a == b;
     /**
      * A predicate that tests if two {@code int} values are not equal.
      */
-    IntBiPredicate NOT_EQUAL = (t, u) -> t != u;
+    IntBiPredicate NOT_EQUAL = (a, b) -> a != b;
     /**
      * A predicate that tests if the first {@code int} value is greater than the second.
      */
-    IntBiPredicate GREATER_THAN = (t, u) -> t > u;
+    IntBiPredicate GREATER_THAN = (a, b) -> a > b;
     /**
      * A predicate that tests if the first {@code int} value is greater than or equal to the second.
      */
-    IntBiPredicate GREATER_EQUAL = (t, u) -> t >= u;
+    IntBiPredicate GREATER_THAN_OR_EQUAL = (a, b) -> a >= b;
     /**
      * A predicate that tests if the first {@code int} value is less than the second.
      */
-    IntBiPredicate LESS_THAN = (t, u) -> t < u;
+    IntBiPredicate LESS_THAN = (a, b) -> a < b;
     /**
      * A predicate that tests if the first {@code int} value is less than or equal to the second.
      */
-    IntBiPredicate LESS_EQUAL = (t, u) -> t <= u;
+    IntBiPredicate LESS_THAN_OR_EQUAL = (a, b) -> a <= b;
 
     /**
      * Evaluates this predicate on the given arguments.
@@ -71,12 +71,12 @@ public interface IntBiPredicate extends Throwables.IntBiPredicate<RuntimeExcepti
      * boolean result = sumGreaterThan10.test(5, 6);   // Returns true
      * }</pre>
      *
-     * @param t the first {@code int} argument
-     * @param u the second {@code int} argument
+     * @param a the first {@code int} argument
+     * @param b the second {@code int} argument
      * @return {@code true} if the input arguments match the predicate, {@code false} otherwise
      */
     @Override
-    boolean test(int t, int u);
+    boolean test(int a, int b);
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
@@ -84,7 +84,7 @@ public interface IntBiPredicate extends Throwables.IntBiPredicate<RuntimeExcepti
      * @return a predicate that represents the logical negation of this predicate
      */
     default IntBiPredicate negate() {
-        return (t, u) -> !test(t, u);
+        return (a, b) -> !test(a, b);
     }
 
     /**
@@ -100,7 +100,7 @@ public interface IntBiPredicate extends Throwables.IntBiPredicate<RuntimeExcepti
      *         the {@code other} predicate
      */
     default IntBiPredicate and(final IntBiPredicate other) {
-        return (t, u) -> test(t, u) && other.test(t, u);
+        return (a, b) -> test(a, b) && other.test(a, b);
     }
 
     /**
@@ -116,6 +116,6 @@ public interface IntBiPredicate extends Throwables.IntBiPredicate<RuntimeExcepti
      *         the {@code other} predicate
      */
     default IntBiPredicate or(final IntBiPredicate other) {
-        return (t, u) -> test(t, u) || other.test(t, u);
+        return (a, b) -> test(a, b) || other.test(a, b);
     }
 }

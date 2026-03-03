@@ -34,10 +34,10 @@ public interface BooleanBinaryOperator extends Throwables.BooleanBinaryOperator<
      * boolean result = and.applyAsBoolean(true, false);   // Returns false
      * }</pre>
      *
-     * @param left the first operand
-     * @param right the second operand
+     * @param a the first operand
+     * @param b the second operand
      * @return the operator result
      */
     @Override
-    boolean applyAsBoolean(boolean left, boolean right);
+    boolean applyAsBoolean(boolean a, boolean b);
 }

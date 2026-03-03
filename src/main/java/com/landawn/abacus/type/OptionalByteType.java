@@ -63,14 +63,14 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
     }
 
     /**
-     * Indicates whether values of this type should be quoted when written to CSV format.
-     * Numeric values typically don't require quotes in CSV.
+     * Indicates whether values of this type require quoting in CSV format.
+     * OptionalByte values are numeric and do not require quotes in CSV.
      *
-     * @return {@code true}, indicating byte values don't need quotes in CSV
+     * @return {@code false}, as OptionalByte values do not require quoting in CSV format
      */
     @Override
-    public boolean isNonQuotableCsvType() {
-        return true;
+    public boolean isCsvQuoteRequired() {
+        return false;
     }
 
     /**

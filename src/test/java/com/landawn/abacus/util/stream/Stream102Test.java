@@ -1261,7 +1261,7 @@ public class Stream102Test extends TestBase {
 
     @Test
     public void testNMatch() {
-        assertTrue(stream.countMatchBetween(2, 3, n -> n > 2));
+        assertTrue(stream.isMatchCountBetween(2, 3, n -> n > 2));
     }
 
     @Test

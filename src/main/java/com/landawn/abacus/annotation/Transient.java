@@ -38,7 +38,7 @@ import java.lang.annotation.Target;
  * <p><b>Important notes:</b></p>
  * <ul>
  *   <li>This annotation only affects persistence operations, not serialization</li>
- *   <li>For serialization exclusion, use framework-specific annotations (e.g., @JsonIgnore)</li>
+ *   <li>For serialization exclusion, use {@link JsonXmlField}{@code (ignore = true)}</li>
  *   <li>Transient fields may still be included in toString(), equals(), and hashCode()</li>
  *   <li>The field will still occupy memory in the object instance</li>
  * </ul>

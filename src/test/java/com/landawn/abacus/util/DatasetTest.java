@@ -49,8 +49,8 @@ public class DatasetTest extends AbstractTest {
     @Test
     public void test_convertColumn() {
 
-        final Dataset dataset = CommonUtil.newDataset(CommonUtil.asList("column1", "column2"),
-                CommonUtil.asList(CommonUtil.asList("ab", "cd"), CommonUtil.asList("ef", "gh")));
+        final Dataset dataset = CommonUtil.newDataset(CommonUtil.toList("column1", "column2"),
+                CommonUtil.toList(CommonUtil.toList("ab", "cd"), CommonUtil.toList("ef", "gh")));
 
         assertThrows(IllegalArgumentException.class, () -> dataset.convertColumn("column1", Long.class));
     }
@@ -156,16 +156,16 @@ public class DatasetTest extends AbstractTest {
         json = N.toJson(CommonUtil.newEmptyDataset(), true);
         N.println(json);
 
-        json = N.toJson(CommonUtil.newEmptyDataset(CommonUtil.asList("a", "b", "c")));
+        json = N.toJson(CommonUtil.newEmptyDataset(CommonUtil.toList("a", "b", "c")));
         N.println(json);
 
-        json = N.toJson(CommonUtil.newEmptyDataset(CommonUtil.asList("a", "b", "c")), true);
+        json = N.toJson(CommonUtil.newEmptyDataset(CommonUtil.toList("a", "b", "c")), true);
         N.println(json);
 
         N.println(ds.toString());
 
-        final List<String> columnNames = CommonUtil.asList("id", "name");
-        final List<List<Object>> columns = CommonUtil.asList(CommonUtil.asList(1, 2, 3), CommonUtil.asList("a", "b", "c"));
+        final List<String> columnNames = CommonUtil.toList("id", "name");
+        final List<List<Object>> columns = CommonUtil.toList(CommonUtil.toList(1, 2, 3), CommonUtil.toList("a", "b", "c"));
         final Map<String, Object> props = CommonUtil.asProps("prop1", 123, "prop2", "abc");
 
         ds = new RowDataset(columnNames, columns, props);
@@ -178,7 +178,7 @@ public class DatasetTest extends AbstractTest {
 
         final List<Account> accountList = createAccountList(Account.class, 3);
         final Dataset ds = CommonUtil.newDataset(accountList);
-        Dataset emptyDS = CommonUtil.newDataset(CommonUtil.asList("id"), CommonUtil.emptyList());
+        Dataset emptyDS = CommonUtil.newDataset(CommonUtil.toList("id"), CommonUtil.emptyList());
         emptyDS.println();
 
         {
@@ -233,7 +233,7 @@ public class DatasetTest extends AbstractTest {
         }
 
         {
-            emptyDS = CommonUtil.newDataset(CommonUtil.asList("id", "gui"), CommonUtil.emptyList());
+            emptyDS = CommonUtil.newDataset(CommonUtil.toList("id", "gui"), CommonUtil.emptyList());
             emptyDS.println();
 
             N.println("===========union=============");
@@ -288,11 +288,11 @@ public class DatasetTest extends AbstractTest {
                 { "Orange", 2000, "USA" }, { "Banana", 400, "China" }, { "Carrots", 1200, "China" }, { "Beans", 1500, "China" }, { "Orange", 4000, "China" },
                 { "Banana", 2000, "Canada" }, { "Carrots", 2000, "Canada" }, { "Beans", 2000, "Mexico" } };
 
-        final Dataset dataset = CommonUtil.newDataset(CommonUtil.asList("Product", "Amount", "Country"), rowList);
+        final Dataset dataset = CommonUtil.newDataset(CommonUtil.toList("Product", "Amount", "Country"), rowList);
 
         dataset.println();
 
-        dataset.cube(CommonUtil.asList("Product", "Country"), CommonUtil.asList("Amount"), "result", List.class).forEach(Dataset::println);
+        dataset.cube(CommonUtil.toList("Product", "Country"), CommonUtil.toList("Amount"), "result", List.class).forEach(Dataset::println);
     }
 
     @Test
@@ -301,7 +301,7 @@ public class DatasetTest extends AbstractTest {
                 { "Orange", 2000, "USA" }, { "Banana", 400, "China" }, { "Carrots", 1200, "China" }, { "Beans", 1500, "China" }, { "Orange", 4000, "China" },
                 { "Banana", 2000, "Canada" }, { "Carrots", 2000, "Canada" }, { "Beans", 2000, "Mexico" } };
 
-        final Dataset dataset = CommonUtil.newDataset(CommonUtil.asList("Prod\"^@&\\'skdf'''\\\\\\uct", "\\\"^@&\\\\'skdf'''\\\\\\\\\\\\uct", "Country"),
+        final Dataset dataset = CommonUtil.newDataset(CommonUtil.toList("Prod\"^@&\\'skdf'''\\\\\\uct", "\\\"^@&\\\\'skdf'''\\\\\\\\\\\\uct", "Country"),
                 rowList);
 
         dataset.println();
@@ -317,18 +317,18 @@ public class DatasetTest extends AbstractTest {
                 .toList();
         CommonUtil.shuffle(rowList);
 
-        Dataset dataset = CommonUtil.newDataset(CommonUtil.asList("int", "char", "str"), rowList);
+        Dataset dataset = CommonUtil.newDataset(CommonUtil.toList("int", "char", "str"), rowList);
         dataset.println();
 
         dataset.sortBy("int");
         dataset.println();
 
-        dataset = CommonUtil.newDataset(CommonUtil.asList("int", "char", "str"), rowList);
-        dataset.sortBy(CommonUtil.asList("char", "int"), Comparators.OBJECT_ARRAY_COMPARATOR);
+        dataset = CommonUtil.newDataset(CommonUtil.toList("int", "char", "str"), rowList);
+        dataset.sortBy(CommonUtil.toList("char", "int"), Comparators.OBJECT_ARRAY_COMPARATOR);
         dataset.println();
 
-        dataset = CommonUtil.newDataset(CommonUtil.asList("int", "char", "str"), rowList);
-        dataset.sortBy(CommonUtil.asList("char", "int"), Comparators.comparingObjArray(Comparators.reverseOrder()));
+        dataset = CommonUtil.newDataset(CommonUtil.toList("int", "char", "str"), rowList);
+        dataset.sortBy(CommonUtil.toList("char", "int"), Comparators.comparingObjArray(Comparators.reverseOrder()));
         dataset.println();
     }
 
@@ -338,11 +338,11 @@ public class DatasetTest extends AbstractTest {
                 { "Orange", 2000, "USA" }, { "Banana", 400, "China" }, { "Carrots", 1200, "China" }, { "Beans", 1500, "China" }, { "Orange", 4000, "China" },
                 { "Banana", 2000, "Canada" }, { "Carrots", 2000, "Canada" }, { "Beans", 2000, "Mexico" } };
 
-        final Dataset dataset = CommonUtil.newDataset(CommonUtil.asList("Product", "Amount", "Country"), rowList);
+        final Dataset dataset = CommonUtil.newDataset(CommonUtil.toList("Product", "Amount", "Country"), rowList);
 
         dataset.println();
 
-        final Dataset ds2 = dataset.groupBy(CommonUtil.asList("Product", "Country"), "Amount", "sum(Amount)",
+        final Dataset ds2 = dataset.groupBy(CommonUtil.toList("Product", "Country"), "Amount", "sum(Amount)",
                 Collectors.summingLong(it -> ((Number) it).longValue()));
         ds2.sortBy("Product");
         ds2.println();
@@ -354,7 +354,7 @@ public class DatasetTest extends AbstractTest {
                 { "Orange", 2000, "USA" }, { "Banana", 400, "China" }, { "Carrots", 1200, "China" }, { "Beans", 1500, "China" }, { "Orange", 4000, "China" },
                 { "Banana", 2000, "Canada" }, { "Carrots", 2000, "Canada" }, { "Beans", 2000, "Mexico" } };
 
-        final Dataset dataset = CommonUtil.newDataset(CommonUtil.asList("Product", "Amount", "Country"), rowList);
+        final Dataset dataset = CommonUtil.newDataset(CommonUtil.toList("Product", "Amount", "Country"), rowList);
 
         dataset.println();
 
@@ -364,20 +364,20 @@ public class DatasetTest extends AbstractTest {
         sheet = dataset.pivot("Country", "Product", "Amount", Collectors.summingDouble(Number::doubleValue));
         sheet.println();
 
-        dataset.pivot("Country", "Product", CommonUtil.asList("Amount", "Country"), it -> it.join("_"), Collectors.toList()).println();
-        dataset.pivot("Country", "Product", CommonUtil.asList("Amount", "Country"), N::toString, Collectors.toList()).println();
-        dataset.pivot("Country", "Product", CommonUtil.asList("Amount", "Country"), Collectors.mappingToList(N::toString)).println();
+        dataset.pivot("Country", "Product", CommonUtil.toList("Amount", "Country"), it -> it.join("_"), Collectors.toList()).println();
+        dataset.pivot("Country", "Product", CommonUtil.toList("Amount", "Country"), N::toString, Collectors.toList()).println();
+        dataset.pivot("Country", "Product", CommonUtil.toList("Amount", "Country"), Collectors.mappingToList(N::toString)).println();
 
-        Sheet<String, Integer, List<String>> sheet2 = dataset.pivot("Country", "Amount", CommonUtil.asList("Product", "Country"),
+        Sheet<String, Integer, List<String>> sheet2 = dataset.pivot("Country", "Amount", CommonUtil.toList("Product", "Country"),
                 Collectors.mappingToList(N::toString));
         sheet2.println();
 
         dataset.sortBy("Amount");
-        sheet2 = dataset.pivot("Country", "Amount", CommonUtil.asList("Product", "Country"), Collectors.mappingToList(N::toString));
+        sheet2 = dataset.pivot("Country", "Amount", CommonUtil.toList("Product", "Country"), Collectors.mappingToList(N::toString));
         sheet2.println();
 
-        dataset.sortBy(CommonUtil.asList("Country", "Amount"));
-        sheet2 = dataset.pivot("Country", "Amount", CommonUtil.asList("Product", "Country"), Collectors.mappingToList(N::toString));
+        dataset.sortBy(CommonUtil.toList("Country", "Amount"));
+        sheet2 = dataset.pivot("Country", "Amount", CommonUtil.toList("Product", "Country"), Collectors.mappingToList(N::toString));
         sheet2.println();
 
         sheet2.sortByColumnKey();
@@ -390,11 +390,11 @@ public class DatasetTest extends AbstractTest {
                 { "Orange", 2000, "USA" }, { "Banana", 400, "China" }, { "Carrots", 1200, "China" }, { "Beans", 1500, "China" }, { "Orange", 4000, "China" },
                 { "Banana", 2000, "Canada" }, { "Carrots", 2000, "Canada" }, { "Beans", 2000, "Mexico" } };
 
-        final Dataset dataset = CommonUtil.newDataset(CommonUtil.asList("Product", "Amount", "Country"), rowList);
+        final Dataset dataset = CommonUtil.newDataset(CommonUtil.toList("Product", "Amount", "Country"), rowList);
 
         dataset.println();
 
-        final Sheet<String, Integer, List<String>> sheet = dataset.pivot("Country", "Amount", CommonUtil.asList("Product", "Country"),
+        final Sheet<String, Integer, List<String>> sheet = dataset.pivot("Country", "Amount", CommonUtil.toList("Product", "Country"),
                 Collectors.mappingToList(N::toString));
         sheet.println();
 
@@ -425,20 +425,20 @@ public class DatasetTest extends AbstractTest {
         N.println("sortByColumns" + Strings.repeat("=", 80));
         copy = sheet.copy();
         copy.println();
-        copy.sortRowsByColumnValues(CommonUtil.asList(1500, 2000), Comparators.comparingObjArray(Comparators.comparingCollection()));
+        copy.sortRowsByColumnValues(CommonUtil.toList(1500, 2000), Comparators.comparingObjArray(Comparators.comparingCollection()));
         copy.println();
         copy = sheet.copy();
-        copy.sortRowsByColumnValues(CommonUtil.asList(1500, 2000), Comparators.comparingObjArray(Comparators.comparingCollection()).reversed());
+        copy.sortRowsByColumnValues(CommonUtil.toList(1500, 2000), Comparators.comparingObjArray(Comparators.comparingCollection()).reversed());
         copy.println();
         N.println(Strings.repeat("=", 80));
 
         N.println("sortByRows" + Strings.repeat("=", 80));
         copy = sheet.copy();
         copy.println();
-        copy.sortColumnsByRowValues(CommonUtil.asList("China", "USA"), Comparators.comparingObjArray(Comparators.comparingCollection()));
+        copy.sortColumnsByRowValues(CommonUtil.toList("China", "USA"), Comparators.comparingObjArray(Comparators.comparingCollection()));
         copy.println();
         copy = sheet.copy();
-        copy.sortColumnsByRowValues(CommonUtil.asList("China", "USA"), Comparators.comparingObjArray(Comparators.comparingCollection()).reversed());
+        copy.sortColumnsByRowValues(CommonUtil.toList("China", "USA"), Comparators.comparingObjArray(Comparators.comparingCollection()).reversed());
         copy.println();
         N.println(Strings.repeat("=", 80));
 
@@ -453,9 +453,9 @@ public class DatasetTest extends AbstractTest {
                 { "Orange", 2000, "USA" }, { "Banana", 400, "China" }, { "Carrots", 1200, "China" }, { "Beans", 1500, "China" }, { "Orange", 4000, "China" },
                 { "Banana", 2000, "Canada" }, { "Carrots", 2000, "Canada" }, { "Beans", 2000, "Mexico" } };
 
-        final Dataset dataset = CommonUtil.newDataset(CommonUtil.asList("Product", "Amount", "Country"), rowList);
+        final Dataset dataset = CommonUtil.newDataset(CommonUtil.toList("Product", "Amount", "Country"), rowList);
 
-        final Sheet<String, Integer, List<String>> sheet = dataset.pivot("Country", "Amount", CommonUtil.asList("Product", "Country"),
+        final Sheet<String, Integer, List<String>> sheet = dataset.pivot("Country", "Amount", CommonUtil.toList("Product", "Country"),
                 Collectors.mappingToList(N::toString));
         sheet.println();
 
@@ -506,7 +506,7 @@ public class DatasetTest extends AbstractTest {
                 Type.ofMap(String.class, Dataset.class));
         map2.entrySet().iterator().next().getValue().println();
 
-        final List<Dataset> list = N.fromJson(N.toJson(CommonUtil.asList(accountList)), JDC.create().setValueTypesByBeanClass(Account.class),
+        final List<Dataset> list = N.fromJson(N.toJson(CommonUtil.toList(accountList)), JDC.create().setValueTypesByBeanClass(Account.class),
                 Type.ofList(Dataset.class));
         list.get(0).println();
 
@@ -532,7 +532,7 @@ public class DatasetTest extends AbstractTest {
         N.println(Strings.repeat("=", 80));
         ds2.println();
 
-        json = N.toJson(CommonUtil.asList(accountList.get(0)));
+        json = N.toJson(CommonUtil.toList(accountList.get(0)));
 
         ds2 = N.fromJson(json, JDC.create().setValueTypesByBeanClass(Account.class), Dataset.class);
         N.println(Strings.repeat("=", 80));
@@ -552,15 +552,15 @@ public class DatasetTest extends AbstractTest {
         final Dataset ds = CommonUtil.newDataset(accountList);
         ds.groupBy("id", ds.columnNames(), "account", Account.class).println();
 
-        ds.groupBy(CommonUtil.asList("id", "firstName"), ds.columnNames(), "account", Account.class).println();
+        ds.groupBy(CommonUtil.toList("id", "firstName"), ds.columnNames(), "account", Account.class).println();
 
-        ds.groupBy(CommonUtil.asList("id", "firstName"), CommonUtil.asList("lastName", "firstName"), "account", it -> it.join(":"), Collectors.toList())
+        ds.groupBy(CommonUtil.toList("id", "firstName"), CommonUtil.toList("lastName", "firstName"), "account", it -> it.join(":"), Collectors.toList())
                 .println();
     }
 
     @Test
     public void test_toList() {
-        final Dataset dataset = CommonUtil.newDataset(CommonUtil.asList("a", "b", "c"), CommonUtil.asList(CommonUtil.asList("a1", "b1", "c1")));
+        final Dataset dataset = CommonUtil.newDataset(CommonUtil.toList("a", "b", "c"), CommonUtil.toList(CommonUtil.toList("a1", "b1", "c1")));
         dataset.toList(dataset.columnNames().subList(1, 3), Object[].class).forEach(Fn.println());
     }
 
@@ -569,7 +569,7 @@ public class DatasetTest extends AbstractTest {
         final Map<String, String> map = new HashMap<>();
         map.put(null, null);
 
-        final List<String> columNames = CommonUtil.asList("id", "name", "devices.id", "devices.model", "devices.serialNumber");
+        final List<String> columNames = CommonUtil.toList("id", "name", "devices.id", "devices.model", "devices.serialNumber");
         final Dataset dataset = Dataset.rows(columNames,
                 new Object[][] { { 100, "Bob", 1, "iPhone", "abc123" }, { 100, "Bob", 2, "MacBook", "mmm123" }, { 200, "Alice", 3, "Android", "aaa223" } });
 
@@ -590,11 +590,11 @@ public class DatasetTest extends AbstractTest {
         final Map<String, String> map = new HashMap<>();
         map.put(null, null);
 
-        final List<String> columNames = CommonUtil.asList("id", "firstName", "contact.id", "contact.address", "contact.city", "device.id", "device.name",
+        final List<String> columNames = CommonUtil.toList("id", "firstName", "contact.id", "contact.address", "contact.city", "device.id", "device.name",
                 "device.model");
         final Dataset dataset = CommonUtil.newDataset(columNames,
-                CommonUtil.asList(CommonUtil.asList(1, "firstName1", 1, "address1", "city1", 1, "device1", "model1"),
-                        CommonUtil.asList(1, "firstName2", 2, "address2", "city2", 2, "device2", "model2")));
+                CommonUtil.toList(CommonUtil.toList(1, "firstName1", 1, "address1", "city1", 1, "device1", "model1"),
+                        CommonUtil.toList(1, "firstName2", 2, "address2", "city2", 2, "device2", "model2")));
 
         dataset.toList(Account.class).stream().map(N::toJson).forEach(Fn.println());
 
@@ -612,7 +612,7 @@ public class DatasetTest extends AbstractTest {
         assertEquals("firstName2", accounts1.get(0).getFirstName());
         assertEquals(2, accounts1.get(0).getDevices().size());
 
-        final List<Account> accounts2 = dataset.toMergedEntities(CommonUtil.asList("id", "firstName"), dataset.columnNames(), Account.class);
+        final List<Account> accounts2 = dataset.toMergedEntities(CommonUtil.toList("id", "firstName"), dataset.columnNames(), Account.class);
         accounts2.stream().map(N::toJson).forEach(Fn.println());
         assertEquals(2, accounts2.size());
         assertEquals("firstName1", accounts2.get(0).getFirstName());
@@ -624,10 +624,10 @@ public class DatasetTest extends AbstractTest {
         final Map<String, String> map = new HashMap<>();
         map.put(null, null);
 
-        final List<String> columNames = CommonUtil.asList("id", "firstName", "ct.id", "ct.address", "ct.city", "device.id", "device.name", "device.model");
+        final List<String> columNames = CommonUtil.toList("id", "firstName", "ct.id", "ct.address", "ct.city", "device.id", "device.name", "device.model");
         final Dataset dataset = CommonUtil.newDataset(columNames,
-                CommonUtil.asList(CommonUtil.asList(1, "firstName1", 1, "address1", "city1", 1, "device1", "model1"),
-                        CommonUtil.asList(1, "firstName2", 2, "address2", "city2", 2, "device2", "model2")));
+                CommonUtil.toList(CommonUtil.toList(1, "firstName1", 1, "address1", "city1", 1, "device1", "model1"),
+                        CommonUtil.toList(1, "firstName2", 2, "address2", "city2", 2, "device2", "model2")));
 
         dataset.toList(Account.class).stream().map(N::toJson).forEach(Fn.println());
 
@@ -639,7 +639,7 @@ public class DatasetTest extends AbstractTest {
         assertEquals(1, accounts.get(0).getDevices().size());
         assertEquals(1, accounts.get(1).getDevices().size());
 
-        final List<Account> accounts1 = dataset.toMergedEntities(CommonUtil.asList("id"), dataset.columnNames(), CommonUtil.asMap("ct", "contact"),
+        final List<Account> accounts1 = dataset.toMergedEntities(CommonUtil.toList("id"), dataset.columnNames(), CommonUtil.asMap("ct", "contact"),
                 Account.class);
         accounts1.stream().map(N::toJson).forEach(Fn.println());
         assertEquals(1, accounts1.size());
@@ -647,7 +647,7 @@ public class DatasetTest extends AbstractTest {
         assertEquals("address2", accounts1.get(0).getContact().getAddress());
         assertEquals(2, accounts1.get(0).getDevices().size());
 
-        final List<Account> accounts2 = dataset.toMergedEntities(CommonUtil.asList("id", "firstName"), dataset.columnNames(), CommonUtil.asMap("ct", "contact"),
+        final List<Account> accounts2 = dataset.toMergedEntities(CommonUtil.toList("id", "firstName"), dataset.columnNames(), CommonUtil.asMap("ct", "contact"),
                 Account.class);
         accounts2.stream().map(N::toJson).forEach(Fn.println());
         assertEquals(2, accounts2.size());
@@ -659,39 +659,39 @@ public class DatasetTest extends AbstractTest {
     @Test
     public void test_emptyDataset() {
         CommonUtil.newEmptyDataset().println();
-        CommonUtil.newEmptyDataset(CommonUtil.asList("co1", "col2")).println();
+        CommonUtil.newEmptyDataset(CommonUtil.toList("co1", "col2")).println();
 
         N.println(CommonUtil.newEmptyDataset().toJson());
         N.println(CommonUtil.newEmptyDataset().toXml());
         N.println(CommonUtil.newEmptyDataset().toCsv());
 
-        N.println(CommonUtil.newEmptyDataset(CommonUtil.asList("firstName", "lastName")).toJson());
-        N.println(CommonUtil.newEmptyDataset(CommonUtil.asList("firstName", "lastName")).toXml());
-        N.println(CommonUtil.newEmptyDataset(CommonUtil.asList("firstName", "lastName")).toCsv());
-        N.println(CommonUtil.newEmptyDataset(CommonUtil.asList("firstName", "lastName")).toCsv());
+        N.println(CommonUtil.newEmptyDataset(CommonUtil.toList("firstName", "lastName")).toJson());
+        N.println(CommonUtil.newEmptyDataset(CommonUtil.toList("firstName", "lastName")).toXml());
+        N.println(CommonUtil.newEmptyDataset(CommonUtil.toList("firstName", "lastName")).toCsv());
+        N.println(CommonUtil.newEmptyDataset(CommonUtil.toList("firstName", "lastName")).toCsv());
 
         N.println(N.toJson(CommonUtil.newEmptyDataset()));
-        N.println(N.toJson(CommonUtil.newEmptyDataset(CommonUtil.asList("firstName", "lastName"))));
+        N.println(N.toJson(CommonUtil.newEmptyDataset(CommonUtil.toList("firstName", "lastName"))));
 
-        N.println(N.fromJson(N.toJson(CommonUtil.newEmptyDataset(CommonUtil.asList("firstName", "lastName"))), Dataset.class));
+        N.println(N.fromJson(N.toJson(CommonUtil.newEmptyDataset(CommonUtil.toList("firstName", "lastName"))), Dataset.class));
         N.println(N.fromJson(N.toJson(CommonUtil.newEmptyDataset()), Dataset.class));
     }
 
     @Test
     public void test_cartesianProduct() {
-        final Dataset a = CommonUtil.newDataset(CommonUtil.asLinkedHashMap("col1", CommonUtil.asList(1, 2), "col2", CommonUtil.asList(3, 4)));
-        final Dataset b = CommonUtil.newDataset(CommonUtil.asLinkedHashMap("col3", CommonUtil.asList("a", "b"), "col4", CommonUtil.asList("c", "d")));
+        final Dataset a = CommonUtil.newDataset(CommonUtil.asLinkedHashMap("col1", CommonUtil.toList(1, 2), "col2", CommonUtil.toList(3, 4)));
+        final Dataset b = CommonUtil.newDataset(CommonUtil.asLinkedHashMap("col3", CommonUtil.toList("a", "b"), "col4", CommonUtil.toList("c", "d")));
         a.cartesianProduct(b).println();
 
         CommonUtil.newEmptyDataset().cartesianProduct(b).println();
-        CommonUtil.newEmptyDataset(CommonUtil.asList("co1", "col2")).cartesianProduct(b).println();
-        CommonUtil.newEmptyDataset(CommonUtil.asList("co1", "col2")).cartesianProduct(CommonUtil.newEmptyDataset()).println();
+        CommonUtil.newEmptyDataset(CommonUtil.toList("co1", "col2")).cartesianProduct(b).println();
+        CommonUtil.newEmptyDataset(CommonUtil.toList("co1", "col2")).cartesianProduct(CommonUtil.newEmptyDataset()).println();
 
         CommonUtil.newEmptyDataset().cartesianProduct(CommonUtil.newEmptyDataset()).println();
 
         try {
-            CommonUtil.newEmptyDataset(CommonUtil.asList("col1", "col2"))
-                    .cartesianProduct(CommonUtil.newEmptyDataset(CommonUtil.asList("col1", "a")))
+            CommonUtil.newEmptyDataset(CommonUtil.toList("col1", "col2"))
+                    .cartesianProduct(CommonUtil.newEmptyDataset(CommonUtil.toList("col1", "a")))
                     .println();
             fail("Should throw: IllegalArgumentException");
         } catch (final IllegalArgumentException e) {
@@ -701,16 +701,16 @@ public class DatasetTest extends AbstractTest {
 
     @Test
     public void test_print() {
-        final Dataset ds = CommonUtil.newDataset(CommonUtil.asList("a", "blafjiawfj;lkasjf23 i2qfja;lsfjoiaslf", "c"), CommonUtil
-                .asList(CommonUtil.asList(1, "n1kafjeoiwajf", "c1"), CommonUtil.asList(2, "n2", "c2las83292rfjioa"), CommonUtil.asList(3, "n3", "c3")));
+        final Dataset ds = CommonUtil.newDataset(CommonUtil.toList("a", "blafjiawfj;lkasjf23 i2qfja;lsfjoiaslf", "c"), CommonUtil
+                .asList(CommonUtil.toList(1, "n1kafjeoiwajf", "c1"), CommonUtil.toList(2, "n2", "c2las83292rfjioa"), CommonUtil.toList(3, "n3", "c3")));
         ds.println();
 
         StringWriter outputWriter = new StringWriter();
         ds.println(outputWriter);
         N.println(outputWriter.toString());
 
-        ds.println(0, 2, CommonUtil.asList("c"));
-        ds.println(1, 3, CommonUtil.asList("a", "c"));
+        ds.println(0, 2, CommonUtil.toList("c"));
+        ds.println(1, 3, CommonUtil.toList("a", "c"));
 
         ds.clear();
         ds.println();
@@ -725,21 +725,21 @@ public class DatasetTest extends AbstractTest {
 
     @Test
     public void test_rename() {
-        final Dataset ds1 = CommonUtil.newDataset(CommonUtil.asList("a", "b", "c"),
-                CommonUtil.asList(CommonUtil.asList(1, "n1", "c1"), CommonUtil.asList(2, "n2", "c2"), CommonUtil.asList(3, "n3", "c3")));
+        final Dataset ds1 = CommonUtil.newDataset(CommonUtil.toList("a", "b", "c"),
+                CommonUtil.toList(CommonUtil.toList(1, "n1", "c1"), CommonUtil.toList(2, "n2", "c2"), CommonUtil.toList(3, "n3", "c3")));
         ds1.renameColumns(CommonUtil.asMap("a", "a", "c", "d"));
         ds1.println();
         N.println(N.toJson(ds1));
 
-        ds1.slice(0, 2, CommonUtil.asList("a")).println();
+        ds1.slice(0, 2, CommonUtil.toList("a")).println();
     }
 
     @Test
     public void test_union_all() {
-        Dataset ds1 = CommonUtil.newDataset(CommonUtil.asList("id", "name", "city"),
-                CommonUtil.asList(CommonUtil.asList(1, "n1", "c1"), CommonUtil.asList(2, "n2", "c2"), CommonUtil.asList(3, "n3", "c3")));
-        Dataset ds2 = CommonUtil.newDataset(CommonUtil.asList("id", "address2", "state"),
-                CommonUtil.asList(CommonUtil.asList(1, "n1", "c1"), CommonUtil.asList(2, "n2", "c2"), CommonUtil.asList(2, "n22", "c22")));
+        Dataset ds1 = CommonUtil.newDataset(CommonUtil.toList("id", "name", "city"),
+                CommonUtil.toList(CommonUtil.toList(1, "n1", "c1"), CommonUtil.toList(2, "n2", "c2"), CommonUtil.toList(3, "n3", "c3")));
+        Dataset ds2 = CommonUtil.newDataset(CommonUtil.toList("id", "address2", "state"),
+                CommonUtil.toList(CommonUtil.toList(1, "n1", "c1"), CommonUtil.toList(2, "n2", "c2"), CommonUtil.toList(2, "n22", "c22")));
 
         N.println("============================== union ===========================");
         ds1.union(ds2).println();
@@ -747,10 +747,10 @@ public class DatasetTest extends AbstractTest {
         N.println("============================== unionAll ===========================");
         ds1.unionAll(ds2).println();
 
-        ds1 = CommonUtil.newDataset(CommonUtil.asList("id", "name", "city"),
-                CommonUtil.asList(CommonUtil.asList(1, "n1", "c1"), CommonUtil.asList(2, "n2", "c2"), CommonUtil.asList(3, "n3", "c3")));
-        ds2 = CommonUtil.newDataset(CommonUtil.asList("id", "name", "city"),
-                CommonUtil.asList(CommonUtil.asList(2, "n2", "c2"), CommonUtil.asList(2, "n2", "c2"), CommonUtil.asList(3, "n4", "c4")));
+        ds1 = CommonUtil.newDataset(CommonUtil.toList("id", "name", "city"),
+                CommonUtil.toList(CommonUtil.toList(1, "n1", "c1"), CommonUtil.toList(2, "n2", "c2"), CommonUtil.toList(3, "n3", "c3")));
+        ds2 = CommonUtil.newDataset(CommonUtil.toList("id", "name", "city"),
+                CommonUtil.toList(CommonUtil.toList(2, "n2", "c2"), CommonUtil.toList(2, "n2", "c2"), CommonUtil.toList(3, "n4", "c4")));
 
         N.println("============================== union ===========================");
         ds1.union(ds2).println();
@@ -764,10 +764,10 @@ public class DatasetTest extends AbstractTest {
         N.println("============================== intersectAll ===========================");
         ds1.intersectAll(ds2).println();
 
-        ds1 = CommonUtil.newDataset(CommonUtil.asList("id", "name", "city"), CommonUtil.asList(CommonUtil.asList(1, "n1", "c1"),
-                CommonUtil.asList(2, "n2", "c2"), CommonUtil.asList(2, "n2", "c2"), CommonUtil.asList(3, "n3", "c3")));
-        ds2 = CommonUtil.newDataset(CommonUtil.asList("id", "name", "city", "state"),
-                CommonUtil.asList(CommonUtil.asList(2, "n2", "c2", "CA"), CommonUtil.asList(2, "n2", "c2", "CA"), CommonUtil.asList(3, "n4", "c4", "CA")));
+        ds1 = CommonUtil.newDataset(CommonUtil.toList("id", "name", "city"), CommonUtil.toList(CommonUtil.toList(1, "n1", "c1"),
+                CommonUtil.toList(2, "n2", "c2"), CommonUtil.toList(2, "n2", "c2"), CommonUtil.toList(3, "n3", "c3")));
+        ds2 = CommonUtil.newDataset(CommonUtil.toList("id", "name", "city", "state"),
+                CommonUtil.toList(CommonUtil.toList(2, "n2", "c2", "CA"), CommonUtil.toList(2, "n2", "c2", "CA"), CommonUtil.toList(3, "n4", "c4", "CA")));
 
         N.println("============================== intersectAll ===========================");
         ds1.intersectAll(ds2).println();
@@ -779,10 +779,10 @@ public class DatasetTest extends AbstractTest {
 
     @Test
     public void test_join_all() {
-        final Dataset ds1 = CommonUtil.newDataset(CommonUtil.asList("id", "name", "city"),
-                CommonUtil.asList(CommonUtil.asList(1, "n1", "c1"), CommonUtil.asList(2, "n2", "c2"), CommonUtil.asList(3, "n3", "c3")));
-        final Dataset ds2 = CommonUtil.newDataset(CommonUtil.asList("id", "address2", "state"), CommonUtil.asList(CommonUtil.asList(1, "n1", "c1"),
-                CommonUtil.asList(2, "n2", "c2"), CommonUtil.asList(2, "n22", "c22"), CommonUtil.asList(4, "n4", "c4")));
+        final Dataset ds1 = CommonUtil.newDataset(CommonUtil.toList("id", "name", "city"),
+                CommonUtil.toList(CommonUtil.toList(1, "n1", "c1"), CommonUtil.toList(2, "n2", "c2"), CommonUtil.toList(3, "n3", "c3")));
+        final Dataset ds2 = CommonUtil.newDataset(CommonUtil.toList("id", "address2", "state"), CommonUtil.toList(CommonUtil.toList(1, "n1", "c1"),
+                CommonUtil.toList(2, "n2", "c2"), CommonUtil.toList(2, "n22", "c22"), CommonUtil.toList(4, "n4", "c4")));
 
         N.println("============================== ds1/2 ===========================");
 
@@ -824,7 +824,7 @@ public class DatasetTest extends AbstractTest {
 
     @Test
     public void test_removeRowRange() {
-        final Dataset ds = CommonUtil.newDataset(CommonUtil.asList(createAccount(Account.class), createAccount(Account.class), createAccount(Account.class),
+        final Dataset ds = CommonUtil.newDataset(CommonUtil.toList(createAccount(Account.class), createAccount(Account.class), createAccount(Account.class),
                 createAccount(Account.class), createAccount(Account.class), createAccount(Account.class)));
 
         final Dataset ds1 = ds.copy();
@@ -848,22 +848,22 @@ public class DatasetTest extends AbstractTest {
 
     @Test
     public void test_combine_divide() throws Exception {
-        final Dataset ds1 = CommonUtil.newDataset(CommonUtil.asList(createAccount(Account.class), createAccount(Account.class), createAccount(Account.class)));
-        ds1.removeColumns(CommonUtil.asList("gui", "emailAddress", "lastUpdateTime", "createdTime"));
+        final Dataset ds1 = CommonUtil.newDataset(CommonUtil.toList(createAccount(Account.class), createAccount(Account.class), createAccount(Account.class)));
+        ds1.removeColumns(CommonUtil.toList("gui", "emailAddress", "lastUpdateTime", "createdTime"));
         ds1.updateRow(0, t -> t instanceof String ? t + "__0" : t);
 
         Dataset ds2 = ds1.copy();
-        ds2.combineColumns(CommonUtil.asList("firstName", "lastName"), "name", Map.class);
+        ds2.combineColumns(CommonUtil.toList("firstName", "lastName"), "name", Map.class);
         ds2.println();
 
         ds2 = ds1.copy();
-        ds2.combineColumns(CommonUtil.asList("firstName", "lastName"), "name", (Function<DisposableObjArray, String>) t -> Strings.join(t.copy(), "-"));
+        ds2.combineColumns(CommonUtil.toList("firstName", "lastName"), "name", (Function<DisposableObjArray, String>) t -> Strings.join(t.copy(), "-"));
         ds2.println();
 
         ds2.moveColumn("name", 0);
         ds2.println();
 
-        ds2.divideColumn("name", CommonUtil.asList("firstName", "lastName"), (BiConsumer<String, Object[]>) (t, a) -> {
+        ds2.divideColumn("name", CommonUtil.toList("firstName", "lastName"), (BiConsumer<String, Object[]>) (t, a) -> {
             final String[] strs = Splitter.with("-").splitToArray(t);
             CommonUtil.copy(strs, 0, a, 0, a.length);
         });
@@ -873,8 +873,8 @@ public class DatasetTest extends AbstractTest {
 
     @Test
     public void test_swap() throws Exception {
-        final Dataset ds1 = CommonUtil.newDataset(CommonUtil.asList(createAccount(Account.class), createAccount(Account.class), createAccount(Account.class)));
-        ds1.removeColumns(CommonUtil.asList("gui", "emailAddress", "lastUpdateTime", "createdTime"));
+        final Dataset ds1 = CommonUtil.newDataset(CommonUtil.toList(createAccount(Account.class), createAccount(Account.class), createAccount(Account.class)));
+        ds1.removeColumns(CommonUtil.toList("gui", "emailAddress", "lastUpdateTime", "createdTime"));
         ds1.println();
 
         ds1.updateRow(0, t -> t instanceof String ? t + "___" : t);
@@ -893,7 +893,7 @@ public class DatasetTest extends AbstractTest {
     @Test
     public void test_update() throws Exception {
         final Account account = createAccount(Account.class);
-        final Dataset ds1 = CommonUtil.newDataset(CommonUtil.asList(account, account));
+        final Dataset ds1 = CommonUtil.newDataset(CommonUtil.toList(account, account));
 
         ds1.updateRow(0, t -> t instanceof String ? t + "___" : t);
 
@@ -905,7 +905,7 @@ public class DatasetTest extends AbstractTest {
 
         ds1.println();
 
-        ds1.updateColumns(CommonUtil.asList("lastName", "firstName"), (i, c, v) -> v instanceof String ? v + "###" : v);
+        ds1.updateColumns(CommonUtil.toList("lastName", "firstName"), (i, c, v) -> v instanceof String ? v + "###" : v);
 
         ds1.println();
 
@@ -917,7 +917,7 @@ public class DatasetTest extends AbstractTest {
     @Test
     public void test_clone() throws Exception {
         final Account account = createAccount(Account.class);
-        final Dataset ds1 = CommonUtil.newDataset(CommonUtil.asList(account, account));
+        final Dataset ds1 = CommonUtil.newDataset(CommonUtil.toList(account, account));
 
         assertEquals(ds1, ds1.copy());
         assertEquals(ds1, ds1.clone());
@@ -940,13 +940,13 @@ public class DatasetTest extends AbstractTest {
     @Test
     public void test_addColumn() throws Exception {
         final Account account = createAccount(Account.class);
-        final Dataset ds1 = CommonUtil.newDataset(CommonUtil.asList(account, account));
+        final Dataset ds1 = CommonUtil.newDataset(CommonUtil.toList(account, account));
 
         ds1.addColumn("firstName2", "firstName", (Function<String, String>) t -> "**********" + t);
 
         ds1.println();
 
-        ds1.addColumn(0, "firstName3", CommonUtil.asList("firstName", "lastName"),
+        ds1.addColumn(0, "firstName3", CommonUtil.toList("firstName", "lastName"),
                 (Function<DisposableObjArray, String>) a -> a.get(0) + "**********" + a.get(1));
 
         ds1.println();
@@ -955,9 +955,9 @@ public class DatasetTest extends AbstractTest {
     @Test
     public void test_intersection() throws Exception {
         final Account account = createAccount(Account.class);
-        final Dataset ds1 = CommonUtil.newDataset(CommonUtil.asList(account));
-        final Dataset ds2 = CommonUtil.newDataset(CommonUtil.asList(account, account));
-        final Dataset ds3 = CommonUtil.newDataset(CommonUtil.asList(account, account, account));
+        final Dataset ds1 = CommonUtil.newDataset(CommonUtil.toList(account));
+        final Dataset ds2 = CommonUtil.newDataset(CommonUtil.toList(account, account));
+        final Dataset ds3 = CommonUtil.newDataset(CommonUtil.toList(account, account, account));
 
         assertEquals(0, ds2.except(ds1).size());
         assertEquals(1, N.difference(ds2, ds1).size());
@@ -986,10 +986,10 @@ public class DatasetTest extends AbstractTest {
         final Dataset ds = CommonUtil.newDataset(accountList);
         N.println(ds.stream("gui").toMultiset());
         N.println(ds.stream("firstName").toMultiset());
-        N.println(ds.stream(CommonUtil.asList("firstName", "lastName"), String[].class).toMultiset());
-        N.println(ds.stream(CommonUtil.asList("firstName", "lastName"), List.class).toMultiset());
-        N.println(ds.stream(CommonUtil.asList("firstName", "lastName"), Set.class).toMultiset());
-        N.println(ds.stream(CommonUtil.asList("firstName", "lastName"), Account.class).toMultiset());
+        N.println(ds.stream(CommonUtil.toList("firstName", "lastName"), String[].class).toMultiset());
+        N.println(ds.stream(CommonUtil.toList("firstName", "lastName"), List.class).toMultiset());
+        N.println(ds.stream(CommonUtil.toList("firstName", "lastName"), Set.class).toMultiset());
+        N.println(ds.stream(CommonUtil.toList("firstName", "lastName"), Account.class).toMultiset());
     }
 
     @Test
@@ -997,15 +997,15 @@ public class DatasetTest extends AbstractTest {
         final List<Account> accountList = createAccountList(Account.class, 7);
         final MutableInt idx = MutableInt.of(100);
         final Dataset ds = CommonUtil.newDataset(accountList);
-        ds.updateColumns(CommonUtil.asList("firstName", "lastName"), (i, c, v) -> (String) v + idx.getAndIncrement());
+        ds.updateColumns(CommonUtil.toList("firstName", "lastName"), (i, c, v) -> (String) v + idx.getAndIncrement());
         ds.println();
 
         ds.topBy("lastName", 3).println();
-        ds.topBy(CommonUtil.asList("lastName", "gui"), 3).println();
+        ds.topBy(CommonUtil.toList("lastName", "gui"), 3).println();
 
         ds.topBy("lastName", 3, (Comparator<String>) (o1, o2) -> o2.compareTo(o1)).println();
 
-        ds.topBy(CommonUtil.asList("lastName", "gui"), 3, (Comparator<Object[]>) (o1, o2) -> ((String) o2[0]).compareTo((String) o1[0])).println();
+        ds.topBy(CommonUtil.toList("lastName", "gui"), 3, (Comparator<Object[]>) (o1, o2) -> ((String) o2[0]).compareTo((String) o1[0])).println();
     }
 
     @Test
@@ -1027,10 +1027,10 @@ public class DatasetTest extends AbstractTest {
         final Dataset ds = CommonUtil.newDataset(accountList);
 
         assertTrue(ds.containsColumn("firstName"));
-        assertTrue(ds.containsAllColumns(CommonUtil.asList("firstName", "lastName")));
+        assertTrue(ds.containsAllColumns(CommonUtil.toList("firstName", "lastName")));
 
         assertFalse(ds.containsColumn("Account.firstName"));
-        assertFalse(ds.containsAllColumns(CommonUtil.asList("firstName", "Account.lastName")));
+        assertFalse(ds.containsAllColumns(CommonUtil.toList("firstName", "Account.lastName")));
     }
 
     @Test
@@ -1612,7 +1612,7 @@ public class DatasetTest extends AbstractTest {
 
         ds.println();
 
-        ds.combineColumns(CommonUtil.asList("firstName", "lastName"), "name", Object[].class);
+        ds.combineColumns(CommonUtil.toList("firstName", "lastName"), "name", Object[].class);
 
         ds.println();
 
@@ -1632,7 +1632,7 @@ public class DatasetTest extends AbstractTest {
         assertTrue(ds.getColumnIndex("lastName") >= 0);
         assertTrue(ds.getColumnIndex("birthDate") >= 0);
 
-        ds.removeColumns(CommonUtil.asList("firstName", "lastName", "birthDate"));
+        ds.removeColumns(CommonUtil.toList("firstName", "lastName", "birthDate"));
 
         ds.println();
 
@@ -1690,7 +1690,7 @@ public class DatasetTest extends AbstractTest {
         final Dataset ds = CommonUtil.newDataset(new ArrayList<>(propsList.get(0).keySet()), propsList);
         N.println(System.currentTimeMillis() - startTime);
 
-        ds.groupBy(CommonUtil.asList("Account.firstName", "Account.lastName"));
+        ds.groupBy(CommonUtil.toList("Account.firstName", "Account.lastName"));
         N.println(System.currentTimeMillis() - startTime);
     }
 
@@ -1713,58 +1713,58 @@ public class DatasetTest extends AbstractTest {
         ds2 = ds.distinctBy("gui", (Function<String, Object>) t -> t.substring(0, 2));
         ds2.println();
 
-        ds2 = ds.distinctBy(CommonUtil.asList("firstName", "lastName"), (Function<DisposableObjArray, Object>) DisposableObjArray::length);
+        ds2 = ds.distinctBy(CommonUtil.toList("firstName", "lastName"), (Function<DisposableObjArray, Object>) DisposableObjArray::length);
         ds2.println();
         assertEquals(1, ds2.size());
 
-        ds2 = ds.groupBy(CommonUtil.asList("firstName", "lastName"), (Function<DisposableObjArray, Object>) DisposableObjArray::length);
+        ds2 = ds.groupBy(CommonUtil.toList("firstName", "lastName"), (Function<DisposableObjArray, Object>) DisposableObjArray::length);
         ds2.println();
         assertEquals(1, ds2.size());
 
         ds2 = ds.groupBy("gui", (Function<String, Object>) t -> t.substring(0, 2), "gui", "*", Collectors.counting());
         ds2.println();
 
-        ds2 = ds.groupBy("gui", (Function<String, Object>) t -> t.substring(0, 2), CommonUtil.asList("gui"), "*", Collectors.counting());
+        ds2 = ds.groupBy("gui", (Function<String, Object>) t -> t.substring(0, 2), CommonUtil.toList("gui"), "*", Collectors.counting());
         ds2.println();
 
-        ds2 = ds.groupBy(CommonUtil.asList("firstName", "lastName"), (Function<DisposableObjArray, Object>) DisposableObjArray::length, "gui", "*",
+        ds2 = ds.groupBy(CommonUtil.toList("firstName", "lastName"), (Function<DisposableObjArray, Object>) DisposableObjArray::length, "gui", "*",
                 Collectors.counting());
 
         ds2.println();
         assertEquals(1, ds2.size());
 
-        ds2 = ds.groupBy(CommonUtil.asList("firstName", "lastName"), (Function<DisposableObjArray, Object>) DisposableObjArray::length,
-                CommonUtil.asList("gui"), "*", Collectors.counting());
+        ds2 = ds.groupBy(CommonUtil.toList("firstName", "lastName"), (Function<DisposableObjArray, Object>) DisposableObjArray::length,
+                CommonUtil.toList("gui"), "*", Collectors.counting());
 
-        ds2 = ds.groupBy(CommonUtil.asList("firstName", "lastName"), (Function<DisposableObjArray, Object>) DisposableObjArray::length,
-                CommonUtil.asList("firstName", "lastName"), "*", Collectors.counting());
-
-        ds2.println();
-        assertEquals(1, ds2.size());
-
-        ds2 = ds.groupBy(CommonUtil.asList("firstName", "lastName"), (Function<DisposableObjArray, Object>) DisposableObjArray::length,
-                CommonUtil.asList("firstName", "lastName"), "*", Collectors.counting());
+        ds2 = ds.groupBy(CommonUtil.toList("firstName", "lastName"), (Function<DisposableObjArray, Object>) DisposableObjArray::length,
+                CommonUtil.toList("firstName", "lastName"), "*", Collectors.counting());
 
         ds2.println();
         assertEquals(1, ds2.size());
 
-        ds2 = ds.distinctBy(CommonUtil.asList("gui"));
-        ds2.println();
-        assertEquals(accountList.size(), ds2.size());
+        ds2 = ds.groupBy(CommonUtil.toList("firstName", "lastName"), (Function<DisposableObjArray, Object>) DisposableObjArray::length,
+                CommonUtil.toList("firstName", "lastName"), "*", Collectors.counting());
 
-        ds2 = ds.distinctBy(CommonUtil.asList("firstName", "lastName", "gui"));
-        ds2.println();
-        assertEquals(accountList.size(), ds2.size());
-
-        ds2 = ds.distinctBy(CommonUtil.asList("firstName", "lastName", "gui"));
-        ds2.println();
-        assertEquals(accountList.size(), ds2.size());
-
-        ds2 = ds.distinctBy(CommonUtil.asList("firstName", "lastName"));
         ds2.println();
         assertEquals(1, ds2.size());
 
-        ds2 = ds.distinctBy(CommonUtil.asList("firstName", "lastName"));
+        ds2 = ds.distinctBy(CommonUtil.toList("gui"));
+        ds2.println();
+        assertEquals(accountList.size(), ds2.size());
+
+        ds2 = ds.distinctBy(CommonUtil.toList("firstName", "lastName", "gui"));
+        ds2.println();
+        assertEquals(accountList.size(), ds2.size());
+
+        ds2 = ds.distinctBy(CommonUtil.toList("firstName", "lastName", "gui"));
+        ds2.println();
+        assertEquals(accountList.size(), ds2.size());
+
+        ds2 = ds.distinctBy(CommonUtil.toList("firstName", "lastName"));
+        ds2.println();
+        assertEquals(1, ds2.size());
+
+        ds2 = ds.distinctBy(CommonUtil.toList("firstName", "lastName"));
         ds2.println();
         assertEquals(1, ds2.size());
     }
@@ -1777,7 +1777,7 @@ public class DatasetTest extends AbstractTest {
         Profiler.run(8, 10, 1, () -> {
             final Dataset copy = dataset.copy();
 
-            copy.sortBy(CommonUtil.asList(AccountPNL.GUI, AccountPNL.FIRST_NAME));
+            copy.sortBy(CommonUtil.toList(AccountPNL.GUI, AccountPNL.FIRST_NAME));
 
         }).printResult();
 

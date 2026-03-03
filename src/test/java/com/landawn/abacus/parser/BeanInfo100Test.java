@@ -121,12 +121,12 @@ public class BeanInfo100Test extends TestBase {
 
     @Test
     public void testGetPropInfoQueue() {
-        List<ParserUtil.PropInfo> queue = beanInfo.getPropInfoQueue("nestedBean.nestedValue");
+        List<ParserUtil.PropInfo> queue = beanInfo.getPropInfoChain("nestedBean.nestedValue");
         Assertions.assertEquals(2, queue.size());
         Assertions.assertEquals("nestedBean", queue.get(0).name);
         Assertions.assertEquals("nestedValue", queue.get(1).name);
 
-        List<ParserUtil.PropInfo> simpleQueue = beanInfo.getPropInfoQueue("id");
+        List<ParserUtil.PropInfo> simpleQueue = beanInfo.getPropInfoChain("id");
         Assertions.assertEquals(0, simpleQueue.size());
     }
 

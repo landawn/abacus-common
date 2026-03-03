@@ -537,10 +537,10 @@ public class CommonUtil105Test extends TestBase {
     }
 
     @Test
-    public void testLessEqual() {
-        assertTrue(CommonUtil.lessEqual(1, 2));
-        assertFalse(CommonUtil.lessEqual(2, 1));
-        assertTrue(CommonUtil.lessEqual(1, 1));
+    public void testLessThanOrEqual() {
+        assertTrue(CommonUtil.lessThanOrEqual(1, 2));
+        assertFalse(CommonUtil.lessThanOrEqual(2, 1));
+        assertTrue(CommonUtil.lessThanOrEqual(1, 1));
     }
 
     @Test
@@ -551,10 +551,10 @@ public class CommonUtil105Test extends TestBase {
     }
 
     @Test
-    public void testGreaterEqual() {
-        assertFalse(CommonUtil.greaterEqual(1, 2));
-        assertTrue(CommonUtil.greaterEqual(2, 1));
-        assertTrue(CommonUtil.greaterEqual(1, 1));
+    public void testGreaterThanOrEqual() {
+        assertFalse(CommonUtil.greaterThanOrEqual(1, 2));
+        assertTrue(CommonUtil.greaterThanOrEqual(2, 1));
+        assertTrue(CommonUtil.greaterThanOrEqual(1, 1));
     }
 
     @Test

@@ -48,7 +48,7 @@ import static com.landawn.abacus.util.Numbers.format;
 import static com.landawn.abacus.util.Numbers.fuzzyCompare;
 import static com.landawn.abacus.util.Numbers.fuzzyEquals;
 import static com.landawn.abacus.util.Numbers.gcd;
-import static com.landawn.abacus.util.Numbers.isCreatable;
+import static com.landawn.abacus.util.Numbers.isConvertibleToNumber;
 import static com.landawn.abacus.util.Numbers.isDigits;
 import static com.landawn.abacus.util.Numbers.isMathematicalInteger;
 import static com.landawn.abacus.util.Numbers.isNumber;
@@ -528,21 +528,21 @@ public class Numbers100Test extends TestBase {
 
     @Test
     public void testIsCreatable() {
-        assertTrue(isCreatable("123"));
-        assertTrue(isCreatable("-456"));
-        assertTrue(isCreatable("123.456"));
-        assertTrue(isCreatable("-123.456"));
-        assertTrue(isCreatable("1.23e4"));
-        assertTrue(isCreatable("1.23E-4"));
-        assertTrue(isCreatable("0x1A"));
-        assertTrue(isCreatable("026"));
-        assertTrue(isCreatable("123L"));
-        assertTrue(isCreatable("123.45f"));
-        assertTrue(isCreatable("123.45d"));
-        assertFalse(isCreatable(""));
-        assertFalse(isCreatable(null));
-        assertFalse(isCreatable("not a number"));
-        assertFalse(isCreatable("123.45.67"));
+        assertTrue(isConvertibleToNumber("123"));
+        assertTrue(isConvertibleToNumber("-456"));
+        assertTrue(isConvertibleToNumber("123.456"));
+        assertTrue(isConvertibleToNumber("-123.456"));
+        assertTrue(isConvertibleToNumber("1.23e4"));
+        assertTrue(isConvertibleToNumber("1.23E-4"));
+        assertTrue(isConvertibleToNumber("0x1A"));
+        assertTrue(isConvertibleToNumber("026"));
+        assertTrue(isConvertibleToNumber("123L"));
+        assertTrue(isConvertibleToNumber("123.45f"));
+        assertTrue(isConvertibleToNumber("123.45d"));
+        assertFalse(isConvertibleToNumber(""));
+        assertFalse(isConvertibleToNumber(null));
+        assertFalse(isConvertibleToNumber("not a number"));
+        assertFalse(isConvertibleToNumber("123.45.67"));
     }
 
     @Test

@@ -138,6 +138,46 @@ public class ParallelArrayStream101Test extends TestBase {
 
             assertEquals(Arrays.asList(5, 6, 7, 8, 9, 10), result);
         }
+
+        @Test
+        @DisplayName("filter() should preserve encounter order for parallel array splitor")
+        public void testFilterPreservesEncounterOrderForArraySplitor() {
+            final Integer[] source = new Integer[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+
+            try (Stream<Integer> local = Stream.of(source).parallel(PS.create(Splitor.ARRAY).maxThreadNum(testMaxThreadNum))) {
+                List<Integer> result = local.filter(x -> {
+                    if ((x & 1) == 0) {
+                        N.sleep(2);
+                    }
+
+                    return x % 3 != 0;
+                }).toList();
+
+                assertHaveSameElements(Arrays.asList(1, 2, 4, 5, 7, 8), result);
+            }
+        }
+
+        //    @Test
+        //    @DisplayName("takeWhile() should keep prefix semantics for parallel array splitor")
+        //    public void testTakeWhilePreservesPrefixForArraySplitor() {
+        //        final Integer[] source = new Integer[] { 3, 1, 2 };
+        //
+        //        try (Stream<Integer> local = Stream.of(source).parallel(PS.create(Splitor.ARRAY).maxThreadNum(testMaxThreadNum))) {
+        //            List<Integer> result = local.takeWhile(x -> x < 3).toList();
+        //            assertEquals(Collections.emptyList(), result);
+        //        }
+        //    }
+
+        @Test
+        @DisplayName("dropWhile() should keep prefix semantics for parallel array splitor")
+        public void testDropWhilePreservesPrefixForArraySplitor() {
+            final Integer[] source = new Integer[] { 1, 2, 3, 4, 1, 2 };
+
+            try (Stream<Integer> local = Stream.of(source).parallel(PS.create(Splitor.ARRAY).maxThreadNum(testMaxThreadNum))) {
+                List<Integer> result = local.dropWhile(x -> x < 3).toList();
+                assertHaveSameElements(Arrays.asList(3, 4, 1, 2), result);
+            }
+        }
     }
 
     @Nested
@@ -160,6 +200,24 @@ public class ParallelArrayStream101Test extends TestBase {
             assertThrows(NullPointerException.class, () -> {
                 stream.map(null).toList();
             });
+        }
+
+        @Test
+        @DisplayName("map() should preserve encounter order for parallel array splitor")
+        public void testMapPreservesEncounterOrderForArraySplitor() {
+            final Integer[] source = new Integer[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+
+            try (Stream<Integer> local = Stream.of(source).parallel(PS.create(Splitor.ARRAY).maxThreadNum(testMaxThreadNum))) {
+                List<Integer> result = local.map(x -> {
+                    if ((x & 1) == 0) {
+                        N.sleep(2);
+                    }
+
+                    return x;
+                }).toList();
+
+                assertHaveSameElements(Arrays.asList(source), result);
+            }
         }
 
         @Test
@@ -709,7 +767,7 @@ public class ParallelArrayStream101Test extends TestBase {
         public void testNMatch() {
             Predicate<Integer> even = x -> x % 2 == 0;
 
-            boolean result = stream.countMatchBetween(3, 7, even);
+            boolean result = stream.isMatchCountBetween(3, 7, even);
 
             assertTrue(result);
         }
@@ -719,7 +777,7 @@ public class ParallelArrayStream101Test extends TestBase {
         public void testNMatchOutsideRange() {
             Predicate<Integer> even = x -> x % 2 == 0;
 
-            boolean result = stream.countMatchBetween(1, 3, even);
+            boolean result = stream.isMatchCountBetween(1, 3, even);
 
             assertFalse(result);
         }
@@ -1220,11 +1278,11 @@ public class ParallelArrayStream101Test extends TestBase {
 
             assertEquals(2, result.size());
 
-            if (N.containsSameElements(N.asList("1", "2", "3"), result.get(0))) {
-                assertHaveSameElements(N.asList("4", "5", "6"), result.get(1));
+            if (N.containsSameElements(N.toList("1", "2", "3"), result.get(0))) {
+                assertHaveSameElements(N.toList("4", "5", "6"), result.get(1));
             } else {
-                assertHaveSameElements(N.asList("1", "2", "3"), result.get(1));
-                assertHaveSameElements(N.asList("4", "5", "6"), result.get(0));
+                assertHaveSameElements(N.toList("1", "2", "3"), result.get(1));
+                assertHaveSameElements(N.toList("4", "5", "6"), result.get(0));
             }
         }
     }
@@ -1744,7 +1802,7 @@ public class ParallelArrayStream101Test extends TestBase {
             Optional<String> result = stream.limit(3).applyIfNotEmpty(function);
 
             assertTrue(result.isPresent());
-            assertHaveSameElements(N.asList("1", "2", "3"), N.asList(result.get().split(",")));
+            assertHaveSameElements(N.toList("1", "2", "3"), N.toList(result.get().split(",")));
         }
 
         @Test

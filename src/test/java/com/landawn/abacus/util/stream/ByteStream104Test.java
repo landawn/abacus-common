@@ -33,16 +33,16 @@ public class ByteStream104Test extends TestBase {
         assertEquals(2, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).filter(i -> i > 2).skip(1).count());
         assertArrayEquals(new byte[] { 3, 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).filter(i -> i > 2).toArray());
         assertArrayEquals(new byte[] { 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).filter(i -> i > 2).skip(1).toArray());
-        assertEquals(N.asList((byte) 3, (byte) 4, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).filter(i -> i > 2).toList());
-        assertEquals(N.asList((byte) 4, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).filter(i -> i > 2).skip(1).toList());
+        assertEquals(N.toList((byte) 3, (byte) 4, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).filter(i -> i > 2).toList());
+        assertEquals(N.toList((byte) 4, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).filter(i -> i > 2).skip(1).toList());
         assertEquals(3, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).filter(i -> i > 2).count());
         assertEquals(2, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).filter(i -> i > 2).skip(1).count());
         assertArrayEquals(new byte[] { 3, 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).filter(i -> i > 2).toArray());
         assertArrayEquals(new byte[] { 4, 5 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).filter(i -> i > 2).skip(1).toArray());
-        assertEquals(N.asList((byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).filter(i -> i > 2).toList());
-        assertEquals(N.asList((byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).filter(i -> i > 2).skip(1).toList());
     }
 
@@ -62,11 +62,11 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).filter(i -> i > 2, dropped::add).skip(1).toArray());
 
         dropped.clear();
-        assertEquals(N.asList((byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).filter(i -> i > 2, dropped::add).toList());
 
         dropped.clear();
-        assertEquals(N.asList((byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).filter(i -> i > 2, dropped::add).skip(1).toList());
 
         dropped.clear();
@@ -84,11 +84,11 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).filter(i -> i > 2, dropped::add).skip(1).toArray());
 
         dropped.clear();
-        assertEquals(N.asList((byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).filter(i -> i > 2, dropped::add).toList());
 
         dropped.clear();
-        assertEquals(N.asList((byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).filter(i -> i > 2, dropped::add).skip(1).toList());
     }
 
@@ -98,15 +98,15 @@ public class ByteStream104Test extends TestBase {
         assertEquals(1, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).takeWhile(i -> i < 3).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).takeWhile(i -> i < 3).toArray());
         assertArrayEquals(new byte[] { 2 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).takeWhile(i -> i < 3).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).takeWhile(i -> i < 3).toList());
-        assertEquals(N.asList((byte) 2), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).takeWhile(i -> i < 3).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).takeWhile(i -> i < 3).toList());
+        assertEquals(N.toList((byte) 2), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).takeWhile(i -> i < 3).skip(1).toList());
         assertEquals(2, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).takeWhile(i -> i < 3).count());
         assertEquals(1, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).takeWhile(i -> i < 3).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).takeWhile(i -> i < 3).toArray());
         assertArrayEquals(new byte[] { 2 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).takeWhile(i -> i < 3).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).takeWhile(i -> i < 3).toList());
-        assertEquals(N.asList((byte) 2), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).takeWhile(i -> i < 3).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).takeWhile(i -> i < 3).toList());
+        assertEquals(N.toList((byte) 2), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).takeWhile(i -> i < 3).skip(1).toList());
     }
 
     @Test
@@ -115,16 +115,16 @@ public class ByteStream104Test extends TestBase {
         assertEquals(2, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).dropWhile(i -> i < 3).skip(1).count());
         assertArrayEquals(new byte[] { 3, 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).dropWhile(i -> i < 3).toArray());
         assertArrayEquals(new byte[] { 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).dropWhile(i -> i < 3).skip(1).toArray());
-        assertEquals(N.asList((byte) 3, (byte) 4, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).dropWhile(i -> i < 3).toList());
-        assertEquals(N.asList((byte) 4, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).dropWhile(i -> i < 3).skip(1).toList());
+        assertEquals(N.toList((byte) 3, (byte) 4, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).dropWhile(i -> i < 3).toList());
+        assertEquals(N.toList((byte) 4, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).dropWhile(i -> i < 3).skip(1).toList());
         assertEquals(3, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).dropWhile(i -> i < 3).count());
         assertEquals(2, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).dropWhile(i -> i < 3).skip(1).count());
         assertArrayEquals(new byte[] { 3, 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).dropWhile(i -> i < 3).toArray());
         assertArrayEquals(new byte[] { 4, 5 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).dropWhile(i -> i < 3).skip(1).toArray());
-        assertEquals(N.asList((byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).dropWhile(i -> i < 3).toList());
-        assertEquals(N.asList((byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).dropWhile(i -> i < 3).skip(1).toList());
     }
 
@@ -145,11 +145,11 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).dropWhile(i -> i < 3, dropped::add).skip(1).toArray());
 
         dropped.clear();
-        assertEquals(N.asList((byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).dropWhile(i -> i < 3, dropped::add).toList());
 
         dropped.clear();
-        assertEquals(N.asList((byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).dropWhile(i -> i < 3, dropped::add).skip(1).toList());
 
         dropped.clear();
@@ -167,11 +167,11 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).dropWhile(i -> i < 3, dropped::add).skip(1).toArray());
 
         dropped.clear();
-        assertEquals(N.asList((byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).dropWhile(i -> i < 3, dropped::add).toList());
 
         dropped.clear();
-        assertEquals(N.asList((byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).dropWhile(i -> i < 3, dropped::add).skip(1).toList());
     }
 
@@ -181,16 +181,16 @@ public class ByteStream104Test extends TestBase {
         assertEquals(2, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).skipUntil(i -> i >= 3).skip(1).count());
         assertArrayEquals(new byte[] { 3, 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).skipUntil(i -> i >= 3).toArray());
         assertArrayEquals(new byte[] { 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).skipUntil(i -> i >= 3).skip(1).toArray());
-        assertEquals(N.asList((byte) 3, (byte) 4, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).skipUntil(i -> i >= 3).toList());
-        assertEquals(N.asList((byte) 4, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).skipUntil(i -> i >= 3).skip(1).toList());
+        assertEquals(N.toList((byte) 3, (byte) 4, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).skipUntil(i -> i >= 3).toList());
+        assertEquals(N.toList((byte) 4, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).skipUntil(i -> i >= 3).skip(1).toList());
         assertEquals(3, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).skipUntil(i -> i >= 3).count());
         assertEquals(2, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).skipUntil(i -> i >= 3).skip(1).count());
         assertArrayEquals(new byte[] { 3, 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).skipUntil(i -> i >= 3).toArray());
         assertArrayEquals(new byte[] { 4, 5 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).skipUntil(i -> i >= 3).skip(1).toArray());
-        assertEquals(N.asList((byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).skipUntil(i -> i >= 3).toList());
-        assertEquals(N.asList((byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).skipUntil(i -> i >= 3).skip(1).toList());
     }
 
@@ -200,14 +200,14 @@ public class ByteStream104Test extends TestBase {
         assertEquals(2, ByteStream.of((byte) 1, (byte) 2, (byte) 2, (byte) 3, (byte) 3).distinct().skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3 }, ByteStream.of((byte) 1, (byte) 2, (byte) 2, (byte) 3, (byte) 3).distinct().toArray());
         assertArrayEquals(new byte[] { 2, 3 }, ByteStream.of((byte) 1, (byte) 2, (byte) 2, (byte) 3, (byte) 3).distinct().skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3), ByteStream.of((byte) 1, (byte) 2, (byte) 2, (byte) 3, (byte) 3).distinct().toList());
-        assertEquals(N.asList((byte) 2, (byte) 3), ByteStream.of((byte) 1, (byte) 2, (byte) 2, (byte) 3, (byte) 3).distinct().skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3), ByteStream.of((byte) 1, (byte) 2, (byte) 2, (byte) 3, (byte) 3).distinct().toList());
+        assertEquals(N.toList((byte) 2, (byte) 3), ByteStream.of((byte) 1, (byte) 2, (byte) 2, (byte) 3, (byte) 3).distinct().skip(1).toList());
         assertEquals(3, ByteStream.of((byte) 1, (byte) 2, (byte) 2, (byte) 3, (byte) 3).map(e -> e).distinct().count());
         assertEquals(2, ByteStream.of((byte) 1, (byte) 2, (byte) 2, (byte) 3, (byte) 3).map(e -> e).distinct().skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3 }, ByteStream.of((byte) 1, (byte) 2, (byte) 2, (byte) 3, (byte) 3).map(e -> e).distinct().toArray());
         assertArrayEquals(new byte[] { 2, 3 }, ByteStream.of((byte) 1, (byte) 2, (byte) 2, (byte) 3, (byte) 3).map(e -> e).distinct().skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3), ByteStream.of((byte) 1, (byte) 2, (byte) 2, (byte) 3, (byte) 3).map(e -> e).distinct().toList());
-        assertEquals(N.asList((byte) 2, (byte) 3), ByteStream.of((byte) 1, (byte) 2, (byte) 2, (byte) 3, (byte) 3).map(e -> e).distinct().skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3), ByteStream.of((byte) 1, (byte) 2, (byte) 2, (byte) 3, (byte) 3).map(e -> e).distinct().toList());
+        assertEquals(N.toList((byte) 2, (byte) 3), ByteStream.of((byte) 1, (byte) 2, (byte) 2, (byte) 3, (byte) 3).map(e -> e).distinct().skip(1).toList());
     }
 
     @Test
@@ -217,16 +217,16 @@ public class ByteStream104Test extends TestBase {
         assertEquals(1, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).intersection(collection).skip(1).count());
         assertArrayEquals(new byte[] { 2, 3 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).intersection(collection).toArray());
         assertArrayEquals(new byte[] { 3 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).intersection(collection).skip(1).toArray());
-        assertEquals(N.asList((byte) 2, (byte) 3), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).intersection(collection).toList());
-        assertEquals(N.asList((byte) 3), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).intersection(collection).skip(1).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).intersection(collection).toList());
+        assertEquals(N.toList((byte) 3), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).intersection(collection).skip(1).toList());
         assertEquals(2, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).intersection(collection).count());
         assertEquals(1, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).intersection(collection).skip(1).count());
         assertArrayEquals(new byte[] { 2, 3 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).intersection(collection).toArray());
         assertArrayEquals(new byte[] { 3 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).intersection(collection).skip(1).toArray());
-        assertEquals(N.asList((byte) 2, (byte) 3),
+        assertEquals(N.toList((byte) 2, (byte) 3),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).intersection(collection).toList());
-        assertEquals(N.asList((byte) 3), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).intersection(collection).skip(1).toList());
+        assertEquals(N.toList((byte) 3), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).intersection(collection).skip(1).toList());
     }
 
     @Test
@@ -236,16 +236,16 @@ public class ByteStream104Test extends TestBase {
         assertEquals(2, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).difference(collection).skip(1).count());
         assertArrayEquals(new byte[] { 1, 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).difference(collection).toArray());
         assertArrayEquals(new byte[] { 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).difference(collection).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 4, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).difference(collection).toList());
-        assertEquals(N.asList((byte) 4, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).difference(collection).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 4, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).difference(collection).toList());
+        assertEquals(N.toList((byte) 4, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).difference(collection).skip(1).toList());
         assertEquals(3, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).difference(collection).count());
         assertEquals(2, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).difference(collection).skip(1).count());
         assertArrayEquals(new byte[] { 1, 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).difference(collection).toArray());
         assertArrayEquals(new byte[] { 4, 5 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).difference(collection).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 1, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).difference(collection).toList());
-        assertEquals(N.asList((byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).difference(collection).skip(1).toList());
     }
 
@@ -257,9 +257,9 @@ public class ByteStream104Test extends TestBase {
         assertArrayEquals(new byte[] { 1, 2, 5, 6 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).symmetricDifference(collection).toArray());
         assertArrayEquals(new byte[] { 2, 5, 6 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).symmetricDifference(collection).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 5, (byte) 6),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 5, (byte) 6),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).symmetricDifference(collection).toList());
-        assertEquals(N.asList((byte) 2, (byte) 5, (byte) 6),
+        assertEquals(N.toList((byte) 2, (byte) 5, (byte) 6),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).symmetricDifference(collection).skip(1).toList());
         assertEquals(4, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).symmetricDifference(collection).count());
         assertEquals(3, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).symmetricDifference(collection).skip(1).count());
@@ -267,9 +267,9 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).symmetricDifference(collection).toArray());
         assertArrayEquals(new byte[] { 2, 5, 6 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).symmetricDifference(collection).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 5, (byte) 6),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 5, (byte) 6),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).symmetricDifference(collection).toList());
-        assertEquals(N.asList((byte) 2, (byte) 5, (byte) 6),
+        assertEquals(N.toList((byte) 2, (byte) 5, (byte) 6),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).symmetricDifference(collection).skip(1).toList());
     }
 
@@ -279,17 +279,17 @@ public class ByteStream104Test extends TestBase {
         assertEquals(4, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).reversed().skip(1).count());
         assertArrayEquals(new byte[] { 5, 4, 3, 2, 1 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).reversed().toArray());
         assertArrayEquals(new byte[] { 4, 3, 2, 1 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).reversed().skip(1).toArray());
-        assertEquals(N.asList((byte) 5, (byte) 4, (byte) 3, (byte) 2, (byte) 1),
+        assertEquals(N.toList((byte) 5, (byte) 4, (byte) 3, (byte) 2, (byte) 1),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).reversed().toList());
-        assertEquals(N.asList((byte) 4, (byte) 3, (byte) 2, (byte) 1),
+        assertEquals(N.toList((byte) 4, (byte) 3, (byte) 2, (byte) 1),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).reversed().skip(1).toList());
         assertEquals(5, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).reversed().count());
         assertEquals(4, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).reversed().skip(1).count());
         assertArrayEquals(new byte[] { 5, 4, 3, 2, 1 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).reversed().toArray());
         assertArrayEquals(new byte[] { 4, 3, 2, 1 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).reversed().skip(1).toArray());
-        assertEquals(N.asList((byte) 5, (byte) 4, (byte) 3, (byte) 2, (byte) 1),
+        assertEquals(N.toList((byte) 5, (byte) 4, (byte) 3, (byte) 2, (byte) 1),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).reversed().toList());
-        assertEquals(N.asList((byte) 4, (byte) 3, (byte) 2, (byte) 1),
+        assertEquals(N.toList((byte) 4, (byte) 3, (byte) 2, (byte) 1),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).reversed().skip(1).toList());
     }
 
@@ -299,17 +299,17 @@ public class ByteStream104Test extends TestBase {
         assertEquals(4, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).rotated(2).skip(1).count());
         assertArrayEquals(new byte[] { 4, 5, 1, 2, 3 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).rotated(2).toArray());
         assertArrayEquals(new byte[] { 5, 1, 2, 3 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).rotated(2).skip(1).toArray());
-        assertEquals(N.asList((byte) 4, (byte) 5, (byte) 1, (byte) 2, (byte) 3),
+        assertEquals(N.toList((byte) 4, (byte) 5, (byte) 1, (byte) 2, (byte) 3),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).rotated(2).toList());
-        assertEquals(N.asList((byte) 5, (byte) 1, (byte) 2, (byte) 3),
+        assertEquals(N.toList((byte) 5, (byte) 1, (byte) 2, (byte) 3),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).rotated(2).skip(1).toList());
         assertEquals(5, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).rotated(2).count());
         assertEquals(4, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).rotated(2).skip(1).count());
         assertArrayEquals(new byte[] { 4, 5, 1, 2, 3 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).rotated(2).toArray());
         assertArrayEquals(new byte[] { 5, 1, 2, 3 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).rotated(2).skip(1).toArray());
-        assertEquals(N.asList((byte) 4, (byte) 5, (byte) 1, (byte) 2, (byte) 3),
+        assertEquals(N.toList((byte) 4, (byte) 5, (byte) 1, (byte) 2, (byte) 3),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).rotated(2).toList());
-        assertEquals(N.asList((byte) 5, (byte) 1, (byte) 2, (byte) 3),
+        assertEquals(N.toList((byte) 5, (byte) 1, (byte) 2, (byte) 3),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).rotated(2).skip(1).toList());
     }
 
@@ -368,17 +368,17 @@ public class ByteStream104Test extends TestBase {
         assertEquals(4, ByteStream.of((byte) 5, (byte) 3, (byte) 1, (byte) 4, (byte) 2).sorted().skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, ByteStream.of((byte) 5, (byte) 3, (byte) 1, (byte) 4, (byte) 2).sorted().toArray());
         assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.of((byte) 5, (byte) 3, (byte) 1, (byte) 4, (byte) 2).sorted().skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 5, (byte) 3, (byte) 1, (byte) 4, (byte) 2).sorted().toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 5, (byte) 3, (byte) 1, (byte) 4, (byte) 2).sorted().skip(1).toList());
         assertEquals(5, ByteStream.of((byte) 5, (byte) 3, (byte) 1, (byte) 4, (byte) 2).map(e -> e).sorted().count());
         assertEquals(4, ByteStream.of((byte) 5, (byte) 3, (byte) 1, (byte) 4, (byte) 2).map(e -> e).sorted().skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, ByteStream.of((byte) 5, (byte) 3, (byte) 1, (byte) 4, (byte) 2).map(e -> e).sorted().toArray());
         assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.of((byte) 5, (byte) 3, (byte) 1, (byte) 4, (byte) 2).map(e -> e).sorted().skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 5, (byte) 3, (byte) 1, (byte) 4, (byte) 2).map(e -> e).sorted().toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 5, (byte) 3, (byte) 1, (byte) 4, (byte) 2).map(e -> e).sorted().skip(1).toList());
     }
 
@@ -388,18 +388,18 @@ public class ByteStream104Test extends TestBase {
         assertEquals(4, ByteStream.of((byte) 5, (byte) 3, (byte) 1, (byte) 4, (byte) 2).reverseSorted().skip(1).count());
         assertArrayEquals(new byte[] { 5, 4, 3, 2, 1 }, ByteStream.of((byte) 5, (byte) 3, (byte) 1, (byte) 4, (byte) 2).reverseSorted().toArray());
         assertArrayEquals(new byte[] { 4, 3, 2, 1 }, ByteStream.of((byte) 5, (byte) 3, (byte) 1, (byte) 4, (byte) 2).reverseSorted().skip(1).toArray());
-        assertEquals(N.asList((byte) 5, (byte) 4, (byte) 3, (byte) 2, (byte) 1),
+        assertEquals(N.toList((byte) 5, (byte) 4, (byte) 3, (byte) 2, (byte) 1),
                 ByteStream.of((byte) 5, (byte) 3, (byte) 1, (byte) 4, (byte) 2).reverseSorted().toList());
-        assertEquals(N.asList((byte) 4, (byte) 3, (byte) 2, (byte) 1),
+        assertEquals(N.toList((byte) 4, (byte) 3, (byte) 2, (byte) 1),
                 ByteStream.of((byte) 5, (byte) 3, (byte) 1, (byte) 4, (byte) 2).reverseSorted().skip(1).toList());
         assertEquals(5, ByteStream.of((byte) 5, (byte) 3, (byte) 1, (byte) 4, (byte) 2).map(e -> e).reverseSorted().count());
         assertEquals(4, ByteStream.of((byte) 5, (byte) 3, (byte) 1, (byte) 4, (byte) 2).map(e -> e).reverseSorted().skip(1).count());
         assertArrayEquals(new byte[] { 5, 4, 3, 2, 1 }, ByteStream.of((byte) 5, (byte) 3, (byte) 1, (byte) 4, (byte) 2).map(e -> e).reverseSorted().toArray());
         assertArrayEquals(new byte[] { 4, 3, 2, 1 },
                 ByteStream.of((byte) 5, (byte) 3, (byte) 1, (byte) 4, (byte) 2).map(e -> e).reverseSorted().skip(1).toArray());
-        assertEquals(N.asList((byte) 5, (byte) 4, (byte) 3, (byte) 2, (byte) 1),
+        assertEquals(N.toList((byte) 5, (byte) 4, (byte) 3, (byte) 2, (byte) 1),
                 ByteStream.of((byte) 5, (byte) 3, (byte) 1, (byte) 4, (byte) 2).map(e -> e).reverseSorted().toList());
-        assertEquals(N.asList((byte) 4, (byte) 3, (byte) 2, (byte) 1),
+        assertEquals(N.toList((byte) 4, (byte) 3, (byte) 2, (byte) 1),
                 ByteStream.of((byte) 5, (byte) 3, (byte) 1, (byte) 4, (byte) 2).map(e -> e).reverseSorted().skip(1).toList());
     }
 
@@ -409,18 +409,18 @@ public class ByteStream104Test extends TestBase {
         assertEquals(9, ByteStream.of((byte) 1, (byte) 2, (byte) 3).cycled().limit(10).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 1, 2, 3, 1, 2, 3, 1 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3).cycled().limit(10).toArray());
         assertArrayEquals(new byte[] { 2, 3, 1, 2, 3, 1, 2, 3, 1 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3).cycled().limit(10).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3, (byte) 1),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3, (byte) 1),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3).cycled().limit(10).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3, (byte) 1),
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3, (byte) 1),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3).cycled().limit(10).skip(1).toList());
         assertEquals(10, ByteStream.of((byte) 1, (byte) 2, (byte) 3).map(e -> e).cycled().limit(10).count());
         assertEquals(9, ByteStream.of((byte) 1, (byte) 2, (byte) 3).map(e -> e).cycled().limit(10).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 1, 2, 3, 1, 2, 3, 1 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3).map(e -> e).cycled().limit(10).toArray());
         assertArrayEquals(new byte[] { 2, 3, 1, 2, 3, 1, 2, 3, 1 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3).map(e -> e).cycled().limit(10).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3, (byte) 1),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3, (byte) 1),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3).map(e -> e).cycled().limit(10).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3, (byte) 1),
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3, (byte) 1),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3).map(e -> e).cycled().limit(10).skip(1).toList());
     }
 
@@ -430,17 +430,17 @@ public class ByteStream104Test extends TestBase {
         assertEquals(8, ByteStream.of((byte) 1, (byte) 2, (byte) 3).cycled(3).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 1, 2, 3, 1, 2, 3 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3).cycled(3).toArray());
         assertArrayEquals(new byte[] { 2, 3, 1, 2, 3, 1, 2, 3 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3).cycled(3).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3).cycled(3).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3),
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3).cycled(3).skip(1).toList());
         assertEquals(9, ByteStream.of((byte) 1, (byte) 2, (byte) 3).map(e -> e).cycled(3).count());
         assertEquals(8, ByteStream.of((byte) 1, (byte) 2, (byte) 3).map(e -> e).cycled(3).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 1, 2, 3, 1, 2, 3 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3).map(e -> e).cycled(3).toArray());
         assertArrayEquals(new byte[] { 2, 3, 1, 2, 3, 1, 2, 3 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3).map(e -> e).cycled(3).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3).map(e -> e).cycled(3).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3),
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3, (byte) 1, (byte) 2, (byte) 3),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3).map(e -> e).cycled(3).skip(1).toList());
     }
 
@@ -494,11 +494,11 @@ public class ByteStream104Test extends TestBase {
         assertArrayEquals(new byte[] { 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).skip(2, skipped::add).skip(1).toArray());
 
         skipped.clear();
-        assertEquals(N.asList((byte) 3, (byte) 4, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).skip(2, skipped::add).toList());
+        assertEquals(N.toList((byte) 3, (byte) 4, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).skip(2, skipped::add).toList());
         assertEquals(Arrays.asList((byte) 1, (byte) 2), skipped);
 
         skipped.clear();
-        assertEquals(N.asList((byte) 4, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).skip(2, skipped::add).skip(1).toList());
+        assertEquals(N.toList((byte) 4, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).skip(2, skipped::add).skip(1).toList());
 
         skipped.clear();
         assertEquals(3, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).skip(2, skipped::add).count());
@@ -516,12 +516,12 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).skip(2, skipped::add).skip(1).toArray());
 
         skipped.clear();
-        assertEquals(N.asList((byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).skip(2, skipped::add).toList());
         assertEquals(Arrays.asList((byte) 1, (byte) 2), skipped);
 
         skipped.clear();
-        assertEquals(N.asList((byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).skip(2, skipped::add).skip(1).toList());
     }
 
@@ -531,14 +531,14 @@ public class ByteStream104Test extends TestBase {
         assertEquals(2, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).limit(3).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).limit(3).toArray());
         assertArrayEquals(new byte[] { 2, 3 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).limit(3).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).limit(3).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).limit(3).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).limit(3).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).limit(3).skip(1).toList());
         assertEquals(3, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).limit(3).count());
         assertEquals(2, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).limit(3).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).limit(3).toArray());
         assertArrayEquals(new byte[] { 2, 3 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).limit(3).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).limit(3).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).limit(3).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).limit(3).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).limit(3).skip(1).toList());
     }
 
     @Test
@@ -547,14 +547,14 @@ public class ByteStream104Test extends TestBase {
         assertEquals(2, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).step(2).skip(1).count());
         assertArrayEquals(new byte[] { 1, 3, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).step(2).toArray());
         assertArrayEquals(new byte[] { 3, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).step(2).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 3, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).step(2).toList());
-        assertEquals(N.asList((byte) 3, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).step(2).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 3, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).step(2).toList());
+        assertEquals(N.toList((byte) 3, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).step(2).skip(1).toList());
         assertEquals(3, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).step(2).count());
         assertEquals(2, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).step(2).skip(1).count());
         assertArrayEquals(new byte[] { 1, 3, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).step(2).toArray());
         assertArrayEquals(new byte[] { 3, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).step(2).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 3, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).step(2).toList());
-        assertEquals(N.asList((byte) 3, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).step(2).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 3, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).step(2).toList());
+        assertEquals(N.toList((byte) 3, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).step(2).skip(1).toList());
     }
 
     @Test
@@ -574,12 +574,12 @@ public class ByteStream104Test extends TestBase {
         assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).onEach(processed::add).skip(1).toArray());
 
         processed.clear();
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).onEach(processed::add).toList());
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), processed);
 
         processed.clear();
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).onEach(processed::add).skip(1).toList());
 
         processed.clear();
@@ -599,12 +599,12 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).onEach(processed::add).skip(1).toArray());
 
         processed.clear();
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).onEach(processed::add).toList());
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), processed);
 
         processed.clear();
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).onEach(processed::add).skip(1).toList());
     }
 
@@ -625,12 +625,12 @@ public class ByteStream104Test extends TestBase {
         assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).peek(processed::add).skip(1).toArray());
 
         processed.clear();
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).peek(processed::add).toList());
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), processed);
 
         processed.clear();
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).peek(processed::add).skip(1).toList());
 
         processed.clear();
@@ -650,12 +650,12 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).peek(processed::add).skip(1).toArray());
 
         processed.clear();
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).peek(processed::add).toList());
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), processed);
 
         processed.clear();
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).peek(processed::add).skip(1).toList());
     }
 
@@ -665,18 +665,18 @@ public class ByteStream104Test extends TestBase {
         assertEquals(4, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).throwIfEmpty().skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).throwIfEmpty().toArray());
         assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).throwIfEmpty().skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).throwIfEmpty().toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).throwIfEmpty().skip(1).toList());
         assertEquals(5, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).throwIfEmpty().count());
         assertEquals(4, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).throwIfEmpty().skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).throwIfEmpty().toArray());
         assertArrayEquals(new byte[] { 2, 3, 4, 5 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).throwIfEmpty().skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).throwIfEmpty().toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).throwIfEmpty().skip(1).toList());
 
         try {
@@ -707,12 +707,12 @@ public class ByteStream104Test extends TestBase {
         assertTrue(closed.get());
 
         closed.set(false);
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).onClose(() -> closed.set(true)).toList());
         assertTrue(closed.get());
 
         closed.set(false);
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).onClose(() -> closed.set(true)).skip(1).toList());
         assertTrue(closed.get());
 
@@ -735,12 +735,12 @@ public class ByteStream104Test extends TestBase {
         assertTrue(closed.get());
 
         closed.set(false);
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).onClose(() -> closed.set(true)).toList());
         assertTrue(closed.get());
 
         closed.set(false);
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).onClose(() -> closed.set(true)).skip(1).toList());
         assertTrue(closed.get());
     }
@@ -752,9 +752,9 @@ public class ByteStream104Test extends TestBase {
         assertArrayEquals(new byte[] { 2, 4, 6, 8, 10 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> (byte) (e * 2)).toArray());
         assertArrayEquals(new byte[] { 4, 6, 8, 10 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> (byte) (e * 2)).skip(1).toArray());
-        assertEquals(N.asList((byte) 2, (byte) 4, (byte) 6, (byte) 8, (byte) 10),
+        assertEquals(N.toList((byte) 2, (byte) 4, (byte) 6, (byte) 8, (byte) 10),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> (byte) (e * 2)).toList());
-        assertEquals(N.asList((byte) 4, (byte) 6, (byte) 8, (byte) 10),
+        assertEquals(N.toList((byte) 4, (byte) 6, (byte) 8, (byte) 10),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> (byte) (e * 2)).skip(1).toList());
         assertEquals(5, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).map(e -> (byte) (e * 2)).count());
         assertEquals(4, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).map(e -> (byte) (e * 2)).skip(1).count());
@@ -762,9 +762,9 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).map(e -> (byte) (e * 2)).toArray());
         assertArrayEquals(new byte[] { 4, 6, 8, 10 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).map(e -> (byte) (e * 2)).skip(1).toArray());
-        assertEquals(N.asList((byte) 2, (byte) 4, (byte) 6, (byte) 8, (byte) 10),
+        assertEquals(N.toList((byte) 2, (byte) 4, (byte) 6, (byte) 8, (byte) 10),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).map(e -> (byte) (e * 2)).toList());
-        assertEquals(N.asList((byte) 4, (byte) 6, (byte) 8, (byte) 10),
+        assertEquals(N.toList((byte) 4, (byte) 6, (byte) 8, (byte) 10),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).map(e -> (byte) (e * 2)).skip(1).toList());
     }
 
@@ -775,16 +775,16 @@ public class ByteStream104Test extends TestBase {
         assertArrayEquals(new int[] { 10, 20, 30, 40, 50 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).mapToInt(e -> e * 10).toArray());
         assertArrayEquals(new int[] { 20, 30, 40, 50 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).mapToInt(e -> e * 10).skip(1).toArray());
-        assertEquals(N.asList(10, 20, 30, 40, 50), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).mapToInt(e -> e * 10).toList());
-        assertEquals(N.asList(20, 30, 40, 50), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).mapToInt(e -> e * 10).skip(1).toList());
+        assertEquals(N.toList(10, 20, 30, 40, 50), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).mapToInt(e -> e * 10).toList());
+        assertEquals(N.toList(20, 30, 40, 50), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).mapToInt(e -> e * 10).skip(1).toList());
         assertEquals(5, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).mapToInt(e -> e * 10).count());
         assertEquals(4, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).mapToInt(e -> e * 10).skip(1).count());
         assertArrayEquals(new int[] { 10, 20, 30, 40, 50 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).mapToInt(e -> e * 10).toArray());
         assertArrayEquals(new int[] { 20, 30, 40, 50 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).mapToInt(e -> e * 10).skip(1).toArray());
-        assertEquals(N.asList(10, 20, 30, 40, 50), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).mapToInt(e -> e * 10).toList());
-        assertEquals(N.asList(20, 30, 40, 50),
+        assertEquals(N.toList(10, 20, 30, 40, 50), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).mapToInt(e -> e * 10).toList());
+        assertEquals(N.toList(20, 30, 40, 50),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).mapToInt(e -> e * 10).skip(1).toList());
     }
 
@@ -796,9 +796,9 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).mapToObj(e -> "Byte:" + e).toArray());
         assertArrayEquals(new String[] { "Byte:2", "Byte:3", "Byte:4", "Byte:5" },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).mapToObj(e -> "Byte:" + e).skip(1).toArray());
-        assertEquals(N.asList("Byte:1", "Byte:2", "Byte:3", "Byte:4", "Byte:5"),
+        assertEquals(N.toList("Byte:1", "Byte:2", "Byte:3", "Byte:4", "Byte:5"),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).mapToObj(e -> "Byte:" + e).toList());
-        assertEquals(N.asList("Byte:2", "Byte:3", "Byte:4", "Byte:5"),
+        assertEquals(N.toList("Byte:2", "Byte:3", "Byte:4", "Byte:5"),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).mapToObj(e -> "Byte:" + e).skip(1).toList());
         assertEquals(5, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).mapToObj(e -> "Byte:" + e).count());
         assertEquals(4, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).mapToObj(e -> "Byte:" + e).skip(1).count());
@@ -806,9 +806,9 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).mapToObj(e -> "Byte:" + e).toArray());
         assertArrayEquals(new String[] { "Byte:2", "Byte:3", "Byte:4", "Byte:5" },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).mapToObj(e -> "Byte:" + e).skip(1).toArray());
-        assertEquals(N.asList("Byte:1", "Byte:2", "Byte:3", "Byte:4", "Byte:5"),
+        assertEquals(N.toList("Byte:1", "Byte:2", "Byte:3", "Byte:4", "Byte:5"),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).mapToObj(e -> "Byte:" + e).toList());
-        assertEquals(N.asList("Byte:2", "Byte:3", "Byte:4", "Byte:5"),
+        assertEquals(N.toList("Byte:2", "Byte:3", "Byte:4", "Byte:5"),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).mapToObj(e -> "Byte:" + e).skip(1).toList());
     }
 
@@ -820,9 +820,9 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMap(e -> ByteStream.of(e, (byte) (e * 2))).toArray());
         assertArrayEquals(new byte[] { 2, 2, 4, 3, 6, 4, 8, 5, 10 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMap(e -> ByteStream.of(e, (byte) (e * 2))).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 2, (byte) 4, (byte) 3, (byte) 6, (byte) 4, (byte) 8, (byte) 5, (byte) 10),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 2, (byte) 4, (byte) 3, (byte) 6, (byte) 4, (byte) 8, (byte) 5, (byte) 10),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMap(e -> ByteStream.of(e, (byte) (e * 2))).toList());
-        assertEquals(N.asList((byte) 2, (byte) 2, (byte) 4, (byte) 3, (byte) 6, (byte) 4, (byte) 8, (byte) 5, (byte) 10),
+        assertEquals(N.toList((byte) 2, (byte) 2, (byte) 4, (byte) 3, (byte) 6, (byte) 4, (byte) 8, (byte) 5, (byte) 10),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMap(e -> ByteStream.of(e, (byte) (e * 2))).skip(1).toList());
         assertEquals(10, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMap(e -> ByteStream.of(e, (byte) (e * 2))).count());
         assertEquals(9,
@@ -831,9 +831,9 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMap(e -> ByteStream.of(e, (byte) (e * 2))).toArray());
         assertArrayEquals(new byte[] { 2, 2, 4, 3, 6, 4, 8, 5, 10 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMap(e -> ByteStream.of(e, (byte) (e * 2))).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 2, (byte) 4, (byte) 3, (byte) 6, (byte) 4, (byte) 8, (byte) 5, (byte) 10),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 2, (byte) 4, (byte) 3, (byte) 6, (byte) 4, (byte) 8, (byte) 5, (byte) 10),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMap(e -> ByteStream.of(e, (byte) (e * 2))).toList());
-        assertEquals(N.asList((byte) 2, (byte) 2, (byte) 4, (byte) 3, (byte) 6, (byte) 4, (byte) 8, (byte) 5, (byte) 10),
+        assertEquals(N.toList((byte) 2, (byte) 2, (byte) 4, (byte) 3, (byte) 6, (byte) 4, (byte) 8, (byte) 5, (byte) 10),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMap(e -> ByteStream.of(e, (byte) (e * 2))).skip(1).toList());
     }
 
@@ -845,9 +845,9 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatmap(e -> new byte[] { e, (byte) (e * 2) }).toArray());
         assertArrayEquals(new byte[] { 2, 2, 4, 3, 6, 4, 8, 5, 10 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatmap(e -> new byte[] { e, (byte) (e * 2) }).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 2, (byte) 4, (byte) 3, (byte) 6, (byte) 4, (byte) 8, (byte) 5, (byte) 10),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 2, (byte) 4, (byte) 3, (byte) 6, (byte) 4, (byte) 8, (byte) 5, (byte) 10),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatmap(e -> new byte[] { e, (byte) (e * 2) }).toList());
-        assertEquals(N.asList((byte) 2, (byte) 2, (byte) 4, (byte) 3, (byte) 6, (byte) 4, (byte) 8, (byte) 5, (byte) 10),
+        assertEquals(N.toList((byte) 2, (byte) 2, (byte) 4, (byte) 3, (byte) 6, (byte) 4, (byte) 8, (byte) 5, (byte) 10),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatmap(e -> new byte[] { e, (byte) (e * 2) }).skip(1).toList());
 
         assertEquals(10, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatmap(e -> new byte[] { e, (byte) (e * 2) }).count());
@@ -857,9 +857,9 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatmap(e -> new byte[] { e, (byte) (e * 2) }).toArray());
         assertArrayEquals(new byte[] { 2, 2, 4, 3, 6, 4, 8, 5, 10 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatmap(e -> new byte[] { e, (byte) (e * 2) }).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 2, (byte) 4, (byte) 3, (byte) 6, (byte) 4, (byte) 8, (byte) 5, (byte) 10),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 2, (byte) 4, (byte) 3, (byte) 6, (byte) 4, (byte) 8, (byte) 5, (byte) 10),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatmap(e -> new byte[] { e, (byte) (e * 2) }).toList());
-        assertEquals(N.asList((byte) 2, (byte) 2, (byte) 4, (byte) 3, (byte) 6, (byte) 4, (byte) 8, (byte) 5, (byte) 10),
+        assertEquals(N.toList((byte) 2, (byte) 2, (byte) 4, (byte) 3, (byte) 6, (byte) 4, (byte) 8, (byte) 5, (byte) 10),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatmap(e -> new byte[] { e, (byte) (e * 2) }).skip(1).toList());
     }
 
@@ -871,9 +871,9 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapToInt(e -> IntStream.of(e, e * 10)).toArray());
         assertArrayEquals(new int[] { 10, 2, 20, 3, 30, 4, 40, 5, 50 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapToInt(e -> IntStream.of(e, e * 10)).skip(1).toArray());
-        assertEquals(N.asList(1, 10, 2, 20, 3, 30, 4, 40, 5, 50),
+        assertEquals(N.toList(1, 10, 2, 20, 3, 30, 4, 40, 5, 50),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapToInt(e -> IntStream.of(e, e * 10)).toList());
-        assertEquals(N.asList(10, 2, 20, 3, 30, 4, 40, 5, 50),
+        assertEquals(N.toList(10, 2, 20, 3, 30, 4, 40, 5, 50),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapToInt(e -> IntStream.of(e, e * 10)).skip(1).toList());
         assertEquals(10, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMapToInt(e -> IntStream.of(e, e * 10)).count());
         assertEquals(9, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMapToInt(e -> IntStream.of(e, e * 10)).skip(1).count());
@@ -881,9 +881,9 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMapToInt(e -> IntStream.of(e, e * 10)).toArray());
         assertArrayEquals(new int[] { 10, 2, 20, 3, 30, 4, 40, 5, 50 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMapToInt(e -> IntStream.of(e, e * 10)).skip(1).toArray());
-        assertEquals(N.asList(1, 10, 2, 20, 3, 30, 4, 40, 5, 50),
+        assertEquals(N.toList(1, 10, 2, 20, 3, 30, 4, 40, 5, 50),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMapToInt(e -> IntStream.of(e, e * 10)).toList());
-        assertEquals(N.asList(10, 2, 20, 3, 30, 4, 40, 5, 50),
+        assertEquals(N.toList(10, 2, 20, 3, 30, 4, 40, 5, 50),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMapToInt(e -> IntStream.of(e, e * 10)).skip(1).toList());
     }
 
@@ -895,9 +895,9 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapToObj(e -> Stream.of("A" + e, "B" + e)).toArray());
         assertArrayEquals(new String[] { "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5" },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapToObj(e -> Stream.of("A" + e, "B" + e)).skip(1).toArray());
-        assertEquals(N.asList("A1", "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
+        assertEquals(N.toList("A1", "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapToObj(e -> Stream.of("A" + e, "B" + e)).toList());
-        assertEquals(N.asList("B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
+        assertEquals(N.toList("B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapToObj(e -> Stream.of("A" + e, "B" + e)).skip(1).toList());
         assertEquals(10, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMapToObj(e -> Stream.of("A" + e, "B" + e)).count());
         assertEquals(9,
@@ -906,9 +906,9 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMapToObj(e -> Stream.of("A" + e, "B" + e)).toArray());
         assertArrayEquals(new String[] { "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5" },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMapToObj(e -> Stream.of("A" + e, "B" + e)).skip(1).toArray());
-        assertEquals(N.asList("A1", "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
+        assertEquals(N.toList("A1", "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMapToObj(e -> Stream.of("A" + e, "B" + e)).toList());
-        assertEquals(N.asList("B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
+        assertEquals(N.toList("B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMapToObj(e -> Stream.of("A" + e, "B" + e)).skip(1).toList());
     }
 
@@ -920,9 +920,9 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatmapToObj(e -> Arrays.asList("A" + e, "B" + e)).toArray());
         assertArrayEquals(new String[] { "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5" },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatmapToObj(e -> Arrays.asList("A" + e, "B" + e)).skip(1).toArray());
-        assertEquals(N.asList("A1", "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
+        assertEquals(N.toList("A1", "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatmapToObj(e -> Arrays.asList("A" + e, "B" + e)).toList());
-        assertEquals(N.asList("B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
+        assertEquals(N.toList("B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatmapToObj(e -> Arrays.asList("A" + e, "B" + e)).skip(1).toList());
         assertEquals(10,
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatmapToObj(e -> Arrays.asList("A" + e, "B" + e)).count());
@@ -936,9 +936,9 @@ public class ByteStream104Test extends TestBase {
                         .map(e -> e)
                         .skip(1)
                         .toArray());
-        assertEquals(N.asList("A1", "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
+        assertEquals(N.toList("A1", "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatmapToObj(e -> Arrays.asList("A" + e, "B" + e)).toList());
-        assertEquals(N.asList("B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
+        assertEquals(N.toList("B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)
                         .flatmapToObj(e -> Arrays.asList("A" + e, "B" + e))
                         .map(e -> e)
@@ -949,14 +949,15 @@ public class ByteStream104Test extends TestBase {
     @Test
     public void testFlattmapToObjArray() {
         assertEquals(10, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).count());
-        assertEquals(9, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).skip(1).count());
+        assertEquals(9,
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).skip(1).count());
         assertArrayEquals(new String[] { "A1", "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5" },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).toArray());
         assertArrayEquals(new String[] { "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5" },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).skip(1).toArray());
-        assertEquals(N.asList("A1", "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
+        assertEquals(N.toList("A1", "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).toList());
-        assertEquals(N.asList("B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
+        assertEquals(N.toList("B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).skip(1).toList());
         assertEquals(10,
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).count());
@@ -967,16 +968,19 @@ public class ByteStream104Test extends TestBase {
                         .skip(1)
                         .count());
         assertArrayEquals(new String[] { "A1", "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5" },
-                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).toArray());
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)
+                        .map(e -> e)
+                        .flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e })
+                        .toArray());
         assertArrayEquals(new String[] { "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5" },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)
                         .map(e -> e)
                         .flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e })
                         .skip(1)
                         .toArray());
-        assertEquals(N.asList("A1", "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
+        assertEquals(N.toList("A1", "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e }).toList());
-        assertEquals(N.asList("B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
+        assertEquals(N.toList("B1", "A2", "B2", "A3", "B3", "A4", "B4", "A5", "B5"),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)
                         .map(e -> e)
                         .flatMapArrayToObj(e -> new String[] { "A" + e, "B" + e })
@@ -1004,11 +1008,11 @@ public class ByteStream104Test extends TestBase {
                         .mapPartial(e -> e % 2 == 0 ? OptionalByte.of((byte) (e * 2)) : OptionalByte.empty())
                         .skip(1)
                         .toArray());
-        assertEquals(N.asList((byte) 4, (byte) 8),
+        assertEquals(N.toList((byte) 4, (byte) 8),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)
                         .mapPartial(e -> e % 2 == 0 ? OptionalByte.of((byte) (e * 2)) : OptionalByte.empty())
                         .toList());
-        assertEquals(N.asList((byte) 8),
+        assertEquals(N.toList((byte) 8),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)
                         .mapPartial(e -> e % 2 == 0 ? OptionalByte.of((byte) (e * 2)) : OptionalByte.empty())
                         .skip(1)
@@ -1035,12 +1039,12 @@ public class ByteStream104Test extends TestBase {
                         .mapPartial(e -> e % 2 == 0 ? OptionalByte.of((byte) (e * 2)) : OptionalByte.empty())
                         .skip(1)
                         .toArray());
-        assertEquals(N.asList((byte) 4, (byte) 8),
+        assertEquals(N.toList((byte) 4, (byte) 8),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)
                         .map(e -> e)
                         .mapPartial(e -> e % 2 == 0 ? OptionalByte.of((byte) (e * 2)) : OptionalByte.empty())
                         .toList());
-        assertEquals(N.asList((byte) 8),
+        assertEquals(N.toList((byte) 8),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)
                         .map(e -> e)
                         .mapPartial(e -> e % 2 == 0 ? OptionalByte.of((byte) (e * 2)) : OptionalByte.empty())
@@ -1064,9 +1068,9 @@ public class ByteStream104Test extends TestBase {
                         .rangeMap((a, b) -> Math.abs(b - a) <= 1, (a, b) -> (byte) (a + b))
                         .skip(1)
                         .toArray());
-        assertEquals(N.asList((byte) 3, (byte) 6, (byte) 21),
+        assertEquals(N.toList((byte) 3, (byte) 6, (byte) 21),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 10, (byte) 11).rangeMap((a, b) -> Math.abs(b - a) <= 1, (a, b) -> (byte) (a + b)).toList());
-        assertEquals(N.asList((byte) 6, (byte) 21),
+        assertEquals(N.toList((byte) 6, (byte) 21),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 10, (byte) 11)
                         .rangeMap((a, b) -> Math.abs(b - a) <= 1, (a, b) -> (byte) (a + b))
                         .skip(1)
@@ -1093,12 +1097,12 @@ public class ByteStream104Test extends TestBase {
                         .rangeMap((a, b) -> Math.abs(b - a) <= 1, (a, b) -> (byte) (a + b))
                         .skip(1)
                         .toArray());
-        assertEquals(N.asList((byte) 3, (byte) 6, (byte) 21),
+        assertEquals(N.toList((byte) 3, (byte) 6, (byte) 21),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 10, (byte) 11)
                         .map(e -> e)
                         .rangeMap((a, b) -> Math.abs(b - a) <= 1, (a, b) -> (byte) (a + b))
                         .toList());
-        assertEquals(N.asList((byte) 6, (byte) 21),
+        assertEquals(N.toList((byte) 6, (byte) 21),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 10, (byte) 11)
                         .map(e -> e)
                         .rangeMap((a, b) -> Math.abs(b - a) <= 1, (a, b) -> (byte) (a + b))
@@ -1126,11 +1130,11 @@ public class ByteStream104Test extends TestBase {
                         .rangeMapToObj((a, b) -> Math.abs(b - a) <= 1, (a, b) -> "Range[" + a + "," + b + "]")
                         .skip(1)
                         .toArray());
-        assertEquals(N.asList("Range[1,2]", "Range[3,3]", "Range[10,11]"),
+        assertEquals(N.toList("Range[1,2]", "Range[3,3]", "Range[10,11]"),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 10, (byte) 11)
                         .rangeMapToObj((a, b) -> Math.abs(b - a) <= 1, (a, b) -> "Range[" + a + "," + b + "]")
                         .toList());
-        assertEquals(N.asList("Range[3,3]", "Range[10,11]"),
+        assertEquals(N.toList("Range[3,3]", "Range[10,11]"),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 10, (byte) 11)
                         .rangeMapToObj((a, b) -> Math.abs(b - a) <= 1, (a, b) -> "Range[" + a + "," + b + "]")
                         .skip(1)
@@ -1157,12 +1161,12 @@ public class ByteStream104Test extends TestBase {
                         .rangeMapToObj((a, b) -> Math.abs(b - a) <= 1, (a, b) -> "Range[" + a + "," + b + "]")
                         .skip(1)
                         .toArray());
-        assertEquals(N.asList("Range[1,2]", "Range[3,3]", "Range[10,11]"),
+        assertEquals(N.toList("Range[1,2]", "Range[3,3]", "Range[10,11]"),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 10, (byte) 11)
                         .map(e -> e)
                         .rangeMapToObj((a, b) -> Math.abs(b - a) <= 1, (a, b) -> "Range[" + a + "," + b + "]")
                         .toList());
-        assertEquals(N.asList("Range[3,3]", "Range[10,11]"),
+        assertEquals(N.toList("Range[3,3]", "Range[10,11]"),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 10, (byte) 11)
                         .map(e -> e)
                         .rangeMapToObj((a, b) -> Math.abs(b - a) <= 1, (a, b) -> "Range[" + a + "," + b + "]")
@@ -1223,9 +1227,9 @@ public class ByteStream104Test extends TestBase {
                         .collapse((a, b) -> Math.abs(b - a) <= 1, (a, b) -> (byte) (a + b))
                         .skip(1)
                         .toArray());
-        assertEquals(N.asList((byte) 6, (byte) 11),
+        assertEquals(N.toList((byte) 6, (byte) 11),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 5, (byte) 6).collapse((a, b) -> Math.abs(b - a) <= 1, (a, b) -> (byte) (a + b)).toList());
-        assertEquals(N.asList((byte) 11),
+        assertEquals(N.toList((byte) 11),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 5, (byte) 6)
                         .collapse((a, b) -> Math.abs(b - a) <= 1, (a, b) -> (byte) (a + b))
                         .skip(1)
@@ -1252,12 +1256,12 @@ public class ByteStream104Test extends TestBase {
                         .collapse((a, b) -> Math.abs(b - a) <= 1, (a, b) -> (byte) (a + b))
                         .skip(1)
                         .toArray());
-        assertEquals(N.asList((byte) 6, (byte) 11),
+        assertEquals(N.toList((byte) 6, (byte) 11),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 5, (byte) 6)
                         .map(e -> e)
                         .collapse((a, b) -> Math.abs(b - a) <= 1, (a, b) -> (byte) (a + b))
                         .toList());
-        assertEquals(N.asList((byte) 11),
+        assertEquals(N.toList((byte) 11),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 5, (byte) 6)
                         .map(e -> e)
                         .collapse((a, b) -> Math.abs(b - a) <= 1, (a, b) -> (byte) (a + b))
@@ -1273,9 +1277,9 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).scan((a, b) -> (byte) (a + b)).toArray());
         assertArrayEquals(new byte[] { 3, 6, 10, 15 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).scan((a, b) -> (byte) (a + b)).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 3, (byte) 6, (byte) 10, (byte) 15),
+        assertEquals(N.toList((byte) 1, (byte) 3, (byte) 6, (byte) 10, (byte) 15),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).scan((a, b) -> (byte) (a + b)).toList());
-        assertEquals(N.asList((byte) 3, (byte) 6, (byte) 10, (byte) 15),
+        assertEquals(N.toList((byte) 3, (byte) 6, (byte) 10, (byte) 15),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).scan((a, b) -> (byte) (a + b)).skip(1).toList());
         assertEquals(5, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).scan((a, b) -> (byte) (a + b)).count());
         assertEquals(4, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).scan((a, b) -> (byte) (a + b)).skip(1).count());
@@ -1283,9 +1287,9 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).scan((a, b) -> (byte) (a + b)).toArray());
         assertArrayEquals(new byte[] { 3, 6, 10, 15 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).scan((a, b) -> (byte) (a + b)).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 3, (byte) 6, (byte) 10, (byte) 15),
+        assertEquals(N.toList((byte) 1, (byte) 3, (byte) 6, (byte) 10, (byte) 15),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).scan((a, b) -> (byte) (a + b)).toList());
-        assertEquals(N.asList((byte) 3, (byte) 6, (byte) 10, (byte) 15),
+        assertEquals(N.toList((byte) 3, (byte) 6, (byte) 10, (byte) 15),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).scan((a, b) -> (byte) (a + b)).skip(1).toList());
     }
 
@@ -1297,9 +1301,9 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).scan((byte) 10, (a, b) -> (byte) (a + b)).toArray());
         assertArrayEquals(new byte[] { 13, 16, 20, 25 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).scan((byte) 10, (a, b) -> (byte) (a + b)).skip(1).toArray());
-        assertEquals(N.asList((byte) 11, (byte) 13, (byte) 16, (byte) 20, (byte) 25),
+        assertEquals(N.toList((byte) 11, (byte) 13, (byte) 16, (byte) 20, (byte) 25),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).scan((byte) 10, (a, b) -> (byte) (a + b)).toList());
-        assertEquals(N.asList((byte) 13, (byte) 16, (byte) 20, (byte) 25),
+        assertEquals(N.toList((byte) 13, (byte) 16, (byte) 20, (byte) 25),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).scan((byte) 10, (a, b) -> (byte) (a + b)).skip(1).toList());
         assertEquals(5, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).scan((byte) 10, (a, b) -> (byte) (a + b)).count());
         assertEquals(4, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).scan((byte) 10, (a, b) -> (byte) (a + b)).skip(1).count());
@@ -1307,9 +1311,9 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).scan((byte) 10, (a, b) -> (byte) (a + b)).toArray());
         assertArrayEquals(new byte[] { 13, 16, 20, 25 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).scan((byte) 10, (a, b) -> (byte) (a + b)).skip(1).toArray());
-        assertEquals(N.asList((byte) 11, (byte) 13, (byte) 16, (byte) 20, (byte) 25),
+        assertEquals(N.toList((byte) 11, (byte) 13, (byte) 16, (byte) 20, (byte) 25),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).scan((byte) 10, (a, b) -> (byte) (a + b)).toList());
-        assertEquals(N.asList((byte) 13, (byte) 16, (byte) 20, (byte) 25),
+        assertEquals(N.toList((byte) 13, (byte) 16, (byte) 20, (byte) 25),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).scan((byte) 10, (a, b) -> (byte) (a + b)).skip(1).toList());
     }
 
@@ -1321,9 +1325,9 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).scan((byte) 10, true, (a, b) -> (byte) (a + b)).toArray());
         assertArrayEquals(new byte[] { 11, 13, 16, 20, 25 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).scan((byte) 10, true, (a, b) -> (byte) (a + b)).skip(1).toArray());
-        assertEquals(N.asList((byte) 10, (byte) 11, (byte) 13, (byte) 16, (byte) 20, (byte) 25),
+        assertEquals(N.toList((byte) 10, (byte) 11, (byte) 13, (byte) 16, (byte) 20, (byte) 25),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).scan((byte) 10, true, (a, b) -> (byte) (a + b)).toList());
-        assertEquals(N.asList((byte) 11, (byte) 13, (byte) 16, (byte) 20, (byte) 25),
+        assertEquals(N.toList((byte) 11, (byte) 13, (byte) 16, (byte) 20, (byte) 25),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).scan((byte) 10, true, (a, b) -> (byte) (a + b)).skip(1).toList());
         assertEquals(6, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).scan((byte) 10, true, (a, b) -> (byte) (a + b)).count());
         assertEquals(5,
@@ -1332,9 +1336,9 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).scan((byte) 10, true, (a, b) -> (byte) (a + b)).toArray());
         assertArrayEquals(new byte[] { 11, 13, 16, 20, 25 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).scan((byte) 10, true, (a, b) -> (byte) (a + b)).skip(1).toArray());
-        assertEquals(N.asList((byte) 10, (byte) 11, (byte) 13, (byte) 16, (byte) 20, (byte) 25),
+        assertEquals(N.toList((byte) 10, (byte) 11, (byte) 13, (byte) 16, (byte) 20, (byte) 25),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).scan((byte) 10, true, (a, b) -> (byte) (a + b)).toList());
-        assertEquals(N.asList((byte) 11, (byte) 13, (byte) 16, (byte) 20, (byte) 25),
+        assertEquals(N.toList((byte) 11, (byte) 13, (byte) 16, (byte) 20, (byte) 25),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).scan((byte) 10, true, (a, b) -> (byte) (a + b)).skip(1).toList());
     }
 
@@ -1361,11 +1365,11 @@ public class ByteStream104Test extends TestBase {
                         .mergeWith(ByteStream.of((byte) 2, (byte) 4, (byte) 6), (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
                         .skip(1)
                         .toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6),
                 ByteStream.of((byte) 1, (byte) 3, (byte) 5)
                         .mergeWith(ByteStream.of((byte) 2, (byte) 4, (byte) 6), (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
                         .toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6),
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6),
                 ByteStream.of((byte) 1, (byte) 3, (byte) 5)
                         .mergeWith(ByteStream.of((byte) 2, (byte) 4, (byte) 6), (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
                         .skip(1)
@@ -1392,12 +1396,12 @@ public class ByteStream104Test extends TestBase {
                         .mergeWith(ByteStream.of((byte) 2, (byte) 4, (byte) 6), (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
                         .skip(1)
                         .toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6),
                 ByteStream.of((byte) 1, (byte) 3, (byte) 5)
                         .map(e -> e)
                         .mergeWith(ByteStream.of((byte) 2, (byte) 4, (byte) 6), (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
                         .toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6),
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6),
                 ByteStream.of((byte) 1, (byte) 3, (byte) 5)
                         .map(e -> e)
                         .mergeWith(ByteStream.of((byte) 2, (byte) 4, (byte) 6), (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
@@ -1414,9 +1418,9 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3).zipWith(ByteStream.of((byte) 4, (byte) 5, (byte) 6), (x, y) -> (byte) (x + y)).toArray());
         assertArrayEquals(new byte[] { 7, 9 },
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3).zipWith(ByteStream.of((byte) 4, (byte) 5, (byte) 6), (x, y) -> (byte) (x + y)).skip(1).toArray());
-        assertEquals(N.asList((byte) 5, (byte) 7, (byte) 9),
+        assertEquals(N.toList((byte) 5, (byte) 7, (byte) 9),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3).zipWith(ByteStream.of((byte) 4, (byte) 5, (byte) 6), (x, y) -> (byte) (x + y)).toList());
-        assertEquals(N.asList((byte) 7, (byte) 9),
+        assertEquals(N.toList((byte) 7, (byte) 9),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3).zipWith(ByteStream.of((byte) 4, (byte) 5, (byte) 6), (x, y) -> (byte) (x + y)).skip(1).toList());
         assertEquals(3,
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3).map(e -> e).zipWith(ByteStream.of((byte) 4, (byte) 5, (byte) 6), (x, y) -> (byte) (x + y)).count());
@@ -1437,12 +1441,12 @@ public class ByteStream104Test extends TestBase {
                         .zipWith(ByteStream.of((byte) 4, (byte) 5, (byte) 6), (x, y) -> (byte) (x + y))
                         .skip(1)
                         .toArray());
-        assertEquals(N.asList((byte) 5, (byte) 7, (byte) 9),
+        assertEquals(N.toList((byte) 5, (byte) 7, (byte) 9),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3)
                         .map(e -> e)
                         .zipWith(ByteStream.of((byte) 4, (byte) 5, (byte) 6), (x, y) -> (byte) (x + y))
                         .toList());
-        assertEquals(N.asList((byte) 7, (byte) 9),
+        assertEquals(N.toList((byte) 7, (byte) 9),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3)
                         .map(e -> e)
                         .zipWith(ByteStream.of((byte) 4, (byte) 5, (byte) 6), (x, y) -> (byte) (x + y))
@@ -1470,11 +1474,11 @@ public class ByteStream104Test extends TestBase {
                         .zipWith(ByteStream.of((byte) 4, (byte) 5, (byte) 6), ByteStream.of((byte) 7, (byte) 8, (byte) 9), (x, y, z) -> (byte) (x + y + z))
                         .skip(1)
                         .toArray());
-        assertEquals(N.asList((byte) 12, (byte) 15, (byte) 18),
+        assertEquals(N.toList((byte) 12, (byte) 15, (byte) 18),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3)
                         .zipWith(ByteStream.of((byte) 4, (byte) 5, (byte) 6), ByteStream.of((byte) 7, (byte) 8, (byte) 9), (x, y, z) -> (byte) (x + y + z))
                         .toList());
-        assertEquals(N.asList((byte) 15, (byte) 18),
+        assertEquals(N.toList((byte) 15, (byte) 18),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3)
                         .zipWith(ByteStream.of((byte) 4, (byte) 5, (byte) 6), ByteStream.of((byte) 7, (byte) 8, (byte) 9), (x, y, z) -> (byte) (x + y + z))
                         .skip(1)
@@ -1501,12 +1505,12 @@ public class ByteStream104Test extends TestBase {
                         .zipWith(ByteStream.of((byte) 4, (byte) 5, (byte) 6), ByteStream.of((byte) 7, (byte) 8, (byte) 9), (x, y, z) -> (byte) (x + y + z))
                         .skip(1)
                         .toArray());
-        assertEquals(N.asList((byte) 12, (byte) 15, (byte) 18),
+        assertEquals(N.toList((byte) 12, (byte) 15, (byte) 18),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3)
                         .map(e -> e)
                         .zipWith(ByteStream.of((byte) 4, (byte) 5, (byte) 6), ByteStream.of((byte) 7, (byte) 8, (byte) 9), (x, y, z) -> (byte) (x + y + z))
                         .toList());
-        assertEquals(N.asList((byte) 15, (byte) 18),
+        assertEquals(N.toList((byte) 15, (byte) 18),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3)
                         .map(e -> e)
                         .zipWith(ByteStream.of((byte) 4, (byte) 5, (byte) 6), ByteStream.of((byte) 7, (byte) 8, (byte) 9), (x, y, z) -> (byte) (x + y + z))
@@ -1532,9 +1536,9 @@ public class ByteStream104Test extends TestBase {
                         .zipWith(ByteStream.of((byte) 4, (byte) 5), (byte) 0, (byte) 10, (x, y) -> (byte) (x + y))
                         .skip(1)
                         .toArray());
-        assertEquals(N.asList((byte) 5, (byte) 7, (byte) 13),
+        assertEquals(N.toList((byte) 5, (byte) 7, (byte) 13),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3).zipWith(ByteStream.of((byte) 4, (byte) 5), (byte) 0, (byte) 10, (x, y) -> (byte) (x + y)).toList());
-        assertEquals(N.asList((byte) 7, (byte) 13),
+        assertEquals(N.toList((byte) 7, (byte) 13),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3)
                         .zipWith(ByteStream.of((byte) 4, (byte) 5), (byte) 0, (byte) 10, (x, y) -> (byte) (x + y))
                         .skip(1)
@@ -1561,12 +1565,12 @@ public class ByteStream104Test extends TestBase {
                         .zipWith(ByteStream.of((byte) 4, (byte) 5), (byte) 0, (byte) 10, (x, y) -> (byte) (x + y))
                         .skip(1)
                         .toArray());
-        assertEquals(N.asList((byte) 5, (byte) 7, (byte) 13),
+        assertEquals(N.toList((byte) 5, (byte) 7, (byte) 13),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3)
                         .map(e -> e)
                         .zipWith(ByteStream.of((byte) 4, (byte) 5), (byte) 0, (byte) 10, (x, y) -> (byte) (x + y))
                         .toList());
-        assertEquals(N.asList((byte) 7, (byte) 13),
+        assertEquals(N.toList((byte) 7, (byte) 13),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3)
                         .map(e -> e)
                         .zipWith(ByteStream.of((byte) 4, (byte) 5), (byte) 0, (byte) 10, (x, y) -> (byte) (x + y))
@@ -1598,12 +1602,12 @@ public class ByteStream104Test extends TestBase {
                                 (x, y, z) -> (byte) (x + y + z))
                         .skip(1)
                         .toArray());
-        assertEquals(N.asList((byte) 12, (byte) 15, (byte) 22, (byte) 20),
+        assertEquals(N.toList((byte) 12, (byte) 15, (byte) 22, (byte) 20),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3)
                         .zipWith(ByteStream.of((byte) 4, (byte) 5), ByteStream.of((byte) 7, (byte) 8, (byte) 9, (byte) 10), (byte) 0, (byte) 10, (byte) 20,
                                 (x, y, z) -> (byte) (x + y + z))
                         .toList());
-        assertEquals(N.asList((byte) 15, (byte) 22, (byte) 20),
+        assertEquals(N.toList((byte) 15, (byte) 22, (byte) 20),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3)
                         .zipWith(ByteStream.of((byte) 4, (byte) 5), ByteStream.of((byte) 7, (byte) 8, (byte) 9, (byte) 10), (byte) 0, (byte) 10, (byte) 20,
                                 (x, y, z) -> (byte) (x + y + z))
@@ -1635,13 +1639,13 @@ public class ByteStream104Test extends TestBase {
                                 (x, y, z) -> (byte) (x + y + z))
                         .skip(1)
                         .toArray());
-        assertEquals(N.asList((byte) 12, (byte) 15, (byte) 22, (byte) 20),
+        assertEquals(N.toList((byte) 12, (byte) 15, (byte) 22, (byte) 20),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3)
                         .map(e -> e)
                         .zipWith(ByteStream.of((byte) 4, (byte) 5), ByteStream.of((byte) 7, (byte) 8, (byte) 9, (byte) 10), (byte) 0, (byte) 10, (byte) 20,
                                 (x, y, z) -> (byte) (x + y + z))
                         .toList());
-        assertEquals(N.asList((byte) 15, (byte) 22, (byte) 20),
+        assertEquals(N.toList((byte) 15, (byte) 22, (byte) 20),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3)
                         .map(e -> e)
                         .zipWith(ByteStream.of((byte) 4, (byte) 5), ByteStream.of((byte) 7, (byte) 8, (byte) 9, (byte) 10), (byte) 0, (byte) 10, (byte) 20,
@@ -1672,9 +1676,9 @@ public class ByteStream104Test extends TestBase {
         assertEquals(4, ByteStream.defer(() -> ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, ByteStream.defer(() -> ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)).toArray());
         assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.defer(() -> ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.defer(() -> ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.defer(() -> ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)).skip(1).toList());
         assertEquals(5, ByteStream.defer(() -> ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)).map(e -> e).count());
         assertEquals(4, ByteStream.defer(() -> ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)).map(e -> e).skip(1).count());
@@ -1682,9 +1686,9 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.defer(() -> ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)).map(e -> e).toArray());
         assertArrayEquals(new byte[] { 2, 3, 4, 5 },
                 ByteStream.defer(() -> ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.defer(() -> ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)).map(e -> e).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.defer(() -> ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5)).map(e -> e).skip(1).toList());
     }
 
@@ -1694,13 +1698,13 @@ public class ByteStream104Test extends TestBase {
         assertEquals(0, ByteStream.ofNullable((byte) 5).skip(1).count());
         assertArrayEquals(new byte[] { 5 }, ByteStream.ofNullable((byte) 5).toArray());
         assertArrayEquals(new byte[0], ByteStream.ofNullable((byte) 5).skip(1).toArray());
-        assertEquals(N.asList((byte) 5), ByteStream.ofNullable((byte) 5).toList());
+        assertEquals(N.toList((byte) 5), ByteStream.ofNullable((byte) 5).toList());
         assertEquals(Collections.emptyList(), ByteStream.ofNullable((byte) 5).skip(1).toList());
         assertEquals(1, ByteStream.ofNullable((byte) 5).map(e -> e).count());
         assertEquals(0, ByteStream.ofNullable((byte) 5).map(e -> e).skip(1).count());
         assertArrayEquals(new byte[] { 5 }, ByteStream.ofNullable((byte) 5).map(e -> e).toArray());
         assertArrayEquals(new byte[0], ByteStream.ofNullable((byte) 5).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList((byte) 5), ByteStream.ofNullable((byte) 5).map(e -> e).toList());
+        assertEquals(N.toList((byte) 5), ByteStream.ofNullable((byte) 5).map(e -> e).toList());
         assertEquals(Collections.emptyList(), ByteStream.ofNullable((byte) 5).map(e -> e).skip(1).toList());
 
         assertEquals(0, ByteStream.ofNullable((Byte) null).count());
@@ -1717,15 +1721,15 @@ public class ByteStream104Test extends TestBase {
         assertEquals(4, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).toArray());
         assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).skip(1).toList());
         assertEquals(5, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).count());
         assertEquals(4, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).toArray());
         assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).skip(1).toList());
     }
 
@@ -1736,14 +1740,14 @@ public class ByteStream104Test extends TestBase {
         assertEquals(2, ByteStream.of(array, 2, 5).skip(1).count());
         assertArrayEquals(new byte[] { 3, 4, 5 }, ByteStream.of(array, 2, 5).toArray());
         assertArrayEquals(new byte[] { 4, 5 }, ByteStream.of(array, 2, 5).skip(1).toArray());
-        assertEquals(N.asList((byte) 3, (byte) 4, (byte) 5), ByteStream.of(array, 2, 5).toList());
-        assertEquals(N.asList((byte) 4, (byte) 5), ByteStream.of(array, 2, 5).skip(1).toList());
+        assertEquals(N.toList((byte) 3, (byte) 4, (byte) 5), ByteStream.of(array, 2, 5).toList());
+        assertEquals(N.toList((byte) 4, (byte) 5), ByteStream.of(array, 2, 5).skip(1).toList());
         assertEquals(3, ByteStream.of(array, 2, 5).map(e -> e).count());
         assertEquals(2, ByteStream.of(array, 2, 5).map(e -> e).skip(1).count());
         assertArrayEquals(new byte[] { 3, 4, 5 }, ByteStream.of(array, 2, 5).map(e -> e).toArray());
         assertArrayEquals(new byte[] { 4, 5 }, ByteStream.of(array, 2, 5).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList((byte) 3, (byte) 4, (byte) 5), ByteStream.of(array, 2, 5).map(e -> e).toList());
-        assertEquals(N.asList((byte) 4, (byte) 5), ByteStream.of(array, 2, 5).map(e -> e).skip(1).toList());
+        assertEquals(N.toList((byte) 3, (byte) 4, (byte) 5), ByteStream.of(array, 2, 5).map(e -> e).toList());
+        assertEquals(N.toList((byte) 4, (byte) 5), ByteStream.of(array, 2, 5).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -1753,14 +1757,14 @@ public class ByteStream104Test extends TestBase {
         assertEquals(4, ByteStream.of(array).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, ByteStream.of(array).toArray());
         assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.of(array).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(array).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(array).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(array).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(array).skip(1).toList());
         assertEquals(5, ByteStream.of(array).map(e -> e).count());
         assertEquals(4, ByteStream.of(array).map(e -> e).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, ByteStream.of(array).map(e -> e).toArray());
         assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.of(array).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(array).map(e -> e).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(array).map(e -> e).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(array).map(e -> e).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(array).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -1770,14 +1774,14 @@ public class ByteStream104Test extends TestBase {
         assertEquals(2, ByteStream.of(array, 2, 5).skip(1).count());
         assertArrayEquals(new byte[] { 3, 4, 5 }, ByteStream.of(array, 2, 5).toArray());
         assertArrayEquals(new byte[] { 4, 5 }, ByteStream.of(array, 2, 5).skip(1).toArray());
-        assertEquals(N.asList((byte) 3, (byte) 4, (byte) 5), ByteStream.of(array, 2, 5).toList());
-        assertEquals(N.asList((byte) 4, (byte) 5), ByteStream.of(array, 2, 5).skip(1).toList());
+        assertEquals(N.toList((byte) 3, (byte) 4, (byte) 5), ByteStream.of(array, 2, 5).toList());
+        assertEquals(N.toList((byte) 4, (byte) 5), ByteStream.of(array, 2, 5).skip(1).toList());
         assertEquals(3, ByteStream.of(array, 2, 5).map(e -> e).count());
         assertEquals(2, ByteStream.of(array, 2, 5).map(e -> e).skip(1).count());
         assertArrayEquals(new byte[] { 3, 4, 5 }, ByteStream.of(array, 2, 5).map(e -> e).toArray());
         assertArrayEquals(new byte[] { 4, 5 }, ByteStream.of(array, 2, 5).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList((byte) 3, (byte) 4, (byte) 5), ByteStream.of(array, 2, 5).map(e -> e).toList());
-        assertEquals(N.asList((byte) 4, (byte) 5), ByteStream.of(array, 2, 5).map(e -> e).skip(1).toList());
+        assertEquals(N.toList((byte) 3, (byte) 4, (byte) 5), ByteStream.of(array, 2, 5).map(e -> e).toList());
+        assertEquals(N.toList((byte) 4, (byte) 5), ByteStream.of(array, 2, 5).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -1787,14 +1791,14 @@ public class ByteStream104Test extends TestBase {
         assertEquals(4, ByteStream.of(collection).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, ByteStream.of(collection).toArray());
         assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.of(collection).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(collection).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(collection).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(collection).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(collection).skip(1).toList());
         assertEquals(5, ByteStream.of(collection).map(e -> e).count());
         assertEquals(4, ByteStream.of(collection).map(e -> e).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, ByteStream.of(collection).map(e -> e).toArray());
         assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.of(collection).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(collection).map(e -> e).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(collection).map(e -> e).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(collection).map(e -> e).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(collection).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -1812,10 +1816,10 @@ public class ByteStream104Test extends TestBase {
         assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.of(iter).skip(1).toArray());
 
         iter = ByteIterator.of(new byte[] { 1, 2, 3, 4, 5 });
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(iter).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(iter).toList());
 
         iter = ByteIterator.of(new byte[] { 1, 2, 3, 4, 5 });
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(iter).skip(1).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(iter).skip(1).toList());
 
         iter = ByteIterator.of(new byte[] { 1, 2, 3, 4, 5 });
         assertEquals(5, ByteStream.of(iter).map(e -> e).count());
@@ -1830,10 +1834,10 @@ public class ByteStream104Test extends TestBase {
         assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.of(iter).map(e -> e).skip(1).toArray());
 
         iter = ByteIterator.of(new byte[] { 1, 2, 3, 4, 5 });
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(iter).map(e -> e).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(iter).map(e -> e).toList());
 
         iter = ByteIterator.of(new byte[] { 1, 2, 3, 4, 5 });
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(iter).map(e -> e).skip(1).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(iter).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -1851,10 +1855,10 @@ public class ByteStream104Test extends TestBase {
         assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.of(buf).skip(1).toArray());
 
         buf = ByteBuffer.wrap(new byte[] { 1, 2, 3, 4, 5 });
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(buf).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(buf).toList());
 
         buf = ByteBuffer.wrap(new byte[] { 1, 2, 3, 4, 5 });
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(buf).skip(1).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(buf).skip(1).toList());
 
         buf = ByteBuffer.wrap(new byte[] { 1, 2, 3, 4, 5 });
         assertEquals(5, ByteStream.of(buf).map(e -> e).count());
@@ -1869,10 +1873,10 @@ public class ByteStream104Test extends TestBase {
         assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.of(buf).map(e -> e).skip(1).toArray());
 
         buf = ByteBuffer.wrap(new byte[] { 1, 2, 3, 4, 5 });
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(buf).map(e -> e).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(buf).map(e -> e).toList());
 
         buf = ByteBuffer.wrap(new byte[] { 1, 2, 3, 4, 5 });
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(buf).map(e -> e).skip(1).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.of(buf).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -1882,14 +1886,14 @@ public class ByteStream104Test extends TestBase {
         assertEquals(5, ByteStream.flatten(array).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5, 6 }, ByteStream.flatten(array).toArray());
         assertArrayEquals(new byte[] { 2, 3, 4, 5, 6 }, ByteStream.flatten(array).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6), ByteStream.flatten(array).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6), ByteStream.flatten(array).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6), ByteStream.flatten(array).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6), ByteStream.flatten(array).skip(1).toList());
         assertEquals(6, ByteStream.flatten(array).map(e -> e).count());
         assertEquals(5, ByteStream.flatten(array).map(e -> e).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5, 6 }, ByteStream.flatten(array).map(e -> e).toArray());
         assertArrayEquals(new byte[] { 2, 3, 4, 5, 6 }, ByteStream.flatten(array).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6), ByteStream.flatten(array).map(e -> e).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6), ByteStream.flatten(array).map(e -> e).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6), ByteStream.flatten(array).map(e -> e).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6), ByteStream.flatten(array).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -1899,14 +1903,14 @@ public class ByteStream104Test extends TestBase {
         assertEquals(5, ByteStream.flatten(array, true).skip(1).count());
         assertArrayEquals(new byte[] { 1, 4, 2, 5, 3, 6 }, ByteStream.flatten(array, true).toArray());
         assertArrayEquals(new byte[] { 4, 2, 5, 3, 6 }, ByteStream.flatten(array, true).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 4, (byte) 2, (byte) 5, (byte) 3, (byte) 6), ByteStream.flatten(array, true).toList());
-        assertEquals(N.asList((byte) 4, (byte) 2, (byte) 5, (byte) 3, (byte) 6), ByteStream.flatten(array, true).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 4, (byte) 2, (byte) 5, (byte) 3, (byte) 6), ByteStream.flatten(array, true).toList());
+        assertEquals(N.toList((byte) 4, (byte) 2, (byte) 5, (byte) 3, (byte) 6), ByteStream.flatten(array, true).skip(1).toList());
         assertEquals(6, ByteStream.flatten(array, true).map(e -> e).count());
         assertEquals(5, ByteStream.flatten(array, true).map(e -> e).skip(1).count());
         assertArrayEquals(new byte[] { 1, 4, 2, 5, 3, 6 }, ByteStream.flatten(array, true).map(e -> e).toArray());
         assertArrayEquals(new byte[] { 4, 2, 5, 3, 6 }, ByteStream.flatten(array, true).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 4, (byte) 2, (byte) 5, (byte) 3, (byte) 6), ByteStream.flatten(array, true).map(e -> e).toList());
-        assertEquals(N.asList((byte) 4, (byte) 2, (byte) 5, (byte) 3, (byte) 6), ByteStream.flatten(array, true).map(e -> e).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 4, (byte) 2, (byte) 5, (byte) 3, (byte) 6), ByteStream.flatten(array, true).map(e -> e).toList());
+        assertEquals(N.toList((byte) 4, (byte) 2, (byte) 5, (byte) 3, (byte) 6), ByteStream.flatten(array, true).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -1916,17 +1920,17 @@ public class ByteStream104Test extends TestBase {
         assertEquals(8, ByteStream.flatten(array, (byte) 0, true).skip(1).count());
         assertArrayEquals(new byte[] { 1, 3, 6, 2, 4, 0, 0, 5, 0 }, ByteStream.flatten(array, (byte) 0, true).toArray());
         assertArrayEquals(new byte[] { 3, 6, 2, 4, 0, 0, 5, 0 }, ByteStream.flatten(array, (byte) 0, true).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 3, (byte) 6, (byte) 2, (byte) 4, (byte) 0, (byte) 0, (byte) 5, (byte) 0),
+        assertEquals(N.toList((byte) 1, (byte) 3, (byte) 6, (byte) 2, (byte) 4, (byte) 0, (byte) 0, (byte) 5, (byte) 0),
                 ByteStream.flatten(array, (byte) 0, true).toList());
-        assertEquals(N.asList((byte) 3, (byte) 6, (byte) 2, (byte) 4, (byte) 0, (byte) 0, (byte) 5, (byte) 0),
+        assertEquals(N.toList((byte) 3, (byte) 6, (byte) 2, (byte) 4, (byte) 0, (byte) 0, (byte) 5, (byte) 0),
                 ByteStream.flatten(array, (byte) 0, true).skip(1).toList());
         assertEquals(9, ByteStream.flatten(array, (byte) 0, true).map(e -> e).count());
         assertEquals(8, ByteStream.flatten(array, (byte) 0, true).map(e -> e).skip(1).count());
         assertArrayEquals(new byte[] { 1, 3, 6, 2, 4, 0, 0, 5, 0 }, ByteStream.flatten(array, (byte) 0, true).map(e -> e).toArray());
         assertArrayEquals(new byte[] { 3, 6, 2, 4, 0, 0, 5, 0 }, ByteStream.flatten(array, (byte) 0, true).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 3, (byte) 6, (byte) 2, (byte) 4, (byte) 0, (byte) 0, (byte) 5, (byte) 0),
+        assertEquals(N.toList((byte) 1, (byte) 3, (byte) 6, (byte) 2, (byte) 4, (byte) 0, (byte) 0, (byte) 5, (byte) 0),
                 ByteStream.flatten(array, (byte) 0, true).map(e -> e).toList());
-        assertEquals(N.asList((byte) 3, (byte) 6, (byte) 2, (byte) 4, (byte) 0, (byte) 0, (byte) 5, (byte) 0),
+        assertEquals(N.toList((byte) 3, (byte) 6, (byte) 2, (byte) 4, (byte) 0, (byte) 0, (byte) 5, (byte) 0),
                 ByteStream.flatten(array, (byte) 0, true).map(e -> e).skip(1).toList());
     }
 
@@ -1937,14 +1941,14 @@ public class ByteStream104Test extends TestBase {
         assertEquals(5, ByteStream.flatten(array).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5, 6 }, ByteStream.flatten(array).toArray());
         assertArrayEquals(new byte[] { 2, 3, 4, 5, 6 }, ByteStream.flatten(array).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6), ByteStream.flatten(array).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6), ByteStream.flatten(array).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6), ByteStream.flatten(array).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6), ByteStream.flatten(array).skip(1).toList());
         assertEquals(6, ByteStream.flatten(array).map(e -> e).count());
         assertEquals(5, ByteStream.flatten(array).map(e -> e).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5, 6 }, ByteStream.flatten(array).map(e -> e).toArray());
         assertArrayEquals(new byte[] { 2, 3, 4, 5, 6 }, ByteStream.flatten(array).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6), ByteStream.flatten(array).map(e -> e).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6), ByteStream.flatten(array).map(e -> e).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6), ByteStream.flatten(array).map(e -> e).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6), ByteStream.flatten(array).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -1953,14 +1957,14 @@ public class ByteStream104Test extends TestBase {
         assertEquals(4, ByteStream.range((byte) 1, (byte) 6).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, ByteStream.range((byte) 1, (byte) 6).toArray());
         assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.range((byte) 1, (byte) 6).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.range((byte) 1, (byte) 6).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.range((byte) 1, (byte) 6).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.range((byte) 1, (byte) 6).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.range((byte) 1, (byte) 6).skip(1).toList());
         assertEquals(5, ByteStream.range((byte) 1, (byte) 6).map(e -> e).count());
         assertEquals(4, ByteStream.range((byte) 1, (byte) 6).map(e -> e).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, ByteStream.range((byte) 1, (byte) 6).map(e -> e).toArray());
         assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.range((byte) 1, (byte) 6).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.range((byte) 1, (byte) 6).map(e -> e).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.range((byte) 1, (byte) 6).map(e -> e).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.range((byte) 1, (byte) 6).map(e -> e).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.range((byte) 1, (byte) 6).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -1969,14 +1973,14 @@ public class ByteStream104Test extends TestBase {
         assertEquals(2, ByteStream.range((byte) 1, (byte) 10, (byte) 3).skip(1).count());
         assertArrayEquals(new byte[] { 1, 4, 7 }, ByteStream.range((byte) 1, (byte) 10, (byte) 3).toArray());
         assertArrayEquals(new byte[] { 4, 7 }, ByteStream.range((byte) 1, (byte) 10, (byte) 3).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 4, (byte) 7), ByteStream.range((byte) 1, (byte) 10, (byte) 3).toList());
-        assertEquals(N.asList((byte) 4, (byte) 7), ByteStream.range((byte) 1, (byte) 10, (byte) 3).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 4, (byte) 7), ByteStream.range((byte) 1, (byte) 10, (byte) 3).toList());
+        assertEquals(N.toList((byte) 4, (byte) 7), ByteStream.range((byte) 1, (byte) 10, (byte) 3).skip(1).toList());
         assertEquals(3, ByteStream.range((byte) 1, (byte) 10, (byte) 3).map(e -> e).count());
         assertEquals(2, ByteStream.range((byte) 1, (byte) 10, (byte) 3).map(e -> e).skip(1).count());
         assertArrayEquals(new byte[] { 1, 4, 7 }, ByteStream.range((byte) 1, (byte) 10, (byte) 3).map(e -> e).toArray());
         assertArrayEquals(new byte[] { 4, 7 }, ByteStream.range((byte) 1, (byte) 10, (byte) 3).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 4, (byte) 7), ByteStream.range((byte) 1, (byte) 10, (byte) 3).map(e -> e).toList());
-        assertEquals(N.asList((byte) 4, (byte) 7), ByteStream.range((byte) 1, (byte) 10, (byte) 3).map(e -> e).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 4, (byte) 7), ByteStream.range((byte) 1, (byte) 10, (byte) 3).map(e -> e).toList());
+        assertEquals(N.toList((byte) 4, (byte) 7), ByteStream.range((byte) 1, (byte) 10, (byte) 3).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -1985,14 +1989,14 @@ public class ByteStream104Test extends TestBase {
         assertEquals(4, ByteStream.rangeClosed((byte) 1, (byte) 5).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, ByteStream.rangeClosed((byte) 1, (byte) 5).toArray());
         assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.rangeClosed((byte) 1, (byte) 5).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.rangeClosed((byte) 1, (byte) 5).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.rangeClosed((byte) 1, (byte) 5).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.rangeClosed((byte) 1, (byte) 5).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.rangeClosed((byte) 1, (byte) 5).skip(1).toList());
         assertEquals(5, ByteStream.rangeClosed((byte) 1, (byte) 5).map(e -> e).count());
         assertEquals(4, ByteStream.rangeClosed((byte) 1, (byte) 5).map(e -> e).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, ByteStream.rangeClosed((byte) 1, (byte) 5).map(e -> e).toArray());
         assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.rangeClosed((byte) 1, (byte) 5).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.rangeClosed((byte) 1, (byte) 5).map(e -> e).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.rangeClosed((byte) 1, (byte) 5).map(e -> e).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.rangeClosed((byte) 1, (byte) 5).map(e -> e).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.rangeClosed((byte) 1, (byte) 5).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -2001,14 +2005,14 @@ public class ByteStream104Test extends TestBase {
         assertEquals(3, ByteStream.rangeClosed((byte) 1, (byte) 10, (byte) 3).skip(1).count());
         assertArrayEquals(new byte[] { 1, 4, 7, 10 }, ByteStream.rangeClosed((byte) 1, (byte) 10, (byte) 3).toArray());
         assertArrayEquals(new byte[] { 4, 7, 10 }, ByteStream.rangeClosed((byte) 1, (byte) 10, (byte) 3).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 4, (byte) 7, (byte) 10), ByteStream.rangeClosed((byte) 1, (byte) 10, (byte) 3).toList());
-        assertEquals(N.asList((byte) 4, (byte) 7, (byte) 10), ByteStream.rangeClosed((byte) 1, (byte) 10, (byte) 3).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 4, (byte) 7, (byte) 10), ByteStream.rangeClosed((byte) 1, (byte) 10, (byte) 3).toList());
+        assertEquals(N.toList((byte) 4, (byte) 7, (byte) 10), ByteStream.rangeClosed((byte) 1, (byte) 10, (byte) 3).skip(1).toList());
         assertEquals(4, ByteStream.rangeClosed((byte) 1, (byte) 10, (byte) 3).map(e -> e).count());
         assertEquals(3, ByteStream.rangeClosed((byte) 1, (byte) 10, (byte) 3).map(e -> e).skip(1).count());
         assertArrayEquals(new byte[] { 1, 4, 7, 10 }, ByteStream.rangeClosed((byte) 1, (byte) 10, (byte) 3).map(e -> e).toArray());
         assertArrayEquals(new byte[] { 4, 7, 10 }, ByteStream.rangeClosed((byte) 1, (byte) 10, (byte) 3).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 4, (byte) 7, (byte) 10), ByteStream.rangeClosed((byte) 1, (byte) 10, (byte) 3).map(e -> e).toList());
-        assertEquals(N.asList((byte) 4, (byte) 7, (byte) 10), ByteStream.rangeClosed((byte) 1, (byte) 10, (byte) 3).map(e -> e).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 4, (byte) 7, (byte) 10), ByteStream.rangeClosed((byte) 1, (byte) 10, (byte) 3).map(e -> e).toList());
+        assertEquals(N.toList((byte) 4, (byte) 7, (byte) 10), ByteStream.rangeClosed((byte) 1, (byte) 10, (byte) 3).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -2017,14 +2021,14 @@ public class ByteStream104Test extends TestBase {
         assertEquals(4, ByteStream.repeat((byte) 7, 5).skip(1).count());
         assertArrayEquals(new byte[] { 7, 7, 7, 7, 7 }, ByteStream.repeat((byte) 7, 5).toArray());
         assertArrayEquals(new byte[] { 7, 7, 7, 7 }, ByteStream.repeat((byte) 7, 5).skip(1).toArray());
-        assertEquals(N.asList((byte) 7, (byte) 7, (byte) 7, (byte) 7, (byte) 7), ByteStream.repeat((byte) 7, 5).toList());
-        assertEquals(N.asList((byte) 7, (byte) 7, (byte) 7, (byte) 7), ByteStream.repeat((byte) 7, 5).skip(1).toList());
+        assertEquals(N.toList((byte) 7, (byte) 7, (byte) 7, (byte) 7, (byte) 7), ByteStream.repeat((byte) 7, 5).toList());
+        assertEquals(N.toList((byte) 7, (byte) 7, (byte) 7, (byte) 7), ByteStream.repeat((byte) 7, 5).skip(1).toList());
         assertEquals(5, ByteStream.repeat((byte) 7, 5).map(e -> e).count());
         assertEquals(4, ByteStream.repeat((byte) 7, 5).map(e -> e).skip(1).count());
         assertArrayEquals(new byte[] { 7, 7, 7, 7, 7 }, ByteStream.repeat((byte) 7, 5).map(e -> e).toArray());
         assertArrayEquals(new byte[] { 7, 7, 7, 7 }, ByteStream.repeat((byte) 7, 5).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList((byte) 7, (byte) 7, (byte) 7, (byte) 7, (byte) 7), ByteStream.repeat((byte) 7, 5).map(e -> e).toList());
-        assertEquals(N.asList((byte) 7, (byte) 7, (byte) 7, (byte) 7), ByteStream.repeat((byte) 7, 5).map(e -> e).skip(1).toList());
+        assertEquals(N.toList((byte) 7, (byte) 7, (byte) 7, (byte) 7, (byte) 7), ByteStream.repeat((byte) 7, 5).map(e -> e).toList());
+        assertEquals(N.toList((byte) 7, (byte) 7, (byte) 7, (byte) 7), ByteStream.repeat((byte) 7, 5).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -2057,15 +2061,15 @@ public class ByteStream104Test extends TestBase {
         assertEquals(4, ByteStream.iterate((byte) 1, n -> (byte) (n + 1)).limit(5).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, ByteStream.iterate((byte) 1, n -> (byte) (n + 1)).limit(5).toArray());
         assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.iterate((byte) 1, n -> (byte) (n + 1)).limit(5).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.iterate((byte) 1, n -> (byte) (n + 1)).limit(5).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.iterate((byte) 1, n -> (byte) (n + 1)).limit(5).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.iterate((byte) 1, n -> (byte) (n + 1)).limit(5).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.iterate((byte) 1, n -> (byte) (n + 1)).limit(5).skip(1).toList());
         assertEquals(5, ByteStream.iterate((byte) 1, n -> (byte) (n + 1)).map(e -> e).limit(5).count());
         assertEquals(4, ByteStream.iterate((byte) 1, n -> (byte) (n + 1)).map(e -> e).limit(5).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, ByteStream.iterate((byte) 1, n -> (byte) (n + 1)).map(e -> e).limit(5).toArray());
         assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.iterate((byte) 1, n -> (byte) (n + 1)).map(e -> e).limit(5).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
                 ByteStream.iterate((byte) 1, n -> (byte) (n + 1)).map(e -> e).limit(5).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.iterate((byte) 1, n -> (byte) (n + 1)).map(e -> e).limit(5).skip(1).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.iterate((byte) 1, n -> (byte) (n + 1)).map(e -> e).limit(5).skip(1).toList());
     }
 
     @Test
@@ -2119,7 +2123,7 @@ public class ByteStream104Test extends TestBase {
                 return ++value;
             }
         };
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.generate(supplier).limit(5).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.generate(supplier).limit(5).toList());
 
         supplier = new ByteSupplier() {
             private byte value = 0;
@@ -2129,7 +2133,7 @@ public class ByteStream104Test extends TestBase {
                 return ++value;
             }
         };
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.generate(supplier).limit(5).skip(1).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.generate(supplier).limit(5).skip(1).toList());
 
         supplier = new ByteSupplier() {
             private byte value = 0;
@@ -2179,7 +2183,7 @@ public class ByteStream104Test extends TestBase {
                 return ++value;
             }
         };
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.generate(supplier).map(e -> e).limit(5).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.generate(supplier).map(e -> e).limit(5).toList());
 
         supplier = new ByteSupplier() {
             private byte value = 0;
@@ -2189,7 +2193,7 @@ public class ByteStream104Test extends TestBase {
                 return ++value;
             }
         };
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.generate(supplier).map(e -> e).limit(5).skip(1).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.generate(supplier).map(e -> e).limit(5).skip(1).toList());
     }
 
     @Test
@@ -2202,14 +2206,14 @@ public class ByteStream104Test extends TestBase {
         assertEquals(4, ByteStream.concat(a1, a2, a3).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, ByteStream.concat(a1, a2, a3).toArray());
         assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.concat(a1, a2, a3).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.concat(a1, a2, a3).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.concat(a1, a2, a3).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.concat(a1, a2, a3).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.concat(a1, a2, a3).skip(1).toList());
         assertEquals(5, ByteStream.concat(a1, a2, a3).map(e -> e).count());
         assertEquals(4, ByteStream.concat(a1, a2, a3).map(e -> e).skip(1).count());
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, ByteStream.concat(a1, a2, a3).map(e -> e).toArray());
         assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.concat(a1, a2, a3).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.concat(a1, a2, a3).map(e -> e).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.concat(a1, a2, a3).map(e -> e).skip(1).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.concat(a1, a2, a3).map(e -> e).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.concat(a1, a2, a3).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -2238,12 +2242,12 @@ public class ByteStream104Test extends TestBase {
         s1 = ByteStream.of((byte) 1, (byte) 2);
         s2 = ByteStream.of((byte) 3, (byte) 4);
         s3 = ByteStream.of((byte) 5);
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.concat(s1, s2, s3).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.concat(s1, s2, s3).toList());
 
         s1 = ByteStream.of((byte) 1, (byte) 2);
         s2 = ByteStream.of((byte) 3, (byte) 4);
         s3 = ByteStream.of((byte) 5);
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.concat(s1, s2, s3).skip(1).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.concat(s1, s2, s3).skip(1).toList());
 
         s1 = ByteStream.of((byte) 1, (byte) 2);
         s2 = ByteStream.of((byte) 3, (byte) 4);
@@ -2268,12 +2272,12 @@ public class ByteStream104Test extends TestBase {
         s1 = ByteStream.of((byte) 1, (byte) 2);
         s2 = ByteStream.of((byte) 3, (byte) 4);
         s3 = ByteStream.of((byte) 5);
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.concat(s1, s2, s3).map(e -> e).toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.concat(s1, s2, s3).map(e -> e).toList());
 
         s1 = ByteStream.of((byte) 1, (byte) 2);
         s2 = ByteStream.of((byte) 3, (byte) 4);
         s3 = ByteStream.of((byte) 5);
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.concat(s1, s2, s3).map(e -> e).skip(1).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.concat(s1, s2, s3).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -2285,14 +2289,14 @@ public class ByteStream104Test extends TestBase {
         assertEquals(2, ByteStream.zip(a, b, (x, y) -> (byte) (x + y)).skip(1).count());
         assertArrayEquals(new byte[] { 5, 7, 9 }, ByteStream.zip(a, b, (x, y) -> (byte) (x + y)).toArray());
         assertArrayEquals(new byte[] { 7, 9 }, ByteStream.zip(a, b, (x, y) -> (byte) (x + y)).skip(1).toArray());
-        assertEquals(N.asList((byte) 5, (byte) 7, (byte) 9), ByteStream.zip(a, b, (x, y) -> (byte) (x + y)).toList());
-        assertEquals(N.asList((byte) 7, (byte) 9), ByteStream.zip(a, b, (x, y) -> (byte) (x + y)).skip(1).toList());
+        assertEquals(N.toList((byte) 5, (byte) 7, (byte) 9), ByteStream.zip(a, b, (x, y) -> (byte) (x + y)).toList());
+        assertEquals(N.toList((byte) 7, (byte) 9), ByteStream.zip(a, b, (x, y) -> (byte) (x + y)).skip(1).toList());
         assertEquals(3, ByteStream.zip(a, b, (x, y) -> (byte) (x + y)).map(e -> e).count());
         assertEquals(2, ByteStream.zip(a, b, (x, y) -> (byte) (x + y)).map(e -> e).skip(1).count());
         assertArrayEquals(new byte[] { 5, 7, 9 }, ByteStream.zip(a, b, (x, y) -> (byte) (x + y)).map(e -> e).toArray());
         assertArrayEquals(new byte[] { 7, 9 }, ByteStream.zip(a, b, (x, y) -> (byte) (x + y)).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList((byte) 5, (byte) 7, (byte) 9), ByteStream.zip(a, b, (x, y) -> (byte) (x + y)).map(e -> e).toList());
-        assertEquals(N.asList((byte) 7, (byte) 9), ByteStream.zip(a, b, (x, y) -> (byte) (x + y)).map(e -> e).skip(1).toList());
+        assertEquals(N.toList((byte) 5, (byte) 7, (byte) 9), ByteStream.zip(a, b, (x, y) -> (byte) (x + y)).map(e -> e).toList());
+        assertEquals(N.toList((byte) 7, (byte) 9), ByteStream.zip(a, b, (x, y) -> (byte) (x + y)).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -2306,9 +2310,9 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.merge(a, b, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray());
         assertArrayEquals(new byte[] { 2, 3, 4, 5, 6 },
                 ByteStream.merge(a, b, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6),
                 ByteStream.merge(a, b, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6),
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6),
                 ByteStream.merge(a, b, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).skip(1).toList());
         assertEquals(6, ByteStream.merge(a, b, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).map(e -> e).count());
         assertEquals(5, ByteStream.merge(a, b, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).map(e -> e).skip(1).count());
@@ -2316,9 +2320,9 @@ public class ByteStream104Test extends TestBase {
                 ByteStream.merge(a, b, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).map(e -> e).toArray());
         assertArrayEquals(new byte[] { 2, 3, 4, 5, 6 },
                 ByteStream.merge(a, b, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6),
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6),
                 ByteStream.merge(a, b, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).map(e -> e).toList());
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6),
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6),
                 ByteStream.merge(a, b, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).map(e -> e).skip(1).toList());
     }
 }

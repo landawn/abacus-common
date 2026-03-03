@@ -137,10 +137,10 @@ public class CharBiPredicate2025Test extends TestBase {
     }
 
     @Test
-    public void testGreaterEqual() {
-        assertTrue(CharBiPredicate.GREATER_EQUAL.test('z', 'a'));
-        assertFalse(CharBiPredicate.GREATER_EQUAL.test('a', 'z'));
-        assertTrue(CharBiPredicate.GREATER_EQUAL.test('m', 'm'));
+    public void testGreaterThanOrEqual() {
+        assertTrue(CharBiPredicate.GREATER_THAN_OR_EQUAL.test('z', 'a'));
+        assertFalse(CharBiPredicate.GREATER_THAN_OR_EQUAL.test('a', 'z'));
+        assertTrue(CharBiPredicate.GREATER_THAN_OR_EQUAL.test('m', 'm'));
     }
 
     @Test
@@ -151,10 +151,10 @@ public class CharBiPredicate2025Test extends TestBase {
     }
 
     @Test
-    public void testLessEqual() {
-        assertFalse(CharBiPredicate.LESS_EQUAL.test('z', 'a'));
-        assertTrue(CharBiPredicate.LESS_EQUAL.test('a', 'z'));
-        assertTrue(CharBiPredicate.LESS_EQUAL.test('m', 'm'));
+    public void testLessThanOrEqual() {
+        assertFalse(CharBiPredicate.LESS_THAN_OR_EQUAL.test('z', 'a'));
+        assertTrue(CharBiPredicate.LESS_THAN_OR_EQUAL.test('a', 'z'));
+        assertTrue(CharBiPredicate.LESS_THAN_OR_EQUAL.test('m', 'm'));
     }
 
     @Test

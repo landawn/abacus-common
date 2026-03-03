@@ -580,11 +580,11 @@ public class CharList100Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test occurrencesOf()")
+    @DisplayName("Test frequency()")
     public void testOccurrencesOf() {
         list.addAll(CharList.of('a', 'b', 'c', 'b', 'b'));
-        assertEquals(3, list.occurrencesOf('b'));
-        assertEquals(0, list.occurrencesOf('x'));
+        assertEquals(3, list.frequency('b'));
+        assertEquals(0, list.frequency('x'));
     }
 
     @Test
@@ -819,9 +819,9 @@ public class CharList100Test extends TestBase {
     public void testToMultiset() {
         list.addAll(CharList.of('a', 'b', 'c', 'b', 'a', 'a'));
         Multiset<Character> multiset = list.toMultiset();
-        assertEquals(3, multiset.occurrencesOf('a'));
-        assertEquals(2, multiset.occurrencesOf('b'));
-        assertEquals(1, multiset.occurrencesOf('c'));
+        assertEquals(3, multiset.getCount('a'));
+        assertEquals(2, multiset.getCount('b'));
+        assertEquals(1, multiset.getCount('c'));
     }
 
     @Test

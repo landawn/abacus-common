@@ -31,41 +31,41 @@ public interface ShortBiPredicate extends Throwables.ShortBiPredicate<RuntimeExc
     /**
      * A predicate that always returns {@code true} regardless of the input values.
      */
-    ShortBiPredicate ALWAYS_TRUE = (t, u) -> true;
+    ShortBiPredicate ALWAYS_TRUE = (a, b) -> true;
     /**
      * A predicate that always returns {@code false} regardless of the input values.
      */
-    ShortBiPredicate ALWAYS_FALSE = (t, u) -> false;
+    ShortBiPredicate ALWAYS_FALSE = (a, b) -> false;
     /**
      * A predicate that tests if two short values are equal.
      * Returns {@code true} if and only if the first argument equals the second argument.
      */
-    ShortBiPredicate EQUAL = (t, u) -> t == u;
+    ShortBiPredicate EQUAL = (a, b) -> a == b;
     /**
      * A predicate that tests if two short values are not equal.
      * Returns {@code true} if and only if the first argument does not equal the second argument.
      */
-    ShortBiPredicate NOT_EQUAL = (t, u) -> t != u;
+    ShortBiPredicate NOT_EQUAL = (a, b) -> a != b;
     /**
      * A predicate that tests if the first short value is greater than the second.
      * Returns {@code true} if and only if the first argument is strictly greater than the second argument.
      */
-    ShortBiPredicate GREATER_THAN = (t, u) -> t > u;
+    ShortBiPredicate GREATER_THAN = (a, b) -> a > b;
     /**
      * A predicate that tests if the first short value is greater than or equal to the second.
      * Returns {@code true} if and only if the first argument is greater than or equal to the second argument.
      */
-    ShortBiPredicate GREATER_EQUAL = (t, u) -> t >= u;
+    ShortBiPredicate GREATER_THAN_OR_EQUAL = (a, b) -> a >= b;
     /**
      * A predicate that tests if the first short value is less than the second.
      * Returns {@code true} if and only if the first argument is strictly less than the second argument.
      */
-    ShortBiPredicate LESS_THAN = (t, u) -> t < u;
+    ShortBiPredicate LESS_THAN = (a, b) -> a < b;
     /**
      * A predicate that tests if the first short value is less than or equal to the second.
      * Returns {@code true} if and only if the first argument is less than or equal to the second argument.
      */
-    ShortBiPredicate LESS_EQUAL = (t, u) -> t <= u;
+    ShortBiPredicate LESS_THAN_OR_EQUAL = (a, b) -> a <= b;
 
     /**
      * Evaluates this predicate on the given arguments.
@@ -87,12 +87,12 @@ public interface ShortBiPredicate extends Throwables.ShortBiPredicate<RuntimeExc
      * boolean result4 = inRange.test((short) 50, (short) 100);   // returns true
      * }</pre>
      *
-     * @param t the first input argument
-     * @param u the second input argument
+     * @param a the first input argument
+     * @param b the second input argument
      * @return {@code true} if the input arguments match the predicate, {@code false} otherwise
      */
     @Override
-    boolean test(short t, short u);
+    boolean test(short a, short b);
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
@@ -114,7 +114,7 @@ public interface ShortBiPredicate extends Throwables.ShortBiPredicate<RuntimeExc
      * @return a predicate that represents the logical negation of this predicate
      */
     default ShortBiPredicate negate() {
-        return (t, u) -> !test(t, u);
+        return (a, b) -> !test(a, b);
     }
 
     /**
@@ -140,7 +140,7 @@ public interface ShortBiPredicate extends Throwables.ShortBiPredicate<RuntimeExc
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
      */
     default ShortBiPredicate and(final ShortBiPredicate other) {
-        return (t, u) -> test(t, u) && other.test(t, u);
+        return (a, b) -> test(a, b) && other.test(a, b);
     }
 
     /**
@@ -166,6 +166,6 @@ public interface ShortBiPredicate extends Throwables.ShortBiPredicate<RuntimeExc
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
      */
     default ShortBiPredicate or(final ShortBiPredicate other) {
-        return (t, u) -> test(t, u) || other.test(t, u);
+        return (a, b) -> test(a, b) || other.test(a, b);
     }
 }

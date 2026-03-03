@@ -62,14 +62,14 @@ public class DurationType extends AbstractType<Duration> {
     }
 
     /**
-     * Indicates whether this type should be quoted in CSV format.
-     * Duration values are numeric (milliseconds) and don't require quotes.
+     * Indicates whether values of this type require quoting in CSV format.
+     * Duration values are numeric (milliseconds) and do not require quotes.
      *
-     * @return {@code true}, indicating Duration values should not be quoted in CSV
+     * @return {@code false}, as duration values do not require quoting in CSV format
      */
     @Override
-    public boolean isNonQuotableCsvType() {
-        return true;
+    public boolean isCsvQuoteRequired() {
+        return false;
     }
 
     /**

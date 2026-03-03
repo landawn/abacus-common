@@ -66,9 +66,9 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
     }
 
     /**
-     * Returns the parameter types associated with this array type.
+     * Returns the parameter types associated with this list type.
      *
-     * @return an array containing the Boolean Type that describes the elements of this array type
+     * @return an array containing the Boolean Type that describes the elements of this list type
      * @see #getElementType()
      */
     @Override

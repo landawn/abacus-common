@@ -459,7 +459,7 @@ public final class HARUtil {
      * @throws RuntimeException if the HTTP request execution fails
      */
     public static <T> T sendRequestByRequestEntry(final Map<String, Object> requestEntry, final Class<T> responseClass) {
-        final String url = getURLByRequestEntry(requestEntry);
+        final String url = getUrlByRequestEntry(requestEntry);
         final HttpMethod httpMethod = getHttpMethodByRequestEntry(requestEntry);
 
         final HttpHeaders httpHeaders = getHeadersByRequestEntry(requestEntry);
@@ -494,7 +494,7 @@ public final class HARUtil {
      * );
      *
      * requestOpt.ifPresent(request -> {
-     *     String url = HARUtil.getURLByRequestEntry(request);
+     *     String url = HARUtil.getUrlByRequestEntry(request);
      *     HttpMethod method = HARUtil.getHttpMethodByRequestEntry(request);
      *     com.landawn.abacus.http.HttpHeaders headers = HARUtil.getHeadersByRequestEntry(request);
      *     System.out.println("Found request: " + method + " " + url);
@@ -550,13 +550,13 @@ public final class HARUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String url = HARUtil.getURLByRequestEntry(requestEntry);
+     * String url = HARUtil.getUrlByRequestEntry(requestEntry);
      * }</pre>
      * 
      * @param requestEntry the HAR request entry map
      * @return the URL string from the request entry
      */
-    public static String getURLByRequestEntry(final Map<String, Object> requestEntry) {
+    public static String getUrlByRequestEntry(final Map<String, Object> requestEntry) {
         return (String) requestEntry.get("url");
     }
 

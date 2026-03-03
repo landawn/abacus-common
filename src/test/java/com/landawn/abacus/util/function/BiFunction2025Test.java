@@ -47,6 +47,12 @@ public class BiFunction2025Test extends TestBase {
     }
 
     @Test
+    public void testAndThenRejectsNullFunctionImmediately() {
+        BiFunction<String, Integer, String> biFunction = (s, i) -> s + ":" + i;
+        assertThrows(NullPointerException.class, () -> biFunction.andThen(null));
+    }
+
+    @Test
     public void testAndThenMultipleChains() {
         BiFunction<Integer, Integer, Integer> biFunction = (a, b) -> a + b;
         java.util.function.Function<Integer, Integer> multiply = x -> x * 2;

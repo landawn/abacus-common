@@ -14,6 +14,9 @@
 
 package com.landawn.abacus.type;
 
+/**
+ * Type handler for {@link StringBuffer} objects, providing conversion between StringBuffer and its string representation.
+ */
 public class StringBufferType extends AbstractCharSequenceType<StringBuffer> {
 
     /**

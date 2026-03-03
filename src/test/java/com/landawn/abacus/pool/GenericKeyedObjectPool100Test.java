@@ -206,6 +206,22 @@ public class GenericKeyedObjectPool100Test extends TestBase {
     }
 
     @Test
+    public void testPutWithMemoryMeasureAndUnlimitedMemory() {
+        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> k.length() + 100;
+        GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 0, measure);
+
+        try {
+            for (int i = 0; i < 5; i++) {
+                assertTrue(memPool.put("key" + i, new TestPoolable("value" + i)));
+            }
+
+            assertEquals(5, memPool.size());
+        } finally {
+            memPool.close();
+        }
+    }
+
+    @Test
     public void testPutWithAutoDestroy() {
         for (int i = 0; i < 10; i++) {
             pool.put("key" + i, new TestPoolable("value" + i));

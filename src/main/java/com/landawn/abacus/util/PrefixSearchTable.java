@@ -173,7 +173,7 @@ public final class PrefixSearchTable<K, V> {
             N.checkArgument(size > 0, "empty key not allowed");
             N.requireNonNull(value);
 
-            Node.Builder<K, V> node = nodes.computeIfAbsent(compoundKey.get(0), k -> new Node.Builder<>());
+            Node.Builder<K, V> node = nodes.computeIfAbsent(requireNonNull(compoundKey.get(0)), k -> new Node.Builder<>());
 
             for (int i = 1; i < size; i++) {
                 node = node.child(compoundKey.get(i));

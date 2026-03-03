@@ -256,8 +256,6 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
                     if (!isBufferedWriter) {
                         bw.flush();
                     }
-                } catch (final IOException e) {
-                    throw new UncheckedIOException(e);
                 } finally {
                     if (!isBufferedWriter) {
                         Objectory.recycle((BufferedWriter) bw);
@@ -298,26 +296,21 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            try {
-                writer.write(WD._BRACKET_L);
+            writer.write(WD._BRACKET_L);
 
-                for (int i = 0, len = x.length; i < len; i++) {
-                    if (i > 0) {
-                        writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-                    }
-
-                    if (x[i] == null) {
-                        writer.write(NULL_CHAR_ARRAY);
-                    } else {
-                        elementType.writeCharacter(writer, x[i], config);
-                    }
+            for (int i = 0, len = x.length; i < len; i++) {
+                if (i > 0) {
+                    writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                 }
 
-                writer.write(WD._BRACKET_R);
-
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
+                if (x[i] == null) {
+                    writer.write(NULL_CHAR_ARRAY);
+                } else {
+                    elementType.writeCharacter(writer, x[i], config);
+                }
             }
+
+            writer.write(WD._BRACKET_R);
         }
     }
 

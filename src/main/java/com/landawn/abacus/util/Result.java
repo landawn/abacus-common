@@ -230,7 +230,7 @@ import com.landawn.abacus.util.u.Optional;
  *   <li><b>{@link Throwables}:</b> Compatible with throwable utility methods for exception handling</li>
  * </ul>
  *
- * <p><b>Example: File Processing Pipeline</b>
+ * <p><b>Usage Examples: File Processing Pipeline</b>
  * <pre>{@code
  * public class FileProcessor {
  *     public Result<String, IOException> readFile(String filename) {

@@ -559,7 +559,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      */
     @SuppressWarnings("deprecation")
     public int[] toArray() {
-        return toList().trimToSize().array();
+        return toList().trimToSize().internalArray();
     }
 
     /**

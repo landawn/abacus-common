@@ -1496,7 +1496,7 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testNMatch() {
-        assertTrue(stream.countMatchBetween(2, 3, n -> n > 2));
+        assertTrue(stream.isMatchCountBetween(2, 3, n -> n > 2));
     }
 
     @Test
@@ -3303,8 +3303,8 @@ public class Stream100Test extends TestBase {
         Integer[] b = { 2, 4, 6 };
         Integer[] c = { 7, 8, 9 };
 
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6), Stream.merge(a, b, (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6, 7, 8, 9),
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6), Stream.merge(a, b, (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6, 7, 8, 9),
                 Stream.merge(a, b, c, (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
     }
 
@@ -3314,21 +3314,21 @@ public class Stream100Test extends TestBase {
         Integer[] b = { 2, 4, 6 };
         Integer[] c = { 7, 8, 9 };
 
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6),
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6),
                 Stream.merge(Stream.of(a), Stream.of(b), (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
 
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6),
-                Stream.merge(N.asList(Stream.of(a), Stream.of(b)), (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6),
+                Stream.merge(N.toList(Stream.of(a), Stream.of(b)), (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
 
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6, 7, 8, 9),
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6, 7, 8, 9),
                 Stream.merge(Stream.of(a), Stream.of(b), Stream.of(c), (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
 
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6, 7, 8, 9),
-                Stream.merge(N.asList(Stream.of(a), Stream.of(b), Stream.of(c)), (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6, 7, 8, 9),
+                Stream.merge(N.toList(Stream.of(a), Stream.of(b), Stream.of(c)), (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
                         .toList());
         assertEquals(
-                N.asList(1, 1, 2, 3, 3, 4, 5, 5, 6, 7, 8, 9), Stream
-                        .merge(N.asList(Stream.of(a), Stream.of(b), Stream.of(c), Stream.of(a)),
+                N.toList(1, 1, 2, 3, 3, 4, 5, 5, 6, 7, 8, 9), Stream
+                        .merge(N.toList(Stream.of(a), Stream.of(b), Stream.of(c), Stream.of(a)),
                                 (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
                         .toList());
 
@@ -3340,15 +3340,15 @@ public class Stream100Test extends TestBase {
         Integer[] b = { 2, 4, 6 };
         Integer[] c = { 7, 8, 9 };
 
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6),
-                Stream.parallelMerge(N.asList(Stream.of(a), Stream.of(b)), (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6),
+                Stream.parallelMerge(N.toList(Stream.of(a), Stream.of(b)), (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
 
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6, 7, 8, 9), Stream
-                .parallelMerge(N.asList(Stream.of(a), Stream.of(b), Stream.of(c)), (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6, 7, 8, 9), Stream
+                .parallelMerge(N.toList(Stream.of(a), Stream.of(b), Stream.of(c)), (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
                 .toList());
         assertEquals(
-                N.asList(1, 1, 2, 3, 3, 4, 5, 5, 6, 7, 8, 9), Stream
-                        .parallelMerge(N.asList(Stream.of(a), Stream.of(b), Stream.of(c), Stream.of(a)),
+                N.toList(1, 1, 2, 3, 3, 4, 5, 5, 6, 7, 8, 9), Stream
+                        .parallelMerge(N.toList(Stream.of(a), Stream.of(b), Stream.of(c), Stream.of(a)),
                                 (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
                         .toList());
 
@@ -3356,18 +3356,18 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testParallelMergeIterators() {
-        List<Integer> a = N.asList(1, 3, 5);
-        List<Integer> b = N.asList(2, 4, 6);
-        List<Integer> c = N.asList(7, 8, 9);
-        List<Integer> d = N.asList(7, 9, 10);
+        List<Integer> a = N.toList(1, 3, 5);
+        List<Integer> b = N.toList(2, 4, 6);
+        List<Integer> c = N.toList(7, 8, 9);
+        List<Integer> d = N.toList(7, 9, 10);
 
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6),
-                Stream.parallelMergeIterables(N.asList(a, b), (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6),
+                Stream.parallelMergeIterables(N.toList(a, b), (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
 
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6, 7, 8, 9),
-                Stream.parallelMergeIterables(N.asList(a, b, c), (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6, 7, 8, 9),
+                Stream.parallelMergeIterables(N.toList(a, b, c), (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
 
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6, 7, 7, 8, 9, 9, 10),
-                Stream.parallelMergeIterables(N.asList(a, b, c, d), (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6, 7, 7, 8, 9, 9, 10),
+                Stream.parallelMergeIterables(N.toList(a, b, c, d), (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
     }
 }

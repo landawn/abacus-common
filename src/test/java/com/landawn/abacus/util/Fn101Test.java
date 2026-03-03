@@ -466,21 +466,21 @@ public class Fn101Test extends TestBase {
     }
 
     @Test
-    public void testGreaterEqual() {
-        Predicate<Integer> greaterEqual5 = Fn.greaterEqual(5);
+    public void testGreaterThanOrEqual() {
+        Predicate<Integer> greaterThanOrEqual5 = Fn.greaterThanOrEqual(5);
 
-        assertTrue(greaterEqual5.test(6));
-        assertTrue(greaterEqual5.test(5));
-        assertFalse(greaterEqual5.test(4));
+        assertTrue(greaterThanOrEqual5.test(6));
+        assertTrue(greaterThanOrEqual5.test(5));
+        assertFalse(greaterThanOrEqual5.test(4));
     }
 
     @Test
-    public void testLessEqual() {
-        Predicate<Integer> lessEqual5 = Fn.lessEqual(5);
+    public void testLessThanOrEqual() {
+        Predicate<Integer> lessThanOrEqual5 = Fn.lessThanOrEqual(5);
 
-        assertTrue(lessEqual5.test(4));
-        assertTrue(lessEqual5.test(5));
-        assertFalse(lessEqual5.test(6));
+        assertTrue(lessThanOrEqual5.test(4));
+        assertTrue(lessThanOrEqual5.test(5));
+        assertFalse(lessThanOrEqual5.test(6));
     }
 
     @Test
@@ -601,12 +601,12 @@ public class Fn101Test extends TestBase {
     }
 
     @Test
-    public void testBiPredicateGreaterEqual() {
-        BiPredicate<Integer, Integer> greaterEqual = Fn.greaterEqual();
+    public void testBiPredicateGreaterThanOrEqual() {
+        BiPredicate<Integer, Integer> greaterThanOrEqual = Fn.greaterThanOrEqual();
 
-        assertTrue(greaterEqual.test(5, 3));
-        assertFalse(greaterEqual.test(3, 5));
-        assertTrue(greaterEqual.test(5, 5));
+        assertTrue(greaterThanOrEqual.test(5, 3));
+        assertFalse(greaterThanOrEqual.test(3, 5));
+        assertTrue(greaterThanOrEqual.test(5, 5));
     }
 
     @Test
@@ -619,12 +619,12 @@ public class Fn101Test extends TestBase {
     }
 
     @Test
-    public void testBiPredicateLessEqual() {
-        BiPredicate<Integer, Integer> lessEqual = Fn.lessEqual();
+    public void testBiPredicateLessThanOrEqual() {
+        BiPredicate<Integer, Integer> lessThanOrEqual = Fn.lessThanOrEqual();
 
-        assertTrue(lessEqual.test(3, 5));
-        assertFalse(lessEqual.test(5, 3));
-        assertTrue(lessEqual.test(5, 5));
+        assertTrue(lessThanOrEqual.test(3, 5));
+        assertFalse(lessThanOrEqual.test(5, 3));
+        assertTrue(lessThanOrEqual.test(5, 5));
     }
 
     @Test

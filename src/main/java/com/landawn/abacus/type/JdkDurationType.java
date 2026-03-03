@@ -51,14 +51,14 @@ public class JdkDurationType extends AbstractType<Duration> {
     }
 
     /**
-     * Indicates whether this type should be written without quotes in CSV format.
-     * Duration values are numeric (milliseconds) and should not be quoted.
+     * Indicates whether values of this type require quoting in CSV format.
+     * JDK Duration values are numeric and do not require quotes.
      *
-     * @return {@code true}, indicating that Duration values should not be quoted in CSV output
+     * @return {@code false}, as JDK Duration values do not require quoting in CSV format
      */
     @Override
-    public boolean isNonQuotableCsvType() {
-        return true;
+    public boolean isCsvQuoteRequired() {
+        return false;
     }
 
     /**

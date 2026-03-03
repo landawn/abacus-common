@@ -17,8 +17,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Duration;
@@ -648,12 +648,12 @@ public class ShortStream104Test extends TestBase {
         assertArrayEquals(new int[] { 10, 20, 30 }, result.toArray());
     }
 
-    @Test
-    public void testDoubleUnderscoreTransform() {
-        IntStream result = createShortStream((short) 1, (short) 2, (short) 3).__(s -> s.mapToInt(n -> n * 10));
-
-        assertArrayEquals(new int[] { 10, 20, 30 }, result.toArray());
-    }
+    //    @Test
+    //    public void testDoubleUnderscoreTransform() {
+    //        IntStream result = createShortStream((short) 1, (short) 2, (short) 3).__(s -> s.mapToInt(n -> n * 10));
+    //
+    //        assertArrayEquals(new int[] { 10, 20, 30 }, result.toArray());
+    //    }
 
     @Test
     public void testApplyIfNotEmpty() {

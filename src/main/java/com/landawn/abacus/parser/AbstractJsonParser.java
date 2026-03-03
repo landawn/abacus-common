@@ -59,9 +59,9 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
 
     protected static final char _BRACKET_R = WD._BRACKET_R;
 
-    protected static final char _D_QUOTATION = WD._QUOTATION_D;
+    protected static final char _DOUBLE_QUOTE = WD._DOUBLE_QUOTE;
 
-    protected static final char _S_QUOTATION = WD._QUOTATION_S;
+    protected static final char _SINGLE_QUOTE = WD._SINGLE_QUOTE;
 
     protected static final Type<Object> objType = TypeFactory.getType(Object.class);
 

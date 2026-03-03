@@ -197,12 +197,12 @@ public class BytePredicate2025Test extends TestBase {
     }
 
     @Test
-    public void testGreaterEqual() {
-        BytePredicate greaterEqual5 = BytePredicate.greaterEqual((byte) 5);
+    public void testGreaterThanOrEqual() {
+        BytePredicate greaterThanOrEqual5 = BytePredicate.greaterThanOrEqual((byte) 5);
 
-        assertTrue(greaterEqual5.test((byte) 10));
-        assertTrue(greaterEqual5.test((byte) 5));
-        assertFalse(greaterEqual5.test((byte) 3));
+        assertTrue(greaterThanOrEqual5.test((byte) 10));
+        assertTrue(greaterThanOrEqual5.test((byte) 5));
+        assertFalse(greaterThanOrEqual5.test((byte) 3));
     }
 
     @Test
@@ -215,12 +215,12 @@ public class BytePredicate2025Test extends TestBase {
     }
 
     @Test
-    public void testLessEqual() {
-        BytePredicate lessEqual5 = BytePredicate.lessEqual((byte) 5);
+    public void testLessThanOrEqual() {
+        BytePredicate lessThanOrEqual5 = BytePredicate.lessThanOrEqual((byte) 5);
 
-        assertFalse(lessEqual5.test((byte) 10));
-        assertTrue(lessEqual5.test((byte) 5));
-        assertTrue(lessEqual5.test((byte) 3));
+        assertFalse(lessThanOrEqual5.test((byte) 10));
+        assertTrue(lessThanOrEqual5.test((byte) 5));
+        assertTrue(lessThanOrEqual5.test((byte) 3));
     }
 
     @Test

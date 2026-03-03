@@ -1083,8 +1083,8 @@ public class Stream2025Test extends TestBase {
 
     @Test
     public void testNMatch() {
-        assertTrue(Stream.of(2, 4, 6, 8).countMatchBetween(2, 3, n -> n > 5));
-        assertFalse(Stream.of(2, 4, 6, 8).countMatchBetween(5, 10, n -> n > 5));
+        assertTrue(Stream.of(2, 4, 6, 8).isMatchCountBetween(2, 3, n -> n > 5));
+        assertFalse(Stream.of(2, 4, 6, 8).isMatchCountBetween(5, 10, n -> n > 5));
     }
 
     @Test
@@ -1966,7 +1966,7 @@ public class Stream2025Test extends TestBase {
 
     @Test
     public void testToDataset() {
-        Dataset dataset = Stream.of(Arrays.asList("a", 1), Arrays.asList("b", 2), Arrays.asList("c", 3)).toDataset(N.asList("Column1", "Column2"));
+        Dataset dataset = Stream.of(Arrays.asList("a", 1), Arrays.asList("b", 2), Arrays.asList("c", 3)).toDataset(N.toList("Column1", "Column2"));
         assertEquals(3, dataset.size());
     }
 
@@ -2921,7 +2921,7 @@ public class Stream2025Test extends TestBase {
     public void testPersistToCSV() throws IOException {
         File tempFile = new File(tempDir.toFile(), "test.csv");
         List<List<String>> rows = Arrays.asList(Arrays.asList("a", "b", "c"), Arrays.asList("1", "2", "3"));
-        Stream.of(rows).persistToCsv(N.asList("Column1", "Column2", "Column3"), tempFile);
+        Stream.of(rows).persistToCsv(N.toList("Column1", "Column2", "Column3"), tempFile);
 
         assertTrue(tempFile.exists());
         assertTrue(tempFile.length() > 0);

@@ -64,6 +64,17 @@ public class WebUtil100Test extends TestBase {
     }
 
     @Test
+    public void testCurl2HttpRequestDeleteWithBody() {
+        String curl = "curl -X DELETE https://api.example.com/users/123 -d '{\"hard\":true}'";
+
+        String result = WebUtil.convertCurlToHttpRequest(curl);
+        assertNotNull(result);
+        assertTrue(result.contains("String requestBody"));
+        assertTrue(result.contains(".body(requestBody)"));
+        assertTrue(result.contains(".delete();"));
+    }
+
+    @Test
     public void testCurl2HttpRequestPut() {
         String curl = "curl -X PUT https://api.example.com/users/123 -d '{\"name\":\"Jane\"}'";
 
@@ -321,6 +332,14 @@ public class WebUtil100Test extends TestBase {
         String result = WebUtil.convertCurlToHttpRequest(curl);
         assertNotNull(result);
         assertTrue(result.contains("https://api.example.com/data"));
+    }
+
+    @Test
+    public void testParseCurlWithDoubleSlashInPath() {
+        String curl = "curl https://api.example.com/a//b";
+        String result = WebUtil.convertCurlToHttpRequest(curl);
+        assertNotNull(result);
+        assertTrue(result.contains("https://api.example.com/a//b"));
     }
 
     @Test

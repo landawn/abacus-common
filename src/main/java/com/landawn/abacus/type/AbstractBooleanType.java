@@ -147,14 +147,14 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
     }
 
     /**
-     * Checks if this type represents values that should not be quoted in CSV format.
-     * Boolean values are self-delimiting and don't require quotes in CSV files.
+     * Indicates whether values of this type require quoting in CSV format.
+     * Boolean values are self-delimiting and do not require quotes in CSV files.
      *
-     * @return {@code true}, indicating that boolean values should not be quoted in CSV format
+     * @return {@code false}, as boolean values do not require quoting in CSV format
      */
     @Override
-    public boolean isNonQuotableCsvType() {
-        return true;
+    public boolean isCsvQuoteRequired() {
+        return false;
     }
 
     /**

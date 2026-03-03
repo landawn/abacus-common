@@ -51,8 +51,8 @@ public class OptionalDoubleType100Test extends TestBase {
     }
 
     @Test
-    public void testIsNonQuotableCsvType() {
-        assertTrue(optionalDoubleType.isNonQuotableCsvType());
+    public void test_isCsvQuoteRequired() {
+        assertFalse(optionalDoubleType.isCsvQuoteRequired());
     }
 
     @Test

@@ -1411,7 +1411,7 @@ public class Sheet200Test extends TestBase {
             sheet.clear();
             assertDoesNotThrow(() -> sheet.trimToSize());
 
-            Sheet<String, String, String> s = new Sheet<>(CommonUtil.asSet("R"), CommonUtil.asSet("C"));
+            Sheet<String, String, String> s = new Sheet<>(CommonUtil.toSet("R"), CommonUtil.toSet("C"));
             assertDoesNotThrow(() -> s.trimToSize());
 
             s.set("R", "C", "V");
@@ -1627,7 +1627,7 @@ public class Sheet200Test extends TestBase {
         @Test
         public void testToDatasetH() {
             Dataset ds = sheet.toDatasetH();
-            assertEquals(CommonUtil.asList("C1", "C2", "C3"), ds.columnNames());
+            assertEquals(CommonUtil.toList("C1", "C2", "C3"), ds.columnNames());
             assertEquals(3, ds.size());
             assertEquals("V11", ds.moveToRow(0).get("C1"));
             assertEquals(true, ds.moveToRow(1).get("C3"));
@@ -1638,7 +1638,7 @@ public class Sheet200Test extends TestBase {
         public void testToDatasetH_uninitialized() {
             Sheet<String, String, String> uninit = new Sheet<>(rowKeys, colKeys);
             Dataset ds = uninit.toDatasetH();
-            assertEquals(CommonUtil.asList("C1", "C2", "C3"), ds.columnNames());
+            assertEquals(CommonUtil.toList("C1", "C2", "C3"), ds.columnNames());
             assertEquals(3, ds.size());
             assertNull(ds.moveToRow(0).get("C1"));
         }
@@ -1646,7 +1646,7 @@ public class Sheet200Test extends TestBase {
         @Test
         public void testToDatasetV() {
             Dataset ds = sheet.toDatasetV();
-            assertEquals(CommonUtil.asList("R1", "R2", "R3"), ds.columnNames());
+            assertEquals(CommonUtil.toList("R1", "R2", "R3"), ds.columnNames());
             assertEquals(3, ds.size());
             assertEquals("V11", ds.moveToRow(0).get("R1"));
             assertEquals(true, ds.moveToRow(2).get("R2"));

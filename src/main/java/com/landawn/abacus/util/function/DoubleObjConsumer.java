@@ -47,6 +47,7 @@ public interface DoubleObjConsumer<T> extends Throwables.DoubleObjConsumer<T, Ru
      * @param i the double input argument
      * @param t the object input argument
      */
+    // @ai-ignore DoubleObj*/ObjDouble* argument order convention - intentional: class name prefix determines parameter order. DoubleObj* has double first; ObjDouble* has object first. Do not suggest reordering.
     @Override
     void accept(double i, T t);
 

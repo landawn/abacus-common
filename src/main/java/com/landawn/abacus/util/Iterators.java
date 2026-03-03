@@ -241,7 +241,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>{@link java.util.stream.Stream}:</b> Java 8+ Stream API</li>
  * </ul>
  *
- * <p><b>Example: Large Dataset Processing</b>
+ * <p><b>Usage Examples: Large Dataset Processing</b>
  * <pre>{@code
  * // Processing large datasets with memory efficiency
  * Iterator<String> largeDataset = getMillionRecordIterator();
@@ -271,7 +271,7 @@ import com.landawn.abacus.util.stream.Stream;
  * }
  * }</pre>
  *
- * <p><b>Example: Data Pipeline with Functional Operations</b>
+ * <p><b>Usage Examples: Data Pipeline with Functional Operations</b>
  * <pre>{@code
  * // Building a data processing pipeline
  * Iterator<RawData> source = dataSource.iterator();
@@ -377,20 +377,20 @@ public final class Iterators {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("A", "B", "A", "C", "A").iterator();
-     * long count = Iterators.occurrencesOf(iter, "A");
+     * long count = Iterators.frequency(iter, "A");
      * // count => 3
      *
      * Iterator<Integer> iter2 = Arrays.asList(1, null, 2, null, 3).iterator();
-     * long nullCount = Iterators.occurrencesOf(iter2, null);
+     * long nullCount = Iterators.frequency(iter2, null);
      * // nullCount => 2
      * }</pre>
      *
      * @param iter the iterator to be searched, or {@code null} to return {@code 0}.
      * @param valueToFind the value to count occurrences of, or {@code null} to count {@code null} occurrences.
      * @return the number of occurrences of the value in the iterator, or {@code 0} if {@code iter} is {@code null}.
-     * @see N#occurrencesOf(Iterator, Object)
+     * @see N#frequency(Iterator, Object)
      */
-    public static long occurrencesOf(final Iterator<?> iter, final Object valueToFind) {
+    public static long frequency(final Iterator<?> iter, final Object valueToFind) {
         if (iter == null) {
             return 0;
         }
@@ -929,7 +929,7 @@ public final class Iterators {
                         list.add(next);
                         return next;
                     } else {
-                        a = (T[]) list.toArray();
+                        a = list.toArray((T[]) new Object[list.size()]);
                         len = a.length;
                         list = null;
                     }
@@ -1011,7 +1011,7 @@ public final class Iterators {
                         return next;
                     } else {
                         m++;
-                        a = (T[]) list.toArray();
+                        a = list.toArray((T[]) new Object[list.size()]);
                         len = a.length;
                         list = null;
                     }

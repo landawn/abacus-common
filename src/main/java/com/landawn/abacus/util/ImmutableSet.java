@@ -343,36 +343,6 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
         return new ImmutableSet<>(N.asLinkedHashSet(e1, e2, e3, e4, e5, e6, e7, e8, e9), false);
     }
 
-    /**
-     * Returns an ImmutableSet containing up to ten distinct elements.
-     * Duplicate elements (as determined by equals()) are included only once in the set.
-     * The iteration order is guaranteed to match the order of the first occurrence of each distinct element.
-     * Unlike some set implementations, this method supports {@code null} elements.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ImmutableSet<Integer> tenDigits = ImmutableSet.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-     * System.out.println(tenDigits.size());   // prints: 10
-     * }</pre>
-     *
-     * @param <E> the type of the elements.
-     * @param e1 the first element.
-     * @param e2 the second element.
-     * @param e3 the third element.
-     * @param e4 the fourth element.
-     * @param e5 the fifth element.
-     * @param e6 the sixth element.
-     * @param e7 the seventh element.
-     * @param e8 the eighth element.
-     * @param e9 the ninth element.
-     * @param e10 the tenth element.
-     * @return an ImmutableSet containing the specified distinct elements.
-     */
-    public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9,
-            final E e10) {
-        return new ImmutableSet<>(N.asLinkedHashSet(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10), false);
-    }
-
     //    /**
     //     * Returns an ImmutableSet containing all distinct elements from the provided array.
     //     * The returned set is independent of the input array; changes to the array after this call
@@ -435,7 +405,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
         } else if (elements.length == 1) {
             return of(elements[0]);
         } else {
-            return copyOf(N.asList(elements));
+            return copyOf(N.toList(elements));
         }
     }
 

@@ -171,7 +171,7 @@ public interface Type<T> {
      * Type<List<String>> type = Type.of(listType);
      * }</pre>
      *
-     * @param <T> the type parameter
+     * @param <T> the Java type represented by the returned {@code Type} instance
      * @param javaType the Java reflection type
      * @return the corresponding Type instance
      */
@@ -192,7 +192,7 @@ public interface Type<T> {
      * Type<Map<String, List<Integer>>> mapType = Type.of(new TypeReference<Map<String, List<Integer>>>(){});
      * }</pre>
      *
-     * @param <T> the type parameter
+     * @param <T> the Java type represented by the returned {@code Type} instance
      * @param typeRef the type reference
      * @return the corresponding Type instance
      */
@@ -216,7 +216,7 @@ public interface Type<T> {
      * Type<User> userType = Type.of(User.class);
      * }</pre>
      *
-     * @param <T> the type parameter
+     * @param <T> the Java type represented by the returned {@code Type} instance
      * @param cls the class
      * @return the corresponding Type instance
      */
@@ -240,7 +240,7 @@ public interface Type<T> {
      * Type<Map<String, List<Long>>> mapType = Type.of("Map<String, List<Long>>");
      * }</pre>
      *
-     * @param <T> the type parameter
+     * @param <T> the Java type represented by the returned {@code Type} instance
      * @param typeName the type name string
      * @return the corresponding Type instance
      */
@@ -262,7 +262,7 @@ public interface Type<T> {
      * List<Type<MyClass>> customTypes = Type.ofAll(User.class, Order.class);
      * }</pre>
      *
-     * @param <T> the type parameter
+     * @param <T> the Java type represented by the returned {@code Type} instance
      * @param classes the array of classes
      * @return list of corresponding Type instances
      */
@@ -285,7 +285,7 @@ public interface Type<T> {
      * List<Type<Number>> numberTypes = Type.ofAll(numberClasses);
      * }</pre>
      *
-     * @param <T> the type parameter
+     * @param <T> the Java type represented by the returned {@code Type} instance
      * @param classes the collection of classes
      * @return list of corresponding Type instances
      */
@@ -1088,13 +1088,16 @@ public interface Type<T> {
     }
 
     /**
-     * Checks if values of this type should not be quoted in CSV format.
-     * Typically applies to numbers, booleans, dates, and calendars.
+     * Indicates whether values of this type should be wrapped in quotes when written to CSV.
      *
-     * @return {@code true} if values should not be quoted in CSV
+     * <p>The default implementation returns {@code true} as a conservative choice for text-oriented
+     * serialization. Concrete type implementations may override and return {@code false} when their
+     * canonical CSV form is emitted without surrounding quotes.</p>
+     *
+     * @return {@code true} if values should be quoted in CSV output; {@code false} otherwise
      */
-    default boolean isNonQuotableCsvType() {
-        return false; // Default implementation, can be overridden by specific types
+    default boolean isCsvQuoteRequired() {
+        return true; // Default implementation, can be overridden by specific types
     }
 
     /**

@@ -31,7 +31,7 @@ public class JsonXmlSerializationConfig100Test extends TestBase {
 
     @Test
     public void testGetCharQuotation() {
-        assertEquals(WD._QUOTATION_D, config.getCharQuotation());
+        assertEquals(WD._DOUBLE_QUOTE, config.getCharQuotation());
     }
 
     @Test
@@ -54,7 +54,7 @@ public class JsonXmlSerializationConfig100Test extends TestBase {
 
     @Test
     public void testGetStringQuotation() {
-        assertEquals(WD._QUOTATION_D, config.getStringQuotation());
+        assertEquals(WD._DOUBLE_QUOTE, config.getStringQuotation());
     }
 
     @Test
@@ -260,8 +260,8 @@ public class JsonXmlSerializationConfig100Test extends TestBase {
     public void testDefaultValues() {
         TestConfig newConfig = new TestConfig();
 
-        assertEquals(WD._QUOTATION_D, newConfig.getCharQuotation());
-        assertEquals(WD._QUOTATION_D, newConfig.getStringQuotation());
+        assertEquals(WD._DOUBLE_QUOTE, newConfig.getCharQuotation());
+        assertEquals(WD._DOUBLE_QUOTE, newConfig.getStringQuotation());
         assertEquals(DateTimeFormat.LONG, newConfig.getDateTimeFormat());
         assertFalse(newConfig.prettyFormat());
         assertEquals("    ", newConfig.getIndentation());

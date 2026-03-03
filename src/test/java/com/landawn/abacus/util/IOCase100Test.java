@@ -132,6 +132,12 @@ public class IOCase100Test extends TestBase {
     }
 
     @Test
+    public void testCheckIndexOfWithNegativeStartIndex() {
+        Assertions.assertEquals(2, IOCase.SENSITIVE.checkIndexOf("abcdef", -100, "cd"));
+        Assertions.assertEquals(2, IOCase.INSENSITIVE.checkIndexOf("ABCDEF", -100, "cd"));
+    }
+
+    @Test
     public void testCheckIndexOfNullStrings() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             IOCase.SENSITIVE.checkIndexOf(null, 0, "test");

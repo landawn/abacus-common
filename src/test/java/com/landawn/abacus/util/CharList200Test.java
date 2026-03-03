@@ -68,7 +68,7 @@ public class CharList200Test extends TestBase {
         CharList copy = CharList.copyOf(data);
         assertEquals(4, copy.size());
         assertArrayEquals(data, copy.toArray());
-        assertNotSame(data, copy.array());
+        assertNotSame(data, copy.internalArray());
 
         CharList partialCopy = CharList.copyOf(data, 1, 3);
         assertEquals(2, partialCopy.size());
@@ -295,7 +295,7 @@ public class CharList200Test extends TestBase {
         CharList copy = list.copy();
         assertEquals(list.size(), copy.size());
         assertArrayEquals(list.toArray(), copy.toArray());
-        assertNotSame(list.array(), copy.array());
+        assertNotSame(list.internalArray(), copy.internalArray());
     }
 
     @Test
@@ -511,9 +511,9 @@ public class CharList200Test extends TestBase {
     @Test
     public void testOccurrencesOf() {
         list.addAll(CharList.of('a', 'b', 'a', 'c', 'a'));
-        assertEquals(3, list.occurrencesOf('a'));
-        assertEquals(1, list.occurrencesOf('c'));
-        assertEquals(0, list.occurrencesOf('z'));
+        assertEquals(3, list.frequency('a'));
+        assertEquals(1, list.frequency('c'));
+        assertEquals(0, list.frequency('z'));
     }
 
     @Test
@@ -634,7 +634,7 @@ public class CharList200Test extends TestBase {
     @Test
     public void testArray() {
         list.addAll(CharList.of('q', 'w', 'e'));
-        char[] internalArray = list.array();
+        char[] internalArray = list.internalArray();
         assertEquals(3, list.size());
 
         assertTrue(internalArray.length >= 3);
@@ -740,7 +740,7 @@ public class CharList200Test extends TestBase {
         listWithCapacity.addAll(CharList.of('a', 'b', 'c'));
         listWithCapacity.trimToSize();
         CharList copy = listWithCapacity.copy();
-        assertEquals(copy.array().length, listWithCapacity.array().length);
+        assertEquals(copy.internalArray().length, listWithCapacity.internalArray().length);
     }
 
 }

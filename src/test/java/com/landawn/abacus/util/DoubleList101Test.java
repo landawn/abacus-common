@@ -881,13 +881,13 @@ public class DoubleList101Test extends TestBase {
     @Test
     public void testArrayModification() {
         list.addAll(new double[] { 1.1, 2.2, 3.3 });
-        double[] array = list.array();
+        double[] array = list.internalArray();
 
         array[1] = 20.5;
         assertEquals(20.5, list.get(1), DELTA);
 
         list.clear();
-        double[] newArray = list.array();
+        double[] newArray = list.internalArray();
         assertSame(array, newArray);
     }
 

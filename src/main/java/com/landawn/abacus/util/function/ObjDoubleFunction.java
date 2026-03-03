@@ -52,6 +52,7 @@ public interface ObjDoubleFunction<T, R> extends Throwables.ObjDoubleFunction<T,
      * @param u the second function argument, a primitive double value
      * @return the function result of type R
      */
+    // @ai-ignore DoubleObj*/ObjDouble* argument order convention - intentional: class name prefix determines parameter order. DoubleObj* has double first; ObjDouble* has object first. Do not suggest reordering.
     @Override
     R apply(T t, double u);
 

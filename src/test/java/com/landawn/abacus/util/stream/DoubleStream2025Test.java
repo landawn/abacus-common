@@ -200,7 +200,7 @@ public class DoubleStream2025Test extends TestBase {
         DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 10.0, 11.0);
         List<String> result = stream.rangeMapToObj((first, next) -> next - first < 2.0, (first, last) -> first + "-" + last).toList();
         assertEquals(3, result.size());
-        assertEquals(N.asList("1.0-2.0", "3.0-3.0", "10.0-11.0"), result);
+        assertEquals(N.toList("1.0-2.0", "3.0-3.0", "10.0-11.0"), result);
     }
 
     @Test

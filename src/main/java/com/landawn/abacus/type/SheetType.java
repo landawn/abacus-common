@@ -116,17 +116,17 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
     }
 
     /**
-     * Indicates whether this type is a generic type.
-     * SheetType is always generic as it is parameterized with three type parameters.
+     * Indicates whether this type is a parameterized type.
+     * SheetType is always parameterized as it has three type parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SheetType<String, String, Object> type = new SheetType<>("String", "String", "Object");
-     * boolean isGeneric = type.isGenericType();
-     * // isGeneric is true
+     * boolean isParameterized = type.isParameterizedType();
+     * // isParameterized is true
      * }</pre>
      *
-     * @return {@code true}, indicating this is a generic type
+     * @return {@code true}, indicating this is a parameterized type
      */
     @Override
     public boolean isParameterizedType() {

@@ -46,11 +46,11 @@ public interface DoubleBiConsumer extends Throwables.DoubleBiConsumer<RuntimeExc
      * coordRecorder.accept(40.7128, -74.0060);
      * }</pre>
      *
-     * @param t the first double input argument
-     * @param u the second double input argument
+     * @param a the first double input argument
+     * @param b the second double input argument
      */
     @Override
-    void accept(double t, double u);
+    void accept(double a, double b);
 
     /**
      * Returns a composed {@code DoubleBiConsumer} that performs, in sequence, this operation followed by the {@code after} operation.
@@ -69,9 +69,9 @@ public interface DoubleBiConsumer extends Throwables.DoubleBiConsumer<RuntimeExc
      * @return a composed {@code DoubleBiConsumer} that performs in sequence this operation followed by the {@code after} operation
      */
     default DoubleBiConsumer andThen(final DoubleBiConsumer after) {
-        return (t, u) -> {
-            accept(t, u);
-            after.accept(t, u);
+        return (a, b) -> {
+            accept(a, b);
+            after.accept(a, b);
         };
     }
 }

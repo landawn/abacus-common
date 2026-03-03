@@ -22,9 +22,8 @@ package com.landawn.abacus.util;
  *
  * <p>ASCII utilities also exist in other classes of this package:</p>
  * <ul>
- * <!-- TODO(kevinb): how can we make this not produce a warning when building gwt javadoc? -->
  * <li>{@link Charsets#US_ASCII} specifies the {@code Charset} of ASCII characters.</li>
- * <li>{@link com.google.common.base.CharMatcher#ascii} matches ASCII characters and provides text processing methods which
+ * <li>Google Guava's {@code CharMatcher.ascii()} matches ASCII characters and provides text processing methods which
  * operate only on the ASCII characters of a string.</li>
  * </ul>
  * 

@@ -252,7 +252,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>{@link java.beans.BeanInfo}:</b> Standard Java bean introspection</li>
  * </ul>
  *
- * <p><b>Example: Complex Object Processing</b>
+ * <p><b>Usage Examples: Complex Object Processing</b>
  * <pre>{@code
  * // Complex bean processing example
  * @Entity
@@ -297,7 +297,7 @@ import com.landawn.abacus.util.stream.Stream;
  * boolean isEqual = Beans.equalsByProps(user, cloned, Arrays.asList("name", "age"));
  * }</pre>
  *
- * <p><b>Example: Configuration Management</b>
+ * <p><b>Usage Examples: Configuration Management</b>
  * <pre>{@code
  * // Configuration bean processing
  * public class DatabaseConfig {

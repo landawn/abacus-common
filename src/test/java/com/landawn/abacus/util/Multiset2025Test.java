@@ -150,8 +150,8 @@ public class Multiset2025Test extends TestBase {
     @Test
     public void testOccurrencesOf() {
         multiset.add("apple", 3);
-        assertEquals(3, multiset.occurrencesOf("apple"));
-        assertEquals(0, multiset.occurrencesOf("banana"));
+        assertEquals(3, multiset.getCount("apple"));
+        assertEquals(0, multiset.getCount("banana"));
     }
 
     @Test

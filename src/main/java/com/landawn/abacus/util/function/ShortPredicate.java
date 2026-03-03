@@ -231,7 +231,7 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortPredicate greaterOrEqual10 = ShortPredicate.greaterEqual((short) 10);
+     * ShortPredicate greaterOrEqual10 = ShortPredicate.greaterThanOrEqual((short) 10);
      * boolean result1 = greaterOrEqual10.test((short) 10);   // returns true
      * boolean result2 = greaterOrEqual10.test((short) 5);    // returns false
      * }</pre>
@@ -239,7 +239,7 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      * @param targetShort the value to compare against
      * @return a predicate that tests if the input is greater than or equal to {@code targetShort}
      */
-    static ShortPredicate greaterEqual(final short targetShort) {
+    static ShortPredicate greaterThanOrEqual(final short targetShort) {
         return value -> value >= targetShort;
     }
 
@@ -265,7 +265,7 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortPredicate lessOrEqual100 = ShortPredicate.lessEqual((short) 100);
+     * ShortPredicate lessOrEqual100 = ShortPredicate.lessThanOrEqual((short) 100);
      * boolean result1 = lessOrEqual100.test((short) 100);   // returns true
      * boolean result2 = lessOrEqual100.test((short) 150);   // returns false
      * }</pre>
@@ -273,7 +273,7 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      * @param targetShort the value to compare against
      * @return a predicate that tests if the input is less than or equal to {@code targetShort}
      */
-    static ShortPredicate lessEqual(final short targetShort) {
+    static ShortPredicate lessThanOrEqual(final short targetShort) {
         return value -> value <= targetShort;
     }
 

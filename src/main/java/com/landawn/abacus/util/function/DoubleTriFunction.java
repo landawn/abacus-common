@@ -24,10 +24,9 @@ import com.landawn.abacus.util.Throwables;
  * <p>This interface extends {@link Throwables.DoubleTriFunction} with {@link RuntimeException},
  * providing exception handling capabilities while maintaining compatibility with standard functional programming patterns.</p>
  *
- * @param <R> the type of the result of the function
- *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @param <R> the type of the result of the function
  *
  * @see java.util.function.Function
  * @see java.util.function.DoubleFunction

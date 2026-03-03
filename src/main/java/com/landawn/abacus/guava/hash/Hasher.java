@@ -58,7 +58,7 @@ import com.google.common.hash.HashCode;
  * </ul>
  *
  * <p><b>Avoiding Collisions</b></p>
- * <p>Since data chunks are not delimited, be careful to avoid unintended collisions:
+ * <p>Since data chunks are not delimited, be careful to avoid unintended collisions:</p>
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code

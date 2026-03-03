@@ -740,13 +740,13 @@ public class IntList101Test extends TestBase {
     @Test
     public void testArrayModification() {
         list.addAll(new int[] { 1, 2, 3 });
-        int[] array = list.array();
+        int[] array = list.internalArray();
 
         array[1] = 20;
         assertEquals(20, list.get(1));
 
         list.clear();
-        int[] newArray = list.array();
+        int[] newArray = list.internalArray();
         assertSame(array, newArray);
     }
 

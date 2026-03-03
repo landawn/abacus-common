@@ -107,12 +107,6 @@ public class ImmutableSet100Test extends TestBase {
         Assertions.assertTrue(set.contains(9));
     }
 
-    @Test
-    public void testOf_TenElements() {
-        ImmutableSet<String> set = ImmutableSet.of("a", "b", "c", "d", "e", "f", "g", "h", "i", "j");
-        Assertions.assertEquals(10, set.size());
-        Assertions.assertTrue(set.contains("j"));
-    }
     //
     //    @Test
     //    public void testOf_VarArgs_Empty() {

@@ -162,8 +162,8 @@ public class DoublePredicate2025Test extends TestBase {
     }
 
     @Test
-    public void testGreaterEqual() {
-        DoublePredicate predicate = DoublePredicate.greaterEqual(5.0);
+    public void testGreaterThanOrEqual() {
+        DoublePredicate predicate = DoublePredicate.greaterThanOrEqual(5.0);
         assertTrue(predicate.test(10.0));
         assertTrue(predicate.test(5.0));
         assertFalse(predicate.test(3.0));
@@ -178,8 +178,8 @@ public class DoublePredicate2025Test extends TestBase {
     }
 
     @Test
-    public void testLessEqual() {
-        DoublePredicate predicate = DoublePredicate.lessEqual(5.0);
+    public void testLessThanOrEqual() {
+        DoublePredicate predicate = DoublePredicate.lessThanOrEqual(5.0);
         assertTrue(predicate.test(3.0));
         assertTrue(predicate.test(5.0));
         assertFalse(predicate.test(10.0));

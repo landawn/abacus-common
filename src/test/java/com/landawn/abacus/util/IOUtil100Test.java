@@ -895,7 +895,7 @@ public class IOUtil100Test extends TestBase {
 
     @Test
     public void testToURL() throws IOException {
-        URL url = IOUtil.toURL(tempFile);
+        URL url = IOUtil.toUrl(tempFile);
         assertNotNull(url);
         assertEquals("file", url.getProtocol());
     }
@@ -903,7 +903,7 @@ public class IOUtil100Test extends TestBase {
     @Test
     public void testToURLs() throws IOException {
         File[] files = new File[] { tempFile, tempDir };
-        URL[] urls = IOUtil.toURLs(files);
+        URL[] urls = IOUtil.toUrls(files);
 
         assertEquals(2, urls.length);
         assertEquals("file", urls[0].getProtocol());

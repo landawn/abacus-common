@@ -179,7 +179,7 @@ public class ContinuableFuture100Test extends TestBase {
     @Test
     public void testGett() throws Exception {
         ContinuableFuture<String> future = ContinuableFuture.call(() -> "success");
-        Result<String, Exception> result = future.gett();
+        Result<String, Exception> result = future.getAsResult();
 
         assertTrue(result.isSuccess());
         assertEquals("success", result.orElseThrow());
@@ -191,7 +191,7 @@ public class ContinuableFuture100Test extends TestBase {
             throw new RuntimeException("test error");
         });
 
-        Result<String, Exception> result = future.gett();
+        Result<String, Exception> result = future.getAsResult();
         assertTrue(result.isFailure());
         assertNotNull(result.getException());
     }
@@ -199,7 +199,7 @@ public class ContinuableFuture100Test extends TestBase {
     @Test
     public void testGettWithTimeout() throws Exception {
         ContinuableFuture<String> future = ContinuableFuture.call(() -> "success");
-        Result<String, Exception> result = future.gett(1, TimeUnit.SECONDS);
+        Result<String, Exception> result = future.getAsResult(1, TimeUnit.SECONDS);
 
         assertTrue(result.isSuccess());
         assertEquals("success", result.orElseThrow());
@@ -821,7 +821,7 @@ public class ContinuableFuture100Test extends TestBase {
         });
 
         future.cancel(true);
-        Result<String, Exception> result = future.gett();
+        Result<String, Exception> result = future.getAsResult();
 
         assertTrue(result.isFailure());
         assertTrue(result.getException() instanceof CancellationException);

@@ -6304,7 +6304,7 @@ public class IOUtil2025Test extends TestBase {
     public void testToURL_ValidFile() throws Exception {
         File file = Files.createTempFile(tempFolder, "to-url", ".txt").toFile();
 
-        java.net.URL url = IOUtil.toURL(file);
+        java.net.URL url = IOUtil.toUrl(file);
 
         assertNotNull(url);
         assertTrue(url.toString().contains(file.getName()));
@@ -6317,7 +6317,7 @@ public class IOUtil2025Test extends TestBase {
 
         File[] files = { file1, file2 };
 
-        java.net.URL[] urls = IOUtil.toURLs(files);
+        java.net.URL[] urls = IOUtil.toUrls(files);
 
         assertNotNull(urls);
         assertEquals(2, urls.length);
@@ -6330,7 +6330,7 @@ public class IOUtil2025Test extends TestBase {
 
         java.util.List<File> files = java.util.Arrays.asList(file1, file2);
 
-        java.util.List<java.net.URL> urls = IOUtil.toURLs(files);
+        java.util.List<java.net.URL> urls = IOUtil.toUrls(files);
 
         assertNotNull(urls);
         assertEquals(2, urls.size());
@@ -6340,7 +6340,7 @@ public class IOUtil2025Test extends TestBase {
     public void testToURLs_EmptyArray() throws Exception {
         File[] files = {};
 
-        java.net.URL[] urls = IOUtil.toURLs(files);
+        java.net.URL[] urls = IOUtil.toUrls(files);
 
         assertNotNull(urls);
         assertEquals(0, urls.length);
@@ -6350,7 +6350,7 @@ public class IOUtil2025Test extends TestBase {
     public void testToURLs_EmptyCollection() throws Exception {
         java.util.List<File> files = new java.util.ArrayList<>();
 
-        java.util.List<java.net.URL> urls = IOUtil.toURLs(files);
+        java.util.List<java.net.URL> urls = IOUtil.toUrls(files);
 
         assertNotNull(urls);
         assertEquals(0, urls.size());

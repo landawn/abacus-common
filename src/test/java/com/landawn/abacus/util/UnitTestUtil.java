@@ -171,7 +171,7 @@ public final class UnitTestUtil {
     public static void generateUnitTest(Class<?> cls, boolean inFail) {
         String simpleClassName = cls.getSimpleName();
         String canonicalClassName = cls.getCanonicalName();
-        Set<String> importClasses = CommonUtil.asSortedSet();
+        Set<String> importClasses = CommonUtil.toSortedSet();
         Map<String, Integer> methodNameMap = new HashMap<>();
         StringBuilder sb = new StringBuilder();
         sb.append("import junit.framework.TestCase;" + IOUtil.LINE_SEPARATOR_UNIX);

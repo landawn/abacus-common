@@ -58,10 +58,10 @@ public interface FloatBinaryOperator extends Throwables.FloatBinaryOperator<Runt
      * FloatBinaryOperator safeDivide = (a, b) -> b != 0 ? a / b : Float.NaN;
      * }</pre>
      *
-     * @param left the first operand (left-hand side of the operation)
-     * @param right the second operand (right-hand side of the operation)
+     * @param a the first operand
+     * @param b the second operand
      * @return the result of applying this operator to the operands
      */
     @Override
-    float applyAsFloat(float left, float right);
+    float applyAsFloat(float a, float b);
 }

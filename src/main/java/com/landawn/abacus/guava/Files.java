@@ -261,7 +261,7 @@ import com.landawn.abacus.util.ImmutableList;
  *   <li><b>{@link com.landawn.abacus.util.Strings}:</b> String manipulation utilities</li>
  * </ul>
  *
- * <p><b>Example: Complete File Processing Workflow</b>
+ * <p><b>Usage Examples: Complete File Processing Workflow</b>
  * <pre>{@code
  * // Process configuration files with error handling
  * File configDir = new File("config");
@@ -1390,14 +1390,9 @@ public abstract class Files { //NOSONAR
      *
      * @param   file the file to read from.
      * @return  a byte array containing the content read from the file.
-     * @throws  IOException
-     *          if an I/O error occurs reading from the file.
-     * @throws  OutOfMemoryError
-     *          if the file is extremely large, for example larger than {@code 2GB}.
-     * @throws  SecurityException
-     *          in the case of the default provider, and a security manager is installed, the {@link
-     *          SecurityManager#checkRead(String) checkRead} method is invoked to check read access to
-     *          the file.
+     * @throws IOException if an I/O error occurs while reading from the file
+     * @throws OutOfMemoryError if the file is too large to fit into memory, for example larger than {@code 2GB}
+     * @throws SecurityException if a security manager is installed and denies read access to the file
      * @see #readString(File)
      * @see java.nio.file.Files#readAllBytes(Path)
      * @see IOUtil#readAllBytes(File)

@@ -67,7 +67,9 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      */
     @Override
     public AtomicLong get(final ResultSet rs, final int columnIndex) throws SQLException {
-        return new AtomicLong(rs.getLong(columnIndex));
+        final long value = rs.getLong(columnIndex);
+
+        return rs.wasNull() ? null : new AtomicLong(value);
     }
 
     /**
@@ -82,7 +84,9 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      */
     @Override
     public AtomicLong get(final ResultSet rs, final String columnName) throws SQLException {
-        return new AtomicLong(rs.getLong(columnName));
+        final long value = rs.getLong(columnName);
+
+        return rs.wasNull() ? null : new AtomicLong(value);
     }
 
     /**
@@ -97,7 +101,11 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final AtomicLong x) throws SQLException {
-        stmt.setLong(columnIndex, (x == null) ? 0 : x.get());
+        if (x == null) {
+            stmt.setNull(columnIndex, java.sql.Types.BIGINT);
+        } else {
+            stmt.setLong(columnIndex, x.get());
+        }
     }
 
     /**
@@ -112,7 +120,11 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final AtomicLong x) throws SQLException {
-        stmt.setLong(parameterName, (x == null) ? 0 : x.get());
+        if (x == null) {
+            stmt.setNull(parameterName, java.sql.Types.BIGINT);
+        } else {
+            stmt.setLong(parameterName, x.get());
+        }
     }
 
     /**

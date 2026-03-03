@@ -171,7 +171,7 @@ public class NTest extends AbstractParserTest {
         }
 
         {
-            Collection<Integer> c = CommonUtil.asLinkedHashSet(1, 2, 3, 4, 5, 6, 7);
+            Collection<Integer> c = CommonUtil.toLinkedHashSet(1, 2, 3, 4, 5, 6, 7);
 
             List<List<Integer>> result = N.splitByChunkCount(c, 5, true);
             assertEquals("[[1], [2], [3], [4, 5], [6, 7]]", CommonUtil.toString(result));
@@ -179,7 +179,7 @@ public class NTest extends AbstractParserTest {
             result = N.splitByChunkCount(c, 5, false);
             assertEquals("[[1, 2], [3, 4], [5], [6], [7]]", CommonUtil.toString(result));
 
-            c = CommonUtil.asLinkedHashSet(1, 2, 3);
+            c = CommonUtil.toLinkedHashSet(1, 2, 3);
 
             result = N.splitByChunkCount(c, 5, true);
             assertEquals("[[1], [2], [3]]", CommonUtil.toString(result));
@@ -190,9 +190,9 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_PermutationIterator() {
-        PermutationIterator.of(CommonUtil.asList(1, 2, null, 3)).forEachRemaining(Fn.println());
+        PermutationIterator.of(CommonUtil.toList(1, 2, null, 3)).forEachRemaining(Fn.println());
 
-        Iterables.powerSet(CommonUtil.asSet(1, 2, null, 3)).forEach(Fn.println());
+        Iterables.powerSet(CommonUtil.toSet(1, 2, null, 3)).forEach(Fn.println());
     }
 
     @Test
@@ -287,8 +287,8 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
-    public void test_occurrencesMap() {
-        final Map<String, Integer> map = N.occurrencesMap(CommonUtil.asList("a", "b", "a", "c", "a", "D", "b"));
+    public void test_frequencyMap() {
+        final Map<String, Integer> map = N.frequencyMap(CommonUtil.toList("a", "b", "a", "c", "a", "D", "b"));
 
         N.println(map);
     }
@@ -303,13 +303,13 @@ public class NTest extends AbstractParserTest {
         }
 
         {
-            final List<String> c = CommonUtil.asList("a ", "b", " c");
+            final List<String> c = CommonUtil.toList("a ", "b", " c");
             N.replaceAll(c, Strings::trim);
             N.println(c);
         }
 
         {
-            final List<String> c = CommonUtil.asLinkedList("a ", "b", " c");
+            final List<String> c = CommonUtil.toLinkedList("a ", "b", " c");
             N.replaceAll(c, Strings::trim);
             N.println(c);
         }
@@ -317,16 +317,16 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_isSorted() throws Exception {
-        assertTrue(CommonUtil.isSorted(CommonUtil.asLinkedHashSet(1, 3, 5)));
-        assertTrue(CommonUtil.isSorted(CommonUtil.asLinkedHashSet(1, 3, 5, 5, 7, 9, 10)));
-        assertTrue(CommonUtil.isSorted(CommonUtil.asLinkedHashSet(1, 3, 5)));
-        assertFalse(CommonUtil.isSorted(CommonUtil.asLinkedHashSet(1, 7, 5)));
-        assertFalse(CommonUtil.isSorted(CommonUtil.asLinkedHashSet(1, 2, 2, 3, 7, 5)));
-        assertTrue(CommonUtil.isSorted(CommonUtil.asLinkedHashSet(1, 2, 2, 3, 7, 5), 1, 3));
-        assertTrue(CommonUtil.isSorted(CommonUtil.asLinkedHashSet(1, 2, 3, 7, 5), 0, 4));
-        assertTrue(CommonUtil.isSorted(CommonUtil.asLinkedHashSet(1, 2, 3, 7, 5), 2, 4));
-        assertTrue(CommonUtil.isSorted(CommonUtil.asLinkedHashSet(1, 2, 3, 7, 5), 3, 4));
-        assertFalse(CommonUtil.isSorted(CommonUtil.asLinkedHashSet(1, 2, 3, 7, 5), 2, 5));
+        assertTrue(CommonUtil.isSorted(CommonUtil.toLinkedHashSet(1, 3, 5)));
+        assertTrue(CommonUtil.isSorted(CommonUtil.toLinkedHashSet(1, 3, 5, 5, 7, 9, 10)));
+        assertTrue(CommonUtil.isSorted(CommonUtil.toLinkedHashSet(1, 3, 5)));
+        assertFalse(CommonUtil.isSorted(CommonUtil.toLinkedHashSet(1, 7, 5)));
+        assertFalse(CommonUtil.isSorted(CommonUtil.toLinkedHashSet(1, 2, 2, 3, 7, 5)));
+        assertTrue(CommonUtil.isSorted(CommonUtil.toLinkedHashSet(1, 2, 2, 3, 7, 5), 1, 3));
+        assertTrue(CommonUtil.isSorted(CommonUtil.toLinkedHashSet(1, 2, 3, 7, 5), 0, 4));
+        assertTrue(CommonUtil.isSorted(CommonUtil.toLinkedHashSet(1, 2, 3, 7, 5), 2, 4));
+        assertTrue(CommonUtil.isSorted(CommonUtil.toLinkedHashSet(1, 2, 3, 7, 5), 3, 4));
+        assertFalse(CommonUtil.isSorted(CommonUtil.toLinkedHashSet(1, 2, 3, 7, 5), 2, 5));
 
         assertFalse(CommonUtil.isSorted(new int[] { 1, 7, 5 }));
         assertFalse(CommonUtil.isSorted(new int[] { 1, 2, 2, 3, 7, 5 }));
@@ -348,26 +348,26 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
-    public void test_occurrencesOf() throws Exception {
-        assertEquals(1, N.occurrencesOf("aaa", "aa"));
-        assertEquals(1, N.occurrencesOf("ababaab", "aa"));
-        assertEquals(4, N.occurrencesOf("ababaab", "a"));
+    public void test_frequency() throws Exception {
+        assertEquals(1, N.frequency("aaa", "aa"));
+        assertEquals(1, N.frequency("ababaab", "aa"));
+        assertEquals(4, N.frequency("ababaab", "a"));
 
     }
 
     @Test
     public void test_cartesianProduct() throws Exception {
-        Sets.cartesianProduct(CommonUtil.asList(CommonUtil.asSet("a", "b"), CommonUtil.asSet("a", "b", "c"))).forEach(Fn.println());
+        Sets.cartesianProduct(CommonUtil.toList(CommonUtil.toSet("a", "b"), CommonUtil.toSet("a", "b", "c"))).forEach(Fn.println());
 
         N.println(Strings.repeat('=', 80));
 
-        Iterables.cartesianProduct(CommonUtil.asList(CommonUtil.asSet("a", "b"), CommonUtil.asSet("a", "b", "c"))).forEach(Fn.println());
+        Iterables.cartesianProduct(CommonUtil.toList(CommonUtil.toSet("a", "b"), CommonUtil.toSet("a", "b", "c"))).forEach(Fn.println());
     }
 
     @Test
     public void test_SetView() throws Exception {
-        final Set<?> set1 = CommonUtil.asSet("a", "c", "d");
-        final Set<?> set2 = CommonUtil.asSet("b", "a", "c");
+        final Set<?> set1 = CommonUtil.toSet("a", "c", "d");
+        final Set<?> set2 = CommonUtil.toSet("b", "a", "c");
         N.println(set1);
         N.println(set2);
 
@@ -406,8 +406,8 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_subSet() throws Exception {
-        final Set<?> a = CommonUtil.asSet("a", "c");
-        final Set<?> b = CommonUtil.asSet("b", "a", "c");
+        final Set<?> a = CommonUtil.toSet("a", "c");
+        final Set<?> b = CommonUtil.toSet("b", "a", "c");
 
         N.println(N.difference(a, b));
         N.println(SetUtils.difference(a, b));
@@ -417,17 +417,17 @@ public class NTest extends AbstractParserTest {
 
         assertTrue(Range.just("a").contains("a"));
 
-        final NavigableSet<String> c = CommonUtil.asNavigableSet("a", "c", "d", "b");
+        final NavigableSet<String> c = CommonUtil.toNavigableSet("a", "c", "d", "b");
 
-        assertEquals(CommonUtil.asNavigableSet("a"), Iterables.subSet(c, Range.just("a")));
+        assertEquals(CommonUtil.toNavigableSet("a"), Iterables.subSet(c, Range.just("a")));
 
-        assertEquals(CommonUtil.asNavigableSet(), Iterables.subSet(c, Range.open("a", "a")));
-        assertEquals(CommonUtil.asNavigableSet("a"), Iterables.subSet(c, Range.closed("a", "a")));
-        assertEquals(CommonUtil.asNavigableSet(), Iterables.subSet(c, Range.openClosed("a", "a")));
-        assertEquals(CommonUtil.asNavigableSet(), Iterables.subSet(c, Range.closedOpen("a", "a")));
-        assertEquals(CommonUtil.asNavigableSet("a"), Iterables.subSet(c, Range.closedOpen("a", "b")));
-        assertEquals(CommonUtil.asNavigableSet("a", "b"), Iterables.subSet(c, Range.closed("a", "b")));
-        assertEquals(CommonUtil.asNavigableSet("a", "b"), Iterables.subSet(c, Range.closedOpen("a", "c")));
+        assertEquals(CommonUtil.toNavigableSet(), Iterables.subSet(c, Range.open("a", "a")));
+        assertEquals(CommonUtil.toNavigableSet("a"), Iterables.subSet(c, Range.closed("a", "a")));
+        assertEquals(CommonUtil.toNavigableSet(), Iterables.subSet(c, Range.openClosed("a", "a")));
+        assertEquals(CommonUtil.toNavigableSet(), Iterables.subSet(c, Range.closedOpen("a", "a")));
+        assertEquals(CommonUtil.toNavigableSet("a"), Iterables.subSet(c, Range.closedOpen("a", "b")));
+        assertEquals(CommonUtil.toNavigableSet("a", "b"), Iterables.subSet(c, Range.closed("a", "b")));
+        assertEquals(CommonUtil.toNavigableSet("a", "b"), Iterables.subSet(c, Range.closedOpen("a", "c")));
 
         N.println(Strings.repeat("=", 80));
 
@@ -438,15 +438,15 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_isSubCollection() throws Exception {
-        Collection<?> a = CommonUtil.asList("a", "b", "c");
-        final Collection<?> b = CommonUtil.asSet("b", "a", "c");
+        Collection<?> a = CommonUtil.toList("a", "b", "c");
+        final Collection<?> b = CommonUtil.toSet("b", "a", "c");
 
         assertTrue(N.isEqualCollection(a, b));
         assertTrue(N.isSubCollection(a, b));
         assertTrue(N.isSubCollection(b, a));
         assertFalse(N.isProperSubCollection(b, a));
 
-        a = CommonUtil.asList("a", "b", "c", "a");
+        a = CommonUtil.toList("a", "b", "c", "a");
         assertFalse(N.isProperSubCollection(a, b));
         assertTrue(N.isProperSubCollection(b, a));
     }
@@ -459,18 +459,18 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_removeDuplicates() {
-        List<String> c = CommonUtil.asList("a", "a");
+        List<String> c = CommonUtil.toList("a", "a");
         N.removeDuplicates(c);
         assertEquals(1, c.size());
 
-        c = CommonUtil.asLinkedList("a", "a");
+        c = CommonUtil.toLinkedList("a", "a");
         N.removeDuplicates(c);
         assertEquals(1, c.size());
     }
 
     @Test
     public void test_firstNonEmpty() {
-        final Optional<List<String>> result = CommonUtil.firstNonEmpty(CommonUtil.asList(), CommonUtil.asList("a"), CommonUtil.asList());
+        final Optional<List<String>> result = CommonUtil.firstNonEmpty(CommonUtil.toList(), CommonUtil.toList("a"), CommonUtil.toList());
         N.println(result);
     }
 
@@ -541,13 +541,13 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_as() {
-        List<String> list = CommonUtil.asList("a");
+        List<String> list = CommonUtil.toList("a");
         N.println(list);
 
-        list = CommonUtil.asList("a", "b");
+        list = CommonUtil.toList("a", "b");
         N.println(list);
 
-        list = CommonUtil.asList(Array.of("a", "b", "c"));
+        list = CommonUtil.toList(Array.of("a", "b", "c"));
         N.println(list);
     }
 
@@ -555,11 +555,11 @@ public class NTest extends AbstractParserTest {
     public void test_concat_01() {
         final String[] abc = N.concat(CommonUtil.asArray("a", "b"), CommonUtil.asArray("c"));
         N.println(abc);
-        final List<String> ab123 = N.concat(CommonUtil.asList("a", "b"), CommonUtil.asList("1", "2", "3"));
+        final List<String> ab123 = N.concat(CommonUtil.toList("a", "b"), CommonUtil.toList("1", "2", "3"));
         N.println(ab123);
-        final List<String> ab = N.concat(CommonUtil.asList("a", "b"));
+        final List<String> ab = N.concat(CommonUtil.toList("a", "b"));
         N.println(ab);
-        final List<String> abcd = N.concat(CommonUtil.asList(CommonUtil.asList("a", "b", "c", "d")));
+        final List<String> abcd = N.concat(CommonUtil.toList(CommonUtil.toList("a", "b", "c", "d")));
         N.println(abcd);
     }
 
@@ -752,14 +752,14 @@ public class NTest extends AbstractParserTest {
     //
     @Test
     public void test_copy_2() {
-        final List<Integer> list1 = CommonUtil.asList(1, 2, 3);
-        List<Integer> list2 = CommonUtil.asList(4, 5, 6);
+        final List<Integer> list1 = CommonUtil.toList(1, 2, 3);
+        List<Integer> list2 = CommonUtil.toList(4, 5, 6);
         Iterables.copyInto(list1, list2);
         assertEquals(list1, list2);
 
-        list2 = CommonUtil.asList(4, 5, 6);
+        list2 = CommonUtil.toList(4, 5, 6);
         Iterables.copyRange(list1, 1, list2, 2, 1);
-        assertEquals(CommonUtil.asList(4, 5, 2), list2);
+        assertEquals(CommonUtil.toList(4, 5, 2), list2);
     }
 
     @Test
@@ -861,7 +861,7 @@ public class NTest extends AbstractParserTest {
     @Test
     public void test_distinct() {
         final Account[] a = { createAccount(Account.class), createAccount(Account.class), createAccount(Account.class) };
-        final List<Account> c = CommonUtil.asList(a);
+        final List<Account> c = CommonUtil.toList(a);
 
         final List<Account> m = N.distinctBy(a, (Function<Account, String>) Account::getFirstName);
 
@@ -882,14 +882,14 @@ public class NTest extends AbstractParserTest {
         }
 
         {
-            final List<Throwables.Runnable<RuntimeException>> runnableList = CommonUtil.asList();
+            final List<Throwables.Runnable<RuntimeException>> runnableList = CommonUtil.toList();
             runnableList.add(() -> N.println("Runnable"));
 
             N.asyncExecute(runnableList).get(0).get();
         }
 
         {
-            final List<Callable<Void>> callableList = CommonUtil.asList((Callable<Void>) () -> {
+            final List<Callable<Void>> callableList = CommonUtil.toList((Callable<Void>) () -> {
                 N.println("Callable");
                 return null;
             });
@@ -898,7 +898,7 @@ public class NTest extends AbstractParserTest {
         }
 
         {
-            final List<Callable<Void>> callableList = CommonUtil.asList();
+            final List<Callable<Void>> callableList = CommonUtil.toList();
             callableList.add(() -> {
                 N.println("Callable");
                 return null;
@@ -912,62 +912,62 @@ public class NTest extends AbstractParserTest {
     public void test_occurrences() {
         {
             final boolean[] a = { true, false, true };
-            assertEquals(2, N.occurrencesOf(a, a[0]));
-            assertEquals(1, N.occurrencesOf(a, a[1]));
+            assertEquals(2, N.frequency(a, a[0]));
+            assertEquals(1, N.frequency(a, a[1]));
         }
 
         {
             final char[] a = { '1', '2', '1' };
-            assertEquals(2, N.occurrencesOf(a, a[0]));
-            assertEquals(1, N.occurrencesOf(a, a[1]));
+            assertEquals(2, N.frequency(a, a[0]));
+            assertEquals(1, N.frequency(a, a[1]));
         }
 
         {
             final byte[] a = { 1, 2, 1 };
-            assertEquals(2, N.occurrencesOf(a, a[0]));
-            assertEquals(1, N.occurrencesOf(a, a[1]));
+            assertEquals(2, N.frequency(a, a[0]));
+            assertEquals(1, N.frequency(a, a[1]));
         }
 
         {
             final short[] a = { 1, 2, 1 };
-            assertEquals(2, N.occurrencesOf(a, a[0]));
-            assertEquals(1, N.occurrencesOf(a, a[1]));
+            assertEquals(2, N.frequency(a, a[0]));
+            assertEquals(1, N.frequency(a, a[1]));
         }
 
         {
             final int[] a = { 1, 2, 1 };
-            assertEquals(2, N.occurrencesOf(a, a[0]));
-            assertEquals(1, N.occurrencesOf(a, a[1]));
+            assertEquals(2, N.frequency(a, a[0]));
+            assertEquals(1, N.frequency(a, a[1]));
         }
 
         {
             final long[] a = { 1, 2, 1 };
-            assertEquals(2, N.occurrencesOf(a, a[0]));
-            assertEquals(1, N.occurrencesOf(a, a[1]));
+            assertEquals(2, N.frequency(a, a[0]));
+            assertEquals(1, N.frequency(a, a[1]));
         }
 
         {
             final float[] a = { 1, 2, 1 };
-            assertEquals(2, N.occurrencesOf(a, a[0]));
-            assertEquals(1, N.occurrencesOf(a, a[1]));
+            assertEquals(2, N.frequency(a, a[0]));
+            assertEquals(1, N.frequency(a, a[1]));
         }
 
         {
             final double[] a = { 1, 2, 1 };
-            assertEquals(2, N.occurrencesOf(a, a[0]));
-            assertEquals(1, N.occurrencesOf(a, a[1]));
+            assertEquals(2, N.frequency(a, a[0]));
+            assertEquals(1, N.frequency(a, a[1]));
         }
 
         {
             final String[] a = { "1", "2", "1" };
-            assertEquals(2, N.occurrencesOf(a, a[0]));
-            assertEquals(1, N.occurrencesOf(a, a[1]));
+            assertEquals(2, N.frequency(a, a[0]));
+            assertEquals(1, N.frequency(a, a[1]));
         }
 
         {
-            final List<String> list = CommonUtil.asList("1", "2", "1");
-            assertEquals(2, N.occurrencesOf(list, list.get(0)));
-            assertEquals(1, N.occurrencesOf(list, list.get(1)));
+            final List<String> list = CommonUtil.toList("1", "2", "1");
+            assertEquals(2, N.frequency(list, list.get(0)));
+            assertEquals(1, N.frequency(list, list.get(1)));
         }
     }
 
@@ -1030,9 +1030,9 @@ public class NTest extends AbstractParserTest {
         }
 
         {
-            final List<String> a = CommonUtil.asList("1", "2", "3", "4", "5", "6");
+            final List<String> a = CommonUtil.toList("1", "2", "3", "4", "5", "6");
             CommonUtil.rotate(a, 2);
-            final List<String> expected = CommonUtil.asList("5", "6", "1", "2", "3", "4");
+            final List<String> expected = CommonUtil.toList("5", "6", "1", "2", "3", "4");
 
             assertTrue(CommonUtil.equals(a, expected));
         }
@@ -1114,7 +1114,7 @@ public class NTest extends AbstractParserTest {
         list = new ArrayList<>();
         N.println(list);
 
-        list = CommonUtil.asList("123", "abc", "234", "ijk");
+        list = CommonUtil.toList("123", "abc", "234", "ijk");
         N.println(list);
 
         Map<?, ?> map = null;
@@ -1133,7 +1133,7 @@ public class NTest extends AbstractParserTest {
         assertEquals(Strings.EMPTY, "abc".substring(1, 1));
 
         {
-            final Multiset<String> multiSet = CommonUtil.asMultiset("1", "2", "3", "2", "3", "3");
+            final Multiset<String> multiSet = CommonUtil.toMultiset("1", "2", "3", "2", "3", "3");
             N.println(multiSet);
 
             final String str = CommonUtil.stringOf(multiSet);
@@ -1357,7 +1357,7 @@ public class NTest extends AbstractParserTest {
         }
 
         {
-            final List<String> list = CommonUtil.asList("a", "b", "c");
+            final List<String> list = CommonUtil.toList("a", "b", "c");
 
             final int count = N.count(list, (Predicate<String>) value -> value.equals("a") || value.equals("b"));
 
@@ -1386,119 +1386,119 @@ public class NTest extends AbstractParserTest {
 
         {
             final String str = "abc";
-            assertTrue(CommonUtil.equals(CommonUtil.asList("a", "b", "c"), N.split(str, 1)));
+            assertTrue(CommonUtil.equals(CommonUtil.toList("a", "b", "c"), N.split(str, 1)));
         }
 
         {
             final String str = "abc";
-            assertTrue(CommonUtil.equals(CommonUtil.asList("ab", "c"), N.split(str, 2)));
+            assertTrue(CommonUtil.equals(CommonUtil.toList("ab", "c"), N.split(str, 2)));
         }
 
         {
             final String str = "abc";
-            assertTrue(CommonUtil.equals(CommonUtil.asList("abc"), N.split(str, 3)));
+            assertTrue(CommonUtil.equals(CommonUtil.toList("abc"), N.split(str, 3)));
         }
 
         {
             final String str = "abc";
-            assertTrue(CommonUtil.equals(CommonUtil.asList("abc"), N.split(str, 4)));
+            assertTrue(CommonUtil.equals(CommonUtil.toList("abc"), N.split(str, 4)));
         }
 
         {
             final boolean[] a = { true, false, true };
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of(true, false), Array.of(true)).toArray(new Object[0]), N.split(a, 2).toArray()));
+            assertTrue(CommonUtil.deepEquals(CommonUtil.toList(Array.of(true, false), Array.of(true)).toArray(new Object[0]), N.split(a, 2).toArray()));
             assertTrue(
-                    CommonUtil.deepEquals(CommonUtil.asList(Array.of(true), Array.of(false), Array.of(true)).toArray(new Object[0]), N.split(a, 1).toArray()));
+                    CommonUtil.deepEquals(CommonUtil.toList(Array.of(true), Array.of(false), Array.of(true)).toArray(new Object[0]), N.split(a, 1).toArray()));
         }
 
         {
             final char[] a = { '1', '2', '3' };
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of('1', '2'), Array.of('3')).toArray(new Object[0]), N.split(a, 2).toArray()));
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of('1'), Array.of('2'), Array.of('3')).toArray(new Object[0]), N.split(a, 1).toArray()));
+            assertTrue(CommonUtil.deepEquals(CommonUtil.toList(Array.of('1', '2'), Array.of('3')).toArray(new Object[0]), N.split(a, 2).toArray()));
+            assertTrue(CommonUtil.deepEquals(CommonUtil.toList(Array.of('1'), Array.of('2'), Array.of('3')).toArray(new Object[0]), N.split(a, 1).toArray()));
         }
 
         {
             final byte[] a = { 1, 2, 3 };
             assertTrue(
-                    CommonUtil.deepEquals(CommonUtil.asList(Array.of((byte) 1, (byte) 2), Array.of((byte) 3)).toArray(new Object[0]), N.split(a, 2).toArray()));
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of((byte) 1), Array.of((byte) 2), Array.of((byte) 3)).toArray(new Object[0]),
+                    CommonUtil.deepEquals(CommonUtil.toList(Array.of((byte) 1, (byte) 2), Array.of((byte) 3)).toArray(new Object[0]), N.split(a, 2).toArray()));
+            assertTrue(CommonUtil.deepEquals(CommonUtil.toList(Array.of((byte) 1), Array.of((byte) 2), Array.of((byte) 3)).toArray(new Object[0]),
                     N.split(a, 1).toArray()));
         }
 
         {
             final short[] a = { 1, 2, 3 };
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of((short) 1, (short) 2), Array.of((short) 3)).toArray(new Object[0]),
+            assertTrue(CommonUtil.deepEquals(CommonUtil.toList(Array.of((short) 1, (short) 2), Array.of((short) 3)).toArray(new Object[0]),
                     N.split(a, 2).toArray()));
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of((short) 1), Array.of((short) 2), Array.of((short) 3)).toArray(new Object[0]),
+            assertTrue(CommonUtil.deepEquals(CommonUtil.toList(Array.of((short) 1), Array.of((short) 2), Array.of((short) 3)).toArray(new Object[0]),
                     N.split(a, 1).toArray()));
         }
 
         {
             final int[] a = { 1, 2, 3 };
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of(1, 2), Array.of(3)).toArray(new Object[0]), N.split(a, 2).toArray()));
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of(1), Array.of(2), Array.of(3)).toArray(new Object[0]), N.split(a, 1).toArray()));
+            assertTrue(CommonUtil.deepEquals(CommonUtil.toList(Array.of(1, 2), Array.of(3)).toArray(new Object[0]), N.split(a, 2).toArray()));
+            assertTrue(CommonUtil.deepEquals(CommonUtil.toList(Array.of(1), Array.of(2), Array.of(3)).toArray(new Object[0]), N.split(a, 1).toArray()));
         }
 
         {
             final long[] a = { 1, 2, 3 };
             assertTrue(
-                    CommonUtil.deepEquals(CommonUtil.asList(Array.of((long) 1, (long) 2), Array.of((long) 3)).toArray(new Object[0]), N.split(a, 2).toArray()));
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of((long) 1), Array.of((long) 2), Array.of((long) 3)).toArray(new Object[0]),
+                    CommonUtil.deepEquals(CommonUtil.toList(Array.of((long) 1, (long) 2), Array.of((long) 3)).toArray(new Object[0]), N.split(a, 2).toArray()));
+            assertTrue(CommonUtil.deepEquals(CommonUtil.toList(Array.of((long) 1), Array.of((long) 2), Array.of((long) 3)).toArray(new Object[0]),
                     N.split(a, 1).toArray()));
         }
 
         {
             final float[] a = { 1, 2, 3 };
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of((float) 1, (float) 2), Array.of((float) 3)).toArray(new Object[0]),
+            assertTrue(CommonUtil.deepEquals(CommonUtil.toList(Array.of((float) 1, (float) 2), Array.of((float) 3)).toArray(new Object[0]),
                     N.split(a, 2).toArray()));
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of((float) 1), Array.of((float) 2), Array.of((float) 3)).toArray(new Object[0]),
+            assertTrue(CommonUtil.deepEquals(CommonUtil.toList(Array.of((float) 1), Array.of((float) 2), Array.of((float) 3)).toArray(new Object[0]),
                     N.split(a, 1).toArray()));
         }
 
         {
             final double[] a = { 1, 2, 3 };
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of((double) 1, (double) 2), Array.of((double) 3)).toArray(new Object[0]),
+            assertTrue(CommonUtil.deepEquals(CommonUtil.toList(Array.of((double) 1, (double) 2), Array.of((double) 3)).toArray(new Object[0]),
                     N.split(a, 2).toArray()));
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(Array.of((double) 1), Array.of((double) 2), Array.of((double) 3)).toArray(new Object[0]),
+            assertTrue(CommonUtil.deepEquals(CommonUtil.toList(Array.of((double) 1), Array.of((double) 2), Array.of((double) 3)).toArray(new Object[0]),
                     N.split(a, 1).toArray()));
         }
 
         {
             final String[] a = { "1", "2", "3" };
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(CommonUtil.asArray("1", "2"), CommonUtil.asArray("3")).toArray(new Object[0]),
+            assertTrue(CommonUtil.deepEquals(CommonUtil.toList(CommonUtil.asArray("1", "2"), CommonUtil.asArray("3")).toArray(new Object[0]),
                     N.split(a, 2).toArray()));
             assertTrue(
-                    CommonUtil.deepEquals(CommonUtil.asList(CommonUtil.asArray("1"), CommonUtil.asArray("2"), CommonUtil.asArray("3")).toArray(new Object[0]),
+                    CommonUtil.deepEquals(CommonUtil.toList(CommonUtil.asArray("1"), CommonUtil.asArray("2"), CommonUtil.asArray("3")).toArray(new Object[0]),
                             N.split(a, 1).toArray()));
         }
 
         {
             final String[] a = { "1", "2", "3" };
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(CommonUtil.asArray("1", "2"), CommonUtil.asArray("3")).toArray(new Object[0]),
+            assertTrue(CommonUtil.deepEquals(CommonUtil.toList(CommonUtil.asArray("1", "2"), CommonUtil.asArray("3")).toArray(new Object[0]),
                     N.split(a, 2).toArray()));
             assertTrue(
-                    CommonUtil.deepEquals(CommonUtil.asList(CommonUtil.asArray("1"), CommonUtil.asArray("2"), CommonUtil.asArray("3")).toArray(new Object[0]),
+                    CommonUtil.deepEquals(CommonUtil.toList(CommonUtil.asArray("1"), CommonUtil.asArray("2"), CommonUtil.asArray("3")).toArray(new Object[0]),
                             N.split(a, 1).toArray()));
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList((Object) CommonUtil.asArray("1", "2", "3")).toArray(new Object[0]), N.split(a, 3).toArray()));
+            assertTrue(CommonUtil.deepEquals(CommonUtil.toList((Object) CommonUtil.asArray("1", "2", "3")).toArray(new Object[0]), N.split(a, 3).toArray()));
         }
 
         {
             final String[] a = { "1", "2", "3" };
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(CommonUtil.asArray("1", "2"), CommonUtil.asArray("3")).toArray(new Object[0]),
+            assertTrue(CommonUtil.deepEquals(CommonUtil.toList(CommonUtil.asArray("1", "2"), CommonUtil.asArray("3")).toArray(new Object[0]),
                     N.split(a, 2).toArray()));
             assertTrue(
-                    CommonUtil.deepEquals(CommonUtil.asList(CommonUtil.asArray("1"), CommonUtil.asArray("2"), CommonUtil.asArray("3")).toArray(new Object[0]),
+                    CommonUtil.deepEquals(CommonUtil.toList(CommonUtil.asArray("1"), CommonUtil.asArray("2"), CommonUtil.asArray("3")).toArray(new Object[0]),
                             N.split(a, 1).toArray()));
             final Object tmp = CommonUtil.asArray("1", "2", "3");
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(tmp).toArray(), N.split(a, 3).toArray()));
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(tmp).toArray(), N.split(a, 4).toArray()));
+            assertTrue(CommonUtil.deepEquals(CommonUtil.toList(tmp).toArray(), N.split(a, 3).toArray()));
+            assertTrue(CommonUtil.deepEquals(CommonUtil.toList(tmp).toArray(), N.split(a, 4).toArray()));
         }
 
         {
-            final List<String> a = CommonUtil.asList("1", "2", "3");
+            final List<String> a = CommonUtil.toList("1", "2", "3");
             final List<List<String>> b = N.split(a, 2);
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(CommonUtil.asList("1", "2"), CommonUtil.asList("3")).toArray(new Object[0]), b.toArray()));
-            assertTrue(CommonUtil.deepEquals(CommonUtil.asList(CommonUtil.asList("1"), CommonUtil.asList("2"), CommonUtil.asList("3")).toArray(new Object[0]),
+            assertTrue(CommonUtil.deepEquals(CommonUtil.toList(CommonUtil.toList("1", "2"), CommonUtil.toList("3")).toArray(new Object[0]), b.toArray()));
+            assertTrue(CommonUtil.deepEquals(CommonUtil.toList(CommonUtil.toList("1"), CommonUtil.toList("2"), CommonUtil.toList("3")).toArray(new Object[0]),
                     N.split(a, 1).toArray()));
         }
 
@@ -1570,15 +1570,15 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_checkNullOrEmpty() {
-        List<String> list = CommonUtil.asList("a");
+        List<String> list = CommonUtil.toList("a");
         list = CommonUtil.checkArgNotEmpty(list, "list");
         N.println(list);
 
-        Set<String> set = CommonUtil.asSet("a");
+        Set<String> set = CommonUtil.toSet("a");
         set = CommonUtil.checkArgNotEmpty(set, "set");
         N.println(set);
 
-        Queue<String> queue = CommonUtil.asQueue("a");
+        Queue<String> queue = CommonUtil.toQueue("a");
         queue = CommonUtil.checkArgNotEmpty(queue, "queue");
         N.println(queue);
     }
@@ -1646,11 +1646,11 @@ public class NTest extends AbstractParserTest {
         assertEquals(5, ((Number) N.max(da)).intValue());
 
         {
-            final Iterable<Integer> c = CommonUtil.asList(3, 2, 1, 4, 5);
+            final Iterable<Integer> c = CommonUtil.toList(3, 2, 1, 4, 5);
             assertEquals(5, N.max(c).intValue());
         }
         {
-            final Iterable<Integer> c = CommonUtil.asList(3, 2, 1, 4, 5);
+            final Iterable<Integer> c = CommonUtil.toList(3, 2, 1, 4, 5);
             assertEquals(1, N.min(c).intValue());
         }
     }
@@ -1772,10 +1772,10 @@ public class NTest extends AbstractParserTest {
 
         final String a1 = "a";
         final String b1 = "b";
-        final List<String> list = CommonUtil.asList(a1, b1);
+        final List<String> list = CommonUtil.toList(a1, b1);
         N.println(list);
 
-        final List<Integer> list2 = CommonUtil.asList(1, 2, 3);
+        final List<Integer> list2 = CommonUtil.toList(1, 2, 3);
         N.println(list2);
 
         final int[] a = Array.of(1, 2, 3);
@@ -1816,7 +1816,7 @@ public class NTest extends AbstractParserTest {
         N.println(CommonUtil.asSingletonList("abc"));
         N.println(CommonUtil.asSingletonMap("key", "value"));
 
-        final List<String> list = CommonUtil.asList("a", "b", "c", "d");
+        final List<String> list = CommonUtil.toList("a", "b", "c", "d");
         N.println(list);
         CommonUtil.reverse(list);
         N.println(list);
@@ -2064,8 +2064,6 @@ public class NTest extends AbstractParserTest {
         N.println(linkedList);
 
         N.println(CommonUtil.asProps("firstName", "1)1"));
-        N.println(CommonUtil.asProps(CommonUtil.asMap("firstName", "1)1")));
-        assertEquals(CommonUtil.asProps("firstName", "1)1"), CommonUtil.asProps(CommonUtil.asMap("firstName", "1)1")));
 
         N.println(new LinkedHashMap<>());
         N.println(new LinkedHashMap<>(10));
@@ -2100,27 +2098,27 @@ public class NTest extends AbstractParserTest {
         N.println(new TreeMap<>(CommonUtil.asProps(AccountPNL.ID, 123)));
         N.println(new TreeMap<>(CommonUtil.asProps(AccountPNL.ID, 123)));
 
-        N.println(CommonUtil.asLinkedList("ab", "c"));
-        N.println(new LinkedList<>(CommonUtil.asList("ab", "c")));
+        N.println(CommonUtil.toLinkedList("ab", "c"));
+        N.println(new LinkedList<>(CommonUtil.toList("ab", "c")));
 
-        N.println(CommonUtil.asLinkedHashSet("ab", "c"));
+        N.println(CommonUtil.toLinkedHashSet("ab", "c"));
 
-        N.println(CommonUtil.asSortedSet());
-        N.println(CommonUtil.asSortedSet("ab", "c"));
-        N.println(new TreeSet<>(CommonUtil.asList("ab", "c")));
-        N.println(new TreeSet<>(CommonUtil.asSortedSet("ab", "c")));
+        N.println(CommonUtil.toSortedSet());
+        N.println(CommonUtil.toSortedSet("ab", "c"));
+        N.println(new TreeSet<>(CommonUtil.toList("ab", "c")));
+        N.println(new TreeSet<>(CommonUtil.toSortedSet("ab", "c")));
 
-        N.println(CommonUtil.asQueue("ab", "c"));
+        N.println(CommonUtil.toQueue("ab", "c"));
         N.println(new ArrayDeque<>());
         N.println(new ArrayDeque<>(3));
-        N.println(new ArrayDeque<>(CommonUtil.asList("ab", "c")));
+        N.println(new ArrayDeque<>(CommonUtil.toList("ab", "c")));
 
-        N.println(CommonUtil.asArrayBlockingQueue("ab", "c"));
+        N.println(CommonUtil.toArrayBlockingQueue("ab", "c"));
 
-        N.println(CommonUtil.asLinkedBlockingQueue("ab", "c"));
+        N.println(CommonUtil.toLinkedBlockingQueue("ab", "c"));
 
-        N.println(CommonUtil.asPriorityQueue("ab", "c"));
-        N.println(CommonUtil.asConcurrentLinkedQueue("ab", "c"));
+        N.println(CommonUtil.toPriorityQueue("ab", "c"));
+        N.println(CommonUtil.toConcurrentLinkedQueue("ab", "c"));
 
         final Delayed d = new Delayed() {
             @Override
@@ -2134,17 +2132,17 @@ public class NTest extends AbstractParserTest {
             }
         };
 
-        N.println(CommonUtil.asDelayQueue(d));
+        N.println(CommonUtil.toDelayQueue(d));
 
-        N.println(CommonUtil.asDeque("ab", "c"));
-        N.println(new ArrayDeque<>(CommonUtil.asList("ab", "c")));
+        N.println(CommonUtil.toDeque("ab", "c"));
+        N.println(new ArrayDeque<>(CommonUtil.toList("ab", "c")));
 
-        N.println(CommonUtil.asDeque("ab", "c"));
-        N.println(new ArrayDeque<>(CommonUtil.asList("ab", "c")));
+        N.println(CommonUtil.toDeque("ab", "c"));
+        N.println(new ArrayDeque<>(CommonUtil.toList("ab", "c")));
 
-        N.println(CommonUtil.asLinkedBlockingDeque("ab", "c"));
+        N.println(CommonUtil.toLinkedBlockingDeque("ab", "c"));
 
-        N.println(CommonUtil.asConcurrentLinkedDeque("ab", "c"));
+        N.println(CommonUtil.toConcurrentLinkedDeque("ab", "c"));
 
         assertEquals(true, Strings.parseBoolean("True"));
         assertEquals(1, Numbers.toByte("1"));
@@ -2285,25 +2283,6 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
-    public void test_asMap() {
-        final Account account = new Account();
-        account.setFirstName("firstName1");
-        account.setLastName("lastName1");
-
-        Map<String, Object> m = CommonUtil.asMap(account);
-        assertEquals("firstName1", m.get("firstName"));
-
-        final com.landawn.abacus.entity.pjo.basic.Account account2 = new com.landawn.abacus.entity.pjo.basic.Account();
-        account2.setFirstName("firstName1");
-        account2.setLastName("lastName1");
-        m = CommonUtil.asMap(account2);
-        assertEquals("firstName1", m.get("firstName"));
-
-        final Map<String, Object> m2 = new HashMap<>(m);
-        assertEquals("firstName1", m2.get("firstName"));
-    }
-
-    @Test
     public void test_xmlToJson() {
         final Account account = new Account();
         account.setFirstName("firstName1");
@@ -2404,7 +2383,7 @@ public class NTest extends AbstractParserTest {
         account = new Account();
         account.setFirstName("firstName");
         account.setLastName("lastName");
-        Beans.clearProps(account, CommonUtil.asList("firstName", "lastName"));
+        Beans.clearProps(account, CommonUtil.toList("firstName", "lastName"));
         assertNull(account.getFirstName());
         assertNull(account.getLastName());
 
@@ -2515,13 +2494,13 @@ public class NTest extends AbstractParserTest {
     public void test_min_max() {
         N.println("==================================================");
 
-        final List<String> coll2 = CommonUtil.asList("1", "2", "7", "0", "-1");
+        final List<String> coll2 = CommonUtil.toList("1", "2", "7", "0", "-1");
         N.println(N.min(coll2));
         N.println(N.max(coll2));
 
         N.println("==================================================");
 
-        final Set<String> coll3 = CommonUtil.asSet("1", "2", "7", "0", "-1");
+        final Set<String> coll3 = CommonUtil.toSet("1", "2", "7", "0", "-1");
         N.println(N.min(coll3));
         N.println(N.max(coll3));
 
@@ -2692,17 +2671,17 @@ public class NTest extends AbstractParserTest {
         final Bean_1 bean = new Bean_1();
         assertEquals(bean, abacusXmlParser.deserialize(abacusXmlParser.serialize(bean), Bean_1.class));
 
-        bean.setStrList(CommonUtil.asList("abc", "123"));
+        bean.setStrList(CommonUtil.toList("abc", "123"));
         assertEquals(bean, abacusXmlParser.deserialize(abacusXmlParser.serialize(bean), Bean_1.class));
 
-        bean.setShortList(CommonUtil.asList((short) 1, (short) 2, (short) 3));
+        bean.setShortList(CommonUtil.toList((short) 1, (short) 2, (short) 3));
         assertEquals(bean, abacusXmlParser.deserialize(abacusXmlParser.serialize(bean), Bean_1.class));
 
-        bean.setIntList(CommonUtil.asList(1, 2, 3));
+        bean.setIntList(CommonUtil.toList(1, 2, 3));
         assertFalse(bean.equals(abacusXmlParser.deserialize(abacusXmlParser.serialize(bean), Bean_1.class)));
 
         final GregorianCalendar c = new GregorianCalendar();
-        bean.setXmlGregorianCalendar(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
+        bean.setXMLGregorianCalendar(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
         N.println(abacusXmlParser.serialize(bean));
 
         assertFalse(bean.equals(abacusXmlParser.deserialize(abacusXmlParser.serialize(bean), Bean_1.class)));
@@ -2713,17 +2692,17 @@ public class NTest extends AbstractParserTest {
         final Bean_1 bean = new Bean_1();
         assertEquals(bean, abacusXMLDOMParser.deserialize(abacusXMLDOMParser.serialize(bean), Bean_1.class));
 
-        bean.setStrList(CommonUtil.asList("abc", "123"));
+        bean.setStrList(CommonUtil.toList("abc", "123"));
         assertEquals(bean, abacusXMLDOMParser.deserialize(abacusXMLDOMParser.serialize(bean), Bean_1.class));
 
-        bean.setShortList(CommonUtil.asList((short) 1, (short) 2, (short) 3));
+        bean.setShortList(CommonUtil.toList((short) 1, (short) 2, (short) 3));
         assertEquals(bean, abacusXMLDOMParser.deserialize(abacusXMLDOMParser.serialize(bean), Bean_1.class));
 
-        bean.setIntList(CommonUtil.asList(1, 2, 3));
+        bean.setIntList(CommonUtil.toList(1, 2, 3));
         assertFalse(bean.equals(abacusXMLDOMParser.deserialize(abacusXMLDOMParser.serialize(bean), Bean_1.class)));
 
         final GregorianCalendar c = new GregorianCalendar();
-        bean.setXmlGregorianCalendar(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
+        bean.setXMLGregorianCalendar(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
         N.println(abacusXMLDOMParser.serialize(bean));
 
         assertFalse(bean.equals(abacusXMLDOMParser.deserialize(abacusXMLDOMParser.serialize(bean), Bean_1.class)));
@@ -3009,12 +2988,12 @@ public class NTest extends AbstractParserTest {
     @Test
     public void test_ParserUtil() {
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(Account.class);
-        final Set<BeanInfo> set = CommonUtil.asSet(beanInfo);
+        final Set<BeanInfo> set = CommonUtil.toSet(beanInfo);
         assertTrue(set.contains(beanInfo));
         N.println(beanInfo);
 
         final PropInfo propInfo = beanInfo.getPropInfo("firstName");
-        final Set<PropInfo> set2 = CommonUtil.asSet(propInfo);
+        final Set<PropInfo> set2 = CommonUtil.toSet(propInfo);
         set2.contains(propInfo);
 
         N.println(propInfo);
@@ -3283,7 +3262,7 @@ public class NTest extends AbstractParserTest {
         assertEquals(-4, CommonUtil.binarySearch(copy9, 5));
         assertEquals(-4, CommonUtil.binarySearch(copy9, 5, Comparators.naturalOrder()));
 
-        final List<Integer> list = CommonUtil.asList(1, 2, 3);
+        final List<Integer> list = CommonUtil.toList(1, 2, 3);
         assertEquals(1, CommonUtil.binarySearch(list, 2));
         assertEquals(1, CommonUtil.binarySearch(list, 2, Comparators.naturalOrder()));
 
@@ -3473,7 +3452,7 @@ public class NTest extends AbstractParserTest {
         println(abacusXmlParser.serialize(account));
         println(abacusXmlParser.serialize(account));
 
-        final Map<Class<?>, Set<String>> ignoredPropNames = CommonUtil.asMap(Account.class, CommonUtil.asSet("lastUpdateTime"));
+        final Map<Class<?>, Set<String>> ignoredPropNames = CommonUtil.asMap(Account.class, CommonUtil.toSet("lastUpdateTime"));
         final XmlSerializationConfig config = new XmlSerializationConfig();
         config.setIgnoredPropNames(ignoredPropNames);
         println(abacusXmlParser.serialize(account, config));
@@ -3492,7 +3471,7 @@ public class NTest extends AbstractParserTest {
         println(abacusXMLDOMParser.serialize(account));
         println(abacusXMLDOMParser.serialize(account));
 
-        final Map<Class<?>, Set<String>> ignoredPropNames = CommonUtil.asMap(Account.class, CommonUtil.asSet("lastUpdateTime"));
+        final Map<Class<?>, Set<String>> ignoredPropNames = CommonUtil.asMap(Account.class, CommonUtil.toSet("lastUpdateTime"));
         final XmlSerializationConfig config = new XmlSerializationConfig();
         config.setIgnoredPropNames(ignoredPropNames);
         println(abacusXMLDOMParser.serialize(account, config));
@@ -3604,7 +3583,7 @@ public class NTest extends AbstractParserTest {
     @Test
     public void testSerialize1() {
         final Bean bean = new Bean();
-        bean.setTypeList(CommonUtil.asList(
+        bean.setTypeList(CommonUtil.toList(
                 "‰β,『�?★业€ > \n sfd \r ds \' f d // \\  \\\\ /// /////// \\\\\\\\  \\\\\\\\n \\\\\\\\r  \t sd \" fe stri‰β,『�?★业€ ng黎< > </ <//、\n", '★', '\n',
                 '\r', '\t', '\"', '\'', ' ', new char[] { '\r', '\t', '\"', '\'', ' ' },
                 new String[] {
@@ -3629,7 +3608,7 @@ public class NTest extends AbstractParserTest {
     @Test
     public void testSerialize1_1() {
         final Bean bean = new Bean();
-        bean.setTypeList(CommonUtil.asList(
+        bean.setTypeList(CommonUtil.toList(
                 "‰β,『�?★业€ > \n sfd \r ds \' f d // \\  \\\\ /// /////// \\\\\\\\  \\\\\\\\n \\\\\\\\r  \t sd \" fe stri‰β,『�?★业€ ng黎< > </ <//、\n", '★', '\n',
                 '\r', '\t', '\"', '\'', ' ', new char[] { '\r', '\t', '\"', '\'', ' ' },
                 new String[] {
@@ -3823,8 +3802,8 @@ public class NTest extends AbstractParserTest {
         xBean.setTypeChar('<');
         xBean.setTypeChar2('>');
         xBean.setTypeGenericList(
-                CommonUtil.asList(Dates.createDate(System.currentTimeMillis() / 1000 * 1000), Dates.createDate(System.currentTimeMillis() / 1000 * 1000)));
-        xBean.setTypeGenericSet(CommonUtil.asSet(1L, 2L));
+                CommonUtil.toList(Dates.createDate(System.currentTimeMillis() / 1000 * 1000), Dates.createDate(System.currentTimeMillis() / 1000 * 1000)));
+        xBean.setTypeGenericSet(CommonUtil.toSet(1L, 2L));
 
         final XmlSerializationConfig config = new XmlSerializationConfig();
         config.writeTypeInfo(true);
@@ -3843,8 +3822,8 @@ public class NTest extends AbstractParserTest {
         xBean.setTypeChar('<');
         xBean.setTypeChar2('>');
         xBean.setTypeGenericList(
-                CommonUtil.asList(Dates.createDate(System.currentTimeMillis() / 1000 * 1000), Dates.createDate(System.currentTimeMillis() / 1000 * 1000)));
-        xBean.setTypeGenericSet(CommonUtil.asSet(1L, 2L));
+                CommonUtil.toList(Dates.createDate(System.currentTimeMillis() / 1000 * 1000), Dates.createDate(System.currentTimeMillis() / 1000 * 1000)));
+        xBean.setTypeGenericSet(CommonUtil.toSet(1L, 2L));
 
         final XmlSerializationConfig config = new XmlSerializationConfig();
         config.writeTypeInfo(true);
@@ -3900,7 +3879,7 @@ public class NTest extends AbstractParserTest {
         typeGenericList.add(null);
         xBean.setTypeGenericList(typeGenericList);
 
-        final Set<Long> typeGenericSet = CommonUtil.asSortedSet();
+        final Set<Long> typeGenericSet = CommonUtil.toSortedSet();
         typeGenericSet.add(1332333L);
         typeGenericSet.add(Long.MAX_VALUE);
         typeGenericSet.add(Long.MIN_VALUE);
@@ -3947,14 +3926,14 @@ public class NTest extends AbstractParserTest {
         typeGenericMap2.put(account.getFirstName(), createAccount(Account.class));
         typeGenericMap2.put(account.getLastName(), createAccount(Account.class));
         typeGenericMap2.put("null", null);
-        typeGenericMap2.put("bookList", CommonUtil.asList(createAccount(Account.class)));
+        typeGenericMap2.put("bookList", CommonUtil.toList(createAccount(Account.class)));
         xBean.setTypeGenericMap2(typeGenericMap2);
 
         final Map<Object, Object> typeGenericMap4 = new ConcurrentHashMap<>();
         typeGenericMap4.put(createAccount(Account.class), createAccount(Account.class));
         typeGenericMap4.put(createAccount(Account.class), createAccount(Account.class));
         typeGenericMap4.put("aaabbbccc", "");
-        typeGenericMap4.put("bookList", CommonUtil.asList(createAccount(Account.class)));
+        typeGenericMap4.put("bookList", CommonUtil.toList(createAccount(Account.class)));
         typeGenericMap4.put(" ", " ");
         typeGenericMap4.put(new HashMap<>(), " ");
         typeGenericMap4.put(new ArrayList<>(), new HashSet<>());
@@ -3968,7 +3947,7 @@ public class NTest extends AbstractParserTest {
         }
 
         typeMap.put("null", null);
-        typeMap.put("bookList", CommonUtil.asList(createAccount(Account.class)));
+        typeMap.put("bookList", CommonUtil.toList(createAccount(Account.class)));
         typeMap.put(" ", " ");
         typeMap.put(new HashMap<>(), " ");
         typeMap.put(new ArrayList<>(), new HashSet<>());
@@ -4254,11 +4233,11 @@ public class NTest extends AbstractParserTest {
             this.shortList = shortList;
         }
 
-        public XMLGregorianCalendar getXmlGregorianCalendar() {
+        public XMLGregorianCalendar getXMLGregorianCalendar() {
             return xmlGregorianCalendar;
         }
 
-        public void setXmlGregorianCalendar(final XMLGregorianCalendar xmlGregorianCalendar) {
+        public void setXMLGregorianCalendar(final XMLGregorianCalendar xmlGregorianCalendar) {
             this.xmlGregorianCalendar = xmlGregorianCalendar;
         }
 

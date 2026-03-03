@@ -213,14 +213,14 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * CharPredicate atLeastA = CharPredicate.greaterEqual('A');
+     * CharPredicate atLeastA = CharPredicate.greaterThanOrEqual('A');
      * boolean result = atLeastA.test('A');   // Returns true
      * }</pre>
      *
      * @param targetChar the value to compare against
      * @return a predicate that tests if the input is greater than or equal to {@code targetChar}
      */
-    static CharPredicate greaterEqual(final char targetChar) {
+    static CharPredicate greaterThanOrEqual(final char targetChar) {
         return value -> value >= targetChar;
     }
 
@@ -247,14 +247,14 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * CharPredicate maxZ = CharPredicate.lessEqual('Z');
+     * CharPredicate maxZ = CharPredicate.lessThanOrEqual('Z');
      * boolean result = maxZ.test('Z');   // Returns true
      * }</pre>
      *
      * @param targetChar the value to compare against
      * @return a predicate that tests if the input is less than or equal to {@code targetChar}
      */
-    static CharPredicate lessEqual(final char targetChar) {
+    static CharPredicate lessThanOrEqual(final char targetChar) {
         return value -> value <= targetChar;
     }
 

@@ -803,9 +803,9 @@ public class LongStream2025Test extends TestBase {
 
         List<LongList> lists = result.toList();
         assertEquals(3, lists.size());
-        assertArrayEquals(new long[] { 1L, 2L }, lists.get(0).trimToSize().array());
-        assertArrayEquals(new long[] { 5L, 6L }, lists.get(1).trimToSize().array());
-        assertArrayEquals(new long[] { 10L }, lists.get(2).trimToSize().array());
+        assertArrayEquals(new long[] { 1L, 2L }, lists.get(0).trimToSize().internalArray());
+        assertArrayEquals(new long[] { 5L, 6L }, lists.get(1).trimToSize().internalArray());
+        assertArrayEquals(new long[] { 10L }, lists.get(2).trimToSize().internalArray());
     }
 
     @Test
@@ -1164,7 +1164,7 @@ public class LongStream2025Test extends TestBase {
     @Test
     public void testToLongList() {
         LongList result = LongStream.of(1L, 2L, 3L).toLongList();
-        assertArrayEquals(new long[] { 1L, 2L, 3L }, result.trimToSize().array());
+        assertArrayEquals(new long[] { 1L, 2L, 3L }, result.trimToSize().internalArray());
     }
 
     @Test

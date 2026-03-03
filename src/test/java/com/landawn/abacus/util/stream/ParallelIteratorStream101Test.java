@@ -19,13 +19,15 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
+import com.landawn.abacus.util.stream.BaseStream.Splitor;
 
 @ExtendWith(MockitoExtension.class)
 @Tag("new-test")
@@ -51,6 +53,10 @@ public class ParallelIteratorStream101Test extends TestBase {
 
     private <T> Stream<T> createStream(Collection<T> data) {
         return Stream.of(data.iterator()).parallel();
+    }
+
+    private <T> Stream<T> createIteratorParallelStream(Collection<T> data) {
+        return Stream.of(data.iterator()).parallel(PS.create(Splitor.ITERATOR).maxThreadNum(4));
     }
 
     @Test
@@ -164,6 +170,54 @@ public class ParallelIteratorStream101Test extends TestBase {
 
             List<Integer> result = sortedStream.toList();
             assertEquals(sortedData, result);
+        }
+    }
+
+    @Test
+    public void testFilterPreservesEncounterOrder() {
+        try (Stream<Integer> local = createIteratorParallelStream(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8))) {
+            List<Integer> result = local.filter(n -> {
+                if ((n & 1) == 0) {
+                    N.sleep(2);
+                }
+
+                return n % 3 != 0;
+            }).toList();
+
+            assertHaveSameElements(Arrays.asList(1, 2, 4, 5, 7, 8), result);
+        }
+    }
+
+    @Test
+    public void testMapPreservesEncounterOrder() {
+        List<Integer> source = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8);
+
+        try (Stream<Integer> local = createIteratorParallelStream(source)) {
+            List<Integer> result = local.map(n -> {
+                if ((n & 1) == 0) {
+                    N.sleep(2);
+                }
+
+                return n;
+            }).toList();
+
+            assertHaveSameElements(source, result);
+        }
+    }
+
+    //    @Test
+    //    public void testTakeWhilePreservesPrefixSemantics() {
+    //        try (Stream<Integer> local = createIteratorParallelStream(Arrays.asList(3, 1, 2))) {
+    //            List<Integer> result = local.takeWhile(n -> n < 3).toList();
+    //            assertHaveSameElements(Collections.emptyList(), result);
+    //        }
+    //    }
+
+    @Test
+    public void testDropWhilePreservesPrefixSemantics() {
+        try (Stream<Integer> local = createIteratorParallelStream(Arrays.asList(1, 2, 3, 4, 1, 2))) {
+            List<Integer> result = local.dropWhile(n -> n < 3).toList();
+            assertHaveSameElements(Arrays.asList(3, 4, 1, 2), result);
         }
     }
 

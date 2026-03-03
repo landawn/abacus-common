@@ -74,14 +74,14 @@ public final class BooleanIntType extends AbstractType<Boolean> {
     }
 
     /**
-     * Determines whether this type should be quoted in CSV format.
-     * Boolean integer values are typically not quoted in CSV files.
+     * Indicates whether values of this type require quoting in CSV format.
+     * Boolean integer values ({@code 0}/{@code 1}) are numeric and do not require quotes.
      *
-     * @return {@code true} indicating that 0/1 values should not be quoted in CSV format
+     * @return {@code false}, as boolean integer values do not require quoting in CSV format
      */
     @Override
-    public boolean isNonQuotableCsvType() {
-        return true;
+    public boolean isCsvQuoteRequired() {
+        return false;
     }
 
     /**

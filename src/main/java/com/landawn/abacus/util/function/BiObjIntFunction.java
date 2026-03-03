@@ -45,6 +45,7 @@ public interface BiObjIntFunction<T, U, R> extends Throwables.BiObjIntFunction<T
      * @param i the third function argument (int value)
      * @return the function result
      */
+    // @ai-ignore BiIntObj*/IntBiObj*/BiObjInt*/ObjBiInt* argument order convention - intentional: class name prefix determines parameter order. BiIntObj* has two ints first; IntBiObj* has int then two objects; BiObjInt* has two objects then int; ObjBiInt* has object then two ints. Do not suggest reordering.
     @Override
     R apply(T t, U u, int i);
 

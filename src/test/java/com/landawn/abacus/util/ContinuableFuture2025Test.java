@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -399,7 +400,7 @@ public class ContinuableFuture2025Test extends TestBase {
     @Test
     public void testGett_success() throws Exception {
         ContinuableFuture<String> future = ContinuableFuture.call(() -> "success");
-        Result<String, Exception> result = future.gett();
+        Result<String, Exception> result = future.getAsResult();
 
         assertTrue(result.isSuccess());
         assertFalse(result.isFailure());
@@ -413,7 +414,7 @@ public class ContinuableFuture2025Test extends TestBase {
             throw new RuntimeException("test error");
         });
 
-        Result<String, Exception> result = future.gett();
+        Result<String, Exception> result = future.getAsResult();
         assertTrue(result.isFailure());
         assertFalse(result.isSuccess());
         assertNotNull(result.getException());
@@ -428,7 +429,7 @@ public class ContinuableFuture2025Test extends TestBase {
         });
 
         future.cancel(true);
-        Result<String, Exception> result = future.gett();
+        Result<String, Exception> result = future.getAsResult();
 
         assertTrue(result.isFailure());
         assertTrue(result.getException() instanceof CancellationException);
@@ -437,7 +438,7 @@ public class ContinuableFuture2025Test extends TestBase {
     @Test
     public void testGett_withNull() throws Exception {
         ContinuableFuture<String> future = ContinuableFuture.call(() -> null);
-        Result<String, Exception> result = future.gett();
+        Result<String, Exception> result = future.getAsResult();
 
         assertTrue(result.isSuccess());
         assertNull(result.orElseThrow());
@@ -446,7 +447,7 @@ public class ContinuableFuture2025Test extends TestBase {
     @Test
     public void testGettWithTimeout_success() throws Exception {
         ContinuableFuture<String> future = ContinuableFuture.call(() -> "success");
-        Result<String, Exception> result = future.gett(1, TimeUnit.SECONDS);
+        Result<String, Exception> result = future.getAsResult(1, TimeUnit.SECONDS);
 
         assertTrue(result.isSuccess());
         assertEquals("success", result.orElseThrow());
@@ -459,7 +460,7 @@ public class ContinuableFuture2025Test extends TestBase {
             return "too late";
         });
 
-        Result<String, Exception> result = future.gett(100, TimeUnit.MILLISECONDS);
+        Result<String, Exception> result = future.getAsResult(100, TimeUnit.MILLISECONDS);
         assertTrue(result.isFailure());
         assertTrue(result.getException() instanceof TimeoutException);
         future.cancel(true);
@@ -471,7 +472,7 @@ public class ContinuableFuture2025Test extends TestBase {
             throw new IllegalStateException("state error");
         });
 
-        Result<String, Exception> result = future.gett(1, TimeUnit.SECONDS);
+        Result<String, Exception> result = future.getAsResult(1, TimeUnit.SECONDS);
         assertTrue(result.isFailure());
         assertNotNull(result.getException());
     }
@@ -1906,7 +1907,7 @@ public class ContinuableFuture2025Test extends TestBase {
         assertEquals("value", future.get(1, TimeUnit.MILLISECONDS));
         assertEquals("value", future.getNow("default"));
 
-        Result<String, Exception> result = future.gett();
+        Result<String, Exception> result = future.getAsResult();
         assertTrue(result.isSuccess());
         assertEquals("value", result.orElseThrow());
     }
@@ -1926,6 +1927,43 @@ public class ContinuableFuture2025Test extends TestBase {
     }
 
     @Test
+    public void testToCompletableFuture_preservesInterruptFlagOnInterruptedGet() {
+        Thread.interrupted(); // Clear the current interrupt flag before the test.
+
+        Future<String> interruptedFuture = createInterruptedFuture();
+        ContinuableFuture<String> future = new ContinuableFuture<>(interruptedFuture, null, Runnable::run);
+
+        CompletionException ex = assertThrows(CompletionException.class, () -> future.toCompletableFuture().join());
+
+        assertTrue(ex.getCause() instanceof InterruptedException);
+        assertTrue(Thread.currentThread().isInterrupted());
+
+        Thread.interrupted(); // Clear to avoid impacting subsequent tests.
+    }
+
+    @Test
+    public void testToCompletableFutureWithExecutor_preservesInterruptFlagOnInterruptedGet() {
+        Thread.interrupted(); // Clear the current interrupt flag before the test.
+
+        Future<String> interruptedFuture = createInterruptedFuture();
+        ContinuableFuture<String> future = new ContinuableFuture<>(interruptedFuture, null, executor);
+
+        CompletionException ex = assertThrows(CompletionException.class, () -> future.toCompletableFuture(Runnable::run).join());
+
+        assertTrue(ex.getCause() instanceof InterruptedException);
+        assertTrue(Thread.currentThread().isInterrupted());
+
+        Thread.interrupted(); // Clear to avoid impacting subsequent tests.
+    }
+
+    @Test
+    public void testToCompletableFutureWithExecutor_rejectsNullExecutor() {
+        ContinuableFuture<String> future = ContinuableFuture.completed("v");
+
+        assertThrows(IllegalArgumentException.class, () -> future.toCompletableFuture((Executor) null));
+    }
+
+    @Test
     public void testAllPublicMethodsCovered() {
         ContinuableFuture<String> f = ContinuableFuture.completed("test");
 
@@ -1942,5 +1980,34 @@ public class ContinuableFuture2025Test extends TestBase {
         f.isDone();
 
         assertTrue(true);
+    }
+
+    private static Future<String> createInterruptedFuture() {
+        return new Future<String>() {
+            @Override
+            public boolean cancel(boolean mayInterruptIfRunning) {
+                return false;
+            }
+
+            @Override
+            public boolean isCancelled() {
+                return false;
+            }
+
+            @Override
+            public boolean isDone() {
+                return true;
+            }
+
+            @Override
+            public String get() throws InterruptedException {
+                throw new InterruptedException("simulated interruption");
+            }
+
+            @Override
+            public String get(long timeout, TimeUnit unit) throws InterruptedException {
+                throw new InterruptedException("simulated interruption");
+            }
+        };
     }
 }

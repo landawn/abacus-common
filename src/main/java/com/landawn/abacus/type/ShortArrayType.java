@@ -22,6 +22,9 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
+/**
+ * Type handler for {@code Short[]} arrays, providing serialization and deserialization support.
+ */
 public final class ShortArrayType extends ObjectArrayType<Short> {
 
     /**
@@ -71,8 +74,8 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      * }</pre>
      *
      * @param str the string to parse, expected format is "[value1, value2, ...]"
-     * @return the parsed Short array, or {@code null} if the input string is {@code null}.
-     *         Returns an empty array for empty string or "[]".
+     * @return the parsed Short array, or {@code null} if the input string is {@code null}, empty, or blank.
+     *         Returns an empty array for "[]".
      * @throws NumberFormatException if any {@code non-null} element in the string cannot be parsed as a short
      */
     @Override

@@ -85,7 +85,7 @@ public final class MapEntity implements Serializable {
      * @param entityName the name of the entity
      */
     public MapEntity(final String entityName) {
-        this.entityName = entityName;
+        this.entityName = entityName == null ? Strings.EMPTY : entityName;
     }
 
     /**

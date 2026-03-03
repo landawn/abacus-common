@@ -511,9 +511,9 @@ public class ByteStream100Test extends TestBase {
         Stream<ByteList> collapsed = stream.collapse((a, b) -> a == b);
         List<ByteList> result = collapsed.toList();
         assertEquals(3, result.size());
-        assertArrayEquals(new byte[] { 1, 1 }, result.get(0).trimToSize().array());
-        assertArrayEquals(new byte[] { 2, 2, 2 }, result.get(1).trimToSize().array());
-        assertArrayEquals(new byte[] { 3 }, result.get(2).trimToSize().array());
+        assertArrayEquals(new byte[] { 1, 1 }, result.get(0).trimToSize().internalArray());
+        assertArrayEquals(new byte[] { 2, 2, 2 }, result.get(1).trimToSize().internalArray());
+        assertArrayEquals(new byte[] { 3 }, result.get(2).trimToSize().internalArray());
     }
 
     @Test

@@ -652,10 +652,10 @@ public class LongStream102Test extends TestBase {
         List<LongList> result = createLongStream(1L, 2L, 2L, 3L, 3L, 3L, 4L).collapse((a, b) -> a == b).toList();
 
         assertEquals(4, result.size());
-        assertArrayEquals(new long[] { 1L }, result.get(0).trimToSize().array());
-        assertArrayEquals(new long[] { 2L, 2L }, result.get(1).trimToSize().array());
-        assertArrayEquals(new long[] { 3L, 3L, 3L }, result.get(2).trimToSize().array());
-        assertArrayEquals(new long[] { 4L }, result.get(3).trimToSize().array());
+        assertArrayEquals(new long[] { 1L }, result.get(0).trimToSize().internalArray());
+        assertArrayEquals(new long[] { 2L, 2L }, result.get(1).trimToSize().internalArray());
+        assertArrayEquals(new long[] { 3L, 3L, 3L }, result.get(2).trimToSize().internalArray());
+        assertArrayEquals(new long[] { 4L }, result.get(3).trimToSize().internalArray());
     }
 
     @Test

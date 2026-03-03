@@ -21,10 +21,9 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #apply(double, double)}.
  *
- * @param <R> the type of the result of the function
- *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @param <R> the type of the result of the function
  *
  * @see java.util.function.Function
  * @see java.util.function.BiFunction
@@ -53,12 +52,12 @@ public interface DoubleBiFunction<R> extends Throwables.DoubleBiFunction<R, Runt
      * Double avg = average.apply(10.0, 20.0);   // Returns 15.0
      * }</pre>
      *
-     * @param t the first double input argument
-     * @param u the second double input argument
+     * @param a the first double input argument
+     * @param b the second double input argument
      * @return the function result
      */
     @Override
-    R apply(double t, double u);
+    R apply(double a, double b);
 
     /**
      * Returns a composed function that first applies this function to its input, and then applies the {@code after} function to the result.
@@ -77,6 +76,6 @@ public interface DoubleBiFunction<R> extends Throwables.DoubleBiFunction<R, Runt
      * @return a composed function that first applies this function and then applies the {@code after} function
      */
     default <V> DoubleBiFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        return (t, u) -> after.apply(apply(t, u));
+        return (a, b) -> after.apply(apply(a, b));
     }
 }

@@ -11,7 +11,7 @@ public class CodeGenerationUtilTest {
 
     @Test
     public void test_generatePropNameTableClasses() {
-        N.println(CodeGenerationUtil.generatePropNameTableClass(Account.class, CodeGenerationUtil.X, "./src/test/resources"));
+        N.println(CodeGenerationUtil.generatePropNameTableClass(Account.class, CodeGenerationUtil.X, null));
 
         final Collection<Class<?>> classes = N.concat(ClassUtil.findClassesInPackage(Account.class.getPackageName(), false, false));
 
@@ -19,7 +19,7 @@ public class CodeGenerationUtilTest {
                 .entityClasses(classes)
                 .className(CodeGenerationUtil.S)
                 .packageName("com.landawn.abacus.entity.pjo.basic")
-                .srcDir("./src/test/resources")
+                .srcDir(null)
                 .propNameConverter((cls, propName) -> propName.equals("create_time") ? "createdTime" : propName)
                 .generateClassPropNameList(true)
                 .generateSnakeCase(true)

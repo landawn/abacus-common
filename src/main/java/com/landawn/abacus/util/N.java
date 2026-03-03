@@ -90,7 +90,6 @@ import com.landawn.abacus.parser.XmlDeserializationConfig;
 import com.landawn.abacus.parser.XmlDeserializationConfig.XDC;
 import com.landawn.abacus.parser.XmlSerializationConfig;
 import com.landawn.abacus.type.Type;
-import com.landawn.abacus.util.Iterables.Slice;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.Tuple.Tuple4;
@@ -145,7 +144,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Core Functional Areas:</b>
  * <ul>
- *   <li><b>Array Operations:</b> occurrencesOf, contains, indexOf, concat, split, add, remove, reverse, rotate, shuffle, sort, etc.</li>
+ *   <li><b>Array Operations:</b> frequency, contains, indexOf, concat, split, add, remove, reverse, rotate, shuffle, sort, etc.</li>
  *   <li><b>Collection Operations:</b> groupBy, partition, toMap, intersection, union, difference, etc.</li>
  *   <li><b>String Operations:</b> String manipulation, parsing, formatting, and validation utilities</li>
  *   <li><b>Math Operations:</b> min, max, sum, average, median, percentilesOfSorted for arrays and collections</li>
@@ -176,7 +175,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <pre>{@code
  * // Array operations - null-safe and efficient
  * int[] numbers = {1, 2, 3, 4, 5, 3, 2};
- * int count = N.occurrencesOf(numbers, 3);     // Returns 2
+ * int count = N.frequency(numbers, 3);     // Returns 2
  * boolean hasThree = N.contains(numbers, 3);   // Returns true
  * int index = N.indexOf(numbers, 3);           // Returns 2
 * int[] sorted = numbers.clone();
@@ -186,7 +185,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * // Collection operations with null safety
  * List<String> list = Arrays.asList("apple", "banana", "apple", null);
- * Map<String, Integer> freq = N.occurrencesMap(list);     // {apple=2, banana=1, null=1}
+ * Map<String, Integer> freq = N.frequencyMap(list);     // {apple=2, banana=1, null=1}
  * List<String> unique = N.distinct(list);                 // [apple, banana, null]
 * List<String> filtered = N.filter(list, Objects::nonNull);   // [apple, banana, apple]
  *
@@ -293,7 +292,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>{@link Fn}:</b> Functional interface utilities and operations</li>
  * </ul>
  *
- * <p><b>Example: Data Processing Pipeline</b>
+ * <p><b>Usage Examples: Data Processing Pipeline</b>
  * <pre>{@code
  * // Complete data processing example
  * List<String> rawData = Arrays.asList("  1  ", "2", null, "invalid", "3", "  ");
@@ -312,7 +311,7 @@ import com.landawn.abacus.util.stream.Stream;
  * // Mathematical analysis
  * double average = N.averageInt(processedNumbers);   // Calculate average
  * Integer maximum = N.max(processedNumbers);         // Find maximum
- * Map<Integer, Integer> frequencies = N.occurrencesMap(processedNumbers);   // Count frequencies
+ * Map<Integer, Integer> frequencies = N.frequencyMap(processedNumbers);   // Count frequencies
  *
  * // Async processing
  * N.asyncExecute(() -> {
@@ -384,15 +383,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] flags = {true, false, true, true, false};
-     * int result = N.occurrencesOf(flags, true);   // Returns 3
+     * int result = N.frequency(flags, true);   // Returns 3
      * }</pre>
      *
      * @param a the boolean array to search in
      * @param valueToFind the boolean value to count occurrences of
      * @return the number of occurrences (0 if array is {@code null} or empty)
-     * @see #occurrencesOf(char[], char)
+     * @see #frequency(char[], char)
      */
-    public static int occurrencesOf(final boolean[] a, final boolean valueToFind) {
+    public static int frequency(final boolean[] a, final boolean valueToFind) {
         if (isEmpty(a)) {
             return 0;
         }
@@ -414,15 +413,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] letters = {'a', 'b', 'c', 'a', 'b', 'a'};
-     * int result = N.occurrencesOf(letters, 'a');   // Returns 3
+     * int result = N.frequency(letters, 'a');   // Returns 3
      * }</pre>
      *
      * @param a the char array to search in
      * @param valueToFind the char value to count occurrences of
      * @return the number of occurrences (0 if array is {@code null} or empty)
-     * @see #occurrencesOf(byte[], byte)
+     * @see #frequency(byte[], byte)
      */
-    public static int occurrencesOf(final char[] a, final char valueToFind) {
+    public static int frequency(final char[] a, final char valueToFind) {
         if (isEmpty(a)) {
             return 0;
         }
@@ -444,16 +443,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data = {1, 2, 3, 1, 2, 1};
-     * int result = N.occurrencesOf(data, (byte) 1);   // Returns 3
+     * int result = N.frequency(data, (byte) 1);   // Returns 3
      * }</pre>
      *
      * @param a the byte array to search in
      * @param valueToFind the byte value to count occurrences of
      * @return the number of occurrences (0 if array is {@code null} or empty)
-     * @see #occurrencesOf(char[], char)
-     * @see #occurrencesOf(short[], short)
+     * @see #frequency(char[], char)
+     * @see #frequency(short[], short)
      */
-    public static int occurrencesOf(final byte[] a, final byte valueToFind) {
+    public static int frequency(final byte[] a, final byte valueToFind) {
         if (isEmpty(a)) {
             return 0;
         }
@@ -475,15 +474,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] values = {10, 20, 30, 10, 20, 10};
-     * int result = N.occurrencesOf(values, (short) 10);   // Returns 3
+     * int result = N.frequency(values, (short) 10);   // Returns 3
      * }</pre>
      *
      * @param a the short array to search in
      * @param valueToFind the short value to count occurrences of
      * @return the number of occurrences (0 if array is {@code null} or empty)
-     * @see #occurrencesOf(int[], int)
+     * @see #frequency(int[], int)
      */
-    public static int occurrencesOf(final short[] a, final short valueToFind) {
+    public static int frequency(final short[] a, final short valueToFind) {
         if (isEmpty(a)) {
             return 0;
         }
@@ -505,15 +504,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] numbers = {1, 2, 3, 2, 4, 2, 5};
-     * int result = N.occurrencesOf(numbers, 2);   // Returns 3
+     * int result = N.frequency(numbers, 2);   // Returns 3
      * }</pre>
      *
      * @param a the int array to search in
      * @param valueToFind the int value to count occurrences of
      * @return the number of occurrences (0 if array is {@code null} or empty)
-     * @see #occurrencesOf(long[], long)
+     * @see #frequency(long[], long)
      */
-    public static int occurrencesOf(final int[] a, final int valueToFind) {
+    public static int frequency(final int[] a, final int valueToFind) {
         if (isEmpty(a)) {
             return 0;
         }
@@ -535,15 +534,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] ids = {1000L, 2000L, 3000L, 1000L, 2000L, 1000L};
-     * int result = N.occurrencesOf(ids, 1000L);   // Returns 3
+     * int result = N.frequency(ids, 1000L);   // Returns 3
      * }</pre>
      *
      * @param a the long array to search in
      * @param valueToFind the long value to count occurrences of
      * @return the number of occurrences (0 if array is {@code null} or empty)
-     * @see #occurrencesOf(float[], float)
+     * @see #frequency(float[], float)
      */
-    public static int occurrencesOf(final long[] a, final long valueToFind) {
+    public static int frequency(final long[] a, final long valueToFind) {
         if (isEmpty(a)) {
             return 0;
         }
@@ -567,15 +566,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] prices = {1.5f, 2.3f, 1.5f, 3.7f, 1.5f};
-     * int result = N.occurrencesOf(prices, 1.5f);   // Returns 3
+     * int result = N.frequency(prices, 1.5f);   // Returns 3
      * }</pre>
      *
      * @param a the float array to search in
      * @param valueToFind the float value to count occurrences of
      * @return the number of occurrences (0 if array is {@code null} or empty)
-     * @see #occurrencesOf(double[], double)
+     * @see #frequency(double[], double)
      */
-    public static int occurrencesOf(final float[] a, final float valueToFind) {
+    public static int frequency(final float[] a, final float valueToFind) {
         if (isEmpty(a)) {
             return 0;
         }
@@ -599,15 +598,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] measurements = {1.5, 2.3, 1.5, 3.7, 1.5};
-     * int result = N.occurrencesOf(measurements, 1.5);   // Returns 3
+     * int result = N.frequency(measurements, 1.5);   // Returns 3
      * }</pre>
      *
      * @param a the double array to search in
      * @param valueToFind the double value to count occurrences of
      * @return the number of occurrences (0 if array is {@code null} or empty)
-     * @see #occurrencesOf(Object[], Object)
+     * @see #frequency(Object[], Object)
      */
-    public static int occurrencesOf(final double[] a, final double valueToFind) {
+    public static int frequency(final double[] a, final double valueToFind) {
         if (isEmpty(a)) {
             return 0;
         }
@@ -631,15 +630,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] words = {"hello", "world", "hello", "java", "hello"};
-     * int result = N.occurrencesOf(words, "hello");   // Returns 3
+     * int result = N.frequency(words, "hello");   // Returns 3
      * }</pre>
      *
      * @param a the Object array to search in
      * @param valueToFind the Object value to count occurrences of (may be {@code null})
      * @return the number of occurrences (0 if array is {@code null} or empty)
-     * @see #occurrencesOf(Iterable, Object)
+     * @see #frequency(Iterable, Object)
      */
-    public static int occurrencesOf(final Object[] a, final Object valueToFind) {
+    public static int frequency(final Object[] a, final Object valueToFind) {
         if (isEmpty(a)) {
             return 0;
         }
@@ -671,16 +670,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> words = Arrays.asList("hello", "world", "hello", "java");
-     * int result = N.occurrencesOf(words, "hello");   // Returns 2
+     * int result = N.frequency(words, "hello");   // Returns 2
      * }</pre>
      *
      * @param c the Iterable to search in
      * @param valueToFind the Object value to count occurrences of (may be {@code null})
      * @return the number of occurrences (0 if iterable is {@code null} or empty)
      * @throws ArithmeticException if the number of occurrences exceeds Integer.MAX_VALUE
-     * @see #occurrencesOf(Iterator, Object)
+     * @see #frequency(Iterator, Object)
      */
-    public static int occurrencesOf(final Iterable<?> c, final Object valueToFind) {
+    public static int frequency(final Iterable<?> c, final Object valueToFind) {
         if (isEmptyCollection(c)) {
             return 0;
         }
@@ -713,18 +712,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * List<String> words = Arrays.asList("hello", "world", "hello", "java");
      * Iterator<String> iter = words.iterator();
-     * int result = N.occurrencesOf(iter, "hello");   // Returns 2 (iterator is now exhausted)
+     * int result = N.frequency(iter, "hello");   // Returns 2 (iterator is now exhausted)
      * }</pre>
      *
      * @param iter the Iterator to search in
      * @param valueToFind the Object value to count occurrences of (may be {@code null})
      * @return the number of occurrences (0 if iterator is {@code null})
      * @throws ArithmeticException if the number of occurrences exceeds Integer.MAX_VALUE
-     * @see Iterators#occurrencesOf(Iterator, Object)
-     * @see #occurrencesOf(String, char)
+     * @see Iterators#frequency(Iterator, Object)
+     * @see #frequency(String, char)
      */
-    public static int occurrencesOf(final Iterator<?> iter, final Object valueToFind) throws ArithmeticException {
-        return Numbers.toIntExact(Iterators.occurrencesOf(iter, valueToFind));
+    public static int frequency(final Iterator<?> iter, final Object valueToFind) throws ArithmeticException {
+        return Numbers.toIntExact(Iterators.frequency(iter, valueToFind));
     }
 
     /**
@@ -733,16 +732,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String text = "hello world";
-     * int result = N.occurrencesOf(text, 'l');   // Returns 3
+     * int result = N.frequency(text, 'l');   // Returns 3
      * }</pre>
      *
      * @param str the String to search in
      * @param valueToFind the char value to count occurrences of
      * @return the number of occurrences (0 if string is {@code null} or empty)
      * @see Strings#countMatches(String, char)
-     * @see #occurrencesOf(String, String)
+     * @see #frequency(String, String)
      */
-    public static int occurrencesOf(final String str, final char valueToFind) {
+    public static int frequency(final String str, final char valueToFind) {
         return Strings.countMatches(str, valueToFind);
     }
 
@@ -752,7 +751,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String text = "hello hello world hello";
-     * int result = N.occurrencesOf(text, "hello");   // Returns 3
+     * int result = N.frequency(text, "hello");   // Returns 3
      * }</pre>
      *
      * @param str the String to search in
@@ -760,7 +759,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the number of occurrences (0 if string is {@code null} or empty)
      * @see Strings#countMatches(String, String)
      */
-    public static int occurrencesOf(final String str, final String valueToFind) {
+    public static int frequency(final String str, final String valueToFind) {
         return Strings.countMatches(str, valueToFind);
     }
 
@@ -770,17 +769,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] words = {"apple", "banana", "apple", "cherry", "banana", "apple"};
-     * Map<String, Integer> result = N.occurrencesMap(words);
+     * Map<String, Integer> result = N.frequencyMap(words);
      * // Returns {apple=3, banana=2, cherry=1}
      * }</pre>
      *
      * @param <T> the type of elements in the array
      * @param a the array to count occurrences from
      * @return the map with elements as keys and occurrence counts as values (empty if array is {@code null} or empty)
-     * @see #occurrencesMap(Object[], Supplier)
+     * @see #frequencyMap(Object[], Supplier)
      */
-    public static <T> Map<T, Integer> occurrencesMap(final T[] a) {
-        return occurrencesMap(a, Suppliers.ofMap());
+    public static <T> Map<T, Integer> frequencyMap(final T[] a) {
+        return frequencyMap(a, Suppliers.ofMap());
     }
 
     /**
@@ -789,7 +788,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] words = {"c", "a", "b", "a", "c"};
-     * Map<String, Integer> result = N.occurrencesMap(words, TreeMap::new);
+     * Map<String, Integer> result = N.frequencyMap(words, TreeMap::new);
      * // Returns map with keys in order: [a, b, c]
      * }</pre>
      *
@@ -797,9 +796,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array to count occurrences from
      * @param mapSupplier the supplier for the map to use (e.g., TreeMap::new for sorted keys)
      * @return the map with elements as keys and occurrence counts as values
-     * @see #occurrencesMap(Iterable)
+     * @see #frequencyMap(Iterable)
      */
-    public static <T> Map<T, Integer> occurrencesMap(final T[] a, final Supplier<Map<T, Integer>> mapSupplier) {
+    public static <T> Map<T, Integer> frequencyMap(final T[] a, final Supplier<Map<T, Integer>> mapSupplier) {
         if (isEmpty(a)) {
             return mapSupplier.get();
         }
@@ -819,17 +818,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> words = Arrays.asList("apple", "banana", "apple", "cherry");
-     * Map<String, Integer> result = N.occurrencesMap(words);
+     * Map<String, Integer> result = N.frequencyMap(words);
      * // Returns {apple=2, banana=1, cherry=1}
      * }</pre>
      *
      * @param <T> the type of elements in the iterable
      * @param c the iterable to count occurrences from
      * @return the map with elements as keys and occurrence counts as values (empty if iterable is {@code null} or empty)
-     * @see #occurrencesMap(Iterable, Supplier)
+     * @see #frequencyMap(Iterable, Supplier)
      */
-    public static <T> Map<T, Integer> occurrencesMap(final Iterable<? extends T> c) {
-        return occurrencesMap(c, Suppliers.ofMap());
+    public static <T> Map<T, Integer> frequencyMap(final Iterable<? extends T> c) {
+        return frequencyMap(c, Suppliers.ofMap());
     }
 
     /**
@@ -838,7 +837,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> words = Arrays.asList("c", "a", "b", "a", "c");
-     * Map<String, Integer> result = N.occurrencesMap(words, TreeMap::new);
+     * Map<String, Integer> result = N.frequencyMap(words, TreeMap::new);
      * // Returns map with keys in order: [a, b, c]
      * }</pre>
      *
@@ -846,9 +845,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c the iterable to count occurrences from
      * @param mapSupplier the supplier for the map to use (e.g., TreeMap::new for sorted keys)
      * @return the map with elements as keys and occurrence counts as values
-     * @see #occurrencesMap(Iterator)
+     * @see #frequencyMap(Iterator)
      */
-    public static <T> Map<T, Integer> occurrencesMap(final Iterable<? extends T> c, final Supplier<Map<T, Integer>> mapSupplier) {
+    public static <T> Map<T, Integer> frequencyMap(final Iterable<? extends T> c, final Supplier<Map<T, Integer>> mapSupplier) {
         if (isEmptyCollection(c)) {
             return mapSupplier.get();
         }
@@ -877,17 +876,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * List<String> words = Arrays.asList("apple", "banana", "apple", "cherry");
      * Iterator<String> iter = words.iterator();
-     * Map<String, Integer> result = N.occurrencesMap(iter);
+     * Map<String, Integer> result = N.frequencyMap(iter);
      * // Returns {apple=2, banana=1, cherry=1} (iterator is now exhausted)
      * }</pre>
      *
      * @param <T> the type of elements in the iterator
      * @param iter the iterator to count occurrences from
      * @return the map with elements as keys and occurrence counts as values (empty if iterator is {@code null})
-     * @see #occurrencesMap(Iterator, Supplier)
+     * @see #frequencyMap(Iterator, Supplier)
      */
-    public static <T> Map<T, Integer> occurrencesMap(final Iterator<? extends T> iter) {
-        return occurrencesMap(iter, Suppliers.ofMap());
+    public static <T> Map<T, Integer> frequencyMap(final Iterator<? extends T> iter) {
+        return frequencyMap(iter, Suppliers.ofMap());
     }
 
     /**
@@ -899,7 +898,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * List<String> words = Arrays.asList("c", "a", "b", "a", "c");
      * Iterator<String> iter = words.iterator();
-     * Map<String, Integer> result = N.occurrencesMap(iter, TreeMap::new);
+     * Map<String, Integer> result = N.frequencyMap(iter, TreeMap::new);
      * // Returns map with keys in order: [a, b, c]
      * }</pre>
      *
@@ -909,7 +908,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the map with elements as keys and occurrence counts as values
      * @throws ArithmeticException if any occurrence count exceeds Integer.MAX_VALUE
      */
-    public static <T> Map<T, Integer> occurrencesMap(final Iterator<? extends T> iter, final Supplier<Map<T, Integer>> mapSupplier) {
+    public static <T> Map<T, Integer> frequencyMap(final Iterator<? extends T> iter, final Supplier<Map<T, Integer>> mapSupplier) {
         if (iter == null) {
             return mapSupplier.get();
         }
@@ -1502,133 +1501,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         return !containsAny(iter, valuesToFind);
-    }
-
-    /**
-     * Returns an immutable slice of the array from the specified range [fromIndex, toIndex).
-     * Returns ImmutableList.empty() if the array is {@code null} or empty.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * String[] words = {"apple", "banana", "cherry", "date", "elderberry"};
-     * ImmutableList<String> slice = N.slice(words, 1, 4);
-     * // Returns ["banana", "cherry", "date"]
-     * }</pre>
-     *
-     * @param <T> the type of elements in the array
-     * @param a the array to slice
-     * @param fromIndex the start index (inclusive)
-     * @param toIndex the end index (exclusive)
-     * @return an immutable list containing the slice, or ImmutableList.empty() if the array is {@code null} or empty
-     * @throws IndexOutOfBoundsException if the range is invalid
-     * @see #slice(List, int, int)
-     */
-    public static <T> ImmutableList<T> slice(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-
-        if (isEmpty(a)) {
-            return ImmutableList.empty();
-        }
-
-        return slice(Array.asList(a), fromIndex, toIndex);
-    }
-
-    /**
-     * Returns an immutable slice of the list from the specified range [fromIndex, toIndex).
-     * Returns ImmutableList.empty() if the list is {@code null} or empty.
-     * Uses List.subList() for O(1) view creation without copying elements.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<String> words = Arrays.asList("apple", "banana", "cherry", "date", "elderberry");
-     * ImmutableList<String> slice = N.slice(words, 1, 4);
-     * // Returns ["banana", "cherry", "date"]
-     * }</pre>
-     *
-     * @param <T> the type of elements in the list
-     * @param c the list to slice
-     * @param fromIndex the start index (inclusive)
-     * @param toIndex the end index (exclusive)
-     * @return an immutable list containing the slice, or ImmutableList.empty() if the list is {@code null} or empty
-     * @throws IndexOutOfBoundsException if the range is invalid
-     * @see List#subList(int, int)
-     */
-    public static <T> ImmutableList<T> slice(final List<? extends T> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, size(c));
-
-        if (isEmpty(c)) {
-            return ImmutableList.empty();
-        } else if (fromIndex == 0 && toIndex == size(c)) {
-            return ImmutableList.wrap(c);
-        }
-
-        return ImmutableList.wrap(((List<T>) c).subList(fromIndex, toIndex));
-    }
-
-    /**
-     * Returns an immutable slice of the collection from the specified range [fromIndex, toIndex).
-     * Returns ImmutableList.empty() if the collection is {@code null} or empty.
-     * For List collections, uses List.subList() for O(1) view creation.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<String> list = Arrays.asList("a", "b", "c", "d", "e");
-     * ImmutableCollection<String> slice = N.slice(list, 1, 4);
-     * // Returns ["b", "c", "d"]
-     * }</pre>
-     *
-     * @param <T> the type of elements in the collection
-     * @param c the collection to slice
-     * @param fromIndex the start index (inclusive)
-     * @param toIndex the end index (exclusive)
-     * @return an immutable collection containing the slice, or ImmutableList.empty() if the collection is {@code null} or empty
-     * @throws IndexOutOfBoundsException if the range is invalid
-     * @see #slice(List, int, int)
-     */
-    public static <T> ImmutableCollection<T> slice(final Collection<? extends T> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, size(c));
-
-        if (isEmpty(c)) {
-            return ImmutableList.empty();
-        }
-
-        if (c instanceof List) {
-            return slice((List<T>) c, fromIndex, toIndex);
-        }
-
-        return new Slice<>(c, fromIndex, toIndex);
-    }
-
-    /**
-     * Returns a slice of the iterator from the specified range [fromIndex, toIndex).
-     * Returns an empty iterator if iter is {@code null} or fromIndex equals toIndex.
-     * This method consumes elements from the iterator up to toIndex.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-    * com.landawn.abacus.util.stream.Stream<Integer> stream = com.landawn.abacus.util.stream.Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-     * ObjIterator<Integer> slice = N.slice(stream.iterator(), 2, 7);
-     * // Returns [3, 4, 5, 6, 7]
-     * }</pre>
-     *
-     * @param <T> the type of elements in the iterator
-     * @param iter the iterator to slice
-     * @param fromIndex the start index (inclusive)
-     * @param toIndex the end index (exclusive)
-     * @return an iterator containing the slice, or an empty iterator if iter is {@code null} or fromIndex equals toIndex
-     * @throws IllegalArgumentException if fromIndex is negative or fromIndex &gt; toIndex
-     * @see Iterators#skipAndLimit(Iterator, long, long)
-     */
-    public static <T> ObjIterator<T> slice(final Iterator<? extends T> iter, final int fromIndex, final int toIndex) {
-        if (fromIndex < 0 || fromIndex > toIndex) {
-            throw new IllegalArgumentException("Invalid fromIndex/toIndex: [" + fromIndex + ", " + toIndex + "]");
-        }
-
-        if (iter == null || fromIndex == toIndex) {
-            return ObjIterator.empty();
-        }
-
-        return Iterators.skipAndLimit(iter, fromIndex, toIndex - fromIndex); // NOSONAR
     }
 
     /**
@@ -2376,26 +2248,28 @@ public final class N extends CommonUtil { // public final class N extends π imp
         if (c instanceof List) {
             final List<T> list = (List<T>) c;
 
-            for (int i = fromIndex; i < toIndex; i = i <= toIndex - chunkSize ? i + chunkSize : toIndex) {
-                res.add(list.subList(i, i <= toIndex - chunkSize ? i + chunkSize : toIndex));
+            for (int i = fromIndex; i < toIndex;) {
+                final int end = i <= toIndex - chunkSize ? i + chunkSize : toIndex;
+                res.add(list.subList(i, end));
+                i = end;
             }
         } else {
             final Iterator<? extends T> iter = c.iterator();
 
-            for (int i = 0; i < toIndex;) {
-                if (i < fromIndex) {
-                    iter.next();
-                    i++;
-                    continue;
-                }
+            for (int i = 0; i < fromIndex; i++) {
+                iter.next();
+            }
 
-                final List<T> subList = new ArrayList<>(min(chunkSize, toIndex - i));
+            for (int i = fromIndex; i < toIndex;) {
+                final int end = i <= toIndex - chunkSize ? i + chunkSize : toIndex;
+                final List<T> subList = new ArrayList<>(end - i);
 
-                for (final int j = i <= toIndex - chunkSize ? i + chunkSize : toIndex; i < j; i++) {
+                for (int j = i; j < end; j++) {
                     subList.add(iter.next());
                 }
 
                 res.add(subList);
+                i = end;
             }
         }
 
@@ -2769,6 +2643,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 continue;
             }
 
+            if (a.length > Integer.MAX_VALUE - len) {
+                throw new IllegalArgumentException("Combined array length exceeds maximum array size");
+            }
+
             len += a.length;
         }
 
@@ -2866,6 +2744,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 continue;
             }
 
+            if (a.length > Integer.MAX_VALUE - len) {
+                throw new IllegalArgumentException("Combined array length exceeds maximum array size");
+            }
+
             len += a.length;
         }
 
@@ -2953,6 +2835,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
         for (final byte[] a : aa) {
             if (isEmpty(a)) {
                 continue;
+            }
+
+            if (a.length > Integer.MAX_VALUE - len) {
+                throw new IllegalArgumentException("Combined array length exceeds maximum array size");
             }
 
             len += a.length;
@@ -3044,6 +2930,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 continue;
             }
 
+            if (a.length > Integer.MAX_VALUE - len) {
+                throw new IllegalArgumentException("Combined array length exceeds maximum array size");
+            }
+
             len += a.length;
         }
 
@@ -3131,6 +3021,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
         for (final int[] a : aa) {
             if (isEmpty(a)) {
                 continue;
+            }
+
+            if (a.length > Integer.MAX_VALUE - len) {
+                throw new IllegalArgumentException("Combined array length exceeds maximum array size");
             }
 
             len += a.length;
@@ -3222,6 +3116,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 continue;
             }
 
+            if (a.length > Integer.MAX_VALUE - len) {
+                throw new IllegalArgumentException("Combined array length exceeds maximum array size");
+            }
+
             len += a.length;
         }
 
@@ -3311,6 +3209,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 continue;
             }
 
+            if (a.length > Integer.MAX_VALUE - len) {
+                throw new IllegalArgumentException("Combined array length exceeds maximum array size");
+            }
+
             len += a.length;
         }
 
@@ -3398,6 +3300,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
         for (final double[] a : aa) {
             if (isEmpty(a)) {
                 continue;
+            }
+
+            if (a.length > Integer.MAX_VALUE - len) {
+                throw new IllegalArgumentException("Combined array length exceeds maximum array size");
             }
 
             len += a.length;
@@ -3498,6 +3404,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
         for (final T[] a : aa) {
             if (isEmpty(a)) {
                 continue;
+            }
+
+            if (a.length > Integer.MAX_VALUE - len) {
+                throw new IllegalArgumentException("Combined array length exceeds maximum array size");
             }
 
             len += a.length;
@@ -4319,7 +4229,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return EMPTY_BOOLEAN_ARRAY;
         }
 
-        return BooleanList.of(a).intersection(BooleanList.of(b)).trimToSize().array();
+        return BooleanList.of(a).intersection(BooleanList.of(b)).trimToSize().internalArray();
     }
 
     /**
@@ -4351,7 +4261,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return EMPTY_CHAR_ARRAY;
         }
 
-        return CharList.of(a).intersection(CharList.of(b)).trimToSize().array();
+        return CharList.of(a).intersection(CharList.of(b)).trimToSize().internalArray();
     }
 
     /**
@@ -4383,7 +4293,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return EMPTY_BYTE_ARRAY;
         }
 
-        return ByteList.of(a).intersection(ByteList.of(b)).trimToSize().array();
+        return ByteList.of(a).intersection(ByteList.of(b)).trimToSize().internalArray();
     }
 
     /**
@@ -4415,7 +4325,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return EMPTY_SHORT_ARRAY;
         }
 
-        return ShortList.of(a).intersection(ShortList.of(b)).trimToSize().array();
+        return ShortList.of(a).intersection(ShortList.of(b)).trimToSize().internalArray();
     }
 
     /**
@@ -4446,7 +4356,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return EMPTY_INT_ARRAY;
         }
 
-        return IntList.of(a).intersection(IntList.of(b)).trimToSize().array();
+        return IntList.of(a).intersection(IntList.of(b)).trimToSize().internalArray();
     }
 
     /**
@@ -4478,7 +4388,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return EMPTY_LONG_ARRAY;
         }
 
-        return LongList.of(a).intersection(LongList.of(b)).trimToSize().array();
+        return LongList.of(a).intersection(LongList.of(b)).trimToSize().internalArray();
     }
 
     /**
@@ -4510,7 +4420,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return EMPTY_FLOAT_ARRAY;
         }
 
-        return FloatList.of(a).intersection(FloatList.of(b)).trimToSize().array();
+        return FloatList.of(a).intersection(FloatList.of(b)).trimToSize().internalArray();
     }
 
     /**
@@ -4542,7 +4452,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return EMPTY_DOUBLE_ARRAY;
         }
 
-        return DoubleList.of(a).intersection(DoubleList.of(b)).trimToSize().array();
+        return DoubleList.of(a).intersection(DoubleList.of(b)).trimToSize().internalArray();
     }
 
     /**
@@ -5068,7 +4978,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return a.clone();
         }
 
-        return BooleanList.of(a).difference(BooleanList.of(b)).trimToSize().array();
+        return BooleanList.of(a).difference(BooleanList.of(b)).trimToSize().internalArray();
     }
 
     /**
@@ -5112,7 +5022,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return a.clone();
         }
 
-        return CharList.of(a).difference(CharList.of(b)).trimToSize().array();
+        return CharList.of(a).difference(CharList.of(b)).trimToSize().internalArray();
     }
 
     /**
@@ -5156,7 +5066,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return a.clone();
         }
 
-        return ByteList.of(a).difference(ByteList.of(b)).trimToSize().array();
+        return ByteList.of(a).difference(ByteList.of(b)).trimToSize().internalArray();
     }
 
     /**
@@ -5200,7 +5110,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return a.clone();
         }
 
-        return ShortList.of(a).difference(ShortList.of(b)).trimToSize().array();
+        return ShortList.of(a).difference(ShortList.of(b)).trimToSize().internalArray();
     }
 
     /**
@@ -5243,7 +5153,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return a.clone();
         }
 
-        return IntList.of(a).difference(IntList.of(b)).trimToSize().array();
+        return IntList.of(a).difference(IntList.of(b)).trimToSize().internalArray();
     }
 
     /**
@@ -5287,7 +5197,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return a.clone();
         }
 
-        return LongList.of(a).difference(LongList.of(b)).trimToSize().array();
+        return LongList.of(a).difference(LongList.of(b)).trimToSize().internalArray();
     }
 
     /**
@@ -5331,7 +5241,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return a.clone();
         }
 
-        return FloatList.of(a).difference(FloatList.of(b)).trimToSize().array();
+        return FloatList.of(a).difference(FloatList.of(b)).trimToSize().internalArray();
     }
 
     /**
@@ -5365,7 +5275,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return a.clone();
         }
 
-        return DoubleList.of(a).difference(DoubleList.of(b)).trimToSize().array();
+        return DoubleList.of(a).difference(DoubleList.of(b)).trimToSize().internalArray();
     }
 
     /**
@@ -5398,7 +5308,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         if (isEmpty(a)) {
             return new ArrayList<>();
         } else if (isEmpty(b)) {
-            return asList(a);
+            return toList(a);
         }
 
         final Multiset<?> bOccurrences = Multiset.of(b);
@@ -5674,7 +5584,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return a.clone();
         }
 
-        return BooleanList.of(a).symmetricDifference(BooleanList.of(b)).trimToSize().array();
+        return BooleanList.of(a).symmetricDifference(BooleanList.of(b)).trimToSize().internalArray();
     }
 
     /**
@@ -5704,7 +5614,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return a.clone();
         }
 
-        return CharList.of(a).symmetricDifference(CharList.of(b)).trimToSize().array();
+        return CharList.of(a).symmetricDifference(CharList.of(b)).trimToSize().internalArray();
     }
 
     /**
@@ -5734,7 +5644,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return a.clone();
         }
 
-        return ByteList.of(a).symmetricDifference(ByteList.of(b)).trimToSize().array();
+        return ByteList.of(a).symmetricDifference(ByteList.of(b)).trimToSize().internalArray();
     }
 
     /**
@@ -5764,7 +5674,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return a.clone();
         }
 
-        return ShortList.of(a).symmetricDifference(ShortList.of(b)).trimToSize().array();
+        return ShortList.of(a).symmetricDifference(ShortList.of(b)).trimToSize().internalArray();
     }
 
     /**
@@ -5794,7 +5704,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return a.clone();
         }
 
-        return IntList.of(a).symmetricDifference(IntList.of(b)).trimToSize().array();
+        return IntList.of(a).symmetricDifference(IntList.of(b)).trimToSize().internalArray();
     }
 
     /**
@@ -5824,7 +5734,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return a.clone();
         }
 
-        return LongList.of(a).symmetricDifference(LongList.of(b)).trimToSize().array();
+        return LongList.of(a).symmetricDifference(LongList.of(b)).trimToSize().internalArray();
     }
 
     /**
@@ -5854,7 +5764,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return a.clone();
         }
 
-        return FloatList.of(a).symmetricDifference(FloatList.of(b)).trimToSize().array();
+        return FloatList.of(a).symmetricDifference(FloatList.of(b)).trimToSize().internalArray();
     }
 
     /**
@@ -5884,7 +5794,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return a.clone();
         }
 
-        return DoubleList.of(a).symmetricDifference(DoubleList.of(b)).trimToSize().array();
+        return DoubleList.of(a).symmetricDifference(DoubleList.of(b)).trimToSize().internalArray();
     }
 
     /**
@@ -5910,9 +5820,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> List<T> symmetricDifference(final T[] a, final T[] b) {
         if (isEmpty(a)) {
-            return asList(b);
+            return toList(b);
         } else if (isEmpty(b)) {
-            return asList(a);
+            return toList(a);
         }
 
         final Multiset<T> bOccurrences = Multiset.of(b);
@@ -6265,9 +6175,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int cnt = 1;
         MutableInt val = null;
+        boolean skippedSmallest = false;
 
         for (final Collection<? extends T> ec : c) {
-            if (ec == smallest) { // NOSONAR
+            if (!skippedSmallest && ec == smallest) { // NOSONAR
+                skippedSmallest = true;
                 continue;
             }
 
@@ -6491,7 +6403,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final Multiset<?> multisetB = Multiset.create(coll);
 
         for (final Object e : multisetA.elementSet()) {
-            if (multisetA.occurrencesOf(e) > multisetB.occurrencesOf(e)) {
+            if (multisetA.getCount(e) > multisetB.getCount(e)) {
                 return false;
             }
         }
@@ -9837,7 +9749,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return false;
         }
 
-        return list.addAll(index, asList(elementsToInsert));
+        return list.addAll(index, toList(elementsToInsert));
     }
 
     /**
@@ -11159,7 +11071,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final BooleanList list = BooleanList.of(a.clone());
         list.removeAll(BooleanList.of(valuesToRemove));
-        return list.trimToSize().array();
+        return list.trimToSize().internalArray();
     }
 
     /**
@@ -11194,7 +11106,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final CharList list = CharList.of(a.clone());
         list.removeAll(CharList.of(valuesToRemove));
-        return list.trimToSize().array();
+        return list.trimToSize().internalArray();
     }
 
     /**
@@ -11229,7 +11141,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final ByteList list = ByteList.of(a.clone());
         list.removeAll(ByteList.of(valuesToRemove));
-        return list.trimToSize().array();
+        return list.trimToSize().internalArray();
     }
 
     /**
@@ -11264,7 +11176,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final ShortList list = ShortList.of(a.clone());
         list.removeAll(ShortList.of(valuesToRemove));
-        return list.trimToSize().array();
+        return list.trimToSize().internalArray();
     }
 
     /**
@@ -11299,7 +11211,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final IntList list = IntList.of(a.clone());
         list.removeAll(IntList.of(valuesToRemove));
-        return list.trimToSize().array();
+        return list.trimToSize().internalArray();
     }
 
     /**
@@ -11334,7 +11246,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final LongList list = LongList.of(a.clone());
         list.removeAll(LongList.of(valuesToRemove));
-        return list.trimToSize().array();
+        return list.trimToSize().internalArray();
     }
 
     /**
@@ -11369,7 +11281,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final FloatList list = FloatList.of(a.clone());
         list.removeAll(FloatList.of(valuesToRemove));
-        return list.trimToSize().array();
+        return list.trimToSize().internalArray();
     }
 
     /**
@@ -11404,7 +11316,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final DoubleList list = DoubleList.of(a.clone());
         list.removeAll(DoubleList.of(valuesToRemove));
-        return list.trimToSize().array();
+        return list.trimToSize().internalArray();
     }
 
     /**
@@ -11435,7 +11347,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return removeAllOccurrences(a, valuesToRemove[0]);
         }
 
-        final Set<String> set = asSet(valuesToRemove);
+        final Set<String> set = toSet(valuesToRemove);
         final List<String> result = new ArrayList<>();
 
         for (final String e : a) {
@@ -11478,7 +11390,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return removeAllOccurrences(a, valuesToRemove[0]);
         }
 
-        final Set<Object> set = asSet(valuesToRemove);
+        final Set<Object> set = toSet(valuesToRemove);
         final List<T> result = new ArrayList<>();
 
         for (final T e : a) {
@@ -11511,7 +11423,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         if (isEmpty(c) || isEmpty(valuesToRemove)) {
             return false;
         } else {
-            return removeAll(c, asSet(valuesToRemove));
+            return removeAll(c, toSet(valuesToRemove));
         }
     }
 
@@ -14324,7 +14236,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return false;
         }
 
-        final T[] tmp = (T[]) c.toArray();
+        final T[] tmp = c.toArray((T[]) new Object[c.size()]);
 
         moveRange(tmp, fromIndex, toIndex, newPositionAfterMove);
 
@@ -30040,7 +29952,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] words = {"apple", "banana", "cherry", "date"};
-     * boolean result = N.countMatchBetween(words, 2, 3, s -> s.length() > 5);
+     * boolean result = N.isMatchCountBetween(words, 2, 3, s -> s.length() > 5);
      * // Returns true (2 words: "banana" and "cherry" are > 5 chars)
      * }</pre>
      *
@@ -30054,7 +29966,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #allMatch(Object[], Predicate)
      * @see #count(Object[], Predicate)
      */
-    public static <T> boolean countMatchBetween(final T[] a, final int atLeast, final int atMost, final Predicate<? super T> filter) {
+    public static <T> boolean isMatchCountBetween(final T[] a, final int atLeast, final int atMost, final Predicate<? super T> filter) {
         checkArgNotNegative(atLeast, "atLeast"); //NOSONAR
         checkArgNotNegative(atMost, "atMost"); //NOSONAR
         checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'"); //NOSONAR
@@ -30086,7 +29998,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> numbers = Arrays.asList(2, 4, 5, 6, 8);
-     * boolean result = N.countMatchBetween(numbers, 2, 4, n -> n % 2 == 0);
+     * boolean result = N.isMatchCountBetween(numbers, 2, 4, n -> n % 2 == 0);
      * // Returns true (4 even numbers: 2, 4, 6, 8)
      * }</pre>
      *
@@ -30100,7 +30012,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #allMatch(Iterable, Predicate)
      * @see #count(Iterable, Predicate)
      */
-    public static <T> boolean countMatchBetween(final Iterable<? extends T> c, final int atLeast, final int atMost, final Predicate<? super T> filter) {
+    public static <T> boolean isMatchCountBetween(final Iterable<? extends T> c, final int atLeast, final int atMost, final Predicate<? super T> filter) {
         checkArgNotNegative(atLeast, cs.atLeast);
         checkArgNotNegative(atMost, cs.atMost);
         checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
@@ -30117,7 +30029,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             }
         }
 
-        return countMatchBetween(c.iterator(), atLeast, atMost, filter);
+        return isMatchCountBetween(c.iterator(), atLeast, atMost, filter);
     }
 
     /**
@@ -30128,7 +30040,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("Hi", "Hey", "Hello", "World").iterator();
-     * boolean result = N.countMatchBetween(iter, 1, 2, s -> s.length() <= 3);
+     * boolean result = N.isMatchCountBetween(iter, 1, 2, s -> s.length() <= 3);
      * // Returns true (2 short words: "Hi" and "Hey")
      * }</pre>
      *
@@ -30142,7 +30054,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #allMatch(Iterator, Predicate)
      * @see #count(Iterator, Predicate)
      */
-    public static <T> boolean countMatchBetween(final Iterator<? extends T> iter, final int atLeast, final int atMost, final Predicate<? super T> filter) {
+    public static <T> boolean isMatchCountBetween(final Iterator<? extends T> iter, final int atLeast, final int atMost, final Predicate<? super T> filter) {
         checkArgNotNegative(atLeast, cs.atLeast);
         checkArgNotNegative(atMost, cs.atMost);
         checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
@@ -30956,9 +30868,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> List<T> merge(final T[] a, final T[] b, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
         if (isEmpty(a)) {
-            return isEmpty(b) ? new ArrayList<>() : asList(b);
+            return isEmpty(b) ? new ArrayList<>() : toList(b);
         } else if (isEmpty(b)) {
-            return asList(a);
+            return toList(a);
         }
 
         final List<T> result = new ArrayList<>(a.length + b.length);
@@ -32630,7 +32542,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <K> the type of keys
      * @param <V> the type of values
-     * @param map the map
+     * @param map the map whose entries will be iterated
      * @return an iterator over the map entries (empty if map is {@code null}/empty)
      * @see Map#entrySet()
      */
@@ -32733,7 +32645,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return true;
         }
 
-        return a.length >= b.length ? disjoint(Arrays.asList(a), asSet(b)) : disjoint(asSet(a), Arrays.asList(b));
+        return a.length >= b.length ? disjoint(Arrays.asList(a), toSet(b)) : disjoint(toSet(a), Arrays.asList(b));
     }
 
     /**
@@ -38692,12 +38604,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
             a[cnt++ % batchSize] = iter.next();
 
             if (cnt % batchSize == 0) {
-                batchAction.accept(ImmutableList.wrap(N.asList(a)));
+                batchAction.accept(ImmutableList.wrap(Array.asList(a)));
             }
         }
 
         if (cnt % batchSize != 0) {
-            batchAction.accept(ImmutableList.wrap(N.asList(copyOfRange(a, 0, cnt % batchSize))));
+            batchAction.accept(ImmutableList.wrap(Array.asList(copyOfRange(a, 0, cnt % batchSize))));
         }
     }
 
@@ -38967,12 +38879,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
             a[cnt++ % batchSize] = iter.next();
 
             if (cnt % batchSize == 0) {
-                result.add(batchAction.apply(ImmutableList.wrap(N.asList(a))));
+                result.add(batchAction.apply(ImmutableList.wrap(Array.asList(a))));
             }
         }
 
         if (cnt % batchSize != 0) {
-            result.add(batchAction.apply(ImmutableList.wrap(N.asList(copyOfRange(a, 0, cnt % batchSize)))));
+            result.add(batchAction.apply(ImmutableList.wrap(Array.asList(copyOfRange(a, 0, cnt % batchSize)))));
         }
 
         return result;

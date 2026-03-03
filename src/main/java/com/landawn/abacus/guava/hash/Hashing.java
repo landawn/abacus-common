@@ -704,7 +704,14 @@ public final class Hashing {
         final List<com.google.common.hash.HashFunction> guavaHashFunctions = new ArrayList<>();
 
         while (iterator.hasNext()) {
-            guavaHashFunctions.add(((GuavaHashFunction) iterator.next()).gHashFunction);
+            final HashFunction hashFunction = iterator.next();
+
+            if (hashFunction instanceof GuavaHashFunction guavaHashFunction) {
+                guavaHashFunctions.add(guavaHashFunction.gHashFunction);
+            } else {
+                throw new IllegalArgumentException(
+                        "Unsupported HashFunction implementation: " + hashFunction.getClass().getName() + ". Use factory methods from Hashing.");
+            }
         }
 
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.concatenating(guavaHashFunctions));

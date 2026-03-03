@@ -574,9 +574,9 @@ public class DoubleList100Test extends TestBase {
     public void testOccurrencesOf() {
         list.addAll(new double[] { 1.1, 2.2, 3.3, 2.2, 2.2, 4.4 });
 
-        assertEquals(3, list.occurrencesOf(2.2));
-        assertEquals(1, list.occurrencesOf(1.1));
-        assertEquals(0, list.occurrencesOf(5.5));
+        assertEquals(3, list.frequency(2.2));
+        assertEquals(1, list.frequency(1.1));
+        assertEquals(0, list.frequency(5.5));
     }
 
     @Test
@@ -1114,7 +1114,7 @@ public class DoubleList100Test extends TestBase {
     public void testArray() {
         list.addAll(new double[] { 1.1, 2.2, 3.3 });
 
-        double[] array = list.array();
+        double[] array = list.internalArray();
         assertEquals(1.1, array[0], DELTA);
         assertEquals(2.2, array[1], DELTA);
         assertEquals(3.3, array[2], DELTA);

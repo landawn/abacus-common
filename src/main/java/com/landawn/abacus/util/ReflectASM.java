@@ -159,6 +159,8 @@ final class ReflectASM<T> {
      * @throws IllegalArgumentException if cls is null
      */
     public static <T> ReflectASM<T> on(final Class<T> cls) {
+        N.checkArgNotNull(cls, "cls");
+
         return new ReflectASM<>(cls, null);
     }
 
@@ -193,6 +195,8 @@ final class ReflectASM<T> {
      * @throws IllegalArgumentException if target is null
      */
     public static <T> ReflectASM<T> on(final T instance) {
+        N.checkArgNotNull(instance, "instance");
+
         return new ReflectASM<>((Class<T>) instance.getClass(), instance);
     }
 

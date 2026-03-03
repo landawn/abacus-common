@@ -268,8 +268,10 @@ public enum IOCase {
         }
 
         final int toIndex = str.length() - search.length();
-        if (toIndex >= strStartIndex) {
-            for (int i = strStartIndex; i <= toIndex; i++) {
+        final int fromIndex = Math.max(0, strStartIndex);
+
+        if (toIndex >= fromIndex) {
+            for (int i = fromIndex; i <= toIndex; i++) {
                 if (checkRegiocountMatchBetweenes(str, i, search)) {
                     return i;
                 }

@@ -30,7 +30,7 @@ public class DifferenceTest extends AbstractTest {
 
         assertFalse(diff.differentValues().containsKey("lastUpdateTime"));
 
-        diff = BeanDifference.of(a, b, CommonUtil.asList("lastUpdateTime", "createdTime"));
+        diff = BeanDifference.of(a, b, CommonUtil.toList("lastUpdateTime", "createdTime"));
         assertTrue(diff.differentValues().containsKey("lastUpdateTime"));
     }
 

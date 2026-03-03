@@ -71,7 +71,7 @@ public class NumbersTest extends TestCase {
             assertEquals(Double.valueOf(0), Numbers.createNumber("0e0D"));
 
             assertEquals(0, Double.compare(0.0d, Double.parseDouble("0.0e-2000")));
-            assertTrue(Numbers.isCreatable("0.0e-2000"));
+            assertTrue(Numbers.isConvertibleToNumber("0.0e-2000"));
 
             assertEquals(Float.valueOf(0.0f), Numbers.createNumber("0.0e-2000F"));
             assertEquals(Double.valueOf(0.0), Numbers.createNumber("0.0e-2000D"));
@@ -107,9 +107,9 @@ public class NumbersTest extends TestCase {
 
     @Test
     public void testCreatePositiveHexInteger() {
-        assertTrue(Numbers.isCreatable("+0xF"));
-        assertTrue(Numbers.isCreatable("+0xFFFFFFFF"));
-        assertTrue(Numbers.isCreatable("+0xFFFFFFFFFFFFFFFFF"));
+        assertTrue(Numbers.isConvertibleToNumber("+0xF"));
+        assertTrue(Numbers.isConvertibleToNumber("+0xFFFFFFFF"));
+        assertTrue(Numbers.isConvertibleToNumber("+0xFFFFFFFFFFFFFFFFF"));
 
         assertEquals(Integer.decode("+0xF"), Numbers.createInteger("+0xF"));
         assertEquals(Long.decode("+0xFFFFFFFF"), Numbers.createLong("+0xFFFFFFFF"));

@@ -28,8 +28,8 @@ public class JsonParserImpl2025Test extends TestBase {
         ParameterizedBean<Integer, String, Double, Byte, Short> bean = new ParameterizedBean<>();
         bean.setA(100);
         bean.setB(new String[] { "one", "two", "three" });
-        bean.setCList(N.asList(11.11, 22.22, 33.33));
-        bean.setMapList(N.asList(N.asMap((byte) 1, (short) 10), N.asMap((byte) 2, (short) 20)));
+        bean.setCList(N.toList(11.11, 22.22, 33.33));
+        bean.setMapList(N.toList(N.asMap((byte) 1, (short) 10), N.asMap((byte) 2, (short) 20)));
         bean.setName("ParameterizedBean");
         bean.setBb(new String[][] { { "aa", "bb" }, { "cc", "dd" } });
         bean.setMap2(N.asMap(N.asSingletonList(new Byte[] { 1, 2 }), N.asSingletonList(new String[][] { { "v11", "v12" }, { "v21", "v22" } })));

@@ -1215,7 +1215,7 @@ public final class TypeFactory {
      * Type<List> listType = TypeFactory.getType(List.class);
      * }</pre>
      *
-     * @param <T> the type parameter
+     * @param <T> the Java type represented by the requested {@code Type} object
      * @param cls the Class object for which to retrieve the Type
      * @return the Type object corresponding to the specified class
      * @throws IllegalArgumentException if cls is null
@@ -1275,7 +1275,7 @@ public final class TypeFactory {
      * Type<Map<String, Integer>> mapping = TypeFactory.getType(mapType);
      * }</pre>
      *
-     * @param <T> the type parameter
+     * @param <T> the Java type represented by the requested {@code Type} object
      * @param javaType the java.lang.reflect.Type to convert, can be a Class or ParameterizedType
      * @return the corresponding Type object
      * @see #getType(Class)
@@ -1328,7 +1328,7 @@ public final class TypeFactory {
      * a warning is logged about the pool size.
      * </p>
      *
-     * @param <T> the type parameter
+     * @param <T> the Java type represented by the requested {@code Type} object
      * @param typeName the name of the type to retrieve, with optional type parameters
      * @return the Type object corresponding to the type name
      * @throws IllegalArgumentException if typeName is {@code null} or if the type name format is invalid
@@ -1358,7 +1358,7 @@ public final class TypeFactory {
      * );
      * }</pre>
      *
-     * @param <T> the type parameter
+     * @param <T> the Java type handled by the custom type registration
      * @param targetClass the class for which to register the custom type
      * @param toStringFunc the function to convert an object of type T to a String, receives the object and a JsonParser
      * @param fromStringFunc the function to convert a String to an object of type T, receives the string and a JsonParser
@@ -1406,7 +1406,7 @@ public final class TypeFactory {
      * );
      * }</pre>
      *
-     * @param <T> the type parameter
+     * @param <T> the Java type handled by the custom type registration
      * @param cls the class for which to register the custom type
      * @param toStringFunc the function to convert an object of type T to a String
      * @param fromStringFunc the function to convert a String to an object of type T
@@ -1457,7 +1457,7 @@ public final class TypeFactory {
      * Type<MyClass> retrieved = TypeFactory.getType(MyClass.class);
      * }</pre>
      *
-     * @param <T> the type parameter
+     * @param <T> the Java type handled by the custom type registration
      * @param cls the class for which to register the type
      * @param type the Type implementation to register for the class
      * @throws IllegalArgumentException if cls or type is {@code null}, or if a type is already registered for the class
@@ -1495,7 +1495,7 @@ public final class TypeFactory {
      * );
      * }</pre>
      *
-     * @param <T> the type parameter
+     * @param <T> the Java type handled by the custom type registration
      * @param typeName the custom name for this type registration
      * @param targetClass the class that this type handles
      * @param toStringFunc the function to convert an object of type T to a String, receives the object and a JsonParser
@@ -1554,7 +1554,7 @@ public final class TypeFactory {
      * );
      * }</pre>
      *
-     * @param <T> the type parameter
+     * @param <T> the Java type handled by the custom type registration
      * @param typeName the custom name for this type registration
      * @param targetClass the class that this type handles
      * @param toStringFunc the function to convert an object of type T to a String

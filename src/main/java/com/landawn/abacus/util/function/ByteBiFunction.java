@@ -37,12 +37,12 @@ public interface ByteBiFunction<R> extends Throwables.ByteBiFunction<R, RuntimeE
      * String result = formatter.apply((byte)5, (byte)3);   // Returns "5+3=8"
      * }</pre>
      *
-     * @param t the first function argument
-     * @param u the second function argument
+     * @param a the first function argument
+     * @param b the second function argument
      * @return the function result
      */
     @Override
-    R apply(byte t, byte u);
+    R apply(byte a, byte b);
 
     /**
      * Returns a composed function that first applies this function to its input, and then applies the {@code after} function to the result.
@@ -53,6 +53,6 @@ public interface ByteBiFunction<R> extends Throwables.ByteBiFunction<R, RuntimeE
      * @return a composed function that first applies this function and then applies the {@code after} function
      */
     default <V> ByteBiFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        return (t, u) -> after.apply(apply(t, u));
+        return (a, b) -> after.apply(apply(a, b));
     }
 }

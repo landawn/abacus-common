@@ -31,10 +31,10 @@ import com.landawn.abacus.type.Type;
  *   <li>{@link #END_BRACE} - Closing brace '}' for objects</li>
  *   <li>{@link #START_BRACKET} - Opening bracket '[' for arrays</li>
  *   <li>{@link #END_BRACKET} - Closing bracket ']' for arrays</li>
- *   <li>{@link #START_QUOTATION_D} - Double quote '"' start</li>
- *   <li>{@link #END_QUOTATION_D} - Double quote '"' end</li>
- *   <li>{@link #START_QUOTATION_S} - Single quote <i>\'</i> start</li>
- *   <li>{@link #END_QUOTATION_S} - Single quote <i>\'</i> end</li>
+ *   <li>{@link #START_DOUBLE_QUOTE} - Double quote '"' start</li>
+ *   <li>{@link #END_DOUBLE_QUOTE} - Double quote '"' end</li>
+ *   <li>{@link #START_SINGLE_QUOTE} - Single quote <i>\'</i> start</li>
+ *   <li>{@link #END_SINGLE_QUOTE} - Single quote <i>\'</i> end</li>
  *   <li>{@link #COLON} - Colon ':' separator</li>
  *   <li>{@link #COMMA} - Comma ',' separator</li>
  * </ul>
@@ -77,24 +77,24 @@ interface JsonReader {
     /**
      * Start double quotation token '"'. Indicates the beginning of a double-quoted string.
      */
-    int START_QUOTATION_D = 5;
+    int START_DOUBLE_QUOTE = 5;
 
     /**
      * End double quotation token '"'. Indicates the end of a double-quoted string.
      */
-    int END_QUOTATION_D = 6;
+    int END_DOUBLE_QUOTE = 6;
 
     /**
      * Start single quotation token <i>\'</i>. Indicates the beginning of a single-quoted string.
      * Note: Single quotes are not standard JSON but may be supported for flexibility.
      */
-    int START_QUOTATION_S = 7;
+    int START_SINGLE_QUOTE = 7;
 
     /**
      * End single quotation token <i>\'</i>. Indicates the end of a single-quoted string.
      * Note: Single quotes are not standard JSON but may be supported for flexibility.
      */
-    int END_QUOTATION_S = 8;
+    int END_SINGLE_QUOTE = 8;
 
     /**
      * Colon token ':'. Used as the key-value separator in JSON objects.

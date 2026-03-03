@@ -241,7 +241,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li><b>{@link java.util.Collections}:</b> Core Java collection utilities</li>
  * </ul>
  *
- * <p><b>Example: Data Processing Pipeline</b>
+ * <p><b>Usage Examples: Data Processing Pipeline</b>
  * <pre>{@code
  * // Complete map processing example
  * Map<String, Double> salesData = Maps.of(
@@ -275,7 +275,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * boolean anyTargetMissed = Maps.anyMatch(variance, (quarter, var) -> var < 0);
  * }</pre>
  *
- * <p><b>Example: Configuration Management</b>
+ * <p><b>Usage Examples: Configuration Management</b>
  * <pre>{@code
  * // Configuration map processing
  * Map<String, String> config = loadConfiguration();
@@ -736,12 +736,12 @@ public final class Maps {
      */
     public static <K, V, M extends Map<K, V>> M zip(final Iterable<? extends K> keys, final Iterable<? extends V> values, final K defaultForKey,
             final V defaultForValue, final BiFunction<? super V, ? super V, ? extends V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
-        if (N.isEmpty(keys) || N.isEmpty(values)) {
+        if (N.isEmpty(keys) && N.isEmpty(values)) {
             return mapSupplier.apply(0);
         }
 
-        final Iterator<? extends K> keyIter = keys.iterator();
-        final Iterator<? extends V> valueIter = values.iterator();
+        final Iterator<? extends K> keyIter = N.isEmpty(keys) ? java.util.Collections.<K> emptyIterator() : keys.iterator();
+        final Iterator<? extends V> valueIter = N.isEmpty(values) ? java.util.Collections.<V> emptyIterator() : values.iterator();
 
         final int maxLen = N.max(keys instanceof Collection ? ((Collection<K>) keys).size() : 0,
                 values instanceof Collection ? ((Collection<V>) values).size() : 0);
@@ -789,6 +789,7 @@ public final class Maps {
      * @see #getOrDefaultIfAbsent(Map, Object, Object)
      * @see #getIfExists(Map, Object, Object, Object)
      */
+    // @ai-ignore getIfExists variants - intentional overloads for type-safe nested map access (1/2/3 level deep). Do not suggest consolidation.
     public static <K, V> Nullable<V> getIfExists(final Map<K, ? extends V> map, final K key) {
         if (N.isEmpty(map)) {
             return Nullable.empty();
@@ -982,6 +983,7 @@ public final class Maps {
      * @return the value at the specified path, or {@code null} if the path cannot be resolved
      * @see #getByPathOrDefault(Map, String, Object)
      */
+    // @ai-ignore getByPath variants - dot-separated path navigation into nested map/collection structures. Each variant serves a distinct return-type contract (raw, typed, Optional, Nullable). Do not suggest consolidation.
     @MayReturnNull
     public static <T> T getByPath(final Map<String, ?> map, final String path) {
         final Object val = getByPathOrDefaultValue(map, path, NONE);
@@ -1288,6 +1290,7 @@ public final class Maps {
      * @see #getIfExists(Map, Object)
      * @see #getAsOrDefault(Map, Object, Object)
      */
+    // @ai-ignore getOrDefaultIfAbsent variants - null-treating-as-absent retrieval with default values/suppliers and nested map support. Do not suggest consolidation.
     public static <K, V> V getOrDefaultIfAbsent(final Map<K, ? extends V> map, final K key, final V defaultValue) {
         N.checkArgNotNull(defaultValue, cs.defaultValue);
 
@@ -1426,6 +1429,7 @@ public final class Maps {
      * @return the List value mapped by the key, or an empty immutable List if the key is absent.
      * @see N#emptyList()
      */
+    // @ai-ignore getOrEmpty*IfAbsent variants - return empty immutable collection (List/Set/Map) when key is absent. Do not suggest consolidation.
     public static <K, E, V extends List<E>> List<E> getOrEmptyListIfAbsent(final Map<K, V> map, final K key) {
         if (N.isEmpty(map)) {
             return N.emptyList();
@@ -1521,13 +1525,13 @@ public final class Maps {
     /**
      * Returns the value associated with the specified {@code key} if it exists and is not {@code null} in the specified {@code map},
      * otherwise puts a new value obtained from {@code defaultValueSupplier} and returns it.
-     * 
+     *
      * <p>Here absent means key is not found in the specified map or found with {@code null} value.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, List<String>> map = new HashMap<>();
-     * 
+     *
      * List<String> list1 = Maps.getOrPutIfAbsent(map, "key1", () -> new ArrayList<>());
      * list1.add("value1");
      * // map now contains: {"key1"=["value1"]}
@@ -1547,6 +1551,7 @@ public final class Maps {
      * @param defaultValueSupplier the supplier to provide a default value if the key is absent; must not be {@code null}.
      * @return the value associated with the specified key, or a new value from {@code defaultValueSupplier} if the key is absent.
      */
+    // @ai-ignore getOrPut*IfAbsent variants - get-or-create pattern that inserts a new collection (List/Set/LinkedHashSet/Map/LinkedHashMap) when key is absent. Do not suggest consolidation.
     public static <K, V> V getOrPutIfAbsent(final Map<K, V> map, final K key, final Supplier<? extends V> defaultValueSupplier) {
         V val = map.get(key);
 
@@ -1761,6 +1766,7 @@ public final class Maps {
      * @param key the key whose associated value is to be returned.
      * @return an OptionalBoolean containing the boolean value, or empty if not found.
      */
+    // @ai-ignore getAs* type-conversion variants - retrieve map values with automatic type conversion for each primitive type (boolean/char/byte/short/int/long/float/double/String) plus generic typed access. Each pair provides Optional and OrDefault forms. Do not suggest consolidation.
     public static <K> OptionalBoolean getAsBoolean(final Map<? super K, ?> map, final K key) {
         if (N.isEmpty(map)) {
             return OptionalBoolean.empty();
@@ -2621,6 +2627,7 @@ public final class Maps {
      * @return a list of values corresponding to the keys found in the map. Returns an empty list
      *         if {@code map} or {@code keys} is {@code null} or empty.
      */
+    // @ai-ignore getValues* variants - batch retrieval of values by a collection of keys, with present-only or default-value semantics. Do not suggest consolidation.
     public static <K, V> List<V> getValuesIfPresent(final Map<K, ? extends V> map, final Collection<?> keys) {
         if (N.isEmpty(map) || N.isEmpty(keys)) {
             return new ArrayList<>();
@@ -3240,7 +3247,8 @@ public final class Maps {
         final int originalSize = map.size();
 
         for (final Map.Entry<?, ?> entry : entriesToRemove.entrySet()) {
-            if (N.equals(map.get(entry.getKey()), entry.getValue())) {
+            final Object curValue = map.get(entry.getKey());
+            if (N.equals(curValue, entry.getValue()) && (curValue != null || map.containsKey(entry.getKey()))) {
                 map.remove(entry.getKey());
             }
         }
@@ -4381,7 +4389,16 @@ public final class Maps {
                 final V value = map.remove(key);
 
                 if (value == null) {
-                    map.putIfAbsent(newKey, null);
+                    if (map.containsKey(newKey)) {
+                        final V merged = merger.apply(map.get(newKey), null);
+                        if (merged == null) {
+                            map.remove(newKey);
+                        } else {
+                            map.put(newKey, merged);
+                        }
+                    } else {
+                        map.put(newKey, null);
+                    }
                 } else {
                     map.merge(newKey, value, merger);
                 }

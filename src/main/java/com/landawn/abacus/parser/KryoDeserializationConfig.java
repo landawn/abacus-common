@@ -53,6 +53,17 @@ public class KryoDeserializationConfig extends DeserializationConfig<KryoDeseria
     }
 
     /**
+     * Compares this configuration with another object for equality.
+     *
+     * @param obj the object to compare with
+     * @return {@code true} if the objects are equal, {@code false} otherwise
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        return this == obj || (obj instanceof KryoDeserializationConfig && super.equals(obj));
+    }
+
+    /**
      * Returns a string representation of this configuration.
      *
      * <p>The string includes all configuration settings in the format:

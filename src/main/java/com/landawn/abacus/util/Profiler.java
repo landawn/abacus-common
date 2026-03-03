@@ -1628,7 +1628,7 @@ public final class Profiler {
         @Override
         public List<String> getMethodNameList() {
             List<String> result = null;
-            if (loopStatisticsList == null) {
+            if (loopStatisticsList == null || loopStatisticsList.isEmpty()) {
                 result = new ArrayList<>();
             } else {
                 result = (loopStatisticsList.get(0)).getMethodNameList();
@@ -1673,7 +1673,7 @@ public final class Profiler {
             if (loopStatisticsList != null) {
                 for (final LoopStatistics loopStatistics : loopStatisticsList) {
                     final MethodStatistics methodStatistics = loopStatistics.getMaxElapsedTimeMethod();
-                    if ((result == null) || (methodStatistics.getElapsedTimeInMillis() > result.getElapsedTimeInMillis())) {
+                    if (methodStatistics != null && ((result == null) || (methodStatistics.getElapsedTimeInMillis() > result.getElapsedTimeInMillis()))) {
                         result = methodStatistics;
                     }
                 }
@@ -1688,7 +1688,7 @@ public final class Profiler {
             if (loopStatisticsList != null) {
                 for (final LoopStatistics loopStatistics : loopStatisticsList) {
                     final MethodStatistics methodStatistics = loopStatistics.getMinElapsedTimeMethod();
-                    if ((result == null) || (methodStatistics.getElapsedTimeInMillis() < result.getElapsedTimeInMillis())) {
+                    if (methodStatistics != null && ((result == null) || (methodStatistics.getElapsedTimeInMillis() < result.getElapsedTimeInMillis()))) {
                         result = methodStatistics;
                     }
                 }

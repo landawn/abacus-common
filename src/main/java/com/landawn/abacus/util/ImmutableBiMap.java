@@ -70,7 +70,7 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
 
     private final BiMap<K, V> biMap;
 
-    private transient ImmutableBiMap<V, K> invertedView;
+    private transient volatile ImmutableBiMap<V, K> invertedView;
 
     /**
      * Constructs an {@code ImmutableBiMap} backed by the provided {@link BiMap}.

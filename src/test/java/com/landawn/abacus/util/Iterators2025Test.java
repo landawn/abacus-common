@@ -58,14 +58,14 @@ public class Iterators2025Test extends TestBase {
     @Test
     public void testOccurrencesOf() {
         List<Integer> numbers = Arrays.asList(1, 2, 3, 2, 4, 2, 5);
-        assertEquals(3, Iterators.occurrencesOf(numbers.iterator(), 2));
-        assertEquals(1, Iterators.occurrencesOf(numbers.iterator(), 5));
-        assertEquals(0, Iterators.occurrencesOf(numbers.iterator(), 6));
+        assertEquals(3, Iterators.frequency(numbers.iterator(), 2));
+        assertEquals(1, Iterators.frequency(numbers.iterator(), 5));
+        assertEquals(0, Iterators.frequency(numbers.iterator(), 6));
 
         List<String> withNulls = Arrays.asList("a", null, "b", null, "c");
-        assertEquals(2, Iterators.occurrencesOf(withNulls.iterator(), null));
+        assertEquals(2, Iterators.frequency(withNulls.iterator(), null));
 
-        assertEquals(0, Iterators.occurrencesOf(null, "test"));
+        assertEquals(0, Iterators.frequency(null, "test"));
     }
 
     @Test

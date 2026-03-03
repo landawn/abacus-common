@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -125,6 +127,7 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      */
     @Override
     default IntPredicate and(final java.util.function.IntPredicate other) {
+        Objects.requireNonNull(other);
         return value -> test(value) && other.test(value);
     }
 
@@ -152,6 +155,7 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      */
     @Override
     default IntPredicate or(final java.util.function.IntPredicate other) {
+        Objects.requireNonNull(other);
         return value -> test(value) || other.test(value);
     }
 
@@ -225,14 +229,14 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IntPredicate atLeastZero = IntPredicate.greaterEqual(0);
+     * IntPredicate atLeastZero = IntPredicate.greaterThanOrEqual(0);
      * boolean result = atLeastZero.test(0);   // Returns true
      * }</pre>
      *
      * @param targetInt the value to compare against
      * @return a predicate that tests if an {@code int} value is greater than or equal to {@code targetInt}
      */
-    static IntPredicate greaterEqual(final int targetInt) {
+    static IntPredicate greaterThanOrEqual(final int targetInt) {
         return value -> value >= targetInt;
     }
 
@@ -257,14 +261,14 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IntPredicate maxTen = IntPredicate.lessEqual(10);
+     * IntPredicate maxTen = IntPredicate.lessThanOrEqual(10);
      * boolean result = maxTen.test(10);   // Returns true
      * }</pre>
      *
      * @param targetInt the value to compare against
      * @return a predicate that tests if an {@code int} value is less than or equal to {@code targetInt}
      */
-    static IntPredicate lessEqual(final int targetInt) {
+    static IntPredicate lessThanOrEqual(final int targetInt) {
         return value -> value <= targetInt;
     }
 

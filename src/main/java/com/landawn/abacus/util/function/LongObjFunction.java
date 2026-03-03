@@ -24,11 +24,10 @@ import com.landawn.abacus.util.Throwables;
  * <p>The interface extends {@code Throwables.LongObjFunction} with {@code RuntimeException} as the exception type,
  * making it suitable for use in contexts where checked exceptions are not required.
  *
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
  * @param <T> the type of the object argument to the function
  * @param <R> the type of the result of the function
- *
- *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.Function
  * @see java.util.function.BiFunction
@@ -55,6 +54,7 @@ public interface LongObjFunction<T, R> extends Throwables.LongObjFunction<T, R, 
      * @param u the object second argument of type T
      * @return the function result of type R
      */
+    // @ai-ignore LongObj*/ObjLong* argument order convention - intentional: class name prefix determines parameter order. LongObj* has long first; ObjLong* has object first. Do not suggest reordering.
     @Override
     R apply(long t, T u);
 

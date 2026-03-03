@@ -1710,24 +1710,24 @@ public class CommonUtil110Test extends TestBase {
     }
 
     @Test
-    public void testLessEqual() {
-        Assertions.assertTrue(CommonUtil.lessEqual(1, 2));
-        Assertions.assertFalse(CommonUtil.lessEqual(2, 1));
-        Assertions.assertTrue(CommonUtil.lessEqual(1, 1));
+    public void testLessThanOrEqual() {
+        Assertions.assertTrue(CommonUtil.lessThanOrEqual(1, 2));
+        Assertions.assertFalse(CommonUtil.lessThanOrEqual(2, 1));
+        Assertions.assertTrue(CommonUtil.lessThanOrEqual(1, 1));
 
-        Assertions.assertTrue(CommonUtil.lessEqual(null, "a"));
-        Assertions.assertTrue(CommonUtil.lessEqual((String) null, (String) null));
+        Assertions.assertTrue(CommonUtil.lessThanOrEqual(null, "a"));
+        Assertions.assertTrue(CommonUtil.lessThanOrEqual((String) null, (String) null));
     }
 
     @Test
-    public void testLessEqualWithComparator() {
+    public void testLessThanOrEqualWithComparator() {
         Comparator<Integer> reverseComparator = (a, b) -> b.compareTo(a);
 
-        Assertions.assertTrue(CommonUtil.lessEqual(1, 2, null));
-        Assertions.assertTrue(CommonUtil.lessEqual(1, 1, null));
+        Assertions.assertTrue(CommonUtil.lessThanOrEqual(1, 2, null));
+        Assertions.assertTrue(CommonUtil.lessThanOrEqual(1, 1, null));
 
-        Assertions.assertFalse(CommonUtil.lessEqual(1, 2, reverseComparator));
-        Assertions.assertTrue(CommonUtil.lessEqual(2, 1, reverseComparator));
+        Assertions.assertFalse(CommonUtil.lessThanOrEqual(1, 2, reverseComparator));
+        Assertions.assertTrue(CommonUtil.lessThanOrEqual(2, 1, reverseComparator));
     }
 
     @Test
@@ -1754,24 +1754,24 @@ public class CommonUtil110Test extends TestBase {
     }
 
     @Test
-    public void testGreaterEqual() {
-        Assertions.assertFalse(CommonUtil.greaterEqual(1, 2));
-        Assertions.assertTrue(CommonUtil.greaterEqual(2, 1));
-        Assertions.assertTrue(CommonUtil.greaterEqual(1, 1));
+    public void testGreaterThanOrEqual() {
+        Assertions.assertFalse(CommonUtil.greaterThanOrEqual(1, 2));
+        Assertions.assertTrue(CommonUtil.greaterThanOrEqual(2, 1));
+        Assertions.assertTrue(CommonUtil.greaterThanOrEqual(1, 1));
 
-        Assertions.assertFalse(CommonUtil.greaterEqual(null, "a"));
-        Assertions.assertTrue(CommonUtil.greaterEqual((String) null, (String) null));
+        Assertions.assertFalse(CommonUtil.greaterThanOrEqual(null, "a"));
+        Assertions.assertTrue(CommonUtil.greaterThanOrEqual((String) null, (String) null));
     }
 
     @Test
-    public void testGreaterEqualWithComparator() {
+    public void testGreaterThanOrEqualWithComparator() {
         Comparator<Integer> reverseComparator = (a, b) -> b.compareTo(a);
 
-        Assertions.assertFalse(CommonUtil.greaterEqual(1, 2, null));
-        Assertions.assertTrue(CommonUtil.greaterEqual(1, 1, null));
+        Assertions.assertFalse(CommonUtil.greaterThanOrEqual(1, 2, null));
+        Assertions.assertTrue(CommonUtil.greaterThanOrEqual(1, 1, null));
 
-        Assertions.assertTrue(CommonUtil.greaterEqual(1, 2, reverseComparator));
-        Assertions.assertFalse(CommonUtil.greaterEqual(2, 1, reverseComparator));
+        Assertions.assertTrue(CommonUtil.greaterThanOrEqual(1, 2, reverseComparator));
+        Assertions.assertFalse(CommonUtil.greaterThanOrEqual(2, 1, reverseComparator));
     }
 
     @Test

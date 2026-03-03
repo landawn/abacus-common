@@ -177,7 +177,7 @@ public class BooleanList2025Test extends TestBase {
     public void test_array() {
         boolean[] arr = { true, false };
         BooleanList list = new BooleanList(arr);
-        assertSame(arr, list.array());
+        assertSame(arr, list.internalArray());
     }
 
     @Test
@@ -825,16 +825,16 @@ public class BooleanList2025Test extends TestBase {
     }
 
     @Test
-    public void test_occurrencesOf() {
+    public void test_frequency() {
         BooleanList list = BooleanList.of(true, false, true, false, true);
-        assertEquals(3, list.occurrencesOf(true));
-        assertEquals(2, list.occurrencesOf(false));
+        assertEquals(3, list.frequency(true));
+        assertEquals(2, list.frequency(false));
     }
 
     @Test
-    public void test_occurrencesOf_empty() {
+    public void test_frequency_empty() {
         BooleanList list = new BooleanList();
-        assertEquals(0, list.occurrencesOf(true));
+        assertEquals(0, list.frequency(true));
     }
 
     @Test

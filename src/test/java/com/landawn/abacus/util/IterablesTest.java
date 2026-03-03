@@ -18,39 +18,39 @@ public class IterablesTest extends AbstractTest {
     public void test_reverse() {
 
         {
-            final List<Integer> list = CommonUtil.asList(1, 2, 3, 4, 5);
+            final List<Integer> list = CommonUtil.toList(1, 2, 3, 4, 5);
             final List<Integer> reversed = Iterables.asReversed(list);
-            assertEquals(CommonUtil.asList(5, 4, 3, 2, 1), reversed);
+            assertEquals(CommonUtil.toList(5, 4, 3, 2, 1), reversed);
 
             reversed.add(6);
-            assertEquals(CommonUtil.asList(6, 1, 2, 3, 4, 5), list);
+            assertEquals(CommonUtil.toList(6, 1, 2, 3, 4, 5), list);
 
             list.remove(1);
-            assertEquals(CommonUtil.asList(5, 4, 3, 2, 6), reversed);
+            assertEquals(CommonUtil.toList(5, 4, 3, 2, 6), reversed);
         }
 
         {
-            final List<Integer> list = CommonUtil.asList(1, 2, 3, 4, 5);
+            final List<Integer> list = CommonUtil.toList(1, 2, 3, 4, 5);
             final List<Integer> reversed = Lists.reverse(list);
-            assertEquals(CommonUtil.asList(5, 4, 3, 2, 1), reversed);
+            assertEquals(CommonUtil.toList(5, 4, 3, 2, 1), reversed);
 
             reversed.add(6);
-            assertEquals(CommonUtil.asList(6, 1, 2, 3, 4, 5), list);
+            assertEquals(CommonUtil.toList(6, 1, 2, 3, 4, 5), list);
 
             list.remove(1);
-            assertEquals(CommonUtil.asList(5, 4, 3, 2, 6), reversed);
+            assertEquals(CommonUtil.toList(5, 4, 3, 2, 6), reversed);
         }
 
         {
-            final List<Integer> list = CommonUtil.asList(1, 2, 3, 4, 5);
+            final List<Integer> list = CommonUtil.toList(1, 2, 3, 4, 5);
             final List<Integer> reversed = CommonUtil.reverseToList(list);
-            assertEquals(CommonUtil.asList(5, 4, 3, 2, 1), reversed);
+            assertEquals(CommonUtil.toList(5, 4, 3, 2, 1), reversed);
         }
 
         {
-            final Collection<Integer> c = CommonUtil.asLinkedHashSet(1, 2, 3, 4, 5);
+            final Collection<Integer> c = CommonUtil.toLinkedHashSet(1, 2, 3, 4, 5);
             CommonUtil.reverse(c);
-            assertEquals(CommonUtil.asLinkedHashSet(5, 4, 3, 2, 1), c);
+            assertEquals(CommonUtil.toLinkedHashSet(5, 4, 3, 2, 1), c);
         }
     }
 

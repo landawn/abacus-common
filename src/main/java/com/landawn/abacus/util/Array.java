@@ -203,7 +203,7 @@ import com.landawn.abacus.annotation.NullSafe;
  *   <li><b>{@link com.landawn.abacus.util.stream.Stream}:</b> Stream operations for arrays</li>
  * </ul>
  *
- * <p><b>Example: Data Processing Pipeline</b>
+ * <p><b>Usage Examples: Data Processing Pipeline</b>
  * <pre>{@code
  * // Complete array processing example
  * Integer[] rawData = {1, null, 3, null, 5, 6, null, 8};
@@ -229,7 +229,7 @@ import com.landawn.abacus.annotation.NullSafe;
  * double[][][] processedCube = Array.unbox(cube, 0.0);
  * }</pre>
  *
- * <p><b>Example: Matrix Mathematics</b>
+ * <p><b>Usage Examples: Matrix Mathematics</b>
  * <pre>{@code
  * // Matrix operations for mathematical computations
  * double[][] matrixA = {{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}};
@@ -802,7 +802,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param a the array to be converted to a list. Can be {@code null} or empty.
      * @return a fixed-size list backed by the specified array, or an empty list if the array is {@code null} or empty.
      * @see Arrays#asList(Object...)
-     * @see N#asList(Object...)
+     * @see N#asArray(Object...)
+     * @see N#toList(Object...)
      * @see List#of(Object...)
      * @see N#emptyList()
      */
@@ -949,6 +950,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * String[] names = Array.of("Alice", "Bob", "Charlie");     // returns String array of names
      * }</pre>
      *
+     * @param <T> the type of the elements in the array.
      * @param a the input array of CharSequence.
      * @return the same input array.
      * @see N#asArray(Object...)

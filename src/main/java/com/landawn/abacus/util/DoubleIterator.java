@@ -569,7 +569,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      */
     @SuppressWarnings("deprecation")
     public double[] toArray() {
-        return toList().trimToSize().array();
+        return toList().trimToSize().internalArray();
     }
 
     /**

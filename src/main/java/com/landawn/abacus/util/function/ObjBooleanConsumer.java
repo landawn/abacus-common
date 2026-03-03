@@ -52,10 +52,9 @@ import com.landawn.abacus.util.Throwables;
  * };
  * }</pre>
  *
- * @param <T> the type of the object argument to the operation
- *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @param <T> the type of the object argument to the operation
  *
  * @see java.util.function.Consumer
  * @see java.util.function.ObjIntConsumer
@@ -71,6 +70,7 @@ public interface ObjBooleanConsumer<T> extends Throwables.ObjBooleanConsumer<T, 
      * @param t the first input argument
      * @param value the second input argument
      */
+    // @ai-ignore Obj* argument order convention - intentional: class name prefix determines parameter order. ObjBoolean* has object first, boolean second. Do not suggest reordering.
     @Override
     void accept(T t, boolean value);
 }

@@ -62,7 +62,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *   <li><b>Fluent API Design:</b> Intuitive method chaining for building complex asynchronous workflows</li>
  *   <li><b>Recursive Cancellation:</b> {@code cancelAll()} propagates cancellation through entire execution chains</li>
  *   <li><b>Built-in Delay Support:</b> Native {@code thenDelay()} methods for time-based workflow control</li>
- *   <li><b>Result Wrapping:</b> {@code gett()} methods return {@link Result} objects for enhanced error handling</li>
+ *   <li><b>Result Wrapping:</b> {@code getAsResult()} methods return {@link Result} objects for enhanced error handling</li>
  *   <li><b>Executor Flexibility:</b> Per-operation executor configuration with {@code thenUse()} methods</li>
  *   <li><b>Multiple Combination Patterns:</b> Support for both/either completion scenarios with various callback types</li>
  *   <li><b>Type Safety:</b> Strong generic typing throughout the composition chain</li>
@@ -161,8 +161,8 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *
  * <p><b>Result Handling and Error Management:</b>
  * <ul>
- *   <li><b>{@code gett()}:</b> Non-blocking result retrieval with Result wrapper</li>
- *   <li><b>{@code gett(timeout)}:</b> Timeout-aware result retrieval</li>
+ *   <li><b>{@code getAsResult()}:</b> Non-blocking result retrieval with Result wrapper</li>
+ *   <li><b>{@code getAsResult(timeout)}:</b> Timeout-aware result retrieval</li>
  *   <li><b>{@code handle()}:</b> Unified success/error handling with BiFunction</li>
  *   <li><b>{@code whenComplete()}:</b> Side-effect execution regardless of completion state</li>
  *   <li><b>{@code exceptionally()}:</b> Error recovery with fallback values</li>
@@ -221,7 +221,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *   <li>Prefer {@code map()} over {@code thenCallAsync()} for simple transformations</li>
  *   <li>Use {@code cancelAll()} to ensure complete resource cleanup</li>
  *   <li>Specify appropriate executors for CPU-bound vs I/O-bound operations</li>
- *   <li>Use {@code gett()} methods for non-blocking result retrieval with error handling</li>
+ *   <li>Use {@code getAsResult()} methods for non-blocking result retrieval with error handling</li>
  *   <li>Implement timeouts using {@code thenDelay()} or combination patterns</li>
  *   <li>Use {@code handle()} for unified success/error processing</li>
  * </ul>
@@ -241,10 +241,10 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *   <li><b>Propagation:</b> Exceptions automatically propagate through the chain unless handled</li>
  *   <li><b>Recovery:</b> Use {@code handle()} or {@code exceptionally()} for error recovery</li>
  *   <li><b>Timeout Handling:</b> Combine with delayed futures for timeout management</li>
- *   <li><b>Validation:</b> Use {@code gett()} methods to safely retrieve results without exceptions</li>
+ *   <li><b>Validation:</b> Use {@code getAsResult()} methods to safely retrieve results without exceptions</li>
  * </ul>
  *
- * <p><b>Example: Microservice Integration Pattern</b>
+ * <p><b>Usage Examples: Microservice Integration Pattern</b>
  * <pre>{@code
  * public class OrderProcessingService {
  *     private final UserService userService;
@@ -606,9 +606,9 @@ public class ContinuableFuture<T> implements Future<T> {
      * boolean allCancelled = future3.cancelAll(true);
      * }</pre>
      *
-     * @param mayInterruptIfRunning {@code true} if the thread executing the tasks should be interrupted;.
+     * @param mayInterruptIfRunning {@code true} if the thread executing the tasks should be interrupted;
      *                              otherwise, in-progress tasks are allowed to complete.
-     * @return {@code true} if all futures in the chain were successfully cancelled; {@code false} if.
+     * @return {@code true} if all futures in the chain were successfully cancelled; {@code false} if
      *         any future failed to cancel.
      * @see #cancel(boolean)
      * @see Future#cancel(boolean)
@@ -776,7 +776,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <pre>{@code
      * ContinuableFuture<String> future = ContinuableFuture.call(() -> riskyOperation());
      * 
-     * Result<String, Exception> result = future.gett();
+     * Result<String, Exception> result = future.getAsResult();
      * 
      * if (result.isSuccess()) {
      *     System.out.println("Success: " + result.orElseThrow());
@@ -790,7 +790,7 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @return a {@code Result} object containing either the computed result or the exception.
      */
-    public Result<T, Exception> gett() {
+    public Result<T, Exception> getAsResult() {
         try {
             return Result.of(get(), null);
         } catch (final Exception e) {
@@ -803,14 +803,14 @@ public class ContinuableFuture<T> implements Future<T> {
      * wrapping both the result and any exception into a {@link Result} object. This method
      * never throws checked exceptions.
      * 
-     * <p>This is the timeout version of {@link #gett()}, useful when you want to limit
+     * <p>This is the timeout version of {@link #getAsResult()}, useful when you want to limit
      * the waiting time but still handle results in a functional style without checked exceptions.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Data> future = ContinuableFuture.call(() -> fetchData());
      * 
-     * Result<Data, Exception> result = future.gett(10, TimeUnit.SECONDS);
+     * Result<Data, Exception> result = future.getAsResult(10, TimeUnit.SECONDS);
      * 
      * Data data = result.orElseGet(() -> {
      *     if (result.getException() instanceof TimeoutException) {
@@ -824,7 +824,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param unit the time unit of the timeout argument.
      * @return a {@code Result} object containing either the computed result or the exception.
      */
-    public Result<T, Exception> gett(final long timeout, final TimeUnit unit) {
+    public Result<T, Exception> getAsResult(final long timeout, final TimeUnit unit) {
         try {
             return Result.of(get(timeout, unit), null);
         } catch (final Exception e) {
@@ -838,7 +838,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * or providing immediate fallback values.
      * 
      * <p>Note that this method still throws exceptions if the future is done but completed
-     * exceptionally. Use {@link #gett()} with {@link Result#orElseThrow()} for exception-safe
+     * exceptionally. Use {@link #getAsResult()} with {@link Result#orElseThrow()} for exception-safe
      * immediate value retrieval.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -971,10 +971,10 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action the bi-function to apply to the result and exception.
      * @return the result of applying the function.
      * @throws E if the bi-function throws an exception.
-     * @see #gett()
+     * @see #getAsResult()
      */
     public <U, E extends Exception> U getThenApply(final Throwables.BiFunction<? super T, ? super Exception, ? extends U, E> action) throws E {
-        final Result<T, Exception> result = gett();
+        final Result<T, Exception> result = getAsResult();
         return action.apply(result.orElseIfFailure(null), result.getException());
     }
 
@@ -1004,11 +1004,11 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action the bi-function to apply to the result and exception.
      * @return the result of applying the function.
      * @throws E if the bi-function throws an exception.
-     * @see #gett(long, TimeUnit)
+     * @see #getAsResult(long, TimeUnit)
      */
     public <U, E extends Exception> U getThenApply(final long timeout, final TimeUnit unit,
             final Throwables.BiFunction<? super T, ? super Exception, ? extends U, E> action) throws E {
-        final Result<T, Exception> result = gett(timeout, unit);
+        final Result<T, Exception> result = getAsResult(timeout, unit);
         return action.apply(result.orElseIfFailure(null), result.getException());
     }
 
@@ -1099,10 +1099,10 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param <E> the type of exception the bi-consumer may throw.
      * @param action the bi-consumer to execute with the result and exception.
      * @throws E if the bi-consumer throws an exception.
-     * @see #gett()
+     * @see #getAsResult()
      */
     public <E extends Exception> void getThenAccept(final Throwables.BiConsumer<? super T, ? super Exception, E> action) throws E {
-        final Result<T, Exception> result = gett();
+        final Result<T, Exception> result = getAsResult();
         action.accept(result.orElseIfFailure(null), result.getException());
     }
 
@@ -1131,11 +1131,11 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param unit the time unit of the timeout argument.
      * @param action the bi-consumer to execute with the result and exception.
      * @throws E if the bi-consumer throws an exception.
-     * @see #gett(long, TimeUnit)
+     * @see #getAsResult(long, TimeUnit)
      */
     public <E extends Exception> void getThenAccept(final long timeout, final TimeUnit unit,
             final Throwables.BiConsumer<? super T, ? super Exception, E> action) throws E {
-        final Result<T, Exception> result = gett(timeout, unit);
+        final Result<T, Exception> result = getAsResult(timeout, unit);
         action.accept(result.orElseIfFailure(null), result.getException());
     }
 
@@ -1303,11 +1303,11 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param action the bi-consumer to execute with the result and exception.
      * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
-     * @see #gett()
+     * @see #getAsResult()
      */
     public ContinuableFuture<Void> thenRunAsync(final Throwables.BiConsumer<? super T, ? super Exception, ? extends Exception> action) {
         return execute(() -> {
-            final Result<T, Exception> result = gett();
+            final Result<T, Exception> result = getAsResult();
             action.accept(result.orElseIfFailure(null), result.getException());
             return null;
         });
@@ -1398,11 +1398,11 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param <R> the type of the result returned by the bi-function.
      * @param action the bi-function to apply to the result and exception.
      * @return a new {@code ContinuableFuture<R>} with the transformed result.
-     * @see #gett()
+     * @see #getAsResult()
      */
     public <R> ContinuableFuture<R> thenCallAsync(final Throwables.BiFunction<? super T, ? super Exception, ? extends R, ? extends Exception> action) {
         return execute(() -> {
-            final Result<T, Exception> result = gett();
+            final Result<T, Exception> result = getAsResult();
             return action.apply(result.orElseIfFailure(null), result.getException());
         });
     }
@@ -1503,13 +1503,13 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param other the other future to wait for.
      * @param action the consumer to execute with the tuple of results and exceptions.
      * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
-     * @see #gett()
+     * @see #getAsResult()
      */
     public <U> ContinuableFuture<Void> runAsyncAfterBoth(final ContinuableFuture<U> other,
             final Throwables.Consumer<? super Tuple4<T, ? super Exception, U, ? super Exception>, ? extends Exception> action) {
         return execute(() -> {
-            final Result<T, Exception> result = gett();
-            final Result<U, Exception> result2 = other.gett();
+            final Result<T, Exception> result = getAsResult();
+            final Result<U, Exception> result2 = other.getAsResult();
 
             action.accept(Tuple.of(result.orElseIfFailure(null), result.getException(), result2.orElseIfFailure(null), result2.getException()));
             return null;
@@ -1543,13 +1543,13 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param other the other future to wait for.
      * @param action the quad-consumer to execute with both results and exceptions.
      * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
-     * @see #gett()
+     * @see #getAsResult()
      */
     public <U> ContinuableFuture<Void> runAsyncAfterBoth(final ContinuableFuture<U> other,
             final Throwables.QuadConsumer<? super T, ? super Exception, ? super U, ? super Exception, ? extends Exception> action) {
         return execute(() -> {
-            final Result<T, Exception> result = gett();
-            final Result<U, Exception> result2 = other.gett();
+            final Result<T, Exception> result = getAsResult();
+            final Result<U, Exception> result2 = other.getAsResult();
 
             action.accept(result.orElseIfFailure(null), result.getException(), result2.orElseIfFailure(null), result2.getException());
             return null;
@@ -1653,13 +1653,13 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param other the other ContinuableFuture to wait for; must not be null.
      * @param action the function that processes the tuple of results and exceptions; must not be null.
      * @return a new {@code ContinuableFuture<R>} that completes with the result of the function.
-     * @see #gett()
+     * @see #getAsResult()
      */
     public <U, R> ContinuableFuture<R> callAsyncAfterBoth(final ContinuableFuture<U> other,
             final Throwables.Function<? super Tuple4<T, ? super Exception, U, ? super Exception>, ? extends R, ? extends Exception> action) {
         return execute(() -> {
-            final Result<T, Exception> result = gett();
-            final Result<U, Exception> result2 = other.gett();
+            final Result<T, Exception> result = getAsResult();
+            final Result<U, Exception> result2 = other.getAsResult();
 
             return action.apply(Tuple.of(result.orElseIfFailure(null), result.getException(), result2.orElseIfFailure(null), result2.getException()));
         }, other);
@@ -1699,8 +1699,8 @@ public class ContinuableFuture<T> implements Future<T> {
     public <U, R> ContinuableFuture<R> callAsyncAfterBoth(final ContinuableFuture<U> other,
             final Throwables.QuadFunction<? super T, ? super Exception, ? super U, ? super Exception, ? extends R, ? extends Exception> action) {
         return execute(() -> {
-            final Result<T, Exception> result = gett();
-            final Result<U, Exception> result2 = other.gett();
+            final Result<T, Exception> result = getAsResult();
+            final Result<U, Exception> result2 = other.getAsResult();
 
             return action.apply(result.orElseIfFailure(null), result.getException(), result2.orElseIfFailure(null), result2.getException());
         }, other);
@@ -1796,12 +1796,12 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param other the other ContinuableFuture to race against; must not be null.
      * @param action the BiConsumer to execute with the result and exception; must not be null.
      * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
-     * @see #gett()
+     * @see #getAsResult()
      */
     public ContinuableFuture<Void> runAsyncAfterEither(final ContinuableFuture<? extends T> other,
             final Throwables.BiConsumer<? super T, ? super Exception, ? extends Exception> action) {
         return execute(() -> {
-            final Result<T, Exception> result = Futures.anyOf(Array.asList(ContinuableFuture.this, other)).gett();
+            final Result<T, Exception> result = Futures.anyOf(Array.asList(ContinuableFuture.this, other)).getAsResult();
 
             action.accept(result.orElseIfFailure(null), result.getException());
             return null;
@@ -1898,7 +1898,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param other the other ContinuableFuture to race against; must not be null.
      * @param action the BiFunction to transform the result and exception; must not be null.
      * @return a new ContinuableFuture that completes with the transformed result.
-     * @see #gett()
+     * @see #getAsResult()
      */
     public <R> ContinuableFuture<R> callAsyncAfterEither(final ContinuableFuture<? extends T> other,
             final Throwables.BiFunction<? super T, ? super Exception, ? extends R, ? extends Exception> action) {
@@ -2175,7 +2175,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param other the other ContinuableFuture to wait for; must not be null.
      * @param action the BiFunction to transform based on result and exception; must not be null.
      * @return a new ContinuableFuture that completes with the transformed result.
-     * @see #gett()
+     * @see #getAsResult()
      */
     public <R> ContinuableFuture<R> callAsyncAfterFirstSuccess(final ContinuableFuture<? extends T> other,
             final Throwables.BiFunction<? super T, ? super Exception, ? extends R, ? extends Exception> action) {
@@ -2448,6 +2448,9 @@ public class ContinuableFuture<T> implements Future<T> {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return this.get();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new CompletionException(e);
             } catch (Exception e) {
                 throw new CompletionException(e);
             }
@@ -2542,9 +2545,14 @@ public class ContinuableFuture<T> implements Future<T> {
      */
     @Beta
     public CompletableFuture<T> toCompletableFuture(final Executor executor) {
+        N.checkArgNotNull(executor);
+
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return this.get();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new CompletionException(e);
             } catch (Exception e) {
                 throw new CompletionException(e);
             }

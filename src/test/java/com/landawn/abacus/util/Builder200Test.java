@@ -146,7 +146,7 @@ public class Builder200Test extends TestBase {
 
     @Test
     public void testOfDataset() {
-        Dataset dataset = new RowDataset(Arrays.asList("col1"), CommonUtil.asList(new ArrayList<>()));
+        Dataset dataset = new RowDataset(Arrays.asList("col1"), CommonUtil.toList(new ArrayList<>()));
         DatasetBuilder builder = Builder.of(dataset);
         assertNotNull(builder);
         assertSame(dataset, builder.val());
@@ -169,14 +169,14 @@ public class Builder200Test extends TestBase {
 
     @Test
     public void testVal() {
-        ListBuilder<String, List<String>> builder = Builder.of(CommonUtil.asList("test"));
-        assertEquals(CommonUtil.asList("test"), builder.val());
+        ListBuilder<String, List<String>> builder = Builder.of(CommonUtil.toList("test"));
+        assertEquals(CommonUtil.toList("test"), builder.val());
     }
 
     @Test
     public void testAccept() {
         AtomicInteger counter = new AtomicInteger(0);
-        ListBuilder<String, List<String>> builder = Builder.of(CommonUtil.asList("test"));
+        ListBuilder<String, List<String>> builder = Builder.of(CommonUtil.toList("test"));
         builder.accept(s -> counter.incrementAndGet());
         assertEquals(1, counter.get());
     }

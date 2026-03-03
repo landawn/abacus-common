@@ -921,11 +921,11 @@ public class Fn102Test extends TestBase {
     }
 
     @Test
-    public void testGreaterEqual() {
-        Predicate<Integer> greaterEqual = Fn.greaterEqual(5);
-        assertTrue(greaterEqual.test(6));
-        assertTrue(greaterEqual.test(5));
-        assertFalse(greaterEqual.test(4));
+    public void testGreaterThanOrEqual() {
+        Predicate<Integer> greaterThanOrEqual = Fn.greaterThanOrEqual(5);
+        assertTrue(greaterThanOrEqual.test(6));
+        assertTrue(greaterThanOrEqual.test(5));
+        assertFalse(greaterThanOrEqual.test(4));
     }
 
     @Test
@@ -937,11 +937,11 @@ public class Fn102Test extends TestBase {
     }
 
     @Test
-    public void testLessEqual() {
-        Predicate<Integer> lessEqual = Fn.lessEqual(5);
-        assertTrue(lessEqual.test(4));
-        assertTrue(lessEqual.test(5));
-        assertFalse(lessEqual.test(6));
+    public void testLessThanOrEqual() {
+        Predicate<Integer> lessThanOrEqual = Fn.lessThanOrEqual(5);
+        assertTrue(lessThanOrEqual.test(4));
+        assertTrue(lessThanOrEqual.test(5));
+        assertFalse(lessThanOrEqual.test(6));
     }
 
     @Test
@@ -1118,11 +1118,11 @@ public class Fn102Test extends TestBase {
     }
 
     @Test
-    public void testGreaterEqualBiPredicate() {
-        BiPredicate<Integer, Integer> greaterEqual = Fn.greaterEqual();
-        assertTrue(greaterEqual.test(6, 5));
-        assertTrue(greaterEqual.test(5, 5));
-        assertFalse(greaterEqual.test(4, 5));
+    public void testGreaterThanOrEqualBiPredicate() {
+        BiPredicate<Integer, Integer> greaterThanOrEqual = Fn.greaterThanOrEqual();
+        assertTrue(greaterThanOrEqual.test(6, 5));
+        assertTrue(greaterThanOrEqual.test(5, 5));
+        assertFalse(greaterThanOrEqual.test(4, 5));
     }
 
     @Test
@@ -1134,11 +1134,11 @@ public class Fn102Test extends TestBase {
     }
 
     @Test
-    public void testLessEqualBiPredicate() {
-        BiPredicate<Integer, Integer> lessEqual = Fn.lessEqual();
-        assertTrue(lessEqual.test(4, 5));
-        assertTrue(lessEqual.test(5, 5));
-        assertFalse(lessEqual.test(6, 5));
+    public void testLessThanOrEqualBiPredicate() {
+        BiPredicate<Integer, Integer> lessThanOrEqual = Fn.lessThanOrEqual();
+        assertTrue(lessThanOrEqual.test(4, 5));
+        assertTrue(lessThanOrEqual.test(5, 5));
+        assertFalse(lessThanOrEqual.test(6, 5));
     }
 
     @Test

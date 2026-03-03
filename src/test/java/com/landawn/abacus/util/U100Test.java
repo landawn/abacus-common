@@ -379,9 +379,9 @@ public class U100Test extends TestBase {
             java.util.Optional<String> empty = Optional.<String> empty().toJdkOptional();
             assertFalse(empty.isPresent());
 
-            java.util.Optional<String> presentDeprecated = Optional.of("test").__();
-            assertTrue(presentDeprecated.isPresent());
-            assertEquals("test", presentDeprecated.get());
+            //        java.util.Optional<String> presentDeprecated = Optional.of("test").__();
+            //        assertTrue(presentDeprecated.isPresent());
+            //        assertEquals("test", presentDeprecated.get());
         }
 
         @Test
@@ -1533,9 +1533,9 @@ public class U100Test extends TestBase {
             java.util.OptionalInt jdkEmpty = OptionalInt.empty().toJdkOptional();
             assertFalse(jdkEmpty.isPresent());
 
-            java.util.OptionalInt jdkOptDeprecated = OptionalInt.of(42).__();
-            assertTrue(jdkOptDeprecated.isPresent());
-            assertEquals(42, jdkOptDeprecated.getAsInt());
+            //    java.util.OptionalInt jdkOptDeprecated = OptionalInt.of(42).__();
+            //    assertTrue(jdkOptDeprecated.isPresent());
+            //    assertEquals(42, jdkOptDeprecated.getAsInt());
         }
 
         @Test
@@ -2586,9 +2586,9 @@ public class U100Test extends TestBase {
             java.util.OptionalLong jdkEmpty = OptionalLong.empty().toJdkOptional();
             assertFalse(jdkEmpty.isPresent());
 
-            java.util.OptionalLong jdkOptDeprecated = OptionalLong.of(42L).__();
-            assertTrue(jdkOptDeprecated.isPresent());
-            assertEquals(42L, jdkOptDeprecated.getAsLong());
+            //    java.util.OptionalLong jdkOptDeprecated = OptionalLong.of(42L).__();
+            //    assertTrue(jdkOptDeprecated.isPresent());
+            //    assertEquals(42L, jdkOptDeprecated.getAsLong());
         }
 
         @Test
@@ -2988,9 +2988,9 @@ public class U100Test extends TestBase {
             java.util.OptionalDouble jdkEmpty = OptionalDouble.empty().toJdkOptional();
             assertFalse(jdkEmpty.isPresent());
 
-            java.util.OptionalDouble jdkOptDeprecated = OptionalDouble.of(42.5).__();
-            assertTrue(jdkOptDeprecated.isPresent());
-            assertEquals(42.5, jdkOptDeprecated.getAsDouble());
+            //    java.util.OptionalDouble jdkOptDeprecated = OptionalDouble.of(42.5).__();
+            //    assertTrue(jdkOptDeprecated.isPresent());
+            //    assertEquals(42.5, jdkOptDeprecated.getAsDouble());
         }
 
         @Test

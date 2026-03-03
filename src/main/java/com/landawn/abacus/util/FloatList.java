@@ -222,7 +222,7 @@ import com.landawn.abacus.util.stream.FloatStream;
  * <ul>
  *   <li><b>Aggregation:</b> Sum, min, max operations via stream API</li>
  *   <li><b>Central Tendency:</b> Median calculation with efficient sorting</li>
- *   <li><b>Occurrence Counting:</b> {@code occurrencesOf()} for frequency analysis</li>
+ *   <li><b>Occurrence Counting:</b> {@code frequency()} for frequency analysis</li>
  *   <li><b>Duplicate Detection:</b> {@code hasDuplicates()}, {@code removeDuplicates()}</li>
  * </ul>
  *
@@ -270,7 +270,7 @@ import com.landawn.abacus.util.stream.FloatStream;
  *   <li><b>{@link FloatStream}:</b> Functional processing of float sequences</li>
  * </ul>
  *
- * <p><b>Example: Graphics Programming</b>
+ * <p><b>Usage Examples: Graphics Programming</b>
  * <pre>{@code
  * // Define 3D vertex data for a triangle
  * FloatList vertices = new FloatList(9);   // 3 vertices × 3 coordinates
@@ -488,7 +488,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     @Beta
     @Deprecated
     @Override
-    public float[] array() {
+    public float[] internalArray() {
         return elementData;
     }
 
@@ -586,7 +586,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
         ensureCapacity(size + numNew);
 
-        N.copy(c.array(), 0, elementData, size, numNew);
+        N.copy(c.internalArray(), 0, elementData, size, numNew);
 
         size += numNew;
 
@@ -622,7 +622,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
             N.copy(elementData, index, elementData, index + numNew, numMoved);
         }
 
-        N.copy(c.array(), 0, elementData, index, numNew);
+        N.copy(c.internalArray(), 0, elementData, index, numNew);
 
         size += numNew;
 
@@ -1659,7 +1659,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @param valueToFind the value whose occurrences are to be counted
      * @return the number of times the specified value appears in this list
      */
-    public int occurrencesOf(final float valueToFind) {
+    public int frequency(final float valueToFind) {
         if (size == 0) {
             return 0;
         }

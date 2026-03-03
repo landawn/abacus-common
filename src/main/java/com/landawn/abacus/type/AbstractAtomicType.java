@@ -34,16 +34,14 @@ public abstract class AbstractAtomicType<T> extends AbstractType<T> {
     }
 
     /**
-     * Checks if this type represents values that should not be quoted in CSV format.
-     * For atomic types, this method always returns {@code true}, indicating that
-     * atomic values should be written without quotes in CSV files.
-     * This is because atomic types typically represent numeric or boolean values
-     * that are self-delimiting and don't require quotation marks.
+     * Indicates whether values of this type require quoting in CSV format.
+     * Atomic types represent numeric or boolean values that are self-delimiting
+     * and do not require quotation marks.
      *
-     * @return {@code true}, indicating that atomic type values should not be quoted in CSV format
+     * @return {@code false}, as atomic type values do not require quoting in CSV format
      */
     @Override
-    public boolean isNonQuotableCsvType() {
-        return true;
+    public boolean isCsvQuoteRequired() {
+        return false;
     }
 }

@@ -89,7 +89,7 @@ public class Multiset200Test extends TestBase {
 
     @Test
     public void testConstructorWithSetCollection() {
-        Set<String> initialElements = CommonUtil.asSet("a", "b", "c");
+        Set<String> initialElements = CommonUtil.toSet("a", "b", "c");
         Multiset<String> multiset = new Multiset<>(initialElements);
         assertEquals(3, multiset.size());
         assertEquals(1, multiset.getCount("a"));
@@ -191,11 +191,11 @@ public class Multiset200Test extends TestBase {
     @Test
     public void testOccurrencesOfAndGetCount() {
         Multiset<String> multiset = Multiset.of("a", "b", "a");
-        assertEquals(2, multiset.occurrencesOf("a"));
         assertEquals(2, multiset.getCount("a"));
-        assertEquals(1, multiset.occurrencesOf("b"));
+        assertEquals(2, multiset.getCount("a"));
         assertEquals(1, multiset.getCount("b"));
-        assertEquals(0, multiset.occurrencesOf("c"));
+        assertEquals(1, multiset.getCount("b"));
+        assertEquals(0, multiset.getCount("c"));
         assertEquals(0, multiset.getCount("c"));
         assertEquals(0, multiset.getCount(null));
     }
@@ -215,7 +215,7 @@ public class Multiset200Test extends TestBase {
         min = multiset.minOccurrences();
         assertTrue(min.isPresent());
         assertEquals(1, min.get().left().intValue());
-        assertTrue(CommonUtil.asSet("b", "d").contains(min.get().right()));
+        assertTrue(CommonUtil.toSet("b", "d").contains(min.get().right()));
 
         multiset.clear();
         multiset.add("x", 5);
@@ -240,7 +240,7 @@ public class Multiset200Test extends TestBase {
         max = multiset.maxOccurrences();
         assertTrue(max.isPresent());
         assertEquals(3, max.get().left().intValue());
-        assertTrue(CommonUtil.asSet("c", "d").contains(max.get().right()));
+        assertTrue(CommonUtil.toSet("c", "d").contains(max.get().right()));
 
         multiset.clear();
         multiset.add("y", 2);
@@ -259,7 +259,7 @@ public class Multiset200Test extends TestBase {
         Optional<Pair<Integer, List<String>>> allMin = multiset.allMinOccurrences();
         assertTrue(allMin.isPresent());
         assertEquals(1, allMin.get().left().intValue());
-        assertEquals(CommonUtil.asSet("b", "d"), new HashSet<>(allMin.get().right()));
+        assertEquals(CommonUtil.toSet("b", "d"), new HashSet<>(allMin.get().right()));
 
         multiset.clear();
         multiset.add("x", 5);
@@ -267,7 +267,7 @@ public class Multiset200Test extends TestBase {
         allMin = multiset.allMinOccurrences();
         assertTrue(allMin.isPresent());
         assertEquals(5, allMin.get().left().intValue());
-        assertEquals(CommonUtil.asSet("x", "y"), new HashSet<>(allMin.get().right()));
+        assertEquals(CommonUtil.toSet("x", "y"), new HashSet<>(allMin.get().right()));
     }
 
     @Test
@@ -279,7 +279,7 @@ public class Multiset200Test extends TestBase {
         Optional<Pair<Integer, List<String>>> allMax = multiset.allMaxOccurrences();
         assertTrue(allMax.isPresent());
         assertEquals(3, allMax.get().left().intValue());
-        assertEquals(CommonUtil.asSet("a", "d"), new HashSet<>(allMax.get().right()));
+        assertEquals(CommonUtil.toSet("a", "d"), new HashSet<>(allMax.get().right()));
 
         multiset.clear();
         multiset.add("x", 1);
@@ -287,7 +287,7 @@ public class Multiset200Test extends TestBase {
         allMax = multiset.allMaxOccurrences();
         assertTrue(allMax.isPresent());
         assertEquals(1, allMax.get().left().intValue());
-        assertEquals(CommonUtil.asSet("x", "y"), new HashSet<>(allMax.get().right()));
+        assertEquals(CommonUtil.toSet("x", "y"), new HashSet<>(allMax.get().right()));
     }
 
     @Test
@@ -336,20 +336,20 @@ public class Multiset200Test extends TestBase {
     public void testElementSet() {
         Multiset<String> multiset = Multiset.of("a", "b", "a", "c", "b", "a");
         Set<String> elementSet = multiset.elementSet();
-        assertEquals(CommonUtil.asSet("a", "b", "c"), elementSet);
+        assertEquals(CommonUtil.toSet("a", "b", "c"), elementSet);
         assertEquals(3, elementSet.size());
 
         multiset.add("d");
-        assertEquals(CommonUtil.asSet("a", "b", "c", "d"), elementSet);
+        assertEquals(CommonUtil.toSet("a", "b", "c", "d"), elementSet);
         assertEquals(4, elementSet.size());
 
         multiset.remove("a", 3);
-        assertEquals(CommonUtil.asSet("b", "c", "d"), elementSet);
+        assertEquals(CommonUtil.toSet("b", "c", "d"), elementSet);
 
         elementSet.remove("b");
         assertFalse(multiset.contains("b"));
         assertEquals(0, multiset.getCount("b"));
-        assertEquals(CommonUtil.asSet("c", "d"), elementSet);
+        assertEquals(CommonUtil.toSet("c", "d"), elementSet);
     }
 
     @Test

@@ -636,7 +636,7 @@ public class IOUtilTest extends AbstractTest {
     @Test
     public void test_readString_2() throws IOException {
 
-        List<String> lines = CommonUtil.asList("abc", "1海洋23", "ef😀g😁");
+        List<String> lines = CommonUtil.toList("abc", "1海洋23", "ef😀g😁");
         String allInString = Strings.join(lines, IOUtil.LINE_SEPARATOR_UNIX) + IOUtil.LINE_SEPARATOR_UNIX;
 
         File file = new File("./test.txt");

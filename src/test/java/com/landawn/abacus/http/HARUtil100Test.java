@@ -202,7 +202,7 @@ public class HARUtil100Test extends TestBase {
         Map<String, Object> requestEntry = new HashMap<>();
         requestEntry.put("url", "https://api.example.com/test");
 
-        String url = HARUtil.getURLByRequestEntry(requestEntry);
+        String url = HARUtil.getUrlByRequestEntry(requestEntry);
         assertEquals("https://api.example.com/test", url);
     }
 

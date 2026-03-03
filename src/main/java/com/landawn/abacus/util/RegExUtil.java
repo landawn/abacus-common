@@ -220,7 +220,7 @@ import com.landawn.abacus.util.function.IntBiFunction;
  *   <li><b>Limit Parameters:</b> Use split limits to avoid unnecessary array allocations</li>
  * </ul>
  *
- * <p><b>Example: Log File Processing</b>
+ * <p><b>Usage Examples: Log File Processing</b>
  * <pre>{@code
  * public class LogProcessor {
  *     private static final Pattern TIMESTAMP_PATTERN = 

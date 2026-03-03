@@ -521,12 +521,12 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
      *     1, "one", 3, "three", 5, "five"
      * );
-     * System.out.println(map.lowerEntry(3))   =one
-     * System.out.println(map.lowerEntry(4))   =three
+     * System.out.println(map.lowerEntry(3));   // 1=one
+     * System.out.println(map.lowerEntry(4));   // 3=three
      * System.out.println(map.lowerEntry(1));   // null
      * }</pre>
      *
-     * @param key the key
+     * @param key the reference key whose immediate predecessor entry is requested
      * @return an entry with the greatest key less than {@code key}, or {@code null} if there is no such key
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      *         or its comparator does not permit {@code null} keys
@@ -551,7 +551,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * System.out.println(map.lowerKey(1));   // null
      * }</pre>
      *
-     * @param key the key
+     * @param key the reference key whose immediate predecessor key is requested
      * @return the greatest key less than {@code key}, or {@code null} if there is no such key
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      *         or its comparator does not permit {@code null} keys
@@ -571,12 +571,12 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
      *     1, "one", 3, "three", 5, "five"
      * );
-     * System.out.println(map.floorEntry(3))   =three
-     * System.out.println(map.floorEntry(4))   =three
+     * System.out.println(map.floorEntry(3));   // 3=three
+     * System.out.println(map.floorEntry(4));   // 3=three
      * System.out.println(map.floorEntry(0));   // null
      * }</pre>
      *
-     * @param key the key
+     * @param key the reference key whose floor entry is requested
      * @return an entry with the greatest key less than or equal to {@code key}, or {@code null} if there is no such key
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      *         or its comparator does not permit {@code null} keys
@@ -601,7 +601,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * System.out.println(map.floorKey(0));   // null
      * }</pre>
      *
-     * @param key the key
+     * @param key the reference key whose floor key is requested
      * @return the greatest key less than or equal to {@code key}, or {@code null} if there is no such key
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      *         or its comparator does not permit {@code null} keys
@@ -621,12 +621,12 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
      *     1, "one", 3, "three", 5, "five"
      * );
-     * System.out.println(map.ceilingEntry(3))   =three
-     * System.out.println(map.ceilingEntry(4))   =five
+     * System.out.println(map.ceilingEntry(3));   // 3=three
+     * System.out.println(map.ceilingEntry(4));   // 5=five
      * System.out.println(map.ceilingEntry(6));   // null
      * }</pre>
      *
-     * @param key the key
+     * @param key the reference key whose ceiling entry is requested
      * @return an entry with the least key greater than or equal to {@code key}, or {@code null} if there is no such key
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      *         or its comparator does not permit {@code null} keys
@@ -651,7 +651,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * System.out.println(map.ceilingKey(6));   // null
      * }</pre>
      *
-     * @param key the key
+     * @param key the reference key whose ceiling key is requested
      * @return the least key greater than or equal to {@code key}, or {@code null} if there is no such key
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      *         or its comparator does not permit {@code null} keys
@@ -671,12 +671,12 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
      *     1, "one", 3, "three", 5, "five"
      * );
-     * System.out.println(map.higherEntry(3))   =five
-     * System.out.println(map.higherEntry(4))   =five
+     * System.out.println(map.higherEntry(3));   // 5=five
+     * System.out.println(map.higherEntry(4));   // 5=five
      * System.out.println(map.higherEntry(5));   // null
      * }</pre>
      *
-     * @param key the key
+     * @param key the reference key whose immediate successor entry is requested
      * @return an entry with the least key greater than {@code key}, or {@code null} if there is no such key
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      *         or its comparator does not permit {@code null} keys
@@ -701,7 +701,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * System.out.println(map.higherKey(5));   // null
      * }</pre>
      *
-     * @param key the key
+     * @param key the reference key whose immediate successor key is requested
      * @return the least key greater than {@code key}, or {@code null} if there is no such key
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      *         or its comparator does not permit {@code null} keys

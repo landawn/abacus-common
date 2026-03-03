@@ -897,7 +897,7 @@ public final class ParserUtil {
 
                 return privateLookup.unreflectVarHandle(field);
             } catch (IllegalAccessException e2) {
-                logger.debug("Faield to unreflect field: {}, error: {}", field, e);
+                logger.debug("Failed to unreflect field: {}, error: {}", field, e);
             }
         }
 
@@ -1015,7 +1015,7 @@ public final class ParserUtil {
         private final Tuple3<Class<?>, ? extends Supplier<Object>, ? extends Function<Object, Object>> builderInfo;
 
         /** Whether this class is marked with @Entity or similar annotations */
-        public final boolean isMarkedToBean;
+        public final boolean isMarkedAsBean;
 
         /**
          * Constructs a new BeanInfo for the specified class.
@@ -1238,9 +1238,9 @@ public final class ParserUtil {
                 }
             }
 
-            propInfoList = ImmutableList.wrap(N.asList(propInfos));
+            propInfoList = ImmutableList.wrap(N.toList(propInfos));
 
-            final List<PropInfo> tmpIdPropInfoList = N.filter(propInfos, it -> it.isMarkedToId);
+            final List<PropInfo> tmpIdPropInfoList = N.filter(propInfos, it -> it.isMarkedAsId);
 
             if (N.isEmpty(tmpIdPropInfoList)) {
                 tmpIdPropInfoList.addAll(N.filter(propInfos, it -> "id".equals(it.name) && idTypeSet.contains(it.clazz)));
@@ -1249,7 +1249,7 @@ public final class ParserUtil {
             idPropInfoList = ImmutableList.wrap(tmpIdPropInfoList);
             idPropNameList = ImmutableList.wrap(N.map(idPropInfoList, it -> it.name));
 
-            readOnlyIdPropInfoList = ImmutableList.wrap(N.filter(propInfos, it -> it.isMarkedToReadOnlyId));
+            readOnlyIdPropInfoList = ImmutableList.wrap(N.filter(propInfos, it -> it.isMarkedAsReadOnlyId));
             readOnlyIdPropNameList = ImmutableList.wrap(N.map(readOnlyIdPropInfoList, it -> it.name));
 
             subEntityPropInfoList = ImmutableList.wrap(N.filter(propInfos, it -> it.isSubEntity));
@@ -1326,7 +1326,7 @@ public final class ParserUtil {
                 }
             }
 
-            isMarkedToBean = tmpIsMarkedToBean;
+            isMarkedAsBean = tmpIsMarkedToBean;
         }
 
         /**
@@ -1462,7 +1462,7 @@ public final class ParserUtil {
             final PropInfo propInfo = getPropInfo(propName);
 
             if (propInfo == null) {
-                final List<PropInfo> propInfoQueue = getPropInfoQueue(propName);
+                final List<PropInfo> propInfoQueue = getPropInfoChain(propName);
 
                 if (propInfoQueue.size() == 0) {
                     throw new RuntimeException("No getter method found with property name: " + propName + " in class: " + clazz.getCanonicalName());
@@ -1532,7 +1532,7 @@ public final class ParserUtil {
             PropInfo propInfo = getPropInfo(propName);
 
             if (propInfo == null) {
-                final List<PropInfo> propInfoQueue = getPropInfoQueue(propName);
+                final List<PropInfo> propInfoQueue = getPropInfoChain(propName);
 
                 if (propInfoQueue.size() == 0) {
                     if (!ignoreUnmatchedProperty) {
@@ -1693,14 +1693,14 @@ public final class ParserUtil {
          * 
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * List<PropInfo> queue = beanInfo.getPropInfoQueue("address.street.name");
+         * List<PropInfo> queue = beanInfo.getPropInfoChain("address.street.name");
          * // Returns [PropInfo(address), PropInfo(street), PropInfo(name)]
          * }</pre>
          *
          * @param propName the property path (e.g., "address.street")
          * @return a list of PropInfo objects for each level, or empty list if invalid
          */
-        public List<PropInfo> getPropInfoQueue(final String propName) {
+        public List<PropInfo> getPropInfoChain(final String propName) {
             List<PropInfo> propInfoQueue = propInfoQueueMap.get(propName);
 
             if (propInfoQueue == null) {
@@ -2198,19 +2198,19 @@ public final class ParserUtil {
          * Indicates whether this property is marked as an identifier (primary key).
          * True if annotated with @Id or listed in id property names.
          */
-        public final boolean isMarkedToId;
+        public final boolean isMarkedAsId;
 
         /**
          * Indicates whether this property is marked as a read-only identifier.
          * True if annotated with @ReadOnlyId or is an @Id with @ReadOnly.
          */
-        public final boolean isMarkedToReadOnlyId;
+        public final boolean isMarkedAsReadOnlyId;
 
         /**
          * Indicates whether this property is explicitly marked as a database column.
          * True if annotated with @Column (from any supported persistence API).
          */
-        public final boolean isMarkedToColumn;
+        public final boolean isMarkedAsColumn;
 
         /**
          * Indicates whether this property represents a sub-entity relationship.
@@ -2292,7 +2292,7 @@ public final class ParserUtil {
             declaringClass = (Class<Object>) (field != null ? field.getDeclaringClass() : getMethod.getDeclaringClass());
             this.field = field;
             this.name = propName;
-            this.aliases = ImmutableList.wrap(N.asList(getAliases(field)));
+            this.aliases = ImmutableList.wrap(N.toList(getAliases(field)));
 
             this.getMethod = getMethod;
             this.setMethod = setMethod;
@@ -2383,9 +2383,9 @@ public final class ParserUtil {
                 }
             }
 
-            isMarkedToId = tmpIsMarkedToId;
+            isMarkedAsId = tmpIsMarkedToId;
 
-            isMarkedToReadOnlyId = annotations.containsKey(ReadOnlyId.class) || (isMarkedToId && annotations.containsKey(ReadOnly.class))
+            isMarkedAsReadOnlyId = annotations.containsKey(ReadOnlyId.class) || (isMarkedAsId && annotations.containsKey(ReadOnly.class))
                     || readOnlyIdPropNames.contains(propName);
 
             String tmpColumnName = null;
@@ -2427,9 +2427,9 @@ public final class ParserUtil {
                 throw new IllegalArgumentException("Column name: \"" + tmpColumnName + "\" must not start or end with any whitespace for field: " + field);
             }
 
-            isMarkedToColumn = tmpIsMarkedToColumn;
+            isMarkedAsColumn = tmpIsMarkedToColumn;
 
-            isSubEntity = !isMarkedToColumn && (type.isBean() || (type.isCollection() && type.getElementType().isBean()));
+            isSubEntity = !isMarkedAsColumn && (type.isBean() || (type.isCollection() && type.getElementType().isBean()));
 
             columnName = Strings.isEmpty(tmpColumnName) ? Optional.empty() : Optional.ofNullable(tmpColumnName);
 
@@ -2571,7 +2571,7 @@ public final class ParserUtil {
                         failureCountForSetProp++;
                     }
 
-                    if (logger.isWarnEnabled() && (failureCountForSetProp % 1000 == 0)) {
+                    if (logger.isWarnEnabled() && (failureCountForSetProp % 100 == 0)) {
                         logger.warn("Failed to set value for field: {} in class: {} with value type {}", field == null ? name : field.getName(),
                                 ClassUtil.getClassName(declaringClass), propValue == null ? "null" : ClassUtil.getClassName(propValue.getClass()));
                     }
@@ -2589,7 +2589,7 @@ public final class ParserUtil {
                             field.set(obj, propValue);
                         }
                     } catch (IllegalAccessException | InvocationTargetException e2) {
-                        throw ExceptionUtil.toRuntimeException(e, true);
+                        throw ExceptionUtil.toRuntimeException(e2, true);
                     }
                 }
             }
@@ -2965,7 +2965,9 @@ public final class ParserUtil {
                     return func.read(this, strValue);
                 } else {
                     try {
-                        return numberFormat.parse(strValue);
+                        synchronized (numberFormat) {
+                            return numberFormat.parse(strValue);
+                        }
                     } catch (ParseException e) {
                         throw new RuntimeException("Failed to parse number value: " + strValue + " with format: " + numberFormat, e);
                     }
@@ -3027,7 +3029,9 @@ public final class ParserUtil {
                         writer.write(config.getStringQuotation());
                     }
                 } else {
-                    writer.write(numberFormat.format(x));
+                    synchronized (numberFormat) {
+                        writer.write(numberFormat.format(x));
+                    }
                 }
             } else if (isJsonRawValue) {
                 if (x == null) {
@@ -3116,9 +3120,9 @@ public final class ParserUtil {
         /**
          * Gets the annotated type name for general serialization.
          * 
-         * @param field the field
+         * @param field the declared field for the property being serialized
          * @param propClass the property class
-         * @param jsonXmlConfig the configuration
+         * @param jsonXmlConfig the optional JSON/XML serialization configuration
          * @return the type name or {@code null} if not specified
          */
         @SuppressWarnings("unused")
@@ -3153,9 +3157,9 @@ public final class ParserUtil {
         /**
          * Gets the annotated type name specifically for JSON/XML serialization.
          * 
-         * @param field the field
+         * @param field the declared field for the property being serialized
          * @param propClass the property class
-         * @param jsonXmlConfig the configuration
+         * @param jsonXmlConfig the optional JSON/XML serialization configuration
          * @return the type name or {@code null} if not specified
          */
         @SuppressWarnings("unused")
@@ -3503,7 +3507,7 @@ public final class ParserUtil {
                         failureCountForSetProp++; // NOSONAR
                     }
 
-                    if (logger.isWarnEnabled() && (failureCountForSetProp % 1000 == 0)) {
+                    if (logger.isWarnEnabled() && (failureCountForSetProp % 100 == 0)) {
                         logger.warn("Failed to set value for field: {} in class: {} with value type {}", field == null ? name : field.getName(),
                                 ClassUtil.getClassName(declaringClass), propValue == null ? "null" : ClassUtil.getClassName(propValue.getClass()));
                     }
@@ -3520,7 +3524,7 @@ public final class ParserUtil {
                         try {
                             field.set(obj, propValue); //NOSONAR
                         } catch (final IllegalAccessException e2) {
-                            throw ExceptionUtil.toRuntimeException(e, true);
+                            throw ExceptionUtil.toRuntimeException(e2, true);
                         }
                     }
                 }

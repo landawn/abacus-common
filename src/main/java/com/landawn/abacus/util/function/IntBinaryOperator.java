@@ -56,10 +56,10 @@ public interface IntBinaryOperator extends Throwables.IntBinaryOperator<RuntimeE
      * int maximum = max.applyAsInt(10, 20);   // Returns 20
      * }</pre>
      *
-     * @param left the first operand
-     * @param right the second operand
+     * @param a the first operand
+     * @param b the second operand
      * @return the operator result
      */
     @Override
-    int applyAsInt(int left, int right);
+    int applyAsInt(int a, int b);
 }

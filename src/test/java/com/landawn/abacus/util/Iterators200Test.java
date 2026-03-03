@@ -82,13 +82,13 @@ public class Iterators200Test extends TestBase {
 
     @Test
     public void testOccurrencesOf() {
-        assertEquals(0, Iterators.occurrencesOf(null, "a"));
-        assertEquals(0, Iterators.occurrencesOf(Collections.emptyIterator(), "a"));
-        assertEquals(2, Iterators.occurrencesOf(list("a", "b", "a", "c").iterator(), "a"));
-        assertEquals(1, Iterators.occurrencesOf(list("a", "b", "a", "c").iterator(), "c"));
-        assertEquals(0, Iterators.occurrencesOf(list("a", "b", "a", "c").iterator(), "d"));
-        assertEquals(2, Iterators.occurrencesOf(list(null, "a", null).iterator(), null));
-        assertEquals(1, Iterators.occurrencesOf(list(null, "a", null).iterator(), "a"));
+        assertEquals(0, Iterators.frequency(null, "a"));
+        assertEquals(0, Iterators.frequency(Collections.emptyIterator(), "a"));
+        assertEquals(2, Iterators.frequency(list("a", "b", "a", "c").iterator(), "a"));
+        assertEquals(1, Iterators.frequency(list("a", "b", "a", "c").iterator(), "c"));
+        assertEquals(0, Iterators.frequency(list("a", "b", "a", "c").iterator(), "d"));
+        assertEquals(2, Iterators.frequency(list(null, "a", null).iterator(), null));
+        assertEquals(1, Iterators.frequency(list(null, "a", null).iterator(), "a"));
     }
 
     @Test

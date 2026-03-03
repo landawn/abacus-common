@@ -1283,7 +1283,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * Each key-value mapping is rendered as the key followed by an equal sign ("=") followed by the associated value.
      * The format is consistent with {@code Map.toString()}.
      *
-     * <p><b>Usage Example:</b> {@code {one=1, two=2}}</p>
+     * <p><b>Usage Examples:</b> {@code {one=1, two=2}}</p>
      *
      * @return a string representation of this BiMap.
      */

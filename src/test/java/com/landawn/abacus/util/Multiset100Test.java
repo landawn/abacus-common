@@ -140,13 +140,13 @@ public class Multiset100Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test occurrencesOf()")
+    @DisplayName("Test frequency()")
     public void testOccurrencesOf() {
         multiset.add("apple", 3);
         multiset.add("banana", 2);
-        assertEquals(3, multiset.occurrencesOf("apple"));
-        assertEquals(2, multiset.occurrencesOf("banana"));
-        assertEquals(0, multiset.occurrencesOf("orange"));
+        assertEquals(3, multiset.getCount("apple"));
+        assertEquals(2, multiset.getCount("banana"));
+        assertEquals(0, multiset.getCount("orange"));
     }
 
     @Test

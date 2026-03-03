@@ -622,9 +622,9 @@ public class LongList100Test extends TestBase {
     public void testOccurrencesOf() {
         list.addAll(new long[] { 1L, 2L, 3L, 2L, 2L, 4L });
 
-        assertEquals(3, list.occurrencesOf(2L));
-        assertEquals(1, list.occurrencesOf(1L));
-        assertEquals(0, list.occurrencesOf(5L));
+        assertEquals(3, list.frequency(2L));
+        assertEquals(1, list.frequency(1L));
+        assertEquals(0, list.frequency(5L));
     }
 
     @Test
@@ -1181,7 +1181,7 @@ public class LongList100Test extends TestBase {
     public void testArray() {
         list.addAll(new long[] { 1L, 2L, 3L });
 
-        long[] array = list.array();
+        long[] array = list.internalArray();
         assertEquals(1L, array[0]);
         assertEquals(2L, array[1]);
         assertEquals(3L, array[2]);

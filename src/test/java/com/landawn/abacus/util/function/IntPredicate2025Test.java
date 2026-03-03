@@ -157,6 +157,12 @@ public class IntPredicate2025Test extends TestBase {
     }
 
     @Test
+    public void test_andRejectsNullPredicateImmediately() {
+        IntPredicate isPositive = value -> value > 0;
+        assertThrows(NullPointerException.class, () -> isPositive.and(null));
+    }
+
+    @Test
     public void test_or() {
         IntPredicate isNegative = value -> value < 0;
         IntPredicate isEven = value -> value % 2 == 0;
@@ -167,6 +173,12 @@ public class IntPredicate2025Test extends TestBase {
         assertTrue(isNegativeOrEven.test(-2));
         assertFalse(isNegativeOrEven.test(1));
         assertFalse(isNegativeOrEven.test(3));
+    }
+
+    @Test
+    public void test_orRejectsNullPredicateImmediately() {
+        IntPredicate isNegative = value -> value < 0;
+        assertThrows(NullPointerException.class, () -> isNegative.or(null));
     }
 
     @Test
@@ -198,13 +210,13 @@ public class IntPredicate2025Test extends TestBase {
     }
 
     @Test
-    public void test_greaterEqual() {
-        IntPredicate greaterEqualToTen = IntPredicate.greaterEqual(10);
+    public void test_greaterThanOrEqual() {
+        IntPredicate greaterThanOrEqualToTen = IntPredicate.greaterThanOrEqual(10);
 
-        assertTrue(greaterEqualToTen.test(11));
-        assertTrue(greaterEqualToTen.test(10));
-        assertTrue(greaterEqualToTen.test(100));
-        assertFalse(greaterEqualToTen.test(9));
+        assertTrue(greaterThanOrEqualToTen.test(11));
+        assertTrue(greaterThanOrEqualToTen.test(10));
+        assertTrue(greaterThanOrEqualToTen.test(100));
+        assertFalse(greaterThanOrEqualToTen.test(9));
     }
 
     @Test
@@ -218,13 +230,13 @@ public class IntPredicate2025Test extends TestBase {
     }
 
     @Test
-    public void test_lessEqual() {
-        IntPredicate lessEqualToTen = IntPredicate.lessEqual(10);
+    public void test_lessThanOrEqual() {
+        IntPredicate lessThanOrEqualToTen = IntPredicate.lessThanOrEqual(10);
 
-        assertTrue(lessEqualToTen.test(9));
-        assertTrue(lessEqualToTen.test(10));
-        assertTrue(lessEqualToTen.test(-100));
-        assertFalse(lessEqualToTen.test(11));
+        assertTrue(lessThanOrEqualToTen.test(9));
+        assertTrue(lessThanOrEqualToTen.test(10));
+        assertTrue(lessThanOrEqualToTen.test(-100));
+        assertFalse(lessThanOrEqualToTen.test(11));
     }
 
     @Test

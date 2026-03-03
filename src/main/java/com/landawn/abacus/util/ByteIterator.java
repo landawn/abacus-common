@@ -579,7 +579,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      */
     @SuppressWarnings("deprecation")
     public byte[] toArray() {
-        return toList().trimToSize().array();
+        return toList().trimToSize().internalArray();
     }
 
     /**

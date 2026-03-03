@@ -37,12 +37,12 @@ public class RowDataset100Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        columnNames = CommonUtil.asList("id", "name", "age", "score");
+        columnNames = CommonUtil.toList("id", "name", "age", "score");
         columns = new ArrayList<>();
-        columns.add(CommonUtil.asList(1, 2, 3));
-        columns.add(CommonUtil.asList("John", "Jane", "Bob"));
-        columns.add(CommonUtil.asList(25, 30, 35));
-        columns.add(CommonUtil.asList(85.5, 90.0, 88.5));
+        columns.add(CommonUtil.toList(1, 2, 3));
+        columns.add(CommonUtil.toList("John", "Jane", "Bob"));
+        columns.add(CommonUtil.toList(25, 30, 35));
+        columns.add(CommonUtil.toList(85.5, 90.0, 88.5));
         dataset = new RowDataset(columnNames, columns);
     }
 

@@ -127,8 +127,8 @@ public class MoreStreamTest {
             final int[] source = { 1, 2, 3, 1, 2, 1 };
             final int[] targetSubArray = { 1, 2 };
 
-            N.println(N.lastIndexOfSubList(N.asList(1, 2, 3, 1, 2, 1), N.asList(1, 2)));
-            N.println(Collections.lastIndexOfSubList(N.asList(1, 2, 3, 1, 2, 1), N.asList(1, 2)));
+            N.println(N.lastIndexOfSubList(N.toList(1, 2, 3, 1, 2, 1), N.toList(1, 2)));
+            N.println(Collections.lastIndexOfSubList(N.toList(1, 2, 3, 1, 2, 1), N.toList(1, 2)));
             N.println("aabba".lastIndexOf("ab", 5));
             IntStreamEx.ofIndices(source, (a, fromIndex) -> Index.ofSubArray(a, fromIndex, targetSubArray, 0, targetSubArray.length).orElse(-1)).println();
 
@@ -223,10 +223,10 @@ public class MoreStreamTest {
     public void test_scan() {
         Stream.of(1, 2, 3).prepend(0).scan((e, r) -> e + r).println();
 
-        assertTrue(N.equals(Stream.of(1, 2, 3).scan((e, r) -> e + r).toList(), N.asList(1, 3, 6)));
-        assertTrue(N.equals(Stream.of(1, 2, 3).prepend(0).scan((e, r) -> e + r).toList(), N.asList(0, 1, 3, 6)));
-        assertTrue(N.equals(Stream.of(1, 2, 3).scan("a", true, (e, r) -> e + r).toList(), N.asList("a", "a1", "a12", "a123")));
-        assertTrue(N.equals(IntStream.of(1, 2, 3).scan(1, true, (e, r) -> e + r).toList(), N.asList(1, 2, 4, 7)));
+        assertTrue(N.equals(Stream.of(1, 2, 3).scan((e, r) -> e + r).toList(), N.toList(1, 3, 6)));
+        assertTrue(N.equals(Stream.of(1, 2, 3).prepend(0).scan((e, r) -> e + r).toList(), N.toList(0, 1, 3, 6)));
+        assertTrue(N.equals(Stream.of(1, 2, 3).scan("a", true, (e, r) -> e + r).toList(), N.toList("a", "a1", "a12", "a123")));
+        assertTrue(N.equals(IntStream.of(1, 2, 3).scan(1, true, (e, r) -> e + r).toList(), N.toList(1, 2, 4, 7)));
 
     }
 
@@ -1063,7 +1063,8 @@ public class MoreStreamTest {
                 }
 
                 int[] c = IntStream
-                        .merge(b[0].trimToSize().array(), b[1].trimToSize().array(), (i, j) -> i <= j ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+                        .merge(b[0].trimToSize().internalArray(), b[1].trimToSize().internalArray(),
+                                (i, j) -> i <= j ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
                         .toArray();
 
                 for (int i = 1; i < c.length; i++) {
@@ -1072,7 +1073,7 @@ public class MoreStreamTest {
 
                 assertTrue(N.equals(a,
                         IntStream
-                                .merge(Stream.of(b).map(i -> IntStream.of(i.trimToSize().array())).toList(),
+                                .merge(Stream.of(b).map(i -> IntStream.of(i.trimToSize().internalArray())).toList(),
                                         (i, j) -> i <= j ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
                                 .toArray()));
 

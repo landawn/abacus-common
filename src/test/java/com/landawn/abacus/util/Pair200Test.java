@@ -35,7 +35,7 @@ public class Pair200Test extends TestBase {
         assertEquals(123, p2.right());
 
         Map.Entry<String, Integer> entry = new HashMap.SimpleEntry<>("world", 456);
-        Pair<String, Integer> p3 = Pair.create(entry);
+        Pair<String, Integer> p3 = Pair.from(entry);
         assertEquals("world", p3.left());
         assertEquals(456, p3.right());
     }

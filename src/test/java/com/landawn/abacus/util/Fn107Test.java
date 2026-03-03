@@ -130,8 +130,8 @@ public class Fn107Test extends TestBase {
         }
 
         @Test
-        public void testGreaterEqual() {
-            CharBiPredicate predicate = Fn.FC.greaterEqual();
+        public void testGreaterThanOrEqual() {
+            CharBiPredicate predicate = Fn.FC.greaterThanOrEqual();
             Assertions.assertTrue(predicate.test('b', 'a'));
             Assertions.assertTrue(predicate.test('a', 'a'));
             Assertions.assertFalse(predicate.test('a', 'b'));
@@ -147,8 +147,8 @@ public class Fn107Test extends TestBase {
         }
 
         @Test
-        public void testLessEqual() {
-            CharBiPredicate predicate = Fn.FC.lessEqual();
+        public void testLessThanOrEqual() {
+            CharBiPredicate predicate = Fn.FC.lessThanOrEqual();
             Assertions.assertTrue(predicate.test('a', 'b'));
             Assertions.assertTrue(predicate.test('a', 'a'));
             Assertions.assertFalse(predicate.test('b', 'a'));
@@ -288,8 +288,8 @@ public class Fn107Test extends TestBase {
         }
 
         @Test
-        public void testGreaterEqual() {
-            ByteBiPredicate predicate = Fn.FB.greaterEqual();
+        public void testGreaterThanOrEqual() {
+            ByteBiPredicate predicate = Fn.FB.greaterThanOrEqual();
             Assertions.assertTrue(predicate.test((byte) 10, (byte) 5));
             Assertions.assertTrue(predicate.test((byte) 5, (byte) 5));
             Assertions.assertFalse(predicate.test((byte) 5, (byte) 10));
@@ -305,8 +305,8 @@ public class Fn107Test extends TestBase {
         }
 
         @Test
-        public void testLessEqual() {
-            ByteBiPredicate predicate = Fn.FB.lessEqual();
+        public void testLessThanOrEqual() {
+            ByteBiPredicate predicate = Fn.FB.lessThanOrEqual();
             Assertions.assertTrue(predicate.test((byte) 5, (byte) 10));
             Assertions.assertTrue(predicate.test((byte) 5, (byte) 5));
             Assertions.assertFalse(predicate.test((byte) 10, (byte) 5));
@@ -461,8 +461,8 @@ public class Fn107Test extends TestBase {
         }
 
         @Test
-        public void testGreaterEqual() {
-            ShortBiPredicate predicate = Fn.FS.greaterEqual();
+        public void testGreaterThanOrEqual() {
+            ShortBiPredicate predicate = Fn.FS.greaterThanOrEqual();
             Assertions.assertTrue(predicate.test((short) 100, (short) 50));
             Assertions.assertTrue(predicate.test((short) 50, (short) 50));
             Assertions.assertFalse(predicate.test((short) 50, (short) 100));
@@ -478,8 +478,8 @@ public class Fn107Test extends TestBase {
         }
 
         @Test
-        public void testLessEqual() {
-            ShortBiPredicate predicate = Fn.FS.lessEqual();
+        public void testLessThanOrEqual() {
+            ShortBiPredicate predicate = Fn.FS.lessThanOrEqual();
             Assertions.assertTrue(predicate.test((short) 50, (short) 100));
             Assertions.assertTrue(predicate.test((short) 50, (short) 50));
             Assertions.assertFalse(predicate.test((short) 100, (short) 50));
@@ -634,8 +634,8 @@ public class Fn107Test extends TestBase {
         }
 
         @Test
-        public void testGreaterEqual() {
-            IntBiPredicate predicate = Fn.FI.greaterEqual();
+        public void testGreaterThanOrEqual() {
+            IntBiPredicate predicate = Fn.FI.greaterThanOrEqual();
             Assertions.assertTrue(predicate.test(1000, 500));
             Assertions.assertTrue(predicate.test(500, 500));
             Assertions.assertFalse(predicate.test(500, 1000));
@@ -651,8 +651,8 @@ public class Fn107Test extends TestBase {
         }
 
         @Test
-        public void testLessEqual() {
-            IntBiPredicate predicate = Fn.FI.lessEqual();
+        public void testLessThanOrEqual() {
+            IntBiPredicate predicate = Fn.FI.lessThanOrEqual();
             Assertions.assertTrue(predicate.test(500, 1000));
             Assertions.assertTrue(predicate.test(500, 500));
             Assertions.assertFalse(predicate.test(1000, 500));
@@ -811,8 +811,8 @@ public class Fn107Test extends TestBase {
         }
 
         @Test
-        public void testGreaterEqual() {
-            LongBiPredicate predicate = Fn.FL.greaterEqual();
+        public void testGreaterThanOrEqual() {
+            LongBiPredicate predicate = Fn.FL.greaterThanOrEqual();
             Assertions.assertTrue(predicate.test(1000000L, 500000L));
             Assertions.assertTrue(predicate.test(500000L, 500000L));
             Assertions.assertFalse(predicate.test(500000L, 1000000L));
@@ -828,8 +828,8 @@ public class Fn107Test extends TestBase {
         }
 
         @Test
-        public void testLessEqual() {
-            LongBiPredicate predicate = Fn.FL.lessEqual();
+        public void testLessThanOrEqual() {
+            LongBiPredicate predicate = Fn.FL.lessThanOrEqual();
             Assertions.assertTrue(predicate.test(500000L, 1000000L));
             Assertions.assertTrue(predicate.test(500000L, 500000L));
             Assertions.assertFalse(predicate.test(1000000L, 500000L));
@@ -995,8 +995,8 @@ public class Fn107Test extends TestBase {
         }
 
         @Test
-        public void testGreaterEqual() {
-            FloatBiPredicate predicate = Fn.FF.greaterEqual();
+        public void testGreaterThanOrEqual() {
+            FloatBiPredicate predicate = Fn.FF.greaterThanOrEqual();
             Assertions.assertTrue(predicate.test(10.5f, 5.5f));
             Assertions.assertTrue(predicate.test(5.5f, 5.5f));
             Assertions.assertFalse(predicate.test(5.5f, 10.5f));
@@ -1012,8 +1012,8 @@ public class Fn107Test extends TestBase {
         }
 
         @Test
-        public void testLessEqual() {
-            FloatBiPredicate predicate = Fn.FF.lessEqual();
+        public void testLessThanOrEqual() {
+            FloatBiPredicate predicate = Fn.FF.lessThanOrEqual();
             Assertions.assertTrue(predicate.test(5.5f, 10.5f));
             Assertions.assertTrue(predicate.test(5.5f, 5.5f));
             Assertions.assertFalse(predicate.test(10.5f, 5.5f));
@@ -1182,8 +1182,8 @@ public class Fn107Test extends TestBase {
         }
 
         @Test
-        public void testGreaterEqual() {
-            DoubleBiPredicate predicate = Fn.FD.greaterEqual();
+        public void testGreaterThanOrEqual() {
+            DoubleBiPredicate predicate = Fn.FD.greaterThanOrEqual();
             Assertions.assertTrue(predicate.test(10.5, 5.5));
             Assertions.assertTrue(predicate.test(5.5, 5.5));
             Assertions.assertFalse(predicate.test(5.5, 10.5));
@@ -1199,8 +1199,8 @@ public class Fn107Test extends TestBase {
         }
 
         @Test
-        public void testLessEqual() {
-            DoubleBiPredicate predicate = Fn.FD.lessEqual();
+        public void testLessThanOrEqual() {
+            DoubleBiPredicate predicate = Fn.FD.lessThanOrEqual();
             Assertions.assertTrue(predicate.test(5.5, 10.5));
             Assertions.assertTrue(predicate.test(5.5, 5.5));
             Assertions.assertFalse(predicate.test(10.5, 5.5));

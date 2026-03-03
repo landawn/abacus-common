@@ -485,26 +485,26 @@ public class Numbers102Test extends TestBase {
 
     @Test
     public void testIsCreatable() {
-        Assertions.assertTrue(Numbers.isCreatable("123"));
-        Assertions.assertTrue(Numbers.isCreatable("-123"));
-        Assertions.assertTrue(Numbers.isCreatable("123.45"));
-        Assertions.assertTrue(Numbers.isCreatable("-123.45"));
-        Assertions.assertTrue(Numbers.isCreatable("1.23e5"));
-        Assertions.assertTrue(Numbers.isCreatable("1.23E5"));
-        Assertions.assertTrue(Numbers.isCreatable("123L"));
-        Assertions.assertTrue(Numbers.isCreatable("123l"));
-        Assertions.assertTrue(Numbers.isCreatable("123.45f"));
-        Assertions.assertTrue(Numbers.isCreatable("123.45F"));
-        Assertions.assertTrue(Numbers.isCreatable("123.45d"));
-        Assertions.assertTrue(Numbers.isCreatable("123.45D"));
-        Assertions.assertTrue(Numbers.isCreatable("0x1A"));
-        Assertions.assertTrue(Numbers.isCreatable("077"));
+        Assertions.assertTrue(Numbers.isConvertibleToNumber("123"));
+        Assertions.assertTrue(Numbers.isConvertibleToNumber("-123"));
+        Assertions.assertTrue(Numbers.isConvertibleToNumber("123.45"));
+        Assertions.assertTrue(Numbers.isConvertibleToNumber("-123.45"));
+        Assertions.assertTrue(Numbers.isConvertibleToNumber("1.23e5"));
+        Assertions.assertTrue(Numbers.isConvertibleToNumber("1.23E5"));
+        Assertions.assertTrue(Numbers.isConvertibleToNumber("123L"));
+        Assertions.assertTrue(Numbers.isConvertibleToNumber("123l"));
+        Assertions.assertTrue(Numbers.isConvertibleToNumber("123.45f"));
+        Assertions.assertTrue(Numbers.isConvertibleToNumber("123.45F"));
+        Assertions.assertTrue(Numbers.isConvertibleToNumber("123.45d"));
+        Assertions.assertTrue(Numbers.isConvertibleToNumber("123.45D"));
+        Assertions.assertTrue(Numbers.isConvertibleToNumber("0x1A"));
+        Assertions.assertTrue(Numbers.isConvertibleToNumber("077"));
 
-        Assertions.assertFalse(Numbers.isCreatable(""));
-        Assertions.assertFalse(Numbers.isCreatable(null));
-        Assertions.assertFalse(Numbers.isCreatable("abc"));
-        Assertions.assertFalse(Numbers.isCreatable("123.45.67"));
-        Assertions.assertFalse(Numbers.isCreatable("123e"));
+        Assertions.assertFalse(Numbers.isConvertibleToNumber(""));
+        Assertions.assertFalse(Numbers.isConvertibleToNumber(null));
+        Assertions.assertFalse(Numbers.isConvertibleToNumber("abc"));
+        Assertions.assertFalse(Numbers.isConvertibleToNumber("123.45.67"));
+        Assertions.assertFalse(Numbers.isConvertibleToNumber("123e"));
     }
 
     @Test

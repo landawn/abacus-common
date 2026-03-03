@@ -570,7 +570,7 @@ public class HttpUtil100Test extends TestBase {
     public void testTurnOffCertificateValidation() {
         // This test can only verify that the method doesn't throw an exception
         // Actually testing the certificate validation would require HTTPS connections
-        HttpUtil.turnOffCertificateValidation();
+        HttpUtil.disableCertificateValidation();
     }
 
     @Test

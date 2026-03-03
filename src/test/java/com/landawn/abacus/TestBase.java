@@ -62,7 +62,7 @@ public abstract class TestBase {
     }
 
     public static <T> void assertHaveSameElements(Collection<? extends T> expected, T[] actual) {
-        assertHaveSameElements(expected, N.asList(actual));
+        assertHaveSameElements(expected, N.toList(actual));
     }
 
     public static <T> void assertHaveSameElements(Collection<? extends T> expected, Collection<? extends T> actual) {
@@ -73,7 +73,7 @@ public abstract class TestBase {
         return new Iterable<>() {
             @Override
             public java.util.Iterator<T> iterator() {
-                return N.asList(a).iterator();
+                return N.toList(a).iterator();
             }
         };
     }

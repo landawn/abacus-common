@@ -988,8 +988,8 @@ public class AbstractStream200Test extends TestBase {
 
     @Test
     public void test_countMatchBetween() {
-        assertTrue(Stream.of(1, 2, 3, 4, 5).countMatchBetween(2, 2, i -> i % 2 == 0));
-        assertFalse(Stream.of(1, 2, 3, 4, 5).countMatchBetween(3, 3, i -> i % 2 == 0));
+        assertTrue(Stream.of(1, 2, 3, 4, 5).isMatchCountBetween(2, 2, i -> i % 2 == 0));
+        assertFalse(Stream.of(1, 2, 3, 4, 5).isMatchCountBetween(3, 3, i -> i % 2 == 0));
     }
 
     @Test

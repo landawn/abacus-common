@@ -23,6 +23,9 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
+/**
+ * Type handler for primitive {@code long[]} arrays, providing serialization and deserialization support.
+ */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<long[]> {
 
@@ -145,8 +148,8 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * }</pre>
      *
      * @param str the string to parse, expected format is "[value1, value2, ...]"
-     * @return the parsed long array, or {@code null} if the input string is {@code null}.
-     *         Returns an empty array for empty string or "[]".
+     * @return the parsed long array, or {@code null} if the input string is {@code null}, empty, or blank.
+     *         Returns an empty array for "[]".
      * @throws NumberFormatException if any element in the string cannot be parsed as a long
      */
     @Override
@@ -310,7 +313,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      *
      * @param x the long array to convert
      * @param output the Collection to add the array elements to
-     * @param <E> the type parameter of the output collection
+     * @param <E> the element type accepted by the output collection
      * @throws ClassCastException if the output collection cannot accept Long objects
      */
     @Override

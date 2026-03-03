@@ -232,7 +232,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li><b>{@link PriorityQueue}:</b> Underlying data structure for the algorithm</li>
  * </ul>
  *
- * <p><b>Example: Statistical Analysis Workflow</b>
+ * <p><b>Usage Examples: Statistical Analysis Workflow</b>
  * <pre>{@code
  * public class DataAnalysis {
  *     public StatisticalSummary analyzeDataset(double[] dataset) {
@@ -930,7 +930,7 @@ public final class Median {
                     queue.add(source[i]);
                 } else {
                     //noinspection DataFlowIssue
-                    if (source[i] > queue.peek()) {
+                    if (Float.compare(source[i], queue.peek()) > 0) {
                         queue.remove();
                         queue.add(source[i]);
                     }
@@ -1044,7 +1044,7 @@ public final class Median {
                     queue.add(source[i]);
                 } else {
                     //noinspection DataFlowIssue
-                    if (source[i] > queue.peek()) {
+                    if (Double.compare(source[i], queue.peek()) > 0) {
                         queue.remove();
                         queue.add(source[i]);
                     }

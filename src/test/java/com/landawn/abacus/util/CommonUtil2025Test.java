@@ -3236,7 +3236,7 @@ public class CommonUtil2025Test extends TestBase {
 
     @Test
     public void testAsList() {
-        List<String> list = CommonUtil.asList("a", "b", "c");
+        List<String> list = CommonUtil.toList("a", "b", "c");
         assertEquals(3, list.size());
         assertEquals("a", list.get(0));
         assertEquals("b", list.get(1));
@@ -3245,15 +3245,15 @@ public class CommonUtil2025Test extends TestBase {
 
     @Test
     public void testAsLinkedList() {
-        LinkedList<String> list = CommonUtil.asLinkedList("a", "b", "c");
-        assertEquals(3, list.size());
+        LinkedList<String> list = CommonUtil.asLinkedList("a", "b", "c", "d", "e", "f", "g", "h", "i");
+        assertEquals(9, list.size());
         assertEquals("a", list.getFirst());
-        assertEquals("c", list.getLast());
+        assertEquals("i", list.getLast());
     }
 
     @Test
     public void testAsSet() {
-        Set<String> set = CommonUtil.asSet("a", "b", "c", "a");
+        Set<String> set = CommonUtil.toSet("a", "b", "c", "a");
         assertEquals(3, set.size());
         assertTrue(set.contains("a"));
         assertTrue(set.contains("b"));
@@ -3262,8 +3262,8 @@ public class CommonUtil2025Test extends TestBase {
 
     @Test
     public void testAsLinkedHashSet() {
-        Set<String> set = CommonUtil.asLinkedHashSet("c", "b", "a");
-        assertEquals(3, set.size());
+        Set<String> set = CommonUtil.asLinkedHashSet("c", "b", "a", "d", "e", "f", "g", "h", "i");
+        assertEquals(9, set.size());
         Iterator<String> it = set.iterator();
         assertEquals("c", it.next());
         assertEquals("b", it.next());
@@ -3272,19 +3272,21 @@ public class CommonUtil2025Test extends TestBase {
 
     @Test
     public void testAsLinkedHashMap() {
-        Map<String, Integer> map = CommonUtil.asLinkedHashMap("a", 1, "b", 2);
-        assertEquals(2, map.size());
+        Map<String, Integer> map = CommonUtil.asLinkedHashMap("a", 1, "b", 2, "c", 3, "d", 4, "e", 5, "f", 6, "g", 7, "h", 8, "i", 9);
+        assertEquals(9, map.size());
         assertEquals(Integer.valueOf(1), map.get("a"));
         assertEquals(Integer.valueOf(2), map.get("b"));
+        assertEquals(Integer.valueOf(9), map.get("i"));
     }
 
     @Test
     public void testAsMap() {
-        Map<String, Integer> map = CommonUtil.asMap("a", 1, "b", 2, "c", 3);
-        assertEquals(3, map.size());
+        Map<String, Integer> map = CommonUtil.asMap("a", 1, "b", 2, "c", 3, "d", 4, "e", 5, "f", 6, "g", 7, "h", 8, "i", 9);
+        assertEquals(9, map.size());
         assertEquals(Integer.valueOf(1), map.get("a"));
         assertEquals(Integer.valueOf(2), map.get("b"));
         assertEquals(Integer.valueOf(3), map.get("c"));
+        assertEquals(Integer.valueOf(9), map.get("i"));
     }
 
     @Test
@@ -3318,7 +3320,7 @@ public class CommonUtil2025Test extends TestBase {
 
     @Test
     public void testAsDeque() {
-        java.util.Deque<String> deque = CommonUtil.asDeque("a", "b", "c");
+        java.util.Deque<String> deque = CommonUtil.toDeque("a", "b", "c");
         assertEquals(3, deque.size());
         assertEquals("a", deque.getFirst());
         assertEquals("c", deque.getLast());
@@ -3326,7 +3328,7 @@ public class CommonUtil2025Test extends TestBase {
 
     @Test
     public void testAsArrayDeque() {
-        java.util.ArrayDeque<String> deque = CommonUtil.asArrayDeque("a", "b", "c");
+        java.util.ArrayDeque<String> deque = CommonUtil.toArrayDeque("a", "b", "c");
         assertEquals(3, deque.size());
         assertEquals("a", deque.getFirst());
         assertEquals("c", deque.getLast());
@@ -3334,14 +3336,14 @@ public class CommonUtil2025Test extends TestBase {
 
     @Test
     public void testAsQueue() {
-        java.util.Queue<String> queue = CommonUtil.asQueue("a", "b", "c");
+        java.util.Queue<String> queue = CommonUtil.toQueue("a", "b", "c");
         assertEquals(3, queue.size());
         assertEquals("a", queue.peek());
     }
 
     @Test
     public void testAsPriorityQueue() {
-        java.util.PriorityQueue<Integer> queue = CommonUtil.asPriorityQueue(3, 1, 2);
+        java.util.PriorityQueue<Integer> queue = CommonUtil.toPriorityQueue(3, 1, 2);
         assertEquals(3, queue.size());
         assertEquals(Integer.valueOf(1), queue.poll());
         assertEquals(Integer.valueOf(2), queue.poll());
@@ -3350,7 +3352,7 @@ public class CommonUtil2025Test extends TestBase {
 
     @Test
     public void testAsNavigableSet() {
-        java.util.NavigableSet<Integer> set = CommonUtil.asNavigableSet(3, 1, 2);
+        java.util.NavigableSet<Integer> set = CommonUtil.toNavigableSet(3, 1, 2);
         assertEquals(3, set.size());
         assertEquals(Integer.valueOf(1), set.first());
         assertEquals(Integer.valueOf(3), set.last());
@@ -3358,7 +3360,7 @@ public class CommonUtil2025Test extends TestBase {
 
     @Test
     public void testAsSortedSet() {
-        java.util.SortedSet<Integer> set = CommonUtil.asSortedSet(3, 1, 2);
+        java.util.SortedSet<Integer> set = CommonUtil.toSortedSet(3, 1, 2);
         assertEquals(3, set.size());
         assertEquals(Integer.valueOf(1), set.first());
         assertEquals(Integer.valueOf(3), set.last());
@@ -3366,49 +3368,49 @@ public class CommonUtil2025Test extends TestBase {
 
     @Test
     public void testAsArrayBlockingQueue() {
-        java.util.concurrent.ArrayBlockingQueue<String> queue = CommonUtil.asArrayBlockingQueue("a", "b");
+        java.util.concurrent.ArrayBlockingQueue<String> queue = CommonUtil.toArrayBlockingQueue("a", "b");
         assertEquals(2, queue.size());
         assertEquals("a", queue.peek());
     }
 
     @Test
     public void testAsLinkedBlockingQueue() {
-        java.util.concurrent.LinkedBlockingQueue<String> queue = CommonUtil.asLinkedBlockingQueue("a", "b");
+        java.util.concurrent.LinkedBlockingQueue<String> queue = CommonUtil.toLinkedBlockingQueue("a", "b");
         assertEquals(2, queue.size());
         assertEquals("a", queue.peek());
     }
 
     @Test
     public void testAsLinkedBlockingDeque() {
-        java.util.concurrent.LinkedBlockingDeque<String> deque = CommonUtil.asLinkedBlockingDeque("a", "b");
+        java.util.concurrent.LinkedBlockingDeque<String> deque = CommonUtil.toLinkedBlockingDeque("a", "b");
         assertEquals(2, deque.size());
         assertEquals("a", deque.getFirst());
     }
 
     @Test
     public void testAsConcurrentLinkedQueue() {
-        java.util.concurrent.ConcurrentLinkedQueue<String> queue = CommonUtil.asConcurrentLinkedQueue("a", "b");
+        java.util.concurrent.ConcurrentLinkedQueue<String> queue = CommonUtil.toConcurrentLinkedQueue("a", "b");
         assertEquals(2, queue.size());
         assertEquals("a", queue.peek());
     }
 
     @Test
     public void testAsConcurrentLinkedDeque() {
-        java.util.concurrent.ConcurrentLinkedDeque<String> deque = CommonUtil.asConcurrentLinkedDeque("a", "b");
+        java.util.concurrent.ConcurrentLinkedDeque<String> deque = CommonUtil.toConcurrentLinkedDeque("a", "b");
         assertEquals(2, deque.size());
         assertEquals("a", deque.getFirst());
     }
 
     @Test
     public void testAsDelayQueue() {
-        java.util.concurrent.DelayQueue<java.util.concurrent.Delayed> queue = CommonUtil.asDelayQueue();
+        java.util.concurrent.DelayQueue<java.util.concurrent.Delayed> queue = CommonUtil.toDelayQueue();
         assertNotNull(queue);
         assertTrue(queue.isEmpty());
     }
 
     @Test
     public void testAsMultiset() {
-        com.landawn.abacus.util.Multiset<String> multiset = CommonUtil.asMultiset("a", "b", "a", "c");
+        com.landawn.abacus.util.Multiset<String> multiset = CommonUtil.toMultiset("a", "b", "a", "c");
         assertEquals(4, multiset.size());
         assertEquals(2, multiset.count("a"));
         assertEquals(1, multiset.count("b"));
@@ -3956,10 +3958,10 @@ public class CommonUtil2025Test extends TestBase {
     }
 
     @Test
-    public void testGreaterEqual() {
-        assertTrue(CommonUtil.greaterEqual(5, 3));
-        assertTrue(CommonUtil.greaterEqual(3, 3));
-        assertFalse(CommonUtil.greaterEqual(2, 3));
+    public void testGreaterThanOrEqual() {
+        assertTrue(CommonUtil.greaterThanOrEqual(5, 3));
+        assertTrue(CommonUtil.greaterThanOrEqual(3, 3));
+        assertFalse(CommonUtil.greaterThanOrEqual(2, 3));
     }
 
     @Test
@@ -3970,10 +3972,10 @@ public class CommonUtil2025Test extends TestBase {
     }
 
     @Test
-    public void testLessEqual() {
-        assertTrue(CommonUtil.lessEqual(3, 5));
-        assertTrue(CommonUtil.lessEqual(3, 3));
-        assertFalse(CommonUtil.lessEqual(5, 3));
+    public void testLessThanOrEqual() {
+        assertTrue(CommonUtil.lessThanOrEqual(3, 5));
+        assertTrue(CommonUtil.lessThanOrEqual(3, 3));
+        assertFalse(CommonUtil.lessThanOrEqual(5, 3));
     }
 
     @Test

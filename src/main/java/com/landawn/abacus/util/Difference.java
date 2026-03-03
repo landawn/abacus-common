@@ -1780,18 +1780,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                         //noinspection SuspiciousMethodCalls
                         val2 = map2.get(key1);
 
-                        if (val2 == null) {
-                            //noinspection SuspiciousMethodCalls
-                            if (map2.containsKey(key1)) {
-                                if (val1 == null) {
-                                    common.put(key1, val1);
-                                } else {
-                                    //noinspection ConstantValue
-                                    differentValues.put(key1, Pair.of(val1, val2));
-                                }
-                            } else {
-                                onlyOnLeft.put(key1, val1);
-                            }
+                        //noinspection SuspiciousMethodCalls
+                        if (val2 == null && !map2.containsKey(key1)) {
+                            onlyOnLeft.put(key1, val1);
                         } else if (valueEquivalence.test(key1, val1, val2)) {
                             common.put(key1, val1);
                         } else {
@@ -1837,18 +1828,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                         //noinspection SuspiciousMethodCalls
                         val2 = map2.get(key1);
 
-                        if (val2 == null) {
-                            //noinspection SuspiciousMethodCalls
-                            if (map2.containsKey(key1)) {
-                                if (val1 == null) {
-                                    common.put(key1, val1);
-                                } else {
-                                    //noinspection ConstantValue
-                                    differentValues.put(key1, Pair.of(val1, val2));
-                                }
-                            } else {
-                                onlyOnLeft.put(key1, val1);
-                            }
+                        //noinspection SuspiciousMethodCalls
+                        if (val2 == null && !map2.containsKey(key1)) {
+                            onlyOnLeft.put(key1, val1);
                         } else if (valueEquivalence.test(key1, val1, val2)) {
                             common.put(key1, val1);
                         } else {
@@ -2631,8 +2613,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                             continue;
                         }
 
-                        if (ignoredPropNamesForNullValues.contains(propInfo.name) || common.containsKey(propInfo.name)
-                                || differentValues.containsKey(propInfo.name)) {
+                        if ((!diffIgnoredPropNamesForBean1.isEmpty() && diffIgnoredPropNamesForBean1.contains(propInfo.name))
+                                || ignoredPropNamesForNullValues.contains(propInfo.name) || common.containsKey(propInfo.name)
+                                || differentValues.containsKey(propInfo.name) || onlyOnLeft.containsKey(propInfo.name)) {
                             continue;
                         }
 

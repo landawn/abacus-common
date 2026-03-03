@@ -52,6 +52,7 @@ public interface ObjFloatConsumer<T> extends Throwables.ObjFloatConsumer<T, Runt
      * @param t the first input argument of type T
      * @param value the second input argument, a primitive float value
      */
+    // @ai-ignore Obj* argument order convention - intentional: class name prefix determines parameter order. ObjFloat* has object first, float second. Do not suggest reordering.
     @Override
     void accept(T t, float value);
 }

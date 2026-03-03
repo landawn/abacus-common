@@ -28,35 +28,35 @@ public interface ByteBiPredicate extends Throwables.ByteBiPredicate<RuntimeExcep
     /**
      * A predicate that always returns {@code true} regardless of the input arguments.
      */
-    ByteBiPredicate ALWAYS_TRUE = (t, u) -> true;
+    ByteBiPredicate ALWAYS_TRUE = (a, b) -> true;
     /**
      * A predicate that always returns {@code false} regardless of the input arguments.
      */
-    ByteBiPredicate ALWAYS_FALSE = (t, u) -> false;
+    ByteBiPredicate ALWAYS_FALSE = (a, b) -> false;
     /**
      * A predicate that returns {@code true} if both arguments are equal.
      */
-    ByteBiPredicate EQUAL = (t, u) -> t == u;
+    ByteBiPredicate EQUAL = (a, b) -> a == b;
     /**
      * A predicate that returns {@code true} if the arguments are not equal.
      */
-    ByteBiPredicate NOT_EQUAL = (t, u) -> t != u;
+    ByteBiPredicate NOT_EQUAL = (a, b) -> a != b;
     /**
      * A predicate that returns {@code true} if the first argument is greater than the second.
      */
-    ByteBiPredicate GREATER_THAN = (t, u) -> t > u;
+    ByteBiPredicate GREATER_THAN = (a, b) -> a > b;
     /**
      * A predicate that returns {@code true} if the first argument is greater than or equal to the second.
      */
-    ByteBiPredicate GREATER_EQUAL = (t, u) -> t >= u;
+    ByteBiPredicate GREATER_THAN_OR_EQUAL = (a, b) -> a >= b;
     /**
      * A predicate that returns {@code true} if the first argument is less than the second.
      */
-    ByteBiPredicate LESS_THAN = (t, u) -> t < u;
+    ByteBiPredicate LESS_THAN = (a, b) -> a < b;
     /**
      * A predicate that returns {@code true} if the first argument is less than or equal to the second.
      */
-    ByteBiPredicate LESS_EQUAL = (t, u) -> t <= u;
+    ByteBiPredicate LESS_THAN_OR_EQUAL = (a, b) -> a <= b;
 
     /**
      * Evaluates this predicate on the given arguments.
@@ -67,12 +67,12 @@ public interface ByteBiPredicate extends Throwables.ByteBiPredicate<RuntimeExcep
      * boolean result = sumGreaterThan10.test((byte)5, (byte)7);   // Returns true
      * }</pre>
      *
-     * @param t the first input argument
-     * @param u the second input argument
+     * @param a the first input argument
+     * @param b the second input argument
      * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
      */
     @Override
-    boolean test(byte t, byte u);
+    boolean test(byte a, byte b);
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
@@ -80,7 +80,7 @@ public interface ByteBiPredicate extends Throwables.ByteBiPredicate<RuntimeExcep
      * @return a predicate that represents the logical negation of this predicate
      */
     default ByteBiPredicate negate() {
-        return (t, u) -> !test(t, u);
+        return (a, b) -> !test(a, b);
     }
 
     /**
@@ -95,7 +95,7 @@ public interface ByteBiPredicate extends Throwables.ByteBiPredicate<RuntimeExcep
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
      */
     default ByteBiPredicate and(final ByteBiPredicate other) {
-        return (t, u) -> test(t, u) && other.test(t, u);
+        return (a, b) -> test(a, b) && other.test(a, b);
     }
 
     /**
@@ -110,6 +110,6 @@ public interface ByteBiPredicate extends Throwables.ByteBiPredicate<RuntimeExcep
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
      */
     default ByteBiPredicate or(final ByteBiPredicate other) {
-        return (t, u) -> test(t, u) || other.test(t, u);
+        return (a, b) -> test(a, b) || other.test(a, b);
     }
 }

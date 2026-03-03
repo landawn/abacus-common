@@ -22,6 +22,9 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
+/**
+ * Type handler for {@code Long[]} arrays, providing serialization and deserialization support.
+ */
 public final class LongArrayType extends ObjectArrayType<Long> {
 
     LongArrayType() {

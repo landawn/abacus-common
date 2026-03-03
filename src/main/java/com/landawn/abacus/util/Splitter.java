@@ -275,9 +275,9 @@ public final class Splitter {
      */
     public static final Pattern WHITE_SPACE_PATTERN = Pattern.compile("\\s+", Pattern.UNICODE_CHARACTER_CLASS);
 
-    private static final SubStringFunc defaultSubStringFunc = (source, start, end) -> source.subSequence(start, end).toString();
+    private static final SubstringFunc defaultSubstringFunc = (source, start, end) -> source.subSequence(start, end).toString();
 
-    private static final SubStringFunc trimSubStringFunc = (source, start, end) -> {
+    private static final SubstringFunc trimSubstringFunc = (source, start, end) -> {
         while (start < end && source.charAt(start) == ' ') {
             start++;
         }
@@ -289,7 +289,7 @@ public final class Splitter {
         return start >= end ? Strings.EMPTY : source.subSequence(start, end).toString();
     };
 
-    private static final SubStringFunc stripSubStringFunc = (source, start, end) -> {
+    private static final SubstringFunc stripSubstringFunc = (source, start, end) -> {
         while (start < end && Character.isWhitespace(source.charAt(start))) {
             start++;
         }
@@ -375,7 +375,7 @@ public final class Splitter {
             }
 
             return new ObjIterator<>() {
-                private final SubStringFunc subStringFunc = strip ? stripSubStringFunc : (trim ? trimSubStringFunc : defaultSubStringFunc);
+                private final SubstringFunc substringFunc = strip ? stripSubstringFunc : (trim ? trimSubstringFunc : defaultSubstringFunc);
                 private final int sourceLen = source.length();
                 private String next = null;
                 private int start = 0;
@@ -386,7 +386,7 @@ public final class Splitter {
                 public boolean hasNext() {
                     if (next == null && (cursor >= 0 && cursor <= sourceLen)) {
                         if (limit - cnt == 1) {
-                            next = subStringFunc.subString(source, start, sourceLen);
+                            next = substringFunc.substring(source, start, sourceLen);
                             start = (cursor = sourceLen + 1);
 
                             if (omitEmptyStrings && next.isEmpty()) {
@@ -395,7 +395,7 @@ public final class Splitter {
                         } else {
                             while (cursor >= 0 && cursor <= sourceLen) {
                                 if (cursor == sourceLen || source.charAt(cursor) == delimiter) {
-                                    next = subStringFunc.subString(source, start, cursor);
+                                    next = substringFunc.substring(source, start, cursor);
                                     start = ++cursor;
 
                                     if (omitEmptyStrings && next.isEmpty()) {
@@ -466,7 +466,7 @@ public final class Splitter {
                 }
 
                 return new ObjIterator<>() {
-                    private final SubStringFunc subStringFunc = strip ? stripSubStringFunc : (trim ? trimSubStringFunc : defaultSubStringFunc);
+                    private final SubstringFunc substringFunc = strip ? stripSubstringFunc : (trim ? trimSubstringFunc : defaultSubstringFunc);
                     @SuppressWarnings("deprecation")
                     private final char[] delimiterChars = InternalUtil.getCharsForReadOnly(delimiter.toString());
                     private final int sourceLen = source.length();
@@ -480,7 +480,7 @@ public final class Splitter {
                     public boolean hasNext() {
                         if (next == null && (cursor >= 0 && cursor <= sourceLen)) {
                             if (limit - cnt == 1) {
-                                next = subStringFunc.subString(source, start, sourceLen);
+                                next = substringFunc.substring(source, start, sourceLen);
                                 start = (cursor = sourceLen + 1);
 
                                 if (omitEmptyStrings && next.isEmpty()) {
@@ -490,10 +490,10 @@ public final class Splitter {
                                 while (cursor >= 0 && cursor <= sourceLen) {
                                     if (cursor > sourceLen - delimiterLen || (source.charAt(cursor) == delimiterChars[0] && match(cursor))) {
                                         if (cursor > sourceLen - delimiterLen) {
-                                            next = subStringFunc.subString(source, start, sourceLen);
+                                            next = substringFunc.substring(source, start, sourceLen);
                                             start = (cursor = sourceLen + 1);
                                         } else {
-                                            next = subStringFunc.subString(source, start, cursor);
+                                            next = substringFunc.substring(source, start, cursor);
                                             start = (cursor += delimiter.length());
                                         }
 
@@ -573,7 +573,7 @@ public final class Splitter {
             }
 
             return new ObjIterator<>() {
-                private final SubStringFunc subStringFunc = strip ? stripSubStringFunc : (trim ? trimSubStringFunc : defaultSubStringFunc);
+                private final SubstringFunc substringFunc = strip ? stripSubstringFunc : (trim ? trimSubstringFunc : defaultSubstringFunc);
                 private final int sourceLen = source.length();
                 private final Matcher matcher = delimiter.matcher(source);
                 private String next = null;
@@ -586,7 +586,7 @@ public final class Splitter {
                 public boolean hasNext() {
                     if (next == null && (cursor >= 0 && cursor <= sourceLen)) {
                         if (limit - cnt == 1) {
-                            next = subStringFunc.subString(source, start, sourceLen);
+                            next = substringFunc.substring(source, start, sourceLen);
                             start = (cursor = sourceLen + 1);
 
                             if (omitEmptyStrings && next.isEmpty()) {
@@ -596,11 +596,11 @@ public final class Splitter {
                             while (cursor >= 0 && cursor <= sourceLen) {
                                 if (cursor == sourceLen || (matches = matcher.find())) {
                                     if (matches) {
-                                        next = subStringFunc.subString(source, start, matcher.start());
+                                        next = substringFunc.substring(source, start, matcher.start());
                                         start = (cursor = matcher.end());
                                         matches = false;
                                     } else {
-                                        next = subStringFunc.subString(source, start, sourceLen);
+                                        next = substringFunc.substring(source, start, sourceLen);
                                         start = (cursor = sourceLen + 1);
                                     }
 
@@ -613,7 +613,7 @@ public final class Splitter {
                                     }
                                 } else {
                                     // No more matches found, extract final substring
-                                    next = subStringFunc.subString(source, start, sourceLen);
+                                    next = substringFunc.substring(source, start, sourceLen);
                                     start = (cursor = sourceLen + 1);
 
                                     if (omitEmptyStrings && next.isEmpty()) {
@@ -2315,11 +2315,11 @@ public final class Splitter {
     }
 
     /**
-     * The Interface SubStringFunc defines a function for extracting substrings with
+     * The Interface SubstringFunc defines a function for extracting substrings with
      * optional preprocessing. Different implementations can trim or strip whitespace
      * from the extracted substring before returning it.
      */
-    interface SubStringFunc {
+    interface SubstringFunc {
 
         /**
          * Extracts a substring from the specified source CharSequence, optionally
@@ -2331,6 +2331,6 @@ public final class Splitter {
          * @param end the ending index (exclusive) of the substring
          * @return the extracted and optionally processed substring
          */
-        String subString(CharSequence source, int start, int end);
+        String substring(CharSequence source, int start, int end);
     }
 }

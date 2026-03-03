@@ -868,13 +868,13 @@ public class FloatList101Test extends TestBase {
     @Test
     public void testArrayModification() {
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f });
-        float[] array = list.array();
+        float[] array = list.internalArray();
 
         array[1] = 20.5f;
         assertEquals(20.5f, list.get(1), DELTA);
 
         list.clear();
-        float[] newArray = list.array();
+        float[] newArray = list.internalArray();
         assertSame(array, newArray);
     }
 

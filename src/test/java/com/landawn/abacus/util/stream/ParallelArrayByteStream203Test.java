@@ -167,11 +167,11 @@ public class ParallelArrayByteStream203Test extends TestBase {
     public void testFlatMapToInt() {
         ByteStream stream1 = createStream(new byte[] { 1, 2, 3 });
         int[] result1 = stream1.flatMapToInt(b -> IntStream.of(b, b + 100)).toArray();
-        assertHaveSameElements(N.asList(1, 101, 2, 102, 3, 103), N.toList(result1));
+        assertHaveSameElements(N.toList(1, 101, 2, 102, 3, 103), N.toList(result1));
 
         ByteStream stream2 = createStream(new byte[] { 1, 2, 3 });
         int[] result2 = stream2.flatMapToInt(b -> IntStream.of(b * 2)).toArray();
-        assertHaveSameElements(N.asList(2, 4, 6), N.toList(result2));
+        assertHaveSameElements(N.toList(2, 4, 6), N.toList(result2));
     }
 
     @Test
@@ -460,7 +460,7 @@ public class ParallelArrayByteStream203Test extends TestBase {
         ByteStream stream2A = createStream(dataA);
         ByteStream stream2B = createStream(dataB);
         byte[] result2 = stream2A.zipWith(stream2B, (a, b) -> (byte) (a + b)).toArray();
-        assertHaveSameElements(N.asList((byte) 11, (byte) 22, (byte) 33), N.toList(result2));
+        assertHaveSameElements(N.toList((byte) 11, (byte) 22, (byte) 33), N.toList(result2));
         stream2A.close();
         stream2B.close();
 

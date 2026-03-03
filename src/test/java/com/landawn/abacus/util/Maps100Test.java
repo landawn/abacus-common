@@ -1242,7 +1242,7 @@ public class Maps100Test extends TestBase {
         assertEquals("Jane", beans.get(1).getName());
         assertEquals(25, beans.get(1).getAge());
 
-        List<TestBean> beans2 = Beans.mapToBean(maps, CommonUtil.asList("name"), TestBean.class);
+        List<TestBean> beans2 = Beans.mapToBean(maps, CommonUtil.toList("name"), TestBean.class);
 
         assertEquals(2, beans2.size());
         assertEquals("John", beans2.get(0).getName());
@@ -1354,7 +1354,7 @@ public class Maps100Test extends TestBase {
             bean.setName("John");
             bean.setNestedBean(nested);
 
-            Map<String, Object> map = Beans.deepBeanToMap(bean, CommonUtil.asList("name", "nestedBean"));
+            Map<String, Object> map = Beans.deepBeanToMap(bean, CommonUtil.toList("name", "nestedBean"));
             assertEquals("John", map.get("name"));
 
             Map<String, Object> nestedMap = (Map<String, Object>) map.get("nestedBean");
@@ -1389,7 +1389,7 @@ public class Maps100Test extends TestBase {
             bean.setAge(30);
             bean.setNestedBean(nested);
 
-            Map<String, Object> flatMap = Beans.beanToFlatMap(bean, CommonUtil.asList("name", "nestedBean"));
+            Map<String, Object> flatMap = Beans.beanToFlatMap(bean, CommonUtil.toList("name", "nestedBean"));
             assertEquals("John", flatMap.get("name"));
             assertNull(flatMap.get("age"));
             assertEquals("nestedValue", flatMap.get("nestedBean.value"));

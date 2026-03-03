@@ -2003,17 +2003,17 @@ public class U102Test extends TestBase {
             assertFalse(jdkOptional.isPresent());
         }
 
-        @Test
-        public void testDeprecatedDunderscoreMethod() {
-            u.OptionalInt optional = u.OptionalInt.of(42);
-            java.util.OptionalInt jdkOptional = optional.__();
-            assertTrue(jdkOptional.isPresent());
-            assertEquals(42, jdkOptional.getAsInt());
-
-            u.OptionalInt empty = u.OptionalInt.empty();
-            jdkOptional = empty.__();
-            assertFalse(jdkOptional.isPresent());
-        }
+        //    @Test
+        //    public void testDeprecatedDunderscoreMethod() {
+        //        u.OptionalInt optional = u.OptionalInt.of(42);
+        //        java.util.OptionalInt jdkOptional = optional.__();
+        //        assertTrue(jdkOptional.isPresent());
+        //        assertEquals(42, jdkOptional.getAsInt());
+        //
+        //        u.OptionalInt empty = u.OptionalInt.empty();
+        //        jdkOptional = empty.__();
+        //        assertFalse(jdkOptional.isPresent());
+        //    }
 
         @Test
         public void testCompareTo() {
@@ -2435,17 +2435,17 @@ public class U102Test extends TestBase {
             assertFalse(jdkOptional.isPresent());
         }
 
-        @Test
-        public void testDeprecatedDunderscoreMethod() {
-            u.OptionalLong optional = u.OptionalLong.of(42L);
-            java.util.OptionalLong jdkOptional = optional.__();
-            assertTrue(jdkOptional.isPresent());
-            assertEquals(42L, jdkOptional.getAsLong());
-
-            u.OptionalLong empty = u.OptionalLong.empty();
-            jdkOptional = empty.__();
-            assertFalse(jdkOptional.isPresent());
-        }
+        //    @Test
+        //    public void testDeprecatedDunderscoreMethod() {
+        //        u.OptionalLong optional = u.OptionalLong.of(42L);
+        //        java.util.OptionalLong jdkOptional = optional.__();
+        //        assertTrue(jdkOptional.isPresent());
+        //        assertEquals(42L, jdkOptional.getAsLong());
+        //
+        //        u.OptionalLong empty = u.OptionalLong.empty();
+        //        jdkOptional = empty.__();
+        //        assertFalse(jdkOptional.isPresent());
+        //    }
 
         @Test
         public void testCompareTo() {
@@ -3250,17 +3250,17 @@ public class U102Test extends TestBase {
             assertFalse(jdkOptional.isPresent());
         }
 
-        @Test
-        public void testDeprecatedDunderscoreMethod() {
-            u.OptionalDouble optional = u.OptionalDouble.of(42.5);
-            java.util.OptionalDouble jdkOptional = optional.__();
-            assertTrue(jdkOptional.isPresent());
-            assertEquals(42.5, jdkOptional.getAsDouble());
-
-            u.OptionalDouble empty = u.OptionalDouble.empty();
-            jdkOptional = empty.__();
-            assertFalse(jdkOptional.isPresent());
-        }
+        //    @Test
+        //    public void testDeprecatedDunderscoreMethod() {
+        //        u.OptionalDouble optional = u.OptionalDouble.of(42.5);
+        //        java.util.OptionalDouble jdkOptional = optional.__();
+        //        assertTrue(jdkOptional.isPresent());
+        //        assertEquals(42.5, jdkOptional.getAsDouble());
+        //
+        //        u.OptionalDouble empty = u.OptionalDouble.empty();
+        //        jdkOptional = empty.__();
+        //        assertFalse(jdkOptional.isPresent());
+        //    }
 
         @Test
         public void testCompareTo() {

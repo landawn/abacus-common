@@ -16,8 +16,8 @@
 package com.landawn.abacus.util;
 
 import static com.landawn.abacus.util.WD._BACKSLASH;
-import static com.landawn.abacus.util.WD._QUOTATION_D;
-import static com.landawn.abacus.util.WD._QUOTATION_S;
+import static com.landawn.abacus.util.WD._DOUBLE_QUOTE;
+import static com.landawn.abacus.util.WD._SINGLE_QUOTE;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -249,7 +249,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>{@link java.util.regex.Pattern}:</b> Regular expression patterns</li>
  * </ul>
  *
- * <p><b>Example: Text Processing Pipeline</b>
+ * <p><b>Usage Examples: Text Processing Pipeline</b>
  * <pre>{@code
  * // Comprehensive text processing example
  * String rawInput = "  Contact: John.Doe@COMPANY.COM, Phone: 123-456-7890  ";
@@ -4103,7 +4103,7 @@ public final class Strings {
                     sb.append(ch);
                     sb.append(str.charAt(++i));
                 } else {
-                    if ((ch == _QUOTATION_S) || (ch == _QUOTATION_D)) {
+                    if ((ch == _SINGLE_QUOTE) || (ch == _DOUBLE_QUOTE)) {
                         sb.append(_BACKSLASH);
                     }
                     sb.append(ch);
@@ -6830,6 +6830,7 @@ public final class Strings {
      * @see #removeWhitespace(String[])
      * @deprecated Use {@link #removeWhitespace(String)} instead
      */
+    @Deprecated
     public static String deleteWhitespace(final String str) {
         return removeWhitespace(str);
     }
@@ -6854,6 +6855,7 @@ public final class Strings {
      * @see #removeWhitespace(String)
      * @deprecated Use {@link #removeWhitespace(String[])} instead
      */
+    @Deprecated
     public static void deleteWhitespace(final String[] strs) {
         removeWhitespace(strs);
     }
@@ -8532,7 +8534,7 @@ public final class Strings {
      * @param str the {@code String} to check
      * @return {@code true} if the string is a correctly formatted number
      * @see Numbers#isNumber(String)
-     * @see Numbers#isCreatable(String)
+     * @see Numbers#isConvertibleToNumber(String)
      * @see Numbers#isParsable(String)
      *        validation
      * @deprecated use {@link Numbers#isNumber(String)} instead
@@ -10322,14 +10324,14 @@ public final class Strings {
         final int fromIndexToUse = Math.max(0, fromIndex);
 
         final int len = str.length();
-        final List<String> subStringsSortedByLen = Stream.of(valuesToFind) //
+        final List<String> substringsSortedByLen = Stream.of(valuesToFind) //
                 .filter(it -> !(it == null || (fromIndexToUse + it.length() > len)))
                 .sortedByInt(N::len)
                 .toList();
 
         int result = N.INDEX_NOT_FOUND;
 
-        for (final String substr : subStringsSortedByLen) {
+        for (final String substr : substringsSortedByLen) {
             if (result >= 0 && substr.length() >= len - result) {
                 continue;
             }
@@ -10743,7 +10745,7 @@ public final class Strings {
      * @param str the string to be checked, may be {@code null} or empty
      * @param charValueToFind the character to be counted
      * @return the number of occurrences of the specified character in the string, or 0 if the string is {@code null} or empty
-     * @see N#occurrencesOf(String, char)
+     * @see N#frequency(String, char)
      */
     @SuppressWarnings("deprecation")
     public static int countMatches(final String str, final char charValueToFind) {
@@ -10786,7 +10788,7 @@ public final class Strings {
      * @param str the string to be checked, may be {@code null} or empty
      * @param valueToFind the substring to be counted
      * @return the number of occurrences of the specified substring in the string, or 0 if either parameter is {@code null} or empty
-     * @see N#occurrencesOf(String, String)
+     * @see N#frequency(String, String)
      */
     public static int countMatches(final String str, final String valueToFind) {
         if (isEmpty(str) || isEmpty(valueToFind)) {
@@ -18756,8 +18758,7 @@ public final class Strings {
      *
      * <p><b>Note:</b> For most string-formatting needs, use {@link String#format String.format},
      * {@link java.io.PrintWriter#format PrintWriter.format}, and related methods. These support the
-     * full range of <a
-     * href="https://docs.oracle.com/javase/9/docs/api/java/util/Formatter.html#syntax">format
+     * full range of <a href="https://docs.oracle.com/javase/9/docs/api/java/util/Formatter.html#syntax">format
      * specifiers</a>, and alert you to usage errors by throwing {@link
      * java.util.IllegalFormatException}.</p>
      *
@@ -22424,7 +22425,7 @@ public final class Strings {
          */
         @Beta
         public static u.OptionalInt createInteger(final String str) {
-            if (!Numbers.quickCheckForIsCreatable(str)) {
+            if (!Numbers.quickCheckForIsConvertibleToNumber(str)) {
                 return u.OptionalInt.empty();
             }
 
@@ -22461,7 +22462,7 @@ public final class Strings {
          */
         @Beta
         public static u.OptionalLong createLong(final String str) {
-            if (!Numbers.quickCheckForIsCreatable(str)) {
+            if (!Numbers.quickCheckForIsConvertibleToNumber(str)) {
                 return u.OptionalLong.empty();
             }
 
@@ -22499,7 +22500,7 @@ public final class Strings {
          */
         @Beta
         public static u.OptionalFloat createFloat(final String str) {
-            if (!Numbers.quickCheckForIsCreatable(str)) {
+            if (!Numbers.quickCheckForIsConvertibleToNumber(str)) {
                 return u.OptionalFloat.empty();
             }
 
@@ -22537,7 +22538,7 @@ public final class Strings {
          */
         @Beta
         public static u.OptionalDouble createDouble(final String str) {
-            if (!Numbers.quickCheckForIsCreatable(str)) {
+            if (!Numbers.quickCheckForIsConvertibleToNumber(str)) {
                 return u.OptionalDouble.empty();
             }
 
@@ -22574,7 +22575,7 @@ public final class Strings {
          */
         @Beta
         public static u.Optional<BigInteger> createBigInteger(final String str) {
-            if (!Numbers.quickCheckForIsCreatable(str)) {
+            if (!Numbers.quickCheckForIsConvertibleToNumber(str)) {
                 return u.Optional.empty();
             }
 
@@ -22611,7 +22612,7 @@ public final class Strings {
          */
         @Beta
         public static u.Optional<BigDecimal> createBigDecimal(final String str) {
-            if (!Numbers.quickCheckForIsCreatable(str)) {
+            if (!Numbers.quickCheckForIsConvertibleToNumber(str)) {
                 return u.Optional.empty();
             }
 
@@ -22650,7 +22651,7 @@ public final class Strings {
          */
         @Beta
         public static u.Optional<Number> createNumber(final String str) {
-            if (!Numbers.quickCheckForIsCreatable(str)) {
+            if (!Numbers.quickCheckForIsConvertibleToNumber(str)) {
                 return u.Optional.empty();
             }
 

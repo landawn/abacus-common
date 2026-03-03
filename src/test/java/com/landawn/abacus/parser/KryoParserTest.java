@@ -27,7 +27,7 @@ public class KryoParserTest extends AbstractParserTest {
 
         N.println(ksc1);
 
-        assertTrue(N.asSet(ksc1).contains(ksc2));
+        assertTrue(N.toSet(ksc1).contains(ksc2));
     }
 
     @Test

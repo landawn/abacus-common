@@ -227,7 +227,7 @@ import com.landawn.abacus.util.stream.DoubleStream;
  * <ul>
  *   <li><b>Aggregation:</b> Sum, min, max, average operations via stream API</li>
  *   <li><b>Central Tendency:</b> Median calculation with efficient sorting</li>
- *   <li><b>Occurrence Counting:</b> {@code occurrencesOf()} for frequency analysis</li>
+ *   <li><b>Occurrence Counting:</b> {@code frequency()} for frequency analysis</li>
  *   <li><b>Duplicate Detection:</b> {@code hasDuplicates()}, {@code removeDuplicates()}</li>
  *   <li><b>Advanced Statistics:</b> Standard deviation, variance via stream operations</li>
  * </ul>
@@ -276,7 +276,7 @@ import com.landawn.abacus.util.stream.DoubleStream;
  *   <li><b>{@link DoubleStream}:</b> Functional processing of double sequences</li>
  * </ul>
  *
- * <p><b>Example: Financial Analysis</b>
+ * <p><b>Usage Examples: Financial Analysis</b>
  * <pre>{@code
  * // Analyze stock price data
  * DoubleList prices = DoubleList.of(100.0, 102.5, 101.8, 105.2, 103.7, 106.1);
@@ -504,7 +504,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     @Beta
     @Deprecated
     @Override
-    public double[] array() {
+    public double[] internalArray() {
         return elementData;
     }
 
@@ -601,7 +601,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
         ensureCapacity(size + numNew);
 
-        N.copy(c.array(), 0, elementData, size, numNew);
+        N.copy(c.internalArray(), 0, elementData, size, numNew);
 
         size += numNew;
 
@@ -637,7 +637,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
             N.copy(elementData, index, elementData, index + numNew, numMoved);
         }
 
-        N.copy(c.array(), 0, elementData, index, numNew);
+        N.copy(c.internalArray(), 0, elementData, index, numNew);
 
         size += numNew;
 
@@ -1674,7 +1674,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param valueToFind the value to count occurrences of
      * @return the number of times the specified value appears in this list
      */
-    public int occurrencesOf(final double valueToFind) {
+    public int frequency(final double valueToFind) {
         if (size == 0) {
             return 0;
         }

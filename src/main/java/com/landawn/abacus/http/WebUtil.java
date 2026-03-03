@@ -107,8 +107,15 @@ public final class WebUtil {
         String token = "";
         String body = "";
         boolean hasDataOption = false;
+        boolean hasHeadOption = false;
         for (int i = 0, size = tokens.size(); i < size; i++) {
             token = tokens.get(i);
+
+            if (Strings.equals(token, "-I") || Strings.equals(token, "--head")) {
+                hasHeadOption = true;
+                continue;
+            }
+
             final String inlineBody = extractInlineDataValue(token);
 
             if (httpMethod == null && (token.equals("-X") || token.equals("--request")) && i + 1 < size
@@ -131,7 +138,11 @@ public final class WebUtil {
                 hasDataOption = true;
 
                 if (inlineBody != null) {
-                    body = inlineBody;
+                    if (shouldConsumeNextDataToken(token, inlineBody, i, size, tokens)) {
+                        body = tokens.get(++i);
+                    } else {
+                        body = inlineBody;
+                    }
                 } else if (i + 1 < size) {
                     body = tokens.get(++i);
                 } else {
@@ -159,13 +170,11 @@ public final class WebUtil {
         }
 
         if (httpMethod == null) {
-            httpMethod = hasDataOption ? HttpMethod.POST : (Strings.contains(curl, " -I ") ? HttpMethod.HEAD : HttpMethod.GET);
+            httpMethod = hasDataOption ? HttpMethod.POST : (hasHeadOption ? HttpMethod.HEAD : HttpMethod.GET);
         }
 
         if (httpMethod == HttpMethod.GET) {
             sb.append(indent).append(".get();");
-        } else if (httpMethod == HttpMethod.DELETE) {
-            sb.append(indent).append(".delete();");
         } else {
             if (Strings.isNotEmpty(body)) {
                 sb.append(indent).append(".body(requestBody)");
@@ -175,6 +184,8 @@ public final class WebUtil {
                 sb.append(indent).append(".post(");
             } else if (httpMethod == HttpMethod.PUT) {
                 sb.append(indent).append(".put(");
+            } else if (httpMethod == HttpMethod.DELETE) {
+                sb.append(indent).append(".delete(");
             } else {
                 sb.append(indent).append(".execute(HttpMethod.").append(httpMethod.name());
             }
@@ -243,8 +254,15 @@ public final class WebUtil {
         String body = "";
         String mediaType = null;
         boolean hasDataOption = false;
+        boolean hasHeadOption = false;
         for (int i = 0, size = tokens.size(); i < size; i++) {
             token = tokens.get(i);
+
+            if (Strings.equals(token, "-I") || Strings.equals(token, "--head")) {
+                hasHeadOption = true;
+                continue;
+            }
+
             final String inlineBody = extractInlineDataValue(token);
 
             if (httpMethod == null && (token.equals("-X") || token.equals("--request")) && i + 1 < size
@@ -271,7 +289,11 @@ public final class WebUtil {
                 hasDataOption = true;
 
                 if (inlineBody != null) {
-                    body = inlineBody;
+                    if (shouldConsumeNextDataToken(token, inlineBody, i, size, tokens)) {
+                        body = tokens.get(++i);
+                    } else {
+                        body = inlineBody;
+                    }
                 } else if (i + 1 < size) {
                     body = tokens.get(++i);
                 } else {
@@ -303,7 +325,7 @@ public final class WebUtil {
         }
 
         if (httpMethod == null) {
-            httpMethod = hasDataOption ? HttpMethod.POST : (Strings.contains(curl, " -I ") ? HttpMethod.HEAD : HttpMethod.GET);
+            httpMethod = hasDataOption ? HttpMethod.POST : (hasHeadOption ? HttpMethod.HEAD : HttpMethod.GET);
         }
 
         if (httpMethod == HttpMethod.GET) {
@@ -332,14 +354,25 @@ public final class WebUtil {
         final String shortDataPrefix = "-d=";
 
         if (Strings.startsWith(token, dataRawPrefix)) {
-            return token.length() > dataRawPrefix.length() ? token.substring(dataRawPrefix.length()) : null;
+            return token.substring(dataRawPrefix.length());
         } else if (Strings.startsWith(token, dataPrefix)) {
-            return token.length() > dataPrefix.length() ? token.substring(dataPrefix.length()) : null;
+            return token.substring(dataPrefix.length());
         } else if (Strings.startsWith(token, shortDataPrefix)) {
-            return token.length() > shortDataPrefix.length() ? token.substring(shortDataPrefix.length()) : null;
+            return token.substring(shortDataPrefix.length());
         }
 
         return null;
+    }
+
+    private static boolean shouldConsumeNextDataToken(final String token, final String inlineBody, final int index, final int size, final List<String> tokens) {
+        if (!inlineBody.isEmpty() || !Strings.endsWith(token, "=") || index + 1 >= size) {
+            return false;
+        }
+
+        final String nextToken = tokens.get(index + 1);
+
+        return !(Strings.startsWithIgnoreCase(nextToken, "https://") || Strings.startsWithIgnoreCase(nextToken, "http://")
+                || Strings.startsWith(nextToken, "-"));
     }
 
     private static String escapeJava(final String str) {
@@ -396,7 +429,8 @@ public final class WebUtil {
                 }
 
                 cursor = i + 1;
-            } else if (ch == '/' && i + 1 < len && str.charAt(i + 1) == '/' && (i == 0 || str.charAt(i - 1) != ':')) {
+            } else if (ch == '/' && i + 1 < len && str.charAt(i + 1) == '/'
+                    && (i == 0 || (Character.isWhitespace(str.charAt(i - 1)) && str.charAt(i - 1) != ':'))) {
                 if (cursor < i) {
                     tokens.add(str.substring(cursor, i));
                 }

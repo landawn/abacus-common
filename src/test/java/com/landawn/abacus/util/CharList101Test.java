@@ -581,11 +581,11 @@ public class CharList101Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test occurrencesOf()")
+    @DisplayName("Test frequency()")
     public void testOccurrencesOf() {
         list.addAll(CharList.of('a', 'b', 'c', 'b', 'b'));
-        assertEquals(3, list.occurrencesOf('b'));
-        assertEquals(0, list.occurrencesOf('x'));
+        assertEquals(3, list.frequency('b'));
+        assertEquals(0, list.frequency('x'));
     }
 
     @Test
@@ -820,9 +820,9 @@ public class CharList101Test extends TestBase {
     public void testToMultiset() {
         list.addAll(CharList.of('a', 'b', 'c', 'b', 'a', 'a'));
         Multiset<Character> multiset = list.toMultiset();
-        assertEquals(3, multiset.occurrencesOf('a'));
-        assertEquals(2, multiset.occurrencesOf('b'));
-        assertEquals(1, multiset.occurrencesOf('c'));
+        assertEquals(3, multiset.getCount('a'));
+        assertEquals(2, multiset.getCount('b'));
+        assertEquals(1, multiset.getCount('c'));
     }
 
     @Test
@@ -994,7 +994,7 @@ public class CharList101Test extends TestBase {
         char[] originalArray = { 'a', 'b', 'c' };
         CharList listWithArray = new CharList(originalArray);
 
-        char[] backingArray = listWithArray.array();
+        char[] backingArray = listWithArray.internalArray();
         assertSame(originalArray, backingArray);
 
         backingArray[0] = 'z';
@@ -1155,9 +1155,9 @@ public class CharList101Test extends TestBase {
         list.addAll(CharList.of('a', 'b', 'b', 'c', 'b'));
 
         Multiset<Character> multiset = list.toMultiset(1, 4);
-        assertEquals(2, multiset.occurrencesOf('b'));
-        assertEquals(1, multiset.occurrencesOf('c'));
-        assertEquals(0, multiset.occurrencesOf('a'));
+        assertEquals(2, multiset.getCount('b'));
+        assertEquals(1, multiset.getCount('c'));
+        assertEquals(0, multiset.getCount('a'));
     }
 
     @Test
@@ -1279,13 +1279,13 @@ public class CharList101Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test occurrencesOf edge cases")
+    @DisplayName("Test frequency edge cases")
     public void testOccurrencesOfEdgeCases() {
-        assertEquals(0, list.occurrencesOf('a'));
+        assertEquals(0, list.frequency('a'));
 
         list.addAll(CharList.of('a', 'a', 'a', 'a', 'a'));
-        assertEquals(5, list.occurrencesOf('a'));
-        assertEquals(0, list.occurrencesOf('b'));
+        assertEquals(5, list.frequency('a'));
+        assertEquals(0, list.frequency('b'));
     }
 
     @Test

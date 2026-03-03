@@ -836,12 +836,12 @@ public class CharList2025Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test occurrencesOf()")
+    @DisplayName("Test frequency()")
     public void testOccurrencesOf() {
         CharList list = CharList.of('a', 'b', 'a', 'c', 'a');
-        assertEquals(3, list.occurrencesOf('a'));
-        assertEquals(1, list.occurrencesOf('b'));
-        assertEquals(0, list.occurrencesOf('x'));
+        assertEquals(3, list.frequency('a'));
+        assertEquals(1, list.frequency('b'));
+        assertEquals(0, list.frequency('x'));
     }
 
     @Test
@@ -1325,7 +1325,7 @@ public class CharList2025Test extends TestBase {
     @DisplayName("Test array() method")
     public void testArrayMethod() {
         CharList list = CharList.of('a', 'b', 'c');
-        char[] arr = list.array();
+        char[] arr = list.internalArray();
         assertNotNull(arr);
         assertTrue(arr.length >= 3);
     }
@@ -1335,7 +1335,7 @@ public class CharList2025Test extends TestBase {
     public void testEmptyListOperations() {
         CharList list = new CharList();
         assertFalse(list.remove('a'));
-        assertEquals(0, list.occurrencesOf('a'));
+        assertEquals(0, list.frequency('a'));
         assertEquals(-1, list.indexOf('a'));
         assertEquals(-1, list.lastIndexOf('a'));
     }
@@ -1347,7 +1347,7 @@ public class CharList2025Test extends TestBase {
         assertTrue(list.contains('a'));
         assertEquals(0, list.indexOf('a'));
         assertEquals(0, list.lastIndexOf('a'));
-        assertEquals(1, list.occurrencesOf('a'));
+        assertEquals(1, list.frequency('a'));
     }
 
     @Test

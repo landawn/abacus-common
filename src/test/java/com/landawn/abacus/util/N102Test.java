@@ -1296,7 +1296,7 @@ public class N102Test extends TestBase {
         assertEquals("c", N.median(sorted, 1, 4));
         assertEquals("c", N.median(sorted, Comparator.naturalOrder()));
         assertEquals("c", N.median(sorted, 0, 5, Comparator.naturalOrder()));
-        assertEquals("bee", N.median(CommonUtil.asList("ant", "bee", "tiger"), Comparator.comparing(String::length)));
+        assertEquals("bee", N.median(CommonUtil.toList("ant", "bee", "tiger"), Comparator.comparing(String::length)));
     }
 
     @Test

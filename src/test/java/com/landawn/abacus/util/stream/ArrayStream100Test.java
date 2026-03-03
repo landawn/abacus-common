@@ -740,10 +740,10 @@ public class ArrayStream100Test extends TestBase {
     @Test
     public void testNMatch() {
         Stream<Integer> stream = Stream.of(integerArray);
-        assertTrue(stream.countMatchBetween(5, 5, x -> x <= 5));
+        assertTrue(stream.isMatchCountBetween(5, 5, x -> x <= 5));
 
         Stream<Integer> stream2 = Stream.of(integerArray);
-        assertTrue(stream2.countMatchBetween(1, 3, x -> x > 8));
+        assertTrue(stream2.isMatchCountBetween(1, 3, x -> x > 8));
     }
 
     @Test

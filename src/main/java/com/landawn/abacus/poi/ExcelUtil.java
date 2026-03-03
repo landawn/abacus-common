@@ -1283,7 +1283,7 @@ public final class ExcelUtil {
      * @param excelFile the Excel file to read, must exist and be a valid Excel file
      * @param sheetIndex the zero-based index of the sheet to convert (0 for first sheet)
      * @param csvHeaders custom headers for the CSV file (null to use original Excel headers from first row)
-     * @param outputWriter the CSV file to write to (will be created or overwritten) 
+     * @param outputWriter the Writer to write the CSV content to
      * @throws UncheckedException if an I/O error occurs during conversion, if the file is not a valid Excel file,
      *                            or if the sheet index is out of bounds
      */
@@ -1324,7 +1324,7 @@ public final class ExcelUtil {
      * @param excelFile the Excel file to read, must exist and be a valid Excel file
      * @param sheetName the name of the sheet to convert, case-sensitive
      * @param csvHeaders custom headers for the CSV file (null to use original Excel headers from first row)
-     * @param outputWriter the CSV writer to write to (will be created or overwritten) 
+     * @param outputWriter the Writer to write the CSV content to
      * @throws UncheckedException if an I/O error occurs, if the file is not a valid Excel file,
      *                            or if the sheet name is not found in the workbook
      */
@@ -1877,7 +1877,7 @@ public final class ExcelUtil {
          * only {@code autoFilter} will be applied. Set to {@code null} to use {@code autoFilterByFirstRow}
          * instead or to disable auto-filters entirely.</p>
          *
-         * <p><b>Example:</b>
+         * <p><b>Usage Examples:</b>
          * {@code new CellRangeAddress(0, 0, 0, 5)} creates auto-filter for the first row
          * across columns A through F (indices 0-5).</p>
          *

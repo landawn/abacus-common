@@ -43,12 +43,12 @@ public interface CharBiFunction<R> extends Throwables.CharBiFunction<R, RuntimeE
      * int sum = sumCodes.apply('A', 'B');   // Returns sum of char codes
      * }</pre>
      *
-     * @param t the first char function argument
-     * @param u the second char function argument
+     * @param a the first char function argument
+     * @param b the second char function argument
      * @return the function result of type R
      */
     @Override
-    R apply(char t, char u);
+    R apply(char a, char b);
 
     /**
      * Returns a composed function that first applies this function to its input,
@@ -62,6 +62,6 @@ public interface CharBiFunction<R> extends Throwables.CharBiFunction<R, RuntimeE
      *         {@code after} function
      */
     default <V> CharBiFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        return (t, u) -> after.apply(apply(t, u));
+        return (a, b) -> after.apply(apply(a, b));
     }
 }

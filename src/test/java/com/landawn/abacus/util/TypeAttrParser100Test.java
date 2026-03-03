@@ -178,4 +178,45 @@ public class TypeAttrParser100Test extends TestBase {
             Assertions.assertEquals("Modified", parser.getTypeParameters()[0]);
         }
     }
+
+    @Test
+    public void testParseTrimsClassNameWithConstructorParameters() {
+        TypeAttrParser parser = TypeAttrParser.parse("  java.util.ArrayList  (16)");
+
+        Assertions.assertEquals("java.util.ArrayList", parser.getClassName());
+        Assertions.assertArrayEquals(new String[] { "16" }, parser.getParameters());
+    }
+
+    @Test
+    public void testNewInstanceSupportsSingleStringArrayConstructor() {
+        SingleArrayArg result = TypeAttrParser.newInstance(SingleArrayArg.class, "SingleArrayArg(alpha)");
+
+        Assertions.assertArrayEquals(new String[] { "alpha" }, result.values);
+    }
+
+    @Test
+    public void testNewInstanceWithArgsSupportsSingleStringArrayConstructor() {
+        PrefixedSingleArrayArg result = TypeAttrParser.newInstance(PrefixedSingleArrayArg.class, "PrefixedSingleArrayArg(beta)", Integer.class, 7);
+
+        Assertions.assertEquals(7, result.prefix);
+        Assertions.assertArrayEquals(new String[] { "beta" }, result.values);
+    }
+
+    static class SingleArrayArg {
+        final String[] values;
+
+        SingleArrayArg(final String[] values) {
+            this.values = values;
+        }
+    }
+
+    static class PrefixedSingleArrayArg {
+        final int prefix;
+        final String[] values;
+
+        PrefixedSingleArrayArg(final Integer prefix, final String[] values) {
+            this.prefix = prefix;
+            this.values = values;
+        }
+    }
 }

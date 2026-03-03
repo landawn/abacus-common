@@ -16,6 +16,8 @@ package com.landawn.abacus.parser;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FilterInputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -211,12 +213,13 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
             return;
         }
 
+        final OutputStream targetOutput = nonClosingOutputStream(output);
         final Type<Object> type = Type.of(obj.getClass());
 
         if (obj instanceof SpecificRecord specificRecord) {
             final SpecificDatumWriter<SpecificRecord> datumWriter = new SpecificDatumWriter<>((Class<SpecificRecord>) specificRecord.getClass());
 
-            try (final DataFileWriter<SpecificRecord> dataFileWriter = new DataFileWriter<>(datumWriter).create(specificRecord.getSchema(), output)) {
+            try (final DataFileWriter<SpecificRecord> dataFileWriter = new DataFileWriter<>(datumWriter).create(specificRecord.getSchema(), targetOutput)) {
                 dataFileWriter.append(specificRecord);
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
@@ -226,7 +229,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
             final SpecificRecord specificRecord = c.iterator().next();
             final DatumWriter<SpecificRecord> datumWriter = new SpecificDatumWriter<>((Class<SpecificRecord>) specificRecord.getClass());
 
-            try (final DataFileWriter<SpecificRecord> dataFileWriter = new DataFileWriter<>(datumWriter).create(specificRecord.getSchema(), output)) {
+            try (final DataFileWriter<SpecificRecord> dataFileWriter = new DataFileWriter<>(datumWriter).create(specificRecord.getSchema(), targetOutput)) {
                 for (final SpecificRecord e : c) {
                     dataFileWriter.append(e);
                 }
@@ -241,7 +244,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
             final Schema schema = config.getSchema();
             final DatumWriter<Object> datumWriter = new GenericDatumWriter<>(schema);
 
-            try (final DataFileWriter<Object> dataFileWriter = new DataFileWriter<>(datumWriter).create(schema, output)) {
+            try (final DataFileWriter<Object> dataFileWriter = new DataFileWriter<>(datumWriter).create(schema, targetOutput)) {
                 if (obj instanceof GenericRecord genericRecord) {
                     dataFileWriter.append(genericRecord);
                 } else if (type.isBean() || type.isMap()) {
@@ -259,7 +262,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
 
                     if (isMapOrBean) {
                         for (final Object e : c) {
-                            dataFileWriter.append(toGenericRecord(e, schema));
+                            dataFileWriter.append(e == null ? null : toGenericRecord(e, schema));
                         }
                     } else {
                         dataFileWriter.append(c);
@@ -485,6 +488,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      */
     @Override
     public <T> T deserialize(InputStream source, AvroDeserializationConfig config, Type<? extends T> targetType) throws UncheckedIOException {
+        final InputStream targetInput = nonClosingInputStream(source);
         final Class<? extends T> targetClass = targetType.clazz();
         final Type<Object> eleType = config == null || config.getElementType() == null
                 ? (targetType.isCollection() && !targetType.getElementType().isObjectType() ? (Type<Object>) targetType.getElementType() : null)
@@ -494,7 +498,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
             final SpecificDatumReader<T> datumReader = new SpecificDatumReader<>((Class<T>) targetClass);
             T bean = null;
 
-            try (DataFileStream<T> dataFileReader = new DataFileStream<>(source, datumReader)) {
+            try (DataFileStream<T> dataFileReader = new DataFileStream<>(targetInput, datumReader)) {
                 if (dataFileReader.hasNext()) {
                     bean = dataFileReader.next();
                 }
@@ -509,7 +513,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
             final Collection<Object> c = targetType.isCollection() ? N.newCollection((Class<Collection>) targetClass) : new ArrayList<>();
             final DatumReader<Object> datumReader = new SpecificDatumReader<>(eleClass);
 
-            try (DataFileStream<Object> dataFileReader = new DataFileStream<>(source, datumReader)) {
+            try (DataFileStream<Object> dataFileReader = new DataFileStream<>(targetInput, datumReader)) {
                 while (dataFileReader.hasNext()) {
                     c.add(dataFileReader.next());
                 }
@@ -526,7 +530,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
             final Schema schema = config.getSchema();
             final DatumReader<Object> datumReader = new GenericDatumReader<>(schema);
 
-            try (DataFileStream<Object> dataFileReader = new DataFileStream<>(source, datumReader)) {
+            try (DataFileStream<Object> dataFileReader = new DataFileStream<>(targetInput, datumReader)) {
                 if (GenericRecord.class.isAssignableFrom(targetClass)) {
                     return (T) (dataFileReader.hasNext() ? dataFileReader.next() : null);
                 } else if (targetType.isBean() || targetType.isMap()) {
@@ -551,6 +555,24 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
                 throw new UncheckedIOException(e);
             }
         }
+    }
+
+    private static OutputStream nonClosingOutputStream(final OutputStream output) {
+        return new FilterOutputStream(output) {
+            @Override
+            public void close() throws IOException {
+                flush();
+            }
+        };
+    }
+
+    private static InputStream nonClosingInputStream(final InputStream input) {
+        return new FilterInputStream(input) {
+            @Override
+            public void close() {
+                // no-op: caller owns the source stream lifecycle
+            }
+        };
     }
 
     /**

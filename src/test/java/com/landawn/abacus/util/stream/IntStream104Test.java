@@ -31,14 +31,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(2, IntStream.of(1, 2, 3, 4, 5).filter(i -> i > 2).skip(1).count());
         assertArrayEquals(new int[] { 3, 4, 5 }, IntStream.of(1, 2, 3, 4, 5).filter(i -> i > 2).toArray());
         assertArrayEquals(new int[] { 4, 5 }, IntStream.of(1, 2, 3, 4, 5).filter(i -> i > 2).skip(1).toArray());
-        assertEquals(N.asList(3, 4, 5), IntStream.of(1, 2, 3, 4, 5).filter(i -> i > 2).toList());
-        assertEquals(N.asList(4, 5), IntStream.of(1, 2, 3, 4, 5).filter(i -> i > 2).skip(1).toList());
+        assertEquals(N.toList(3, 4, 5), IntStream.of(1, 2, 3, 4, 5).filter(i -> i > 2).toList());
+        assertEquals(N.toList(4, 5), IntStream.of(1, 2, 3, 4, 5).filter(i -> i > 2).skip(1).toList());
         assertEquals(3, IntStream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2).count());
         assertEquals(2, IntStream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2).skip(1).count());
         assertArrayEquals(new int[] { 3, 4, 5 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2).toArray());
         assertArrayEquals(new int[] { 4, 5 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2).skip(1).toArray());
-        assertEquals(N.asList(3, 4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2).toList());
-        assertEquals(N.asList(4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2).skip(1).toList());
+        assertEquals(N.toList(3, 4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2).toList());
+        assertEquals(N.toList(4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2).skip(1).toList());
     }
 
     @Test
@@ -52,9 +52,9 @@ public class IntStream104Test extends TestBase {
         droppedCount.set(0);
         assertArrayEquals(new int[] { 4, 5 }, IntStream.of(1, 2, 3, 4, 5).filter(i -> i > 2, i -> droppedCount.incrementAndGet()).skip(1).toArray());
         droppedCount.set(0);
-        assertEquals(N.asList(3, 4, 5), IntStream.of(1, 2, 3, 4, 5).filter(i -> i > 2, i -> droppedCount.incrementAndGet()).toList());
+        assertEquals(N.toList(3, 4, 5), IntStream.of(1, 2, 3, 4, 5).filter(i -> i > 2, i -> droppedCount.incrementAndGet()).toList());
         droppedCount.set(0);
-        assertEquals(N.asList(4, 5), IntStream.of(1, 2, 3, 4, 5).filter(i -> i > 2, i -> droppedCount.incrementAndGet()).skip(1).toList());
+        assertEquals(N.toList(4, 5), IntStream.of(1, 2, 3, 4, 5).filter(i -> i > 2, i -> droppedCount.incrementAndGet()).skip(1).toList());
         droppedCount.set(0);
         assertEquals(3, IntStream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2, i -> droppedCount.incrementAndGet()).count());
         droppedCount.set(0);
@@ -65,9 +65,9 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new int[] { 4, 5 },
                 IntStream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2, i -> droppedCount.incrementAndGet()).skip(1).toArray());
         droppedCount.set(0);
-        assertEquals(N.asList(3, 4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2, i -> droppedCount.incrementAndGet()).toList());
+        assertEquals(N.toList(3, 4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2, i -> droppedCount.incrementAndGet()).toList());
         droppedCount.set(0);
-        assertEquals(N.asList(4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2, i -> droppedCount.incrementAndGet()).skip(1).toList());
+        assertEquals(N.toList(4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2, i -> droppedCount.incrementAndGet()).skip(1).toList());
     }
 
     @Test
@@ -76,14 +76,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(2, IntStream.of(1, 2, 3, 4, 5).takeWhile(i -> i <= 3).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3 }, IntStream.of(1, 2, 3, 4, 5).takeWhile(i -> i <= 3).toArray());
         assertArrayEquals(new int[] { 2, 3 }, IntStream.of(1, 2, 3, 4, 5).takeWhile(i -> i <= 3).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3), IntStream.of(1, 2, 3, 4, 5).takeWhile(i -> i <= 3).toList());
-        assertEquals(N.asList(2, 3), IntStream.of(1, 2, 3, 4, 5).takeWhile(i -> i <= 3).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3), IntStream.of(1, 2, 3, 4, 5).takeWhile(i -> i <= 3).toList());
+        assertEquals(N.toList(2, 3), IntStream.of(1, 2, 3, 4, 5).takeWhile(i -> i <= 3).skip(1).toList());
         assertEquals(3, IntStream.of(1, 2, 3, 4, 5).map(e -> e).takeWhile(i -> i <= 3).count());
         assertEquals(2, IntStream.of(1, 2, 3, 4, 5).map(e -> e).takeWhile(i -> i <= 3).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).takeWhile(i -> i <= 3).toArray());
         assertArrayEquals(new int[] { 2, 3 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).takeWhile(i -> i <= 3).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3), IntStream.of(1, 2, 3, 4, 5).map(e -> e).takeWhile(i -> i <= 3).toList());
-        assertEquals(N.asList(2, 3), IntStream.of(1, 2, 3, 4, 5).map(e -> e).takeWhile(i -> i <= 3).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3), IntStream.of(1, 2, 3, 4, 5).map(e -> e).takeWhile(i -> i <= 3).toList());
+        assertEquals(N.toList(2, 3), IntStream.of(1, 2, 3, 4, 5).map(e -> e).takeWhile(i -> i <= 3).skip(1).toList());
     }
 
     @Test
@@ -92,14 +92,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(1, IntStream.of(1, 2, 3, 4, 5).dropWhile(i -> i <= 3).skip(1).count());
         assertArrayEquals(new int[] { 4, 5 }, IntStream.of(1, 2, 3, 4, 5).dropWhile(i -> i <= 3).toArray());
         assertArrayEquals(new int[] { 5 }, IntStream.of(1, 2, 3, 4, 5).dropWhile(i -> i <= 3).skip(1).toArray());
-        assertEquals(N.asList(4, 5), IntStream.of(1, 2, 3, 4, 5).dropWhile(i -> i <= 3).toList());
-        assertEquals(N.asList(5), IntStream.of(1, 2, 3, 4, 5).dropWhile(i -> i <= 3).skip(1).toList());
+        assertEquals(N.toList(4, 5), IntStream.of(1, 2, 3, 4, 5).dropWhile(i -> i <= 3).toList());
+        assertEquals(N.toList(5), IntStream.of(1, 2, 3, 4, 5).dropWhile(i -> i <= 3).skip(1).toList());
         assertEquals(2, IntStream.of(1, 2, 3, 4, 5).map(e -> e).dropWhile(i -> i <= 3).count());
         assertEquals(1, IntStream.of(1, 2, 3, 4, 5).map(e -> e).dropWhile(i -> i <= 3).skip(1).count());
         assertArrayEquals(new int[] { 4, 5 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).dropWhile(i -> i <= 3).toArray());
         assertArrayEquals(new int[] { 5 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).dropWhile(i -> i <= 3).skip(1).toArray());
-        assertEquals(N.asList(4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).dropWhile(i -> i <= 3).toList());
-        assertEquals(N.asList(5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).dropWhile(i -> i <= 3).skip(1).toList());
+        assertEquals(N.toList(4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).dropWhile(i -> i <= 3).toList());
+        assertEquals(N.toList(5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).dropWhile(i -> i <= 3).skip(1).toList());
     }
 
     @Test
@@ -113,9 +113,9 @@ public class IntStream104Test extends TestBase {
         droppedCount.set(0);
         assertArrayEquals(new int[] { 5 }, IntStream.of(1, 2, 3, 4, 5).dropWhile(i -> i <= 3, i -> droppedCount.incrementAndGet()).skip(1).toArray());
         droppedCount.set(0);
-        assertEquals(N.asList(4, 5), IntStream.of(1, 2, 3, 4, 5).dropWhile(i -> i <= 3, i -> droppedCount.incrementAndGet()).toList());
+        assertEquals(N.toList(4, 5), IntStream.of(1, 2, 3, 4, 5).dropWhile(i -> i <= 3, i -> droppedCount.incrementAndGet()).toList());
         droppedCount.set(0);
-        assertEquals(N.asList(5), IntStream.of(1, 2, 3, 4, 5).dropWhile(i -> i <= 3, i -> droppedCount.incrementAndGet()).skip(1).toList());
+        assertEquals(N.toList(5), IntStream.of(1, 2, 3, 4, 5).dropWhile(i -> i <= 3, i -> droppedCount.incrementAndGet()).skip(1).toList());
         droppedCount.set(0);
         assertEquals(2, IntStream.of(1, 2, 3, 4, 5).map(e -> e).dropWhile(i -> i <= 3, i -> droppedCount.incrementAndGet()).count());
         droppedCount.set(0);
@@ -126,9 +126,9 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new int[] { 5 },
                 IntStream.of(1, 2, 3, 4, 5).map(e -> e).dropWhile(i -> i <= 3, i -> droppedCount.incrementAndGet()).skip(1).toArray());
         droppedCount.set(0);
-        assertEquals(N.asList(4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).dropWhile(i -> i <= 3, i -> droppedCount.incrementAndGet()).toList());
+        assertEquals(N.toList(4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).dropWhile(i -> i <= 3, i -> droppedCount.incrementAndGet()).toList());
         droppedCount.set(0);
-        assertEquals(N.asList(5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).dropWhile(i -> i <= 3, i -> droppedCount.incrementAndGet()).skip(1).toList());
+        assertEquals(N.toList(5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).dropWhile(i -> i <= 3, i -> droppedCount.incrementAndGet()).skip(1).toList());
     }
 
     @Test
@@ -137,14 +137,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(1, IntStream.of(1, 2, 3, 4, 5).skipUntil(i -> i > 3).skip(1).count());
         assertArrayEquals(new int[] { 4, 5 }, IntStream.of(1, 2, 3, 4, 5).skipUntil(i -> i > 3).toArray());
         assertArrayEquals(new int[] { 5 }, IntStream.of(1, 2, 3, 4, 5).skipUntil(i -> i > 3).skip(1).toArray());
-        assertEquals(N.asList(4, 5), IntStream.of(1, 2, 3, 4, 5).skipUntil(i -> i > 3).toList());
-        assertEquals(N.asList(5), IntStream.of(1, 2, 3, 4, 5).skipUntil(i -> i > 3).skip(1).toList());
+        assertEquals(N.toList(4, 5), IntStream.of(1, 2, 3, 4, 5).skipUntil(i -> i > 3).toList());
+        assertEquals(N.toList(5), IntStream.of(1, 2, 3, 4, 5).skipUntil(i -> i > 3).skip(1).toList());
         assertEquals(2, IntStream.of(1, 2, 3, 4, 5).map(e -> e).skipUntil(i -> i > 3).count());
         assertEquals(1, IntStream.of(1, 2, 3, 4, 5).map(e -> e).skipUntil(i -> i > 3).skip(1).count());
         assertArrayEquals(new int[] { 4, 5 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).skipUntil(i -> i > 3).toArray());
         assertArrayEquals(new int[] { 5 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).skipUntil(i -> i > 3).skip(1).toArray());
-        assertEquals(N.asList(4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).skipUntil(i -> i > 3).toList());
-        assertEquals(N.asList(5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).skipUntil(i -> i > 3).skip(1).toList());
+        assertEquals(N.toList(4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).skipUntil(i -> i > 3).toList());
+        assertEquals(N.toList(5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).skipUntil(i -> i > 3).skip(1).toList());
     }
 
     @Test
@@ -153,14 +153,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(4, IntStream.of(1, 2, 2, 3, 3, 3, 4, 5, 5).distinct().skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, IntStream.of(1, 2, 2, 3, 3, 3, 4, 5, 5).distinct().toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5 }, IntStream.of(1, 2, 2, 3, 3, 3, 4, 5, 5).distinct().skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.of(1, 2, 2, 3, 3, 3, 4, 5, 5).distinct().toList());
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.of(1, 2, 2, 3, 3, 3, 4, 5, 5).distinct().skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.of(1, 2, 2, 3, 3, 3, 4, 5, 5).distinct().toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.of(1, 2, 2, 3, 3, 3, 4, 5, 5).distinct().skip(1).toList());
         assertEquals(5, IntStream.of(1, 2, 2, 3, 3, 3, 4, 5, 5).map(e -> e).distinct().count());
         assertEquals(4, IntStream.of(1, 2, 2, 3, 3, 3, 4, 5, 5).map(e -> e).distinct().skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, IntStream.of(1, 2, 2, 3, 3, 3, 4, 5, 5).map(e -> e).distinct().toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5 }, IntStream.of(1, 2, 2, 3, 3, 3, 4, 5, 5).map(e -> e).distinct().skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.of(1, 2, 2, 3, 3, 3, 4, 5, 5).map(e -> e).distinct().toList());
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.of(1, 2, 2, 3, 3, 3, 4, 5, 5).map(e -> e).distinct().skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.of(1, 2, 2, 3, 3, 3, 4, 5, 5).map(e -> e).distinct().toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.of(1, 2, 2, 3, 3, 3, 4, 5, 5).map(e -> e).distinct().skip(1).toList());
     }
 
     @Test
@@ -170,14 +170,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(2, IntStream.of(1, 2, 3, 4, 5).intersection(c).skip(1).count());
         assertArrayEquals(new int[] { 3, 4, 5 }, IntStream.of(1, 2, 3, 4, 5).intersection(c).toArray());
         assertArrayEquals(new int[] { 4, 5 }, IntStream.of(1, 2, 3, 4, 5).intersection(c).skip(1).toArray());
-        assertEquals(N.asList(3, 4, 5), IntStream.of(1, 2, 3, 4, 5).intersection(c).toList());
-        assertEquals(N.asList(4, 5), IntStream.of(1, 2, 3, 4, 5).intersection(c).skip(1).toList());
+        assertEquals(N.toList(3, 4, 5), IntStream.of(1, 2, 3, 4, 5).intersection(c).toList());
+        assertEquals(N.toList(4, 5), IntStream.of(1, 2, 3, 4, 5).intersection(c).skip(1).toList());
         assertEquals(3, IntStream.of(1, 2, 3, 4, 5).map(e -> e).intersection(c).count());
         assertEquals(2, IntStream.of(1, 2, 3, 4, 5).map(e -> e).intersection(c).skip(1).count());
         assertArrayEquals(new int[] { 3, 4, 5 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).intersection(c).toArray());
         assertArrayEquals(new int[] { 4, 5 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).intersection(c).skip(1).toArray());
-        assertEquals(N.asList(3, 4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).intersection(c).toList());
-        assertEquals(N.asList(4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).intersection(c).skip(1).toList());
+        assertEquals(N.toList(3, 4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).intersection(c).toList());
+        assertEquals(N.toList(4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).intersection(c).skip(1).toList());
     }
 
     @Test
@@ -187,14 +187,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(1, IntStream.of(1, 2, 3, 4, 5).difference(c).skip(1).count());
         assertArrayEquals(new int[] { 1, 2 }, IntStream.of(1, 2, 3, 4, 5).difference(c).toArray());
         assertArrayEquals(new int[] { 2 }, IntStream.of(1, 2, 3, 4, 5).difference(c).skip(1).toArray());
-        assertEquals(N.asList(1, 2), IntStream.of(1, 2, 3, 4, 5).difference(c).toList());
-        assertEquals(N.asList(2), IntStream.of(1, 2, 3, 4, 5).difference(c).skip(1).toList());
+        assertEquals(N.toList(1, 2), IntStream.of(1, 2, 3, 4, 5).difference(c).toList());
+        assertEquals(N.toList(2), IntStream.of(1, 2, 3, 4, 5).difference(c).skip(1).toList());
         assertEquals(2, IntStream.of(1, 2, 3, 4, 5).map(e -> e).difference(c).count());
         assertEquals(1, IntStream.of(1, 2, 3, 4, 5).map(e -> e).difference(c).skip(1).count());
         assertArrayEquals(new int[] { 1, 2 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).difference(c).toArray());
         assertArrayEquals(new int[] { 2 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).difference(c).skip(1).toArray());
-        assertEquals(N.asList(1, 2), IntStream.of(1, 2, 3, 4, 5).map(e -> e).difference(c).toList());
-        assertEquals(N.asList(2), IntStream.of(1, 2, 3, 4, 5).map(e -> e).difference(c).skip(1).toList());
+        assertEquals(N.toList(1, 2), IntStream.of(1, 2, 3, 4, 5).map(e -> e).difference(c).toList());
+        assertEquals(N.toList(2), IntStream.of(1, 2, 3, 4, 5).map(e -> e).difference(c).skip(1).toList());
     }
 
     @Test
@@ -204,14 +204,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(2, IntStream.of(1, 2, 3, 4, 5).symmetricDifference(c).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 6 }, IntStream.of(1, 2, 3, 4, 5).symmetricDifference(c).toArray());
         assertArrayEquals(new int[] { 2, 6 }, IntStream.of(1, 2, 3, 4, 5).symmetricDifference(c).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 6), IntStream.of(1, 2, 3, 4, 5).symmetricDifference(c).toList());
-        assertEquals(N.asList(2, 6), IntStream.of(1, 2, 3, 4, 5).symmetricDifference(c).skip(1).toList());
+        assertEquals(N.toList(1, 2, 6), IntStream.of(1, 2, 3, 4, 5).symmetricDifference(c).toList());
+        assertEquals(N.toList(2, 6), IntStream.of(1, 2, 3, 4, 5).symmetricDifference(c).skip(1).toList());
         assertEquals(3, IntStream.of(1, 2, 3, 4, 5).map(e -> e).symmetricDifference(c).count());
         assertEquals(2, IntStream.of(1, 2, 3, 4, 5).map(e -> e).symmetricDifference(c).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 6 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).symmetricDifference(c).toArray());
         assertArrayEquals(new int[] { 2, 6 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).symmetricDifference(c).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 6), IntStream.of(1, 2, 3, 4, 5).map(e -> e).symmetricDifference(c).toList());
-        assertEquals(N.asList(2, 6), IntStream.of(1, 2, 3, 4, 5).map(e -> e).symmetricDifference(c).skip(1).toList());
+        assertEquals(N.toList(1, 2, 6), IntStream.of(1, 2, 3, 4, 5).map(e -> e).symmetricDifference(c).toList());
+        assertEquals(N.toList(2, 6), IntStream.of(1, 2, 3, 4, 5).map(e -> e).symmetricDifference(c).skip(1).toList());
     }
 
     @Test
@@ -220,14 +220,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(4, IntStream.of(1, 2, 3, 4, 5).reversed().skip(1).count());
         assertArrayEquals(new int[] { 5, 4, 3, 2, 1 }, IntStream.of(1, 2, 3, 4, 5).reversed().toArray());
         assertArrayEquals(new int[] { 4, 3, 2, 1 }, IntStream.of(1, 2, 3, 4, 5).reversed().skip(1).toArray());
-        assertEquals(N.asList(5, 4, 3, 2, 1), IntStream.of(1, 2, 3, 4, 5).reversed().toList());
-        assertEquals(N.asList(4, 3, 2, 1), IntStream.of(1, 2, 3, 4, 5).reversed().skip(1).toList());
+        assertEquals(N.toList(5, 4, 3, 2, 1), IntStream.of(1, 2, 3, 4, 5).reversed().toList());
+        assertEquals(N.toList(4, 3, 2, 1), IntStream.of(1, 2, 3, 4, 5).reversed().skip(1).toList());
         assertEquals(5, IntStream.of(1, 2, 3, 4, 5).map(e -> e).reversed().count());
         assertEquals(4, IntStream.of(1, 2, 3, 4, 5).map(e -> e).reversed().skip(1).count());
         assertArrayEquals(new int[] { 5, 4, 3, 2, 1 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).reversed().toArray());
         assertArrayEquals(new int[] { 4, 3, 2, 1 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).reversed().skip(1).toArray());
-        assertEquals(N.asList(5, 4, 3, 2, 1), IntStream.of(1, 2, 3, 4, 5).map(e -> e).reversed().toList());
-        assertEquals(N.asList(4, 3, 2, 1), IntStream.of(1, 2, 3, 4, 5).map(e -> e).reversed().skip(1).toList());
+        assertEquals(N.toList(5, 4, 3, 2, 1), IntStream.of(1, 2, 3, 4, 5).map(e -> e).reversed().toList());
+        assertEquals(N.toList(4, 3, 2, 1), IntStream.of(1, 2, 3, 4, 5).map(e -> e).reversed().skip(1).toList());
     }
 
     @Test
@@ -236,14 +236,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(4, IntStream.of(1, 2, 3, 4, 5).rotated(2).skip(1).count());
         assertArrayEquals(new int[] { 4, 5, 1, 2, 3 }, IntStream.of(1, 2, 3, 4, 5).rotated(2).toArray());
         assertArrayEquals(new int[] { 5, 1, 2, 3 }, IntStream.of(1, 2, 3, 4, 5).rotated(2).skip(1).toArray());
-        assertEquals(N.asList(4, 5, 1, 2, 3), IntStream.of(1, 2, 3, 4, 5).rotated(2).toList());
-        assertEquals(N.asList(5, 1, 2, 3), IntStream.of(1, 2, 3, 4, 5).rotated(2).skip(1).toList());
+        assertEquals(N.toList(4, 5, 1, 2, 3), IntStream.of(1, 2, 3, 4, 5).rotated(2).toList());
+        assertEquals(N.toList(5, 1, 2, 3), IntStream.of(1, 2, 3, 4, 5).rotated(2).skip(1).toList());
         assertEquals(5, IntStream.of(1, 2, 3, 4, 5).map(e -> e).rotated(2).count());
         assertEquals(4, IntStream.of(1, 2, 3, 4, 5).map(e -> e).rotated(2).skip(1).count());
         assertArrayEquals(new int[] { 4, 5, 1, 2, 3 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).rotated(2).toArray());
         assertArrayEquals(new int[] { 5, 1, 2, 3 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).rotated(2).skip(1).toArray());
-        assertEquals(N.asList(4, 5, 1, 2, 3), IntStream.of(1, 2, 3, 4, 5).map(e -> e).rotated(2).toList());
-        assertEquals(N.asList(5, 1, 2, 3), IntStream.of(1, 2, 3, 4, 5).map(e -> e).rotated(2).skip(1).toList());
+        assertEquals(N.toList(4, 5, 1, 2, 3), IntStream.of(1, 2, 3, 4, 5).map(e -> e).rotated(2).toList());
+        assertEquals(N.toList(5, 1, 2, 3), IntStream.of(1, 2, 3, 4, 5).map(e -> e).rotated(2).skip(1).toList());
     }
 
     @Test
@@ -252,11 +252,11 @@ public class IntStream104Test extends TestBase {
         assertEquals(4, IntStream.of(1, 2, 3, 4, 5).shuffled().skip(1).count());
         int[] shuffledArray = IntStream.of(1, 2, 3, 4, 5).shuffled().toArray();
         assertEquals(5, shuffledArray.length);
-        assertHaveSameElements(N.toList(shuffledArray), N.asList(1, 2, 3, 4, 5));
+        assertHaveSameElements(N.toList(shuffledArray), N.toList(1, 2, 3, 4, 5));
 
         List<Integer> shuffledList = IntStream.of(1, 2, 3, 4, 5).shuffled().toList();
         assertEquals(5, shuffledList.size());
-        assertHaveSameElements(shuffledList, N.asList(1, 2, 3, 4, 5));
+        assertHaveSameElements(shuffledList, N.toList(1, 2, 3, 4, 5));
 
         assertEquals(5, IntStream.of(1, 2, 3, 4, 5).map(e -> e).shuffled().count());
         assertEquals(4, IntStream.of(1, 2, 3, 4, 5).map(e -> e).shuffled().skip(1).count());
@@ -271,12 +271,12 @@ public class IntStream104Test extends TestBase {
         rnd = new Random(42);
         int[] shuffledArray = IntStream.of(1, 2, 3, 4, 5).shuffled(rnd).toArray();
         assertEquals(5, shuffledArray.length);
-        assertHaveSameElements(N.toList(shuffledArray), N.asList(1, 2, 3, 4, 5));
+        assertHaveSameElements(N.toList(shuffledArray), N.toList(1, 2, 3, 4, 5));
 
         rnd = new Random(42);
         List<Integer> shuffledList = IntStream.of(1, 2, 3, 4, 5).shuffled(rnd).toList();
         assertEquals(5, shuffledList.size());
-        assertHaveSameElements(shuffledList, N.asList(1, 2, 3, 4, 5));
+        assertHaveSameElements(shuffledList, N.toList(1, 2, 3, 4, 5));
 
         rnd = new Random(42);
         assertEquals(5, IntStream.of(1, 2, 3, 4, 5).map(e -> e).shuffled(rnd).count());
@@ -290,14 +290,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(4, IntStream.of(3, 1, 4, 2, 5).sorted().skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, IntStream.of(3, 1, 4, 2, 5).sorted().toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5 }, IntStream.of(3, 1, 4, 2, 5).sorted().skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.of(3, 1, 4, 2, 5).sorted().toList());
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.of(3, 1, 4, 2, 5).sorted().skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.of(3, 1, 4, 2, 5).sorted().toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.of(3, 1, 4, 2, 5).sorted().skip(1).toList());
         assertEquals(5, IntStream.of(3, 1, 4, 2, 5).map(e -> e).sorted().count());
         assertEquals(4, IntStream.of(3, 1, 4, 2, 5).map(e -> e).sorted().skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, IntStream.of(3, 1, 4, 2, 5).map(e -> e).sorted().toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5 }, IntStream.of(3, 1, 4, 2, 5).map(e -> e).sorted().skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.of(3, 1, 4, 2, 5).map(e -> e).sorted().toList());
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.of(3, 1, 4, 2, 5).map(e -> e).sorted().skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.of(3, 1, 4, 2, 5).map(e -> e).sorted().toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.of(3, 1, 4, 2, 5).map(e -> e).sorted().skip(1).toList());
     }
 
     @Test
@@ -306,14 +306,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(4, IntStream.of(3, 1, 4, 2, 5).reverseSorted().skip(1).count());
         assertArrayEquals(new int[] { 5, 4, 3, 2, 1 }, IntStream.of(3, 1, 4, 2, 5).reverseSorted().toArray());
         assertArrayEquals(new int[] { 4, 3, 2, 1 }, IntStream.of(3, 1, 4, 2, 5).reverseSorted().skip(1).toArray());
-        assertEquals(N.asList(5, 4, 3, 2, 1), IntStream.of(3, 1, 4, 2, 5).reverseSorted().toList());
-        assertEquals(N.asList(4, 3, 2, 1), IntStream.of(3, 1, 4, 2, 5).reverseSorted().skip(1).toList());
+        assertEquals(N.toList(5, 4, 3, 2, 1), IntStream.of(3, 1, 4, 2, 5).reverseSorted().toList());
+        assertEquals(N.toList(4, 3, 2, 1), IntStream.of(3, 1, 4, 2, 5).reverseSorted().skip(1).toList());
         assertEquals(5, IntStream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted().count());
         assertEquals(4, IntStream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted().skip(1).count());
         assertArrayEquals(new int[] { 5, 4, 3, 2, 1 }, IntStream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted().toArray());
         assertArrayEquals(new int[] { 4, 3, 2, 1 }, IntStream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted().skip(1).toArray());
-        assertEquals(N.asList(5, 4, 3, 2, 1), IntStream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted().toList());
-        assertEquals(N.asList(4, 3, 2, 1), IntStream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted().skip(1).toList());
+        assertEquals(N.toList(5, 4, 3, 2, 1), IntStream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted().toList());
+        assertEquals(N.toList(4, 3, 2, 1), IntStream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted().skip(1).toList());
     }
 
     @Test
@@ -322,14 +322,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(14, IntStream.of(1, 2, 3, 4, 5).cycled().limit(15).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5, 1, 2, 3 }, IntStream.of(1, 2, 3, 4, 5).cycled().limit(8).toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5, 1, 2, 3 }, IntStream.of(1, 2, 3, 4, 5).cycled().limit(8).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5, 1, 2, 3), IntStream.of(1, 2, 3, 4, 5).cycled().limit(8).toList());
-        assertEquals(N.asList(2, 3, 4, 5, 1, 2, 3), IntStream.of(1, 2, 3, 4, 5).cycled().limit(8).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5, 1, 2, 3), IntStream.of(1, 2, 3, 4, 5).cycled().limit(8).toList());
+        assertEquals(N.toList(2, 3, 4, 5, 1, 2, 3), IntStream.of(1, 2, 3, 4, 5).cycled().limit(8).skip(1).toList());
         assertEquals(15, IntStream.of(1, 2, 3, 4, 5).map(e -> e).cycled().limit(15).count());
         assertEquals(14, IntStream.of(1, 2, 3, 4, 5).map(e -> e).cycled().limit(15).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5, 1, 2, 3 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).cycled().limit(8).toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5, 1, 2, 3 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).cycled().limit(8).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5, 1, 2, 3), IntStream.of(1, 2, 3, 4, 5).map(e -> e).cycled().limit(8).toList());
-        assertEquals(N.asList(2, 3, 4, 5, 1, 2, 3), IntStream.of(1, 2, 3, 4, 5).map(e -> e).cycled().limit(8).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5, 1, 2, 3), IntStream.of(1, 2, 3, 4, 5).map(e -> e).cycled().limit(8).toList());
+        assertEquals(N.toList(2, 3, 4, 5, 1, 2, 3), IntStream.of(1, 2, 3, 4, 5).map(e -> e).cycled().limit(8).skip(1).toList());
     }
 
     @Test
@@ -338,14 +338,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(9, IntStream.of(1, 2, 3, 4, 5).cycled(2).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5, 1, 2, 3, 4, 5 }, IntStream.of(1, 2, 3, 4, 5).cycled(2).toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5, 1, 2, 3, 4, 5 }, IntStream.of(1, 2, 3, 4, 5).cycled(2).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5, 1, 2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).cycled(2).toList());
-        assertEquals(N.asList(2, 3, 4, 5, 1, 2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).cycled(2).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5, 1, 2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).cycled(2).toList());
+        assertEquals(N.toList(2, 3, 4, 5, 1, 2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).cycled(2).skip(1).toList());
         assertEquals(10, IntStream.of(1, 2, 3, 4, 5).map(e -> e).cycled(2).count());
         assertEquals(9, IntStream.of(1, 2, 3, 4, 5).map(e -> e).cycled(2).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5, 1, 2, 3, 4, 5 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).cycled(2).toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5, 1, 2, 3, 4, 5 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).cycled(2).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5, 1, 2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).cycled(2).toList());
-        assertEquals(N.asList(2, 3, 4, 5, 1, 2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).cycled(2).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5, 1, 2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).cycled(2).toList());
+        assertEquals(N.toList(2, 3, 4, 5, 1, 2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).cycled(2).skip(1).toList());
     }
 
     @Test
@@ -384,8 +384,8 @@ public class IntStream104Test extends TestBase {
         assertEquals(2, IntStream.of(1, 2, 3, 4, 5).skip(2).skip(1).count());
         assertArrayEquals(new int[] { 3, 4, 5 }, IntStream.of(1, 2, 3, 4, 5).skip(2).toArray());
         assertArrayEquals(new int[] { 4, 5 }, IntStream.of(1, 2, 3, 4, 5).skip(2).skip(1).toArray());
-        assertEquals(N.asList(3, 4, 5), IntStream.of(1, 2, 3, 4, 5).skip(2).toList());
-        assertEquals(N.asList(4, 5), IntStream.of(1, 2, 3, 4, 5).skip(2).skip(1).toList());
+        assertEquals(N.toList(3, 4, 5), IntStream.of(1, 2, 3, 4, 5).skip(2).toList());
+        assertEquals(N.toList(4, 5), IntStream.of(1, 2, 3, 4, 5).skip(2).skip(1).toList());
         assertEquals(3, IntStream.of(1, 2, 3, 4, 5).map(e -> e).skip(2).count());
         assertEquals(2, IntStream.of(1, 2, 3, 4, 5).map(e -> e).skip(2).skip(1).count());
         assertArrayEquals(new int[] { 3, 4, 5 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).skip(2).toArray());
@@ -398,14 +398,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(4, IntStream.of(1, 2, 3, 4, 5).map(i -> i * 2).skip(1).count());
         assertArrayEquals(new int[] { 2, 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).map(i -> i * 2).toArray());
         assertArrayEquals(new int[] { 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).map(i -> i * 2).skip(1).toArray());
-        assertEquals(N.asList(2, 4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(i -> i * 2).toList());
-        assertEquals(N.asList(4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(i -> i * 2).skip(1).toList());
+        assertEquals(N.toList(2, 4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(i -> i * 2).toList());
+        assertEquals(N.toList(4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(i -> i * 2).skip(1).toList());
         assertEquals(5, IntStream.of(1, 2, 3, 4, 5).map(e -> e).map(i -> i * 2).count());
         assertEquals(4, IntStream.of(1, 2, 3, 4, 5).map(e -> e).map(i -> i * 2).skip(1).count());
         assertArrayEquals(new int[] { 2, 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).map(i -> i * 2).toArray());
         assertArrayEquals(new int[] { 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).map(i -> i * 2).skip(1).toArray());
-        assertEquals(N.asList(2, 4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(e -> e).map(i -> i * 2).toList());
-        assertEquals(N.asList(4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(e -> e).map(i -> i * 2).skip(1).toList());
+        assertEquals(N.toList(2, 4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(e -> e).map(i -> i * 2).toList());
+        assertEquals(N.toList(4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(e -> e).map(i -> i * 2).skip(1).toList());
     }
 
     @Test
@@ -423,16 +423,16 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new char[] { 'B', 'C', 'D', 'E' }, charStream.skip(1).toArray());
 
         charStream = IntStream.of(65, 66, 67, 68, 69).mapToChar(i -> (char) i);
-        assertEquals(N.asList('A', 'B', 'C', 'D', 'E'), charStream.toList());
+        assertEquals(N.toList('A', 'B', 'C', 'D', 'E'), charStream.toList());
 
         charStream = IntStream.of(65, 66, 67, 68, 69).mapToChar(i -> (char) i);
-        assertEquals(N.asList('B', 'C', 'D', 'E'), charStream.skip(1).toList());
+        assertEquals(N.toList('B', 'C', 'D', 'E'), charStream.skip(1).toList());
 
         charStream = IntStream.of(65, 66, 67, 68, 69).map(e -> e).mapToChar(i -> (char) i);
         assertEquals(5, charStream.count());
 
         charStream = IntStream.of(65, 66, 67, 68, 69).map(e -> e).mapToChar(i -> (char) i);
-        assertEquals(N.asList('A', 'B', 'C', 'D', 'E'), charStream.toList());
+        assertEquals(N.toList('A', 'B', 'C', 'D', 'E'), charStream.toList());
     }
 
     @Test
@@ -450,16 +450,16 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new byte[] { 2, 3, 4, 5 }, byteStream.skip(1).toArray());
 
         byteStream = IntStream.of(1, 2, 3, 4, 5).mapToByte(i -> (byte) i);
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), byteStream.toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), byteStream.toList());
 
         byteStream = IntStream.of(1, 2, 3, 4, 5).mapToByte(i -> (byte) i);
-        assertEquals(N.asList((byte) 2, (byte) 3, (byte) 4, (byte) 5), byteStream.skip(1).toList());
+        assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5), byteStream.skip(1).toList());
 
         byteStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).mapToByte(i -> (byte) i);
         assertEquals(5, byteStream.count());
 
         byteStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).mapToByte(i -> (byte) i);
-        assertEquals(N.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), byteStream.toList());
+        assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), byteStream.toList());
     }
 
     @Test
@@ -477,16 +477,16 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new short[] { 2, 3, 4, 5 }, shortStream.skip(1).toArray());
 
         shortStream = IntStream.of(1, 2, 3, 4, 5).mapToShort(i -> (short) i);
-        assertEquals(N.asList((short) 1, (short) 2, (short) 3, (short) 4, (short) 5), shortStream.toList());
+        assertEquals(N.toList((short) 1, (short) 2, (short) 3, (short) 4, (short) 5), shortStream.toList());
 
         shortStream = IntStream.of(1, 2, 3, 4, 5).mapToShort(i -> (short) i);
-        assertEquals(N.asList((short) 2, (short) 3, (short) 4, (short) 5), shortStream.skip(1).toList());
+        assertEquals(N.toList((short) 2, (short) 3, (short) 4, (short) 5), shortStream.skip(1).toList());
 
         shortStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).mapToShort(i -> (short) i);
         assertEquals(5, shortStream.count());
 
         shortStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).mapToShort(i -> (short) i);
-        assertEquals(N.asList((short) 1, (short) 2, (short) 3, (short) 4, (short) 5), shortStream.toList());
+        assertEquals(N.toList((short) 1, (short) 2, (short) 3, (short) 4, (short) 5), shortStream.toList());
     }
 
     @Test
@@ -504,16 +504,16 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new long[] { 2L, 3L, 4L, 5L }, longStream.skip(1).toArray());
 
         longStream = IntStream.of(1, 2, 3, 4, 5).mapToLong(i -> (long) i);
-        assertEquals(N.asList(1L, 2L, 3L, 4L, 5L), longStream.toList());
+        assertEquals(N.toList(1L, 2L, 3L, 4L, 5L), longStream.toList());
 
         longStream = IntStream.of(1, 2, 3, 4, 5).mapToLong(i -> (long) i);
-        assertEquals(N.asList(2L, 3L, 4L, 5L), longStream.skip(1).toList());
+        assertEquals(N.toList(2L, 3L, 4L, 5L), longStream.skip(1).toList());
 
         longStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).mapToLong(i -> (long) i);
         assertEquals(5, longStream.count());
 
         longStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).mapToLong(i -> (long) i);
-        assertEquals(N.asList(1L, 2L, 3L, 4L, 5L), longStream.toList());
+        assertEquals(N.toList(1L, 2L, 3L, 4L, 5L), longStream.toList());
     }
 
     @Test
@@ -531,16 +531,16 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new float[] { 2f, 3f, 4f, 5f }, floatStream.skip(1).toArray(), 0.001f);
 
         floatStream = IntStream.of(1, 2, 3, 4, 5).mapToFloat(i -> (float) i);
-        assertEquals(N.asList(1f, 2f, 3f, 4f, 5f), floatStream.toList());
+        assertEquals(N.toList(1f, 2f, 3f, 4f, 5f), floatStream.toList());
 
         floatStream = IntStream.of(1, 2, 3, 4, 5).mapToFloat(i -> (float) i);
-        assertEquals(N.asList(2f, 3f, 4f, 5f), floatStream.skip(1).toList());
+        assertEquals(N.toList(2f, 3f, 4f, 5f), floatStream.skip(1).toList());
 
         floatStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).mapToFloat(i -> (float) i);
         assertEquals(5, floatStream.count());
 
         floatStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).mapToFloat(i -> (float) i);
-        assertEquals(N.asList(1f, 2f, 3f, 4f, 5f), floatStream.toList());
+        assertEquals(N.toList(1f, 2f, 3f, 4f, 5f), floatStream.toList());
     }
 
     @Test
@@ -558,16 +558,16 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new double[] { 2.0, 3.0, 4.0, 5.0 }, doubleStream.skip(1).toArray(), 0.001);
 
         doubleStream = IntStream.of(1, 2, 3, 4, 5).mapToDouble(i -> (double) i);
-        assertEquals(N.asList(1.0, 2.0, 3.0, 4.0, 5.0), doubleStream.toList());
+        assertEquals(N.toList(1.0, 2.0, 3.0, 4.0, 5.0), doubleStream.toList());
 
         doubleStream = IntStream.of(1, 2, 3, 4, 5).mapToDouble(i -> (double) i);
-        assertEquals(N.asList(2.0, 3.0, 4.0, 5.0), doubleStream.skip(1).toList());
+        assertEquals(N.toList(2.0, 3.0, 4.0, 5.0), doubleStream.skip(1).toList());
 
         doubleStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).mapToDouble(i -> (double) i);
         assertEquals(5, doubleStream.count());
 
         doubleStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).mapToDouble(i -> (double) i);
-        assertEquals(N.asList(1.0, 2.0, 3.0, 4.0, 5.0), doubleStream.toList());
+        assertEquals(N.toList(1.0, 2.0, 3.0, 4.0, 5.0), doubleStream.toList());
     }
 
     @Test
@@ -585,16 +585,16 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new String[] { "Item2", "Item3", "Item4", "Item5" }, stringStream.skip(1).toArray(String[]::new));
 
         stringStream = IntStream.of(1, 2, 3, 4, 5).mapToObj(i -> "Item" + i);
-        assertEquals(N.asList("Item1", "Item2", "Item3", "Item4", "Item5"), stringStream.toList());
+        assertEquals(N.toList("Item1", "Item2", "Item3", "Item4", "Item5"), stringStream.toList());
 
         stringStream = IntStream.of(1, 2, 3, 4, 5).mapToObj(i -> "Item" + i);
-        assertEquals(N.asList("Item2", "Item3", "Item4", "Item5"), stringStream.skip(1).toList());
+        assertEquals(N.toList("Item2", "Item3", "Item4", "Item5"), stringStream.skip(1).toList());
 
         stringStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).mapToObj(i -> "Item" + i);
         assertEquals(5, stringStream.count());
 
         stringStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).mapToObj(i -> "Item" + i);
-        assertEquals(N.asList("Item1", "Item2", "Item3", "Item4", "Item5"), stringStream.toList());
+        assertEquals(N.toList("Item1", "Item2", "Item3", "Item4", "Item5"), stringStream.toList());
     }
 
     @Test
@@ -604,16 +604,16 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new int[] { 1, 10, 100, 2, 20, 200, 3, 30, 300 }, IntStream.of(1, 2, 3).flatMap(i -> IntStream.of(i, i * 10, i * 100)).toArray());
         assertArrayEquals(new int[] { 10, 100, 2, 20, 200, 3, 30, 300 },
                 IntStream.of(1, 2, 3).flatMap(i -> IntStream.of(i, i * 10, i * 100)).skip(1).toArray());
-        assertEquals(N.asList(1, 10, 100, 2, 20, 200, 3, 30, 300), IntStream.of(1, 2, 3).flatMap(i -> IntStream.of(i, i * 10, i * 100)).toList());
-        assertEquals(N.asList(10, 100, 2, 20, 200, 3, 30, 300), IntStream.of(1, 2, 3).flatMap(i -> IntStream.of(i, i * 10, i * 100)).skip(1).toList());
+        assertEquals(N.toList(1, 10, 100, 2, 20, 200, 3, 30, 300), IntStream.of(1, 2, 3).flatMap(i -> IntStream.of(i, i * 10, i * 100)).toList());
+        assertEquals(N.toList(10, 100, 2, 20, 200, 3, 30, 300), IntStream.of(1, 2, 3).flatMap(i -> IntStream.of(i, i * 10, i * 100)).skip(1).toList());
         assertEquals(9, IntStream.of(1, 2, 3).map(e -> e).flatMap(i -> IntStream.of(i, i * 10, i * 100)).count());
         assertEquals(8, IntStream.of(1, 2, 3).map(e -> e).flatMap(i -> IntStream.of(i, i * 10, i * 100)).skip(1).count());
         assertArrayEquals(new int[] { 1, 10, 100, 2, 20, 200, 3, 30, 300 },
                 IntStream.of(1, 2, 3).map(e -> e).flatMap(i -> IntStream.of(i, i * 10, i * 100)).toArray());
         assertArrayEquals(new int[] { 10, 100, 2, 20, 200, 3, 30, 300 },
                 IntStream.of(1, 2, 3).map(e -> e).flatMap(i -> IntStream.of(i, i * 10, i * 100)).skip(1).toArray());
-        assertEquals(N.asList(1, 10, 100, 2, 20, 200, 3, 30, 300), IntStream.of(1, 2, 3).map(e -> e).flatMap(i -> IntStream.of(i, i * 10, i * 100)).toList());
-        assertEquals(N.asList(10, 100, 2, 20, 200, 3, 30, 300),
+        assertEquals(N.toList(1, 10, 100, 2, 20, 200, 3, 30, 300), IntStream.of(1, 2, 3).map(e -> e).flatMap(i -> IntStream.of(i, i * 10, i * 100)).toList());
+        assertEquals(N.toList(10, 100, 2, 20, 200, 3, 30, 300),
                 IntStream.of(1, 2, 3).map(e -> e).flatMap(i -> IntStream.of(i, i * 10, i * 100)).skip(1).toList());
     }
 
@@ -624,16 +624,16 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new int[] { 1, 10, 100, 2, 20, 200, 3, 30, 300 }, IntStream.of(1, 2, 3).flatmap(i -> new int[] { i, i * 10, i * 100 }).toArray());
         assertArrayEquals(new int[] { 10, 100, 2, 20, 200, 3, 30, 300 },
                 IntStream.of(1, 2, 3).flatmap(i -> new int[] { i, i * 10, i * 100 }).skip(1).toArray());
-        assertEquals(N.asList(1, 10, 100, 2, 20, 200, 3, 30, 300), IntStream.of(1, 2, 3).flatmap(i -> new int[] { i, i * 10, i * 100 }).toList());
-        assertEquals(N.asList(10, 100, 2, 20, 200, 3, 30, 300), IntStream.of(1, 2, 3).flatmap(i -> new int[] { i, i * 10, i * 100 }).skip(1).toList());
+        assertEquals(N.toList(1, 10, 100, 2, 20, 200, 3, 30, 300), IntStream.of(1, 2, 3).flatmap(i -> new int[] { i, i * 10, i * 100 }).toList());
+        assertEquals(N.toList(10, 100, 2, 20, 200, 3, 30, 300), IntStream.of(1, 2, 3).flatmap(i -> new int[] { i, i * 10, i * 100 }).skip(1).toList());
         assertEquals(9, IntStream.of(1, 2, 3).map(e -> e).flatmap(i -> new int[] { i, i * 10, i * 100 }).count());
         assertEquals(8, IntStream.of(1, 2, 3).map(e -> e).flatmap(i -> new int[] { i, i * 10, i * 100 }).skip(1).count());
         assertArrayEquals(new int[] { 1, 10, 100, 2, 20, 200, 3, 30, 300 },
                 IntStream.of(1, 2, 3).map(e -> e).flatmap(i -> new int[] { i, i * 10, i * 100 }).toArray());
         assertArrayEquals(new int[] { 10, 100, 2, 20, 200, 3, 30, 300 },
                 IntStream.of(1, 2, 3).map(e -> e).flatmap(i -> new int[] { i, i * 10, i * 100 }).skip(1).toArray());
-        assertEquals(N.asList(1, 10, 100, 2, 20, 200, 3, 30, 300), IntStream.of(1, 2, 3).map(e -> e).flatmap(i -> new int[] { i, i * 10, i * 100 }).toList());
-        assertEquals(N.asList(10, 100, 2, 20, 200, 3, 30, 300),
+        assertEquals(N.toList(1, 10, 100, 2, 20, 200, 3, 30, 300), IntStream.of(1, 2, 3).map(e -> e).flatmap(i -> new int[] { i, i * 10, i * 100 }).toList());
+        assertEquals(N.toList(10, 100, 2, 20, 200, 3, 30, 300),
                 IntStream.of(1, 2, 3).map(e -> e).flatmap(i -> new int[] { i, i * 10, i * 100 }).skip(1).toList());
     }
 
@@ -645,9 +645,9 @@ public class IntStream104Test extends TestBase {
                 IntStream.of(1, 2, 3).flattMap(i -> java.util.stream.IntStream.of(i, i * 10, i * 100)).toArray());
         assertArrayEquals(new int[] { 10, 100, 2, 20, 200, 3, 30, 300 },
                 IntStream.of(1, 2, 3).flattMap(i -> java.util.stream.IntStream.of(i, i * 10, i * 100)).skip(1).toArray());
-        assertEquals(N.asList(1, 10, 100, 2, 20, 200, 3, 30, 300),
+        assertEquals(N.toList(1, 10, 100, 2, 20, 200, 3, 30, 300),
                 IntStream.of(1, 2, 3).flattMap(i -> java.util.stream.IntStream.of(i, i * 10, i * 100)).toList());
-        assertEquals(N.asList(10, 100, 2, 20, 200, 3, 30, 300),
+        assertEquals(N.toList(10, 100, 2, 20, 200, 3, 30, 300),
                 IntStream.of(1, 2, 3).flattMap(i -> java.util.stream.IntStream.of(i, i * 10, i * 100)).skip(1).toList());
         assertEquals(9, IntStream.of(1, 2, 3).map(e -> e).flattMap(i -> java.util.stream.IntStream.of(i, i * 10, i * 100)).count());
         assertEquals(8, IntStream.of(1, 2, 3).map(e -> e).flattMap(i -> java.util.stream.IntStream.of(i, i * 10, i * 100)).skip(1).count());
@@ -655,9 +655,9 @@ public class IntStream104Test extends TestBase {
                 IntStream.of(1, 2, 3).map(e -> e).flattMap(i -> java.util.stream.IntStream.of(i, i * 10, i * 100)).toArray());
         assertArrayEquals(new int[] { 10, 100, 2, 20, 200, 3, 30, 300 },
                 IntStream.of(1, 2, 3).map(e -> e).flattMap(i -> java.util.stream.IntStream.of(i, i * 10, i * 100)).skip(1).toArray());
-        assertEquals(N.asList(1, 10, 100, 2, 20, 200, 3, 30, 300),
+        assertEquals(N.toList(1, 10, 100, 2, 20, 200, 3, 30, 300),
                 IntStream.of(1, 2, 3).map(e -> e).flattMap(i -> java.util.stream.IntStream.of(i, i * 10, i * 100)).toList());
-        assertEquals(N.asList(10, 100, 2, 20, 200, 3, 30, 300),
+        assertEquals(N.toList(10, 100, 2, 20, 200, 3, 30, 300),
                 IntStream.of(1, 2, 3).map(e -> e).flattMap(i -> java.util.stream.IntStream.of(i, i * 10, i * 100)).skip(1).toList());
     }
 
@@ -676,16 +676,16 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new char[] { 'a', 'B', 'b', 'C', 'c' }, charStream.skip(1).toArray());
 
         charStream = IntStream.of(1, 2, 3).flatMapToChar(i -> CharStream.of((char) ('A' + i - 1), (char) ('a' + i - 1)));
-        assertEquals(N.asList('A', 'a', 'B', 'b', 'C', 'c'), charStream.toList());
+        assertEquals(N.toList('A', 'a', 'B', 'b', 'C', 'c'), charStream.toList());
 
         charStream = IntStream.of(1, 2, 3).flatMapToChar(i -> CharStream.of((char) ('A' + i - 1), (char) ('a' + i - 1)));
-        assertEquals(N.asList('a', 'B', 'b', 'C', 'c'), charStream.skip(1).toList());
+        assertEquals(N.toList('a', 'B', 'b', 'C', 'c'), charStream.skip(1).toList());
 
         charStream = IntStream.of(1, 2, 3).map(e -> e).flatMapToChar(i -> CharStream.of((char) ('A' + i - 1), (char) ('a' + i - 1)));
         assertEquals(6, charStream.count());
 
         charStream = IntStream.of(1, 2, 3).map(e -> e).flatMapToChar(i -> CharStream.of((char) ('A' + i - 1), (char) ('a' + i - 1)));
-        assertEquals(N.asList('A', 'a', 'B', 'b', 'C', 'c'), charStream.toList());
+        assertEquals(N.toList('A', 'a', 'B', 'b', 'C', 'c'), charStream.toList());
     }
 
     @Test
@@ -703,16 +703,16 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new byte[] { 10, 2, 20, 3, 30 }, byteStream.skip(1).toArray());
 
         byteStream = IntStream.of(1, 2, 3).flatMapToByte(i -> ByteStream.of((byte) i, (byte) (i * 10)));
-        assertEquals(N.asList((byte) 1, (byte) 10, (byte) 2, (byte) 20, (byte) 3, (byte) 30), byteStream.toList());
+        assertEquals(N.toList((byte) 1, (byte) 10, (byte) 2, (byte) 20, (byte) 3, (byte) 30), byteStream.toList());
 
         byteStream = IntStream.of(1, 2, 3).flatMapToByte(i -> ByteStream.of((byte) i, (byte) (i * 10)));
-        assertEquals(N.asList((byte) 10, (byte) 2, (byte) 20, (byte) 3, (byte) 30), byteStream.skip(1).toList());
+        assertEquals(N.toList((byte) 10, (byte) 2, (byte) 20, (byte) 3, (byte) 30), byteStream.skip(1).toList());
 
         byteStream = IntStream.of(1, 2, 3).map(e -> e).flatMapToByte(i -> ByteStream.of((byte) i, (byte) (i * 10)));
         assertEquals(6, byteStream.count());
 
         byteStream = IntStream.of(1, 2, 3).map(e -> e).flatMapToByte(i -> ByteStream.of((byte) i, (byte) (i * 10)));
-        assertEquals(N.asList((byte) 1, (byte) 10, (byte) 2, (byte) 20, (byte) 3, (byte) 30), byteStream.toList());
+        assertEquals(N.toList((byte) 1, (byte) 10, (byte) 2, (byte) 20, (byte) 3, (byte) 30), byteStream.toList());
     }
 
     @Test
@@ -730,16 +730,16 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new short[] { 10, 2, 20, 3, 30 }, shortStream.skip(1).toArray());
 
         shortStream = IntStream.of(1, 2, 3).flatMapToShort(i -> ShortStream.of((short) i, (short) (i * 10)));
-        assertEquals(N.asList((short) 1, (short) 10, (short) 2, (short) 20, (short) 3, (short) 30), shortStream.toList());
+        assertEquals(N.toList((short) 1, (short) 10, (short) 2, (short) 20, (short) 3, (short) 30), shortStream.toList());
 
         shortStream = IntStream.of(1, 2, 3).flatMapToShort(i -> ShortStream.of((short) i, (short) (i * 10)));
-        assertEquals(N.asList((short) 10, (short) 2, (short) 20, (short) 3, (short) 30), shortStream.skip(1).toList());
+        assertEquals(N.toList((short) 10, (short) 2, (short) 20, (short) 3, (short) 30), shortStream.skip(1).toList());
 
         shortStream = IntStream.of(1, 2, 3).map(e -> e).flatMapToShort(i -> ShortStream.of((short) i, (short) (i * 10)));
         assertEquals(6, shortStream.count());
 
         shortStream = IntStream.of(1, 2, 3).map(e -> e).flatMapToShort(i -> ShortStream.of((short) i, (short) (i * 10)));
-        assertEquals(N.asList((short) 1, (short) 10, (short) 2, (short) 20, (short) 3, (short) 30), shortStream.toList());
+        assertEquals(N.toList((short) 1, (short) 10, (short) 2, (short) 20, (short) 3, (short) 30), shortStream.toList());
     }
 
     @Test
@@ -757,16 +757,16 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new long[] { 10L, 2L, 20L, 3L, 30L }, longStream.skip(1).toArray());
 
         longStream = IntStream.of(1, 2, 3).flatMapToLong(i -> LongStream.of((long) i, (long) (i * 10)));
-        assertEquals(N.asList(1L, 10L, 2L, 20L, 3L, 30L), longStream.toList());
+        assertEquals(N.toList(1L, 10L, 2L, 20L, 3L, 30L), longStream.toList());
 
         longStream = IntStream.of(1, 2, 3).flatMapToLong(i -> LongStream.of((long) i, (long) (i * 10)));
-        assertEquals(N.asList(10L, 2L, 20L, 3L, 30L), longStream.skip(1).toList());
+        assertEquals(N.toList(10L, 2L, 20L, 3L, 30L), longStream.skip(1).toList());
 
         longStream = IntStream.of(1, 2, 3).map(e -> e).flatMapToLong(i -> LongStream.of((long) i, (long) (i * 10)));
         assertEquals(6, longStream.count());
 
         longStream = IntStream.of(1, 2, 3).map(e -> e).flatMapToLong(i -> LongStream.of((long) i, (long) (i * 10)));
-        assertEquals(N.asList(1L, 10L, 2L, 20L, 3L, 30L), longStream.toList());
+        assertEquals(N.toList(1L, 10L, 2L, 20L, 3L, 30L), longStream.toList());
     }
 
     @Test
@@ -784,16 +784,16 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new float[] { 10f, 2f, 20f, 3f, 30f }, floatStream.skip(1).toArray(), 0.001f);
 
         floatStream = IntStream.of(1, 2, 3).flatMapToFloat(i -> FloatStream.of((float) i, (float) (i * 10)));
-        assertEquals(N.asList(1f, 10f, 2f, 20f, 3f, 30f), floatStream.toList());
+        assertEquals(N.toList(1f, 10f, 2f, 20f, 3f, 30f), floatStream.toList());
 
         floatStream = IntStream.of(1, 2, 3).flatMapToFloat(i -> FloatStream.of((float) i, (float) (i * 10)));
-        assertEquals(N.asList(10f, 2f, 20f, 3f, 30f), floatStream.skip(1).toList());
+        assertEquals(N.toList(10f, 2f, 20f, 3f, 30f), floatStream.skip(1).toList());
 
         floatStream = IntStream.of(1, 2, 3).map(e -> e).flatMapToFloat(i -> FloatStream.of((float) i, (float) (i * 10)));
         assertEquals(6, floatStream.count());
 
         floatStream = IntStream.of(1, 2, 3).map(e -> e).flatMapToFloat(i -> FloatStream.of((float) i, (float) (i * 10)));
-        assertEquals(N.asList(1f, 10f, 2f, 20f, 3f, 30f), floatStream.toList());
+        assertEquals(N.toList(1f, 10f, 2f, 20f, 3f, 30f), floatStream.toList());
     }
 
     @Test
@@ -811,16 +811,16 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new double[] { 10.0, 2.0, 20.0, 3.0, 30.0 }, doubleStream.skip(1).toArray(), 0.001);
 
         doubleStream = IntStream.of(1, 2, 3).flatMapToDouble(i -> DoubleStream.of((double) i, (double) (i * 10)));
-        assertEquals(N.asList(1.0, 10.0, 2.0, 20.0, 3.0, 30.0), doubleStream.toList());
+        assertEquals(N.toList(1.0, 10.0, 2.0, 20.0, 3.0, 30.0), doubleStream.toList());
 
         doubleStream = IntStream.of(1, 2, 3).flatMapToDouble(i -> DoubleStream.of((double) i, (double) (i * 10)));
-        assertEquals(N.asList(10.0, 2.0, 20.0, 3.0, 30.0), doubleStream.skip(1).toList());
+        assertEquals(N.toList(10.0, 2.0, 20.0, 3.0, 30.0), doubleStream.skip(1).toList());
 
         doubleStream = IntStream.of(1, 2, 3).map(e -> e).flatMapToDouble(i -> DoubleStream.of((double) i, (double) (i * 10)));
         assertEquals(6, doubleStream.count());
 
         doubleStream = IntStream.of(1, 2, 3).map(e -> e).flatMapToDouble(i -> DoubleStream.of((double) i, (double) (i * 10)));
-        assertEquals(N.asList(1.0, 10.0, 2.0, 20.0, 3.0, 30.0), doubleStream.toList());
+        assertEquals(N.toList(1.0, 10.0, 2.0, 20.0, 3.0, 30.0), doubleStream.toList());
     }
 
     @Test
@@ -838,16 +838,16 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new String[] { "B1", "A2", "B2", "A3", "B3" }, stringStream.skip(1).toArray(String[]::new));
 
         stringStream = IntStream.of(1, 2, 3).flatMapToObj(i -> Stream.of("A" + i, "B" + i));
-        assertEquals(N.asList("A1", "B1", "A2", "B2", "A3", "B3"), stringStream.toList());
+        assertEquals(N.toList("A1", "B1", "A2", "B2", "A3", "B3"), stringStream.toList());
 
         stringStream = IntStream.of(1, 2, 3).flatMapToObj(i -> Stream.of("A" + i, "B" + i));
-        assertEquals(N.asList("B1", "A2", "B2", "A3", "B3"), stringStream.skip(1).toList());
+        assertEquals(N.toList("B1", "A2", "B2", "A3", "B3"), stringStream.skip(1).toList());
 
         stringStream = IntStream.of(1, 2, 3).map(e -> e).flatMapToObj(i -> Stream.of("A" + i, "B" + i));
         assertEquals(6, stringStream.count());
 
         stringStream = IntStream.of(1, 2, 3).map(e -> e).flatMapToObj(i -> Stream.of("A" + i, "B" + i));
-        assertEquals(N.asList("A1", "B1", "A2", "B2", "A3", "B3"), stringStream.toList());
+        assertEquals(N.toList("A1", "B1", "A2", "B2", "A3", "B3"), stringStream.toList());
     }
 
     @Test
@@ -865,16 +865,16 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new String[] { "B1", "A2", "B2", "A3", "B3" }, stringStream.skip(1).toArray(String[]::new));
 
         stringStream = IntStream.of(1, 2, 3).flatmapToObj(i -> Arrays.asList("A" + i, "B" + i));
-        assertEquals(N.asList("A1", "B1", "A2", "B2", "A3", "B3"), stringStream.toList());
+        assertEquals(N.toList("A1", "B1", "A2", "B2", "A3", "B3"), stringStream.toList());
 
         stringStream = IntStream.of(1, 2, 3).flatmapToObj(i -> Arrays.asList("A" + i, "B" + i));
-        assertEquals(N.asList("B1", "A2", "B2", "A3", "B3"), stringStream.skip(1).toList());
+        assertEquals(N.toList("B1", "A2", "B2", "A3", "B3"), stringStream.skip(1).toList());
 
         stringStream = IntStream.of(1, 2, 3).map(e -> e).flatmapToObj(i -> Arrays.asList("A" + i, "B" + i));
         assertEquals(6, stringStream.count());
 
         stringStream = IntStream.of(1, 2, 3).map(e -> e).flatmapToObj(i -> Arrays.asList("A" + i, "B" + i));
-        assertEquals(N.asList("A1", "B1", "A2", "B2", "A3", "B3"), stringStream.toList());
+        assertEquals(N.toList("A1", "B1", "A2", "B2", "A3", "B3"), stringStream.toList());
     }
 
     @Test
@@ -892,16 +892,16 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new String[] { "B1", "A2", "B2", "A3", "B3" }, stringStream.skip(1).toArray(String[]::new));
 
         stringStream = IntStream.of(1, 2, 3).flatMapArrayToObj(i -> new String[] { "A" + i, "B" + i });
-        assertEquals(N.asList("A1", "B1", "A2", "B2", "A3", "B3"), stringStream.toList());
+        assertEquals(N.toList("A1", "B1", "A2", "B2", "A3", "B3"), stringStream.toList());
 
         stringStream = IntStream.of(1, 2, 3).flatMapArrayToObj(i -> new String[] { "A" + i, "B" + i });
-        assertEquals(N.asList("B1", "A2", "B2", "A3", "B3"), stringStream.skip(1).toList());
+        assertEquals(N.toList("B1", "A2", "B2", "A3", "B3"), stringStream.skip(1).toList());
 
         stringStream = IntStream.of(1, 2, 3).map(e -> e).flatMapArrayToObj(i -> new String[] { "A" + i, "B" + i });
         assertEquals(6, stringStream.count());
 
         stringStream = IntStream.of(1, 2, 3).map(e -> e).flatMapArrayToObj(i -> new String[] { "A" + i, "B" + i });
-        assertEquals(N.asList("A1", "B1", "A2", "B2", "A3", "B3"), stringStream.toList());
+        assertEquals(N.toList("A1", "B1", "A2", "B2", "A3", "B3"), stringStream.toList());
     }
 
     @Test
@@ -922,11 +922,11 @@ public class IntStream104Test extends TestBase {
             consumer.accept(i);
             consumer.accept(i * 10);
         }).skip(1).toArray());
-        assertEquals(N.asList(1, 10, 2, 20, 3, 30), IntStream.of(1, 2, 3).mapMulti((i, consumer) -> {
+        assertEquals(N.toList(1, 10, 2, 20, 3, 30), IntStream.of(1, 2, 3).mapMulti((i, consumer) -> {
             consumer.accept(i);
             consumer.accept(i * 10);
         }).toList());
-        assertEquals(N.asList(10, 2, 20, 3, 30), IntStream.of(1, 2, 3).mapMulti((i, consumer) -> {
+        assertEquals(N.toList(10, 2, 20, 3, 30), IntStream.of(1, 2, 3).mapMulti((i, consumer) -> {
             consumer.accept(i);
             consumer.accept(i * 10);
         }).skip(1).toList());
@@ -946,11 +946,11 @@ public class IntStream104Test extends TestBase {
             consumer.accept(i);
             consumer.accept(i * 10);
         }).skip(1).toArray());
-        assertEquals(N.asList(1, 10, 2, 20, 3, 30), IntStream.of(1, 2, 3).map(e -> e).mapMulti((i, consumer) -> {
+        assertEquals(N.toList(1, 10, 2, 20, 3, 30), IntStream.of(1, 2, 3).map(e -> e).mapMulti((i, consumer) -> {
             consumer.accept(i);
             consumer.accept(i * 10);
         }).toList());
-        assertEquals(N.asList(10, 2, 20, 3, 30), IntStream.of(1, 2, 3).map(e -> e).mapMulti((i, consumer) -> {
+        assertEquals(N.toList(10, 2, 20, 3, 30), IntStream.of(1, 2, 3).map(e -> e).mapMulti((i, consumer) -> {
             consumer.accept(i);
             consumer.accept(i * 10);
         }).skip(1).toList());
@@ -964,17 +964,17 @@ public class IntStream104Test extends TestBase {
                 IntStream.of(1, 2, 3, 4, 5).mapPartial(i -> i % 2 == 0 ? OptionalInt.empty() : OptionalInt.of(i * 10)).toArray());
         assertArrayEquals(new int[] { 30, 50 },
                 IntStream.of(1, 2, 3, 4, 5).mapPartial(i -> i % 2 == 0 ? OptionalInt.empty() : OptionalInt.of(i * 10)).skip(1).toArray());
-        assertEquals(N.asList(10, 30, 50), IntStream.of(1, 2, 3, 4, 5).mapPartial(i -> i % 2 == 0 ? OptionalInt.empty() : OptionalInt.of(i * 10)).toList());
-        assertEquals(N.asList(30, 50), IntStream.of(1, 2, 3, 4, 5).mapPartial(i -> i % 2 == 0 ? OptionalInt.empty() : OptionalInt.of(i * 10)).skip(1).toList());
+        assertEquals(N.toList(10, 30, 50), IntStream.of(1, 2, 3, 4, 5).mapPartial(i -> i % 2 == 0 ? OptionalInt.empty() : OptionalInt.of(i * 10)).toList());
+        assertEquals(N.toList(30, 50), IntStream.of(1, 2, 3, 4, 5).mapPartial(i -> i % 2 == 0 ? OptionalInt.empty() : OptionalInt.of(i * 10)).skip(1).toList());
         assertEquals(3, IntStream.of(1, 2, 3, 4, 5).map(e -> e).mapPartial(i -> i % 2 == 0 ? OptionalInt.empty() : OptionalInt.of(i * 10)).count());
         assertEquals(2, IntStream.of(1, 2, 3, 4, 5).map(e -> e).mapPartial(i -> i % 2 == 0 ? OptionalInt.empty() : OptionalInt.of(i * 10)).skip(1).count());
         assertArrayEquals(new int[] { 10, 30, 50 },
                 IntStream.of(1, 2, 3, 4, 5).map(e -> e).mapPartial(i -> i % 2 == 0 ? OptionalInt.empty() : OptionalInt.of(i * 10)).toArray());
         assertArrayEquals(new int[] { 30, 50 },
                 IntStream.of(1, 2, 3, 4, 5).map(e -> e).mapPartial(i -> i % 2 == 0 ? OptionalInt.empty() : OptionalInt.of(i * 10)).skip(1).toArray());
-        assertEquals(N.asList(10, 30, 50),
+        assertEquals(N.toList(10, 30, 50),
                 IntStream.of(1, 2, 3, 4, 5).map(e -> e).mapPartial(i -> i % 2 == 0 ? OptionalInt.empty() : OptionalInt.of(i * 10)).toList());
-        assertEquals(N.asList(30, 50),
+        assertEquals(N.toList(30, 50),
                 IntStream.of(1, 2, 3, 4, 5).map(e -> e).mapPartial(i -> i % 2 == 0 ? OptionalInt.empty() : OptionalInt.of(i * 10)).skip(1).toList());
     }
 
@@ -990,9 +990,9 @@ public class IntStream104Test extends TestBase {
                         .mapPartialJdk(i -> i % 2 == 0 ? java.util.OptionalInt.empty() : java.util.OptionalInt.of(i * 10))
                         .skip(1)
                         .toArray());
-        assertEquals(N.asList(10, 30, 50),
+        assertEquals(N.toList(10, 30, 50),
                 IntStream.of(1, 2, 3, 4, 5).mapPartialJdk(i -> i % 2 == 0 ? java.util.OptionalInt.empty() : java.util.OptionalInt.of(i * 10)).toList());
-        assertEquals(N.asList(30, 50),
+        assertEquals(N.toList(30, 50),
                 IntStream.of(1, 2, 3, 4, 5).mapPartialJdk(i -> i % 2 == 0 ? java.util.OptionalInt.empty() : java.util.OptionalInt.of(i * 10)).skip(1).toList());
         assertEquals(3,
                 IntStream.of(1, 2, 3, 4, 5)
@@ -1016,12 +1016,12 @@ public class IntStream104Test extends TestBase {
                         .mapPartialJdk(i -> i % 2 == 0 ? java.util.OptionalInt.empty() : java.util.OptionalInt.of(i * 10))
                         .skip(1)
                         .toArray());
-        assertEquals(N.asList(10, 30, 50),
+        assertEquals(N.toList(10, 30, 50),
                 IntStream.of(1, 2, 3, 4, 5)
                         .map(e -> e)
                         .mapPartialJdk(i -> i % 2 == 0 ? java.util.OptionalInt.empty() : java.util.OptionalInt.of(i * 10))
                         .toList());
-        assertEquals(N.asList(30, 50),
+        assertEquals(N.toList(30, 50),
                 IntStream.of(1, 2, 3, 4, 5)
                         .map(e -> e)
                         .mapPartialJdk(i -> i % 2 == 0 ? java.util.OptionalInt.empty() : java.util.OptionalInt.of(i * 10))
@@ -1037,17 +1037,17 @@ public class IntStream104Test extends TestBase {
                 IntStream.of(1, 2, 4, 5, 8).rangeMap((first, next) -> next - first <= 1, (first, last) -> first + last).toArray());
         assertArrayEquals(new int[] { 9, 16 },
                 IntStream.of(1, 2, 4, 5, 8).rangeMap((first, next) -> next - first <= 1, (first, last) -> first + last).skip(1).toArray());
-        assertEquals(N.asList(3, 9, 16), IntStream.of(1, 2, 4, 5, 8).rangeMap((first, next) -> next - first <= 1, (first, last) -> first + last).toList());
-        assertEquals(N.asList(9, 16), IntStream.of(1, 2, 4, 5, 8).rangeMap((first, next) -> next - first <= 1, (first, last) -> first + last).skip(1).toList());
+        assertEquals(N.toList(3, 9, 16), IntStream.of(1, 2, 4, 5, 8).rangeMap((first, next) -> next - first <= 1, (first, last) -> first + last).toList());
+        assertEquals(N.toList(9, 16), IntStream.of(1, 2, 4, 5, 8).rangeMap((first, next) -> next - first <= 1, (first, last) -> first + last).skip(1).toList());
         assertEquals(3, IntStream.of(1, 2, 4, 5, 8).map(e -> e).rangeMap((first, next) -> next - first <= 1, (first, last) -> first + last).count());
         assertEquals(2, IntStream.of(1, 2, 4, 5, 8).map(e -> e).rangeMap((first, next) -> next - first <= 1, (first, last) -> first + last).skip(1).count());
         assertArrayEquals(new int[] { 3, 9, 16 },
                 IntStream.of(1, 2, 4, 5, 8).map(e -> e).rangeMap((first, next) -> next - first <= 1, (first, last) -> first + last).toArray());
         assertArrayEquals(new int[] { 9, 16 },
                 IntStream.of(1, 2, 4, 5, 8).map(e -> e).rangeMap((first, next) -> next - first <= 1, (first, last) -> first + last).skip(1).toArray());
-        assertEquals(N.asList(3, 9, 16),
+        assertEquals(N.toList(3, 9, 16),
                 IntStream.of(1, 2, 4, 5, 8).map(e -> e).rangeMap((first, next) -> next - first <= 1, (first, last) -> first + last).toList());
-        assertEquals(N.asList(9, 16),
+        assertEquals(N.toList(9, 16),
                 IntStream.of(1, 2, 4, 5, 8).map(e -> e).rangeMap((first, next) -> next - first <= 1, (first, last) -> first + last).skip(1).toList());
     }
 
@@ -1066,16 +1066,16 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new String[] { "4-5", "8-8" }, stringStream.skip(1).toArray(String[]::new));
 
         stringStream = IntStream.of(1, 2, 4, 5, 8).rangeMapToObj((first, next) -> next - first <= 1, (first, last) -> first + "-" + last);
-        assertEquals(N.asList("1-2", "4-5", "8-8"), stringStream.toList());
+        assertEquals(N.toList("1-2", "4-5", "8-8"), stringStream.toList());
 
         stringStream = IntStream.of(1, 2, 4, 5, 8).rangeMapToObj((first, next) -> next - first <= 1, (first, last) -> first + "-" + last);
-        assertEquals(N.asList("4-5", "8-8"), stringStream.skip(1).toList());
+        assertEquals(N.toList("4-5", "8-8"), stringStream.skip(1).toList());
 
         stringStream = IntStream.of(1, 2, 4, 5, 8).map(e -> e).rangeMapToObj((first, next) -> next - first <= 1, (first, last) -> first + "-" + last);
         assertEquals(3, stringStream.count());
 
         stringStream = IntStream.of(1, 2, 4, 5, 8).map(e -> e).rangeMapToObj((first, next) -> next - first <= 1, (first, last) -> first + "-" + last);
-        assertEquals(N.asList("1-2", "4-5", "8-8"), stringStream.toList());
+        assertEquals(N.toList("1-2", "4-5", "8-8"), stringStream.toList());
     }
 
     @Test
@@ -1103,16 +1103,16 @@ public class IntStream104Test extends TestBase {
         assertEquals(2, IntStream.of(1, 2, 3, 5, 6, 8).collapse((last, next) -> next - last <= 1, (a, b) -> a + b).skip(1).count());
         assertArrayEquals(new int[] { 6, 11, 8 }, IntStream.of(1, 2, 3, 5, 6, 8).collapse((last, next) -> next - last <= 1, (a, b) -> a + b).toArray());
         assertArrayEquals(new int[] { 11, 8 }, IntStream.of(1, 2, 3, 5, 6, 8).collapse((last, next) -> next - last <= 1, (a, b) -> a + b).skip(1).toArray());
-        assertEquals(N.asList(6, 11, 8), IntStream.of(1, 2, 3, 5, 6, 8).collapse((last, next) -> next - last <= 1, (a, b) -> a + b).toList());
-        assertEquals(N.asList(11, 8), IntStream.of(1, 2, 3, 5, 6, 8).collapse((last, next) -> next - last <= 1, (a, b) -> a + b).skip(1).toList());
+        assertEquals(N.toList(6, 11, 8), IntStream.of(1, 2, 3, 5, 6, 8).collapse((last, next) -> next - last <= 1, (a, b) -> a + b).toList());
+        assertEquals(N.toList(11, 8), IntStream.of(1, 2, 3, 5, 6, 8).collapse((last, next) -> next - last <= 1, (a, b) -> a + b).skip(1).toList());
         assertEquals(3, IntStream.of(1, 2, 3, 5, 6, 8).map(e -> e).collapse((last, next) -> next - last <= 1, (a, b) -> a + b).count());
         assertEquals(2, IntStream.of(1, 2, 3, 5, 6, 8).map(e -> e).collapse((last, next) -> next - last <= 1, (a, b) -> a + b).skip(1).count());
         assertArrayEquals(new int[] { 6, 11, 8 },
                 IntStream.of(1, 2, 3, 5, 6, 8).map(e -> e).collapse((last, next) -> next - last <= 1, (a, b) -> a + b).toArray());
         assertArrayEquals(new int[] { 11, 8 },
                 IntStream.of(1, 2, 3, 5, 6, 8).map(e -> e).collapse((last, next) -> next - last <= 1, (a, b) -> a + b).skip(1).toArray());
-        assertEquals(N.asList(6, 11, 8), IntStream.of(1, 2, 3, 5, 6, 8).map(e -> e).collapse((last, next) -> next - last <= 1, (a, b) -> a + b).toList());
-        assertEquals(N.asList(11, 8), IntStream.of(1, 2, 3, 5, 6, 8).map(e -> e).collapse((last, next) -> next - last <= 1, (a, b) -> a + b).skip(1).toList());
+        assertEquals(N.toList(6, 11, 8), IntStream.of(1, 2, 3, 5, 6, 8).map(e -> e).collapse((last, next) -> next - last <= 1, (a, b) -> a + b).toList());
+        assertEquals(N.toList(11, 8), IntStream.of(1, 2, 3, 5, 6, 8).map(e -> e).collapse((last, next) -> next - last <= 1, (a, b) -> a + b).skip(1).toList());
     }
 
     @Test
@@ -1122,17 +1122,17 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new int[] { 6, 11, 8 }, IntStream.of(1, 2, 3, 5, 6, 8).collapse((first, last, next) -> next - last <= 1, (a, b) -> a + b).toArray());
         assertArrayEquals(new int[] { 11, 8 },
                 IntStream.of(1, 2, 3, 5, 6, 8).collapse((first, last, next) -> next - last <= 1, (a, b) -> a + b).skip(1).toArray());
-        assertEquals(N.asList(6, 11, 8), IntStream.of(1, 2, 3, 5, 6, 8).collapse((first, last, next) -> next - last <= 1, (a, b) -> a + b).toList());
-        assertEquals(N.asList(11, 8), IntStream.of(1, 2, 3, 5, 6, 8).collapse((first, last, next) -> next - last <= 1, (a, b) -> a + b).skip(1).toList());
+        assertEquals(N.toList(6, 11, 8), IntStream.of(1, 2, 3, 5, 6, 8).collapse((first, last, next) -> next - last <= 1, (a, b) -> a + b).toList());
+        assertEquals(N.toList(11, 8), IntStream.of(1, 2, 3, 5, 6, 8).collapse((first, last, next) -> next - last <= 1, (a, b) -> a + b).skip(1).toList());
         assertEquals(3, IntStream.of(1, 2, 3, 5, 6, 8).map(e -> e).collapse((first, last, next) -> next - last <= 1, (a, b) -> a + b).count());
         assertEquals(2, IntStream.of(1, 2, 3, 5, 6, 8).map(e -> e).collapse((first, last, next) -> next - last <= 1, (a, b) -> a + b).skip(1).count());
         assertArrayEquals(new int[] { 6, 11, 8 },
                 IntStream.of(1, 2, 3, 5, 6, 8).map(e -> e).collapse((first, last, next) -> next - last <= 1, (a, b) -> a + b).toArray());
         assertArrayEquals(new int[] { 11, 8 },
                 IntStream.of(1, 2, 3, 5, 6, 8).map(e -> e).collapse((first, last, next) -> next - last <= 1, (a, b) -> a + b).skip(1).toArray());
-        assertEquals(N.asList(6, 11, 8),
+        assertEquals(N.toList(6, 11, 8),
                 IntStream.of(1, 2, 3, 5, 6, 8).map(e -> e).collapse((first, last, next) -> next - last <= 1, (a, b) -> a + b).toList());
-        assertEquals(N.asList(11, 8),
+        assertEquals(N.toList(11, 8),
                 IntStream.of(1, 2, 3, 5, 6, 8).map(e -> e).collapse((first, last, next) -> next - last <= 1, (a, b) -> a + b).skip(1).toList());
     }
 
@@ -1142,14 +1142,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(4, IntStream.of(1, 2, 3, 4, 5).scan((a, b) -> a + b).skip(1).count());
         assertArrayEquals(new int[] { 1, 3, 6, 10, 15 }, IntStream.of(1, 2, 3, 4, 5).scan((a, b) -> a + b).toArray());
         assertArrayEquals(new int[] { 3, 6, 10, 15 }, IntStream.of(1, 2, 3, 4, 5).scan((a, b) -> a + b).skip(1).toArray());
-        assertEquals(N.asList(1, 3, 6, 10, 15), IntStream.of(1, 2, 3, 4, 5).scan((a, b) -> a + b).toList());
-        assertEquals(N.asList(3, 6, 10, 15), IntStream.of(1, 2, 3, 4, 5).scan((a, b) -> a + b).skip(1).toList());
+        assertEquals(N.toList(1, 3, 6, 10, 15), IntStream.of(1, 2, 3, 4, 5).scan((a, b) -> a + b).toList());
+        assertEquals(N.toList(3, 6, 10, 15), IntStream.of(1, 2, 3, 4, 5).scan((a, b) -> a + b).skip(1).toList());
         assertEquals(5, IntStream.of(1, 2, 3, 4, 5).map(e -> e).scan((a, b) -> a + b).count());
         assertEquals(4, IntStream.of(1, 2, 3, 4, 5).map(e -> e).scan((a, b) -> a + b).skip(1).count());
         assertArrayEquals(new int[] { 1, 3, 6, 10, 15 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).scan((a, b) -> a + b).toArray());
         assertArrayEquals(new int[] { 3, 6, 10, 15 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).scan((a, b) -> a + b).skip(1).toArray());
-        assertEquals(N.asList(1, 3, 6, 10, 15), IntStream.of(1, 2, 3, 4, 5).map(e -> e).scan((a, b) -> a + b).toList());
-        assertEquals(N.asList(3, 6, 10, 15), IntStream.of(1, 2, 3, 4, 5).map(e -> e).scan((a, b) -> a + b).skip(1).toList());
+        assertEquals(N.toList(1, 3, 6, 10, 15), IntStream.of(1, 2, 3, 4, 5).map(e -> e).scan((a, b) -> a + b).toList());
+        assertEquals(N.toList(3, 6, 10, 15), IntStream.of(1, 2, 3, 4, 5).map(e -> e).scan((a, b) -> a + b).skip(1).toList());
     }
 
     @Test
@@ -1158,14 +1158,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(4, IntStream.of(1, 2, 3, 4, 5).scan(10, (a, b) -> a + b).skip(1).count());
         assertArrayEquals(new int[] { 11, 13, 16, 20, 25 }, IntStream.of(1, 2, 3, 4, 5).scan(10, (a, b) -> a + b).toArray());
         assertArrayEquals(new int[] { 13, 16, 20, 25 }, IntStream.of(1, 2, 3, 4, 5).scan(10, (a, b) -> a + b).skip(1).toArray());
-        assertEquals(N.asList(11, 13, 16, 20, 25), IntStream.of(1, 2, 3, 4, 5).scan(10, (a, b) -> a + b).toList());
-        assertEquals(N.asList(13, 16, 20, 25), IntStream.of(1, 2, 3, 4, 5).scan(10, (a, b) -> a + b).skip(1).toList());
+        assertEquals(N.toList(11, 13, 16, 20, 25), IntStream.of(1, 2, 3, 4, 5).scan(10, (a, b) -> a + b).toList());
+        assertEquals(N.toList(13, 16, 20, 25), IntStream.of(1, 2, 3, 4, 5).scan(10, (a, b) -> a + b).skip(1).toList());
         assertEquals(5, IntStream.of(1, 2, 3, 4, 5).map(e -> e).scan(10, (a, b) -> a + b).count());
         assertEquals(4, IntStream.of(1, 2, 3, 4, 5).map(e -> e).scan(10, (a, b) -> a + b).skip(1).count());
         assertArrayEquals(new int[] { 11, 13, 16, 20, 25 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).scan(10, (a, b) -> a + b).toArray());
         assertArrayEquals(new int[] { 13, 16, 20, 25 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).scan(10, (a, b) -> a + b).skip(1).toArray());
-        assertEquals(N.asList(11, 13, 16, 20, 25), IntStream.of(1, 2, 3, 4, 5).map(e -> e).scan(10, (a, b) -> a + b).toList());
-        assertEquals(N.asList(13, 16, 20, 25), IntStream.of(1, 2, 3, 4, 5).map(e -> e).scan(10, (a, b) -> a + b).skip(1).toList());
+        assertEquals(N.toList(11, 13, 16, 20, 25), IntStream.of(1, 2, 3, 4, 5).map(e -> e).scan(10, (a, b) -> a + b).toList());
+        assertEquals(N.toList(13, 16, 20, 25), IntStream.of(1, 2, 3, 4, 5).map(e -> e).scan(10, (a, b) -> a + b).skip(1).toList());
     }
 
     @Test
@@ -1174,14 +1174,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(5, IntStream.of(1, 2, 3, 4, 5).scan(10, true, (a, b) -> a + b).skip(1).count());
         assertArrayEquals(new int[] { 10, 11, 13, 16, 20, 25 }, IntStream.of(1, 2, 3, 4, 5).scan(10, true, (a, b) -> a + b).toArray());
         assertArrayEquals(new int[] { 11, 13, 16, 20, 25 }, IntStream.of(1, 2, 3, 4, 5).scan(10, true, (a, b) -> a + b).skip(1).toArray());
-        assertEquals(N.asList(10, 11, 13, 16, 20, 25), IntStream.of(1, 2, 3, 4, 5).scan(10, true, (a, b) -> a + b).toList());
-        assertEquals(N.asList(11, 13, 16, 20, 25), IntStream.of(1, 2, 3, 4, 5).scan(10, true, (a, b) -> a + b).skip(1).toList());
+        assertEquals(N.toList(10, 11, 13, 16, 20, 25), IntStream.of(1, 2, 3, 4, 5).scan(10, true, (a, b) -> a + b).toList());
+        assertEquals(N.toList(11, 13, 16, 20, 25), IntStream.of(1, 2, 3, 4, 5).scan(10, true, (a, b) -> a + b).skip(1).toList());
         assertEquals(6, IntStream.of(1, 2, 3, 4, 5).map(e -> e).scan(10, true, (a, b) -> a + b).count());
         assertEquals(5, IntStream.of(1, 2, 3, 4, 5).map(e -> e).scan(10, true, (a, b) -> a + b).skip(1).count());
         assertArrayEquals(new int[] { 10, 11, 13, 16, 20, 25 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).scan(10, true, (a, b) -> a + b).toArray());
         assertArrayEquals(new int[] { 11, 13, 16, 20, 25 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).scan(10, true, (a, b) -> a + b).skip(1).toArray());
-        assertEquals(N.asList(10, 11, 13, 16, 20, 25), IntStream.of(1, 2, 3, 4, 5).map(e -> e).scan(10, true, (a, b) -> a + b).toList());
-        assertEquals(N.asList(11, 13, 16, 20, 25), IntStream.of(1, 2, 3, 4, 5).map(e -> e).scan(10, true, (a, b) -> a + b).skip(1).toList());
+        assertEquals(N.toList(10, 11, 13, 16, 20, 25), IntStream.of(1, 2, 3, 4, 5).map(e -> e).scan(10, true, (a, b) -> a + b).toList());
+        assertEquals(N.toList(11, 13, 16, 20, 25), IntStream.of(1, 2, 3, 4, 5).map(e -> e).scan(10, true, (a, b) -> a + b).skip(1).toList());
     }
 
     @Test
@@ -1190,14 +1190,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(7, IntStream.of(1, 2, 3, 4, 5).prepend(-2, -1, 0).skip(1).count());
         assertArrayEquals(new int[] { -2, -1, 0, 1, 2, 3, 4, 5 }, IntStream.of(1, 2, 3, 4, 5).prepend(-2, -1, 0).toArray());
         assertArrayEquals(new int[] { -1, 0, 1, 2, 3, 4, 5 }, IntStream.of(1, 2, 3, 4, 5).prepend(-2, -1, 0).skip(1).toArray());
-        assertEquals(N.asList(-2, -1, 0, 1, 2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).prepend(-2, -1, 0).toList());
-        assertEquals(N.asList(-1, 0, 1, 2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).prepend(-2, -1, 0).skip(1).toList());
+        assertEquals(N.toList(-2, -1, 0, 1, 2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).prepend(-2, -1, 0).toList());
+        assertEquals(N.toList(-1, 0, 1, 2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).prepend(-2, -1, 0).skip(1).toList());
         assertEquals(8, IntStream.of(1, 2, 3, 4, 5).map(e -> e).prepend(-2, -1, 0).count());
         assertEquals(7, IntStream.of(1, 2, 3, 4, 5).map(e -> e).prepend(-2, -1, 0).skip(1).count());
         assertArrayEquals(new int[] { -2, -1, 0, 1, 2, 3, 4, 5 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).prepend(-2, -1, 0).toArray());
         assertArrayEquals(new int[] { -1, 0, 1, 2, 3, 4, 5 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).prepend(-2, -1, 0).skip(1).toArray());
-        assertEquals(N.asList(-2, -1, 0, 1, 2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).prepend(-2, -1, 0).toList());
-        assertEquals(N.asList(-1, 0, 1, 2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).prepend(-2, -1, 0).skip(1).toList());
+        assertEquals(N.toList(-2, -1, 0, 1, 2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).prepend(-2, -1, 0).toList());
+        assertEquals(N.toList(-1, 0, 1, 2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).prepend(-2, -1, 0).skip(1).toList());
     }
 
     @Test
@@ -1206,14 +1206,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(7, IntStream.of(1, 2, 3, 4, 5).append(6, 7, 8).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5, 6, 7, 8 }, IntStream.of(1, 2, 3, 4, 5).append(6, 7, 8).toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5, 6, 7, 8 }, IntStream.of(1, 2, 3, 4, 5).append(6, 7, 8).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6, 7, 8), IntStream.of(1, 2, 3, 4, 5).append(6, 7, 8).toList());
-        assertEquals(N.asList(2, 3, 4, 5, 6, 7, 8), IntStream.of(1, 2, 3, 4, 5).append(6, 7, 8).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6, 7, 8), IntStream.of(1, 2, 3, 4, 5).append(6, 7, 8).toList());
+        assertEquals(N.toList(2, 3, 4, 5, 6, 7, 8), IntStream.of(1, 2, 3, 4, 5).append(6, 7, 8).skip(1).toList());
         assertEquals(8, IntStream.of(1, 2, 3, 4, 5).map(e -> e).append(6, 7, 8).count());
         assertEquals(7, IntStream.of(1, 2, 3, 4, 5).map(e -> e).append(6, 7, 8).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5, 6, 7, 8 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).append(6, 7, 8).toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5, 6, 7, 8 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).append(6, 7, 8).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6, 7, 8), IntStream.of(1, 2, 3, 4, 5).map(e -> e).append(6, 7, 8).toList());
-        assertEquals(N.asList(2, 3, 4, 5, 6, 7, 8), IntStream.of(1, 2, 3, 4, 5).map(e -> e).append(6, 7, 8).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6, 7, 8), IntStream.of(1, 2, 3, 4, 5).map(e -> e).append(6, 7, 8).toList());
+        assertEquals(N.toList(2, 3, 4, 5, 6, 7, 8), IntStream.of(1, 2, 3, 4, 5).map(e -> e).append(6, 7, 8).skip(1).toList());
     }
 
     @Test
@@ -1222,15 +1222,15 @@ public class IntStream104Test extends TestBase {
         assertEquals(2, IntStream.empty().appendIfEmpty(1, 2, 3).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3 }, IntStream.empty().appendIfEmpty(1, 2, 3).toArray());
         assertArrayEquals(new int[] { 2, 3 }, IntStream.empty().appendIfEmpty(1, 2, 3).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3), IntStream.empty().appendIfEmpty(1, 2, 3).toList());
-        assertEquals(N.asList(2, 3), IntStream.empty().appendIfEmpty(1, 2, 3).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3), IntStream.empty().appendIfEmpty(1, 2, 3).toList());
+        assertEquals(N.toList(2, 3), IntStream.empty().appendIfEmpty(1, 2, 3).skip(1).toList());
 
         assertEquals(5, IntStream.of(1, 2, 3, 4, 5).appendIfEmpty(6, 7, 8).count());
         assertEquals(4, IntStream.of(1, 2, 3, 4, 5).appendIfEmpty(6, 7, 8).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, IntStream.of(1, 2, 3, 4, 5).appendIfEmpty(6, 7, 8).toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5 }, IntStream.of(1, 2, 3, 4, 5).appendIfEmpty(6, 7, 8).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).appendIfEmpty(6, 7, 8).toList());
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).appendIfEmpty(6, 7, 8).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).appendIfEmpty(6, 7, 8).toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).appendIfEmpty(6, 7, 8).skip(1).toList());
     }
 
     @Test
@@ -1239,14 +1239,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(2, IntStream.of(3, 1, 4, 2, 5).top(3).skip(1).count());
         assertArrayEquals(new int[] { 3, 4, 5 }, IntStream.of(3, 1, 4, 2, 5).top(3).toArray());
         assertArrayEquals(new int[] { 4, 5 }, IntStream.of(3, 1, 4, 2, 5).top(3).skip(1).toArray());
-        assertEquals(N.asList(3, 4, 5), IntStream.of(3, 1, 4, 2, 5).top(3).toList());
-        assertEquals(N.asList(4, 5), IntStream.of(3, 1, 4, 2, 5).top(3).skip(1).toList());
+        assertEquals(N.toList(3, 4, 5), IntStream.of(3, 1, 4, 2, 5).top(3).toList());
+        assertEquals(N.toList(4, 5), IntStream.of(3, 1, 4, 2, 5).top(3).skip(1).toList());
         assertEquals(3, IntStream.of(3, 1, 4, 2, 5).map(e -> e).top(3).count());
         assertEquals(2, IntStream.of(3, 1, 4, 2, 5).map(e -> e).top(3).skip(1).count());
         assertArrayEquals(new int[] { 3, 4, 5 }, IntStream.of(3, 1, 4, 2, 5).map(e -> e).top(3).toArray());
         assertArrayEquals(new int[] { 4, 5 }, IntStream.of(3, 1, 4, 2, 5).map(e -> e).top(3).skip(1).toArray());
-        assertEquals(N.asList(3, 4, 5), IntStream.of(3, 1, 4, 2, 5).map(e -> e).top(3).toList());
-        assertEquals(N.asList(4, 5), IntStream.of(3, 1, 4, 2, 5).map(e -> e).top(3).skip(1).toList());
+        assertEquals(N.toList(3, 4, 5), IntStream.of(3, 1, 4, 2, 5).map(e -> e).top(3).toList());
+        assertEquals(N.toList(4, 5), IntStream.of(3, 1, 4, 2, 5).map(e -> e).top(3).skip(1).toList());
     }
 
     @Test
@@ -1256,14 +1256,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(2, IntStream.of(3, 1, 4, 2, 5).top(3, reverseComparator).skip(1).count());
         assertArrayEquals(new int[] { 3, 1, 2 }, IntStream.of(3, 1, 4, 2, 5).top(3, reverseComparator).toArray());
         assertArrayEquals(new int[] { 1, 2 }, IntStream.of(3, 1, 4, 2, 5).top(3, reverseComparator).skip(1).toArray());
-        assertEquals(N.asList(3, 1, 2), IntStream.of(3, 1, 4, 2, 5).top(3, reverseComparator).toList());
-        assertEquals(N.asList(1, 2), IntStream.of(3, 1, 4, 2, 5).top(3, reverseComparator).skip(1).toList());
+        assertEquals(N.toList(3, 1, 2), IntStream.of(3, 1, 4, 2, 5).top(3, reverseComparator).toList());
+        assertEquals(N.toList(1, 2), IntStream.of(3, 1, 4, 2, 5).top(3, reverseComparator).skip(1).toList());
         assertEquals(3, IntStream.of(3, 1, 4, 2, 5).map(e -> e).top(3, reverseComparator).count());
         assertEquals(2, IntStream.of(3, 1, 4, 2, 5).map(e -> e).top(3, reverseComparator).skip(1).count());
         assertArrayEquals(new int[] { 3, 1, 2 }, IntStream.of(3, 1, 4, 2, 5).map(e -> e).top(3, reverseComparator).toArray());
         assertArrayEquals(new int[] { 1, 2 }, IntStream.of(3, 1, 4, 2, 5).map(e -> e).top(3, reverseComparator).skip(1).toArray());
-        assertEquals(N.asList(3, 1, 2), IntStream.of(3, 1, 4, 2, 5).map(e -> e).top(3, reverseComparator).toList());
-        assertEquals(N.asList(1, 2), IntStream.of(3, 1, 4, 2, 5).map(e -> e).top(3, reverseComparator).skip(1).toList());
+        assertEquals(N.toList(3, 1, 2), IntStream.of(3, 1, 4, 2, 5).map(e -> e).top(3, reverseComparator).toList());
+        assertEquals(N.toList(1, 2), IntStream.of(3, 1, 4, 2, 5).map(e -> e).top(3, reverseComparator).skip(1).toList());
     }
 
     @Test
@@ -1283,18 +1283,18 @@ public class IntStream104Test extends TestBase {
                 IntStream.of(1, 3, 5).mergeWith(streamB, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).skip(1).toArray());
 
         streamB = IntStream.of(2, 4, 6);
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6),
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6),
                 IntStream.of(1, 3, 5).mergeWith(streamB, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
 
         streamB = IntStream.of(2, 4, 6);
-        assertEquals(N.asList(2, 3, 4, 5, 6),
+        assertEquals(N.toList(2, 3, 4, 5, 6),
                 IntStream.of(1, 3, 5).mergeWith(streamB, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).skip(1).toList());
 
         streamB = IntStream.of(2, 4, 6);
         assertEquals(6, IntStream.of(1, 3, 5).map(e -> e).mergeWith(streamB, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).count());
 
         streamB = IntStream.of(2, 4, 6);
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6),
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6),
                 IntStream.of(1, 3, 5).map(e -> e).mergeWith(streamB, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
     }
 
@@ -1313,16 +1313,16 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new int[] { 22, 33 }, IntStream.of(1, 2, 3, 4, 5).zipWith(streamB, (a, b) -> a + b).skip(1).toArray());
 
         streamB = IntStream.of(10, 20, 30);
-        assertEquals(N.asList(11, 22, 33), IntStream.of(1, 2, 3, 4, 5).zipWith(streamB, (a, b) -> a + b).toList());
+        assertEquals(N.toList(11, 22, 33), IntStream.of(1, 2, 3, 4, 5).zipWith(streamB, (a, b) -> a + b).toList());
 
         streamB = IntStream.of(10, 20, 30);
-        assertEquals(N.asList(22, 33), IntStream.of(1, 2, 3, 4, 5).zipWith(streamB, (a, b) -> a + b).skip(1).toList());
+        assertEquals(N.toList(22, 33), IntStream.of(1, 2, 3, 4, 5).zipWith(streamB, (a, b) -> a + b).skip(1).toList());
 
         streamB = IntStream.of(10, 20, 30);
         assertEquals(3, IntStream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(streamB, (a, b) -> a + b).count());
 
         streamB = IntStream.of(10, 20, 30);
-        assertEquals(N.asList(11, 22, 33), IntStream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(streamB, (a, b) -> a + b).toList());
+        assertEquals(N.toList(11, 22, 33), IntStream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(streamB, (a, b) -> a + b).toList());
     }
 
     @Test
@@ -1345,11 +1345,11 @@ public class IntStream104Test extends TestBase {
 
         streamB = IntStream.of(10, 20, 30);
         streamC = IntStream.of(100, 200, 300);
-        assertEquals(N.asList(111, 222, 333), IntStream.of(1, 2, 3, 4, 5).zipWith(streamB, streamC, (a, b, c) -> a + b + c).toList());
+        assertEquals(N.toList(111, 222, 333), IntStream.of(1, 2, 3, 4, 5).zipWith(streamB, streamC, (a, b, c) -> a + b + c).toList());
 
         streamB = IntStream.of(10, 20, 30);
         streamC = IntStream.of(100, 200, 300);
-        assertEquals(N.asList(222, 333), IntStream.of(1, 2, 3, 4, 5).zipWith(streamB, streamC, (a, b, c) -> a + b + c).skip(1).toList());
+        assertEquals(N.toList(222, 333), IntStream.of(1, 2, 3, 4, 5).zipWith(streamB, streamC, (a, b, c) -> a + b + c).skip(1).toList());
 
         streamB = IntStream.of(10, 20, 30);
         streamC = IntStream.of(100, 200, 300);
@@ -1357,7 +1357,7 @@ public class IntStream104Test extends TestBase {
 
         streamB = IntStream.of(10, 20, 30);
         streamC = IntStream.of(100, 200, 300);
-        assertEquals(N.asList(111, 222, 333), IntStream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(streamB, streamC, (a, b, c) -> a + b + c).toList());
+        assertEquals(N.toList(111, 222, 333), IntStream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(streamB, streamC, (a, b, c) -> a + b + c).toList());
     }
 
     @Test
@@ -1375,16 +1375,16 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new int[] { 22, 103, 104, 105 }, IntStream.of(1, 2, 3, 4, 5).zipWith(streamB, 0, 100, (a, b) -> a + b).skip(1).toArray());
 
         streamB = IntStream.of(10, 20);
-        assertEquals(N.asList(11, 22, 103, 104, 105), IntStream.of(1, 2, 3, 4, 5).zipWith(streamB, 0, 100, (a, b) -> a + b).toList());
+        assertEquals(N.toList(11, 22, 103, 104, 105), IntStream.of(1, 2, 3, 4, 5).zipWith(streamB, 0, 100, (a, b) -> a + b).toList());
 
         streamB = IntStream.of(10, 20);
-        assertEquals(N.asList(22, 103, 104, 105), IntStream.of(1, 2, 3, 4, 5).zipWith(streamB, 0, 100, (a, b) -> a + b).skip(1).toList());
+        assertEquals(N.toList(22, 103, 104, 105), IntStream.of(1, 2, 3, 4, 5).zipWith(streamB, 0, 100, (a, b) -> a + b).skip(1).toList());
 
         streamB = IntStream.of(10, 20);
         assertEquals(5, IntStream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(streamB, 0, 100, (a, b) -> a + b).count());
 
         streamB = IntStream.of(10, 20);
-        assertEquals(N.asList(11, 22, 103, 104, 105), IntStream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(streamB, 0, 100, (a, b) -> a + b).toList());
+        assertEquals(N.toList(11, 22, 103, 104, 105), IntStream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(streamB, 0, 100, (a, b) -> a + b).toList());
     }
 
     @Test
@@ -1409,11 +1409,11 @@ public class IntStream104Test extends TestBase {
 
         streamB = IntStream.of(10, 20);
         streamC = IntStream.of(100);
-        assertEquals(N.asList(111, 522, 553, 554, 555), IntStream.of(1, 2, 3, 4, 5).zipWith(streamB, streamC, 0, 50, 500, (a, b, c) -> a + b + c).toList());
+        assertEquals(N.toList(111, 522, 553, 554, 555), IntStream.of(1, 2, 3, 4, 5).zipWith(streamB, streamC, 0, 50, 500, (a, b, c) -> a + b + c).toList());
 
         streamB = IntStream.of(10, 20);
         streamC = IntStream.of(100);
-        assertEquals(N.asList(522, 553, 554, 555), IntStream.of(1, 2, 3, 4, 5).zipWith(streamB, streamC, 0, 50, 500, (a, b, c) -> a + b + c).skip(1).toList());
+        assertEquals(N.toList(522, 553, 554, 555), IntStream.of(1, 2, 3, 4, 5).zipWith(streamB, streamC, 0, 50, 500, (a, b, c) -> a + b + c).skip(1).toList());
 
         streamB = IntStream.of(10, 20);
         streamC = IntStream.of(100);
@@ -1421,7 +1421,7 @@ public class IntStream104Test extends TestBase {
 
         streamB = IntStream.of(10, 20);
         streamC = IntStream.of(100);
-        assertEquals(N.asList(111, 522, 553, 554, 555),
+        assertEquals(N.toList(111, 522, 553, 554, 555),
                 IntStream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(streamB, streamC, 0, 50, 500, (a, b, c) -> a + b + c).toList());
     }
 
@@ -1440,16 +1440,16 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new long[] { 2L, 3L, 4L, 5L }, longStream.skip(1).toArray());
 
         longStream = IntStream.of(1, 2, 3, 4, 5).asLongStream();
-        assertEquals(N.asList(1L, 2L, 3L, 4L, 5L), longStream.toList());
+        assertEquals(N.toList(1L, 2L, 3L, 4L, 5L), longStream.toList());
 
         longStream = IntStream.of(1, 2, 3, 4, 5).asLongStream();
-        assertEquals(N.asList(2L, 3L, 4L, 5L), longStream.skip(1).toList());
+        assertEquals(N.toList(2L, 3L, 4L, 5L), longStream.skip(1).toList());
 
         longStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).asLongStream();
         assertEquals(5, longStream.count());
 
         longStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).asLongStream();
-        assertEquals(N.asList(1L, 2L, 3L, 4L, 5L), longStream.toList());
+        assertEquals(N.toList(1L, 2L, 3L, 4L, 5L), longStream.toList());
     }
 
     @Test
@@ -1467,16 +1467,16 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new float[] { 2f, 3f, 4f, 5f }, floatStream.skip(1).toArray(), 0.001f);
 
         floatStream = IntStream.of(1, 2, 3, 4, 5).asFloatStream();
-        assertEquals(N.asList(1f, 2f, 3f, 4f, 5f), floatStream.toList());
+        assertEquals(N.toList(1f, 2f, 3f, 4f, 5f), floatStream.toList());
 
         floatStream = IntStream.of(1, 2, 3, 4, 5).asFloatStream();
-        assertEquals(N.asList(2f, 3f, 4f, 5f), floatStream.skip(1).toList());
+        assertEquals(N.toList(2f, 3f, 4f, 5f), floatStream.skip(1).toList());
 
         floatStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).asFloatStream();
         assertEquals(5, floatStream.count());
 
         floatStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).asFloatStream();
-        assertEquals(N.asList(1f, 2f, 3f, 4f, 5f), floatStream.toList());
+        assertEquals(N.toList(1f, 2f, 3f, 4f, 5f), floatStream.toList());
     }
 
     @Test
@@ -1494,16 +1494,16 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new double[] { 2.0, 3.0, 4.0, 5.0 }, doubleStream.skip(1).toArray(), 0.001);
 
         doubleStream = IntStream.of(1, 2, 3, 4, 5).asDoubleStream();
-        assertEquals(N.asList(1.0, 2.0, 3.0, 4.0, 5.0), doubleStream.toList());
+        assertEquals(N.toList(1.0, 2.0, 3.0, 4.0, 5.0), doubleStream.toList());
 
         doubleStream = IntStream.of(1, 2, 3, 4, 5).asDoubleStream();
-        assertEquals(N.asList(2.0, 3.0, 4.0, 5.0), doubleStream.skip(1).toList());
+        assertEquals(N.toList(2.0, 3.0, 4.0, 5.0), doubleStream.skip(1).toList());
 
         doubleStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).asDoubleStream();
         assertEquals(5, doubleStream.count());
 
         doubleStream = IntStream.of(1, 2, 3, 4, 5).map(e -> e).asDoubleStream();
-        assertEquals(N.asList(1.0, 2.0, 3.0, 4.0, 5.0), doubleStream.toList());
+        assertEquals(N.toList(1.0, 2.0, 3.0, 4.0, 5.0), doubleStream.toList());
     }
 
     @Test
@@ -1566,14 +1566,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(4, IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(i -> i * 2)).skip(1).count());
         assertArrayEquals(new int[] { 2, 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(i -> i * 2)).toArray());
         assertArrayEquals(new int[] { 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(i -> i * 2)).skip(1).toArray());
-        assertEquals(N.asList(2, 4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(i -> i * 2)).toList());
-        assertEquals(N.asList(4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(i -> i * 2)).skip(1).toList());
+        assertEquals(N.toList(2, 4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(i -> i * 2)).toList());
+        assertEquals(N.toList(4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(i -> i * 2)).skip(1).toList());
         assertEquals(5, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2)).count());
         assertEquals(4, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2)).skip(1).count());
         assertArrayEquals(new int[] { 2, 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2)).toArray());
         assertArrayEquals(new int[] { 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2)).skip(1).toArray());
-        assertEquals(N.asList(2, 4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2)).toList());
-        assertEquals(N.asList(4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2)).skip(1).toList());
+        assertEquals(N.toList(2, 4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2)).toList());
+        assertEquals(N.toList(4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2)).skip(1).toList());
     }
 
     @Test
@@ -1582,14 +1582,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(4, IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(i -> i * 2), true).skip(1).count());
         assertArrayEquals(new int[] { 2, 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(i -> i * 2), true).toArray());
         assertArrayEquals(new int[] { 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(i -> i * 2), true).skip(1).toArray());
-        assertEquals(N.asList(2, 4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(i -> i * 2), true).toList());
-        assertEquals(N.asList(4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(i -> i * 2), true).skip(1).toList());
+        assertEquals(N.toList(2, 4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(i -> i * 2), true).toList());
+        assertEquals(N.toList(4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(i -> i * 2), true).skip(1).toList());
         assertEquals(5, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2), true).count());
         assertEquals(4, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2), true).skip(1).count());
         assertArrayEquals(new int[] { 2, 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2), true).toArray());
         assertArrayEquals(new int[] { 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2), true).skip(1).toArray());
-        assertEquals(N.asList(2, 4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2), true).toList());
-        assertEquals(N.asList(4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2), true).skip(1).toList());
+        assertEquals(N.toList(2, 4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2), true).toList());
+        assertEquals(N.toList(4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2), true).skip(1).toList());
     }
 
     @Test
@@ -1598,14 +1598,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(0, IntStream.empty().skip(1).count());
         assertArrayEquals(new int[] {}, IntStream.empty().toArray());
         assertArrayEquals(new int[] {}, IntStream.empty().skip(1).toArray());
-        assertEquals(N.asList(), IntStream.empty().toList());
-        assertEquals(N.asList(), IntStream.empty().skip(1).toList());
+        assertEquals(N.toList(), IntStream.empty().toList());
+        assertEquals(N.toList(), IntStream.empty().skip(1).toList());
         assertEquals(0, IntStream.empty().map(e -> e).count());
         assertEquals(0, IntStream.empty().map(e -> e).skip(1).count());
         assertArrayEquals(new int[] {}, IntStream.empty().map(e -> e).toArray());
         assertArrayEquals(new int[] {}, IntStream.empty().map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(), IntStream.empty().map(e -> e).toList());
-        assertEquals(N.asList(), IntStream.empty().map(e -> e).skip(1).toList());
+        assertEquals(N.toList(), IntStream.empty().map(e -> e).toList());
+        assertEquals(N.toList(), IntStream.empty().map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -1614,14 +1614,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(4, IntStream.defer(() -> IntStream.of(1, 2, 3, 4, 5)).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, IntStream.defer(() -> IntStream.of(1, 2, 3, 4, 5)).toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5 }, IntStream.defer(() -> IntStream.of(1, 2, 3, 4, 5)).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.defer(() -> IntStream.of(1, 2, 3, 4, 5)).toList());
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.defer(() -> IntStream.of(1, 2, 3, 4, 5)).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.defer(() -> IntStream.of(1, 2, 3, 4, 5)).toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.defer(() -> IntStream.of(1, 2, 3, 4, 5)).skip(1).toList());
         assertEquals(5, IntStream.defer(() -> IntStream.of(1, 2, 3, 4, 5)).map(e -> e).count());
         assertEquals(4, IntStream.defer(() -> IntStream.of(1, 2, 3, 4, 5)).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, IntStream.defer(() -> IntStream.of(1, 2, 3, 4, 5)).map(e -> e).toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5 }, IntStream.defer(() -> IntStream.of(1, 2, 3, 4, 5)).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.defer(() -> IntStream.of(1, 2, 3, 4, 5)).map(e -> e).toList());
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.defer(() -> IntStream.of(1, 2, 3, 4, 5)).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.defer(() -> IntStream.of(1, 2, 3, 4, 5)).map(e -> e).toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.defer(() -> IntStream.of(1, 2, 3, 4, 5)).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -1639,10 +1639,10 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new int[] { 2, 3, 4, 5 }, IntStream.from(jdkStream).skip(1).toArray());
 
         jdkStream = java.util.stream.IntStream.of(1, 2, 3, 4, 5);
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.from(jdkStream).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.from(jdkStream).toList());
 
         jdkStream = java.util.stream.IntStream.of(1, 2, 3, 4, 5);
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.from(jdkStream).skip(1).toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.from(jdkStream).skip(1).toList());
 
         jdkStream = java.util.stream.IntStream.of(1, 2, 3, 4, 5);
         assertEquals(5, IntStream.from(jdkStream).map(e -> e).count());
@@ -1657,10 +1657,10 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new int[] { 2, 3, 4, 5 }, IntStream.from(jdkStream).map(e -> e).skip(1).toArray());
 
         jdkStream = java.util.stream.IntStream.of(1, 2, 3, 4, 5);
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.from(jdkStream).map(e -> e).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.from(jdkStream).map(e -> e).toList());
 
         jdkStream = java.util.stream.IntStream.of(1, 2, 3, 4, 5);
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.from(jdkStream).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.from(jdkStream).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -1669,21 +1669,21 @@ public class IntStream104Test extends TestBase {
         assertEquals(0, IntStream.ofNullable(5).skip(1).count());
         assertArrayEquals(new int[] { 5 }, IntStream.ofNullable(5).toArray());
         assertArrayEquals(new int[] {}, IntStream.ofNullable(5).skip(1).toArray());
-        assertEquals(N.asList(5), IntStream.ofNullable(5).toList());
-        assertEquals(N.asList(), IntStream.ofNullable(5).skip(1).toList());
+        assertEquals(N.toList(5), IntStream.ofNullable(5).toList());
+        assertEquals(N.toList(), IntStream.ofNullable(5).skip(1).toList());
         assertEquals(1, IntStream.ofNullable(5).map(e -> e).count());
         assertEquals(0, IntStream.ofNullable(5).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 5 }, IntStream.ofNullable(5).map(e -> e).toArray());
         assertArrayEquals(new int[] {}, IntStream.ofNullable(5).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(5), IntStream.ofNullable(5).map(e -> e).toList());
-        assertEquals(N.asList(), IntStream.ofNullable(5).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(5), IntStream.ofNullable(5).map(e -> e).toList());
+        assertEquals(N.toList(), IntStream.ofNullable(5).map(e -> e).skip(1).toList());
 
         assertEquals(0, IntStream.ofNullable(null).count());
         assertEquals(0, IntStream.ofNullable(null).skip(1).count());
         assertArrayEquals(new int[] {}, IntStream.ofNullable(null).toArray());
         assertArrayEquals(new int[] {}, IntStream.ofNullable(null).skip(1).toArray());
-        assertEquals(N.asList(), IntStream.ofNullable(null).toList());
-        assertEquals(N.asList(), IntStream.ofNullable(null).skip(1).toList());
+        assertEquals(N.toList(), IntStream.ofNullable(null).toList());
+        assertEquals(N.toList(), IntStream.ofNullable(null).skip(1).toList());
     }
 
     @Test
@@ -1692,14 +1692,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(4, IntStream.of(1, 2, 3, 4, 5).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, IntStream.of(1, 2, 3, 4, 5).toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5 }, IntStream.of(1, 2, 3, 4, 5).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).toList());
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).skip(1).toList());
         assertEquals(5, IntStream.of(1, 2, 3, 4, 5).map(e -> e).count());
         assertEquals(4, IntStream.of(1, 2, 3, 4, 5).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).toList());
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.of(1, 2, 3, 4, 5).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -1709,14 +1709,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(4, IntStream.of(array, 2, 7).skip(1).count());
         assertArrayEquals(new int[] { 3, 4, 5, 6, 7 }, IntStream.of(array, 2, 7).toArray());
         assertArrayEquals(new int[] { 4, 5, 6, 7 }, IntStream.of(array, 2, 7).skip(1).toArray());
-        assertEquals(N.asList(3, 4, 5, 6, 7), IntStream.of(array, 2, 7).toList());
-        assertEquals(N.asList(4, 5, 6, 7), IntStream.of(array, 2, 7).skip(1).toList());
+        assertEquals(N.toList(3, 4, 5, 6, 7), IntStream.of(array, 2, 7).toList());
+        assertEquals(N.toList(4, 5, 6, 7), IntStream.of(array, 2, 7).skip(1).toList());
         assertEquals(5, IntStream.of(array, 2, 7).map(e -> e).count());
         assertEquals(4, IntStream.of(array, 2, 7).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 3, 4, 5, 6, 7 }, IntStream.of(array, 2, 7).map(e -> e).toArray());
         assertArrayEquals(new int[] { 4, 5, 6, 7 }, IntStream.of(array, 2, 7).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(3, 4, 5, 6, 7), IntStream.of(array, 2, 7).map(e -> e).toList());
-        assertEquals(N.asList(4, 5, 6, 7), IntStream.of(array, 2, 7).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(3, 4, 5, 6, 7), IntStream.of(array, 2, 7).map(e -> e).toList());
+        assertEquals(N.toList(4, 5, 6, 7), IntStream.of(array, 2, 7).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -1726,14 +1726,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(4, IntStream.of(array).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, IntStream.of(array).toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5 }, IntStream.of(array).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.of(array).toList());
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.of(array).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.of(array).toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.of(array).skip(1).toList());
         assertEquals(5, IntStream.of(array).map(e -> e).count());
         assertEquals(4, IntStream.of(array).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, IntStream.of(array).map(e -> e).toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5 }, IntStream.of(array).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.of(array).map(e -> e).toList());
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.of(array).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.of(array).map(e -> e).toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.of(array).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -1743,14 +1743,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(4, IntStream.of(array, 2, 7).skip(1).count());
         assertArrayEquals(new int[] { 3, 4, 5, 6, 7 }, IntStream.of(array, 2, 7).toArray());
         assertArrayEquals(new int[] { 4, 5, 6, 7 }, IntStream.of(array, 2, 7).skip(1).toArray());
-        assertEquals(N.asList(3, 4, 5, 6, 7), IntStream.of(array, 2, 7).toList());
-        assertEquals(N.asList(4, 5, 6, 7), IntStream.of(array, 2, 7).skip(1).toList());
+        assertEquals(N.toList(3, 4, 5, 6, 7), IntStream.of(array, 2, 7).toList());
+        assertEquals(N.toList(4, 5, 6, 7), IntStream.of(array, 2, 7).skip(1).toList());
         assertEquals(5, IntStream.of(array, 2, 7).map(e -> e).count());
         assertEquals(4, IntStream.of(array, 2, 7).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 3, 4, 5, 6, 7 }, IntStream.of(array, 2, 7).map(e -> e).toArray());
         assertArrayEquals(new int[] { 4, 5, 6, 7 }, IntStream.of(array, 2, 7).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(3, 4, 5, 6, 7), IntStream.of(array, 2, 7).map(e -> e).toList());
-        assertEquals(N.asList(4, 5, 6, 7), IntStream.of(array, 2, 7).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(3, 4, 5, 6, 7), IntStream.of(array, 2, 7).map(e -> e).toList());
+        assertEquals(N.toList(4, 5, 6, 7), IntStream.of(array, 2, 7).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -1760,14 +1760,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(4, IntStream.of(collection).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, IntStream.of(collection).toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5 }, IntStream.of(collection).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.of(collection).toList());
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.of(collection).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.of(collection).toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.of(collection).skip(1).toList());
         assertEquals(5, IntStream.of(collection).map(e -> e).count());
         assertEquals(4, IntStream.of(collection).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, IntStream.of(collection).map(e -> e).toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5 }, IntStream.of(collection).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.of(collection).map(e -> e).toList());
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.of(collection).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.of(collection).map(e -> e).toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.of(collection).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -1785,10 +1785,10 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new int[] { 2, 3, 4, 5 }, IntStream.of(iterator).skip(1).toArray());
 
         iterator = IntIterator.of(1, 2, 3, 4, 5);
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.of(iterator).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.of(iterator).toList());
 
         iterator = IntIterator.of(1, 2, 3, 4, 5);
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.of(iterator).skip(1).toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.of(iterator).skip(1).toList());
 
         iterator = IntIterator.of(1, 2, 3, 4, 5);
         assertEquals(5, IntStream.of(iterator).map(e -> e).count());
@@ -1803,10 +1803,10 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new int[] { 2, 3, 4, 5 }, IntStream.of(iterator).map(e -> e).skip(1).toArray());
 
         iterator = IntIterator.of(1, 2, 3, 4, 5);
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.of(iterator).map(e -> e).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.of(iterator).map(e -> e).toList());
 
         iterator = IntIterator.of(1, 2, 3, 4, 5);
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.of(iterator).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.of(iterator).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -1816,22 +1816,22 @@ public class IntStream104Test extends TestBase {
         assertEquals(0, IntStream.of(op).skip(1).count());
         assertArrayEquals(new int[] { 5 }, IntStream.of(op).toArray());
         assertArrayEquals(new int[] {}, IntStream.of(op).skip(1).toArray());
-        assertEquals(N.asList(5), IntStream.of(op).toList());
-        assertEquals(N.asList(), IntStream.of(op).skip(1).toList());
+        assertEquals(N.toList(5), IntStream.of(op).toList());
+        assertEquals(N.toList(), IntStream.of(op).skip(1).toList());
         assertEquals(1, IntStream.of(op).map(e -> e).count());
         assertEquals(0, IntStream.of(op).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 5 }, IntStream.of(op).map(e -> e).toArray());
         assertArrayEquals(new int[] {}, IntStream.of(op).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(5), IntStream.of(op).map(e -> e).toList());
-        assertEquals(N.asList(), IntStream.of(op).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(5), IntStream.of(op).map(e -> e).toList());
+        assertEquals(N.toList(), IntStream.of(op).map(e -> e).skip(1).toList());
 
         op = OptionalInt.empty();
         assertEquals(0, IntStream.of(op).count());
         assertEquals(0, IntStream.of(op).skip(1).count());
         assertArrayEquals(new int[] {}, IntStream.of(op).toArray());
         assertArrayEquals(new int[] {}, IntStream.of(op).skip(1).toArray());
-        assertEquals(N.asList(), IntStream.of(op).toList());
-        assertEquals(N.asList(), IntStream.of(op).skip(1).toList());
+        assertEquals(N.toList(), IntStream.of(op).toList());
+        assertEquals(N.toList(), IntStream.of(op).skip(1).toList());
     }
 
     @Test
@@ -1841,22 +1841,22 @@ public class IntStream104Test extends TestBase {
         assertEquals(0, IntStream.of(op).skip(1).count());
         assertArrayEquals(new int[] { 5 }, IntStream.of(op).toArray());
         assertArrayEquals(new int[] {}, IntStream.of(op).skip(1).toArray());
-        assertEquals(N.asList(5), IntStream.of(op).toList());
-        assertEquals(N.asList(), IntStream.of(op).skip(1).toList());
+        assertEquals(N.toList(5), IntStream.of(op).toList());
+        assertEquals(N.toList(), IntStream.of(op).skip(1).toList());
         assertEquals(1, IntStream.of(op).map(e -> e).count());
         assertEquals(0, IntStream.of(op).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 5 }, IntStream.of(op).map(e -> e).toArray());
         assertArrayEquals(new int[] {}, IntStream.of(op).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(5), IntStream.of(op).map(e -> e).toList());
-        assertEquals(N.asList(), IntStream.of(op).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(5), IntStream.of(op).map(e -> e).toList());
+        assertEquals(N.toList(), IntStream.of(op).map(e -> e).skip(1).toList());
 
         op = java.util.OptionalInt.empty();
         assertEquals(0, IntStream.of(op).count());
         assertEquals(0, IntStream.of(op).skip(1).count());
         assertArrayEquals(new int[] {}, IntStream.of(op).toArray());
         assertArrayEquals(new int[] {}, IntStream.of(op).skip(1).toArray());
-        assertEquals(N.asList(), IntStream.of(op).toList());
-        assertEquals(N.asList(), IntStream.of(op).skip(1).toList());
+        assertEquals(N.toList(), IntStream.of(op).toList());
+        assertEquals(N.toList(), IntStream.of(op).skip(1).toList());
     }
 
     @Test
@@ -1874,10 +1874,10 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new int[] { 2, 3, 4, 5 }, IntStream.of(buffer).skip(1).toArray());
 
         buffer = IntBuffer.wrap(new int[] { 1, 2, 3, 4, 5 });
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.of(buffer).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.of(buffer).toList());
 
         buffer = IntBuffer.wrap(new int[] { 1, 2, 3, 4, 5 });
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.of(buffer).skip(1).toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.of(buffer).skip(1).toList());
 
         buffer = IntBuffer.wrap(new int[] { 1, 2, 3, 4, 5 });
         assertEquals(5, IntStream.of(buffer).map(e -> e).count());
@@ -1892,10 +1892,10 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new int[] { 2, 3, 4, 5 }, IntStream.of(buffer).map(e -> e).skip(1).toArray());
 
         buffer = IntBuffer.wrap(new int[] { 1, 2, 3, 4, 5 });
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.of(buffer).map(e -> e).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.of(buffer).map(e -> e).toList());
 
         buffer = IntBuffer.wrap(new int[] { 1, 2, 3, 4, 5 });
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.of(buffer).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.of(buffer).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -1905,14 +1905,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(4, IntStream.ofCodePoints(str).skip(1).count());
         assertArrayEquals(new int[] { 72, 101, 108, 108, 111 }, IntStream.ofCodePoints(str).toArray());
         assertArrayEquals(new int[] { 101, 108, 108, 111 }, IntStream.ofCodePoints(str).skip(1).toArray());
-        assertEquals(N.asList(72, 101, 108, 108, 111), IntStream.ofCodePoints(str).toList());
-        assertEquals(N.asList(101, 108, 108, 111), IntStream.ofCodePoints(str).skip(1).toList());
+        assertEquals(N.toList(72, 101, 108, 108, 111), IntStream.ofCodePoints(str).toList());
+        assertEquals(N.toList(101, 108, 108, 111), IntStream.ofCodePoints(str).skip(1).toList());
         assertEquals(5, IntStream.ofCodePoints(str).map(e -> e).count());
         assertEquals(4, IntStream.ofCodePoints(str).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 72, 101, 108, 108, 111 }, IntStream.ofCodePoints(str).map(e -> e).toArray());
         assertArrayEquals(new int[] { 101, 108, 108, 111 }, IntStream.ofCodePoints(str).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(72, 101, 108, 108, 111), IntStream.ofCodePoints(str).map(e -> e).toList());
-        assertEquals(N.asList(101, 108, 108, 111), IntStream.ofCodePoints(str).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(72, 101, 108, 108, 111), IntStream.ofCodePoints(str).map(e -> e).toList());
+        assertEquals(N.toList(101, 108, 108, 111), IntStream.ofCodePoints(str).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -1921,14 +1921,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(2, IntStream.splitByChunkCount(10, 3, (from, to) -> to - from).skip(1).count());
         assertArrayEquals(new int[] { 4, 3, 3 }, IntStream.splitByChunkCount(10, 3, (from, to) -> to - from).toArray());
         assertArrayEquals(new int[] { 3, 3 }, IntStream.splitByChunkCount(10, 3, (from, to) -> to - from).skip(1).toArray());
-        assertEquals(N.asList(4, 3, 3), IntStream.splitByChunkCount(10, 3, (from, to) -> to - from).toList());
-        assertEquals(N.asList(3, 3), IntStream.splitByChunkCount(10, 3, (from, to) -> to - from).skip(1).toList());
+        assertEquals(N.toList(4, 3, 3), IntStream.splitByChunkCount(10, 3, (from, to) -> to - from).toList());
+        assertEquals(N.toList(3, 3), IntStream.splitByChunkCount(10, 3, (from, to) -> to - from).skip(1).toList());
         assertEquals(3, IntStream.splitByChunkCount(10, 3, (from, to) -> to - from).map(e -> e).count());
         assertEquals(2, IntStream.splitByChunkCount(10, 3, (from, to) -> to - from).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 4, 3, 3 }, IntStream.splitByChunkCount(10, 3, (from, to) -> to - from).map(e -> e).toArray());
         assertArrayEquals(new int[] { 3, 3 }, IntStream.splitByChunkCount(10, 3, (from, to) -> to - from).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(4, 3, 3), IntStream.splitByChunkCount(10, 3, (from, to) -> to - from).map(e -> e).toList());
-        assertEquals(N.asList(3, 3), IntStream.splitByChunkCount(10, 3, (from, to) -> to - from).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(4, 3, 3), IntStream.splitByChunkCount(10, 3, (from, to) -> to - from).map(e -> e).toList());
+        assertEquals(N.toList(3, 3), IntStream.splitByChunkCount(10, 3, (from, to) -> to - from).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -1937,14 +1937,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(4, IntStream.splitByChunkCount(7, 5, true, (from, to) -> to - from).skip(1).count());
         assertArrayEquals(new int[] { 1, 1, 1, 2, 2 }, IntStream.splitByChunkCount(7, 5, true, (from, to) -> to - from).toArray());
         assertArrayEquals(new int[] { 1, 1, 2, 2 }, IntStream.splitByChunkCount(7, 5, true, (from, to) -> to - from).skip(1).toArray());
-        assertEquals(N.asList(1, 1, 1, 2, 2), IntStream.splitByChunkCount(7, 5, true, (from, to) -> to - from).toList());
-        assertEquals(N.asList(1, 1, 2, 2), IntStream.splitByChunkCount(7, 5, true, (from, to) -> to - from).skip(1).toList());
+        assertEquals(N.toList(1, 1, 1, 2, 2), IntStream.splitByChunkCount(7, 5, true, (from, to) -> to - from).toList());
+        assertEquals(N.toList(1, 1, 2, 2), IntStream.splitByChunkCount(7, 5, true, (from, to) -> to - from).skip(1).toList());
         assertEquals(5, IntStream.splitByChunkCount(7, 5, true, (from, to) -> to - from).map(e -> e).count());
         assertEquals(4, IntStream.splitByChunkCount(7, 5, true, (from, to) -> to - from).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 1, 1, 1, 2, 2 }, IntStream.splitByChunkCount(7, 5, true, (from, to) -> to - from).map(e -> e).toArray());
         assertArrayEquals(new int[] { 1, 1, 2, 2 }, IntStream.splitByChunkCount(7, 5, true, (from, to) -> to - from).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(1, 1, 1, 2, 2), IntStream.splitByChunkCount(7, 5, true, (from, to) -> to - from).map(e -> e).toList());
-        assertEquals(N.asList(1, 1, 2, 2), IntStream.splitByChunkCount(7, 5, true, (from, to) -> to - from).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(1, 1, 1, 2, 2), IntStream.splitByChunkCount(7, 5, true, (from, to) -> to - from).map(e -> e).toList());
+        assertEquals(N.toList(1, 1, 2, 2), IntStream.splitByChunkCount(7, 5, true, (from, to) -> to - from).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -1954,14 +1954,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(4, IntStream.flatten(array).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, IntStream.flatten(array).toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5 }, IntStream.flatten(array).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.flatten(array).toList());
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.flatten(array).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.flatten(array).toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.flatten(array).skip(1).toList());
         assertEquals(5, IntStream.flatten(array).map(e -> e).count());
         assertEquals(4, IntStream.flatten(array).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, IntStream.flatten(array).map(e -> e).toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5 }, IntStream.flatten(array).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.flatten(array).map(e -> e).toList());
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.flatten(array).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.flatten(array).map(e -> e).toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.flatten(array).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -1971,14 +1971,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(8, IntStream.flatten(array, true).skip(1).count());
         assertArrayEquals(new int[] { 1, 4, 7, 2, 5, 8, 3, 6, 9 }, IntStream.flatten(array, true).toArray());
         assertArrayEquals(new int[] { 4, 7, 2, 5, 8, 3, 6, 9 }, IntStream.flatten(array, true).skip(1).toArray());
-        assertEquals(N.asList(1, 4, 7, 2, 5, 8, 3, 6, 9), IntStream.flatten(array, true).toList());
-        assertEquals(N.asList(4, 7, 2, 5, 8, 3, 6, 9), IntStream.flatten(array, true).skip(1).toList());
+        assertEquals(N.toList(1, 4, 7, 2, 5, 8, 3, 6, 9), IntStream.flatten(array, true).toList());
+        assertEquals(N.toList(4, 7, 2, 5, 8, 3, 6, 9), IntStream.flatten(array, true).skip(1).toList());
         assertEquals(9, IntStream.flatten(array, true).map(e -> e).count());
         assertEquals(8, IntStream.flatten(array, true).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 1, 4, 7, 2, 5, 8, 3, 6, 9 }, IntStream.flatten(array, true).map(e -> e).toArray());
         assertArrayEquals(new int[] { 4, 7, 2, 5, 8, 3, 6, 9 }, IntStream.flatten(array, true).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(1, 4, 7, 2, 5, 8, 3, 6, 9), IntStream.flatten(array, true).map(e -> e).toList());
-        assertEquals(N.asList(4, 7, 2, 5, 8, 3, 6, 9), IntStream.flatten(array, true).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(1, 4, 7, 2, 5, 8, 3, 6, 9), IntStream.flatten(array, true).map(e -> e).toList());
+        assertEquals(N.toList(4, 7, 2, 5, 8, 3, 6, 9), IntStream.flatten(array, true).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -1988,14 +1988,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(8, IntStream.flatten(array, 0, true).skip(1).count());
         assertArrayEquals(new int[] { 1, 3, 6, 2, 4, 0, 0, 5, 0 }, IntStream.flatten(array, 0, true).toArray());
         assertArrayEquals(new int[] { 3, 6, 2, 4, 0, 0, 5, 0 }, IntStream.flatten(array, 0, true).skip(1).toArray());
-        assertEquals(N.asList(1, 3, 6, 2, 4, 0, 0, 5, 0), IntStream.flatten(array, 0, true).toList());
-        assertEquals(N.asList(3, 6, 2, 4, 0, 0, 5, 0), IntStream.flatten(array, 0, true).skip(1).toList());
+        assertEquals(N.toList(1, 3, 6, 2, 4, 0, 0, 5, 0), IntStream.flatten(array, 0, true).toList());
+        assertEquals(N.toList(3, 6, 2, 4, 0, 0, 5, 0), IntStream.flatten(array, 0, true).skip(1).toList());
         assertEquals(9, IntStream.flatten(array, 0, true).map(e -> e).count());
         assertEquals(8, IntStream.flatten(array, 0, true).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 1, 3, 6, 2, 4, 0, 0, 5, 0 }, IntStream.flatten(array, 0, true).map(e -> e).toArray());
         assertArrayEquals(new int[] { 3, 6, 2, 4, 0, 0, 5, 0 }, IntStream.flatten(array, 0, true).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(1, 3, 6, 2, 4, 0, 0, 5, 0), IntStream.flatten(array, 0, true).map(e -> e).toList());
-        assertEquals(N.asList(3, 6, 2, 4, 0, 0, 5, 0), IntStream.flatten(array, 0, true).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(1, 3, 6, 2, 4, 0, 0, 5, 0), IntStream.flatten(array, 0, true).map(e -> e).toList());
+        assertEquals(N.toList(3, 6, 2, 4, 0, 0, 5, 0), IntStream.flatten(array, 0, true).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -2005,14 +2005,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(7, IntStream.flatten(array).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5, 6, 7, 8 }, IntStream.flatten(array).toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5, 6, 7, 8 }, IntStream.flatten(array).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6, 7, 8), IntStream.flatten(array).toList());
-        assertEquals(N.asList(2, 3, 4, 5, 6, 7, 8), IntStream.flatten(array).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6, 7, 8), IntStream.flatten(array).toList());
+        assertEquals(N.toList(2, 3, 4, 5, 6, 7, 8), IntStream.flatten(array).skip(1).toList());
         assertEquals(8, IntStream.flatten(array).map(e -> e).count());
         assertEquals(7, IntStream.flatten(array).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5, 6, 7, 8 }, IntStream.flatten(array).map(e -> e).toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5, 6, 7, 8 }, IntStream.flatten(array).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6, 7, 8), IntStream.flatten(array).map(e -> e).toList());
-        assertEquals(N.asList(2, 3, 4, 5, 6, 7, 8), IntStream.flatten(array).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6, 7, 8), IntStream.flatten(array).map(e -> e).toList());
+        assertEquals(N.toList(2, 3, 4, 5, 6, 7, 8), IntStream.flatten(array).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -2021,14 +2021,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(4, IntStream.range(0, 5).skip(1).count());
         assertArrayEquals(new int[] { 0, 1, 2, 3, 4 }, IntStream.range(0, 5).toArray());
         assertArrayEquals(new int[] { 1, 2, 3, 4 }, IntStream.range(0, 5).skip(1).toArray());
-        assertEquals(N.asList(0, 1, 2, 3, 4), IntStream.range(0, 5).toList());
-        assertEquals(N.asList(1, 2, 3, 4), IntStream.range(0, 5).skip(1).toList());
+        assertEquals(N.toList(0, 1, 2, 3, 4), IntStream.range(0, 5).toList());
+        assertEquals(N.toList(1, 2, 3, 4), IntStream.range(0, 5).skip(1).toList());
         assertEquals(5, IntStream.range(0, 5).map(e -> e).count());
         assertEquals(4, IntStream.range(0, 5).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 0, 1, 2, 3, 4 }, IntStream.range(0, 5).map(e -> e).toArray());
         assertArrayEquals(new int[] { 1, 2, 3, 4 }, IntStream.range(0, 5).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(0, 1, 2, 3, 4), IntStream.range(0, 5).map(e -> e).toList());
-        assertEquals(N.asList(1, 2, 3, 4), IntStream.range(0, 5).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(0, 1, 2, 3, 4), IntStream.range(0, 5).map(e -> e).toList());
+        assertEquals(N.toList(1, 2, 3, 4), IntStream.range(0, 5).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -2037,14 +2037,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(3, IntStream.range(0, 10, 3).skip(1).count());
         assertArrayEquals(new int[] { 0, 3, 6, 9 }, IntStream.range(0, 10, 3).toArray());
         assertArrayEquals(new int[] { 3, 6, 9 }, IntStream.range(0, 10, 3).skip(1).toArray());
-        assertEquals(N.asList(0, 3, 6, 9), IntStream.range(0, 10, 3).toList());
-        assertEquals(N.asList(3, 6, 9), IntStream.range(0, 10, 3).skip(1).toList());
+        assertEquals(N.toList(0, 3, 6, 9), IntStream.range(0, 10, 3).toList());
+        assertEquals(N.toList(3, 6, 9), IntStream.range(0, 10, 3).skip(1).toList());
         assertEquals(4, IntStream.range(0, 10, 3).map(e -> e).count());
         assertEquals(3, IntStream.range(0, 10, 3).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 0, 3, 6, 9 }, IntStream.range(0, 10, 3).map(e -> e).toArray());
         assertArrayEquals(new int[] { 3, 6, 9 }, IntStream.range(0, 10, 3).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(0, 3, 6, 9), IntStream.range(0, 10, 3).map(e -> e).toList());
-        assertEquals(N.asList(3, 6, 9), IntStream.range(0, 10, 3).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(0, 3, 6, 9), IntStream.range(0, 10, 3).map(e -> e).toList());
+        assertEquals(N.toList(3, 6, 9), IntStream.range(0, 10, 3).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -2053,14 +2053,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(5, IntStream.rangeClosed(0, 5).skip(1).count());
         assertArrayEquals(new int[] { 0, 1, 2, 3, 4, 5 }, IntStream.rangeClosed(0, 5).toArray());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, IntStream.rangeClosed(0, 5).skip(1).toArray());
-        assertEquals(N.asList(0, 1, 2, 3, 4, 5), IntStream.rangeClosed(0, 5).toList());
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.rangeClosed(0, 5).skip(1).toList());
+        assertEquals(N.toList(0, 1, 2, 3, 4, 5), IntStream.rangeClosed(0, 5).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.rangeClosed(0, 5).skip(1).toList());
         assertEquals(6, IntStream.rangeClosed(0, 5).map(e -> e).count());
         assertEquals(5, IntStream.rangeClosed(0, 5).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 0, 1, 2, 3, 4, 5 }, IntStream.rangeClosed(0, 5).map(e -> e).toArray());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, IntStream.rangeClosed(0, 5).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(0, 1, 2, 3, 4, 5), IntStream.rangeClosed(0, 5).map(e -> e).toList());
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.rangeClosed(0, 5).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(0, 1, 2, 3, 4, 5), IntStream.rangeClosed(0, 5).map(e -> e).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.rangeClosed(0, 5).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -2069,14 +2069,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(3, IntStream.rangeClosed(0, 9, 3).skip(1).count());
         assertArrayEquals(new int[] { 0, 3, 6, 9 }, IntStream.rangeClosed(0, 9, 3).toArray());
         assertArrayEquals(new int[] { 3, 6, 9 }, IntStream.rangeClosed(0, 9, 3).skip(1).toArray());
-        assertEquals(N.asList(0, 3, 6, 9), IntStream.rangeClosed(0, 9, 3).toList());
-        assertEquals(N.asList(3, 6, 9), IntStream.rangeClosed(0, 9, 3).skip(1).toList());
+        assertEquals(N.toList(0, 3, 6, 9), IntStream.rangeClosed(0, 9, 3).toList());
+        assertEquals(N.toList(3, 6, 9), IntStream.rangeClosed(0, 9, 3).skip(1).toList());
         assertEquals(4, IntStream.rangeClosed(0, 9, 3).map(e -> e).count());
         assertEquals(3, IntStream.rangeClosed(0, 9, 3).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 0, 3, 6, 9 }, IntStream.rangeClosed(0, 9, 3).map(e -> e).toArray());
         assertArrayEquals(new int[] { 3, 6, 9 }, IntStream.rangeClosed(0, 9, 3).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(0, 3, 6, 9), IntStream.rangeClosed(0, 9, 3).map(e -> e).toList());
-        assertEquals(N.asList(3, 6, 9), IntStream.rangeClosed(0, 9, 3).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(0, 3, 6, 9), IntStream.rangeClosed(0, 9, 3).map(e -> e).toList());
+        assertEquals(N.toList(3, 6, 9), IntStream.rangeClosed(0, 9, 3).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -2085,14 +2085,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(4, IntStream.repeat(7, 5).skip(1).count());
         assertArrayEquals(new int[] { 7, 7, 7, 7, 7 }, IntStream.repeat(7, 5).toArray());
         assertArrayEquals(new int[] { 7, 7, 7, 7 }, IntStream.repeat(7, 5).skip(1).toArray());
-        assertEquals(N.asList(7, 7, 7, 7, 7), IntStream.repeat(7, 5).toList());
-        assertEquals(N.asList(7, 7, 7, 7), IntStream.repeat(7, 5).skip(1).toList());
+        assertEquals(N.toList(7, 7, 7, 7, 7), IntStream.repeat(7, 5).toList());
+        assertEquals(N.toList(7, 7, 7, 7), IntStream.repeat(7, 5).skip(1).toList());
         assertEquals(5, IntStream.repeat(7, 5).map(e -> e).count());
         assertEquals(4, IntStream.repeat(7, 5).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 7, 7, 7, 7, 7 }, IntStream.repeat(7, 5).map(e -> e).toArray());
         assertArrayEquals(new int[] { 7, 7, 7, 7 }, IntStream.repeat(7, 5).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(7, 7, 7, 7, 7), IntStream.repeat(7, 5).map(e -> e).toList());
-        assertEquals(N.asList(7, 7, 7, 7), IntStream.repeat(7, 5).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(7, 7, 7, 7, 7), IntStream.repeat(7, 5).map(e -> e).toList());
+        assertEquals(N.toList(7, 7, 7, 7), IntStream.repeat(7, 5).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -2173,14 +2173,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(4, IntStream.ofIndices(5).skip(1).count());
         assertArrayEquals(new int[] { 0, 1, 2, 3, 4 }, IntStream.ofIndices(5).toArray());
         assertArrayEquals(new int[] { 1, 2, 3, 4 }, IntStream.ofIndices(5).skip(1).toArray());
-        assertEquals(N.asList(0, 1, 2, 3, 4), IntStream.ofIndices(5).toList());
-        assertEquals(N.asList(1, 2, 3, 4), IntStream.ofIndices(5).skip(1).toList());
+        assertEquals(N.toList(0, 1, 2, 3, 4), IntStream.ofIndices(5).toList());
+        assertEquals(N.toList(1, 2, 3, 4), IntStream.ofIndices(5).skip(1).toList());
         assertEquals(5, IntStream.ofIndices(5).map(e -> e).count());
         assertEquals(4, IntStream.ofIndices(5).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 0, 1, 2, 3, 4 }, IntStream.ofIndices(5).map(e -> e).toArray());
         assertArrayEquals(new int[] { 1, 2, 3, 4 }, IntStream.ofIndices(5).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(0, 1, 2, 3, 4), IntStream.ofIndices(5).map(e -> e).toList());
-        assertEquals(N.asList(1, 2, 3, 4), IntStream.ofIndices(5).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(0, 1, 2, 3, 4), IntStream.ofIndices(5).map(e -> e).toList());
+        assertEquals(N.toList(1, 2, 3, 4), IntStream.ofIndices(5).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -2189,14 +2189,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(3, IntStream.ofIndices(10, 3).skip(1).count());
         assertArrayEquals(new int[] { 0, 3, 6, 9 }, IntStream.ofIndices(10, 3).toArray());
         assertArrayEquals(new int[] { 3, 6, 9 }, IntStream.ofIndices(10, 3).skip(1).toArray());
-        assertEquals(N.asList(0, 3, 6, 9), IntStream.ofIndices(10, 3).toList());
-        assertEquals(N.asList(3, 6, 9), IntStream.ofIndices(10, 3).skip(1).toList());
+        assertEquals(N.toList(0, 3, 6, 9), IntStream.ofIndices(10, 3).toList());
+        assertEquals(N.toList(3, 6, 9), IntStream.ofIndices(10, 3).skip(1).toList());
         assertEquals(4, IntStream.ofIndices(10, 3).map(e -> e).count());
         assertEquals(3, IntStream.ofIndices(10, 3).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 0, 3, 6, 9 }, IntStream.ofIndices(10, 3).map(e -> e).toArray());
         assertArrayEquals(new int[] { 3, 6, 9 }, IntStream.ofIndices(10, 3).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(0, 3, 6, 9), IntStream.ofIndices(10, 3).map(e -> e).toList());
-        assertEquals(N.asList(3, 6, 9), IntStream.ofIndices(10, 3).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(0, 3, 6, 9), IntStream.ofIndices(10, 3).map(e -> e).toList());
+        assertEquals(N.toList(3, 6, 9), IntStream.ofIndices(10, 3).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -2214,10 +2214,10 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new int[] { 1, 2, 3, 4 }, IntStream.iterate(() -> counter.get() < 5, () -> counter.getAndIncrement()).skip(1).toArray());
 
         counter.set(0);
-        assertEquals(N.asList(0, 1, 2, 3, 4), IntStream.iterate(() -> counter.get() < 5, () -> counter.getAndIncrement()).toList());
+        assertEquals(N.toList(0, 1, 2, 3, 4), IntStream.iterate(() -> counter.get() < 5, () -> counter.getAndIncrement()).toList());
 
         counter.set(0);
-        assertEquals(N.asList(1, 2, 3, 4), IntStream.iterate(() -> counter.get() < 5, () -> counter.getAndIncrement()).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4), IntStream.iterate(() -> counter.get() < 5, () -> counter.getAndIncrement()).skip(1).toList());
 
         counter.set(0);
         assertEquals(5, IntStream.iterate(() -> counter.get() < 5, () -> counter.getAndIncrement()).map(e -> e).count());
@@ -2232,10 +2232,10 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new int[] { 1, 2, 3, 4 }, IntStream.iterate(() -> counter.get() < 5, () -> counter.getAndIncrement()).map(e -> e).skip(1).toArray());
 
         counter.set(0);
-        assertEquals(N.asList(0, 1, 2, 3, 4), IntStream.iterate(() -> counter.get() < 5, () -> counter.getAndIncrement()).map(e -> e).toList());
+        assertEquals(N.toList(0, 1, 2, 3, 4), IntStream.iterate(() -> counter.get() < 5, () -> counter.getAndIncrement()).map(e -> e).toList());
 
         counter.set(0);
-        assertEquals(N.asList(1, 2, 3, 4), IntStream.iterate(() -> counter.get() < 5, () -> counter.getAndIncrement()).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4), IntStream.iterate(() -> counter.get() < 5, () -> counter.getAndIncrement()).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -2265,13 +2265,13 @@ public class IntStream104Test extends TestBase {
         }).skip(1).toArray());
 
         counter.set(0);
-        assertEquals(N.asList(0, 1, 2, 3, 4, 5), IntStream.iterate(0, () -> counter.get() < 5, i -> {
+        assertEquals(N.toList(0, 1, 2, 3, 4, 5), IntStream.iterate(0, () -> counter.get() < 5, i -> {
             counter.incrementAndGet();
             return i + 1;
         }).toList());
 
         counter.set(0);
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.iterate(0, () -> counter.get() < 5, i -> {
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.iterate(0, () -> counter.get() < 5, i -> {
             counter.incrementAndGet();
             return i + 1;
         }).skip(1).toList());
@@ -2301,13 +2301,13 @@ public class IntStream104Test extends TestBase {
         }).map(e -> e).skip(1).toArray());
 
         counter.set(0);
-        assertEquals(N.asList(0, 1, 2, 3, 4, 5), IntStream.iterate(0, () -> counter.get() < 5, i -> {
+        assertEquals(N.toList(0, 1, 2, 3, 4, 5), IntStream.iterate(0, () -> counter.get() < 5, i -> {
             counter.incrementAndGet();
             return i + 1;
         }).map(e -> e).toList());
 
         counter.set(0);
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.iterate(0, () -> counter.get() < 5, i -> {
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.iterate(0, () -> counter.get() < 5, i -> {
             counter.incrementAndGet();
             return i + 1;
         }).map(e -> e).skip(1).toList());
@@ -2319,14 +2319,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(4, IntStream.iterate(0, i -> i < 5, i -> i + 1).skip(1).count());
         assertArrayEquals(new int[] { 0, 1, 2, 3, 4 }, IntStream.iterate(0, i -> i < 5, i -> i + 1).toArray());
         assertArrayEquals(new int[] { 1, 2, 3, 4 }, IntStream.iterate(0, i -> i < 5, i -> i + 1).skip(1).toArray());
-        assertEquals(N.asList(0, 1, 2, 3, 4), IntStream.iterate(0, i -> i < 5, i -> i + 1).toList());
-        assertEquals(N.asList(1, 2, 3, 4), IntStream.iterate(0, i -> i < 5, i -> i + 1).skip(1).toList());
+        assertEquals(N.toList(0, 1, 2, 3, 4), IntStream.iterate(0, i -> i < 5, i -> i + 1).toList());
+        assertEquals(N.toList(1, 2, 3, 4), IntStream.iterate(0, i -> i < 5, i -> i + 1).skip(1).toList());
         assertEquals(5, IntStream.iterate(0, i -> i < 5, i -> i + 1).map(e -> e).count());
         assertEquals(4, IntStream.iterate(0, i -> i < 5, i -> i + 1).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 0, 1, 2, 3, 4 }, IntStream.iterate(0, i -> i < 5, i -> i + 1).map(e -> e).toArray());
         assertArrayEquals(new int[] { 1, 2, 3, 4 }, IntStream.iterate(0, i -> i < 5, i -> i + 1).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(0, 1, 2, 3, 4), IntStream.iterate(0, i -> i < 5, i -> i + 1).map(e -> e).toList());
-        assertEquals(N.asList(1, 2, 3, 4), IntStream.iterate(0, i -> i < 5, i -> i + 1).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(0, 1, 2, 3, 4), IntStream.iterate(0, i -> i < 5, i -> i + 1).map(e -> e).toList());
+        assertEquals(N.toList(1, 2, 3, 4), IntStream.iterate(0, i -> i < 5, i -> i + 1).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -2335,14 +2335,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(9, IntStream.iterate(0, i -> i + 1).limit(10).skip(1).count());
         assertArrayEquals(new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }, IntStream.iterate(0, i -> i + 1).limit(10).toArray());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, IntStream.iterate(0, i -> i + 1).limit(10).skip(1).toArray());
-        assertEquals(N.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), IntStream.iterate(0, i -> i + 1).limit(10).toList());
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6, 7, 8, 9), IntStream.iterate(0, i -> i + 1).limit(10).skip(1).toList());
+        assertEquals(N.toList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), IntStream.iterate(0, i -> i + 1).limit(10).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6, 7, 8, 9), IntStream.iterate(0, i -> i + 1).limit(10).skip(1).toList());
         assertEquals(10, IntStream.iterate(0, i -> i + 1).map(e -> e).limit(10).count());
         assertEquals(9, IntStream.iterate(0, i -> i + 1).map(e -> e).limit(10).skip(1).count());
         assertArrayEquals(new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }, IntStream.iterate(0, i -> i + 1).map(e -> e).limit(10).toArray());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, IntStream.iterate(0, i -> i + 1).map(e -> e).limit(10).skip(1).toArray());
-        assertEquals(N.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), IntStream.iterate(0, i -> i + 1).map(e -> e).limit(10).toList());
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6, 7, 8, 9), IntStream.iterate(0, i -> i + 1).map(e -> e).limit(10).skip(1).toList());
+        assertEquals(N.toList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), IntStream.iterate(0, i -> i + 1).map(e -> e).limit(10).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6, 7, 8, 9), IntStream.iterate(0, i -> i + 1).map(e -> e).limit(10).skip(1).toList());
     }
 
     @Test
@@ -2360,10 +2360,10 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new int[] { 1, 2, 3, 4 }, IntStream.generate(() -> counter.getAndIncrement()).limit(5).skip(1).toArray());
 
         counter.set(0);
-        assertEquals(N.asList(0, 1, 2, 3, 4), IntStream.generate(() -> counter.getAndIncrement()).limit(5).toList());
+        assertEquals(N.toList(0, 1, 2, 3, 4), IntStream.generate(() -> counter.getAndIncrement()).limit(5).toList());
 
         counter.set(0);
-        assertEquals(N.asList(1, 2, 3, 4), IntStream.generate(() -> counter.getAndIncrement()).limit(5).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4), IntStream.generate(() -> counter.getAndIncrement()).limit(5).skip(1).toList());
 
         counter.set(0);
         assertEquals(5, IntStream.generate(() -> counter.getAndIncrement()).map(e -> e).limit(5).count());
@@ -2378,10 +2378,10 @@ public class IntStream104Test extends TestBase {
         assertArrayEquals(new int[] { 1, 2, 3, 4 }, IntStream.generate(() -> counter.getAndIncrement()).map(e -> e).limit(5).skip(1).toArray());
 
         counter.set(0);
-        assertEquals(N.asList(0, 1, 2, 3, 4), IntStream.generate(() -> counter.getAndIncrement()).map(e -> e).limit(5).toList());
+        assertEquals(N.toList(0, 1, 2, 3, 4), IntStream.generate(() -> counter.getAndIncrement()).map(e -> e).limit(5).toList());
 
         counter.set(0);
-        assertEquals(N.asList(1, 2, 3, 4), IntStream.generate(() -> counter.getAndIncrement()).map(e -> e).limit(5).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4), IntStream.generate(() -> counter.getAndIncrement()).map(e -> e).limit(5).skip(1).toList());
     }
 
     @Test
@@ -2391,14 +2391,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(4, IntStream.concat(arrays).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, IntStream.concat(arrays).toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5 }, IntStream.concat(arrays).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.concat(arrays).toList());
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.concat(arrays).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.concat(arrays).toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.concat(arrays).skip(1).toList());
         assertEquals(5, IntStream.concat(arrays).map(e -> e).count());
         assertEquals(4, IntStream.concat(arrays).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, IntStream.concat(arrays).map(e -> e).toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5 }, IntStream.concat(arrays).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.concat(arrays).map(e -> e).toList());
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.concat(arrays).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.concat(arrays).map(e -> e).toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.concat(arrays).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -2426,12 +2426,12 @@ public class IntStream104Test extends TestBase {
         iter1 = IntIterator.of(1, 2);
         iter2 = IntIterator.of(3, 4);
         iter3 = IntIterator.of(5);
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.concat(iter1, iter2, iter3).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.concat(iter1, iter2, iter3).toList());
 
         iter1 = IntIterator.of(1, 2);
         iter2 = IntIterator.of(3, 4);
         iter3 = IntIterator.of(5);
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.concat(iter1, iter2, iter3).skip(1).toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.concat(iter1, iter2, iter3).skip(1).toList());
 
         iter1 = IntIterator.of(1, 2);
         iter2 = IntIterator.of(3, 4);
@@ -2456,12 +2456,12 @@ public class IntStream104Test extends TestBase {
         iter1 = IntIterator.of(1, 2);
         iter2 = IntIterator.of(3, 4);
         iter3 = IntIterator.of(5);
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.concat(iter1, iter2, iter3).map(e -> e).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.concat(iter1, iter2, iter3).map(e -> e).toList());
 
         iter1 = IntIterator.of(1, 2);
         iter2 = IntIterator.of(3, 4);
         iter3 = IntIterator.of(5);
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.concat(iter1, iter2, iter3).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.concat(iter1, iter2, iter3).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -2489,12 +2489,12 @@ public class IntStream104Test extends TestBase {
         stream1 = IntStream.of(1, 2);
         stream2 = IntStream.of(3, 4);
         stream3 = IntStream.of(5);
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.concat(stream1, stream2, stream3).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.concat(stream1, stream2, stream3).toList());
 
         stream1 = IntStream.of(1, 2);
         stream2 = IntStream.of(3, 4);
         stream3 = IntStream.of(5);
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.concat(stream1, stream2, stream3).skip(1).toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.concat(stream1, stream2, stream3).skip(1).toList());
 
         stream1 = IntStream.of(1, 2);
         stream2 = IntStream.of(3, 4);
@@ -2519,12 +2519,12 @@ public class IntStream104Test extends TestBase {
         stream1 = IntStream.of(1, 2);
         stream2 = IntStream.of(3, 4);
         stream3 = IntStream.of(5);
-        assertEquals(N.asList(1, 2, 3, 4, 5), IntStream.concat(stream1, stream2, stream3).map(e -> e).toList());
+        assertEquals(N.toList(1, 2, 3, 4, 5), IntStream.concat(stream1, stream2, stream3).map(e -> e).toList());
 
         stream1 = IntStream.of(1, 2);
         stream2 = IntStream.of(3, 4);
         stream3 = IntStream.of(5);
-        assertEquals(N.asList(2, 3, 4, 5), IntStream.concat(stream1, stream2, stream3).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(2, 3, 4, 5), IntStream.concat(stream1, stream2, stream3).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -2535,14 +2535,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(2, IntStream.zip(array1, array2, (a, b) -> a + b).skip(1).count());
         assertArrayEquals(new int[] { 11, 22, 33 }, IntStream.zip(array1, array2, (a, b) -> a + b).toArray());
         assertArrayEquals(new int[] { 22, 33 }, IntStream.zip(array1, array2, (a, b) -> a + b).skip(1).toArray());
-        assertEquals(N.asList(11, 22, 33), IntStream.zip(array1, array2, (a, b) -> a + b).toList());
-        assertEquals(N.asList(22, 33), IntStream.zip(array1, array2, (a, b) -> a + b).skip(1).toList());
+        assertEquals(N.toList(11, 22, 33), IntStream.zip(array1, array2, (a, b) -> a + b).toList());
+        assertEquals(N.toList(22, 33), IntStream.zip(array1, array2, (a, b) -> a + b).skip(1).toList());
         assertEquals(3, IntStream.zip(array1, array2, (a, b) -> a + b).map(e -> e).count());
         assertEquals(2, IntStream.zip(array1, array2, (a, b) -> a + b).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 11, 22, 33 }, IntStream.zip(array1, array2, (a, b) -> a + b).map(e -> e).toArray());
         assertArrayEquals(new int[] { 22, 33 }, IntStream.zip(array1, array2, (a, b) -> a + b).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(11, 22, 33), IntStream.zip(array1, array2, (a, b) -> a + b).map(e -> e).toList());
-        assertEquals(N.asList(22, 33), IntStream.zip(array1, array2, (a, b) -> a + b).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(11, 22, 33), IntStream.zip(array1, array2, (a, b) -> a + b).map(e -> e).toList());
+        assertEquals(N.toList(22, 33), IntStream.zip(array1, array2, (a, b) -> a + b).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -2554,14 +2554,14 @@ public class IntStream104Test extends TestBase {
         assertEquals(2, IntStream.zip(array1, array2, array3, (a, b, c) -> a + b + c).skip(1).count());
         assertArrayEquals(new int[] { 111, 222, 333 }, IntStream.zip(array1, array2, array3, (a, b, c) -> a + b + c).toArray());
         assertArrayEquals(new int[] { 222, 333 }, IntStream.zip(array1, array2, array3, (a, b, c) -> a + b + c).skip(1).toArray());
-        assertEquals(N.asList(111, 222, 333), IntStream.zip(array1, array2, array3, (a, b, c) -> a + b + c).toList());
-        assertEquals(N.asList(222, 333), IntStream.zip(array1, array2, array3, (a, b, c) -> a + b + c).skip(1).toList());
+        assertEquals(N.toList(111, 222, 333), IntStream.zip(array1, array2, array3, (a, b, c) -> a + b + c).toList());
+        assertEquals(N.toList(222, 333), IntStream.zip(array1, array2, array3, (a, b, c) -> a + b + c).skip(1).toList());
         assertEquals(3, IntStream.zip(array1, array2, array3, (a, b, c) -> a + b + c).map(e -> e).count());
         assertEquals(2, IntStream.zip(array1, array2, array3, (a, b, c) -> a + b + c).map(e -> e).skip(1).count());
         assertArrayEquals(new int[] { 111, 222, 333 }, IntStream.zip(array1, array2, array3, (a, b, c) -> a + b + c).map(e -> e).toArray());
         assertArrayEquals(new int[] { 222, 333 }, IntStream.zip(array1, array2, array3, (a, b, c) -> a + b + c).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(111, 222, 333), IntStream.zip(array1, array2, array3, (a, b, c) -> a + b + c).map(e -> e).toList());
-        assertEquals(N.asList(222, 333), IntStream.zip(array1, array2, array3, (a, b, c) -> a + b + c).map(e -> e).skip(1).toList());
+        assertEquals(N.toList(111, 222, 333), IntStream.zip(array1, array2, array3, (a, b, c) -> a + b + c).map(e -> e).toList());
+        assertEquals(N.toList(222, 333), IntStream.zip(array1, array2, array3, (a, b, c) -> a + b + c).map(e -> e).skip(1).toList());
     }
 
     @Test
@@ -2574,8 +2574,8 @@ public class IntStream104Test extends TestBase {
                 IntStream.merge(array1, array2, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5, 6 },
                 IntStream.merge(array1, array2, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6), IntStream.merge(array1, array2, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
-        assertEquals(N.asList(2, 3, 4, 5, 6),
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6), IntStream.merge(array1, array2, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
+        assertEquals(N.toList(2, 3, 4, 5, 6),
                 IntStream.merge(array1, array2, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).skip(1).toList());
         assertEquals(6, IntStream.merge(array1, array2, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).map(e -> e).count());
         assertEquals(5, IntStream.merge(array1, array2, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).map(e -> e).skip(1).count());
@@ -2583,9 +2583,9 @@ public class IntStream104Test extends TestBase {
                 IntStream.merge(array1, array2, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).map(e -> e).toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5, 6 },
                 IntStream.merge(array1, array2, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6),
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6),
                 IntStream.merge(array1, array2, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).map(e -> e).toList());
-        assertEquals(N.asList(2, 3, 4, 5, 6),
+        assertEquals(N.toList(2, 3, 4, 5, 6),
                 IntStream.merge(array1, array2, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).map(e -> e).skip(1).toList());
     }
 
@@ -2600,9 +2600,9 @@ public class IntStream104Test extends TestBase {
                 IntStream.merge(array1, array2, array3, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5, 6, 7, 8, 9 },
                 IntStream.merge(array1, array2, array3, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6, 7, 8, 9),
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6, 7, 8, 9),
                 IntStream.merge(array1, array2, array3, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
-        assertEquals(N.asList(2, 3, 4, 5, 6, 7, 8, 9),
+        assertEquals(N.toList(2, 3, 4, 5, 6, 7, 8, 9),
                 IntStream.merge(array1, array2, array3, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).skip(1).toList());
         assertEquals(9, IntStream.merge(array1, array2, array3, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).map(e -> e).count());
         assertEquals(8,
@@ -2611,9 +2611,9 @@ public class IntStream104Test extends TestBase {
                 IntStream.merge(array1, array2, array3, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).map(e -> e).toArray());
         assertArrayEquals(new int[] { 2, 3, 4, 5, 6, 7, 8, 9 },
                 IntStream.merge(array1, array2, array3, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).map(e -> e).skip(1).toArray());
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6, 7, 8, 9),
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6, 7, 8, 9),
                 IntStream.merge(array1, array2, array3, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).map(e -> e).toList());
-        assertEquals(N.asList(2, 3, 4, 5, 6, 7, 8, 9),
+        assertEquals(N.toList(2, 3, 4, 5, 6, 7, 8, 9),
                 IntStream.merge(array1, array2, array3, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).map(e -> e).skip(1).toList());
     }
 }

@@ -484,7 +484,7 @@ public class Splitter2025Test extends TestBase {
     }
 
     @Test
-    public void testMapSplitterTrimBoolean() {
+    public void testMapSplitterightTrimBoolean() {
         Splitter.MapSplitter mapSplitter = Splitter.MapSplitter.with(",", "=").trim(true);
         Map<String, String> result = mapSplitter.split("a = 1 , b = 2");
         Map<String, String> expected = new LinkedHashMap<>();
@@ -494,7 +494,7 @@ public class Splitter2025Test extends TestBase {
     }
 
     @Test
-    public void testMapSplitterTrimResults() {
+    public void testMapSplitterightTrimResults() {
         Splitter.MapSplitter mapSplitter = Splitter.MapSplitter.with(",", "=").trimResults();
         Map<String, String> result = mapSplitter.split("a = 1 , b = 2");
         Map<String, String> expected = new LinkedHashMap<>();

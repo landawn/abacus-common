@@ -307,9 +307,9 @@ public class ByteList200Test extends TestBase {
     public void testCopyAndTrim() {
         ByteList list = new ByteList(20);
         list.addAll(new byte[] { 1, 2, 3 });
-        assertEquals(20, list.array().length);
+        assertEquals(20, list.internalArray().length);
         list.trimToSize();
-        assertEquals(3, list.array().length);
+        assertEquals(3, list.internalArray().length);
 
         ByteList copy = list.copy();
         assertNotSame(list, copy);
@@ -324,7 +324,7 @@ public class ByteList200Test extends TestBase {
 
         ByteList list2 = new ByteList(20);
         assertTrue(list2.isEmpty());
-        assertEquals(20, list2.array().length);
+        assertEquals(20, list2.internalArray().length);
 
         byte[] data = { 1, 2, 3 };
         ByteList list3 = new ByteList(data);
@@ -528,7 +528,7 @@ public class ByteList200Test extends TestBase {
         list.add((byte) 1);
         list.add((byte) 2);
 
-        byte[] internalArray = list.array();
+        byte[] internalArray = list.internalArray();
         assertEquals(10, internalArray.length);
         assertEquals((byte) 1, internalArray[0]);
         assertEquals((byte) 2, internalArray[1]);

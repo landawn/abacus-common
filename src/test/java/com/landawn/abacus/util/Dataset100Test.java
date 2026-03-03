@@ -48,12 +48,12 @@ public class Dataset100Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        columnNames = CommonUtil.asList("id", "name", "age", "salary");
+        columnNames = CommonUtil.toList("id", "name", "age", "salary");
         columnList = new ArrayList<>();
-        columnList.add(CommonUtil.asList(1, 2, 3, 4, 5));
-        columnList.add(CommonUtil.asList("John", "Jane", "Bob", "Alice", "Charlie"));
-        columnList.add(CommonUtil.asList(25, 30, 35, 28, 40));
-        columnList.add(CommonUtil.asList(50000.0, 60000.0, 70000.0, 55000.0, 80000.0));
+        columnList.add(CommonUtil.toList(1, 2, 3, 4, 5));
+        columnList.add(CommonUtil.toList("John", "Jane", "Bob", "Alice", "Charlie"));
+        columnList.add(CommonUtil.toList(25, 30, 35, 28, 40));
+        columnList.add(CommonUtil.toList(50000.0, 60000.0, 70000.0, 55000.0, 80000.0));
 
         dataset = new RowDataset(columnNames, columnList);
     }
@@ -2358,7 +2358,7 @@ public class Dataset100Test extends TestBase {
 
         Dataset result = dataset1.cartesianProduct(dataset2);
 
-        assertEquals(CommonUtil.asList("id", "name", "category", "score"), result.columnNames());
+        assertEquals(CommonUtil.toList("id", "name", "category", "score"), result.columnNames());
         assertEquals(4, result.size());
         assertEquals(4, result.columnCount());
         assertEquals(1, (Integer) result.get(0, 0));
@@ -3343,7 +3343,7 @@ public class Dataset100Test extends TestBase {
     @DisplayName("Should move single column")
     public void testMoveColumnsSingle() {
 
-        dataset.moveColumns(CommonUtil.asList("age"), 0);
+        dataset.moveColumns(CommonUtil.toList("age"), 0);
 
         assertEquals("age", dataset.columnNames().get(0));
         assertEquals("id", dataset.columnNames().get(1));
@@ -3521,7 +3521,7 @@ public class Dataset100Test extends TestBase {
     @Test
     @DisplayName("Should verify column order preservation with complex moves")
     public void testMoveColumnsComplexOrderPreservation() {
-        dataset.moveColumns(CommonUtil.asList("salary"), 0);
+        dataset.moveColumns(CommonUtil.toList("salary"), 0);
         dataset.moveColumns(Arrays.asList("name", "age"), 2);
 
         assertEquals("salary", dataset.columnNames().get(0));

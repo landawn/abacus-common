@@ -606,10 +606,10 @@ public class TypeInterface100Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test isNonQuotableCsvType()")
-    public void testIsNonQuotableCsvType() {
-        assertTrue(integerType.isNonQuotableCsvType());
-        assertFalse(stringType.isNonQuotableCsvType());
+    @DisplayName("Test isCsvQuoteRequired()")
+    public void test_isCsvQuoteRequired() {
+        assertFalse(integerType.isCsvQuoteRequired());
+        assertTrue(stringType.isCsvQuoteRequired());
     }
 
     @Test

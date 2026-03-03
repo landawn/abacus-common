@@ -1,9 +1,9 @@
 package com.landawn.abacus.type;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -42,8 +42,8 @@ public class JdkDurationType100Test extends TestBase {
     }
 
     @Test
-    public void testIsNonQuotableCsvType() {
-        assertTrue(durationType.isNonQuotableCsvType());
+    public void test_isCsvQuoteRequired() {
+        assertFalse(durationType.isCsvQuoteRequired());
     }
 
     @Test

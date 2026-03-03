@@ -467,7 +467,7 @@ public class CsvParser {
                     } else {
                         // the tricky case of an embedded quote in the middle: a,bc"d"ef,g
                         if (!strictQuotes && !sb.isEmpty() //
-                                && i > 2 //not on the beginning of the line //NOSONAR
+                                && i > 0 //not on the beginning of the line //NOSONAR
                                 && nextLine.charAt(i - 1) != separator //not at the beginning of an escape sequence
                                 && i < len - 1 && nextLine.charAt(i + 1) != separator //not at the end of an escape sequence
                         ) {

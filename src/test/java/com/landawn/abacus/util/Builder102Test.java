@@ -667,7 +667,7 @@ public class Builder102Test extends TestBase {
     @Test
     public void testMultimapBuilderRemoveAll() {
         ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap();
-        multimap.putValues("key", CommonUtil.asList(1, 2, 3));
+        multimap.putValues("key", CommonUtil.toList(1, 2, 3));
 
         Builder.MultimapBuilder<String, Integer, List<Integer>, ListMultimap<String, Integer>> builder = Builder.of(multimap);
         builder.removeAll("key");
@@ -700,17 +700,17 @@ public class Builder102Test extends TestBase {
 
     @Test
     public void testDatasetBuilderAddColumn() {
-        Dataset ds = new RowDataset(CommonUtil.asList("col1"), CommonUtil.asList(Arrays.asList("val1")));
+        Dataset ds = new RowDataset(CommonUtil.toList("col1"), CommonUtil.toList(Arrays.asList("val1")));
         Builder.DatasetBuilder builder = Builder.of(ds);
 
-        builder.addColumn("col2", CommonUtil.asList("val2"));
+        builder.addColumn("col2", CommonUtil.toList("val2"));
         Assertions.assertEquals(2, ds.columnCount());
         Assertions.assertTrue(ds.columnNames().contains("col2"));
     }
 
     @Test
     public void testDatasetBuilderRemoveColumn() {
-        Dataset ds = new RowDataset(CommonUtil.asList("col1", "col2"), CommonUtil.asList(CommonUtil.asList("val1"), CommonUtil.asList("val2")));
+        Dataset ds = new RowDataset(CommonUtil.toList("col1", "col2"), CommonUtil.toList(CommonUtil.toList("val1"), CommonUtil.toList("val2")));
         Builder.DatasetBuilder builder = Builder.of(ds);
 
         builder.removeColumn("col2");

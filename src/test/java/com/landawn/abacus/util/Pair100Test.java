@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.AbstractMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -66,7 +67,7 @@ public class Pair100Test extends TestBase {
             }
         };
 
-        Pair<String, Integer> p = Pair.create(entry);
+        Pair<String, Integer> p = Pair.from(entry);
         assertEquals("key", p.left());
         assertEquals(100, p.right());
     }
@@ -386,6 +387,23 @@ public class Pair100Test extends TestBase {
         assertEquals(nullLeft1, nullLeft2);
         assertEquals(nullRight1, nullRight2);
         assertNotEquals(nullLeft1, nullRight1);
+    }
+
+    @Test
+    public void testMapEntryEqualsCompatibility() {
+        Pair<String, Integer> pair = Pair.of("k", 1);
+        Map.Entry<String, Integer> entry = new AbstractMap.SimpleEntry<>("k", 1);
+
+        assertTrue(pair.equals(entry));
+        assertTrue(entry.equals(pair));
+    }
+
+    @Test
+    public void testMapEntryHashCodeCompatibility() {
+        Pair<String, Integer> pair = Pair.of("k", 1);
+        Map.Entry<String, Integer> entry = new AbstractMap.SimpleEntry<>("k", 1);
+
+        assertEquals(entry.hashCode(), pair.hashCode());
     }
 
     @Test

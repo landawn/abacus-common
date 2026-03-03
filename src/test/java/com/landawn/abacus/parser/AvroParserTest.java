@@ -49,7 +49,7 @@ public class AvroParserTest {
 
         User user2 = new User("Ben", 7, "red");
         User user3 = User.newBuilder().setName("Charlie").setFavoriteColor("blue").setFavoriteNumber(null).build();
-        str = avroParser.serialize(N.asList(user1, user2, user3));
+        str = avroParser.serialize(N.toList(user1, user2, user3));
 
         N.println(str);
 
@@ -78,7 +78,7 @@ public class AvroParserTest {
 
         User user2 = new User("Ben", 7, "red");
         User user3 = User.newBuilder().setName("Charlie").setFavoriteColor("blue").setFavoriteNumber(null).build();
-        avroParser.serialize(N.asList(user1, user2, user3), file);
+        avroParser.serialize(N.toList(user1, user2, user3), file);
 
         N.println(IOUtil.readAllToString(file));
 

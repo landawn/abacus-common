@@ -785,7 +785,7 @@ public final class ClassUtil {
     /**
      * Supports primitive types: boolean, char, byte, short, int, long, float, double. And array type with format {@code java.lang.String[]}
      *
-     * @param <T> the type parameter
+     * @param <T> the class type represented by the returned {@code Class} object
      * @param clsName the fully qualified class name
      * @param cacheResult {@code true} to cache the result, {@code false} otherwise
      * @return the Class object for the specified class name

@@ -48,7 +48,7 @@ public class PropInfo100Test extends TestBase {
         Assertions.assertNotNull(idProp.field);
         Assertions.assertNotNull(idProp.getMethod);
         Assertions.assertNotNull(idProp.setMethod);
-        Assertions.assertTrue(idProp.isMarkedToId);
+        Assertions.assertTrue(idProp.isMarkedAsId);
         Assertions.assertFalse(idProp.isTransient);
     }
 

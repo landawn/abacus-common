@@ -14,6 +14,9 @@
 
 package com.landawn.abacus.type;
 
+/**
+ * Type handler for {@link StringBuilder} objects, providing conversion between StringBuilder and its string representation.
+ */
 public class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
 
     /**

@@ -212,7 +212,7 @@ import com.landawn.abacus.util.stream.LongStream;
  * <ul>
  *   <li><b>Aggregation:</b> Sum, min, max operations via stream API</li>
  *   <li><b>Central Tendency:</b> Median calculation with efficient sorting</li>
- *   <li><b>Occurrence Counting:</b> {@code occurrencesOf()} for frequency analysis</li>
+ *   <li><b>Occurrence Counting:</b> {@code frequency()} for frequency analysis</li>
  *   <li><b>Duplicate Detection:</b> {@code hasDuplicates()}, {@code removeDuplicates()}</li>
  * </ul>
  *
@@ -260,7 +260,7 @@ import com.landawn.abacus.util.stream.LongStream;
  *   <li><b>{@link LongStream}:</b> Functional processing of long sequences</li>
  * </ul>
  *
- * <p><b>Example: Timestamp Analysis</b>
+ * <p><b>Usage Examples: Timestamp Analysis</b>
  * <pre>{@code
  * // Collect and analyze system timestamps
  * LongList systemEvents = new LongList(1000);
@@ -585,7 +585,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     @Beta
     @Deprecated
     @Override
-    public long[] array() {
+    public long[] internalArray() {
         return elementData;
     }
 
@@ -688,7 +688,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
         ensureCapacity(size + numNew);
 
-        N.copy(c.array(), 0, elementData, size, numNew);
+        N.copy(c.internalArray(), 0, elementData, size, numNew);
 
         size += numNew;
 
@@ -727,7 +727,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
             N.copy(elementData, index, elementData, index + numNew, numMoved);
         }
 
-        N.copy(c.array(), 0, elementData, index, numNew);
+        N.copy(c.internalArray(), 0, elementData, index, numNew);
 
         size += numNew;
 
@@ -1806,7 +1806,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param valueToFind the value to count occurrences of
      * @return the number of times the specified value appears in this list
      */
-    public int occurrencesOf(final long valueToFind) {
+    public int frequency(final long valueToFind) {
         if (size == 0) {
             return 0;
         }

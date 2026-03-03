@@ -91,13 +91,6 @@ public class ImmutableMap100Test extends TestBase {
     }
 
     @Test
-    public void testOf_TenEntries() {
-        ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5, "f", 6, "g", 7, "h", 8, "i", 9, "j", 10);
-        Assertions.assertEquals(10, map.size());
-        Assertions.assertEquals(10, map.get("j"));
-    }
-
-    @Test
     public void testCopyOf() {
         Map<String, Integer> mutable = new HashMap<>();
         mutable.put("one", 1);

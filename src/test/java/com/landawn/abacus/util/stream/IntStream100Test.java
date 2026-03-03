@@ -839,10 +839,10 @@ public class IntStream100Test extends TestBase {
         int[] result = IntStream.concat(a, b).toArray();
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5, 6 }, result);
 
-        result = IntStream.concat(N.asList(a, b)).toArray();
+        result = IntStream.concat(N.toList(a, b)).toArray();
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5, 6 }, result);
 
-        result = IntStream.concatIterators(N.asList(IntIterator.of(a), IntIterator.of(b))).toArray();
+        result = IntStream.concatIterators(N.toList(IntIterator.of(a), IntIterator.of(b))).toArray();
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5, 6 }, result);
     }
 
@@ -879,7 +879,7 @@ public class IntStream100Test extends TestBase {
             int[] a = { 1, 2, 3 };
             int[] b = { 4, 5, 6 };
             int[] c = { 7, 8, 9 };
-            int[] result = IntStream.zip(N.asList(IntStream.of(a), IntStream.of(b), IntStream.of(c)), it -> it[0] + it[1] + it[2]).toArray();
+            int[] result = IntStream.zip(N.toList(IntStream.of(a), IntStream.of(b), IntStream.of(c)), it -> it[0] + it[1] + it[2]).toArray();
             assertArrayEquals(new int[] { 12, 15, 18 }, result);
         }
     }
@@ -903,7 +903,7 @@ public class IntStream100Test extends TestBase {
         {
             int[] a = { 1, 2, 3 };
             int[] b = { 4, 5, 6 };
-            int[] result = IntStream.merge(N.asList(IntStream.of(a), IntStream.of(b)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+            int[] result = IntStream.merge(N.toList(IntStream.of(a), IntStream.of(b)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
                     .toArray();
             assertArrayEquals(new int[] { 1, 2, 3, 4, 5, 6 }, result);
         }
@@ -913,7 +913,7 @@ public class IntStream100Test extends TestBase {
             int[] b = { 4, 5, 6 };
             int[] c = { 7, 8, 9 };
             int[] result = IntStream
-                    .merge(N.asList(IntStream.of(a), IntStream.of(b), IntStream.of(c)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+                    .merge(N.toList(IntStream.of(a), IntStream.of(b), IntStream.of(c)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
                     .toArray();
             assertArrayEquals(new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, result);
         }
@@ -921,15 +921,15 @@ public class IntStream100Test extends TestBase {
             int[] a = { 1, 2, 3 };
             int[] b = { 4, 5, 6 };
             int[] c = { 7, 8, 9 };
-            int[] result = IntStream.merge(N.asList(IntStream.of(a)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray();
+            int[] result = IntStream.merge(N.toList(IntStream.of(a)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray();
             assertArrayEquals(new int[] { 1, 2, 3 }, result);
 
-            result = IntStream.merge(N.asList(IntStream.of(a), IntStream.of(b)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+            result = IntStream.merge(N.toList(IntStream.of(a), IntStream.of(b)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
                     .toArray();
             assertArrayEquals(new int[] { 1, 2, 3, 4, 5, 6 }, result);
 
             result = IntStream
-                    .merge(N.asList(IntStream.of(a), IntStream.of(b), IntStream.of(c)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+                    .merge(N.toList(IntStream.of(a), IntStream.of(b), IntStream.of(c)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
                     .toArray();
             assertArrayEquals(new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, result);
         }

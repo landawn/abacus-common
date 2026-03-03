@@ -31,11 +31,11 @@ public class AddrUtilTest extends AbstractTest {
             N.println(str);
         }
 
-        for (InetSocketAddress add : AddrUtil.getAddressList(N.asList("localhost:11", "localhost:22"))) {
+        for (InetSocketAddress add : AddrUtil.getAddressList(N.toList("localhost:11", "localhost:22"))) {
             N.println(add.toString());
         }
 
-        N.println(AddrUtil.getAddressListFromURL(N.asList(new URL("https://www.google.com:443/"))));
+        N.println(AddrUtil.getAddressListFromURL(N.toList(new URL("https://www.google.com:443/"))));
 
         try {
             AddrUtil.getServerList(Strings.EMPTY);

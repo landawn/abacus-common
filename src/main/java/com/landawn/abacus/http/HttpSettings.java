@@ -38,7 +38,7 @@ import com.landawn.abacus.util.Strings;
  *     .header("Authorization", "Bearer token123")
  *     .header("Accept", "application/json")
  *     .setContentType("application/json")
- *     .setUseCaches(false);
+ *     .useCaches(false);
  *
  * // Use with HttpClient
  * HttpClient client = HttpClient.create("http://localhost:18080",

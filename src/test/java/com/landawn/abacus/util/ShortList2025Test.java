@@ -196,7 +196,7 @@ public class ShortList2025Test extends TestBase {
     @Test
     public void testArray() {
         ShortList list = ShortList.of((short) 1, (short) 2, (short) 3);
-        short[] arr = list.array();
+        short[] arr = list.internalArray();
         assertEquals((short) 1, arr[0]);
         assertEquals((short) 2, arr[1]);
         assertEquals((short) 3, arr[2]);
@@ -702,9 +702,9 @@ public class ShortList2025Test extends TestBase {
     @Test
     public void testOccurrencesOf() {
         ShortList list = ShortList.of((short) 1, (short) 2, (short) 3, (short) 2, (short) 2);
-        assertEquals(3, list.occurrencesOf((short) 2));
-        assertEquals(1, list.occurrencesOf((short) 1));
-        assertEquals(0, list.occurrencesOf((short) 100));
+        assertEquals(3, list.frequency((short) 2));
+        assertEquals(1, list.frequency((short) 1));
+        assertEquals(0, list.frequency((short) 100));
     }
 
     @Test

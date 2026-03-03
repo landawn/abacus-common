@@ -1555,7 +1555,7 @@ public final class EscapeUtil {
          * @param index the index of the current character in the sequence
          * @param out the Writer to write the escaped output to
          * @return the number of codepoints consumed
-         * @throws IOException Signals that an I/O exception has occurred.
+         * @throws IOException if an I/O error occurs while writing to the output
          */
         @Override
         public int translate(final CharSequence input, final int index, final Writer out) throws IOException {
@@ -1598,7 +1598,7 @@ public final class EscapeUtil {
          * @param index the index of the current character in the sequence
          * @param out the Writer to write the unescaped output to
          * @return the number of codepoints consumed
-         * @throws IOException Signals that an I/O exception has occurred.
+         * @throws IOException if an I/O error occurs while writing to the output
          */
         @Override
         public int translate(final CharSequence input, final int index, final Writer out) throws IOException {

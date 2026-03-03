@@ -51,7 +51,7 @@ public class Pair2025Test extends TestBase {
         Map<String, Integer> map = new HashMap<>();
         map.put("age", 25);
         Map.Entry<String, Integer> entry = map.entrySet().iterator().next();
-        Pair<String, Integer> pair = Pair.create(entry);
+        Pair<String, Integer> pair = Pair.from(entry);
         assertEquals("age", pair.left());
         assertEquals(25, pair.right());
     }

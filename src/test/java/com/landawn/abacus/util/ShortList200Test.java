@@ -30,7 +30,7 @@ public class ShortList200Test extends TestBase {
 
         ShortList list2 = new ShortList(20);
         assertTrue(list2.isEmpty());
-        assertEquals(20, list2.array().length);
+        assertEquals(20, list2.internalArray().length);
 
         short[] data = { 1, 2, 3 };
         ShortList list3 = new ShortList(data);
@@ -167,7 +167,7 @@ public class ShortList200Test extends TestBase {
         assertEquals(OptionalShort.of((short) 2), list.min(1, 4));
         assertEquals(OptionalShort.of((short) 7), list.max(1, 4));
         assertEquals(OptionalShort.of((short) 5), list.median(1, 4));
-        assertEquals(2, list.occurrencesOf((short) 2));
+        assertEquals(2, list.frequency((short) 2));
     }
 
     @Test
@@ -286,9 +286,9 @@ public class ShortList200Test extends TestBase {
     public void testCopySplitTrim() {
         ShortList listWithCap = new ShortList(10);
         listWithCap.addAll(new short[] { 1, 2, 3 });
-        assertEquals(10, listWithCap.array().length);
+        assertEquals(10, listWithCap.internalArray().length);
         listWithCap.trimToSize();
-        assertEquals(3, listWithCap.array().length);
+        assertEquals(3, listWithCap.internalArray().length);
 
         ShortList copy = listWithCap.copy(0, 3, 2);
         assertArrayEquals(new short[] { 1, 3 }, copy.toArray());

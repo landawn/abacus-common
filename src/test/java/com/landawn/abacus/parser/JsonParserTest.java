@@ -212,7 +212,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
         N.println(json);
         json = JsonMappers.toJson(N.asMap("key1", obj, "key2", "ddd"), serializationConfig);
         N.println(json);
-        json = JsonMappers.toJson(N.asList("key1", obj, "key2", "ddd"), serializationConfig);
+        json = JsonMappers.toJson(N.toList("key1", obj, "key2", "ddd"), serializationConfig);
         N.println(json);
 
         try {
@@ -228,13 +228,13 @@ public class JsonParserTest extends AbstractJsonParserTest {
         N.println(json);
         json = N.toJson(N.asMap("key1", obj, "key2", "ddd"), jsc);
         N.println(json);
-        json = N.toJson(N.asList("key1", obj, "key2", "ddd"), jsc);
+        json = N.toJson(N.toList("key1", obj, "key2", "ddd"), jsc);
         N.println(json);
     }
 
     @Test
     public void test_selfReference() {
-        final List<Object> list = N.asList("a", "b");
+        final List<Object> list = N.toList("a", "b");
         list.add(list);
 
         final Map<String, Object> map = N.asMap("a", "va", "b", 123);
@@ -355,7 +355,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
         final TypeBean xbean = new TypeBean();
 
         xbean.setStringType(bigValue);
-        xbean.setStringListType(N.asList(bigValue, bigValue, bigValue));
+        xbean.setStringListType(N.toList(bigValue, bigValue, bigValue));
         xbean.setStringArrayType(N.asArray(bigValue, bigValue));
 
         {
@@ -511,11 +511,11 @@ public class JsonParserTest extends AbstractJsonParserTest {
     public void test_ignoreProp() {
         final Account account = createAccount(Account.class);
 
-        final String json = N.toJson(account, JSC.create().setIgnoredPropNames(N.asSet("firstName")));
+        final String json = N.toJson(account, JSC.create().setIgnoredPropNames(N.toSet("firstName")));
 
         N.println(json);
 
-        final Account account2 = N.fromJson(json, JDC.create().setIgnoredPropNames(N.asSet("lastName")), Account.class);
+        final Account account2 = N.fromJson(json, JDC.create().setIgnoredPropNames(N.toSet("lastName")), Account.class);
 
         N.println(account2);
     }
@@ -762,7 +762,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
                 .gui(gui)
                 .json(N.toJson(N.asMap("key1", 2, "key2", Dates.currentCalendar(), "key3", Dates.currentDate()),
                         JSC.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP)))
-                .json2(N.asList(N.asMap("aa", currentDate)))
+                .json2(N.toList(N.asMap("aa", currentDate)))
                 .build();
 
         String json = N.toJson(bean);
@@ -787,7 +787,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
                 .id(1001)
                 .gui(gui)
                 .json(N.toJson(N.asMap("key1", 2)).replace(": 2}", ": 2  }  ").replace("[{\"", " [  {   \"").replace(", ", ",    "))
-                .json2(N.asList(N.asMap("aa", currentDate)))
+                .json2(N.toList(N.asMap("aa", currentDate)))
                 .build();
 
         json = N.toJson(bean);
@@ -1206,7 +1206,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
                 .ignoreNullOrEmpty(true)
                 .setElementType(String.class)
                 .setElementType(Type.of("List<String>"))
-                .setIgnoredPropNames(N.asSet("abc", "123"));
+                .setIgnoredPropNames(N.toSet("abc", "123"));
         final JsonDeserializationConfig copy = config.copy();
         assertEquals(config, copy);
     }
@@ -1327,8 +1327,8 @@ public class JsonParserTest extends AbstractJsonParserTest {
         N.println(N.fromJson("1.234567899E8", BigDecimal.class));
 
         final B<String> b = new B<>();
-        b.setList(N.asList("a", "b"));
-        b.setArrayList(N.asArray(N.asList("c", "d")));
+        b.setList(N.toList("a", "b"));
+        b.setArrayList(N.asArray(N.toList("c", "d")));
         json = gson.toJson(b);
         N.println(json);
 
@@ -1625,8 +1625,8 @@ public class JsonParserTest extends AbstractJsonParserTest {
         try {
             while (sb.length() < cbuf.length - 128) {
                 sb.append(Strings.uuid());
-                sb.append(WD._QUOTATION_D);
-                sb.append(WD._QUOTATION_S);
+                sb.append(WD._DOUBLE_QUOTE);
+                sb.append(WD._SINGLE_QUOTE);
             }
 
             bigStr = sb.toString();
@@ -1645,7 +1645,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
         array2 = jsonParser.deserialize(IOUtil.stringToReader(json), String[].class);
         assertTrue(N.equals(array, array2));
 
-        final JsonSerializationConfig jsc = JSC.create().setStringQuotation(WD._QUOTATION_D);
+        final JsonSerializationConfig jsc = JSC.create().setStringQuotation(WD._DOUBLE_QUOTE);
         json = jsonParser.serialize(array, jsc);
 
         array2 = jsonParser.deserialize(json, String[].class);
@@ -1740,11 +1740,11 @@ public class JsonParserTest extends AbstractJsonParserTest {
         final Account account = createAccount(Account.class);
 
         final GenericEntity genericBean = new GenericEntity();
-        genericBean.setBooleanList(N.asList(true, false));
-        genericBean.setCharList(N.asList('a', 'b', '好'));
-        genericBean.setIntList(N.asList(1, 2, 3));
-        genericBean.setStringList(N.asList("abc", "123"));
-        genericBean.setAccountList(N.asList(account));
+        genericBean.setBooleanList(N.toList(true, false));
+        genericBean.setCharList(N.toList('a', 'b', '好'));
+        genericBean.setIntList(N.toList(1, 2, 3));
+        genericBean.setStringList(N.toList("abc", "123"));
+        genericBean.setAccountList(N.toList(account));
         final Map<String, Account> map = N.asMap(account.getFirstName(), account);
         genericBean.setAccountMap(map);
 
@@ -1770,7 +1770,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
         final String[] array2 = jsonParser.deserialize(str, String[].class);
         assertTrue(N.equals(array, array2));
 
-        final List<String> list = N.asList(nullElement);
+        final List<String> list = N.toList(nullElement);
         str = jsonParser.serialize(list);
         N.println(str);
 
@@ -1821,7 +1821,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
         final Object[] array2 = jsonParser.deserialize(str, JDC.create().setElementType(Account.class), Object[].class);
         assertTrue(N.equals(array, array2));
 
-        final List<?> list = N.asList(account, nullElement);
+        final List<?> list = N.toList(account, nullElement);
         str = jsonParser.serialize(list);
         N.println(str);
 
@@ -1858,7 +1858,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
         map.put("lastName", null);
         map.put("account", account);
 
-        final Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Map.class, N.asSet("id"));
+        final Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Map.class, N.toSet("id"));
 
         JsonSerializationConfig jsc = JSC.of(Exclusion.DEFAULT, ignoredPropNames).prettyFormat(true);
         str = jsonParser.serialize(map, jsc);
@@ -1867,7 +1867,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
         final Map<String, Object> map2 = jsonParser.deserialize(str, JDC.create().setElementType(Account.class), Map.class);
         N.println(map2);
 
-        str = jsonParser.serialize(N.asList(map), jsc);
+        str = jsonParser.serialize(N.toList(map), jsc);
         N.println(str);
 
         final JsonDeserializationConfig xdc = JDC.create().setElementType(Map.class);
@@ -1875,7 +1875,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
         N.println(list);
 
         final Map<String, Object> map3 = new HashMap<>();
-        map3.put("accountList", N.asList(account, null, account));
+        map3.put("accountList", N.toList(account, null, account));
         map3.put("accountArray", N.asArray(account, null, account));
 
         jsc = JSC.of(Exclusion.DEFAULT, ignoredPropNames).prettyFormat(true);
@@ -1902,14 +1902,14 @@ public class JsonParserTest extends AbstractJsonParserTest {
 
         N.println(jsc1);
 
-        assertTrue(N.asSet(jsc1).contains(jsc2));
+        assertTrue(N.toSet(jsc1).contains(jsc2));
 
         final JsonDeserializationConfig jdc1 = JDC.create();
         final JsonDeserializationConfig jdc2 = JDC.create();
 
         N.println(jdc1);
 
-        assertTrue(N.asSet(jdc1).contains(jdc2));
+        assertTrue(N.toSet(jdc1).contains(jdc2));
     }
 
     @Test
@@ -1919,14 +1919,14 @@ public class JsonParserTest extends AbstractJsonParserTest {
 
         N.println(jsc1);
 
-        assertTrue(N.asSet(jsc1).contains(jsc2));
+        assertTrue(N.toSet(jsc1).contains(jsc2));
 
         final XmlDeserializationConfig jdc1 = new XmlDeserializationConfig();
         final XmlDeserializationConfig jdc2 = new XmlDeserializationConfig();
 
         N.println(jdc1);
 
-        assertTrue(N.asSet(jdc1).contains(jdc2));
+        assertTrue(N.toSet(jdc1).contains(jdc2));
     }
 
     @Test
@@ -1976,7 +1976,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
         String str = jsonParser.serialize(account, config);
         N.println(str);
 
-        str = jsonParser.serialize(N.asList("abc", "123"), config);
+        str = jsonParser.serialize(N.toList("abc", "123"), config);
         N.println(str);
         assertTrue(N.equals("abc, 123", str));
 
@@ -2096,18 +2096,18 @@ public class JsonParserTest extends AbstractJsonParserTest {
         assertTrue(N.equals(N.asArray("a", "b", "c"), jsonParser.parse(str, String[].class)));
         assertTrue(N.equals(N.asArray("a", "b", "c"), jsonParser.deserialize(str, String[].class)));
 
-        assertTrue(N.equals(N.asList('a', 'b', 'c'), jsonParser.parse(str, JDC.create().setElementType(char.class), List.class)));
-        assertTrue(N.equals(N.asList('a', 'b', 'c'), jsonParser.deserialize(str, JDC.create().setElementType(char.class), List.class)));
+        assertTrue(N.equals(N.toList('a', 'b', 'c'), jsonParser.parse(str, JDC.create().setElementType(char.class), List.class)));
+        assertTrue(N.equals(N.toList('a', 'b', 'c'), jsonParser.deserialize(str, JDC.create().setElementType(char.class), List.class)));
 
         str = jsonParser.serialize(N.asArray("a", "b", "c"));
         N.println(str);
 
-        assertTrue(N.equals(N.asList("a", "b", "c"), jsonParser.parse(str, List.class)));
-        assertTrue(N.equals(N.asList("a", "b", "c"), jsonParser.deserialize(str, List.class)));
+        assertTrue(N.equals(N.toList("a", "b", "c"), jsonParser.parse(str, List.class)));
+        assertTrue(N.equals(N.toList("a", "b", "c"), jsonParser.deserialize(str, List.class)));
         final List<String> list = new ArrayList<>();
         jsonParser.parse(str, list);
 
-        assertTrue(N.equals(N.asList("a", "b", "c"), list));
+        assertTrue(N.equals(N.toList("a", "b", "c"), list));
 
         final Map<String, Object> map = N.asMap("abc", 123);
 
@@ -2137,7 +2137,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
         final String[] array2 = jsonParser.parse(str, String[].class);
         assertTrue(N.equals(array, array2));
 
-        final List<String> list = N.asList("abc", "123");
+        final List<String> list = N.toList("abc", "123");
         str = jsonParser.serialize(list, jsc);
         N.println(str);
 
@@ -2161,7 +2161,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
 
         jsonParser.parse(str, Map.class);
 
-        final Dataset dataset = N.newDataset(N.asList(account));
+        final Dataset dataset = N.newDataset(N.toList(account));
         str = jsonParser.serialize(dataset, jsc);
         N.println(str);
 
@@ -2186,7 +2186,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
         final String[] array2 = jsonParser.parse(str, String[].class);
         assertTrue(N.equals(array, array2));
 
-        final List<String> list = N.asList("abc", "123");
+        final List<String> list = N.toList("abc", "123");
         str = jsonParser.serialize(list, jsc);
         N.println(str);
 
@@ -2210,7 +2210,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
 
         jsonParser.parse(str, Map.class);
 
-        final Dataset dataset = N.newDataset(N.asList(account));
+        final Dataset dataset = N.newDataset(N.toList(account));
         str = jsonParser.serialize(dataset, jsc);
         N.println(str);
 
@@ -2235,7 +2235,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
         final String[] array2 = jsonParser.parse(str, String[].class);
         assertTrue(N.equals(array, array2));
 
-        final List<String> list = N.asList("abc", "123");
+        final List<String> list = N.toList("abc", "123");
         str = jsonParser.serialize(list, jsc);
         N.println(str);
 
@@ -2259,7 +2259,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
 
         jsonParser.parse(str, Map.class);
 
-        final Dataset dataset = N.newDataset(N.asList(account));
+        final Dataset dataset = N.newDataset(N.toList(account));
         str = jsonParser.serialize(dataset, jsc);
         N.println(str);
 
@@ -2404,7 +2404,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
     public void testSerialize_2() throws Exception {
         final XBean xBean = createXBean();
 
-        final Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(XBean.class, N.asSet("typeBoolean", "typeShort", "typeLong"));
+        final Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(XBean.class, N.toSet("typeBoolean", "typeShort", "typeLong"));
         final JsonSerializationConfig sc = JSC.create();
         sc.setIgnoredPropNames(ignoredPropNames);
 
@@ -2427,7 +2427,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
     public void testSerialize_3() throws Exception {
         final XBean xBean = createXBean();
 
-        final Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(XBean.class, N.asSet("typeBoolean", "typeShort", "typeLong"));
+        final Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(XBean.class, N.toSet("typeBoolean", "typeShort", "typeLong"));
         final JsonSerializationConfig sc = JSC.create();
         sc.setIgnoredPropNames(ignoredPropNames);
         sc.setExclusion(Exclusion.NONE);
@@ -2451,7 +2451,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
     public void testSerialize_ignorePropName() throws Exception {
         final Account account = createAccountWithContact(Account.class);
 
-        final Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Account.class, N.asSet("firstName", "contact"));
+        final Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Account.class, N.toSet("firstName", "contact"));
         final JsonSerializationConfig sc = JSC.create();
         sc.setIgnoredPropNames(ignoredPropNames);
 
@@ -2481,7 +2481,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
         Account account2 = jsonParser.deserialize(json, Account.class);
         N.println(account2);
 
-        final Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Account.class, N.asSet("unknownProperty", "contact"));
+        final Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Account.class, N.toSet("unknownProperty", "contact"));
         JsonDeserializationConfig ds = JDC.create().ignoreUnmatchedProperty(false).setIgnoredPropNames(ignoredPropNames);
         account2 = jsonParser.deserialize(json, Account.class);
         N.println(account2);
@@ -2511,7 +2511,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
         Account account2 = jsonParser.deserialize(json, Account.class);
         N.println(account2);
 
-        final Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Account.class, N.asSet("unknownProperty", "contact"));
+        final Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Account.class, N.toSet("unknownProperty", "contact"));
         JsonDeserializationConfig ds = JDC.create().ignoreUnmatchedProperty(false).setIgnoredPropNames(ignoredPropNames);
         account2 = jsonParser.deserialize(json, Account.class);
         N.println(account2);
@@ -2533,7 +2533,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
     public void testSerialize_ignorePropName_2() throws Exception {
         final Account account = createAccountWithContact(Account.class);
 
-        final Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Map.class, N.asSet("firstName", "contact"));
+        final Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Map.class, N.toSet("firstName", "contact"));
         final JsonSerializationConfig sc = JSC.create();
         sc.setIgnoredPropNames(ignoredPropNames);
 
@@ -2556,7 +2556,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
         final String json = "{gui_1:\"a59341120b70449c9ef003af96c61b79\", emailAddress:\"f89fd851ce774443b244468cc056762b@earth.com\", firstName:\"firstName\", middleName:\"MN\", lastName:\"lastName\", birthDate:1413839121008, lastUpdateTime:1413839121008, createdTime:1413839121008, contact_1:{address:\"ca, US\", city:\"sunnyvale\", state:\"CA\", country:\"U.S.\"}}";
         N.println(json);
 
-        Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Account.class, N.asSet("firstName", "contact"));
+        Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Account.class, N.toSet("firstName", "contact"));
         final JsonDeserializationConfig ds = JDC.create();
         ds.setIgnoredPropNames(ignoredPropNames);
         Account account2 = jsonParser.deserialize(json, ds, Account.class);
@@ -2572,7 +2572,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
 
         }
 
-        ignoredPropNames = N.asMap(Account.class, N.asSet("gui_1", "contact_1"));
+        ignoredPropNames = N.asMap(Account.class, N.toSet("gui_1", "contact_1"));
         account2 = jsonParser.deserialize(json, JDC.create().ignoreUnmatchedProperty(false).setIgnoredPropNames(ignoredPropNames), Account.class);
 
         assertNotNull(account2.getFirstName());

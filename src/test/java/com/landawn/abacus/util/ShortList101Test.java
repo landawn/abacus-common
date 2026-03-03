@@ -458,8 +458,8 @@ public class ShortList101Test extends TestBase {
         list.add((short) 1);
         list.add((short) 2);
 
-        short[] array1 = list.array();
-        short[] array2 = list.array();
+        short[] array1 = list.internalArray();
+        short[] array2 = list.internalArray();
 
         assertSame(array1, array2);
 
@@ -514,7 +514,7 @@ public class ShortList101Test extends TestBase {
         assertFalse(list.contains((short) 0));
         assertEquals(-1, list.indexOf((short) 0));
         assertEquals(-1, list.lastIndexOf((short) 0));
-        assertEquals(0, list.occurrencesOf((short) 0));
+        assertEquals(0, list.frequency((short) 0));
 
         assertFalse(list.min().isPresent());
         assertFalse(list.max().isPresent());

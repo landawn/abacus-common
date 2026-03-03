@@ -396,8 +396,8 @@ public class Fn200Test extends TestBase {
     }
 
     @Test
-    public void greaterEqual() {
-        assertThat(Fn.greaterEqual(1).test(1)).isTrue();
+    public void greaterThanOrEqual() {
+        assertThat(Fn.greaterThanOrEqual(1).test(1)).isTrue();
     }
 
     @Test
@@ -406,8 +406,8 @@ public class Fn200Test extends TestBase {
     }
 
     @Test
-    public void lessEqual() {
-        assertThat(Fn.lessEqual(1).test(1)).isTrue();
+    public void lessThanOrEqual() {
+        assertThat(Fn.lessThanOrEqual(1).test(1)).isTrue();
     }
 
     @Test
@@ -486,8 +486,8 @@ public class Fn200Test extends TestBase {
     }
 
     @Test
-    public void greaterEqualBiPredicate() {
-        assertThat(Fn.<Integer> greaterEqual().test(1, 1)).isTrue();
+    public void greaterThanOrEqualBiPredicate() {
+        assertThat(Fn.<Integer> greaterThanOrEqual().test(1, 1)).isTrue();
     }
 
     @Test
@@ -496,8 +496,8 @@ public class Fn200Test extends TestBase {
     }
 
     @Test
-    public void lessEqualBiPredicate() {
-        assertThat(Fn.<Integer> lessEqual().test(1, 1)).isTrue();
+    public void lessThanOrEqualBiPredicate() {
+        assertThat(Fn.<Integer> lessThanOrEqual().test(1, 1)).isTrue();
     }
 
     @Test

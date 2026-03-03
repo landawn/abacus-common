@@ -84,8 +84,8 @@ import com.landawn.abacus.util.stream.Stream;
  * flags.set(1, true);   // Modify existing value
  *
  * // Boolean-specific operations
- * int trueCount = flags.occurrencesOf(true);   // Count true values
- * int falseCount = flags.occurrencesOf(false);   // Count false values
+ * int trueCount = flags.frequency(true);   // Count true values
+ * int falseCount = flags.frequency(false);   // Count false values
  * boolean hasTrue = flags.contains(true);   // Check for true values
  *
  * // Set operations for boolean logic
@@ -124,7 +124,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Boolean-Specific Operations:</b>
  * <ul>
- *   <li><b>Value Counting:</b> {@code occurrencesOf(boolean)} for true/false frequency</li>
+ *   <li><b>Value Counting:</b> {@code frequency(boolean)} for true/false frequency</li>
  *   <li><b>Value Replacement:</b> {@code replaceAll(boolean, boolean)} for bulk updates</li>
  *   <li><b>Logical Operations:</b> Set operations simulate boolean logic on collections</li>
  *   <li><b>Filtering:</b> {@code removeIf(BooleanPredicate)} for conditional removal</li>
@@ -224,7 +224,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>Pre-size lists with known capacity using constructor or {@code ensureCapacity()}</li>
  *   <li>Use bulk operations ({@code addAll}, {@code removeAll}) instead of loops</li>
  *   <li>Prefer {@code contains()} over {@code indexOf() >= 0} for existence checks</li>
- *   <li>Use {@code occurrencesOf()} instead of manual counting loops</li>
+ *   <li>Use {@code frequency()} instead of manual counting loops</li>
  * </ul>
  *
  * <p><b>Common Patterns:</b>
@@ -243,7 +243,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>{@link java.util.List}:</b> Standard collection interface</li>
  * </ul>
  *
- * <p><b>Example: Boolean Logic Operations</b>
+ * <p><b>Usage Examples: Boolean Logic Operations</b>
  * <pre>{@code
  * // Simulate logical operations on boolean vectors
  * BooleanList a = BooleanList.of(true, false, true, false);
@@ -466,7 +466,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     @Beta
     @Deprecated
     @Override
-    public boolean[] array() {
+    public boolean[] internalArray() {
         return elementData;
     }
 
@@ -565,7 +565,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
         ensureCapacity(size + numNew);
 
-        N.copy(c.array(), 0, elementData, size, numNew);
+        N.copy(c.internalArray(), 0, elementData, size, numNew);
 
         size += numNew;
 
@@ -604,7 +604,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
             N.copy(elementData, index, elementData, index + numNew, numMoved);
         }
 
-        N.copy(c.array(), 0, elementData, index, numNew);
+        N.copy(c.internalArray(), 0, elementData, index, numNew);
 
         size += numNew;
 
@@ -1684,13 +1684,13 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false, true);
-     * int count = list.occurrencesOf(true);   // returns 3
+     * int count = list.frequency(true);   // returns 3
      * }</pre>
      *
      * @param valueToFind the value whose frequency is to be determined
      * @return the number of times the specified value appears in this list
      */
-    public int occurrencesOf(final boolean valueToFind) {
+    public int frequency(final boolean valueToFind) {
         if (size == 0) {
             return 0;
         }
@@ -2451,7 +2451,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * of the list's elements in order, enclosed in square brackets ("[]"). Adjacent
      * elements are separated by the characters ", " (comma and space).
      *
-     * <p><b>Usage Example:</b> A list containing {@code true}, {@code false}, {@code true} would return "{@code [true, false, true]}".</p>
+     * <p><b>Usage Examples:</b> A list containing {@code true}, {@code false}, {@code true} would return "{@code [true, false, true]}".</p>
      *
      * @return a string representation of this list
      */

@@ -238,7 +238,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
     /**
      * Writes a float value to a CharacterWriter with optional configuration.
      * If the configuration specifies {@code writeNullNumberAsZero} and the value is {@code null},
-     * writes 0.0f instead of {@code null}. Uses {@link IOUtil#write(char, Writer)}
+     * writes 0.0f instead of {@code null}. Uses {@link IOUtil#write(float, Writer)}
      * for efficient float writing.
      *
      * @param writer the CharacterWriter to write to

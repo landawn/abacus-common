@@ -3748,16 +3748,16 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         * Converts this OptionalInt to a java.util.OptionalInt.
-         *
-         * @return a java.util.OptionalInt containing the value if present, otherwise an empty java.util.OptionalInt
-         * @deprecated to be removed in a future version.
-         */
-        @Deprecated
-        public java.util.OptionalInt __() {//NOSONAR
-            return toJdkOptional();
-        }
+        //    /**
+        //     * Converts this OptionalInt to a java.util.OptionalInt.
+        //     *
+        //     * @return a java.util.OptionalInt containing the value if present, otherwise an empty java.util.OptionalInt
+        //     * @deprecated to be removed in a future version.
+        //     */
+        //    @Deprecated
+        //    public java.util.OptionalInt __() {//NOSONAR
+        //        return toJdkOptional();
+        //    }
 
         /**
          * Compares this OptionalInt with another OptionalInt for ordering.
@@ -4406,16 +4406,16 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         * Converts this OptionalLong to a java.util.OptionalLong.
-         *
-         * @return a java.util.OptionalLong containing the value if present, otherwise an empty java.util.OptionalLong
-         * @deprecated to be removed in a future version.
-         */
-        @Deprecated
-        public java.util.OptionalLong __() {//NOSONAR
-            return toJdkOptional();
-        }
+        //    /**
+        //     * Converts this OptionalLong to a java.util.OptionalLong.
+        //     *
+        //     * @return a java.util.OptionalLong containing the value if present, otherwise an empty java.util.OptionalLong
+        //     * @deprecated to be removed in a future version.
+        //     */
+        //    @Deprecated
+        //    public java.util.OptionalLong __() {//NOSONAR
+        //        return toJdkOptional();
+        //    }
 
         /**
          * Compares this OptionalLong with another OptionalLong for ordering.
@@ -5696,19 +5696,19 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         * Converts this {@code OptionalDouble} to a {@code java.util.OptionalDouble}.
-         *
-         * <p><b>Note:</b> This is a deprecated convenience method. Use {@link #toJdkOptional()} instead.
-         *
-         * @return a {@code java.util.OptionalDouble} containing the value if present, otherwise an empty {@code java.util.OptionalDouble}
-         * @deprecated Use {@link #toJdkOptional()} instead. This method will be removed in a future version.
-         * @see #toJdkOptional()
-         */
-        @Deprecated
-        public java.util.OptionalDouble __() {//NOSONAR
-            return toJdkOptional();
-        }
+        //    /**
+        //     * Converts this {@code OptionalDouble} to a {@code java.util.OptionalDouble}.
+        //     *
+        //     * <p><b>Note:</b> This is a deprecated convenience method. Use {@link #toJdkOptional()} instead.
+        //     *
+        //     * @return a {@code java.util.OptionalDouble} containing the value if present, otherwise an empty {@code java.util.OptionalDouble}
+        //     * @deprecated Use {@link #toJdkOptional()} instead. This method will be removed in a future version.
+        //     * @see #toJdkOptional()
+        //     */
+        //    @Deprecated
+        //    public java.util.OptionalDouble __() {//NOSONAR
+        //        return toJdkOptional();
+        //    }
 
         /**
          * Compares this {@code OptionalDouble} with the specified {@code OptionalDouble} for order.
@@ -6491,17 +6491,17 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         * Converts this {@code Optional} to a {@code java.util.Optional}.
-         * This is a shorthand method for {@link #toJdkOptional()}.
-         *
-         * @return a {@code java.util.Optional} containing the value if present, otherwise an empty {@code java.util.Optional}
-         * @deprecated to be removed in a future version.
-         */
-        @Deprecated
-        public java.util.Optional<T> __() {//NOSONAR
-            return toJdkOptional();
-        }
+        //    /**
+        //     * Converts this {@code Optional} to a {@code java.util.Optional}.
+        //     * This is a shorthand method for {@link #toJdkOptional()}.
+        //     *
+        //     * @return a {@code java.util.Optional} containing the value if present, otherwise an empty {@code java.util.Optional}
+        //     * @deprecated to be removed in a future version.
+        //     */
+        //    @Deprecated
+        //    public java.util.Optional<T> __() {//NOSONAR
+        //        return toJdkOptional();
+        //    }
 
         /**
          * Indicates whether some other object is "equal to" this {@code Optional}.

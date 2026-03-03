@@ -21,6 +21,9 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.LongList;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for {@link LongList} objects, providing serialization and deserialization support.
+ */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongList> {
 

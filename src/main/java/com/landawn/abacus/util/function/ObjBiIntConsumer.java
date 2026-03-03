@@ -38,10 +38,9 @@ import com.landawn.abacus.util.Throwables;
  * };
  * }</pre>
  *
- * @param <T> the type of the object argument to the operation
- *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @param <T> the type of the object argument to the operation
  *
  * @see java.util.function.Consumer
  * @see java.util.function.ObjIntConsumer
@@ -66,6 +65,7 @@ public interface ObjBiIntConsumer<T> extends Throwables.ObjBiIntConsumer<T, Runt
      * @param i the first int input argument
      * @param j the second int input argument
      */
+    // @ai-ignore BiIntObj*/IntBiObj*/BiObjInt*/ObjBiInt* argument order convention - intentional: class name prefix determines parameter order. BiIntObj* has two ints first; IntBiObj* has int then two objects; BiObjInt* has two objects then int; ObjBiInt* has object then two ints. Do not suggest reordering.
     @Override
     void accept(T t, int i, int j);
 

@@ -49,11 +49,11 @@ public interface FloatBiConsumer extends Throwables.FloatBiConsumer<RuntimeExcep
      * coordRecorder.accept(40.71f, -74.01f);
      * }</pre>
      *
-     * @param t the first float argument
-     * @param u the second float argument
+     * @param a the first float argument
+     * @param b the second float argument
      */
     @Override
-    void accept(float t, float u);
+    void accept(float a, float b);
 
     /**
      * Returns a composed {@code FloatBiConsumer} that performs, in sequence, this operation
@@ -87,9 +87,9 @@ public interface FloatBiConsumer extends Throwables.FloatBiConsumer<RuntimeExcep
      * @return a composed {@code FloatBiConsumer} that performs in sequence this operation followed by the {@code after} operation
      */
     default FloatBiConsumer andThen(final FloatBiConsumer after) {
-        return (t, u) -> {
-            accept(t, u);
-            after.accept(t, u);
+        return (a, b) -> {
+            accept(a, b);
+            after.accept(a, b);
         };
     }
 }

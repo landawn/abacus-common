@@ -254,7 +254,7 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  *   <li><b>Resource Cleanup:</b> Proper cleanup of resources when operations timeout or are cancelled</li>
  * </ul>
  *
- * <p><b>Example: Microservice Orchestration</b>
+ * <p><b>Usage Examples: Microservice Orchestration</b>
  * <pre>{@code
  * public class OrderProcessingOrchestrator {
  *     private final UserService userService;

@@ -364,7 +364,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     };
 
     @SuppressWarnings("deprecation")
-    private static final Function<BooleanList, boolean[]> BooleanArray_Finisher = t -> t.trimToSize().array();
+    private static final Function<BooleanList, boolean[]> BooleanArray_Finisher = t -> t.trimToSize().internalArray();
 
     private static final BiConsumer<CharList, Character> CharList_Accumulator = CharList::add;
 
@@ -374,7 +374,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     };
 
     @SuppressWarnings("deprecation")
-    private static final Function<CharList, char[]> CharArray_Finisher = t -> t.trimToSize().array();
+    private static final Function<CharList, char[]> CharArray_Finisher = t -> t.trimToSize().internalArray();
 
     private static final BiConsumer<ByteList, Byte> ByteList_Accumulator = ByteList::add;
 
@@ -389,7 +389,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     };
 
     @SuppressWarnings("deprecation")
-    private static final Function<ByteList, byte[]> ByteArray_Finisher = t -> t.trimToSize().array();
+    private static final Function<ByteList, byte[]> ByteArray_Finisher = t -> t.trimToSize().internalArray();
 
     private static final BiConsumer<ShortList, Short> ShortList_Accumulator = ShortList::add;
 
@@ -404,7 +404,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     };
 
     @SuppressWarnings("deprecation")
-    private static final Function<ShortList, short[]> ShortArray_Finisher = t -> t.trimToSize().array();
+    private static final Function<ShortList, short[]> ShortArray_Finisher = t -> t.trimToSize().internalArray();
 
     private static final BiConsumer<IntList, Integer> IntList_Accumulator = IntList::add;
 
@@ -419,7 +419,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     };
 
     @SuppressWarnings("deprecation")
-    private static final Function<IntList, int[]> IntArray_Finisher = t -> t.trimToSize().array();
+    private static final Function<IntList, int[]> IntArray_Finisher = t -> t.trimToSize().internalArray();
 
     private static final BiConsumer<LongList, Long> LongList_Accumulator = LongList::add;
 
@@ -434,7 +434,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     };
 
     @SuppressWarnings("deprecation")
-    private static final Function<LongList, long[]> LongArray_Finisher = t -> t.trimToSize().array();
+    private static final Function<LongList, long[]> LongArray_Finisher = t -> t.trimToSize().internalArray();
 
     private static final BiConsumer<FloatList, Float> FloatList_Accumulator = FloatList::add;
 
@@ -449,7 +449,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     };
 
     @SuppressWarnings("deprecation")
-    private static final Function<FloatList, float[]> FloatArray_Finisher = t -> t.trimToSize().array();
+    private static final Function<FloatList, float[]> FloatArray_Finisher = t -> t.trimToSize().internalArray();
 
     private static final BiConsumer<DoubleList, Double> DoubleList_Accumulator = DoubleList::add;
 
@@ -464,7 +464,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     };
 
     @SuppressWarnings("deprecation")
-    private static final Function<DoubleList, double[]> DoubleArray_Finisher = t -> t.trimToSize().array();
+    private static final Function<DoubleList, double[]> DoubleArray_Finisher = t -> t.trimToSize().internalArray();
 
     private static final BiConsumer<Joiner, Object> Joiner_Accumulator = Joiner::append;
 
@@ -2407,7 +2407,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             throw new TooManyElementsException("Duplicate values");
         }
 
-        holder.setValue(Optional.of(val));
+        holder.setValue(Optional.ofNullable(val));
     };
 
     private static final BinaryOperator<Holder<Optional<Object>>> onlyOne_combiner = (t, u) -> {

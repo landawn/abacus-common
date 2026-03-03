@@ -206,15 +206,15 @@ class JsonStringReader extends AbstractJsonReader {
         nextChar = 0;
         startIndexForText = strBeginIndex;
 
-        if (nextEvent == START_QUOTATION_D || nextEvent == START_QUOTATION_S) {
-            final char quoteChar = nextEvent == START_QUOTATION_D ? WD._QUOTATION_D : WD._QUOTATION_S;
+        if (nextEvent == START_DOUBLE_QUOTE || nextEvent == START_SINGLE_QUOTE) {
+            final char quoteChar = nextEvent == START_DOUBLE_QUOTE ? WD._DOUBLE_QUOTE : WD._SINGLE_QUOTE;
 
             for (int ch = 0; strBeginIndex < strEndIndex;) {
                 ch = strValue[strBeginIndex++];
 
                 if (ch == quoteChar) {
                     endIndexForText = strBeginIndex - 1;
-                    nextEvent = quoteChar == WD._QUOTATION_D ? END_QUOTATION_D : END_QUOTATION_S;
+                    nextEvent = quoteChar == WD._DOUBLE_QUOTE ? END_DOUBLE_QUOTE : END_SINGLE_QUOTE;
 
                     return nextEvent;
                 }
@@ -532,7 +532,7 @@ class JsonStringReader extends AbstractJsonReader {
     @SuppressWarnings("unchecked")
     @Override
     public <T> T readValue(final Type<? extends T> type) {
-        if (nextEvent != END_QUOTATION_D && nextEvent != END_QUOTATION_S) {
+        if (nextEvent != END_DOUBLE_QUOTE && nextEvent != END_SINGLE_QUOTE) {
             if (numValue != null) {
                 if (type.isObjectType() || type.clazz().equals(numValue.getClass())) {
                     return (T) numValue;
@@ -625,10 +625,11 @@ class JsonStringReader extends AbstractJsonReader {
      */
 
     void enlargeCharBuffer() {
-        int newCapacity = (int) (cbufLen * 1.75);
+        final long newCapacityLong = (long) (cbufLen * 1.75);
+        final int newCapacity = (int) Math.min(newCapacityLong, Integer.MAX_VALUE);
 
-        if (newCapacity < 0) {
-            newCapacity = Integer.MAX_VALUE;
+        if (newCapacity <= cbufLen) {
+            throw new ParsingException("Character buffer size exceeded maximum capacity");
         }
 
         cbuf = N.copyOf(cbuf, newCapacity);
@@ -640,9 +641,9 @@ class JsonStringReader extends AbstractJsonReader {
      * backslash '\' should have already been read. This supports both unicode escapes "u000A" and two-character escapes
      * "\n".
      *
-     * @return
-     * @throws IOException Signals that an I/O exception has occurred.
-     * @throws NumberFormatException if any unicode escape sequences are malformed.
+     * @return the unescaped character
+     * @throws ParsingException if the escape sequence is incomplete or malformed
+     * @throws NumberFormatException if any unicode escape sequences contain invalid hex digits
      */
     protected char readEscapeCharacter() {
         if (strBeginIndex >= strEndIndex) {
@@ -673,7 +674,7 @@ class JsonStringReader extends AbstractJsonReader {
                     } else if ((c >= 'A') && (c <= 'F')) {
                         result += (char) (c - 'A' + 10);
                     } else {
-                        throw new ParsingException("Number format exception: \\u" + String.valueOf(cbuf));
+                        throw new ParsingException("Number format exception: invalid hex digit '" + c + "' in unicode escape sequence");
                     }
                 }
 

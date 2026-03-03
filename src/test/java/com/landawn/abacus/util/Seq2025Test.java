@@ -1128,10 +1128,10 @@ public class Seq2025Test extends TestBase {
 
     @Test
     public void testNMatch() throws Exception {
-        boolean result = Seq.of(1, 2, 3, 4, 5).countMatchBetween(3, 3, x -> x % 2 == 0);
+        boolean result = Seq.of(1, 2, 3, 4, 5).isMatchCountBetween(3, 3, x -> x % 2 == 0);
         assertFalse(result);
 
-        result = Seq.of(2, 4, 6, 8, 10).countMatchBetween(3, Long.MAX_VALUE, x -> x % 2 == 0);
+        result = Seq.of(2, 4, 6, 8, 10).isMatchCountBetween(3, Long.MAX_VALUE, x -> x % 2 == 0);
         assertTrue(result);
     }
 

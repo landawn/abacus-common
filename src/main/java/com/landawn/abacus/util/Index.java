@@ -242,7 +242,7 @@ import com.landawn.abacus.util.u.OptionalInt;
  *   <li>Using inappropriate tolerance values for floating-point comparisons</li>
  * </ul>
  *
- * <p><b>Example: Complex Search Pipeline</b>
+ * <p><b>Usage Examples: Complex Search Pipeline</b>
  * <pre>{@code
  * // Advanced search combining multiple techniques
  * public class DocumentSearcher {

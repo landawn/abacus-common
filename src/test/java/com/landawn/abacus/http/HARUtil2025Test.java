@@ -85,7 +85,7 @@ public class HARUtil2025Test extends TestBase {
         Map<String, Object> requestEntry = new HashMap<>();
         requestEntry.put("url", "https://api.example.com/users");
 
-        String url = HARUtil.getURLByRequestEntry(requestEntry);
+        String url = HARUtil.getUrlByRequestEntry(requestEntry);
         assertEquals("https://api.example.com/users", url);
     }
 
@@ -254,7 +254,7 @@ public class HARUtil2025Test extends TestBase {
         Map<String, Object> requestEntry = new HashMap<>();
         requestEntry.put("url", "https://api.example.com/search?q=test&limit=10");
 
-        String url = HARUtil.getURLByRequestEntry(requestEntry);
+        String url = HARUtil.getUrlByRequestEntry(requestEntry);
         assertEquals("https://api.example.com/search?q=test&limit=10", url);
     }
 

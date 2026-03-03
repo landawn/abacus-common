@@ -988,7 +988,7 @@ public class IOUtil101Test extends TestBase {
     @Test
     public void testToURLsCollection() throws IOException {
         List<File> files = Arrays.asList(tempFile, tempDir);
-        List<URL> urls = IOUtil.toURLs(files);
+        List<URL> urls = IOUtil.toUrls(files);
 
         assertEquals(2, urls.size());
         assertEquals("file", urls.get(0).getProtocol());

@@ -110,7 +110,7 @@ public class JsonUtil2Test extends AbstractTest {
         }
 
         {
-            List<String> list = N.asList("a", "b", "c");
+            List<String> list = N.toList("a", "b", "c");
 
             List<String> list2 = JsonUtil.unwrap(JsonUtil.wrap(list));
 

@@ -422,7 +422,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * @return an ImmutableList view of this array
      */
     public ImmutableList<T> asList() {
-        return ImmutableList.wrap(N.asList(elements));
+        return ImmutableList.wrap(Array.asList(elements));
     }
 
     /**

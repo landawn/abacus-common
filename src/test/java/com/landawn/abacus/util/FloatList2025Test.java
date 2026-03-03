@@ -113,7 +113,7 @@ public class FloatList2025Test extends TestBase {
     @Test
     public void testArray() {
         FloatList list = FloatList.of(1.0f, 2.0f, 3.0f);
-        float[] arr = list.array();
+        float[] arr = list.internalArray();
         assertNotNull(arr);
     }
 
@@ -648,15 +648,15 @@ public class FloatList2025Test extends TestBase {
     @Test
     public void testOccurrencesOf() {
         FloatList list = FloatList.of(1.0f, 2.0f, 1.0f, 3.0f, 1.0f);
-        assertEquals(3, list.occurrencesOf(1.0f));
-        assertEquals(1, list.occurrencesOf(2.0f));
-        assertEquals(0, list.occurrencesOf(99.0f));
+        assertEquals(3, list.frequency(1.0f));
+        assertEquals(1, list.frequency(2.0f));
+        assertEquals(0, list.frequency(99.0f));
     }
 
     @Test
     public void testOccurrencesOf_emptyList() {
         FloatList list = new FloatList();
-        assertEquals(0, list.occurrencesOf(1.0f));
+        assertEquals(0, list.frequency(1.0f));
     }
 
     @Test

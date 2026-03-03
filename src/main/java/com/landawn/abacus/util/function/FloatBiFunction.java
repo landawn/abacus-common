@@ -24,10 +24,9 @@ import com.landawn.abacus.util.Throwables;
  * <p>This interface extends {@link Throwables.FloatBiFunction} with {@link RuntimeException},
  * providing exception handling capabilities while maintaining compatibility with standard functional programming patterns.</p>
  *
- * @param <R> the type of the result of the function
- *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @param <R> the type of the result of the function
  *
  * @see java.util.function.Function
  * @see java.util.function.BiFunction
@@ -56,12 +55,12 @@ public interface FloatBiFunction<R> extends Throwables.FloatBiFunction<R, Runtim
      * Float result = average.apply(10.0f, 20.0f);   // Returns 15.0f
      * }</pre>
      *
-     * @param t the first float argument
-     * @param u the second float argument
+     * @param a the first float argument
+     * @param b the second float argument
      * @return the function result of type {@code R}
      */
     @Override
-    R apply(float t, float u);
+    R apply(float a, float b);
 
     /**
      * Returns a composed function that first applies this function to its input, and then applies
@@ -90,6 +89,6 @@ public interface FloatBiFunction<R> extends Throwables.FloatBiFunction<R, Runtim
      * @return a composed function that first applies this function and then applies the {@code after} function
      */
     default <V> FloatBiFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        return (t, u) -> after.apply(apply(t, u));
+        return (a, b) -> after.apply(apply(a, b));
     }
 }

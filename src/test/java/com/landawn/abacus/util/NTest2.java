@@ -82,54 +82,54 @@ public class NTest2 extends AbstractParserTest {
     public void test_skipRange() {
         {
             List<Integer> ret = N.skipRange(Stream.range(0, 7).toList(), 0, 3);
-            assertEquals(ret, CommonUtil.asList(3, 4, 5, 6));
+            assertEquals(ret, CommonUtil.toList(3, 4, 5, 6));
 
             ret = N.skipRange(Stream.range(0, 7).toList(), 0, 0);
-            assertEquals(ret, CommonUtil.asList(0, 1, 2, 3, 4, 5, 6));
+            assertEquals(ret, CommonUtil.toList(0, 1, 2, 3, 4, 5, 6));
 
             ret = N.skipRange(Stream.range(0, 7).toList(), 5, 5);
-            assertEquals(ret, CommonUtil.asList(0, 1, 2, 3, 4, 5, 6));
+            assertEquals(ret, CommonUtil.toList(0, 1, 2, 3, 4, 5, 6));
 
             ret = N.skipRange(Stream.range(0, 7).toList(), 6, 6);
-            assertEquals(ret, CommonUtil.asList(0, 1, 2, 3, 4, 5, 6));
+            assertEquals(ret, CommonUtil.toList(0, 1, 2, 3, 4, 5, 6));
 
             ret = N.skipRange(Stream.range(0, 7).toList(), 7, 7);
-            assertEquals(ret, CommonUtil.asList(0, 1, 2, 3, 4, 5, 6));
+            assertEquals(ret, CommonUtil.toList(0, 1, 2, 3, 4, 5, 6));
 
             ret = N.skipRange(Stream.range(0, 7).toList(), 0, 7);
-            assertEquals(ret, CommonUtil.asList());
+            assertEquals(ret, CommonUtil.toList());
 
             ret = N.skipRange(Stream.range(0, 7).toList(), 0, 6);
-            assertEquals(ret, CommonUtil.asList(6));
+            assertEquals(ret, CommonUtil.toList(6));
 
             ret = N.skipRange(Stream.range(0, 7).toList(), 3, 6);
-            assertEquals(ret, CommonUtil.asList(0, 1, 2, 6));
+            assertEquals(ret, CommonUtil.toList(0, 1, 2, 6));
         }
 
         {
             List<Integer> ret = N.skipRange(Stream.range(0, 7).toCollection(Suppliers.ofLinkedHashSet()), 0, 3);
-            assertEquals(ret, CommonUtil.asList(3, 4, 5, 6));
+            assertEquals(ret, CommonUtil.toList(3, 4, 5, 6));
 
             ret = N.skipRange(Stream.range(0, 7).toCollection(Suppliers.ofLinkedHashSet()), 0, 0);
-            assertEquals(ret, CommonUtil.asList(0, 1, 2, 3, 4, 5, 6));
+            assertEquals(ret, CommonUtil.toList(0, 1, 2, 3, 4, 5, 6));
 
             ret = N.skipRange(Stream.range(0, 7).toCollection(Suppliers.ofLinkedHashSet()), 5, 5);
-            assertEquals(ret, CommonUtil.asList(0, 1, 2, 3, 4, 5, 6));
+            assertEquals(ret, CommonUtil.toList(0, 1, 2, 3, 4, 5, 6));
 
             ret = N.skipRange(Stream.range(0, 7).toCollection(Suppliers.ofLinkedHashSet()), 6, 6);
-            assertEquals(ret, CommonUtil.asList(0, 1, 2, 3, 4, 5, 6));
+            assertEquals(ret, CommonUtil.toList(0, 1, 2, 3, 4, 5, 6));
 
             ret = N.skipRange(Stream.range(0, 7).toCollection(Suppliers.ofLinkedHashSet()), 7, 7);
-            assertEquals(ret, CommonUtil.asList(0, 1, 2, 3, 4, 5, 6));
+            assertEquals(ret, CommonUtil.toList(0, 1, 2, 3, 4, 5, 6));
 
             ret = N.skipRange(Stream.range(0, 7).toCollection(Suppliers.ofLinkedHashSet()), 0, 7);
-            assertEquals(ret, CommonUtil.asList());
+            assertEquals(ret, CommonUtil.toList());
 
             ret = N.skipRange(Stream.range(0, 7).toCollection(Suppliers.ofLinkedHashSet()), 0, 6);
-            assertEquals(ret, CommonUtil.asList(6));
+            assertEquals(ret, CommonUtil.toList(6));
 
             ret = N.skipRange(Stream.range(0, 7).toCollection(Suppliers.ofLinkedHashSet()), 3, 6);
-            assertEquals(ret, CommonUtil.asList(0, 1, 2, 6));
+            assertEquals(ret, CommonUtil.toList(0, 1, 2, 6));
         }
     }
 
@@ -170,13 +170,13 @@ public class NTest2 extends AbstractParserTest {
         }
 
         {
-            final List<Integer> list = CommonUtil.asList(1, 2, 3, 4, 5, 6, 7);
+            final List<Integer> list = CommonUtil.toList(1, 2, 3, 4, 5, 6, 7);
             assertEquals(3, CommonUtil.indexOf(list, 4));
             assertEquals(4, CommonUtil.lastIndexOf(list, 5));
         }
 
         {
-            final List<Integer> list = CommonUtil.asLinkedList(1, 2, 3, 4, 5, 6, 7);
+            final List<Integer> list = CommonUtil.toLinkedList(1, 2, 3, 4, 5, 6, 7);
             assertEquals(3, CommonUtil.indexOf(list, 4));
             assertEquals(4, CommonUtil.lastIndexOf(list, 5));
             assertEquals(4, CommonUtil.lastIndexOf(list, 5, 6));
@@ -187,7 +187,7 @@ public class NTest2 extends AbstractParserTest {
         }
 
         {
-            final Deque<Integer> list = CommonUtil.asDeque(1, 2, 3, 4, 5, 6, 7);
+            final Deque<Integer> list = CommonUtil.toDeque(1, 2, 3, 4, 5, 6, 7);
             assertEquals(3, CommonUtil.indexOf(list, 4));
             assertEquals(4, CommonUtil.lastIndexOf(list, 5));
             assertEquals(4, CommonUtil.lastIndexOf(list, 5, 6));
@@ -340,8 +340,8 @@ public class NTest2 extends AbstractParserTest {
 
     @Test
     public void test_exclude() {
-        final Set<Object> c = CommonUtil.asSet("a", null, "b");
-        final Set<Object> objsToExclude = CommonUtil.asSet("a", null, 1, new Date());
+        final Set<Object> c = CommonUtil.toSet("a", null, "b");
+        final Set<Object> objsToExclude = CommonUtil.toSet("a", null, 1, new Date());
 
         N.println(N.excludeAll(c, objsToExclude));
 
@@ -350,32 +350,32 @@ public class NTest2 extends AbstractParserTest {
 
     @Test
     public void test_commonElements() {
-        Set<Integer> result = N.commonSet(CommonUtil.asList(CommonUtil.asList(1, 2, 3, 4)));
+        Set<Integer> result = N.commonSet(CommonUtil.toList(CommonUtil.toList(1, 2, 3, 4)));
         N.println(result);
 
-        result = N.commonSet(CommonUtil.asList(1, 2, 3, 4), CommonUtil.asList(1, 3, 5));
+        result = N.commonSet(CommonUtil.toList(1, 2, 3, 4), CommonUtil.toList(1, 3, 5));
         N.println(result);
 
-        result = N.commonSet(CommonUtil.asSet(CommonUtil.asList(1, 2, 3, 4), CommonUtil.asList(1, 3, 5), CommonUtil.asList(1, 2, 4)));
+        result = N.commonSet(CommonUtil.toSet(CommonUtil.toList(1, 2, 3, 4), CommonUtil.toList(1, 3, 5), CommonUtil.toList(1, 2, 4)));
         N.println(result);
 
-        result = N.commonSet(CommonUtil.asSet(CommonUtil.asList(1, 2, 3, 4), CommonUtil.asList(1, 3, 5), CommonUtil.asList(1, 2, 4), CommonUtil.asSet(6)));
+        result = N.commonSet(CommonUtil.toSet(CommonUtil.toList(1, 2, 3, 4), CommonUtil.toList(1, 3, 5), CommonUtil.toList(1, 2, 4), CommonUtil.toSet(6)));
         N.println(result);
 
-        result = N.commonSet(CommonUtil.asList(CommonUtil.asSet(6), CommonUtil.asList(1, 2, 3, 4), CommonUtil.asList(1, 3, 5), CommonUtil.asList(1, 2, 4),
-                CommonUtil.asSet(6)));
+        result = N.commonSet(CommonUtil.toList(CommonUtil.toSet(6), CommonUtil.toList(1, 2, 3, 4), CommonUtil.toList(1, 3, 5), CommonUtil.toList(1, 2, 4),
+                CommonUtil.toSet(6)));
         N.println(result);
 
-        result = N.commonSet(CommonUtil.repeat(CommonUtil.asSet(6), 2));
+        result = N.commonSet(CommonUtil.repeat(CommonUtil.toSet(6), 2));
         N.println(result);
     }
 
     @Test
     public void test_last() {
-        assertEquals(3, CommonUtil.lastElement(CommonUtil.asLinkedList(1, 2, 3)).get().intValue());
-        assertEquals(3, CommonUtil.lastElement(CommonUtil.asDeque(1, 2, 3)).get().intValue());
-        assertEquals(3, CommonUtil.lastNonNull(CommonUtil.asLinkedList(1, 2, 3)).get().intValue());
-        assertEquals(3, CommonUtil.lastNonNull(CommonUtil.asDeque(1, 2, 3)).get().intValue());
+        assertEquals(3, CommonUtil.lastElement(CommonUtil.toLinkedList(1, 2, 3)).get().intValue());
+        assertEquals(3, CommonUtil.lastElement(CommonUtil.toDeque(1, 2, 3)).get().intValue());
+        assertEquals(3, CommonUtil.lastNonNull(CommonUtil.toLinkedList(1, 2, 3)).get().intValue());
+        assertEquals(3, CommonUtil.lastNonNull(CommonUtil.toDeque(1, 2, 3)).get().intValue());
     }
 
     @Test
@@ -398,17 +398,17 @@ public class NTest2 extends AbstractParserTest {
         final int[] a = { 0, 1, 2, 3, 4, 5 };
         final IntList intList = IntList.of(a);
 
-        assertTrue(CommonUtil.equals(Array.of(1, 2, 3, 4), intList.copy(1, 5).trimToSize().array()));
-        assertTrue(CommonUtil.equals(Array.of(1, 2, 3, 4), intList.copy(1, 5, 1).trimToSize().array()));
-        assertTrue(CommonUtil.equals(Array.of(1, 3), intList.copy(1, 5, 2).trimToSize().array()));
-        assertTrue(CommonUtil.equals(Array.of(1, 3, 5), intList.copy(1, 6, 2).trimToSize().array()));
+        assertTrue(CommonUtil.equals(Array.of(1, 2, 3, 4), intList.copy(1, 5).trimToSize().internalArray()));
+        assertTrue(CommonUtil.equals(Array.of(1, 2, 3, 4), intList.copy(1, 5, 1).trimToSize().internalArray()));
+        assertTrue(CommonUtil.equals(Array.of(1, 3), intList.copy(1, 5, 2).trimToSize().internalArray()));
+        assertTrue(CommonUtil.equals(Array.of(1, 3, 5), intList.copy(1, 6, 2).trimToSize().internalArray()));
 
-        assertTrue(CommonUtil.equals(Array.of(5, 4, 3, 2), intList.copy(5, 1, -1).trimToSize().array()));
-        assertTrue(CommonUtil.equals(Array.of(5, 3), intList.copy(5, 1, -2).trimToSize().array()));
-        assertTrue(CommonUtil.equals(Array.of(5, 3, 1), intList.copy(5, 0, -2).trimToSize().array()));
-        assertTrue(CommonUtil.equals(Array.of(5, 3, 1), intList.copy(5, -1, -2).trimToSize().array()));
-        assertTrue(CommonUtil.equals(Array.of(5, 4, 3, 2, 1, 0), intList.copy(5, -1, -1).trimToSize().array()));
-        assertTrue(CommonUtil.equals(Array.of(4, 2, 0), intList.copy(4, -1, -2).trimToSize().array()));
+        assertTrue(CommonUtil.equals(Array.of(5, 4, 3, 2), intList.copy(5, 1, -1).trimToSize().internalArray()));
+        assertTrue(CommonUtil.equals(Array.of(5, 3), intList.copy(5, 1, -2).trimToSize().internalArray()));
+        assertTrue(CommonUtil.equals(Array.of(5, 3, 1), intList.copy(5, 0, -2).trimToSize().internalArray()));
+        assertTrue(CommonUtil.equals(Array.of(5, 3, 1), intList.copy(5, -1, -2).trimToSize().internalArray()));
+        assertTrue(CommonUtil.equals(Array.of(5, 4, 3, 2, 1, 0), intList.copy(5, -1, -1).trimToSize().internalArray()));
+        assertTrue(CommonUtil.equals(Array.of(4, 2, 0), intList.copy(4, -1, -2).trimToSize().internalArray()));
     }
 
     @Test
@@ -438,14 +438,14 @@ public class NTest2 extends AbstractParserTest {
         N.println(a);
         assertEquals("[[a, b, c], [1, 2, 3], [[e, f]]]", CommonUtil.deepToString(a));
 
-        for (final Set<String> set : Iterables.powerSet(CommonUtil.asLinkedHashSet("a", "b", "c"))) {
+        for (final Set<String> set : Iterables.powerSet(CommonUtil.toLinkedHashSet("a", "b", "c"))) {
             N.println(set);
         }
     }
 
     @Test
     public void test_001() {
-        final Dataset dataset = CommonUtil.newDataset(CommonUtil.asList("contact.email"), CommonUtil.asList(CommonUtil.asList("addd")));
+        final Dataset dataset = CommonUtil.newDataset(CommonUtil.toList("contact.email"), CommonUtil.toList(CommonUtil.toList("addd")));
         dataset.println();
 
         final Account account = dataset.getRow(0, Account.class);

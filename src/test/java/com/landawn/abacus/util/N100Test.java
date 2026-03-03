@@ -29,168 +29,168 @@ public class N100Test extends TestBase {
     @Test
     public void testOccurrencesOfBooleanArray() {
         boolean[] empty = {};
-        assertEquals(0, N.occurrencesOf(empty, true));
-        assertEquals(0, N.occurrencesOf(null, true));
+        assertEquals(0, N.frequency(empty, true));
+        assertEquals(0, N.frequency(null, true));
 
         boolean[] array = { true, false, true, true, false };
-        assertEquals(3, N.occurrencesOf(array, true));
-        assertEquals(2, N.occurrencesOf(array, false));
+        assertEquals(3, N.frequency(array, true));
+        assertEquals(2, N.frequency(array, false));
     }
 
     @Test
     public void testOccurrencesOfCharArray() {
         char[] empty = {};
-        assertEquals(0, N.occurrencesOf(empty, 'a'));
-        assertEquals(0, N.occurrencesOf((char[]) null, 'a'));
+        assertEquals(0, N.frequency(empty, 'a'));
+        assertEquals(0, N.frequency((char[]) null, 'a'));
 
         char[] array = { 'a', 'b', 'c', 'a', 'a' };
-        assertEquals(3, N.occurrencesOf(array, 'a'));
-        assertEquals(1, N.occurrencesOf(array, 'b'));
-        assertEquals(0, N.occurrencesOf(array, 'd'));
+        assertEquals(3, N.frequency(array, 'a'));
+        assertEquals(1, N.frequency(array, 'b'));
+        assertEquals(0, N.frequency(array, 'd'));
     }
 
     @Test
     public void testOccurrencesOfByteArray() {
         byte[] empty = {};
-        assertEquals(0, N.occurrencesOf(empty, (byte) 1));
-        assertEquals(0, N.occurrencesOf((byte[]) null, (byte) 1));
+        assertEquals(0, N.frequency(empty, (byte) 1));
+        assertEquals(0, N.frequency((byte[]) null, (byte) 1));
 
         byte[] array = { 1, 2, 3, 1, 1 };
-        assertEquals(3, N.occurrencesOf(array, (byte) 1));
-        assertEquals(1, N.occurrencesOf(array, (byte) 2));
-        assertEquals(0, N.occurrencesOf(array, (byte) 4));
+        assertEquals(3, N.frequency(array, (byte) 1));
+        assertEquals(1, N.frequency(array, (byte) 2));
+        assertEquals(0, N.frequency(array, (byte) 4));
     }
 
     @Test
     public void testOccurrencesOfShortArray() {
         short[] empty = {};
-        assertEquals(0, N.occurrencesOf(empty, (short) 1));
-        assertEquals(0, N.occurrencesOf((short[]) null, (short) 1));
+        assertEquals(0, N.frequency(empty, (short) 1));
+        assertEquals(0, N.frequency((short[]) null, (short) 1));
 
         short[] array = { 1, 2, 3, 1, 1 };
-        assertEquals(3, N.occurrencesOf(array, (short) 1));
-        assertEquals(1, N.occurrencesOf(array, (short) 2));
-        assertEquals(0, N.occurrencesOf(array, (short) 4));
+        assertEquals(3, N.frequency(array, (short) 1));
+        assertEquals(1, N.frequency(array, (short) 2));
+        assertEquals(0, N.frequency(array, (short) 4));
     }
 
     @Test
     public void testOccurrencesOfIntArray() {
         int[] empty = {};
-        assertEquals(0, N.occurrencesOf(empty, 1));
-        assertEquals(0, N.occurrencesOf((int[]) null, 1));
+        assertEquals(0, N.frequency(empty, 1));
+        assertEquals(0, N.frequency((int[]) null, 1));
 
         int[] array = { 1, 2, 3, 1, 1 };
-        assertEquals(3, N.occurrencesOf(array, 1));
-        assertEquals(1, N.occurrencesOf(array, 2));
-        assertEquals(0, N.occurrencesOf(array, 4));
+        assertEquals(3, N.frequency(array, 1));
+        assertEquals(1, N.frequency(array, 2));
+        assertEquals(0, N.frequency(array, 4));
     }
 
     @Test
     public void testOccurrencesOfLongArray() {
         long[] empty = {};
-        assertEquals(0, N.occurrencesOf(empty, 1L));
-        assertEquals(0, N.occurrencesOf((long[]) null, 1L));
+        assertEquals(0, N.frequency(empty, 1L));
+        assertEquals(0, N.frequency((long[]) null, 1L));
 
         long[] array = { 1L, 2L, 3L, 1L, 1L };
-        assertEquals(3, N.occurrencesOf(array, 1L));
-        assertEquals(1, N.occurrencesOf(array, 2L));
-        assertEquals(0, N.occurrencesOf(array, 4L));
+        assertEquals(3, N.frequency(array, 1L));
+        assertEquals(1, N.frequency(array, 2L));
+        assertEquals(0, N.frequency(array, 4L));
     }
 
     @Test
     public void testOccurrencesOfFloatArray() {
         float[] empty = {};
-        assertEquals(0, N.occurrencesOf(empty, 1.0f));
-        assertEquals(0, N.occurrencesOf((float[]) null, 1.0f));
+        assertEquals(0, N.frequency(empty, 1.0f));
+        assertEquals(0, N.frequency((float[]) null, 1.0f));
 
         float[] array = { 1.0f, 2.0f, 3.0f, 1.0f, 1.0f };
-        assertEquals(3, N.occurrencesOf(array, 1.0f));
-        assertEquals(1, N.occurrencesOf(array, 2.0f));
-        assertEquals(0, N.occurrencesOf(array, 4.0f));
+        assertEquals(3, N.frequency(array, 1.0f));
+        assertEquals(1, N.frequency(array, 2.0f));
+        assertEquals(0, N.frequency(array, 4.0f));
     }
 
     @Test
     public void testOccurrencesOfDoubleArray() {
         double[] empty = {};
-        assertEquals(0, N.occurrencesOf(empty, 1.0));
-        assertEquals(0, N.occurrencesOf(null, 1.0));
+        assertEquals(0, N.frequency(empty, 1.0));
+        assertEquals(0, N.frequency(null, 1.0));
 
         double[] array = { 1.0, 2.0, 3.0, 1.0, 1.0 };
-        assertEquals(3, N.occurrencesOf(array, 1.0));
-        assertEquals(1, N.occurrencesOf(array, 2.0));
-        assertEquals(0, N.occurrencesOf(array, 4.0));
+        assertEquals(3, N.frequency(array, 1.0));
+        assertEquals(1, N.frequency(array, 2.0));
+        assertEquals(0, N.frequency(array, 4.0));
     }
 
     @Test
     public void testOccurrencesOfObjectArray() {
         String[] empty = {};
-        assertEquals(0, N.occurrencesOf(empty, "a"));
-        assertEquals(0, N.occurrencesOf((String[]) null, "a"));
+        assertEquals(0, N.frequency(empty, "a"));
+        assertEquals(0, N.frequency((String[]) null, "a"));
 
         String[] array = { "a", "b", "c", "a", "a" };
-        assertEquals(3, N.occurrencesOf(array, "a"));
-        assertEquals(1, N.occurrencesOf(array, "b"));
-        assertEquals(0, N.occurrencesOf(array, "d"));
+        assertEquals(3, N.frequency(array, "a"));
+        assertEquals(1, N.frequency(array, "b"));
+        assertEquals(0, N.frequency(array, "d"));
 
         String[] arrayWithNull = { "a", null, "a", null };
-        assertEquals(2, N.occurrencesOf(arrayWithNull, null));
-        assertEquals(2, N.occurrencesOf(arrayWithNull, "a"));
+        assertEquals(2, N.frequency(arrayWithNull, null));
+        assertEquals(2, N.frequency(arrayWithNull, "a"));
     }
 
     @Test
     public void testOccurrencesOfIterable() {
         List<String> empty = new ArrayList<>();
-        assertEquals(0, N.occurrencesOf(empty, "a"));
-        assertEquals(0, N.occurrencesOf((List<String>) null, "a"));
+        assertEquals(0, N.frequency(empty, "a"));
+        assertEquals(0, N.frequency((List<String>) null, "a"));
 
         List<String> list = Arrays.asList("a", "b", "c", "a", "a");
-        assertEquals(3, N.occurrencesOf(list, "a"));
-        assertEquals(1, N.occurrencesOf(list, "b"));
-        assertEquals(0, N.occurrencesOf(list, "d"));
+        assertEquals(3, N.frequency(list, "a"));
+        assertEquals(1, N.frequency(list, "b"));
+        assertEquals(0, N.frequency(list, "d"));
 
         List<String> listWithNull = Arrays.asList("a", null, "a", null);
-        assertEquals(2, N.occurrencesOf(listWithNull, null));
-        assertEquals(2, N.occurrencesOf(listWithNull, "a"));
+        assertEquals(2, N.frequency(listWithNull, null));
+        assertEquals(2, N.frequency(listWithNull, "a"));
     }
 
     @Test
     public void testOccurrencesOfIterator() {
         Iterator<String> nullIter = null;
-        assertEquals(0, N.occurrencesOf(nullIter, "a"));
+        assertEquals(0, N.frequency(nullIter, "a"));
 
         List<String> list = Arrays.asList("a", "b", "c", "a", "a");
-        assertEquals(3, N.occurrencesOf(list.iterator(), "a"));
+        assertEquals(3, N.frequency(list.iterator(), "a"));
 
         List<String> list2 = Arrays.asList("a", "b", "c", "a", "a");
-        assertEquals(1, N.occurrencesOf(list2.iterator(), "b"));
+        assertEquals(1, N.frequency(list2.iterator(), "b"));
     }
 
     @Test
     public void testOccurrencesOfString() {
-        assertEquals(0, N.occurrencesOf((String) null, 'a'));
-        assertEquals(0, N.occurrencesOf("", 'a'));
-        assertEquals(3, N.occurrencesOf("banana", 'a'));
-        assertEquals(2, N.occurrencesOf("banana", 'n'));
-        assertEquals(0, N.occurrencesOf("banana", 'x'));
+        assertEquals(0, N.frequency((String) null, 'a'));
+        assertEquals(0, N.frequency("", 'a'));
+        assertEquals(3, N.frequency("banana", 'a'));
+        assertEquals(2, N.frequency("banana", 'n'));
+        assertEquals(0, N.frequency("banana", 'x'));
 
-        assertEquals(0, N.occurrencesOf((String) null, "a"));
-        assertEquals(0, N.occurrencesOf("", "a"));
-        assertEquals(2, N.occurrencesOf("aba aba", "aba"));
-        assertEquals(1, N.occurrencesOf("banana", "ana"));
+        assertEquals(0, N.frequency((String) null, "a"));
+        assertEquals(0, N.frequency("", "a"));
+        assertEquals(2, N.frequency("aba aba", "aba"));
+        assertEquals(1, N.frequency("banana", "ana"));
     }
 
     @Test
     public void testOccurrencesMapArray() {
         String[] empty = {};
-        Map<String, Integer> emptyMap = N.occurrencesMap(empty);
+        Map<String, Integer> emptyMap = N.frequencyMap(empty);
         assertTrue(emptyMap.isEmpty());
 
         String[] nullArray = null;
-        Map<String, Integer> nullMap = N.occurrencesMap(nullArray);
+        Map<String, Integer> nullMap = N.frequencyMap(nullArray);
         assertTrue(nullMap.isEmpty());
 
         String[] array = { "a", "b", "c", "a", "a", "b" };
-        Map<String, Integer> map = N.occurrencesMap(array);
+        Map<String, Integer> map = N.frequencyMap(array);
         assertEquals(3, map.get("a").intValue());
         assertEquals(2, map.get("b").intValue());
         assertEquals(1, map.get("c").intValue());
@@ -199,15 +199,15 @@ public class N100Test extends TestBase {
     @Test
     public void testOccurrencesMapIterable() {
         List<String> empty = new ArrayList<>();
-        Map<String, Integer> emptyMap = N.occurrencesMap(empty);
+        Map<String, Integer> emptyMap = N.frequencyMap(empty);
         assertTrue(emptyMap.isEmpty());
 
         List<String> nullList = null;
-        Map<String, Integer> nullMap = N.occurrencesMap(nullList);
+        Map<String, Integer> nullMap = N.frequencyMap(nullList);
         assertTrue(nullMap.isEmpty());
 
         List<String> list = Arrays.asList("a", "b", "c", "a", "a", "b");
-        Map<String, Integer> map = N.occurrencesMap(list);
+        Map<String, Integer> map = N.frequencyMap(list);
         assertEquals(3, map.get("a").intValue());
         assertEquals(2, map.get("b").intValue());
         assertEquals(1, map.get("c").intValue());
@@ -216,11 +216,11 @@ public class N100Test extends TestBase {
     @Test
     public void testOccurrencesMapIterator() {
         Iterator<String> nullIter = null;
-        Map<String, Integer> nullMap = N.occurrencesMap(nullIter);
+        Map<String, Integer> nullMap = N.frequencyMap(nullIter);
         assertTrue(nullMap.isEmpty());
 
         List<String> list = Arrays.asList("a", "b", "c", "a", "a", "b");
-        Map<String, Integer> map = N.occurrencesMap(list.iterator());
+        Map<String, Integer> map = N.frequencyMap(list.iterator());
         assertEquals(3, map.get("a").intValue());
         assertEquals(2, map.get("b").intValue());
         assertEquals(1, map.get("c").intValue());
@@ -1348,8 +1348,8 @@ public class N100Test extends TestBase {
         char[] b = { 'b', 'd' };
         char[] result = N.difference(a, b);
         assertEquals(3, result.length);
-        assertEquals(2, N.occurrencesOf(result, 'a'));
-        assertEquals(1, N.occurrencesOf(result, 'c'));
+        assertEquals(2, N.frequency(result, 'a'));
+        assertEquals(1, N.frequency(result, 'c'));
     }
 
     @Test
@@ -1358,8 +1358,8 @@ public class N100Test extends TestBase {
         byte[] b = { 2, 4 };
         byte[] result = N.difference(a, b);
         assertEquals(3, result.length);
-        assertEquals(2, N.occurrencesOf(result, (byte) 1));
-        assertEquals(1, N.occurrencesOf(result, (byte) 3));
+        assertEquals(2, N.frequency(result, (byte) 1));
+        assertEquals(1, N.frequency(result, (byte) 3));
     }
 
     @Test
@@ -1368,8 +1368,8 @@ public class N100Test extends TestBase {
         short[] b = { 2, 4 };
         short[] result = N.difference(a, b);
         assertEquals(3, result.length);
-        assertEquals(2, N.occurrencesOf(result, (short) 1));
-        assertEquals(1, N.occurrencesOf(result, (short) 3));
+        assertEquals(2, N.frequency(result, (short) 1));
+        assertEquals(1, N.frequency(result, (short) 3));
     }
 
     @Test
@@ -1386,8 +1386,8 @@ public class N100Test extends TestBase {
         long[] b = { 2L, 4L };
         long[] result = N.difference(a, b);
         assertEquals(3, result.length);
-        assertEquals(2, N.occurrencesOf(result, 1L));
-        assertEquals(1, N.occurrencesOf(result, 3L));
+        assertEquals(2, N.frequency(result, 1L));
+        assertEquals(1, N.frequency(result, 3L));
     }
 
     @Test
@@ -1396,8 +1396,8 @@ public class N100Test extends TestBase {
         float[] b = { 2.0f, 4.0f };
         float[] result = N.difference(a, b);
         assertEquals(3, result.length);
-        assertEquals(2, N.occurrencesOf(result, 1.0f));
-        assertEquals(1, N.occurrencesOf(result, 3.0f));
+        assertEquals(2, N.frequency(result, 1.0f));
+        assertEquals(1, N.frequency(result, 3.0f));
     }
 
     @Test
@@ -1406,8 +1406,8 @@ public class N100Test extends TestBase {
         double[] b = { 2.0, 4.0 };
         double[] result = N.difference(a, b);
         assertEquals(3, result.length);
-        assertEquals(2, N.occurrencesOf(result, 1.0));
-        assertEquals(1, N.occurrencesOf(result, 3.0));
+        assertEquals(2, N.frequency(result, 1.0));
+        assertEquals(1, N.frequency(result, 3.0));
     }
 
     @Test
@@ -1416,8 +1416,8 @@ public class N100Test extends TestBase {
         String[] b = { "b", "d" };
         List<String> result = N.difference(a, b);
         assertEquals(3, result.size());
-        assertEquals(2, N.occurrencesOf(result, "a"));
-        assertEquals(1, N.occurrencesOf(result, "c"));
+        assertEquals(2, N.frequency(result, "a"));
+        assertEquals(1, N.frequency(result, "c"));
 
         assertEquals(new ArrayList<>(), N.difference(new String[] {}, b));
         assertEquals(Arrays.asList(a), N.difference(a, new String[] {}));
@@ -1429,8 +1429,8 @@ public class N100Test extends TestBase {
         List<String> b = Arrays.asList("b", "d");
         List<String> result = N.difference(a, b);
         assertEquals(3, result.size());
-        assertEquals(2, N.occurrencesOf(result, "a"));
-        assertEquals(1, N.occurrencesOf(result, "c"));
+        assertEquals(2, N.frequency(result, "a"));
+        assertEquals(1, N.frequency(result, "c"));
 
         assertEquals(new ArrayList<>(), N.difference(new ArrayList<>(), b));
         assertEquals(new ArrayList<>(a), N.difference(a, new ArrayList<>()));
@@ -1442,8 +1442,8 @@ public class N100Test extends TestBase {
         boolean[] b = { false, false, true };
         boolean[] result = N.symmetricDifference(a, b);
         assertEquals(2, result.length);
-        assertEquals(1, N.occurrencesOf(result, true));
-        assertEquals(1, N.occurrencesOf(result, false));
+        assertEquals(1, N.frequency(result, true));
+        assertEquals(1, N.frequency(result, false));
 
         assertArrayEquals(b.clone(), N.symmetricDifference(new boolean[] {}, b));
         assertArrayEquals(a.clone(), N.symmetricDifference(a, new boolean[] {}));

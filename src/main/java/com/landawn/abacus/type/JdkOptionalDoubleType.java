@@ -53,14 +53,14 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
     }
 
     /**
-     * Indicates whether this type should be written without quotes in CSV format.
-     * Double values are numeric and should not be quoted.
+     * Indicates whether values of this type require quoting in CSV format.
+     * OptionalDouble values are numeric and do not require quotes.
      *
-     * @return {@code true}, indicating that OptionalDouble values should not be quoted in CSV output
+     * @return {@code false}, as OptionalDouble values do not require quoting in CSV format
      */
     @Override
-    public boolean isNonQuotableCsvType() {
-        return true;
+    public boolean isCsvQuoteRequired() {
+        return false;
     }
 
     /**

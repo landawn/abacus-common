@@ -584,8 +584,8 @@ public class LongList2025Test extends TestBase {
         list.add(1L);
         list.add(3L);
         list.add(1L);
-        assertEquals(3, list.occurrencesOf(1L));
-        assertEquals(0, list.occurrencesOf(4L));
+        assertEquals(3, list.frequency(1L));
+        assertEquals(0, list.frequency(4L));
     }
 
     @Test

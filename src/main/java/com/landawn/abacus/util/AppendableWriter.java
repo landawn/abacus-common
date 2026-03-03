@@ -285,8 +285,6 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
             if (appendable instanceof AutoCloseable) {
                 try {
                     ((AutoCloseable) appendable).close();
-                } catch (final IOException e) {
-                    throw e;
                 } catch (final Exception e) {
                     throw ExceptionUtil.toRuntimeException(e, true);
                 }

@@ -71,7 +71,7 @@ public class TypeTest extends AbstractTest {
     @Test
     public void test_GuavaTypes() throws Exception {
         {
-            com.google.common.collect.Multiset<Character> guavaMultiset = com.google.common.collect.HashMultiset.create(N.asList('a', 'b', 'c', 'a'));
+            com.google.common.collect.Multiset<Character> guavaMultiset = com.google.common.collect.HashMultiset.create(N.toList('a', 'b', 'c', 'a'));
             com.google.common.collect.Multimap<Character, Integer> guavaListMultimap = ArrayListMultimap.create();
             guavaListMultimap.put('a', 1);
             guavaListMultimap.put('b', 2);
@@ -159,7 +159,7 @@ public class TypeTest extends AbstractTest {
         }
 
         {
-            List<?> list = N.asList('a', 'b', 'c');
+            List<?> list = N.toList('a', 'b', 'c');
             N.println(list.toString());
         }
     }
@@ -214,7 +214,7 @@ public class TypeTest extends AbstractTest {
 
     @Test
     public void test_valueOf() throws Exception {
-        List<Type<Object>> types = N.asList(byte.class, short.class, int.class, long.class).stream().map(cls -> TypeFactory.getType(cls)).toList();
+        List<Type<Object>> types = N.toList(byte.class, short.class, int.class, long.class).stream().map(cls -> TypeFactory.getType(cls)).toList();
 
         Map<Class<?>, Object[]> rangValues = N.asMap(byte.class, N.asArray(Byte.MIN_VALUE, Byte.MAX_VALUE), short.class,
                 N.asArray(Short.MIN_VALUE, Short.MAX_VALUE), int.class, N.asArray(-1000000, 1000000), long.class, N.asArray(-1000000, 1000000));
@@ -624,7 +624,7 @@ public class TypeTest extends AbstractTest {
     public void test_primaryArray_3() throws IOException {
         {
             Type<Object> type = N.typeOf("List<Boolean>");
-            List<?> list = N.asList(false, true, null, false);
+            List<?> list = N.toList(false, true, null, false);
             String str = "[false, true, null, false]";
             Writer writer = new StringWriter();
             type.appendTo(writer, list);
@@ -644,7 +644,7 @@ public class TypeTest extends AbstractTest {
 
         {
             Type<Object> type = N.typeOf("List<Character>");
-            List<?> list = N.asList('a', 'b', null, 'c');
+            List<?> list = N.toList('a', 'b', null, 'c');
             Writer writer = new StringWriter();
             type.appendTo(writer, list);
 
@@ -662,7 +662,7 @@ public class TypeTest extends AbstractTest {
 
         {
             Type<Object> type = N.typeOf("List<Byte>");
-            List<?> list = N.asList((byte) 1, (byte) 2, null, (byte) 3);
+            List<?> list = N.toList((byte) 1, (byte) 2, null, (byte) 3);
             String str = "[1, 2, null, 3]";
             Writer writer = new StringWriter();
             type.appendTo(writer, list);
@@ -682,7 +682,7 @@ public class TypeTest extends AbstractTest {
 
         {
             Type<Object> type = N.typeOf("List<Short>");
-            List<?> list = N.asList((short) 1, (short) 2, null, (short) 3);
+            List<?> list = N.toList((short) 1, (short) 2, null, (short) 3);
             String str = "[1, 2, null, 3]";
             Writer writer = new StringWriter();
             type.appendTo(writer, list);
@@ -702,7 +702,7 @@ public class TypeTest extends AbstractTest {
 
         {
             Type<Object> type = N.typeOf("List<Integer>");
-            List<?> list = N.asList(1, 2, null, 3);
+            List<?> list = N.toList(1, 2, null, 3);
             String str = "[1, 2, null, 3]";
             Writer writer = new StringWriter();
             type.appendTo(writer, list);
@@ -722,7 +722,7 @@ public class TypeTest extends AbstractTest {
 
         {
             Type<Object> type = N.typeOf("List<Long>");
-            List<?> list = N.asList(1L, 2L, null, 3L);
+            List<?> list = N.toList(1L, 2L, null, 3L);
             String str = "[1, 2, null, 3]";
             Writer writer = new StringWriter();
             type.appendTo(writer, list);
@@ -742,7 +742,7 @@ public class TypeTest extends AbstractTest {
 
         {
             Type<Object> type = N.typeOf("List<Float>");
-            List<?> list = N.asList(1f, 2f, null, 3f);
+            List<?> list = N.toList(1f, 2f, null, 3f);
             String str = "[1.0, 2.0, null, 3.0]";
             Writer writer = new StringWriter();
             type.appendTo(writer, list);
@@ -762,7 +762,7 @@ public class TypeTest extends AbstractTest {
 
         {
             Type<Object> type = N.typeOf("List<Double>");
-            List<?> list = N.asList(1d, 2d, null, 3d);
+            List<?> list = N.toList(1d, 2d, null, 3d);
             String str = "[1.0, 2.0, null, 3.0]";
             Writer writer = new StringWriter();
             type.appendTo(writer, list);
@@ -1046,7 +1046,7 @@ public class TypeTest extends AbstractTest {
         Type<Object> type = N.typeOf(Queue.class);
 
         Writer writer = new StringWriter();
-        type.appendTo(writer, N.asQueue("abc", "123", "213"));
+        type.appendTo(writer, N.toQueue("abc", "123", "213"));
 
         N.println(writer.toString());
 
@@ -1118,7 +1118,7 @@ public class TypeTest extends AbstractTest {
     public void test_TypeFactory() {
         // N.println(TypeFactory.getType(Long.class, long.class, int.class, Timestamp.class));
 
-        //    List<Class<?>> classes = N.asList(Long.class, long.class, int.class, Timestamp.class); 
+        //    List<Class<?>> classes = N.toList(Long.class, long.class, int.class, Timestamp.class); 
         //    N.println(TypeFactory.getType(classes));
 
         N.println(TypeFactory.getType("List<String>").name());

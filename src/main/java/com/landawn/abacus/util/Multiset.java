@@ -379,25 +379,6 @@ public final class Multiset<E> implements Collection<E> {
     }
 
     /**
-     * Returns the number of occurrences of the specified element in this multiset.
-     * This is an alias for {@link #getCount(Object)}.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Multiset<String> multiset = Multiset.of("a", "b", "a", "c");
-     * System.out.println(multiset.occurrencesOf("a"));   // Prints: 2
-     * System.out.println(multiset.occurrencesOf("d"));   // Prints: 0
-     * }</pre>
-     *
-     * @param element the element to count occurrences of.
-     * @return the number of occurrences of the element; zero if not present.
-     * @see #getCount(Object)
-     */
-    public int occurrencesOf(final Object element) {
-        return getCount(element);
-    }
-
-    /**
      * Finds the element with the minimum number of occurrences in this multiset.
      * If multiple elements have the same minimum count, one is arbitrarily chosen.
      * 
@@ -600,6 +581,27 @@ public final class Multiset<E> implements Collection<E> {
 
     /**
      * Returns the number of occurrences of the specified element in this multiset.
+     * This is an alias for {@link #getCount(Object)}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Multiset<String> multiset = Multiset.of("a", "b", "a", "c");
+     * System.out.println(multiset.occurrencesOf("a"));   // Prints: 2
+     * System.out.println(multiset.occurrencesOf("d"));   // Prints: 0
+     * }</pre>
+     *
+     * @param element the element to count occurrences of.
+     * @return the number of occurrences of the element; zero if not present.
+     * @deprecated Use {@link #getCount(Object)} instead for better clarity.
+     * @see #getCount(Object)
+     */
+    @Deprecated
+    public int occurrencesOf(final Object element) {
+        return getCount(element);
+    }
+
+    /**
+     * Returns the number of occurrences of the specified element in this multiset.
      *
      * <p>This method gives the same result as {@link Collections#frequency} for an
      * {@link Object#equals}-based multiset, but with better performance.</p>
@@ -671,7 +673,7 @@ public final class Multiset<E> implements Collection<E> {
      *
      * @param element the element to count occurrences of.
      * @return the number of occurrences of the element; zero if not present.
-     * @see #occurrencesOf(Object)
+     * @see #occurrences(Object)
      */
     public int getCount(final Object element) {
         @SuppressWarnings("SuspiciousMethodCalls")

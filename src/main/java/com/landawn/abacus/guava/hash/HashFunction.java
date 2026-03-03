@@ -43,14 +43,14 @@ import com.google.common.hash.HashCode;
  *
  * <p><b>Usage Patterns</b></p>
  *
- * <p><b>Simple hashing:</b>
+ * <p><b>Simple hashing:</b></p>
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * HashFunction hf = Hashing.sha256();
  * HashCode hash = hf.hash("hello world".getBytes());
  * }</pre>
  * 
- * <p><b>Incremental hashing with Hasher:</b>
+ * <p><b>Incremental hashing with Hasher:</b></p>
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * HashFunction hf = Hashing.murmur3_128();
@@ -64,7 +64,7 @@ import com.google.common.hash.HashCode;
  *     .hash();
  * }</pre>
  * 
- * <p><b>Hashing complex objects with Funnel:</b>
+ * <p><b>Hashing complex objects with Funnel:</b></p>
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * class Person {

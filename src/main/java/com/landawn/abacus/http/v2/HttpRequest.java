@@ -131,7 +131,7 @@ public final class HttpRequest {
      * @param uri the URI object for the request
      * @param httpClient the HttpClient to use for executing the request
      * @return a new HttpRequest instance
-     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
+     * @throws IllegalArgumentException if the scheme of {@code uri} is not {@code http} or {@code https}.
      */
     public static HttpRequest create(final URI uri, final HttpClient httpClient) {
         return new HttpRequest(null, uri, httpClient, null, java.net.http.HttpRequest.newBuilder()).closeHttpClientAfterExecution(false);
@@ -202,7 +202,7 @@ public final class HttpRequest {
      *
      * @param uri the URI object for the request
      * @return a new HttpRequest instance
-     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
+     * @throws IllegalArgumentException if the scheme of {@code uri} is not {@code http} or {@code https}.
      */
     public static HttpRequest url(final URI uri) {
         return new HttpRequest(null, uri, DEFAULT_HTTP_CLIENT, null, java.net.http.HttpRequest.newBuilder()).closeHttpClientAfterExecution(false);

@@ -456,7 +456,7 @@ public class Splitter100Test extends TestBase {
     }
 
     @Test
-    public void testMapSplitterTrimResults() {
+    public void testMapSplitterightTrimResults() {
         Splitter.MapSplitter mapSplitter = Splitter.MapSplitter.with(",", "=").trimResults();
         Map<String, String> result = mapSplitter.split(" a = 1 , b = 2 , c = 3 ");
         Map<String, String> expected = new LinkedHashMap<>();

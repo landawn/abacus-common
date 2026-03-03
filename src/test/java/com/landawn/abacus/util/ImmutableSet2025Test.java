@@ -161,19 +161,6 @@ public class ImmutableSet2025Test extends TestBase {
         assertTrue(set.contains(9));
     }
 
-    @Test
-    public void test_of_ten() {
-        ImmutableSet<Integer> set = ImmutableSet.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-        assertNotNull(set);
-        assertEquals(10, set.size());
-        assertTrue(set.contains(1));
-        assertTrue(set.contains(10));
-
-        ImmutableSet<Integer> setWithNull = ImmutableSet.of(1, 2, 3, 4, 5, 6, 7, 8, 9, null);
-        assertEquals(10, setWithNull.size());
-        assertTrue(setWithNull.contains(null));
-    }
-
     //    @Test
     //    public void test_of_varargs() {
     //        String[] array = { "a", "b", "c", "d" };

@@ -61,11 +61,11 @@ public interface ShortBiConsumer extends Throwables.ShortBiConsumer<RuntimeExcep
      * coordinateProcessor.accept((short) 10, (short) 20);
      * }</pre>
      *
-     * @param t the first input argument
-     * @param u the second input argument
+     * @param a the first input argument
+     * @param b the second input argument
      */
     @Override
-    void accept(short t, short u);
+    void accept(short a, short b);
 
     /**
      * Returns a composed {@code ShortBiConsumer} that performs, in sequence, this
@@ -97,9 +97,9 @@ public interface ShortBiConsumer extends Throwables.ShortBiConsumer<RuntimeExcep
      *         operation followed by the {@code after} operation
      */
     default ShortBiConsumer andThen(final ShortBiConsumer after) {
-        return (t, u) -> {
-            accept(t, u);
-            after.accept(t, u);
+        return (a, b) -> {
+            accept(a, b);
+            after.accept(a, b);
         };
     }
 }

@@ -636,14 +636,14 @@ public class Fn202Test extends TestBase {
         assertTrue(Fn.greaterThan(5).test(10));
         assertFalse(Fn.greaterThan(5).test(5));
 
-        assertTrue(Fn.greaterEqual(5).test(5));
-        assertFalse(Fn.greaterEqual(5).test(4));
+        assertTrue(Fn.greaterThanOrEqual(5).test(5));
+        assertFalse(Fn.greaterThanOrEqual(5).test(4));
 
         assertTrue(Fn.lessThan(5).test(0));
         assertFalse(Fn.lessThan(5).test(5));
 
-        assertTrue(Fn.lessEqual(5).test(5));
-        assertFalse(Fn.lessEqual(5).test(6));
+        assertTrue(Fn.lessThanOrEqual(5).test(5));
+        assertFalse(Fn.lessThanOrEqual(5).test(6));
     }
 
     @Test
@@ -717,9 +717,9 @@ public class Fn202Test extends TestBase {
         assertTrue(Fn.equal().test("a", "a"));
         assertFalse(Fn.notEqual().test("a", "a"));
         assertTrue(Fn.<Integer> greaterThan().test(10, 5));
-        assertTrue(Fn.<Integer> greaterEqual().test(5, 5));
+        assertTrue(Fn.<Integer> greaterThanOrEqual().test(5, 5));
         assertTrue(Fn.<Integer> lessThan().test(5, 10));
-        assertTrue(Fn.<Integer> lessEqual().test(5, 5));
+        assertTrue(Fn.<Integer> lessThanOrEqual().test(5, 5));
     }
 
     @Test

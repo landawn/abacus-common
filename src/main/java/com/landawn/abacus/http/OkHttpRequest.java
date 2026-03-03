@@ -1139,9 +1139,9 @@ public final class OkHttpRequest {
     @Beta
     public Response execute(final HttpMethod httpMethod) throws IOException {
         // body = (body == null && HttpMethod.DELETE.equals(httpMethod)) ? Util.EMPTY_REQUEST : body;
-        final Request request = createRequest(httpMethod);
+        // final Request request = createRequest(httpMethod);
 
-        return execute(request);
+        return execute(httpMethod, Response.class);
     }
 
     /**
@@ -1165,16 +1165,18 @@ public final class OkHttpRequest {
     public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException, IOException {
         N.checkArgNotNull(resultClass, cs.resultClass);
         N.checkArgument(!HttpResponse.class.equals(resultClass), "Return type cannot be HttpResponse");
-        final Request request = createRequest(httpMethod);
 
-        final Response resp = execute(request);
-
-        if (Response.class.equals(resultClass)) {
-            return (T) resp;
-        }
+        Response resp = null;
 
         try {
-            if (resultClass.equals(Void.class)) {
+            final Request request = createRequest(httpMethod);
+            resp = execute(request);
+
+            if (Response.class.equals(resultClass)) {
+                return (T) resp;
+            }
+
+            if (resultClass == null || resultClass.equals(Void.class)) {
                 return null;
             } else if (resp.isSuccessful()) {
                 final String contentType = request.header(HttpHeaders.Names.CONTENT_TYPE);
@@ -1215,19 +1217,21 @@ public final class OkHttpRequest {
                 throw new IOException(resp.code() + ": " + resp.message());
             }
         } finally {
-            IOUtil.close(resp);
+            try {
+                if (!Response.class.equals(resultClass) && resp != null) {
+                    IOUtil.close(resp);
+                }
+            } finally {
+                doAfterExecution();
+            }
         }
     }
 
     private Response execute(final Request request) throws IOException {
-        try {
-            if (httpClientBuilder != null) {
-                return httpClientBuilder.build().newCall(request).execute();
-            } else {
-                return httpClient.newCall(request).execute();
-            }
-        } finally {
-            doAfterExecution();
+        if (httpClientBuilder != null) {
+            return httpClientBuilder.build().newCall(request).execute();
+        } else {
+            return httpClient.newCall(request).execute();
         }
     }
 

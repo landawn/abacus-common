@@ -831,7 +831,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @param <E> the element type
      * @param array the array to convert
      * @param collClass the collection class to create
-     * @return the collection
+     * @return a collection containing the converted array elements
      * @throws UnsupportedOperationException if not supported by this type
      */
     @Override
@@ -988,7 +988,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * }</pre>
      *
      * @param string the string to split
-     * @param separator the separator
+     * @param separator the delimiter used to split the input string
      * @return array of split strings
      */
     protected static String[] split(final String string, final String separator) {

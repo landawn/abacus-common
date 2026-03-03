@@ -608,14 +608,14 @@ public class Multimap2025Test extends TestBase {
 
     @Test
     public void testReplaceAllWithOne_NonExistentKey() {
-        assertFalse(listMultimap.replaceValues("key1", N.asList(99)));
+        assertFalse(listMultimap.replaceValues("key1", N.toList(99)));
     }
 
     @Test
     public void testReplaceAllWithOne_ExistingKey() {
         listMultimap.putValues("key1", Arrays.asList(10, 20, 30, 40));
 
-        assertTrue(listMultimap.replaceValues("key1", N.asList(99)));
+        assertTrue(listMultimap.replaceValues("key1", N.toList(99)));
         assertEquals(1, listMultimap.get("key1").size());
         assertEquals(Integer.valueOf(99), listMultimap.get("key1").get(0));
     }
@@ -656,7 +656,7 @@ public class Multimap2025Test extends TestBase {
 
     @Test
     public void testReplaceManyWithOneIfPredicate_EmptyOldValues() {
-        assertFalse(listMultimap.replaceValuesIf(key -> true, N.asList(99)));
+        assertFalse(listMultimap.replaceValuesIf(key -> true, N.toList(99)));
     }
 
     @Test
@@ -664,7 +664,7 @@ public class Multimap2025Test extends TestBase {
         listMultimap.putValues("key1", Arrays.asList(10, 20, 30));
         listMultimap.putValues("key2", Arrays.asList(10, 20, 40));
 
-        assertTrue(listMultimap.replaceValuesIf(key -> key.equals("key1"), N.asList(99)));
+        assertTrue(listMultimap.replaceValuesIf(key -> key.equals("key1"), N.toList(99)));
         assertEquals(1, listMultimap.get("key1").size());
         assertTrue(listMultimap.get("key1").contains(99));
         assertFalse(listMultimap.get("key1").contains(30));
@@ -673,7 +673,7 @@ public class Multimap2025Test extends TestBase {
 
     @Test
     public void testReplaceManyWithOneIfBiPredicate_EmptyOldValues() {
-        assertFalse(listMultimap.replaceValuesIf((k, v) -> true, N.asList(99)));
+        assertFalse(listMultimap.replaceValuesIf((k, v) -> true, N.toList(99)));
     }
 
     @Test
@@ -681,7 +681,7 @@ public class Multimap2025Test extends TestBase {
         listMultimap.putValues("key1", Arrays.asList(10, 20, 30, 40));
         listMultimap.putValues("key2", Arrays.asList(10, 20));
 
-        assertTrue(listMultimap.replaceValuesIf((k, v) -> v.size() > 2, N.asList(99)));
+        assertTrue(listMultimap.replaceValuesIf((k, v) -> v.size() > 2, N.toList(99)));
         assertEquals(1, listMultimap.get("key1").size());
         assertTrue(listMultimap.get("key1").contains(99));
         assertEquals(2, listMultimap.get("key2").size());

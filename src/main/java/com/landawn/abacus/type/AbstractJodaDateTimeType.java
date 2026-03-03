@@ -72,14 +72,14 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
     }
 
     /**
-     * Checks if this type represents values that should not be quoted in CSV format.
-     * DateTime values are typically formatted as timestamp strings that don't require quotes.
+     * Indicates whether values of this type require quoting in CSV format.
+     * Joda DateTime values are typically formatted as timestamp strings that do not require quotes.
      *
-     * @return {@code true}, indicating that Joda DateTime values should not be quoted in CSV format
+     * @return {@code false}, as Joda DateTime values do not require quoting in CSV format
      */
     @Override
-    public boolean isNonQuotableCsvType() {
-        return true;
+    public boolean isCsvQuoteRequired() {
+        return false;
     }
 
     /**

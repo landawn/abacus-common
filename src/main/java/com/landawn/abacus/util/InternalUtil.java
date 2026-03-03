@@ -151,7 +151,7 @@ public final class InternalUtil {
             return new ArrayList<>();
         }
 
-        return N.asList(a);
+        return N.toList(a);
     }
 
     /**

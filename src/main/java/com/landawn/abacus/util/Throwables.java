@@ -884,7 +884,7 @@ public final class Throwables {
          */
         @SafeVarargs
         public static <T, E extends Exception> Throwables.Iterator<T, E> concat(final Throwables.Iterator<? extends T, ? extends E>... a) {
-            return concat(N.asList(a));
+            return concat(N.toList(a));
         }
 
         /**
@@ -1375,7 +1375,7 @@ public final class Throwables {
         /**
          * Gets a result.
          *
-         * @return the result
+         * @return the supplied value
          * @throws E if an exception occurs while getting the result
          */
         T get() throws E;
@@ -2794,7 +2794,7 @@ public final class Throwables {
          * @param a the first operand
          * @param b the second operand
          * @param c the third operand
-         * @return the operator result
+         * @return the result of applying this operator
          * @throws E if an error occurs during operator execution
          */
         T apply(T a, T b, T c) throws E;
@@ -2811,8 +2811,8 @@ public final class Throwables {
         /**
          * Applies this operator to the given operand.
          *
-         * @param operand the operand
-         * @return the operator result
+         * @param operand the input operand
+         * @return the result of applying this operator
          * @throws E if an error occurs during operator execution
          */
         boolean applyAsBoolean(boolean operand) throws E;
@@ -2829,8 +2829,8 @@ public final class Throwables {
         /**
          * Applies this operator to the given operand.
          *
-         * @param operand the operand
-         * @return the operator result
+         * @param operand the input operand
+         * @return the result of applying this operator
          * @throws E if an error occurs during operator execution
          */
         char applyAsChar(char operand) throws E;
@@ -2847,8 +2847,8 @@ public final class Throwables {
         /**
          * Applies this operator to the given operand.
          *
-         * @param operand the operand
-         * @return the operator result
+         * @param operand the input operand
+         * @return the result of applying this operator
          * @throws E if an error occurs during operator execution
          */
         byte applyAsByte(byte operand) throws E;
@@ -2865,8 +2865,8 @@ public final class Throwables {
         /**
          * Applies this operator to the given operand.
          *
-         * @param operand the operand
-         * @return the operator result
+         * @param operand the input operand
+         * @return the result of applying this operator
          * @throws E if an error occurs during operator execution
          */
         short applyAsShort(short operand) throws E;
@@ -2883,8 +2883,8 @@ public final class Throwables {
         /**
          * Applies this operator to the given operand.
          *
-         * @param operand the operand
-         * @return the operator result
+         * @param operand the input operand
+         * @return the result of applying this operator
          * @throws E if an error occurs during operator execution
          */
         int applyAsInt(int operand) throws E;
@@ -2905,7 +2905,7 @@ public final class Throwables {
          *
          * @param operand the int operand
          * @param obj the object operand
-         * @return the operator result
+         * @return the result of applying this operator
          * @throws E if an error occurs during operator execution
          */
         int applyAsInt(int operand, T obj) throws E;
@@ -2922,8 +2922,8 @@ public final class Throwables {
         /**
          * Applies this operator to the given operand.
          *
-         * @param operand the operand
-         * @return the operator result
+         * @param operand the input operand
+         * @return the result of applying this operator
          * @throws E if an error occurs during operator execution
          */
         long applyAsLong(long operand) throws E;
@@ -2940,8 +2940,8 @@ public final class Throwables {
         /**
          * Applies this operator to the given operand.
          *
-         * @param operand the operand
-         * @return the operator result
+         * @param operand the input operand
+         * @return the result of applying this operator
          * @throws E if an error occurs during operator execution
          */
         float applyAsFloat(float operand) throws E;
@@ -2958,8 +2958,8 @@ public final class Throwables {
         /**
          * Applies this operator to the given operand.
          *
-         * @param operand the operand
-         * @return the operator result
+         * @param operand the input operand
+         * @return the result of applying this operator
          * @throws E if an error occurs during operator execution
          */
         double applyAsDouble(double operand) throws E;
@@ -2978,7 +2978,7 @@ public final class Throwables {
          *
          * @param left the first operand
          * @param right the second operand
-         * @return the operator result
+         * @return the result of applying this operator
          * @throws E if an error occurs during operator execution
          */
         boolean applyAsBoolean(boolean left, boolean right) throws E;
@@ -2997,7 +2997,7 @@ public final class Throwables {
          *
          * @param left the first operand
          * @param right the second operand
-         * @return the operator result
+         * @return the result of applying this operator
          * @throws E if an error occurs during operator execution
          */
         char applyAsChar(char left, char right) throws E;
@@ -3016,7 +3016,7 @@ public final class Throwables {
          *
          * @param left the first operand
          * @param right the second operand
-         * @return the operator result
+         * @return the result of applying this operator
          * @throws E if an error occurs during operator execution
          */
         byte applyAsByte(byte left, byte right) throws E;
@@ -3035,7 +3035,7 @@ public final class Throwables {
          *
          * @param left the first operand
          * @param right the second operand
-         * @return the operator result
+         * @return the result of applying this operator
          * @throws E if an error occurs during operator execution
          */
         short applyAsShort(short left, short right) throws E;
@@ -3054,7 +3054,7 @@ public final class Throwables {
          *
          * @param left the first operand
          * @param right the second operand
-         * @return the operator result
+         * @return the result of applying this operator
          * @throws E if an error occurs during operator execution
          */
         int applyAsInt(int left, int right) throws E;
@@ -3073,7 +3073,7 @@ public final class Throwables {
          *
          * @param left the first operand
          * @param right the second operand
-         * @return the operator result
+         * @return the result of applying this operator
          * @throws E if an error occurs during operator execution
          */
         long applyAsLong(long left, long right) throws E;
@@ -3092,7 +3092,7 @@ public final class Throwables {
          *
          * @param left the first operand
          * @param right the second operand
-         * @return the operator result
+         * @return the result of applying this operator
          * @throws E if an error occurs during operator execution
          */
         float applyAsFloat(float left, float right) throws E;
@@ -3111,7 +3111,7 @@ public final class Throwables {
          *
          * @param left the first operand
          * @param right the second operand
-         * @return the operator result
+         * @return the result of applying this operator
          * @throws E if an error occurs during operator execution
          */
         double applyAsDouble(double left, double right) throws E;
@@ -3131,7 +3131,7 @@ public final class Throwables {
          * @param a the first operand
          * @param b the second operand
          * @param c the third operand
-         * @return the operator result
+         * @return the result of applying this operator
          * @throws E if an error occurs during operator execution
          */
         boolean applyAsBoolean(boolean a, boolean b, boolean c) throws E;
@@ -3151,7 +3151,7 @@ public final class Throwables {
          * @param a the first operand
          * @param b the second operand
          * @param c the third operand
-         * @return the operator result
+         * @return the result of applying this operator
          * @throws E if an error occurs during operator execution
          */
         char applyAsChar(char a, char b, char c) throws E;
@@ -3171,7 +3171,7 @@ public final class Throwables {
          * @param a the first operand
          * @param b the second operand
          * @param c the third operand
-         * @return the operator result
+         * @return the result of applying this operator
          * @throws E if an error occurs during operator execution
          */
         byte applyAsByte(byte a, byte b, byte c) throws E;
@@ -3191,7 +3191,7 @@ public final class Throwables {
          * @param a the first operand
          * @param b the second operand
          * @param c the third operand
-         * @return the operator result
+         * @return the result of applying this operator
          * @throws E if an error occurs during operator execution
          */
         short applyAsShort(short a, short b, short c) throws E;
@@ -3211,7 +3211,7 @@ public final class Throwables {
          * @param a the first operand
          * @param b the second operand
          * @param c the third operand
-         * @return the operator result
+         * @return the result of applying this operator
          * @throws E if an error occurs during operator execution
          */
         int applyAsInt(int a, int b, int c) throws E;
@@ -3231,7 +3231,7 @@ public final class Throwables {
          * @param a the first operand
          * @param b the second operand
          * @param c the third operand
-         * @return the operator result
+         * @return the result of applying this operator
          * @throws E if an error occurs during operator execution
          */
         long applyAsLong(long a, long b, long c) throws E;
@@ -3251,7 +3251,7 @@ public final class Throwables {
          * @param a the first operand
          * @param b the second operand
          * @param c the third operand
-         * @return the operator result
+         * @return the result of applying this operator
          * @throws E if an error occurs during operator execution
          */
         float applyAsFloat(float a, float b, float c) throws E;
@@ -3271,7 +3271,7 @@ public final class Throwables {
          * @param a the first operand
          * @param b the second operand
          * @param c the third operand
-         * @return the operator result
+         * @return the result of applying this operator
          * @throws E if an error occurs during operator execution
          */
         double applyAsDouble(double a, double b, double c) throws E;
@@ -5253,7 +5253,7 @@ public final class Throwables {
         /**
          * Performs this operation on the given arguments.
          *
-         * @param idx the index
+         * @param idx the zero-based index associated with the value
          * @param e the boolean element at the index
          * @throws E if an error occurs during operation execution
          */
@@ -5272,7 +5272,7 @@ public final class Throwables {
         /**
          * Performs this operation on the given arguments.
          *
-         * @param idx the index
+         * @param idx the zero-based index associated with the value
          * @param e the char element at the index
          * @throws E if an error occurs during operation execution
          */
@@ -5291,7 +5291,7 @@ public final class Throwables {
         /**
          * Performs this operation on the given arguments.
          *
-         * @param idx the index
+         * @param idx the zero-based index associated with the value
          * @param e the byte element at the index
          * @throws E if an error occurs during operation execution
          */
@@ -5310,7 +5310,7 @@ public final class Throwables {
         /**
          * Performs this operation on the given arguments.
          *
-         * @param idx the index
+         * @param idx the zero-based index associated with the value
          * @param e the short element at the index
          * @throws E if an error occurs during operation execution
          */
@@ -5329,7 +5329,7 @@ public final class Throwables {
         /**
          * Performs this operation on the given arguments.
          *
-         * @param idx the index
+         * @param idx the zero-based index associated with the value
          * @param e the int element at the index
          * @throws E if an error occurs during operation execution
          */
@@ -5348,7 +5348,7 @@ public final class Throwables {
         /**
          * Performs this operation on the given arguments.
          *
-         * @param idx the index
+         * @param idx the zero-based index associated with the value
          * @param e the long element at the index
          * @throws E if an error occurs during operation execution
          */
@@ -5367,7 +5367,7 @@ public final class Throwables {
         /**
          * Performs this operation on the given arguments.
          *
-         * @param idx the index
+         * @param idx the zero-based index associated with the value
          * @param e the float element at the index
          * @throws E if an error occurs during operation execution
          */
@@ -5386,7 +5386,7 @@ public final class Throwables {
         /**
          * Performs this operation on the given arguments.
          *
-         * @param idx the index
+         * @param idx the zero-based index associated with the value
          * @param e the double element at the index
          * @throws E if an error occurs during operation execution
          */

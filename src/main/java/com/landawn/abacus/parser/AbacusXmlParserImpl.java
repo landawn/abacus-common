@@ -2853,14 +2853,8 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
         }
 
         Class<?> nodeClass = null;
-        Map<String, Class<?>> nodeNameClassMap = nodeNameClassMapPool.get(cls);
-
-        if (nodeNameClassMap == null) {
-            nodeNameClassMap = new ConcurrentHashMap<>();
-            nodeNameClassMapPool.put(cls, nodeNameClassMap);
-        } else {
-            nodeClass = nodeNameClassMap.get(nodeName);
-        }
+        Map<String, Class<?>> nodeNameClassMap = nodeNameClassMapPool.computeIfAbsent(cls, k -> new ConcurrentHashMap<>());
+        nodeClass = nodeNameClassMap.get(nodeName);
 
         if (nodeClass == null) {
             String packName = null;
@@ -2951,7 +2945,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
     /**
      * The Class XmlSAXHandler.
      *
-     * @param <T>
+     * @param <T> the target object type produced by this SAX handler
      */
     static final class XmlSAXHandler<T> extends DefaultHandler { // NOSONAR
 
@@ -3326,6 +3320,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
 
                     if (propInfo == null) {
                         if (ignoreUnmatchedProperty) {
+                            inIgnorePropRefCount = 1;
                             break;
                         } else {
                             throw new ParsingException("Unknown property element: " + beanOrPropName + " for class: " + beanClass.getCanonicalName());

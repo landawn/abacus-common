@@ -24,6 +24,9 @@ import java.util.Date;
 import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 
+/**
+ * Type handler for {@link java.util.Date} objects, providing conversion between {@code java.util.Date} and its string representation.
+ */
 @SuppressWarnings({ "java:S1942", "java:S2143", "java:S2160" })
 public class JUDateType extends AbstractDateType<Date> {
 

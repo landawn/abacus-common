@@ -115,19 +115,19 @@ public class DoubleStream103Test extends TestBase {
             DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0);
 
             List<Double> result = stream.toList();
-            assertHaveSameElements(N.asSet(1.0, 2.0, 3.0, 4.0, 5.0), result);
+            assertHaveSameElements(N.toSet(1.0, 2.0, 3.0, 4.0, 5.0), result);
         }
         {
             DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0);
 
             Set<Double> result = stream.toSet();
-            assertHaveSameElements(N.asSet(1.0, 2.0, 3.0, 4.0, 5.0), result);
+            assertHaveSameElements(N.toSet(1.0, 2.0, 3.0, 4.0, 5.0), result);
         }
         {
             DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0);
 
             Set<Double> result = stream.toCollection(Suppliers.ofLinkedHashSet());
-            assertHaveSameElements(N.asSet(1.0, 2.0, 3.0, 4.0, 5.0), result);
+            assertHaveSameElements(N.toSet(1.0, 2.0, 3.0, 4.0, 5.0), result);
         }
     }
 

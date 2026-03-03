@@ -57,6 +57,7 @@ public interface ObjLongPredicate<T> extends Throwables.ObjLongPredicate<T, Runt
      * @param u the second input argument, a primitive long value
      * @return {@code true} if the input arguments match the predicate, {@code false} otherwise
      */
+    // @ai-ignore LongObj*/ObjLong* argument order convention - intentional: class name prefix determines parameter order. LongObj* has long first; ObjLong* has object first. Do not suggest reordering.
     @Override
     boolean test(T t, long u);
 

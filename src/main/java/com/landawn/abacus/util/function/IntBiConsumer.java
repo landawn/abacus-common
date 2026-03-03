@@ -44,11 +44,11 @@ public interface IntBiConsumer extends Throwables.IntBiConsumer<RuntimeException
      * mapPutter.accept(1, 100);
      * }</pre>
      *
-     * @param t the first {@code int} argument
-     * @param u the second {@code int} argument
+     * @param a the first {@code int} argument
+     * @param b the second {@code int} argument
      */
     @Override
-    void accept(int t, int u);
+    void accept(int a, int b);
 
     /**
      * Returns a composed {@code IntBiConsumer} that performs, in sequence, this operation followed by
@@ -69,9 +69,9 @@ public interface IntBiConsumer extends Throwables.IntBiConsumer<RuntimeException
      *         the {@code after} operation
      */
     default IntBiConsumer andThen(final IntBiConsumer after) {
-        return (t, u) -> {
-            accept(t, u);
-            after.accept(t, u);
+        return (a, b) -> {
+            accept(a, b);
+            after.accept(a, b);
         };
     }
 }

@@ -74,9 +74,9 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
             if (x[i] == null) {
                 sb.append(NULL_CHAR_ARRAY);
             } else {
-                sb.append(WD.QUOTATION_S);
+                sb.append(WD.SINGLE_QUOTE);
                 sb.append(x[i]);
-                sb.append(WD.QUOTATION_S);
+                sb.append(WD.SINGLE_QUOTE);
             }
         }
 
@@ -121,28 +121,24 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
         final int len = elements.length;
         final Character[] array = new Character[len];
 
-        if (len > 0) {
-            boolean isQuoted = (elements[0].length() > 1) && ((elements[0].charAt(0) == WD._QUOTATION_S) || (elements[0].charAt(0) == WD._QUOTATION_D));
+        for (int i = 0; i < len; i++) {
+            final String element = elements[i];
 
-            if (isQuoted) {
-                for (int i = 0; i < len; i++) {
-                    if (elements[i].length() == 4 && elements[i].equals(NULL_STRING)) {
-                        array[i] = null;
-                    } else if (elements[i].length() >= 2) {
-                        array[i] = elementType.valueOf(elements[i].substring(1, elements[i].length() - 1));
-                    } else {
-                        array[i] = elementType.valueOf(elements[i]);
-                    }
-                }
-            } else {
-                for (int i = 0; i < len; i++) {
-                    if (elements[i].length() == 4 && elements[i].equals(NULL_STRING)) {
-                        array[i] = null;
-                    } else {
-                        array[i] = elementType.valueOf(elements[i]);
-                    }
+            if (element.length() == 4 && element.equals(NULL_STRING)) {
+                array[i] = null;
+                continue;
+            }
+
+            if (element.length() >= 2) {
+                final char quoteChar = element.charAt(0);
+
+                if ((quoteChar == WD._SINGLE_QUOTE || quoteChar == WD._DOUBLE_QUOTE) && element.charAt(element.length() - 1) == quoteChar) {
+                    array[i] = elementType.valueOf(element.substring(1, element.length() - 1));
+                    continue;
                 }
             }
+
+            array[i] = elementType.valueOf(element);
         }
 
         return array;

@@ -413,7 +413,7 @@ public class ActivityPrint2025Test extends TestBase {
         assertTrue(str.contains("createdTime"));
         assertTrue(str.contains("liveTime"));
         assertTrue(str.contains("maxIdleTime"));
-        assertTrue(str.contains("lastAccessedTime"));
+        assertTrue(str.contains("lastAccessTime"));
         assertTrue(str.contains("accessCount"));
     }
 

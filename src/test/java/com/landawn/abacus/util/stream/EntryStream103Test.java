@@ -1854,10 +1854,10 @@ public class EntryStream103Test extends TestBase {
         map.put("e", 5);
 
         EntryStream<String, Integer> stream = EntryStream.of(map);
-        assertTrue(stream.countMatchBetween(2, 3, e -> e.getValue() > 3));
+        assertTrue(stream.isMatchCountBetween(2, 3, e -> e.getValue() > 3));
 
         EntryStream<String, Integer> stream2 = EntryStream.of(map);
-        assertFalse(stream2.countMatchBetween(4, 5, e -> e.getValue() > 3));
+        assertFalse(stream2.isMatchCountBetween(4, 5, e -> e.getValue() > 3));
     }
 
     @Test
@@ -1868,10 +1868,10 @@ public class EntryStream103Test extends TestBase {
         map.put("c", 3);
 
         EntryStream<String, Integer> stream = EntryStream.of(map);
-        assertTrue(stream.countMatchBetween(1, 2, (k, v) -> v > 2));
+        assertTrue(stream.isMatchCountBetween(1, 2, (k, v) -> v > 2));
 
         EntryStream<String, Integer> stream2 = EntryStream.of(map);
-        assertFalse(stream2.countMatchBetween(3, 3, (k, v) -> v > 2));
+        assertFalse(stream2.isMatchCountBetween(3, 3, (k, v) -> v > 2));
     }
 
     @Test

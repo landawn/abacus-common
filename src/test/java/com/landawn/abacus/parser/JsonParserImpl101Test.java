@@ -503,7 +503,7 @@ public class JsonParserImpl101Test extends TestBase {
 
     @Test
     public void testConfiguration_IgnoredProperties() {
-        JsonDeserializationConfig config = JDC.create().ignoreUnmatchedProperty(true).setIgnoredPropNames(Map.class, N.asSet("ignored"));
+        JsonDeserializationConfig config = JDC.create().ignoreUnmatchedProperty(true).setIgnoredPropNames(Map.class, N.toSet("ignored"));
 
         String json = "{\"ignored\":\"value1\",\"kept\":\"value2\",\"unknown\":\"value3\"}";
         Map<String, Object> result = parser.deserialize(json, config, Map.class);

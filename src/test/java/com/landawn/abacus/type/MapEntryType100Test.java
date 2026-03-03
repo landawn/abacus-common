@@ -97,6 +97,11 @@ public class MapEntryType100Test extends TestBase {
     }
 
     @Test
+    public void testValueOfWithMultipleEntriesThrowsException() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> mapEntryType.valueOf("{\"a\":1,\"b\":2}"));
+    }
+
+    @Test
     public void testAppendToWithNull() throws IOException {
         StringWriter writer = new StringWriter();
         mapEntryType.appendTo(writer, null);

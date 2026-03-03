@@ -291,7 +291,7 @@ import com.landawn.abacus.type.Type;
  *   <li><b>String Pooling:</b> Benefit from JVM string pooling for repeated property names</li>
  * </ul>
  *
- * <p><b>Example: REST API Integration</b>
+ * <p><b>Usage Examples: REST API Integration</b>
  * <pre>{@code
  * @RestController
  * public class UserController {

@@ -66,14 +66,14 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
     }
 
     /**
-     * Checks if this type represents values that should not be quoted in CSV format.
-     * Calendar values are typically formatted as date strings that don't require quotes.
+     * Indicates whether values of this type require quoting in CSV format.
+     * Calendar values are typically formatted as date strings that do not require quotes.
      *
-     * @return {@code true}, indicating that Calendar values should not be quoted in CSV format
+     * @return {@code false}, as calendar values do not require quoting in CSV format
      */
     @Override
-    public boolean isNonQuotableCsvType() {
-        return true;
+    public boolean isCsvQuoteRequired() {
+        return false;
     }
 
     /**

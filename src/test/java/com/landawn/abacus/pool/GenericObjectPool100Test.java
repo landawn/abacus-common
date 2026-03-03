@@ -182,6 +182,22 @@ public class GenericObjectPool100Test extends TestBase {
     }
 
     @Test
+    public void testAddWithMemoryMeasureAndUnlimitedMemory() {
+        ObjectPool.MemoryMeasure<TestPoolable> measure = e -> 100;
+        GenericObjectPool<TestPoolable> memPool = new GenericObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 0, measure);
+
+        try {
+            for (int i = 0; i < 5; i++) {
+                assertTrue(memPool.add(new TestPoolable("test" + i)));
+            }
+
+            assertEquals(5, memPool.size());
+        } finally {
+            memPool.close();
+        }
+    }
+
+    @Test
     public void testAddWithAutoDestroy() {
         for (int i = 0; i < 10; i++) {
             pool.add(new TestPoolable("test" + i));

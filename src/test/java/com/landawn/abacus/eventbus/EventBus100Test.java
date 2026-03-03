@@ -168,6 +168,22 @@ public class EventBus100Test extends TestBase {
     }
 
     @Test
+    public void testRegisterRejectsStaticAnnotatedSubscriberMethod() {
+        Assertions.assertThrows(RuntimeException.class, () -> eventBus.register(new StaticAnnotatedSubscriber()));
+    }
+
+    @Test
+    public void testRegisterSubscriberWithInheritedOnMethod() {
+        InheritedSubscriberChild subscriber = new InheritedSubscriberChild();
+
+        eventBus.register(subscriber, "inherited");
+        eventBus.post("inherited", "inherited-event");
+
+        Assertions.assertEquals(1, subscriber.receivedEvents.size());
+        Assertions.assertEquals("inherited-event", subscriber.receivedEvents.get(0));
+    }
+
+    @Test
     public void testRegisterThrowsExceptionForLambdaWithoutEventId() {
         Subscriber<Object> generalSubscriber = event -> {
         };
@@ -237,6 +253,12 @@ public class EventBus100Test extends TestBase {
 
         Assertions.assertEquals(1, subscriber.receivedEvents.size());
         Assertions.assertEquals("Sticky Message", subscriber.receivedEvents.get(0));
+    }
+
+    @Test
+    public void testPostStickyRejectsNullEvent() {
+        Assertions.assertThrows(NullPointerException.class, () -> eventBus.postSticky((Object) null));
+        Assertions.assertThrows(NullPointerException.class, () -> eventBus.postSticky("eventId", null));
     }
 
     @Test
@@ -540,6 +562,25 @@ public class EventBus100Test extends TestBase {
         public void onSubSubEvent(SubSubEvent event) {
             subSubEventCount++;
         }
+    }
+
+    public static class StaticAnnotatedSubscriber {
+        @Subscribe
+        public static void onEvent(String event) { // NOSONAR
+            // no-op
+        }
+    }
+
+    public static class InheritedSubscriberBase implements Subscriber<String> {
+        final List<String> receivedEvents = new ArrayList<>();
+
+        @Override
+        public void on(String event) {
+            receivedEvents.add(event);
+        }
+    }
+
+    public static class InheritedSubscriberChild extends InheritedSubscriberBase {
     }
 
     public static class BaseEvent {

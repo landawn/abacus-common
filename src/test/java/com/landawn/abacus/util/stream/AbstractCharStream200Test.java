@@ -104,7 +104,7 @@ public class AbstractCharStream200Test extends TestBase {
     public void testDistinct() {
         stream = CharStream.of(new char[] { 'a', 'b', 'a', 'c', 'b', 'd' });
         List<Character> result = stream.distinct().boxed().toList();
-        assertEquals(N.asSet('a', 'b', 'c', 'd'), N.newHashSet(result));
+        assertEquals(N.toSet('a', 'b', 'c', 'd'), N.newHashSet(result));
     }
 
     @Test
@@ -751,9 +751,9 @@ public class AbstractCharStream200Test extends TestBase {
         stream = CharStream.of(new char[] { 'a', 'b', 'a', 'c' });
         Map<String, Set<Character>> map = stream.groupTo(c -> String.valueOf(c), Collectors.toSet(), () -> new LinkedHashMap<>());
         assertEquals(3, map.size());
-        assertEquals(N.asSet('a'), map.get("a"));
-        assertEquals(N.asSet('b'), map.get("b"));
-        assertEquals(N.asSet('c'), map.get("c"));
+        assertEquals(N.toSet('a'), map.get("a"));
+        assertEquals(N.toSet('b'), map.get("b"));
+        assertEquals(N.toSet('c'), map.get("c"));
         assertTrue(map instanceof java.util.LinkedHashMap);
     }
 

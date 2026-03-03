@@ -254,7 +254,7 @@ import java.math.BigInteger;
  *   <li><b>Scientific Computing:</b> Exact rational number arithmetic in algorithms</li>
  * </ul>
  *
- * <p><b>Example: Financial Interest Calculation</b>
+ * <p><b>Usage Examples: Financial Interest Calculation</b>
  * <pre>{@code
  * public class FinancialCalculator {
  *     public static Fraction calculateCompoundInterest(
@@ -1272,10 +1272,8 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * @param fraction the fraction to subtract, must not be {@code null}
      * @param isAdd {@code true} to add, {@code false} to subtract
      * @return a {@code Fraction} instance with the resulting values
-     * @throws IllegalArgumentException
-     *             if the fraction is {@code null}
-     * @throws ArithmeticException
-     *             if the resulting numerator or denominator cannot be represented in an {@code int}.
+     * @throws IllegalArgumentException if {@code fraction} is {@code null}
+     * @throws ArithmeticException if the resulting numerator or denominator cannot be represented in an {@code int}
      */
     private Fraction addSub(final Fraction fraction, final boolean isAdd) {
         if (fraction == null) {

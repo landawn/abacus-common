@@ -42,6 +42,7 @@ public interface BiIntObjPredicate<T> extends Throwables.BiIntObjPredicate<T, Ru
      * @param t the third input argument (object value)
      * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
      */
+    // @ai-ignore BiIntObj*/IntBiObj*/BiObjInt*/ObjBiInt* argument order convention - intentional: class name prefix determines parameter order. BiIntObj* has two ints first; IntBiObj* has int then two objects; BiObjInt* has two objects then int; ObjBiInt* has object then two ints. Do not suggest reordering.
     @Override
     boolean test(int i, int j, T t);
 

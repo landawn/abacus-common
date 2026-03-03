@@ -317,8 +317,17 @@ public class Multimap100Test extends TestBase {
     public void testReplaceValues() {
         multimap.putValues("key", Arrays.asList(1, 2, 3));
 
-        assertTrue(multimap.replaceValues("key", N.asList(99)));
+        assertTrue(multimap.replaceValues("key", N.toList(99)));
         assertEquals(1, multimap.get("key").size());
+    }
+
+    @Test
+    public void testReplaceValuesWithSameCollectionInstance() {
+        multimap.putValues("key", Arrays.asList(1, 2, 3));
+
+        List<Integer> sameCollection = multimap.get("key");
+        assertTrue(multimap.replaceValues("key", sameCollection));
+        assertEquals(Arrays.asList(1, 2, 3), multimap.get("key"));
     }
 
     @Test
@@ -360,6 +369,14 @@ public class Multimap100Test extends TestBase {
     }
 
     @Test
+    public void testReplaceAllWithAliasedCollection() {
+        multimap.putValues("key", Arrays.asList(1, 2, 3));
+
+        multimap.replaceAll((k, v) -> v.subList(1, v.size()));
+        assertEquals(Arrays.asList(2, 3), multimap.get("key"));
+    }
+
+    @Test
     public void testComputeIfAbsent() {
         List<Integer> result = multimap.computeIfAbsent("key", k -> Arrays.asList(1, 2, 3));
         assertEquals(3, result.size());
@@ -385,6 +402,15 @@ public class Multimap100Test extends TestBase {
     }
 
     @Test
+    public void testComputeIfPresentWithAliasedCollection() {
+        multimap.putValues("key", Arrays.asList(1, 2, 3));
+
+        List<Integer> result = multimap.computeIfPresent("key", (k, v) -> v.subList(1, v.size()));
+        assertEquals(Arrays.asList(2, 3), result);
+        assertEquals(Arrays.asList(2, 3), multimap.get("key"));
+    }
+
+    @Test
     public void testCompute() {
         List<Integer> result1 = multimap.compute("key", (k, v) -> {
             if (v == null) {
@@ -400,6 +426,15 @@ public class Multimap100Test extends TestBase {
             return newList;
         });
         assertEquals(3, result2.size());
+    }
+
+    @Test
+    public void testComputeWithAliasedCollection() {
+        multimap.putValues("key", Arrays.asList(1, 2, 3));
+
+        List<Integer> result = multimap.compute("key", (k, v) -> v.subList(0, 2));
+        assertEquals(Arrays.asList(1, 2), result);
+        assertEquals(Arrays.asList(1, 2), multimap.get("key"));
     }
 
     @Test
@@ -917,7 +952,7 @@ public class Multimap100Test extends TestBase {
         multimap.putValues("key1", Arrays.asList(1, 2, 3, 4));
         multimap.putValues("key2", Arrays.asList(2, 3, 4, 5));
 
-        assertTrue(multimap.replaceValuesIf(k -> k.equals("key1"), N.asList(99)));
+        assertTrue(multimap.replaceValuesIf(k -> k.equals("key1"), N.toList(99)));
         assertEquals(1, multimap.get("key1").size());
         assertTrue(multimap.get("key1").contains(99));
         assertFalse(multimap.get("key1").contains(2));
@@ -929,7 +964,7 @@ public class Multimap100Test extends TestBase {
         multimap.putValues("key1", Arrays.asList(1, 2, 3, 4));
         multimap.putValues("key2", Arrays.asList(2, 3));
 
-        assertTrue(multimap.replaceValuesIf((k, v) -> v.size() > 3, N.asList(99)));
+        assertTrue(multimap.replaceValuesIf((k, v) -> v.size() > 3, N.toList(99)));
         assertTrue(multimap.get("key1").contains(99));
         assertEquals(1, multimap.get("key1").size());
         assertEquals(2, multimap.get("key2").size());
@@ -1147,7 +1182,7 @@ public class Multimap100Test extends TestBase {
     @Test
     public void testReplaceEdgeCases() {
         assertFalse(multimap.replaceEntry("key", 1, 2));
-        assertFalse(multimap.replaceValues("key", N.asList(1)));
+        assertFalse(multimap.replaceValues("key", N.toList(1)));
 
         multimap.put("key", 1);
         assertTrue(multimap.replaceEntry("key", 1, 1));

@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -100,6 +102,7 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      */
     @Override
     default Predicate<T> and(final java.util.function.Predicate<? super T> other) {
+        Objects.requireNonNull(other);
         return t -> test(t) && other.test(t);
     }
 
@@ -129,6 +132,7 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      */
     @Override
     default Predicate<T> or(final java.util.function.Predicate<? super T> other) {
+        Objects.requireNonNull(other);
         return t -> test(t) || other.test(t);
     }
 

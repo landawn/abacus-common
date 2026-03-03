@@ -674,9 +674,6 @@ public abstract class RateLimiter {
          *     during rate limiter operations.</li>
          * </ul>
          *
-         * <p><i>Note:</i> We always hold the mutex when calling this. TODO(cpovirk): Is that important?
-         * Perhaps we need to guarantee that each call to reserveEarliestAvailable, etc. sees a value
-         * &gt;= the previous? Also, is it OK that we don't hold the mutex when sleeping?
          *
          * @return the elapsed time in microseconds, must be monotonically increasing
          * @see #sleepMicrosUninterruptibly(long)

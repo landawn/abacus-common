@@ -53,10 +53,10 @@ public interface DoubleBinaryOperator extends Throwables.DoubleBinaryOperator<Ru
      * double minimum = min.applyAsDouble(5.5, 3.3);   // Returns 3.3
      * }</pre>
      *
-     * @param left the first operand
-     * @param right the second operand
+     * @param a the first operand
+     * @param b the second operand
      * @return the operator result
      */
     @Override
-    double applyAsDouble(double left, double right);
+    double applyAsDouble(double a, double b);
 }

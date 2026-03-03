@@ -146,7 +146,7 @@ public class ParserUtil100Test extends TestBase {
 
         PropInfo idPropInfo = beanInfo.getPropInfo("id");
         assertNotNull(idPropInfo);
-        assertTrue(idPropInfo.isMarkedToId);
+        assertTrue(idPropInfo.isMarkedAsId);
 
         PropInfo agePropInfo = beanInfo.getPropInfo("age");
         assertNotNull(agePropInfo);
@@ -220,10 +220,10 @@ public class ParserUtil100Test extends TestBase {
     public void testBeanInfoGetPropInfoQueue() {
         BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
 
-        var queue = beanInfo.getPropInfoQueue("name");
+        var queue = beanInfo.getPropInfoChain("name");
         assertEquals(0, queue.size());
 
-        var emptyQueue = beanInfo.getPropInfoQueue("nested.property");
+        var emptyQueue = beanInfo.getPropInfoChain("nested.property");
         assertTrue(emptyQueue.isEmpty());
     }
 

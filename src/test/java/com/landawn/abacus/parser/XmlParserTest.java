@@ -56,11 +56,11 @@ public class XmlParserTest extends AbstractXmlParserTest {
         final Account account = createAccount(Account.class);
 
         final GenericEntity genericBean = new GenericEntity();
-        genericBean.setBooleanList(N.asList(true, false));
-        genericBean.setCharList(N.asList('a', 'b', '黎'));
-        genericBean.setIntList(N.asList(1, 2, 3));
-        genericBean.setStringList(N.asList("abc", "123"));
-        genericBean.setAccountList(N.asList(account));
+        genericBean.setBooleanList(N.toList(true, false));
+        genericBean.setCharList(N.toList('a', 'b', '黎'));
+        genericBean.setIntList(N.toList(1, 2, 3));
+        genericBean.setStringList(N.toList("abc", "123"));
+        genericBean.setAccountList(N.toList(account));
         final Map<String, Account> map = N.asMap(account.getFirstName(), account);
         genericBean.setAccountMap(map);
 
@@ -80,11 +80,11 @@ public class XmlParserTest extends AbstractXmlParserTest {
         final Account account = createAccount(Account.class);
 
         final GenericEntity genericBean = new GenericEntity();
-        genericBean.setBooleanList(N.asList(true, false));
-        genericBean.setCharList(N.asList('a', 'b', '黎'));
-        genericBean.setIntList(N.asList(1, 2, 3));
-        genericBean.setStringList(N.asList("abc", "123"));
-        genericBean.setAccountList(N.asList(account));
+        genericBean.setBooleanList(N.toList(true, false));
+        genericBean.setCharList(N.toList('a', 'b', '黎'));
+        genericBean.setIntList(N.toList(1, 2, 3));
+        genericBean.setStringList(N.toList("abc", "123"));
+        genericBean.setAccountList(N.toList(account));
         final Map<String, Account> map = N.asMap(account.getFirstName(), account);
         genericBean.setAccountMap(map);
 
@@ -109,7 +109,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
         final Account account = createAccount(Account.class);
 
         final GenericEntity genericBean = new GenericEntity();
-        genericBean.setAccountList(N.asList(account));
+        genericBean.setAccountList(N.toList(account));
         final Map<String, Account> map = N.asMap(account.getFirstName(), account);
         genericBean.setAccountMap(map);
 
@@ -193,7 +193,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
         final String[] array2 = xmlParser.deserialize(str, String[].class);
         assertTrue(N.equals(array, array2));
 
-        final List<String> list = N.asList(nullElement);
+        final List<String> list = N.toList(nullElement);
         str = xmlParser.serialize(list);
         N.println(str);
 
@@ -246,7 +246,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
         final Object[] array2 = xmlParser.deserialize(str, XDC.of(Account.class), Object[].class);
         assertTrue(N.equals(array, array2));
 
-        final List<?> list = N.asList(account, nullElement);
+        final List<?> list = N.toList(account, nullElement);
         str = xmlParser.serialize(list);
         N.println(str);
 
@@ -283,7 +283,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
         map.put("lastName", null);
         map.put("account", account);
 
-        final Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Map.class, N.asSet("id"));
+        final Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Map.class, N.toSet("id"));
 
         XmlSerializationConfig xsc = XSC.of(Exclusion.DEFAULT, ignoredPropNames).prettyFormat(true);
         str = xmlParser.serialize(map, xsc);
@@ -292,7 +292,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
         final Map<String, Object> map2 = xmlParser.deserialize(str, XDC.of(Account.class), Map.class);
         N.println(map2);
 
-        str = xmlParser.serialize(N.asList(map), xsc);
+        str = xmlParser.serialize(N.toList(map), xsc);
         N.println(str);
 
         final XmlDeserializationConfig xdc = XDC.of(Map.class);
@@ -300,7 +300,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
         N.println(list);
 
         final Map<String, Object> map3 = new HashMap<>();
-        map3.put("accountList", N.asList(account, null, account));
+        map3.put("accountList", N.toList(account, null, account));
         map3.put("accountArray", N.asArray(account, null, account));
 
         xsc = XSC.of(Exclusion.DEFAULT, ignoredPropNames).prettyFormat(true);
@@ -327,14 +327,14 @@ public class XmlParserTest extends AbstractXmlParserTest {
 
         N.println(xsc1);
 
-        assertTrue(N.asSet(xsc1).contains(xsc2));
+        assertTrue(N.toSet(xsc1).contains(xsc2));
 
         final XmlDeserializationConfig xdc1 = XDC.of(String.class, String.class, true, null);
         final XmlDeserializationConfig xdc2 = XDC.of(String.class, String.class, true, null);
 
         N.println(xdc1);
 
-        assertTrue(N.asSet(xdc1).contains(xdc2));
+        assertTrue(N.toSet(xdc1).contains(xdc2));
     }
 
     @Test
@@ -400,7 +400,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
 
     @Test
     public void testSerialize_List() throws Exception {
-        final List<String> list = N.asList("abc", "123");
+        final List<String> list = N.toList("abc", "123");
         final String xml = xmlParser.serialize(list);
 
         N.println(xml);
@@ -525,7 +525,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
     public void testSerialize_2() throws Exception {
         final XBean xBean = createXBean();
 
-        final Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(XBean.class, N.asSet("typeBoolean", "typeShort", "typeLong"));
+        final Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(XBean.class, N.toSet("typeBoolean", "typeShort", "typeLong"));
         final XmlSerializationConfig sc = XSC.create();
         sc.setIgnoredPropNames(ignoredPropNames);
         sc.writeTypeInfo(true);
@@ -548,7 +548,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
     public void testSerialize_3() throws Exception {
         final XBean xBean = createXBean();
 
-        final Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(XBean.class, N.asSet("typeBoolean", "typeShort", "typeLong"));
+        final Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(XBean.class, N.toSet("typeBoolean", "typeShort", "typeLong"));
         final XmlSerializationConfig sc = XSC.create();
         sc.setIgnoredPropNames(ignoredPropNames);
         sc.setExclusion(Exclusion.NONE);
@@ -571,7 +571,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
     public void testSerialize_4() throws Exception {
         final XBean xBean = createXBean();
 
-        final Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(XBean.class, N.asSet("typeBoolean", "typeShort", "typeLong"));
+        final Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(XBean.class, N.toSet("typeBoolean", "typeShort", "typeLong"));
         final XmlSerializationConfig sc = XSC.create();
         sc.setIgnoredPropNames(ignoredPropNames);
         sc.setExclusion(Exclusion.NONE);
@@ -597,9 +597,9 @@ public class XmlParserTest extends AbstractXmlParserTest {
         map.put("intArray", Array.of(1, 2, 3));
         map.put("charArray", Array.of('a', 'b', 'c'));
         map.put("array", N.asArray("abc", "123"));
-        map.put("intList", N.asList(1, 2, 3));
-        map.put("charList", N.asList('a', 'b', 'c'));
-        map.put("list", N.asList("abc", "123"));
+        map.put("intList", N.toList(1, 2, 3));
+        map.put("charList", N.toList('a', 'b', 'c'));
+        map.put("list", N.toList("abc", "123"));
 
         final String str = xmlParser.serialize(map);
 
@@ -620,9 +620,9 @@ public class XmlParserTest extends AbstractXmlParserTest {
         map.put("intArray", Array.of(1, 2, 3));
         map.put("charArray", Array.of('a', 'b', 'c'));
         map.put("array", new Object[] { "abc", "123" });
-        map.put("intList", N.asList(1, 2, 3));
-        map.put("charList", N.asList('a', 'b', 'c'));
-        map.put("list", N.asList("abc", "123"));
+        map.put("intList", N.toList(1, 2, 3));
+        map.put("charList", N.toList('a', 'b', 'c'));
+        map.put("list", N.toList("abc", "123"));
 
         final String str = xmlParser.serialize(map);
 
@@ -643,9 +643,9 @@ public class XmlParserTest extends AbstractXmlParserTest {
         map.put("intArray", Array.of(1, 2, 3));
         map.put("charArray", Array.of('a', 'b', 'c'));
         map.put("array", new Object[] { createAccount(Account.class), createAccount(Account.class) });
-        map.put("intList", N.asList(1, 2, 3));
-        map.put("charList", N.asList('a', 'b', 'c'));
-        map.put("list", N.asList(createAccount(Account.class), createAccount(Account.class)));
+        map.put("intList", N.toList(1, 2, 3));
+        map.put("charList", N.toList('a', 'b', 'c'));
+        map.put("list", N.toList(createAccount(Account.class), createAccount(Account.class)));
 
         String str = xmlParser.serialize(map);
 
@@ -730,7 +730,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
         XmlSerializationConfig xsc = XSC.of(true, false);
 
         xsc.setExclusion(Exclusion.NONE);
-        String xml = xmlParser.serialize(N.asMap(account), xsc);
+        String xml = xmlParser.serialize(Beans.deepBeanToMap(account), xsc);
         N.println(xml);
 
         XmlDeserializationConfig xdc = XDC.create();
@@ -738,7 +738,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
 
         N.println(account2);
 
-        xml = xmlParser.serialize(N.asList(account), xsc);
+        xml = xmlParser.serialize(N.toList(account), xsc);
         N.println(xml);
 
         xdc = XDC.of(Account.class);
@@ -754,7 +754,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
 
         xsc = XSC.of(false, true);
         xsc.setExclusion(Exclusion.NONE);
-        xml = xmlParser.serialize(N.asMap(account), xsc);
+        xml = xmlParser.serialize(Beans.deepBeanToMap(account), xsc);
         N.println(xml);
 
         xdc = XDC.create();
@@ -768,7 +768,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
     public void testSerialize_ignorePropName() throws Exception {
         final Account account = createAccountWithContact(Account.class);
 
-        final Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Account.class, N.asSet("firstName", "contact"));
+        final Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Account.class, N.toSet("firstName", "contact"));
         final XmlSerializationConfig sc = XSC.create();
         sc.setIgnoredPropNames(ignoredPropNames);
 
@@ -790,7 +790,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
     public void testSerialize_ignorePropName_2() throws Exception {
         final Account account = createAccountWithContact(Account.class);
 
-        final Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Map.class, N.asSet("firstName", "contact"));
+        final Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Map.class, N.toSet("firstName", "contact"));
         final XmlSerializationConfig sc = XSC.create();
         sc.setIgnoredPropNames(ignoredPropNames);
 
@@ -813,7 +813,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
         final String xml = "<account><gui_1>9b1b4964298a4868a4ab95ccf6a5f987</gui_1><emailAddress>48c6a440fa114de28fad1bf04fa66090@earth.com</emailAddress><firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName><birthDate>1413839551838</birthDate><lastUpdateTime>1413839551838</lastUpdateTime><createdTime>1413839551838</createdTime><contact_1><accountContact><address>ca, US</address><city>sunnyvale</city><state>CA</state><country>U.S.</country></accountContact></contact_1></account>";
         N.println(xml);
 
-        Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Account.class, N.asSet("firstName", "contact"));
+        Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Account.class, N.toSet("firstName", "contact"));
         final XmlDeserializationConfig dc = XDC.create();
         dc.setIgnoredPropNames(ignoredPropNames);
         Account account2 = xmlParser.deserialize(xml, dc, Account.class);
@@ -829,7 +829,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
 
         }
 
-        ignoredPropNames = N.asMap(Account.class, N.asSet("gui_1", "contact_1"));
+        ignoredPropNames = N.asMap(Account.class, N.toSet("gui_1", "contact_1"));
         account2 = xmlParser.deserialize(xml, XDC.of(false, ignoredPropNames), Account.class);
 
         assertNotNull(account2.getFirstName());
@@ -884,7 +884,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
         }
 
         {
-            final String xml = xmlParser.serialize(N.asList("abc", "123"));
+            final String xml = xmlParser.serialize(N.toList("abc", "123"));
 
             N.println(xml);
 
@@ -897,7 +897,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
 
     @Test
     public void testSerialize_list() throws Exception {
-        final List<Account> accounts = N.asList(createAccount(Account.class), createAccount(Account.class));
+        final List<Account> accounts = N.toList(createAccount(Account.class), createAccount(Account.class));
 
         final String xml = xmlParser.serialize(accounts);
 

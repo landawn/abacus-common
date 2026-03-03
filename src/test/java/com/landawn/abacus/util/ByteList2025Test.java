@@ -155,7 +155,7 @@ public class ByteList2025Test extends TestBase {
     @SuppressWarnings("deprecation")
     public void test_array() {
         ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3);
-        byte[] arr = list.array();
+        byte[] arr = list.internalArray();
         assertNotNull(arr);
         arr[0] = 99;
         assertEquals(99, list.get(0));
@@ -625,11 +625,11 @@ public class ByteList2025Test extends TestBase {
     }
 
     @Test
-    public void test_occurrencesOf() {
+    public void test_frequency() {
         ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 1, (byte) 3, (byte) 1);
-        assertEquals(3, list.occurrencesOf((byte) 1));
-        assertEquals(1, list.occurrencesOf((byte) 2));
-        assertEquals(0, list.occurrencesOf((byte) 5));
+        assertEquals(3, list.frequency((byte) 1));
+        assertEquals(1, list.frequency((byte) 2));
+        assertEquals(0, list.frequency((byte) 5));
     }
 
     @Test

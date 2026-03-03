@@ -170,7 +170,7 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      * @param targetDouble the value to compare against
      * @return a predicate that tests if the input is greater than or equal to {@code targetDouble}
      */
-    static DoublePredicate greaterEqual(final double targetDouble) {
+    static DoublePredicate greaterThanOrEqual(final double targetDouble) {
         return value -> N.compare(value, targetDouble) >= 0;
     }
 
@@ -190,7 +190,7 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      * @param targetDouble the value to compare against
      * @return a predicate that tests if the input is less than or equal to {@code targetDouble}
      */
-    static DoublePredicate lessEqual(final double targetDouble) {
+    static DoublePredicate lessThanOrEqual(final double targetDouble) {
         return value -> N.compare(value, targetDouble) <= 0;
     }
 

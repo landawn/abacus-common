@@ -21,7 +21,7 @@ public class ComparatorTest extends AbstractTest {
         Map<String, Integer> map1 = CommonUtil.asMap("a", 1, "c", 3);
         Map<String, Integer> map2 = CommonUtil.asMap("b", 2, "d", 4);
 
-        List<Map<String, Integer>> maps = CommonUtil.asList(map1, map2);
+        List<Map<String, Integer>> maps = CommonUtil.toList(map1, map2);
 
         N.println(maps);
         CommonUtil.sort(maps, Comparators.comparingMapByKey());
@@ -58,8 +58,8 @@ public class ComparatorTest extends AbstractTest {
 
     @Test
     public void test_02() {
-        List<String> a = CommonUtil.asList("a", "b");
-        Collection<Object> b = CommonUtil.asLinkedHashSet("a", "b", "c");
+        List<String> a = CommonUtil.toList("a", "b");
+        Collection<Object> b = CommonUtil.toLinkedHashSet("a", "b", "c");
         assertEquals(-1, Comparators.COLLECTION_COMPARATOR.compare(a, b));
         assertEquals(1, Comparators.COLLECTION_COMPARATOR.compare(b, a));
 

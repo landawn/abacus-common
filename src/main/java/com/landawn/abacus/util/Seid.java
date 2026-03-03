@@ -135,9 +135,15 @@ public class Seid implements EntityId {
      * @param nameValues a map of property names to their values
      */
     public Seid(final Map<String, Object> nameValues) {
-        this(NameUtil.getParentName(nameValues.keySet().iterator().next()));
+        this(extractEntityName(nameValues));
 
         set(nameValues); // NOSONAR
+    }
+
+    private static String extractEntityName(final Map<String, Object> nameValues) {
+        N.checkArgNotEmpty(nameValues, "nameValues");
+
+        return NameUtil.getParentName(nameValues.keySet().iterator().next());
     }
 
     /**

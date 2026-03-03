@@ -37,22 +37,22 @@ public class CsvUtilTest extends AbstractTest {
 
         N.println(Strings.repeat("=", 80));
 
-        dataset = CsvUtil.load(file, CommonUtil.asList("name", "date"), ClassA.class);
+        dataset = CsvUtil.load(file, CommonUtil.toList("name", "date"), ClassA.class);
         dataset.println();
 
         N.println(Strings.repeat("=", 80));
 
-        dataset = CsvUtil.load(file, CommonUtil.asList("id", "date"), ClassA.class);
+        dataset = CsvUtil.load(file, CommonUtil.toList("id", "date"), ClassA.class);
         dataset.println();
 
         N.println(Strings.repeat("=", 80));
 
-        List<ClassA> list = CsvUtil.stream(file, CommonUtil.asList("name"), ClassA.class).toList();
+        List<ClassA> list = CsvUtil.stream(file, CommonUtil.toList("name"), ClassA.class).toList();
         list.forEach(Fn.println());
 
         N.println(Strings.repeat("=", 80));
 
-        dataset = CsvUtil.stream(file, CommonUtil.asList("name"), ClassA.class).toDataset();
+        dataset = CsvUtil.stream(file, CommonUtil.toList("name"), ClassA.class).toDataset();
         dataset.println();
 
         IOUtil.deleteIfExists(file);
@@ -68,9 +68,9 @@ public class CsvUtilTest extends AbstractTest {
 
         CsvUtil.stream(file, ClassA.class).forEach(Fn.println());
 
-        CsvUtil.stream(file, CommonUtil.asList("name"), ClassA.class).forEach(Fn.println());
+        CsvUtil.stream(file, CommonUtil.toList("name"), ClassA.class).forEach(Fn.println());
 
-        CsvUtil.stream(file, CommonUtil.asSet("date"), ClassA.class).forEach(Fn.println());
+        CsvUtil.stream(file, CommonUtil.toSet("date"), ClassA.class).forEach(Fn.println());
 
     }
 

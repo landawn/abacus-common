@@ -193,14 +193,14 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BytePredicate atLeastZero = BytePredicate.greaterEqual((byte) 0);
+     * BytePredicate atLeastZero = BytePredicate.greaterThanOrEqual((byte) 0);
      * boolean result = atLeastZero.test((byte) 0);   // Returns true
      * }</pre>
      *
      * @param targetByte the value to compare against
      * @return a predicate that tests if the input is greater than or equal to {@code targetByte}
      */
-    static BytePredicate greaterEqual(final byte targetByte) {
+    static BytePredicate greaterThanOrEqual(final byte targetByte) {
         return value -> value >= targetByte;
     }
 
@@ -225,14 +225,14 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BytePredicate maxTen = BytePredicate.lessEqual((byte) 10);
+     * BytePredicate maxTen = BytePredicate.lessThanOrEqual((byte) 10);
      * boolean result = maxTen.test((byte) 10);   // Returns true
      * }</pre>
      *
      * @param targetByte the value to compare against
      * @return a predicate that tests if the input is less than or equal to {@code targetByte}
      */
-    static BytePredicate lessEqual(final byte targetByte) {
+    static BytePredicate lessThanOrEqual(final byte targetByte) {
         return value -> value <= targetByte;
     }
 

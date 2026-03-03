@@ -87,7 +87,7 @@ public class Tuple100Test extends TestBase {
     @Test
     public void testCreateFromMapEntry() {
         Map.Entry<String, Integer> entry = new HashMap.SimpleEntry<>("key", 100);
-        Tuple.Tuple2<String, Integer> tuple = Tuple.create(entry);
+        Tuple.Tuple2<String, Integer> tuple = Tuple.from(entry);
 
         Assertions.assertEquals("key", tuple._1);
         Assertions.assertEquals(100, tuple._2);
@@ -96,36 +96,36 @@ public class Tuple100Test extends TestBase {
     @Test
     public void testCreateFromArray() {
         Object[] emptyArray = new Object[0];
-        Tuple<?> t0 = Tuple.create(emptyArray);
+        Tuple<?> t0 = Tuple.from(emptyArray);
         Assertions.assertEquals(0, t0.arity());
 
-        Tuple<?> tNull = Tuple.create((Object[]) null);
+        Tuple<?> tNull = Tuple.from((Object[]) null);
         Assertions.assertEquals(0, tNull.arity());
 
         Object[] array1 = { "a" };
-        Tuple.Tuple1<Object> t1 = Tuple.create(array1);
+        Tuple.Tuple1<Object> t1 = Tuple.from(array1);
         Assertions.assertEquals("a", t1._1);
 
         Object[] array2 = { "a", 1 };
-        Tuple.Tuple2<Object, Object> t2 = Tuple.create(array2);
+        Tuple.Tuple2<Object, Object> t2 = Tuple.from(array2);
         Assertions.assertEquals("a", t2._1);
         Assertions.assertEquals(1, t2._2);
 
         Object[] array3 = { "a", 1, true };
-        Tuple.Tuple3<Object, Object, Object> t3 = Tuple.create(array3);
+        Tuple.Tuple3<Object, Object, Object> t3 = Tuple.from(array3);
         Assertions.assertEquals("a", t3._1);
         Assertions.assertEquals(1, t3._2);
         Assertions.assertEquals(true, t3._3);
 
         Object[] array4 = { "a", 1, true, 2.0 };
-        Tuple.Tuple4<Object, Object, Object, Object> t4 = Tuple.create(array4);
+        Tuple.Tuple4<Object, Object, Object, Object> t4 = Tuple.from(array4);
         Assertions.assertEquals("a", t4._1);
         Assertions.assertEquals(1, t4._2);
         Assertions.assertEquals(true, t4._3);
         Assertions.assertEquals(2.0, t4._4);
 
         Object[] array5 = { "a", 1, true, 2.0, 3L };
-        Tuple.Tuple5<Object, Object, Object, Object, Object> t5 = Tuple.create(array5);
+        Tuple.Tuple5<Object, Object, Object, Object, Object> t5 = Tuple.from(array5);
         Assertions.assertEquals("a", t5._1);
         Assertions.assertEquals(1, t5._2);
         Assertions.assertEquals(true, t5._3);
@@ -133,7 +133,7 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals(3L, t5._5);
 
         Object[] array6 = { "a", 1, true, 2.0, 3L, 'x' };
-        Tuple.Tuple6<Object, Object, Object, Object, Object, Object> t6 = Tuple.create(array6);
+        Tuple.Tuple6<Object, Object, Object, Object, Object, Object> t6 = Tuple.from(array6);
         Assertions.assertEquals("a", t6._1);
         Assertions.assertEquals(1, t6._2);
         Assertions.assertEquals(true, t6._3);
@@ -142,7 +142,7 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals('x', t6._6);
 
         Object[] array7 = { "a", 1, true, 2.0, 3L, 'x', 4.0f };
-        Tuple.Tuple7<Object, Object, Object, Object, Object, Object, Object> t7 = Tuple.create(array7);
+        Tuple.Tuple7<Object, Object, Object, Object, Object, Object, Object> t7 = Tuple.from(array7);
         Assertions.assertEquals("a", t7._1);
         Assertions.assertEquals(1, t7._2);
         Assertions.assertEquals(true, t7._3);
@@ -152,7 +152,7 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals(4.0f, t7._7);
 
         Object[] array8 = { "a", 1, true, 2.0, 3L, 'x', 4.0f, (byte) 5 };
-        Tuple.Tuple8<Object, Object, Object, Object, Object, Object, Object, Object> t8 = Tuple.create(array8);
+        Tuple.Tuple8<Object, Object, Object, Object, Object, Object, Object, Object> t8 = Tuple.from(array8);
         Assertions.assertEquals("a", t8._1);
         Assertions.assertEquals(1, t8._2);
         Assertions.assertEquals(true, t8._3);
@@ -163,7 +163,7 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals((byte) 5, t8._8);
 
         Object[] array9 = { "a", 1, true, 2.0, 3L, 'x', 4.0f, (byte) 5, (short) 6 };
-        Tuple.Tuple9<Object, Object, Object, Object, Object, Object, Object, Object, Object> t9 = Tuple.create(array9);
+        Tuple.Tuple9<Object, Object, Object, Object, Object, Object, Object, Object, Object> t9 = Tuple.from(array9);
         Assertions.assertEquals("a", t9._1);
         Assertions.assertEquals(1, t9._2);
         Assertions.assertEquals(true, t9._3);
@@ -175,42 +175,42 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals((short) 6, t9._9);
 
         Object[] arrayTooMany = new Object[10];
-        Assertions.assertThrows(IllegalArgumentException.class, () -> Tuple.create(arrayTooMany));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Tuple.from(arrayTooMany));
     }
 
     @Test
     public void testCreateFromCollection() {
         List<Object> emptyList = new ArrayList<>();
-        Tuple<?> t0 = Tuple.create(emptyList);
+        Tuple<?> t0 = Tuple.from(emptyList);
         Assertions.assertEquals(0, t0.arity());
 
-        Tuple<?> tNull = Tuple.create((List<Object>) null);
+        Tuple<?> tNull = Tuple.from((List<Object>) null);
         Assertions.assertEquals(0, tNull.arity());
 
         List<Object> list1 = Arrays.asList("a");
-        Tuple.Tuple1<Object> t1 = Tuple.create(list1);
+        Tuple.Tuple1<Object> t1 = Tuple.from(list1);
         Assertions.assertEquals("a", t1._1);
 
         List<Object> list2 = Arrays.asList("a", 1);
-        Tuple.Tuple2<Object, Object> t2 = Tuple.create(list2);
+        Tuple.Tuple2<Object, Object> t2 = Tuple.from(list2);
         Assertions.assertEquals("a", t2._1);
         Assertions.assertEquals(1, t2._2);
 
         List<Object> list3 = Arrays.asList("a", 1, true);
-        Tuple.Tuple3<Object, Object, Object> t3 = Tuple.create(list3);
+        Tuple.Tuple3<Object, Object, Object> t3 = Tuple.from(list3);
         Assertions.assertEquals("a", t3._1);
         Assertions.assertEquals(1, t3._2);
         Assertions.assertEquals(true, t3._3);
 
         List<Object> list4 = Arrays.asList("a", 1, true, 2.0);
-        Tuple.Tuple4<Object, Object, Object, Object> t4 = Tuple.create(list4);
+        Tuple.Tuple4<Object, Object, Object, Object> t4 = Tuple.from(list4);
         Assertions.assertEquals("a", t4._1);
         Assertions.assertEquals(1, t4._2);
         Assertions.assertEquals(true, t4._3);
         Assertions.assertEquals(2.0, t4._4);
 
         List<Object> list5 = Arrays.asList("a", 1, true, 2.0, 3L);
-        Tuple.Tuple5<Object, Object, Object, Object, Object> t5 = Tuple.create(list5);
+        Tuple.Tuple5<Object, Object, Object, Object, Object> t5 = Tuple.from(list5);
         Assertions.assertEquals("a", t5._1);
         Assertions.assertEquals(1, t5._2);
         Assertions.assertEquals(true, t5._3);
@@ -218,7 +218,7 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals(3L, t5._5);
 
         List<Object> list6 = Arrays.asList("a", 1, true, 2.0, 3L, 'x');
-        Tuple.Tuple6<Object, Object, Object, Object, Object, Object> t6 = Tuple.create(list6);
+        Tuple.Tuple6<Object, Object, Object, Object, Object, Object> t6 = Tuple.from(list6);
         Assertions.assertEquals("a", t6._1);
         Assertions.assertEquals(1, t6._2);
         Assertions.assertEquals(true, t6._3);
@@ -227,7 +227,7 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals('x', t6._6);
 
         List<Object> list7 = Arrays.asList("a", 1, true, 2.0, 3L, 'x', 4.0f);
-        Tuple.Tuple7<Object, Object, Object, Object, Object, Object, Object> t7 = Tuple.create(list7);
+        Tuple.Tuple7<Object, Object, Object, Object, Object, Object, Object> t7 = Tuple.from(list7);
         Assertions.assertEquals("a", t7._1);
         Assertions.assertEquals(1, t7._2);
         Assertions.assertEquals(true, t7._3);
@@ -237,7 +237,7 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals(4.0f, t7._7);
 
         List<Object> list8 = Arrays.asList("a", 1, true, 2.0, 3L, 'x', 4.0f, (byte) 5);
-        Tuple.Tuple8<Object, Object, Object, Object, Object, Object, Object, Object> t8 = Tuple.create(list8);
+        Tuple.Tuple8<Object, Object, Object, Object, Object, Object, Object, Object> t8 = Tuple.from(list8);
         Assertions.assertEquals("a", t8._1);
         Assertions.assertEquals(1, t8._2);
         Assertions.assertEquals(true, t8._3);
@@ -248,7 +248,7 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals((byte) 5, t8._8);
 
         List<Object> list9 = Arrays.asList("a", 1, true, 2.0, 3L, 'x', 4.0f, (byte) 5, (short) 6);
-        Tuple.Tuple9<Object, Object, Object, Object, Object, Object, Object, Object, Object> t9 = Tuple.create(list9);
+        Tuple.Tuple9<Object, Object, Object, Object, Object, Object, Object, Object, Object> t9 = Tuple.from(list9);
         Assertions.assertEquals("a", t9._1);
         Assertions.assertEquals(1, t9._2);
         Assertions.assertEquals(true, t9._3);
@@ -260,7 +260,7 @@ public class Tuple100Test extends TestBase {
         Assertions.assertEquals((short) 6, t9._9);
 
         List<Object> listTooMany = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> Tuple.create(listTooMany));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Tuple.from(listTooMany));
     }
 
     @Test
@@ -405,25 +405,25 @@ public class Tuple100Test extends TestBase {
 
         @Test
         public void testArity() {
-            Tuple.Tuple0 t0 = Tuple.create(new Object[0]);
+            Tuple.Tuple0 t0 = Tuple.from(new Object[0]);
             Assertions.assertEquals(0, t0.arity());
         }
 
         @Test
         public void testAnyNull() {
-            Tuple.Tuple0 t0 = Tuple.create(new Object[0]);
+            Tuple.Tuple0 t0 = Tuple.from(new Object[0]);
             Assertions.assertFalse(t0.anyNull());
         }
 
         @Test
         public void testAllNull() {
-            Tuple.Tuple0 t0 = Tuple.create(new Object[0]);
+            Tuple.Tuple0 t0 = Tuple.from(new Object[0]);
             Assertions.assertTrue(t0.allNull());
         }
 
         @Test
         public void testContains() {
-            Tuple.Tuple0 t0 = Tuple.create(new Object[0]);
+            Tuple.Tuple0 t0 = Tuple.from(new Object[0]);
             Assertions.assertFalse(t0.contains("anything"));
             Assertions.assertFalse(t0.contains(null));
             Assertions.assertFalse(t0.contains(123));
@@ -431,14 +431,14 @@ public class Tuple100Test extends TestBase {
 
         @Test
         public void testToArray() {
-            Tuple.Tuple0 t0 = Tuple.create(new Object[0]);
+            Tuple.Tuple0 t0 = Tuple.from(new Object[0]);
             Object[] array = t0.toArray();
             Assertions.assertEquals(0, array.length);
         }
 
         @Test
         public void testToArrayWithParameter() {
-            Tuple.Tuple0 t0 = Tuple.create(new Object[0]);
+            Tuple.Tuple0 t0 = Tuple.from(new Object[0]);
             String[] array = new String[5];
             String[] result = t0.toArray(array);
             Assertions.assertSame(array, result);
@@ -447,7 +447,7 @@ public class Tuple100Test extends TestBase {
 
         @Test
         public void testForEach() {
-            Tuple.Tuple0 t0 = Tuple.create(new Object[0]);
+            Tuple.Tuple0 t0 = Tuple.from(new Object[0]);
             final int[] callCount = { 0 };
 
             t0.forEach(obj -> callCount[0]++);
@@ -457,13 +457,13 @@ public class Tuple100Test extends TestBase {
 
         @Test
         public void testForEachWithNullConsumer() {
-            Tuple.Tuple0 t0 = Tuple.create(new Object[0]);
+            Tuple.Tuple0 t0 = Tuple.from(new Object[0]);
             Assertions.assertThrows(IllegalArgumentException.class, () -> t0.forEach(null));
         }
 
         @Test
         public void testToString() {
-            Tuple.Tuple0 t0 = Tuple.create(new Object[0]);
+            Tuple.Tuple0 t0 = Tuple.from(new Object[0]);
             Assertions.assertEquals("()", t0.toString());
         }
     }
@@ -727,7 +727,7 @@ public class Tuple100Test extends TestBase {
         @Test
         public void testToEntry() {
             Tuple.Tuple2<String, Integer> t2 = Tuple.of("test", 123);
-            ImmutableEntry<String, Integer> entry = t2.toEntry();
+            ImmutableEntry<String, Integer> entry = t2.toImmutableEntry();
 
             Assertions.assertEquals("test", entry.getKey());
             Assertions.assertEquals(123, entry.getValue());

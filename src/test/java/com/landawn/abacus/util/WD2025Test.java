@@ -67,18 +67,18 @@ public class WD2025Test extends TestBase {
 
     @Test
     public void testQuotations() {
-        assertEquals('\'', WD._QUOTATION_S);
-        assertEquals("'", WD.QUOTATION_S);
-        assertEquals('"', WD._QUOTATION_D);
-        assertEquals("\"", WD.QUOTATION_D);
+        assertEquals('\'', WD._SINGLE_QUOTE);
+        assertEquals("'", WD.SINGLE_QUOTE);
+        assertEquals('"', WD._DOUBLE_QUOTE);
+        assertEquals("\"", WD.DOUBLE_QUOTE);
     }
 
     @Test
     public void testOperators() {
         assertEquals('&', WD._AMPERSAND);
         assertEquals("&", WD.AMPERSAND);
-        assertEquals('|', WD._VERTICALBAR);
-        assertEquals("|", WD.VERTICALBAR);
+        assertEquals('|', WD._VERTICAL_BAR);
+        assertEquals("|", WD.VERTICAL_BAR);
     }
 
     @Test
@@ -186,8 +186,8 @@ public class WD2025Test extends TestBase {
     public void testSQL_Comparisons() {
         assertEquals("!=", WD.NOT_EQUAL);
         assertEquals("<>", WD.NOT_EQUAL2);
-        assertEquals(">=", WD.GREATER_EQUAL);
-        assertEquals("<=", WD.LESS_EQUAL);
+        assertEquals(">=", WD.GREATER_THAN_OR_EQUAL);
+        assertEquals("<=", WD.LESS_THAN_OR_EQUAL);
     }
 
     @Test

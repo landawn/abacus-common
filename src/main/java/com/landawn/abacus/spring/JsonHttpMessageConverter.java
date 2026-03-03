@@ -37,7 +37,7 @@ import com.landawn.abacus.util.N;
  * handling all standard Java types as well as custom POJOs. It automatically handles content type
  * negotiation for "application/json" and related media types.</p>
  * 
- * <p><b>Usage Example in Spring Configuration:</b></p>
+ * <p><b>Usage Examples in Spring Configuration:</b></p>
  * <pre>{@code
  * @Configuration
  * @EnableWebMvc
@@ -50,7 +50,7 @@ import com.landawn.abacus.util.N;
  * }
  * }</pre>
  * 
- * <p><b>Usage Example with RestTemplate:</b></p>
+ * <p><b>Usage Examples with RestTemplate:</b></p>
  * <pre>{@code
  * RestTemplate restTemplate = new RestTemplate();
  * restTemplate.getMessageConverters().add(0, new JsonHttpMessageConverter());

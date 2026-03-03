@@ -145,9 +145,9 @@ public class IntStream103Test extends TestBase {
     public void testToMultiset() {
         Multiset<Integer> multiset = createIntStream(1, 2, 2, 3, 3, 3).toMultiset();
 
-        assertEquals(1, multiset.occurrencesOf(1));
-        assertEquals(2, multiset.occurrencesOf(2));
-        assertEquals(3, multiset.occurrencesOf(3));
+        assertEquals(1, multiset.getCount(1));
+        assertEquals(2, multiset.getCount(2));
+        assertEquals(3, multiset.getCount(3));
     }
 
     @Test

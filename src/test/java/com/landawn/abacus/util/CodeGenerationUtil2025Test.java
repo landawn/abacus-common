@@ -556,6 +556,43 @@ public class CodeGenerationUtil2025Test extends TestBase {
     }
 
     @Test
+    public void test_generatePropNameTableClasses_config_customPropNameConverterAppliedBeforeLowerCaseConverter() {
+        final List<Class<?>> classes = Arrays.asList(Order.class);
+        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
+                .entityClasses(classes)
+                .className("s")
+                .propNameConverter((cls, propName) -> propName.equals("userId") ? "ownerId" : propName)
+                .generateSnakeCase(true)
+                .propNameConverterForSnakeCase((cls, propName) -> propName.equals("ownerId") ? "owner_id_custom" : Strings.toSnakeCase(propName))
+                .build();
+
+        final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
+
+        assertNotNull(code);
+        assertTrue(code.contains("String ownerId = \"owner_id_custom\";"));
+        assertFalse(code.contains("String ownerId = \"user_id\";"));
+    }
+
+    @Test
+    public void test_generatePropNameTableClasses_config_customPropNameConverterAppliedBeforeUpperCaseConverter() {
+        final List<Class<?>> classes = Arrays.asList(Order.class);
+        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
+                .entityClasses(classes)
+                .className("s")
+                .propNameConverter((cls, propName) -> propName.equals("userId") ? "ownerId" : propName)
+                .generateScreamingSnakeCase(true)
+                .propNameConverterForScreamingSnakeCase(
+                        (cls, propName) -> propName.equals("ownerId") ? "OWNER_ID_CUSTOM" : Strings.toScreamingSnakeCase(propName))
+                .build();
+
+        final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
+
+        assertNotNull(code);
+        assertTrue(code.contains("String ownerId = \"OWNER_ID_CUSTOM\";"));
+        assertFalse(code.contains("String ownerId = \"USER_ID\";"));
+    }
+
+    @Test
     public void test_generatePropNameTableClasses_config_propNameConverterReturnsEmpty() {
         final List<Class<?>> classes = Arrays.asList(User.class);
         final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()

@@ -61,14 +61,14 @@ public final class BooleanCharType extends AbstractType<Boolean> {
     }
 
     /**
-     * Determines whether this type should be quoted in CSV format.
-     * Boolean character values are typically not quoted in CSV files.
+     * Indicates whether values of this type require quoting in CSV format.
+     * Boolean character values ({@code 'Y'}/{@code 'N'}) are self-delimiting and do not require quotes.
      *
-     * @return {@code true} indicating that <i>Y'/'N</i> values should not be quoted in CSV format
+     * @return {@code false}, as boolean character values do not require quoting in CSV format
      */
     @Override
-    public boolean isNonQuotableCsvType() {
-        return true;
+    public boolean isCsvQuoteRequired() {
+        return false;
     }
 
     /**

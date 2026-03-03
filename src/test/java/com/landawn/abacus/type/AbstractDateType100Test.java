@@ -1,5 +1,6 @@
 package com.landawn.abacus.type;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -47,8 +48,8 @@ public class AbstractDateType100Test extends TestBase {
     }
 
     @Test
-    public void testIsNonQuotableCsvType() {
-        assertTrue(type.isNonQuotableCsvType());
+    public void test_isCsvQuoteRequired() {
+        assertFalse(type.isCsvQuoteRequired());
     }
 
     @Test
@@ -151,6 +152,5 @@ public class AbstractDateType100Test extends TestBase {
         assertNotNull(timestampType);
         assertTrue(timestampType.isDate());
         assertTrue(timestampType.isComparable());
-        assertTrue(timestampType.isNonQuotableCsvType());
     }
 }

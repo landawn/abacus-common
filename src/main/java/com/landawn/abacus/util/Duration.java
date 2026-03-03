@@ -229,7 +229,7 @@ import java.time.temporal.TemporalUnit;
  *   <li><b>Stopwatch Utilities:</b> Natural fit for timing and performance measurement</li>
  * </ul>
  *
- * <p><b>Example: Performance Monitoring System</b>
+ * <p><b>Usage Examples: Performance Monitoring System</b>
  * <pre>{@code
  * public class PerformanceMonitor {
  *     private static final Duration WARNING_THRESHOLD = Duration.ofSeconds(5);

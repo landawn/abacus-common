@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import javax.xml.parsers.DocumentBuilder;
+import javax.xml.stream.XMLStreamConstants;
 import javax.xml.parsers.SAXParser;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -209,6 +210,45 @@ public class XmlUtil2025Test extends TestBase {
 
         Assertions.assertNotNull(xmlReader);
         is.close();
+    }
+
+    @Test
+    public void testCreateXMLStreamReader_doesNotResolveExternalEntities() throws Exception {
+        final String marker = "XXE_MARKER_2026";
+        final File externalEntityFile = File.createTempFile("xmlutil-xxe-", ".txt");
+
+        try {
+            Files.write(externalEntityFile.toPath(), marker.getBytes(Charsets.UTF_8));
+
+            final String maliciousXml = "<?xml version=\"1.0\"?>" + "<!DOCTYPE root [<!ENTITY xxe SYSTEM \"" + externalEntityFile.toURI() + "\">]>"
+                    + "<root>&xxe;</root>";
+
+            final StringBuilder parsedText = new StringBuilder();
+            boolean blockedByException = false;
+
+            try {
+                final XMLStreamReader xmlReader = XmlUtil.createXMLStreamReader(new StringReader(maliciousXml));
+
+                try {
+                    while (xmlReader.hasNext()) {
+                        if (xmlReader.getEventType() == XMLStreamConstants.CHARACTERS) {
+                            parsedText.append(xmlReader.getText());
+                        }
+
+                        xmlReader.next();
+                    }
+                } finally {
+                    xmlReader.close();
+                }
+            } catch (RuntimeException e) {
+                blockedByException = true;
+            }
+
+            Assertions.assertTrue(blockedByException || !parsedText.toString().contains(marker));
+        } finally {
+            //noinspection ResultOfMethodCallIgnored
+            externalEntityFile.delete();
+        }
     }
 
     @Test

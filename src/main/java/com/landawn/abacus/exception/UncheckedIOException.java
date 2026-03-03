@@ -65,6 +65,11 @@ public class UncheckedIOException extends UncheckedException {
     @Serial
     private static final long serialVersionUID = -8702336402043331418L;
 
+    /**
+     * The wrapped checked I/O exception.
+     *
+     * @serial the wrapped {@link IOException} cause.
+     */
     private final IOException cause;
 
     /**

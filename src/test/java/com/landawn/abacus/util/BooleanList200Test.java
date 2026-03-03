@@ -442,11 +442,11 @@ public class BooleanList200Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test 'occurrencesOf' method")
+    @DisplayName("Test 'frequency' method")
     public void testOccurrencesOf() {
         BooleanList list = BooleanList.of(true, false, true, true, false);
-        assertEquals(3, list.occurrencesOf(true));
-        assertEquals(2, list.occurrencesOf(false));
+        assertEquals(3, list.frequency(true));
+        assertEquals(2, list.frequency(false));
     }
 
     @Test

@@ -228,7 +228,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  *   <li><b>Testing Frameworks:</b> Providing type information for mock object creation</li>
  * </ul>
  *
- * <p><b>Example: Configuration System Integration</b>
+ * <p><b>Usage Examples: Configuration System Integration</b>
  * <pre>{@code
  * public class ConfigurationManager {
  *     private final Map<String, Object> properties;

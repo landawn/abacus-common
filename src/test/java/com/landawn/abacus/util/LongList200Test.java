@@ -38,7 +38,7 @@ public class LongList200Test extends TestBase {
         LongList list = new LongList(10);
         assertEquals(0, list.size());
         assertTrue(list.isEmpty());
-        assertTrue(list.array().length >= 10 || list.array().length == 0);
+        assertTrue(list.internalArray().length >= 10 || list.internalArray().length == 0);
     }
 
     @Test
@@ -47,7 +47,7 @@ public class LongList200Test extends TestBase {
         LongList list = new LongList(a);
         assertEquals(3, list.size());
         assertArrayEquals(a, list.toArray());
-        assertSame(a, list.array());
+        assertSame(a, list.internalArray());
     }
 
     @Test
@@ -357,8 +357,8 @@ public class LongList200Test extends TestBase {
     @Test
     public void testOccurrencesOf() {
         LongList list = LongList.of(1L, 2L, 1L, 3L, 1L, 2L);
-        assertEquals(3, list.occurrencesOf(1L));
-        assertEquals(0, list.occurrencesOf(4L));
+        assertEquals(3, list.frequency(1L));
+        assertEquals(0, list.frequency(4L));
     }
 
     @Test
@@ -484,9 +484,9 @@ public class LongList200Test extends TestBase {
         LongList list = new LongList(10);
         list.add(1L);
         list.add(2L);
-        assertEquals(10, list.array().length);
+        assertEquals(10, list.internalArray().length);
         list.trimToSize();
-        assertEquals(2, list.array().length);
+        assertEquals(2, list.internalArray().length);
         list.clear();
         assertEquals(0, list.size());
     }

@@ -237,7 +237,7 @@ import com.landawn.abacus.util.stream.ByteStream;
  *   <li><b>{@link java.nio.ByteBuffer}:</b> Alternative for sequential byte operations</li>
  * </ul>
  *
- * <p><b>Example: Binary Protocol Processing</b>
+ * <p><b>Usage Examples: Binary Protocol Processing</b>
  * <pre>{@code
  * // Process a network packet with header and payload
  * ByteList packet = new ByteList(1024);
@@ -522,7 +522,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     @Beta
     @Deprecated
     @Override
-    public byte[] array() {
+    public byte[] internalArray() {
         return elementData;
     }
 
@@ -622,7 +622,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
         ensureCapacity(size + numNew);
 
-        N.copy(c.array(), 0, elementData, size, numNew);
+        N.copy(c.internalArray(), 0, elementData, size, numNew);
 
         size += numNew;
 
@@ -659,7 +659,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
             N.copy(elementData, index, elementData, index + numNew, numMoved);
         }
 
-        N.copy(c.array(), 0, elementData, index, numNew);
+        N.copy(c.internalArray(), 0, elementData, index, numNew);
 
         size += numNew;
 
@@ -1718,13 +1718,13 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte)1, (byte)2, (byte)1, (byte)3, (byte)1);
-     * int count = list.occurrencesOf((byte)1);   // Returns 3
+     * int count = list.frequency((byte)1);   // Returns 3
      * }</pre>
      *
      * @param valueToFind the value to count occurrences of
      * @return the number of times the specified value appears in this list; 0 if the value is not found
      */
-    public int occurrencesOf(final byte valueToFind) {
+    public int frequency(final byte valueToFind) {
         if (size == 0) {
             return 0;
         }

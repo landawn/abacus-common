@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.Throwables;
 
@@ -77,6 +79,7 @@ public interface Consumer<T> extends Throwables.Consumer<T, RuntimeException>, j
      */
     @Override
     default Consumer<T> andThen(final java.util.function.Consumer<? super T> after) {
+        Objects.requireNonNull(after);
         return (final T t) -> {
             accept(t);
             after.accept(t);

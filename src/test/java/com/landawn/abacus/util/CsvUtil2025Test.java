@@ -345,7 +345,7 @@ public class CsvUtil2025Test extends TestBase {
         // typeMap.put("name", Type.of(String.class));
         typeMap.put("age", Type.of(Integer.class));
 
-        Dataset ds = CsvUtil.load(testCsvFile, N.asList("id", "name", "age"), 0, Long.MAX_VALUE, typeMap);
+        Dataset ds = CsvUtil.load(testCsvFile, N.toList("id", "name", "age"), 0, Long.MAX_VALUE, typeMap);
         assertNotNull(ds);
         assertEquals(3, ds.columnCount());
         assertEquals(5, ds.size());
@@ -358,7 +358,7 @@ public class CsvUtil2025Test extends TestBase {
         typeMap.put("id", Type.of(String.class));
         typeMap.put("name", Type.of(String.class));
 
-        Dataset ds = CsvUtil.load(testCsvFile, N.asList("id", "name"), 1, 2, typeMap);
+        Dataset ds = CsvUtil.load(testCsvFile, N.toList("id", "name"), 1, 2, typeMap);
         assertNotNull(ds);
         assertEquals(2, ds.columnCount());
         assertEquals(2, ds.size());
@@ -400,7 +400,7 @@ public class CsvUtil2025Test extends TestBase {
         typeMap.put("id", Type.of(String.class));
         typeMap.put("name", Type.of(String.class));
 
-        Dataset ds = CsvUtil.load(reader, N.asList("id", "name", "age"), 0, 3, typeMap);
+        Dataset ds = CsvUtil.load(reader, N.toList("id", "name", "age"), 0, 3, typeMap);
         assertNotNull(ds);
         assertEquals(3, ds.columnCount());
         assertEquals(3, ds.size());

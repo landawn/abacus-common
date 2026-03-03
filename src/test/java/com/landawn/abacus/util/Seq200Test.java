@@ -956,7 +956,7 @@ public class Seq200Test extends TestBase {
 
         Seq<Integer, Exception> seqActual = Seq.of(1, 2, 3, 2, 1).dropWhile(x -> x < 3, dropped::add);
         assertEquals(Arrays.asList(3, 2, 1), drainWithException(seqActual));
-        assertEquals(CommonUtil.asList(1, 2), dropped,
+        assertEquals(CommonUtil.toList(1, 2), dropped,
                 "Action should be called on the first element not satisfying the drop condition, based on current impl.");
     }
 
@@ -1336,20 +1336,20 @@ public class Seq200Test extends TestBase {
     @Test
     public void test_countMatchBetween() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6);
-        assertTrue(seq.countMatchBetween(3, 3, x -> x % 2 == 0));
+        assertTrue(seq.isMatchCountBetween(3, 3, x -> x % 2 == 0));
 
         seq = Seq.of(1, 2, 3, 4, 5, 6);
-        assertFalse(seq.countMatchBetween(2, 2, x -> x % 2 == 0));
+        assertFalse(seq.isMatchCountBetween(2, 2, x -> x % 2 == 0));
 
         seq = Seq.of(1, 2, 3, 4, 5, 6);
-        assertTrue(seq.countMatchBetween(1, 5, x -> x % 2 == 0));
+        assertTrue(seq.isMatchCountBetween(1, 5, x -> x % 2 == 0));
 
         seq = Seq.of(1, 2, 3, 4, 5, 6);
-        assertFalse(seq.countMatchBetween(4, 5, x -> x % 2 == 0));
+        assertFalse(seq.isMatchCountBetween(4, 5, x -> x % 2 == 0));
 
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1).countMatchBetween(-1, 1, x -> true));
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1).countMatchBetween(1, -1, x -> true));
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1).countMatchBetween(2, 1, x -> true));
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1).isMatchCountBetween(-1, 1, x -> true));
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1).isMatchCountBetween(1, -1, x -> true));
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1).isMatchCountBetween(2, 1, x -> true));
     }
 
     @Test

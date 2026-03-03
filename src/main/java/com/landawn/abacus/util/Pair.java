@@ -115,7 +115,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Map<String, Integer> map = new HashMap<>();
      * map.put("age", 25);
      * Map.Entry<String, Integer> entry = map.entrySet().iterator().next();
-     * Pair<String, Integer> pair = Pair.create(entry);
+     * Pair<String, Integer> pair = Pair.from(entry);
      * // pair.left returns "age", pair.right returns 25
      * }</pre>
      *
@@ -124,7 +124,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @param entry the Map.Entry to convert to a Pair, must not be {@code null}.
      * @return a new Pair instance with the key as the left element and the value as the right element.
      */
-    public static <K, V> Pair<K, V> create(final Map.Entry<K, V> entry) {
+    public static <K, V> Pair<K, V> from(final Map.Entry<K, V> entry) {
         return new Pair<>(entry.getKey(), entry.getValue());
     }
 
@@ -941,16 +941,13 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      */
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + N.hashCode(left);
-        return prime * result + N.hashCode(right);
+        return N.hashCode(left) ^ N.hashCode(right);
     }
 
     /**
      * Compares this pair to the specified object for equality.
-     * Returns {@code true} if and only if the specified object is also a Pair,
-     * and both pairs have equal left and right elements.
+     * Returns {@code true} if and only if the specified object is also a {@code Map.Entry},
+     * and both entries have equal keys and values.
      * 
      * <p>Two elements are considered equal if they are both {@code null},
      * or if they are equal according to their equals() method.</p>
@@ -979,8 +976,8 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
             return true;
         }
 
-        if (obj instanceof Pair<?, ?> other) {
-            return N.equals(left, other.left) && N.equals(right, other.right);
+        if (obj instanceof Map.Entry<?, ?> other) {
+            return N.equals(left, other.getKey()) && N.equals(right, other.getValue());
         }
 
         return false;

@@ -86,7 +86,7 @@ public @interface Entity {
      * <p>The entity name is used in:</p>
      * <ul>
      *   <li>SQL generation for table references</li>
-     *   <li>JPQL/HQL queries to reference the entity</li>
+     *   <li>Query generation to reference the entity</li>
      *   <li>Cache keys and other framework internals</li>
      * </ul>
      * 

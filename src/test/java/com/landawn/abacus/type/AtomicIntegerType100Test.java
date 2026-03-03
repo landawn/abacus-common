@@ -114,7 +114,7 @@ public class AtomicIntegerType100Test extends TestBase {
         verify(stmt).setInt(2, -456);
 
         atomicIntegerType.set(stmt, 3, null);
-        verify(stmt).setInt(3, 0);
+        verify(stmt).setNull(3, java.sql.Types.INTEGER);
     }
 
     @Test
@@ -128,7 +128,7 @@ public class AtomicIntegerType100Test extends TestBase {
         verify(stmt).setInt("param2", -100);
 
         atomicIntegerType.set(stmt, "param3", null);
-        verify(stmt).setInt("param3", 0);
+        verify(stmt).setNull("param3", java.sql.Types.INTEGER);
     }
 
     @Test

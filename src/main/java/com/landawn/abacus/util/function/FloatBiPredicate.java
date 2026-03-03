@@ -31,9 +31,9 @@ import com.landawn.abacus.util.Throwables;
  *   <li>{@link #EQUAL} - Tests if two float values are equal</li>
  *   <li>{@link #NOT_EQUAL} - Tests if two float values are not equal</li>
  *   <li>{@link #GREATER_THAN} - Tests if the first value is greater than the second</li>
- *   <li>{@link #GREATER_EQUAL} - Tests if the first value is greater than or equal to the second</li>
+ *   <li>{@link #GREATER_THAN_OR_EQUAL} - Tests if the first value is greater than or equal to the second</li>
  *   <li>{@link #LESS_THAN} - Tests if the first value is less than the second</li>
- *   <li>{@link #LESS_EQUAL} - Tests if the first value is less than or equal to the second</li>
+ *   <li>{@link #LESS_THAN_OR_EQUAL} - Tests if the first value is less than or equal to the second</li>
  * </ul>
  *
  *
@@ -49,12 +49,12 @@ public interface FloatBiPredicate extends Throwables.FloatBiPredicate<RuntimeExc
      * A predicate that always evaluates to {@code true} regardless of the input values.
      * This constant is useful as a default predicate or in scenarios where all value pairs should pass.
      */
-    FloatBiPredicate ALWAYS_TRUE = (t, u) -> true;
+    FloatBiPredicate ALWAYS_TRUE = (a, b) -> true;
     /**
      * A predicate that always evaluates to {@code false} regardless of the input values.
      * This constant is useful as a default predicate or in scenarios where all value pairs should fail.
      */
-    FloatBiPredicate ALWAYS_FALSE = (t, u) -> false;
+    FloatBiPredicate ALWAYS_FALSE = (a, b) -> false;
     /**
      * A predicate that tests if two float values are equal.
      * Uses {@link Float#compare(float, float)} to properly handle NaN and signed zero values.
@@ -65,32 +65,32 @@ public interface FloatBiPredicate extends Throwables.FloatBiPredicate<RuntimeExc
      *   <li>0.0f and -0.0f are considered different</li>
      * </ul>
      */
-    FloatBiPredicate EQUAL = (t, u) -> Float.compare(t, u) == 0;
+    FloatBiPredicate EQUAL = (a, b) -> Float.compare(a, b) == 0;
     /**
      * A predicate that tests if two float values are not equal.
      * Uses {@link Float#compare(float, float)} to properly handle NaN and signed zero values.
      */
-    FloatBiPredicate NOT_EQUAL = (t, u) -> Float.compare(t, u) != 0;
+    FloatBiPredicate NOT_EQUAL = (a, b) -> Float.compare(a, b) != 0;
     /**
      * A predicate that tests if the first float value is greater than the second.
      * Uses {@link Float#compare(float, float)} for consistent comparison handling special float values.
      */
-    FloatBiPredicate GREATER_THAN = (t, u) -> Float.compare(t, u) > 0;
+    FloatBiPredicate GREATER_THAN = (a, b) -> Float.compare(a, b) > 0;
     /**
      * A predicate that tests if the first float value is greater than or equal to the second.
      * Uses {@link Float#compare(float, float)} for consistent comparison handling special float values.
      */
-    FloatBiPredicate GREATER_EQUAL = (t, u) -> Float.compare(t, u) >= 0;
+    FloatBiPredicate GREATER_THAN_OR_EQUAL = (a, b) -> Float.compare(a, b) >= 0;
     /**
      * A predicate that tests if the first float value is less than the second.
      * Uses {@link Float#compare(float, float)} for consistent comparison handling special float values.
      */
-    FloatBiPredicate LESS_THAN = (t, u) -> Float.compare(t, u) < 0;
+    FloatBiPredicate LESS_THAN = (a, b) -> Float.compare(a, b) < 0;
     /**
      * A predicate that tests if the first float value is less than or equal to the second.
      * Uses {@link Float#compare(float, float)} for consistent comparison handling special float values.
      */
-    FloatBiPredicate LESS_EQUAL = (t, u) -> Float.compare(t, u) <= 0;
+    FloatBiPredicate LESS_THAN_OR_EQUAL = (a, b) -> Float.compare(a, b) <= 0;
 
     /**
      * Evaluates this predicate on the given two float arguments.
@@ -106,12 +106,12 @@ public interface FloatBiPredicate extends Throwables.FloatBiPredicate<RuntimeExc
      *   <li>Validating constraints on pairs of measurements</li>
      * </ul>
      *
-     * @param t the first float argument to test
-     * @param u the second float argument to test
+     * @param a the first float argument to test
+     * @param b the second float argument to test
      * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
      */
     @Override
-    boolean test(float t, float u);
+    boolean test(float a, float b);
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
@@ -128,7 +128,7 @@ public interface FloatBiPredicate extends Throwables.FloatBiPredicate<RuntimeExc
      * @return a predicate that represents the logical negation of this predicate
      */
     default FloatBiPredicate negate() {
-        return (t, u) -> !test(t, u);
+        return (a, b) -> !test(a, b);
     }
 
     /**
@@ -153,7 +153,7 @@ public interface FloatBiPredicate extends Throwables.FloatBiPredicate<RuntimeExc
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
      */
     default FloatBiPredicate and(final FloatBiPredicate other) {
-        return (t, u) -> test(t, u) && other.test(t, u);
+        return (a, b) -> test(a, b) && other.test(a, b);
     }
 
     /**
@@ -178,6 +178,6 @@ public interface FloatBiPredicate extends Throwables.FloatBiPredicate<RuntimeExc
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
      */
     default FloatBiPredicate or(final FloatBiPredicate other) {
-        return (t, u) -> test(t, u) || other.test(t, u);
+        return (a, b) -> test(a, b) || other.test(a, b);
     }
 }

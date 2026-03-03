@@ -41,10 +41,10 @@ public interface CharBinaryOperator extends Throwables.CharBinaryOperator<Runtim
      * char sum = concatenateAsChar.applyAsChar('A', 'B');   // Returns char sum
      * }</pre>
      *
-     * @param left the first char operand
-     * @param right the second char operand
+     * @param a the first char operand
+     * @param b the second char operand
      * @return the char result of applying this operator to the two operands
      */
     @Override
-    char applyAsChar(char left, char right);
+    char applyAsChar(char a, char b);
 }

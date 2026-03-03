@@ -17,6 +17,9 @@ package com.landawn.abacus.type;
 import com.landawn.abacus.util.MapEntity;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for {@link MapEntity} objects, providing conversion between MapEntity and its string representation.
+ */
 @SuppressWarnings("java:S2160")
 public class MapEntityType extends AbstractType<MapEntity> {
 

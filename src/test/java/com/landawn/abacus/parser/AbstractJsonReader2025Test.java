@@ -19,10 +19,10 @@ public class AbstractJsonReader2025Test extends TestBase {
         assertEquals(2, JsonReader.END_BRACE);
         assertEquals(3, JsonReader.START_BRACKET);
         assertEquals(4, JsonReader.END_BRACKET);
-        assertEquals(5, JsonReader.START_QUOTATION_D);
-        assertEquals(6, JsonReader.END_QUOTATION_D);
-        assertEquals(7, JsonReader.START_QUOTATION_S);
-        assertEquals(8, JsonReader.END_QUOTATION_S);
+        assertEquals(5, JsonReader.START_DOUBLE_QUOTE);
+        assertEquals(6, JsonReader.END_DOUBLE_QUOTE);
+        assertEquals(7, JsonReader.START_SINGLE_QUOTE);
+        assertEquals(8, JsonReader.END_SINGLE_QUOTE);
         assertEquals(9, JsonReader.COLON);
         assertEquals(10, JsonReader.COMMA);
     }

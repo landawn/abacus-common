@@ -41,7 +41,7 @@ import java.io.Serial;
  * 
  * // With token information
  * if (unexpectedToken) {
- *     throw new ParsingException(currentToken, "Unexpected token at position " + position);
+ *     throw new ParsingException("Unexpected token at position " + position, currentToken);
  * }
  * }</pre>
  * 
@@ -85,7 +85,7 @@ public class ParsingException extends RuntimeException {
     }
 
     /**
-     * Constructs a new {@code ParsingException} with the specified token and detail message.
+     * Constructs a new {@code ParsingException} with the specified detail message and token.
      * This constructor is useful when you want to indicate the specific token or position
      * where the parsing error occurred.
      *
@@ -94,6 +94,7 @@ public class ParsingException extends RuntimeException {
      * // Token could represent a position, token type, or error code
      * throw new ParsingException("Unexpected character '}' at position 42", 42);
      * }</pre>
+     *
      * @param message the detail message. The detail message is saved for later retrieval
      *                by the {@link #getMessage()} method.
      * @param errorToken an integer value representing the token, position, or error code where the parsing failed.

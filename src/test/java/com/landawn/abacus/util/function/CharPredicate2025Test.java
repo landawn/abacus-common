@@ -167,12 +167,12 @@ public class CharPredicate2025Test extends TestBase {
     }
 
     @Test
-    public void testGreaterEqual() {
-        CharPredicate greaterEqualM = CharPredicate.greaterEqual('m');
+    public void testGreaterThanOrEqual() {
+        CharPredicate greaterThanOrEqualM = CharPredicate.greaterThanOrEqual('m');
 
-        assertTrue(greaterEqualM.test('z'));
-        assertTrue(greaterEqualM.test('m'));
-        assertFalse(greaterEqualM.test('a'));
+        assertTrue(greaterThanOrEqualM.test('z'));
+        assertTrue(greaterThanOrEqualM.test('m'));
+        assertFalse(greaterThanOrEqualM.test('a'));
     }
 
     @Test
@@ -185,12 +185,12 @@ public class CharPredicate2025Test extends TestBase {
     }
 
     @Test
-    public void testLessEqual() {
-        CharPredicate lessEqualM = CharPredicate.lessEqual('m');
+    public void testLessThanOrEqual() {
+        CharPredicate lessThanOrEqualM = CharPredicate.lessThanOrEqual('m');
 
-        assertFalse(lessEqualM.test('z'));
-        assertTrue(lessEqualM.test('m'));
-        assertTrue(lessEqualM.test('a'));
+        assertFalse(lessThanOrEqualM.test('z'));
+        assertTrue(lessThanOrEqualM.test('m'));
+        assertTrue(lessThanOrEqualM.test('a'));
     }
 
     @Test

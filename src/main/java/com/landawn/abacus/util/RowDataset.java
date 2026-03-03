@@ -116,7 +116,7 @@ public final class RowDataset implements Dataset, Cloneable {
 
     static final char[] FALSE_CHAR_ARRAY = FALSE.toCharArray();
 
-    static final Set<Class<?>> SUPPORTED_COUNT_COLUMN_TYPES = N.asSet(int.class, Integer.class, long.class, Long.class, float.class, Float.class, double.class,
+    static final Set<Class<?>> SUPPORTED_COUNT_COLUMN_TYPES = N.toSet(int.class, Integer.class, long.class, Long.class, float.class, Float.class, double.class,
             Double.class);
 
     static final String POSTFIX_FOR_SAME_JOINED_COLUMN_NAME = "_2";
@@ -538,7 +538,7 @@ public final class RowDataset implements Dataset, Cloneable {
         final int columnSizeToMove = N.size(columns);
 
         if (newPosition < 0 || newPosition > columnCount - columnSizeToMove) {
-            throw new IndexOutOfBoundsException("The new row position must be >= 0 and <= " + (columnCount - columnSizeToMove));
+            throw new IndexOutOfBoundsException("The new column position must be >= 0 and <= " + (columnCount - columnSizeToMove));
         }
 
         if (N.isEmpty(columns)) {
@@ -2103,10 +2103,8 @@ public final class RowDataset implements Dataset, Cloneable {
 
         for (final String columnName : selectColumnNamesFromOtherToMerge) {
             if (!result.containsColumn(columnName)) {
-                if (column == null) {
-                    column = new ArrayList<>(currentResultSize + rowCountToBeAdded);
-                    N.fill(column, 0, currentResultSize, null);
-                }
+                column = new ArrayList<>(currentResultSize + rowCountToBeAdded);
+                N.fill(column, 0, currentResultSize, null);
 
                 result.addColumn(columnName, column);
             }
@@ -3145,7 +3143,7 @@ public final class RowDataset implements Dataset, Cloneable {
                             final Object defaultIdPropValue = idPropInfo.type.defaultValue();
                             final List<Object> idColumn = tmp._columnList.get(tmp.getColumnIndex(newPropEntityIdNames.get(i)));
 
-                            if (!Stream.of(idColumn).countMatchBetween(0, 1, it -> N.equals(it, defaultIdPropValue))) { // two or more rows have the same id value.
+                            if (!Stream.of(idColumn).isMatchCountBetween(0, 1, it -> N.equals(it, defaultIdPropValue))) { // two or more rows have the same id value.
                                 isToMerge = false;
                                 break;
                             }
@@ -3198,7 +3196,7 @@ public final class RowDataset implements Dataset, Cloneable {
                 }
             }
 
-            final List<T> result = returnAllList || N.isEmpty(idBeanMap) ? (List<T>) N.asList(resultEntities)
+            final List<T> result = returnAllList || N.isEmpty(idBeanMap) ? (List<T>) N.toList(resultEntities)
                     : new ArrayList<>((Collection<T>) idBeanMap.values());
 
             if (rowSupplier == null && N.notEmpty(result)) {
@@ -4266,8 +4264,8 @@ public final class RowDataset implements Dataset, Cloneable {
             val.add(valueColumn.get(i));
         }
 
-        final List<String> newColumnNameList = N.asList(keyColumnName, aggregateResultColumnName);
-        final List<List<Object>> newColumnList = N.asList(keyList, new ArrayList<>(map.values()));
+        final List<String> newColumnNameList = N.toList(keyColumnName, aggregateResultColumnName);
+        final List<List<Object>> newColumnList = N.toList(keyList, new ArrayList<>(map.values()));
 
         return new RowDataset(newColumnNameList, newColumnList);
     }
@@ -4411,7 +4409,7 @@ public final class RowDataset implements Dataset, Cloneable {
             val.add(valueColumn.get(i));
         }
 
-        final List<String> newColumnNameList = N.asList(keyColumnName, aggregateResultColumnName);
+        final List<String> newColumnNameList = N.toList(keyColumnName, aggregateResultColumnName);
         final List<List<Object>> newColumnList = N.asList(keyList, new ArrayList<>(map.values()));
 
         return new RowDataset(newColumnNameList, newColumnList);

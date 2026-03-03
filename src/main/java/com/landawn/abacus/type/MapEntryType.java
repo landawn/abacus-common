@@ -120,17 +120,17 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
     }
 
     /**
-     * Indicates whether this is a generic type.
+     * Indicates whether this is a parameterized type.
      * For MapEntryType, this always returns {@code true} since Map.Entry is parameterized with key and value types.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Map.Entry<String, Integer>> type = TypeFactory.getType("Map.Entry<String, Integer>");
-     * boolean isGeneric = type.isGenericType();
+     * boolean isParameterized = type.isParameterizedType();
      * // Returns: true
      * }</pre>
      *
-     * @return {@code true}, indicating that Map.Entry is a generic type
+     * @return {@code true}, indicating that Map.Entry is a parameterized type
      */
     @Override
     public boolean isParameterizedType() {
@@ -192,6 +192,10 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
 
         if (map == null || map.isEmpty()) {
             return null; // NOSONAR
+        }
+
+        if (map.size() != 1) {
+            throw new IllegalArgumentException("Map.Entry JSON must contain exactly one entry, but got: " + map.size());
         }
 
         return map.entrySet().iterator().next();

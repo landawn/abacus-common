@@ -101,9 +101,9 @@ public class AtomicBooleanType2025Test extends TestBase {
         type.set(stmt, 2, new AtomicBoolean(false));
         verify(stmt).setBoolean(2, false);
 
-        // Test with null
+        // Test with null (sets SQL NULL)
         type.set(stmt, 3, null);
-        verify(stmt).setBoolean(3, false);
+        verify(stmt).setNull(3, java.sql.Types.BOOLEAN);
     }
 
     @Test
@@ -116,7 +116,7 @@ public class AtomicBooleanType2025Test extends TestBase {
 
         // Test with null
         type.set(stmt, "param2", null);
-        verify(stmt).setBoolean("param2", false);
+        verify(stmt).setNull("param2", java.sql.Types.BOOLEAN);
     }
 
     @Test

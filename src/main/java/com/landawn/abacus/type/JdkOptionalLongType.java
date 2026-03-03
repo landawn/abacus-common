@@ -53,14 +53,14 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
     }
 
     /**
-     * Indicates whether this type should be written without quotes in CSV format.
-     * Long values are numeric and should not be quoted.
+     * Indicates whether values of this type require quoting in CSV format.
+     * OptionalLong values are numeric and do not require quotes.
      *
-     * @return {@code true}, indicating that OptionalLong values should not be quoted in CSV output
+     * @return {@code false}, as OptionalLong values do not require quoting in CSV format
      */
     @Override
-    public boolean isNonQuotableCsvType() {
-        return true;
+    public boolean isCsvQuoteRequired() {
+        return false;
     }
 
     /**

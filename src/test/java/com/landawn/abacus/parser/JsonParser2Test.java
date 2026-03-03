@@ -61,6 +61,54 @@ import lombok.experimental.Accessors;
 public class JsonParser2Test extends AbstractParserTest {
     private static final String bigBeanStr = jsonParser.serialize(bigBean);
 
+    private static Map<Object, Object> createNumericLinkedHashMap(final BigInteger bigInteger, final boolean includeBigInteger) {
+        final Map<Object, Object> map = new LinkedHashMap<>();
+
+        map.put("null", null);
+
+        if (includeBigInteger) {
+            map.put("bigInteger", bigInteger);
+        }
+
+        map.put("false", false);
+        map.put("true", true);
+        map.put("minInt", Integer.MIN_VALUE);
+        map.put("maxInt", Integer.MAX_VALUE);
+        map.put("intZero", 0);
+        map.put("minLong", Long.MIN_VALUE);
+        map.put("maxLong", Long.MAX_VALUE);
+        map.put("minLongMinusOne", BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE));
+        map.put("maxLongPlusOne", BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE));
+        map.put("minLongPlusOne", Long.MIN_VALUE + 1);
+        map.put("floatMin", Float.MIN_VALUE);
+        map.put("floatMax", Float.MAX_VALUE);
+        map.put("floatMin-2", -Float.MAX_VALUE);
+        map.put("float-NaN", Float.NaN);
+        map.put("float-NEGATIVE_INFINITY", Float.NEGATIVE_INFINITY);
+        map.put("float-POSITIVE_INFINITY", Float.POSITIVE_INFINITY);
+        map.put("float-0.0", 0.0f);
+        map.put("float-0", 0f);
+        map.put("float-0.000123", 0.000123f);
+        map.put("float--0.000123", -0.000123f);
+        map.put("float-0.12309294093821094201", 0.12309294093821094201f);
+        map.put("float--0.12309294093821094201", -0.12309294093821094201f);
+        map.put("float-232.123092940931094201", 232.123092940931094201f);
+        map.put("doubleMin", Double.MIN_VALUE);
+        map.put("doubleMax", Double.MAX_VALUE);
+        map.put("doubleMin-2", -Double.MAX_VALUE);
+        map.put("double-NaN", Double.NaN);
+        map.put("double-NEGATIVE_INFINITY", Double.NEGATIVE_INFINITY);
+        map.put("double-POSITIVE_INFINITY", Double.POSITIVE_INFINITY);
+        map.put("double-0.0", 0.0d);
+        map.put("double-0.000123", 0.000123d);
+        map.put("double--0.000123", -0.000123d);
+        map.put("double-0.12309294093821094201", 0.12309294093821094201d);
+        map.put("double--0.12309294093821094201", -0.12309294093821094201d);
+        map.put("double-232.123092940931094201", 232.123092940931094201d);
+
+        return map;
+    }
+
     @Test
     public void test_2309() {
         final SpecificResource resource = new SpecificResource();
@@ -158,17 +206,7 @@ public class JsonParser2Test extends AbstractParserTest {
 
         {
 
-            Map map = N.asLinkedHashMap("null", null, "bigInteger", bigInteger, "false", false, "true", true, "minInt", Integer.MIN_VALUE, "maxInt",
-                    Integer.MAX_VALUE, "intZero", 0, "minLong", Long.MIN_VALUE, "maxLong", Long.MAX_VALUE, "minLongMinusOne",
-                    BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE), "maxLongPlusOne", BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE),
-                    "minLongPlusOne", Long.MIN_VALUE + 1, "floatMin", Float.MIN_VALUE, "floatMax", Float.MAX_VALUE, "floatMin-2", -Float.MAX_VALUE, "float-NaN",
-                    Float.NaN, "float-NEGATIVE_INFINITY", Float.NEGATIVE_INFINITY, "float-POSITIVE_INFINITY", Float.POSITIVE_INFINITY, "float-0.0", 0.0f,
-                    "float-0", 0f, "float-0.000123", 0.000123f, "float--0.000123", -0.000123f, "float-0.12309294093821094201", 0.12309294093821094201f,
-                    "float--0.12309294093821094201", -0.12309294093821094201f, "float-232.123092940931094201", 232.123092940931094201f, "doubleMin",
-                    Double.MIN_VALUE, "doubleMax", Double.MAX_VALUE, "doubleMin-2", -Double.MAX_VALUE, "double-NaN", Double.NaN, "double-NEGATIVE_INFINITY",
-                    Double.NEGATIVE_INFINITY, "double-POSITIVE_INFINITY", Double.POSITIVE_INFINITY, "double-0.0", 0.0d, "double-0.000123", 0.000123d,
-                    "double--0.000123", -0.000123d, "double-0.12309294093821094201", 0.12309294093821094201d, "double--0.12309294093821094201",
-                    -0.12309294093821094201d, "double-232.123092940931094201", 232.123092940931094201d);
+            Map map = createNumericLinkedHashMap(bigInteger, true);
 
             String json = N.toJson(map);
             N.println(json);
@@ -208,17 +246,7 @@ public class JsonParser2Test extends AbstractParserTest {
 
         {
 
-            Map map = N.asLinkedHashMap("null", null, "false", false, "true", true, "minInt", Integer.MIN_VALUE, "maxInt", Integer.MAX_VALUE, "intZero", 0,
-                    "minLong", Long.MIN_VALUE, "maxLong", Long.MAX_VALUE, "minLongMinusOne", BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE),
-                    "maxLongPlusOne", BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE), "minLongPlusOne", Long.MIN_VALUE + 1, "floatMin", Float.MIN_VALUE,
-                    "floatMax", Float.MAX_VALUE, "floatMin-2", -Float.MAX_VALUE, "float-NaN", Float.NaN, "float-NEGATIVE_INFINITY", Float.NEGATIVE_INFINITY,
-                    "float-POSITIVE_INFINITY", Float.POSITIVE_INFINITY, "float-0.0", 0.0f, "float-0", 0f, "float-0.000123", 0.000123f, "float--0.000123",
-                    -0.000123f, "float-0.12309294093821094201", 0.12309294093821094201f, "float--0.12309294093821094201", -0.12309294093821094201f,
-                    "float-232.123092940931094201", 232.123092940931094201f, "doubleMin", Double.MIN_VALUE, "doubleMax", Double.MAX_VALUE, "doubleMin-2",
-                    -Double.MAX_VALUE, "double-NaN", Double.NaN, "double-NEGATIVE_INFINITY", Double.NEGATIVE_INFINITY, "double-POSITIVE_INFINITY",
-                    Double.POSITIVE_INFINITY, "double-0.0", 0.0d, "double-0.000123", 0.000123d, "double--0.000123", -0.000123d, "double-0.12309294093821094201",
-                    0.12309294093821094201d, "double--0.12309294093821094201", -0.12309294093821094201d, "double-232.123092940931094201",
-                    232.123092940931094201d);
+            Map map = createNumericLinkedHashMap(bigInteger, false);
 
             String json = N.toJson(map);
             N.println(json);
@@ -261,7 +289,7 @@ public class JsonParser2Test extends AbstractParserTest {
     public void test_03() {
         List<BeanMap> beanMapList = new ArrayList<>();
         beanMapList.add(new BeanMap().setKey("key1").setValue("val1").setType("String"));
-        beanMapList.add(new BeanMap().setKey("key2").setValue(N.asList(beanMapList.get(0), 1, "aaaaaa")).setType("Object"));
+        beanMapList.add(new BeanMap().setKey("key2").setValue(N.toList(beanMapList.get(0), 1, "aaaaaa")).setType("Object"));
         beanMapList.add(new BeanMap().setKey("key3").setValue(Dates.currentCalendar()).setType("Calendar"));
         beanMapList.add(new BeanMap().setKey("key4").setValue(N.asMap("mapKey1", Dates.currentDate())).setType("Calendar"));
 
@@ -275,7 +303,7 @@ public class JsonParser2Test extends AbstractParserTest {
 
     @Test
     public void test_02() {
-        Object obj = N.asList(N.asMap("key", "value", "key2", "value2", "num1", 1, "num2", "92390asdflkj"));
+        Object obj = N.toList(N.asMap("key", "value", "key2", "value2", "num1", 1, "num2", "92390asdflkj"));
         String json = N.toJson(obj);
         N.println(json);
 
@@ -292,7 +320,7 @@ public class JsonParser2Test extends AbstractParserTest {
 
     @Test
     public void test_01() {
-        Object obj = N.asList(N.asMap("key", "value", "key2", "value2"));
+        Object obj = N.toList(N.asMap("key", "value", "key2", "value2"));
         String json = N.toJson(obj);
         N.println(json);
 
@@ -318,8 +346,8 @@ public class JsonParser2Test extends AbstractParserTest {
         N.println(str);
         N.println("========================================================================================================================");
 
-        str = jsonParser.serialize(N.asList(account, account), config);
-        N.println("============N.asList(account, account)===================================================================================");
+        str = jsonParser.serialize(N.toList(account, account), config);
+        N.println("============N.toList(account, account)===================================================================================");
         N.println(str);
         N.println("========================================================================================================================");
 
@@ -333,18 +361,18 @@ public class JsonParser2Test extends AbstractParserTest {
         N.println(str);
         N.println("========================================================================================================================");
 
-        str = jsonParser.serialize(N.asList(Beans.deepBeanToMap(account), account), config);
-        N.println("============N.asList(N.deepBeanToMap(account), account)================================================================");
+        str = jsonParser.serialize(N.toList(Beans.deepBeanToMap(account), account), config);
+        N.println("============N.toList(N.deepBeanToMap(account), account)================================================================");
         N.println(str);
         N.println("========================================================================================================================");
 
-        str = jsonParser.serialize(new Object[] { new Object[] { account, account }, N.asList(account, account) }, config);
-        N.println("============Array.of(Array.of(account, account), N.asList(account, account))==========================================");
+        str = jsonParser.serialize(new Object[] { new Object[] { account, account }, N.toList(account, account) }, config);
+        N.println("============Array.of(Array.of(account, account), N.toList(account, account))==========================================");
         N.println(str);
         N.println("========================================================================================================================");
 
-        str = jsonParser.serialize(N.asList(N.asArray(account, account), N.asList(account, account)), config);
-        N.println("============N.asList(Array.of(account, account), N.asList(account, account))===========================================");
+        str = jsonParser.serialize(N.toList(N.asArray(account, account), N.toList(account, account)), config);
+        N.println("============N.toList(Array.of(account, account), N.toList(account, account))===========================================");
         N.println(str);
         N.println("========================================================================================================================");
 
@@ -562,7 +590,7 @@ public class JsonParser2Test extends AbstractParserTest {
     @Test
     public void testSerialize1() {
         Bean bean = new Bean();
-        bean.setTypeList(N.asList(
+        bean.setTypeList(N.toList(
                 "‰β,『�?★业€ > \n sfd \r ds \' f d // \\  \\\\ /// /////// \\\\\\\\  \\\\\\\\n \\\\\\\\r  \t sd \" fe stri‰β,『�?★业€ ng黎< > </ <//、\n", '★', '\n',
                 '\r', '\t', '\"', '\'', ' ', new char[] { '\r', '\t', '\"', '\'', ' ' },
                 new String[] {
@@ -662,8 +690,8 @@ public class JsonParser2Test extends AbstractParserTest {
         xBean.setTypeChar('<');
         xBean.setTypeChar2('>');
         xBean.setTypeGenericList(
-                N.asList(Dates.createDate(System.currentTimeMillis() / 1000 * 1000), Dates.createDate(System.currentTimeMillis() / 1000 * 1000)));
-        xBean.setTypeGenericSet(N.asSet(1L, 2L));
+                N.toList(Dates.createDate(System.currentTimeMillis() / 1000 * 1000), Dates.createDate(System.currentTimeMillis() / 1000 * 1000)));
+        xBean.setTypeGenericSet(N.toSet(1L, 2L));
 
         String jsonStr = jsonParser.serialize(xBean);
         println(jsonStr);
@@ -724,7 +752,7 @@ public class JsonParser2Test extends AbstractParserTest {
         typeGenericList.add(null);
         xBean.setTypeGenericList(typeGenericList);
 
-        Set<Long> typeGenericSet = N.asSortedSet();
+        Set<Long> typeGenericSet = N.toSortedSet();
         typeGenericSet.add(1332333L);
         typeGenericSet.add(Long.MAX_VALUE);
         typeGenericSet.add(Long.MIN_VALUE);
@@ -771,14 +799,14 @@ public class JsonParser2Test extends AbstractParserTest {
         typeGenericMap2.put(account.getFirstName(), createAccount(Account.class));
         typeGenericMap2.put(account.getLastName(), createAccount(Account.class));
         typeGenericMap2.put("null", null);
-        typeGenericMap2.put("bookList", N.asList(createAccount(Account.class)));
+        typeGenericMap2.put("bookList", N.toList(createAccount(Account.class)));
         xBean.setTypeGenericMap2(typeGenericMap2);
 
         Map<Object, Object> typeGenericMap4 = new ConcurrentHashMap<>();
         typeGenericMap4.put(createAccount(Account.class), createAccount(Account.class));
         typeGenericMap4.put(createAccount(Account.class), createAccount(Account.class));
         typeGenericMap4.put("aaabbbccc", "");
-        typeGenericMap4.put("bookList", N.asList(createAccount(Account.class)));
+        typeGenericMap4.put("bookList", N.toList(createAccount(Account.class)));
         typeGenericMap4.put("edse", " ");
         typeGenericMap4.put(new HashMap<>(), " ");
         typeGenericMap4.put(new ArrayList<>(), new HashSet<>());
@@ -792,7 +820,7 @@ public class JsonParser2Test extends AbstractParserTest {
         }
 
         typeMap.put("null", null);
-        typeMap.put("bookList", N.asList(createAccount(Account.class)));
+        typeMap.put("bookList", N.toList(createAccount(Account.class)));
         typeMap.put(" ", " ");
         typeMap.put(new HashMap<>(), " ");
         typeMap.put(new ArrayList<>(), new HashSet<>());
@@ -919,11 +947,11 @@ public class JsonParser2Test extends AbstractParserTest {
             this.shortList = shortList;
         }
 
-        public XMLGregorianCalendar getXmlGregorianCalendar() {
+        public XMLGregorianCalendar getXMLGregorianCalendar() {
             return xmlGregorianCalendar;
         }
 
-        public void setXmlGregorianCalendar(XMLGregorianCalendar xmlGregorianCalendar) {
+        public void setXMLGregorianCalendar(XMLGregorianCalendar xmlGregorianCalendar) {
             this.xmlGregorianCalendar = xmlGregorianCalendar;
         }
 

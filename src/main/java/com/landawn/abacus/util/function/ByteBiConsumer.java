@@ -40,11 +40,11 @@ public interface ByteBiConsumer extends Throwables.ByteBiConsumer<RuntimeExcepti
      * mapPutter.accept((byte) 1, (byte) 42);
      * }</pre>
      *
-     * @param t the first input argument
-     * @param u the second input argument
+     * @param a the first input argument
+     * @param b the second input argument
      */
     @Override
-    void accept(byte t, byte u);
+    void accept(byte a, byte b);
 
     /**
      * Returns a composed {@code ByteBiConsumer} that performs, in sequence, this operation followed by the {@code after} operation.
@@ -63,9 +63,9 @@ public interface ByteBiConsumer extends Throwables.ByteBiConsumer<RuntimeExcepti
      * @return a composed {@code ByteBiConsumer} that performs in sequence this operation followed by the {@code after} operation
      */
     default ByteBiConsumer andThen(final ByteBiConsumer after) {
-        return (t, u) -> {
-            accept(t, u);
-            after.accept(t, u);
+        return (a, b) -> {
+            accept(a, b);
+            after.accept(a, b);
         };
     }
 }

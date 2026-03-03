@@ -16,7 +16,6 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 
-import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
@@ -230,18 +229,13 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            try {
-                writer.write(WD._BRACKET_L);
+            writer.write(WD._BRACKET_L);
 
-                writer.write(N.stringOf(x.longIndex()));
-                writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-                valueType.writeCharacter(writer, x.value(), config);
+            writer.write(N.stringOf(x.longIndex()));
+            writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+            valueType.writeCharacter(writer, x.value(), config);
 
-                writer.write(WD._BRACKET_R);
-
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
-            }
+            writer.write(WD._BRACKET_R);
         }
     }
 

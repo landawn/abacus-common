@@ -322,7 +322,7 @@ import com.landawn.abacus.util.URLEncodedUtil;
  *   <li><b>Error Information:</b> Avoid exposing sensitive information in error messages</li>
  * </ul>
  *
- * <p><b>Example: Microservice Client Implementation</b>
+ * <p><b>Usage Examples: Microservice Client Implementation</b>
  * <pre>{@code
  * public class UserServiceClient {
  *     private final String baseUrl;
@@ -437,11 +437,35 @@ public final class HttpClient {
 
     private final AtomicInteger _activeConnectionCounter; //NOSONAR
 
+    /**
+     * Creates a new {@code HttpClient} with a string URL and delegates to the core constructor.
+     *
+     * @param url the request URL as a string
+     * @param maxConnection the maximum number of concurrently tracked connections
+     * @param connectTimeoutInMillis the connection timeout in milliseconds
+     * @param readTimeoutInMillis the read timeout in milliseconds
+     * @param settings the default HTTP settings for requests made by this client
+     * @param sharedActiveConnectionCounter the shared counter used to enforce connection limits
+     * @param executor the executor used for asynchronous operations, or {@code null} to use the default
+     */
     private HttpClient(final String url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter, final Executor executor) {
         this(null, url, maxConnection, connectTimeoutInMillis, readTimeoutInMillis, settings, sharedActiveConnectionCounter, executor);
     }
 
+    /**
+     * Creates a new {@code HttpClient} with normalized configuration and validated URL protocol.
+     *
+     * @param netUrl the pre-parsed URL, or {@code null} to derive from {@code url}
+     * @param url the request URL as a string
+     * @param maxConnection the maximum number of concurrently tracked connections
+     * @param connectTimeoutInMillis the connection timeout in milliseconds
+     * @param readTimeoutInMillis the read timeout in milliseconds
+     * @param settings the default HTTP settings for requests made by this client
+     * @param sharedActiveConnectionCounter the shared counter used to enforce connection limits
+     * @param executor the executor used for asynchronous operations, or {@code null} to use the default
+     * @throws IllegalArgumentException if URL/protocol is invalid or timeout/connection limits are negative
+     */
     private HttpClient(final URL netUrl, final String url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter, final Executor executor) {
         N.checkArgument(netUrl != null || Strings.isNotEmpty(url), "url cannot be null or empty");
@@ -457,13 +481,20 @@ public final class HttpClient {
         _maxConnection = (maxConnection == 0) ? DEFAULT_MAX_CONNECTION : maxConnection;
         _connectTimeoutInMillis = (connectTimeoutInMillis == 0) ? DEFAULT_CONNECTION_TIMEOUT : connectTimeoutInMillis;
         _readTimeoutInMillis = (readTimeoutInMillis == 0) ? DEFAULT_READ_TIMEOUT : readTimeoutInMillis;
-        _settings = settings == null ? HttpSettings.create() : settings;
+        _settings = settings == null ? HttpSettings.create() : settings.copy();
 
         _asyncExecutor = executor == null ? HttpUtil.DEFAULT_ASYNC_EXECUTOR : new AsyncExecutor(executor);
 
         _activeConnectionCounter = sharedActiveConnectionCounter;
     }
 
+    /**
+     * Converts a URL string to a {@link URL} and validates that the protocol is supported.
+     *
+     * @param url the URL string to parse
+     * @return the parsed URL
+     * @throws IllegalArgumentException if URL is {@code null} or uses an unsupported protocol
+     */
     private static URL createNetUrl(final String url) {
         try {
             final URL netUrl = URI.create(N.checkArgNotNull(url, "url")).toURL();
@@ -474,6 +505,12 @@ public final class HttpClient {
         }
     }
 
+    /**
+     * Validates that the specified URL uses HTTP or HTTPS protocol.
+     *
+     * @param netUrl the URL to validate
+     * @throws IllegalArgumentException if protocol is not HTTP/HTTPS
+     */
     private static void checkSupportedProtocol(final URL netUrl) {
         final String protocol = netUrl == null ? null : netUrl.getProtocol();
 
@@ -1394,15 +1431,15 @@ public final class HttpClient {
 
     /**
      *
-     * @param httpMethod
-     * @param request
-     * @param settings
-     * @param resultClass
-     * @param outputStream
-     * @param outputWriter
-     * @param <T>
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param httpMethod the HTTP method to use
+     * @param request the request body
+     * @param settings the HTTP settings
+     * @param resultClass the expected response type
+     * @param outputStream the output stream to write response to, or {@code null}
+     * @param outputWriter the writer to write response to, or {@code null}
+     * @param <T> the response type
+     * @return the response parsed as the specified result class
+     * @throws UncheckedIOException if an I/O error occurs
      */
     private <T> T execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final Class<T> resultClass,
             final OutputStream outputStream, final Writer outputWriter) throws UncheckedIOException {
@@ -1525,11 +1562,26 @@ public final class HttpClient {
         }
     }
 
+    /**
+     * Determines whether the request should be treated as one-way and skip response body processing.
+     *
+     * @param settings the per-request settings, or {@code null} to use client defaults
+     * @param resultClass the expected result type
+     * @param outputStream the target output stream for response forwarding
+     * @param outputWriter the target writer for response forwarding
+     * @return {@code true} if no response body should be read into a return value
+     */
     boolean isOneWayRequest(final HttpSettings settings, final Class<?> resultClass, final OutputStream outputStream, final Writer outputWriter) {
         return (resultClass == null || Void.class.equals(resultClass) || (settings == null ? _settings.isOneWayRequest() : settings.isOneWayRequest()))
                 && outputStream == null && outputWriter == null;
     }
 
+    /**
+     * Resolves the effective content format, preferring per-request settings over client defaults.
+     *
+     * @param settings the per-request settings, or {@code null} to use client defaults
+     * @return the resolved content format
+     */
     ContentFormat getContentFormat(final HttpSettings settings) {
         ContentFormat contentFormat = null;
 
@@ -1544,6 +1596,12 @@ public final class HttpClient {
         return contentFormat;
     }
 
+    /**
+     * Resolves the effective content type, preferring per-request settings over client defaults.
+     *
+     * @param settings the per-request settings, or {@code null} to use client defaults
+     * @return the resolved content type
+     */
     String getContentType(final HttpSettings settings) {
         String contentType = null;
 
@@ -1558,6 +1616,12 @@ public final class HttpClient {
         return contentType;
     }
 
+    /**
+     * Resolves the effective content encoding, preferring per-request settings over client defaults.
+     *
+     * @param settings the per-request settings, or {@code null} to use client defaults
+     * @return the resolved content encoding
+     */
     private String getContentEncoding(final HttpSettings settings) {
         String contentEncoding = null;
 
@@ -1572,6 +1636,12 @@ public final class HttpClient {
         return contentEncoding;
     }
 
+    /**
+     * Checks whether the specified HTTP method typically carries a request body.
+     *
+     * @param httpMethod the HTTP method to evaluate
+     * @return {@code true} for POST/PUT/PATCH; otherwise {@code false}
+     */
     private boolean requireBody(final HttpMethod httpMethod) {
         return httpMethod == HttpMethod.POST || httpMethod == HttpMethod.PUT || httpMethod == HttpMethod.PATCH;
     }
@@ -1625,6 +1695,18 @@ public final class HttpClient {
         return openConnection(httpMethod, queryParameters, settings, doOutput, resultClass, false);
     }
 
+    /**
+     * Internal connection factory with optional connection-limit tracking.
+     *
+     * @param httpMethod the HTTP method to use
+     * @param queryParameters query parameters for GET/DELETE requests
+     * @param settings the per-request settings, or {@code null} to use client defaults
+     * @param doOutput whether request-body output should be enabled
+     * @param resultClass the expected response type
+     * @param trackConnectionLimit whether to enforce/decrement the active connection counter
+     * @return a configured HTTP connection
+     * @throws UncheckedIOException if an I/O error occurs while opening/configuring the connection
+     */
     @SuppressWarnings("unused")
     private HttpURLConnection openConnection(final HttpMethod httpMethod, final Object queryParameters, final HttpSettings settings, final boolean doOutput,
             final Class<?> resultClass, final boolean trackConnectionLimit) throws UncheckedIOException {
@@ -1688,7 +1770,7 @@ public final class HttpClient {
                 connection.setDoOutput(true);
             }
 
-            connection.setUseCaches((settings != null && settings.useCaches()) || (_settings != null && _settings.useCaches()));
+            connection.setUseCaches(settings != null ? settings.useCaches() : (_settings != null && _settings.useCaches()));
 
             //noinspection DataFlowIssue
             setHttpProperties(connection, settings == null || settings.headers().isEmpty() ? _settings : settings);
@@ -1709,9 +1791,9 @@ public final class HttpClient {
     /**
      * Sets the http properties.
      *
-     * @param connection
-     * @param settings
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param connection the HTTP URL connection to configure
+     * @param settings the HTTP settings to apply
+     * @throws UncheckedIOException if an I/O error occurs
      */
     void setHttpProperties(final HttpURLConnection connection, final HttpSettings settings) throws UncheckedIOException {
         final HttpHeaders headers = settings.headers();
@@ -1735,6 +1817,13 @@ public final class HttpClient {
         }
     }
 
+    /**
+     * Closes request/response streams and updates active connection tracking.
+     *
+     * @param os the request output stream to close
+     * @param is the response input stream to close
+     * @param connection the connection associated with the completed request
+     */
     void close(final OutputStream os, final InputStream is, @SuppressWarnings("unused") final HttpURLConnection connection) { //NOSONAR
         try {
             IOUtil.closeQuietly(os);

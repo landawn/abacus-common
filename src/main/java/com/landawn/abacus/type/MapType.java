@@ -144,17 +144,17 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
     }
 
     /**
-     * Indicates whether this is a generic type.
+     * Indicates whether this is a parameterized type.
      * For MapType, this always returns {@code true} since Map is parameterized with key and value types.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Map<String, Integer>> type = TypeFactory.getType("Map<String, Integer>");
-     * boolean isGeneric = type.isGenericType();
+     * boolean isParameterized = type.isParameterizedType();
      * // Returns: true
      * }</pre>
      *
-     * @return {@code true}, indicating that Map is a generic type
+     * @return {@code true}, indicating that Map is a parameterized type
      */
     @Override
     public boolean isParameterizedType() {

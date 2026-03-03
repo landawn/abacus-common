@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -56,6 +57,12 @@ public class Predicate2025Test extends TestBase {
     }
 
     @Test
+    public void testAndRejectsNullPredicateImmediately() {
+        Predicate<Integer> positive = n -> n > 0;
+        assertThrows(NullPointerException.class, () -> positive.and(null));
+    }
+
+    @Test
     public void testAnd_ShortCircuit() {
         boolean[] called = new boolean[1];
         called[0] = false;
@@ -81,6 +88,12 @@ public class Predicate2025Test extends TestBase {
         assertTrue(combined.test(-1));
         assertTrue(combined.test(15));
         assertFalse(combined.test(5));
+    }
+
+    @Test
+    public void testOrRejectsNullPredicateImmediately() {
+        Predicate<Integer> negative = n -> n < 0;
+        assertThrows(NullPointerException.class, () -> negative.or(null));
     }
 
     @Test

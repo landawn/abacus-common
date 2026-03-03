@@ -34,8 +34,8 @@ public interface BooleanUnaryOperator extends Throwables.BooleanUnaryOperator<Ru
      * boolean result = not.applyAsBoolean(true);   // Returns false
      * }</pre>
      *
-     * @param operand the operand
-     * @return the operator result
+     * @param operand the input operand
+     * @return the result of applying this operator
      */
     @Override
     boolean applyAsBoolean(boolean operand);

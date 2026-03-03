@@ -222,7 +222,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LongPredicate atLeastTen = LongPredicate.greaterEqual(10L);
+     * LongPredicate atLeastTen = LongPredicate.greaterThanOrEqual(10L);
      * atLeastTen.test(10L);   // returns true
      * atLeastTen.test(9L);    // returns false
      * }</pre>
@@ -230,7 +230,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * @param targetLong the value to compare against
      * @return a predicate that tests if the input is greater than or equal to {@code targetLong}
      */
-    static LongPredicate greaterEqual(final long targetLong) {
+    static LongPredicate greaterThanOrEqual(final long targetLong) {
         return value -> value >= targetLong;
     }
 
@@ -256,7 +256,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LongPredicate atMostTen = LongPredicate.lessEqual(10L);
+     * LongPredicate atMostTen = LongPredicate.lessThanOrEqual(10L);
      * atMostTen.test(10L);   // returns true
      * atMostTen.test(11L);   // returns false
      * }</pre>
@@ -264,7 +264,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * @param targetLong the value to compare against
      * @return a predicate that tests if the input is less than or equal to {@code targetLong}
      */
-    static LongPredicate lessEqual(final long targetLong) {
+    static LongPredicate lessThanOrEqual(final long targetLong) {
         return value -> value <= targetLong;
     }
 

@@ -24,10 +24,9 @@ import com.landawn.abacus.util.Throwables;
  * <p>The interface extends {@code Throwables.LongObjPredicate} with {@code RuntimeException} as the exception type,
  * making it suitable for use in contexts where checked exceptions are not required.
  *
- * @param <T> the type of the object argument to the predicate
- *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @param <T> the type of the object argument to the predicate
  *
  * @see java.util.function.Predicate
  * @see java.util.function.BiPredicate
@@ -54,6 +53,7 @@ public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, Runt
      * @param u the object second argument of type T
      * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
      */
+    // @ai-ignore LongObj*/ObjLong* argument order convention - intentional: class name prefix determines parameter order. LongObj* has long first; ObjLong* has object first. Do not suggest reordering.
     @Override
     boolean test(long t, T u);
 

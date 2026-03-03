@@ -242,7 +242,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li><b>{@link java.util.stream.Stream}:</b> Java 8+ Stream API</li>
  * </ul>
  *
- * <p><b>Example: Data Analysis Pipeline</b>
+ * <p><b>Usage Examples: Data Analysis Pipeline</b>
  * <pre>{@code
  * // Complete data analysis example
  * List<Double> salesData = Arrays.asList(1200.50, 1450.75, 980.25, 1350.00, null, 1600.25);
@@ -272,7 +272,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * OptionalDouble standardAvg = Iterables.average(standard);
  * }</pre>
  *
- * <p><b>Example: Collection Operations</b>
+ * <p><b>Usage Examples: Collection Operations</b>
  * <pre>{@code
  * // Collection manipulation and analysis
  * List<String> categories = Arrays.asList("Electronics", "Books", "Clothing", "Electronics", "Books");
@@ -4804,7 +4804,7 @@ public final class Iterables {
     /**
      * The Class PowerSet.
      *
-     * @param <E>.
+     * @param <E> the element type in the source set
      */
     private static final class PowerSet<E> extends AbstractSet<Set<E>> {
 
@@ -4901,7 +4901,7 @@ public final class Iterables {
     /**
      * The Class SubSet.
      *
-     * @param <E>.
+     * @param <E> the element type in each subset view
      */
     private static final class SubSet<E> extends AbstractSet<E> { //NOSONAR
 
@@ -4963,7 +4963,7 @@ public final class Iterables {
     /**
      * The Class PermutationCollection.
      *
-     * @param <E>.
+     * @param <E> the element type in each generated permutation
      */
     private static final class PermutationCollection<E> extends AbstractCollection<List<E>> {
 
@@ -5007,7 +5007,7 @@ public final class Iterables {
     /**
      * The Class OrderedPermutationCollection.
      *
-     * @param <E>.
+     * @param <E> the element type in each ordered permutation
      */
     private static final class OrderedPermutationCollection<E> extends AbstractCollection<List<E>> {
 
@@ -5106,7 +5106,7 @@ public final class Iterables {
     /**
      * The Class CartesianList.
      *
-     * @param <E>.
+     * @param <E> the element type along each axis of the cartesian product
      */
     private static final class CartesianList<E> extends AbstractList<List<E>> implements RandomAccess { //NOSONAR
 
@@ -5194,7 +5194,7 @@ public final class Iterables {
     /**
      * The Class Slice.
      *
-     * @param <T>.
+     * @param <T> the element type exposed by this slice view
      */
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     static final class Slice<T> extends ImmutableCollection<T> { //NOSONAR

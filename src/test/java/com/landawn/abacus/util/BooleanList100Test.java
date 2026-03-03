@@ -606,12 +606,12 @@ public class BooleanList100Test extends TestBase {
         list.add(false);
         list.add(true);
 
-        assertEquals(3, list.occurrencesOf(true));
-        assertEquals(2, list.occurrencesOf(false));
+        assertEquals(3, list.frequency(true));
+        assertEquals(2, list.frequency(false));
 
         list.clear();
-        assertEquals(0, list.occurrencesOf(true));
-        assertEquals(0, list.occurrencesOf(false));
+        assertEquals(0, list.frequency(true));
+        assertEquals(0, list.frequency(false));
     }
 
     @Test
@@ -1131,7 +1131,7 @@ public class BooleanList100Test extends TestBase {
         list.add(false);
         list.add(true);
 
-        boolean[] array = list.array();
+        boolean[] array = list.internalArray();
         assertEquals(true, array[0]);
         assertEquals(false, array[1]);
         assertEquals(true, array[2]);

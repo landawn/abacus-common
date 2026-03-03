@@ -24,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -412,6 +413,8 @@ public class EventBus {
      * @throws RuntimeException if the thread mode is not supported, if no subscriber methods are found in the subscriber class, or if registering a lambda subscriber without event ID
      */
     public EventBus register(final Object subscriber, final String eventId, final ThreadMode threadMode) {
+        Objects.requireNonNull(subscriber, "subscriber");
+
         if (!isSupportedThreadMode(threadMode)) {
             throw new RuntimeException("Unsupported thread mode: " + threadMode);
         }
@@ -531,14 +534,23 @@ public class EventBus {
 
             if (subscriberMethods == null) {
                 subscriberMethods = new ArrayList<>();
-                final Set<Method> addedMethods = N.newHashSet();
+                final Set<String> addedMethodSignatures = N.newHashSet();
 
                 final Set<Class<?>> allTypes = ClassUtil.getAllSuperTypes(subscriberClass);
                 allTypes.add(subscriberClass);
 
                 for (final Class<?> supertype : allTypes) {
                     for (final Method method : supertype.getDeclaredMethods()) {
-                        if (method.isAnnotationPresent(Subscribe.class) && Modifier.isPublic(method.getModifiers()) && !method.isSynthetic()) {
+                        if (method.isAnnotationPresent(Subscribe.class) && !method.isSynthetic()) {
+                            if (Modifier.isStatic(method.getModifiers())) {
+                                throw new RuntimeException(
+                                        "Subscriber method must not be static: " + method + " in class: " + ClassUtil.getCanonicalClassName(supertype));
+                            }
+
+                            if (!Modifier.isPublic(method.getModifiers())) {
+                                continue;
+                            }
+
                             final Class<?>[] parameterTypes = method.getParameterTypes();
 
                             if (parameterTypes.length != 1) {
@@ -546,7 +558,9 @@ public class EventBus {
                                         method.getName() + " has " + parameterTypes.length + " parameters. Subscriber method must have exactly 1 parameter.");
                             }
 
-                            if (addedMethods.add(method)) {
+                            final String methodSignature = method.getName() + "#" + parameterTypes[0].getName();
+
+                            if (addedMethodSignatures.add(methodSignature)) {
                                 subscriberMethods.add(new SubIdentifier(method));
                             }
                         }
@@ -556,7 +570,7 @@ public class EventBus {
                 if (Subscriber.class.isAssignableFrom(subscriberClass)) {
                     Method subscriberMethod = null;
 
-                    for (final Method method : subscriberClass.getDeclaredMethods()) {
+                    for (final Method method : subscriberClass.getMethods()) {
                         if (method.getName().equals("on") && method.getParameterTypes().length == 1 && !Modifier.isStatic(method.getModifiers())) {
                             if (!method.isBridge() && !method.isSynthetic()) {
                                 subscriberMethod = method;
@@ -569,7 +583,8 @@ public class EventBus {
                         }
                     }
 
-                    if (subscriberMethod != null && addedMethods.add(subscriberMethod)) {
+                    if (subscriberMethod != null
+                            && addedMethodSignatures.add(subscriberMethod.getName() + "#" + subscriberMethod.getParameterTypes()[0].getName())) {
                         subscriberMethods.add(new SubIdentifier(subscriberMethod));
                     }
                 }
@@ -713,6 +728,8 @@ public class EventBus {
      * @return this EventBus instance for method chaining
      */
     public EventBus post(final String eventId, final Object event) {
+        Objects.requireNonNull(event, "event");
+
         final Class<?> eventClass = event.getClass();
         final String normalizedEventId = Strings.isEmpty(eventId) ? null : eventId;
 
@@ -793,6 +810,8 @@ public class EventBus {
      * @return this EventBus instance for method chaining
      */
     public EventBus postSticky(final String eventId, final Object event) {
+        Objects.requireNonNull(event, "event");
+
         final String normalizedEventId = Strings.isEmpty(eventId) ? null : eventId;
 
         synchronized (stickyEventMap) {

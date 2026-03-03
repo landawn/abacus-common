@@ -37,7 +37,7 @@ public class PrimitiveList200Test extends TestBase {
         IntList list = new IntList(10);
         assertEquals(0, list.size());
         assertTrue(list.isEmpty());
-        assertEquals(10, list.array().length);
+        assertEquals(10, list.internalArray().length);
     }
 
     @Test
@@ -143,7 +143,7 @@ public class PrimitiveList200Test extends TestBase {
     public void testArray() {
         int[] a = { 1, 2, 3 };
         IntList list = new IntList(a);
-        assertSame(a, list.array());
+        assertSame(a, list.internalArray());
     }
 
     @Test
@@ -425,9 +425,9 @@ public class PrimitiveList200Test extends TestBase {
     @Test
     public void testOccurrencesOf() {
         IntList list = IntList.of(1, 2, 1, 3, 1, 2);
-        assertEquals(3, list.occurrencesOf(1));
-        assertEquals(2, list.occurrencesOf(2));
-        assertEquals(0, list.occurrencesOf(4));
+        assertEquals(3, list.frequency(1));
+        assertEquals(2, list.frequency(2));
+        assertEquals(0, list.frequency(4));
     }
 
     @Test
@@ -615,7 +615,7 @@ public class PrimitiveList200Test extends TestBase {
         list.add(2);
         list.add(3);
         list.trimToSize();
-        assertEquals(3, list.array().length);
+        assertEquals(3, list.internalArray().length);
     }
 
     @Test

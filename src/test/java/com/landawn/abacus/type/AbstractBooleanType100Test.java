@@ -1,5 +1,6 @@
 package com.landawn.abacus.type;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -52,8 +53,8 @@ public class AbstractBooleanType100Test extends TestBase {
     }
 
     @Test
-    public void testIsNonQuotableCsvType() {
-        assertTrue(type.isNonQuotableCsvType());
+    public void test_isCsvQuoteRequired() {
+        assertFalse(type.isCsvQuoteRequired());
     }
 
     @Test

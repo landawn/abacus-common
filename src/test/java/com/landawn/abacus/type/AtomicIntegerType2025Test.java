@@ -100,9 +100,9 @@ public class AtomicIntegerType2025Test extends TestBase {
         type.set(stmt, 1, new AtomicInteger(888));
         verify(stmt).setInt(1, 888);
 
-        // Test with null (defaults to 0)
+        // Test with null (sets SQL NULL)
         type.set(stmt, 2, null);
-        verify(stmt).setInt(2, 0);
+        verify(stmt).setNull(2, java.sql.Types.INTEGER);
     }
 
     @Test
@@ -115,7 +115,7 @@ public class AtomicIntegerType2025Test extends TestBase {
 
         // Test with null
         type.set(stmt, "param2", null);
-        verify(stmt).setInt("param2", 0);
+        verify(stmt).setNull("param2", java.sql.Types.INTEGER);
     }
 
     @Test

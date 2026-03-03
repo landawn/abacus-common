@@ -1047,31 +1047,31 @@ public class N203Test extends TestBase {
     @Test
     public void testNMatchArray() {
         Integer[] arr = { 1, 2, 3, 4, 5, 6 };
-        assertTrue(N.countMatchBetween(arr, 3, 3, IS_EVEN_INTEGER));
-        assertTrue(N.countMatchBetween(arr, 2, 4, IS_EVEN_INTEGER));
-        assertFalse(N.countMatchBetween(arr, 4, 5, IS_EVEN_INTEGER));
-        assertTrue(N.countMatchBetween(arr, 0, 0, x -> x > 10));
-        assertFalse(N.countMatchBetween(arr, 1, 1, x -> x > 10));
+        assertTrue(N.isMatchCountBetween(arr, 3, 3, IS_EVEN_INTEGER));
+        assertTrue(N.isMatchCountBetween(arr, 2, 4, IS_EVEN_INTEGER));
+        assertFalse(N.isMatchCountBetween(arr, 4, 5, IS_EVEN_INTEGER));
+        assertTrue(N.isMatchCountBetween(arr, 0, 0, x -> x > 10));
+        assertFalse(N.isMatchCountBetween(arr, 1, 1, x -> x > 10));
 
-        assertTrue(N.countMatchBetween((Integer[]) null, 0, 0, IS_EVEN_INTEGER));
-        assertFalse(N.countMatchBetween((Integer[]) null, 1, 1, IS_EVEN_INTEGER));
+        assertTrue(N.isMatchCountBetween((Integer[]) null, 0, 0, IS_EVEN_INTEGER));
+        assertFalse(N.isMatchCountBetween((Integer[]) null, 1, 1, IS_EVEN_INTEGER));
 
-        assertThrows(IllegalArgumentException.class, () -> N.countMatchBetween(arr, -1, 2, IS_EVEN_INTEGER));
-        assertThrows(IllegalArgumentException.class, () -> N.countMatchBetween(arr, 3, 1, IS_EVEN_INTEGER));
+        assertThrows(IllegalArgumentException.class, () -> N.isMatchCountBetween(arr, -1, 2, IS_EVEN_INTEGER));
+        assertThrows(IllegalArgumentException.class, () -> N.isMatchCountBetween(arr, 3, 1, IS_EVEN_INTEGER));
     }
 
     @Test
     public void testNMatchIterable() {
         List<Integer> list = List.of(1, 2, 3, 4, 5, 6);
-        assertTrue(N.countMatchBetween(list, 3, 3, IS_EVEN_INTEGER));
-        assertTrue(N.countMatchBetween(list, 1, 2, x -> x > 5));
-        assertTrue(N.countMatchBetween(list, 1, 1, x -> x > 5));
+        assertTrue(N.isMatchCountBetween(list, 3, 3, IS_EVEN_INTEGER));
+        assertTrue(N.isMatchCountBetween(list, 1, 2, x -> x > 5));
+        assertTrue(N.isMatchCountBetween(list, 1, 1, x -> x > 5));
     }
 
     @Test
     public void testNMatchIterator() {
         Iterator<Integer> iter = List.of(1, 2, 3, 4, 5, 6).iterator();
-        assertTrue(N.countMatchBetween(iter, 3, 3, IS_EVEN_INTEGER));
+        assertTrue(N.isMatchCountBetween(iter, 3, 3, IS_EVEN_INTEGER));
     }
 
     @Test
@@ -1625,7 +1625,7 @@ public class N203Test extends TestBase {
         List<String> l1 = List.of("a", "b");
         List<String> l2 = List.of("c");
         List<String> l3 = Collections.emptyList();
-        Collection<Iterable<String>> iterables = CommonUtil.asList(l1, l2, l3, null);
+        Collection<Iterable<String>> iterables = CommonUtil.toList(l1, l2, l3, null);
 
         List<Iterator<String>> resultIterators = N.iterateEach(iterables);
         assertEquals(4, resultIterators.size());
@@ -1653,7 +1653,7 @@ public class N203Test extends TestBase {
         List<String> l1 = List.of("a", "b");
         List<String> l2 = List.of("c");
         List<String> l3 = Collections.emptyList();
-        Collection<Iterable<String>> iterables = CommonUtil.asList(l1, null, l2, l3);
+        Collection<Iterable<String>> iterables = CommonUtil.toList(l1, null, l2, l3);
 
         Iterator<String> combinedIter = N.iterateAll(iterables);
         assertEquals("a", combinedIter.next());

@@ -276,52 +276,52 @@ public interface JsonParser extends Parser<JsonSerializationConfig, JsonDeserial
     void parse(String source, JsonDeserializationConfig config, Map<?, ?> output);
 
     /**
-     * Parses a substring of a JSON string into an object of the specified type.
-     * This method allows parsing a portion of a larger string without creating a substring,
+     * Deserializes a substring of a JSON string into an object of the specified type.
+     * This method allows deserializing a portion of a larger string without creating a substring,
      * which can improve performance when working with large strings.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "prefix{\"name\":\"John\"}suffix";
-     * // Parse only the JSON object part (indices 6 to 23)
+     * // Deserialize only the JSON object part (indices 6 to 23)
      * Person person = parser.deserialize(json, 6, 23, Type.of(Person.class));
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the JSON string containing the data to parse
+     * @param source the JSON string containing the data to deserialize
      * @param fromIndex the starting index (inclusive) of the JSON content
      * @param toIndex the ending index (exclusive) of the JSON content
      * @param targetType the type of the target object
-     * @return the parsed object of type T
+     * @return the deserialized object of type T
      * @throws IndexOutOfBoundsException if the indices are out of bounds or fromIndex &gt; toIndex
      */
     <T> T deserialize(String source, int fromIndex, int toIndex, Type<? extends T> targetType);
 
     /**
-     * Parses a substring of a JSON string into an object of the specified type.
-     * This method allows parsing a portion of a larger string without creating a substring,
+     * Deserializes a substring of a JSON string into an object of the specified type.
+     * This method allows deserializing a portion of a larger string without creating a substring,
      * which can improve performance when working with large strings.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "prefix{\"name\":\"John\"}suffix";
-     * // Parse only the JSON object part (indices 6 to 23)
+     * // Deserialize only the JSON object part (indices 6 to 23)
      * Person person = parser.deserialize(json, 6, 23, Person.class);
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the JSON string containing the data to parse
+     * @param source the JSON string containing the data to deserialize
      * @param fromIndex the starting index (inclusive) of the JSON content
      * @param toIndex the ending index (exclusive) of the JSON content
      * @param targetType the class of the target object
-     * @return the parsed object of type T
+     * @return the deserialized object of type T
      * @throws IndexOutOfBoundsException if the indices are out of bounds or fromIndex &gt; toIndex
      */
     <T> T deserialize(String source, int fromIndex, int toIndex, Class<? extends T> targetType);
 
     /**
-     * Parses a substring of a JSON string into an object with custom configuration.
-     * This method allows parsing a portion of a larger string without creating a substring,
+     * Deserializes a substring of a JSON string into an object with custom configuration.
+     * This method allows deserializing a portion of a larger string without creating a substring,
      * which can improve performance when working with large strings.
      *
      * <p><b>Usage Examples:</b></p>
@@ -333,19 +333,19 @@ public interface JsonParser extends Parser<JsonSerializationConfig, JsonDeserial
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the JSON string containing the data to parse
+     * @param source the JSON string containing the data to deserialize
      * @param fromIndex the starting index (inclusive) of the JSON content
      * @param toIndex the ending index (exclusive) of the JSON content
      * @param config the deserialization configuration to control parsing behavior
      * @param targetType the type of the target object
-     * @return the parsed object of type T
+     * @return the deserialized object of type T
      * @throws IndexOutOfBoundsException if the indices are out of bounds or fromIndex &gt; toIndex
      */
     <T> T deserialize(String source, int fromIndex, int toIndex, JsonDeserializationConfig config, Type<? extends T> targetType);
 
     /**
-     * Parses a substring of a JSON string into an object with custom configuration.
-     * This method allows parsing a portion of a larger string without creating a substring,
+     * Deserializes a substring of a JSON string into an object with custom configuration.
+     * This method allows deserializing a portion of a larger string without creating a substring,
      * which can improve performance when working with large strings.
      *
      * <p><b>Usage Examples:</b></p>
@@ -357,12 +357,12 @@ public interface JsonParser extends Parser<JsonSerializationConfig, JsonDeserial
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the JSON string containing the data to parse
+     * @param source the JSON string containing the data to deserialize
      * @param fromIndex the starting index (inclusive) of the JSON content
      * @param toIndex the ending index (exclusive) of the JSON content
      * @param config the deserialization configuration to control parsing behavior
      * @param targetType the class of the target object
-     * @return the parsed object of type T
+     * @return the deserialized object of type T
      * @throws IndexOutOfBoundsException if the indices are out of bounds or fromIndex &gt; toIndex
      */
     <T> T deserialize(String source, int fromIndex, int toIndex, JsonDeserializationConfig config, Class<? extends T> targetType);

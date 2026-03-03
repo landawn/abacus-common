@@ -48,13 +48,13 @@ public class JsonStringReader100Test extends TestBase {
         JsonReader reader = JsonStringReader.parse(json, cbuf);
 
         assertEquals(JsonReader.START_BRACE, reader.nextToken());
-        assertEquals(JsonReader.START_QUOTATION_D, reader.nextToken());
-        assertEquals(JsonReader.END_QUOTATION_D, reader.nextToken());
+        assertEquals(JsonReader.START_DOUBLE_QUOTE, reader.nextToken());
+        assertEquals(JsonReader.END_DOUBLE_QUOTE, reader.nextToken());
         assertEquals("name", reader.getText());
 
         assertEquals(JsonReader.COLON, reader.nextToken());
-        assertEquals(JsonReader.START_QUOTATION_D, reader.nextToken());
-        assertEquals(JsonReader.END_QUOTATION_D, reader.nextToken());
+        assertEquals(JsonReader.START_DOUBLE_QUOTE, reader.nextToken());
+        assertEquals(JsonReader.END_DOUBLE_QUOTE, reader.nextToken());
         assertEquals("John", reader.getText());
 
         assertEquals(JsonReader.END_BRACE, reader.nextToken());
@@ -125,8 +125,8 @@ public class JsonStringReader100Test extends TestBase {
         String json = "\"\\n\\r\\t\\b\\f\\\\\\/\\\"\"";
         JsonReader reader = JsonStringReader.parse(json, cbuf);
 
-        assertEquals(JsonReader.START_QUOTATION_D, reader.nextToken());
-        assertEquals(JsonReader.END_QUOTATION_D, reader.nextToken());
+        assertEquals(JsonReader.START_DOUBLE_QUOTE, reader.nextToken());
+        assertEquals(JsonReader.END_DOUBLE_QUOTE, reader.nextToken());
         assertEquals("\n\r\t\b\f\\/\"", reader.getText());
     }
 
@@ -135,8 +135,8 @@ public class JsonStringReader100Test extends TestBase {
         String json = "\"\\u0048\\u0065\\u006C\\u006C\\u006F\"";
         JsonReader reader = JsonStringReader.parse(json, cbuf);
 
-        assertEquals(JsonReader.START_QUOTATION_D, reader.nextToken());
-        assertEquals(JsonReader.END_QUOTATION_D, reader.nextToken());
+        assertEquals(JsonReader.START_DOUBLE_QUOTE, reader.nextToken());
+        assertEquals(JsonReader.END_DOUBLE_QUOTE, reader.nextToken());
         assertEquals("Hello", reader.getText());
     }
 
@@ -145,8 +145,8 @@ public class JsonStringReader100Test extends TestBase {
         String json = "\"\"";
         JsonReader reader = JsonStringReader.parse(json, cbuf);
 
-        assertEquals(JsonReader.START_QUOTATION_D, reader.nextToken());
-        assertEquals(JsonReader.END_QUOTATION_D, reader.nextToken());
+        assertEquals(JsonReader.START_DOUBLE_QUOTE, reader.nextToken());
+        assertEquals(JsonReader.END_DOUBLE_QUOTE, reader.nextToken());
         assertEquals("", reader.getText());
     }
 
@@ -187,13 +187,13 @@ public class JsonStringReader100Test extends TestBase {
         JsonReader reader = JsonStringReader.parse(json, cbuf);
 
         assertEquals(JsonReader.START_BRACE, reader.nextToken());
-        assertEquals(JsonReader.START_QUOTATION_S, reader.nextToken());
-        assertEquals(JsonReader.END_QUOTATION_S, reader.nextToken());
+        assertEquals(JsonReader.START_SINGLE_QUOTE, reader.nextToken());
+        assertEquals(JsonReader.END_SINGLE_QUOTE, reader.nextToken());
         assertEquals("key", reader.getText());
 
         assertEquals(JsonReader.COLON, reader.nextToken());
-        assertEquals(JsonReader.START_QUOTATION_S, reader.nextToken());
-        assertEquals(JsonReader.END_QUOTATION_S, reader.nextToken());
+        assertEquals(JsonReader.START_SINGLE_QUOTE, reader.nextToken());
+        assertEquals(JsonReader.END_SINGLE_QUOTE, reader.nextToken());
         assertEquals("value", reader.getText());
 
         assertEquals(JsonReader.END_BRACE, reader.nextToken());
@@ -205,13 +205,13 @@ public class JsonStringReader100Test extends TestBase {
         JsonReader reader = JsonStringReader.parse(json, cbuf);
 
         assertEquals(JsonReader.START_BRACE, reader.nextToken());
-        assertEquals(JsonReader.START_QUOTATION_D, reader.nextToken());
-        assertEquals(JsonReader.END_QUOTATION_D, reader.nextToken());
+        assertEquals(JsonReader.START_DOUBLE_QUOTE, reader.nextToken());
+        assertEquals(JsonReader.END_DOUBLE_QUOTE, reader.nextToken());
         assertEquals("key", reader.getText());
 
         assertEquals(JsonReader.COLON, reader.nextToken());
-        assertEquals(JsonReader.START_QUOTATION_D, reader.nextToken());
-        assertEquals(JsonReader.END_QUOTATION_D, reader.nextToken());
+        assertEquals(JsonReader.START_DOUBLE_QUOTE, reader.nextToken());
+        assertEquals(JsonReader.END_DOUBLE_QUOTE, reader.nextToken());
         assertEquals("value", reader.getText());
 
         assertEquals(JsonReader.END_BRACE, reader.nextToken());
@@ -296,8 +296,8 @@ public class JsonStringReader100Test extends TestBase {
 
         JsonReader reader = JsonStringReader.parse(sb.toString(), new char[512]);
 
-        assertEquals(JsonReader.START_QUOTATION_D, reader.nextToken());
-        assertEquals(JsonReader.END_QUOTATION_D, reader.nextToken());
+        assertEquals(JsonReader.START_DOUBLE_QUOTE, reader.nextToken());
+        assertEquals(JsonReader.END_DOUBLE_QUOTE, reader.nextToken());
         assertEquals(1000, reader.getText().length());
     }
 

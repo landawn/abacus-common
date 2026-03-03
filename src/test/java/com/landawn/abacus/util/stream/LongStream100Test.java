@@ -654,10 +654,10 @@ public class LongStream100Test extends TestBase {
         List<LongList> result = createLongStream(1L, 2L, 2L, 3L, 3L, 3L, 4L).collapse((a, b) -> a == b).toList();
 
         assertEquals(4, result.size());
-        assertArrayEquals(new long[] { 1L }, result.get(0).trimToSize().array());
-        assertArrayEquals(new long[] { 2L, 2L }, result.get(1).trimToSize().array());
-        assertArrayEquals(new long[] { 3L, 3L, 3L }, result.get(2).trimToSize().array());
-        assertArrayEquals(new long[] { 4L }, result.get(3).trimToSize().array());
+        assertArrayEquals(new long[] { 1L }, result.get(0).trimToSize().internalArray());
+        assertArrayEquals(new long[] { 2L, 2L }, result.get(1).trimToSize().internalArray());
+        assertArrayEquals(new long[] { 3L, 3L, 3L }, result.get(2).trimToSize().internalArray());
+        assertArrayEquals(new long[] { 4L }, result.get(3).trimToSize().internalArray());
     }
 
     @Test
@@ -866,10 +866,10 @@ public class LongStream100Test extends TestBase {
         long[] result = LongStream.concat(a, b).toArray();
         assertArrayEquals(new long[] { 1, 2, 3, 4, 5, 6 }, result);
 
-        result = LongStream.concat(N.asList(a, b)).toArray();
+        result = LongStream.concat(N.toList(a, b)).toArray();
         assertArrayEquals(new long[] { 1, 2, 3, 4, 5, 6 }, result);
 
-        result = LongStream.concatIterators(N.asList(LongIterator.of(a), LongIterator.of(b))).toArray();
+        result = LongStream.concatIterators(N.toList(LongIterator.of(a), LongIterator.of(b))).toArray();
         assertArrayEquals(new long[] { 1, 2, 3, 4, 5, 6 }, result);
     }
 
@@ -887,15 +887,15 @@ public class LongStream100Test extends TestBase {
         long[] a = { 1, 2, 3 };
         long[] b = { 4, 5, 6 };
         long[] c = { 7, 8, 9 };
-        long[] result = LongStream.merge(N.asList(LongStream.of(a)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray();
+        long[] result = LongStream.merge(N.toList(LongStream.of(a)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray();
         assertArrayEquals(new long[] { 1, 2, 3 }, result);
 
-        result = LongStream.merge(N.asList(LongStream.of(a), LongStream.of(b)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+        result = LongStream.merge(N.toList(LongStream.of(a), LongStream.of(b)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
                 .toArray();
         assertArrayEquals(new long[] { 1, 2, 3, 4, 5, 6 }, result);
 
         result = LongStream
-                .merge(N.asList(LongStream.of(a), LongStream.of(b), LongStream.of(c)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+                .merge(N.toList(LongStream.of(a), LongStream.of(b), LongStream.of(c)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
                 .toArray();
         assertArrayEquals(new long[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, result);
 

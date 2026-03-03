@@ -639,7 +639,7 @@ public class Stream200Test extends TestBase {
     @Test
     public void testSplitByChunkSizeAndSupplier() {
         List<Set<Integer>> result = Stream.of(1, 2, 3, 4, 5).split(2, IntFunctions.ofLinkedHashSet()).toList();
-        assertEquals(Arrays.asList(N.asLinkedHashSet(1, 2), N.asLinkedHashSet(3, 4), N.asLinkedHashSet(5)), result);
+        assertEquals(Arrays.asList(N.toLinkedHashSet(1, 2), N.toLinkedHashSet(3, 4), N.toLinkedHashSet(5)), result);
     }
 
     @Test
@@ -680,7 +680,7 @@ public class Stream200Test extends TestBase {
     @Test
     public void testSplitAtPositionWithCollector() {
         List<Long> result = Stream.of(1, 2, 3, 4, 5).splitAt(2, Collectors.summingInt(ToIntFunction.UNBOX)).map(Integer::longValue).toList();
-        assertEquals(N.asList(3L, 12L), result);
+        assertEquals(N.toList(3L, 12L), result);
     }
 
     @Test
@@ -708,9 +708,9 @@ public class Stream200Test extends TestBase {
             assertEquals(Arrays.asList(Arrays.asList(1, 2)), Stream.of(1, 2).sliding(2).toList());
             assertEquals(Arrays.asList(Arrays.asList(1, 2), Arrays.asList(2, 3)), Stream.of(1, 2, 3).sliding(2).toList());
 
-            assertEquals(Arrays.asList(Arrays.asList(1)), Stream.of(N.asList(1).iterator()).sliding(2).toList());
-            assertEquals(Arrays.asList(Arrays.asList(1, 2)), Stream.of(N.asList(1, 2).iterator()).sliding(2).toList());
-            assertEquals(Arrays.asList(Arrays.asList(1, 2), Arrays.asList(2, 3)), Stream.of(N.asList(1, 2, 3).iterator()).sliding(2).toList());
+            assertEquals(Arrays.asList(Arrays.asList(1)), Stream.of(N.toList(1).iterator()).sliding(2).toList());
+            assertEquals(Arrays.asList(Arrays.asList(1, 2)), Stream.of(N.toList(1, 2).iterator()).sliding(2).toList());
+            assertEquals(Arrays.asList(Arrays.asList(1, 2), Arrays.asList(2, 3)), Stream.of(N.toList(1, 2, 3).iterator()).sliding(2).toList());
         }
         {
             assertEquals(Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(2, 3, 4), Arrays.asList(3, 4, 5)), Stream.of(1, 2, 3, 4, 5).sliding(3).toList());
@@ -720,11 +720,11 @@ public class Stream200Test extends TestBase {
             assertEquals(Arrays.asList(Arrays.asList(1, 2, 3)), Stream.of(1, 2, 3, 4, 5).sliding(3, 5).toList());
 
             assertEquals(Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(2, 3, 4), Arrays.asList(3, 4, 5)),
-                    Stream.of(N.asList(1, 2, 3, 4, 5).iterator()).sliding(3).toList());
-            assertEquals(Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(3, 4, 5)), Stream.of(N.asList(1, 2, 3, 4, 5).iterator()).sliding(3, 2).toList());
-            assertEquals(Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(4, 5)), Stream.of(N.asList(1, 2, 3, 4, 5).iterator()).sliding(3, 3).toList());
-            assertEquals(Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(5)), Stream.of(N.asList(1, 2, 3, 4, 5).iterator()).sliding(3, 4).toList());
-            assertEquals(Arrays.asList(Arrays.asList(1, 2, 3)), Stream.of(N.asList(1, 2, 3, 4, 5).iterator()).sliding(3, 5).toList());
+                    Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3).toList());
+            assertEquals(Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(3, 4, 5)), Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 2).toList());
+            assertEquals(Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(4, 5)), Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 3).toList());
+            assertEquals(Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(5)), Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 4).toList());
+            assertEquals(Arrays.asList(Arrays.asList(1, 2, 3)), Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 5).toList());
 
         }
 
@@ -733,52 +733,52 @@ public class Stream200Test extends TestBase {
             assertEquals(0, Stream.of(1, 2).sliding(2).skip(1).count());
             assertEquals(1, Stream.of(1, 2, 3).sliding(2).skip(1).count());
 
-            assertEquals(1, Stream.of(N.asList(1, 2, 3, 4, 5)).sliding(3).skip(2).count());
+            assertEquals(1, Stream.of(N.toList(1, 2, 3, 4, 5)).sliding(3).skip(2).count());
 
-            assertEquals(1, Stream.of(N.asList(1, 2, 3, 4, 5)).sliding(3, 2).skip(1).count());
-            assertEquals(0, Stream.of(N.asList(1, 2, 3, 4, 5)).sliding(3, 2).skip(2).count());
+            assertEquals(1, Stream.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 2).skip(1).count());
+            assertEquals(0, Stream.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 2).skip(2).count());
 
-            assertEquals(1, Stream.of(N.asList(1, 2, 3, 4, 5)).sliding(3, 3).skip(1).count());
+            assertEquals(1, Stream.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 3).skip(1).count());
 
-            assertEquals(1, Stream.of(N.asList(1, 2, 3, 4, 5)).sliding(3, 4).skip(1).count());
+            assertEquals(1, Stream.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 4).skip(1).count());
 
-            assertEquals(0, Stream.of(N.asList(1, 2, 3, 4, 5)).sliding(3, 5).skip(1).count());
-
-        }
-
-        {
-            assertEquals(0, Stream.of(N.asList(1).iterator()).sliding(2).skip(1).count());
-            assertEquals(0, Stream.of(N.asList(1, 2).iterator()).sliding(2).skip(1).count());
-            assertEquals(1, Stream.of(N.asList(1, 2, 3).iterator()).sliding(2).skip(1).count());
-
-            assertEquals(1, Stream.of(N.asList(1, 2, 3, 4, 5).iterator()).sliding(3).skip(2).count());
-
-            assertEquals(1, Stream.of(N.asList(1, 2, 3, 4, 5).iterator()).sliding(3, 2).skip(1).count());
-            assertEquals(0, Stream.of(N.asList(1, 2, 3, 4, 5).iterator()).sliding(3, 2).skip(2).count());
-
-            assertEquals(1, Stream.of(N.asList(1, 2, 3, 4, 5).iterator()).sliding(3, 3).skip(1).count());
-
-            assertEquals(1, Stream.of(N.asList(1, 2, 3, 4, 5).iterator()).sliding(3, 4).skip(1).count());
-
-            assertEquals(0, Stream.of(N.asList(1, 2, 3, 4, 5).iterator()).sliding(3, 5).skip(1).count());
+            assertEquals(0, Stream.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 5).skip(1).count());
 
         }
 
         {
-            assertEquals(0, Stream.of(N.asList(1).iterator()).sliding(2, Collectors.toList()).skip(1).count());
-            assertEquals(0, Stream.of(N.asList(1, 2).iterator()).sliding(2, Collectors.toList()).skip(1).count());
-            assertEquals(1, Stream.of(N.asList(1, 2, 3).iterator()).sliding(2, Collectors.toList()).skip(1).count());
+            assertEquals(0, Stream.of(N.toList(1).iterator()).sliding(2).skip(1).count());
+            assertEquals(0, Stream.of(N.toList(1, 2).iterator()).sliding(2).skip(1).count());
+            assertEquals(1, Stream.of(N.toList(1, 2, 3).iterator()).sliding(2).skip(1).count());
 
-            assertEquals(1, Stream.of(N.asList(1, 2, 3, 4, 5).iterator()).sliding(3, Collectors.toList()).skip(2).count());
+            assertEquals(1, Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3).skip(2).count());
 
-            assertEquals(1, Stream.of(N.asList(1, 2, 3, 4, 5).iterator()).sliding(3, 2, Collectors.toList()).skip(1).count());
-            assertEquals(0, Stream.of(N.asList(1, 2, 3, 4, 5).iterator()).sliding(3, 2, Collectors.toList()).skip(2).count());
+            assertEquals(1, Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 2).skip(1).count());
+            assertEquals(0, Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 2).skip(2).count());
 
-            assertEquals(1, Stream.of(N.asList(1, 2, 3, 4, 5).iterator()).sliding(3, 3, Collectors.toList()).skip(1).count());
+            assertEquals(1, Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 3).skip(1).count());
 
-            assertEquals(1, Stream.of(N.asList(1, 2, 3, 4, 5).iterator()).sliding(3, 4, Collectors.toList()).skip(1).count());
+            assertEquals(1, Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 4).skip(1).count());
 
-            assertEquals(0, Stream.of(N.asList(1, 2, 3, 4, 5).iterator()).sliding(3, 5, Collectors.toList()).skip(1).count());
+            assertEquals(0, Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 5).skip(1).count());
+
+        }
+
+        {
+            assertEquals(0, Stream.of(N.toList(1).iterator()).sliding(2, Collectors.toList()).skip(1).count());
+            assertEquals(0, Stream.of(N.toList(1, 2).iterator()).sliding(2, Collectors.toList()).skip(1).count());
+            assertEquals(1, Stream.of(N.toList(1, 2, 3).iterator()).sliding(2, Collectors.toList()).skip(1).count());
+
+            assertEquals(1, Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, Collectors.toList()).skip(2).count());
+
+            assertEquals(1, Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 2, Collectors.toList()).skip(1).count());
+            assertEquals(0, Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 2, Collectors.toList()).skip(2).count());
+
+            assertEquals(1, Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 3, Collectors.toList()).skip(1).count());
+
+            assertEquals(1, Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 4, Collectors.toList()).skip(1).count());
+
+            assertEquals(0, Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 5, Collectors.toList()).skip(1).count());
 
         }
 
@@ -787,16 +787,16 @@ public class Stream200Test extends TestBase {
             assertEquals(0, Seq.of(1, 2).sliding(2).skip(1).count());
             assertEquals(1, Seq.of(1, 2, 3).sliding(2).skip(1).count());
 
-            assertEquals(1, Seq.of(N.asList(1, 2, 3, 4, 5)).sliding(3).skip(2).count());
+            assertEquals(1, Seq.of(N.toList(1, 2, 3, 4, 5)).sliding(3).skip(2).count());
 
-            assertEquals(1, Seq.of(N.asList(1, 2, 3, 4, 5)).sliding(3, 2).skip(1).count());
-            assertEquals(0, Seq.of(N.asList(1, 2, 3, 4, 5)).sliding(3, 2).skip(2).count());
+            assertEquals(1, Seq.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 2).skip(1).count());
+            assertEquals(0, Seq.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 2).skip(2).count());
 
-            assertEquals(1, Seq.of(N.asList(1, 2, 3, 4, 5)).sliding(3, 3).skip(1).count());
+            assertEquals(1, Seq.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 3).skip(1).count());
 
-            assertEquals(1, Seq.of(N.asList(1, 2, 3, 4, 5)).sliding(3, 4).skip(1).count());
+            assertEquals(1, Seq.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 4).skip(1).count());
 
-            assertEquals(0, Seq.of(N.asList(1, 2, 3, 4, 5)).sliding(3, 5).skip(1).count());
+            assertEquals(0, Seq.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 5).skip(1).count());
 
         }
 
@@ -805,16 +805,16 @@ public class Stream200Test extends TestBase {
             assertEquals(0, Seq.of(1, 2).sliding(2, Collectors.toList()).skip(1).count());
             assertEquals(1, Seq.of(1, 2, 3).sliding(2, Collectors.toList()).skip(1).count());
 
-            assertEquals(1, Seq.of(N.asList(1, 2, 3, 4, 5)).sliding(3, Collectors.toList()).skip(2).count());
+            assertEquals(1, Seq.of(N.toList(1, 2, 3, 4, 5)).sliding(3, Collectors.toList()).skip(2).count());
 
-            assertEquals(1, Seq.of(N.asList(1, 2, 3, 4, 5)).sliding(3, 2, Collectors.toList()).skip(1).count());
-            assertEquals(0, Seq.of(N.asList(1, 2, 3, 4, 5)).sliding(3, 2, Collectors.toList()).skip(2).count());
+            assertEquals(1, Seq.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 2, Collectors.toList()).skip(1).count());
+            assertEquals(0, Seq.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 2, Collectors.toList()).skip(2).count());
 
-            assertEquals(1, Seq.of(N.asList(1, 2, 3, 4, 5)).sliding(3, 3, Collectors.toList()).skip(1).count());
+            assertEquals(1, Seq.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 3, Collectors.toList()).skip(1).count());
 
-            assertEquals(1, Seq.of(N.asList(1, 2, 3, 4, 5)).sliding(3, 4, Collectors.toList()).skip(1).count());
+            assertEquals(1, Seq.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 4, Collectors.toList()).skip(1).count());
 
-            assertEquals(0, Seq.of(N.asList(1, 2, 3, 4, 5)).sliding(3, 5, Collectors.toList()).skip(1).count());
+            assertEquals(0, Seq.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 5, Collectors.toList()).skip(1).count());
 
         }
     }
@@ -994,12 +994,12 @@ public class Stream200Test extends TestBase {
 
     @Test
     public void testNMatch() {
-        assertTrue(Stream.of(1, 2, 3, 4, 5, 6).countMatchBetween(2, 3, x -> x % 2 == 0));
-        assertFalse(Stream.of(1, 2, 3, 4, 5).countMatchBetween(3, 3, x -> x % 2 == 0));
-        assertTrue(Stream.of(1, 2, 3, 4, 5).countMatchBetween(2, 2, x -> x % 2 == 0));
+        assertTrue(Stream.of(1, 2, 3, 4, 5, 6).isMatchCountBetween(2, 3, x -> x % 2 == 0));
+        assertFalse(Stream.of(1, 2, 3, 4, 5).isMatchCountBetween(3, 3, x -> x % 2 == 0));
+        assertTrue(Stream.of(1, 2, 3, 4, 5).isMatchCountBetween(2, 2, x -> x % 2 == 0));
 
-        assertFalse(Stream.of(1, 2, 3).countMatchBetween(2, 3, x -> x % 2 == 0));
-        assertFalse(Stream.of(2, 4, 6, 8).countMatchBetween(2, 3, x -> x % 2 == 0));
+        assertFalse(Stream.of(1, 2, 3).isMatchCountBetween(2, 3, x -> x % 2 == 0));
+        assertFalse(Stream.of(2, 4, 6, 8).isMatchCountBetween(2, 3, x -> x % 2 == 0));
     }
 
     @Test

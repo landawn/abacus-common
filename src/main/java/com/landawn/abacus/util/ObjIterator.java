@@ -228,7 +228,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
 
             @Override
             public List<T> toList() {
-                return N.asList((T[]) toArray());
+                return N.toList((T[]) toArray());
             }
         };
     }

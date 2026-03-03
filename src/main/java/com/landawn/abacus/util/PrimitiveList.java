@@ -262,7 +262,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      */
     @Deprecated
     @Beta
-    public abstract A array();
+    public abstract A internalArray();
 
     /**
      * Appends all elements from the specified PrimitiveList to the end of this list,

@@ -47,7 +47,7 @@ public class MapsTest extends AbstractTest {
         N.println(mapDiff.onlyOnRight());
         N.println(mapDiff.differentValues());
 
-        mapDiff = BeanDifference.of(account1, account2, CommonUtil.asList("id", "firstName", "lastName2"));
+        mapDiff = BeanDifference.of(account1, account2, CommonUtil.toList("id", "firstName", "lastName2"));
 
         N.println(mapDiff);
         N.println(mapDiff.common());
@@ -62,31 +62,31 @@ public class MapsTest extends AbstractTest {
         Map map = CommonUtil.asMap("key1", "val1");
         assertEquals("val1", Maps.getByPath(map, "key1"));
 
-        map = CommonUtil.asMap("key1", CommonUtil.asList("val1"));
+        map = CommonUtil.asMap("key1", CommonUtil.toList("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
 
-        map = CommonUtil.asMap("key1", CommonUtil.asSet("val1"));
+        map = CommonUtil.asMap("key1", CommonUtil.toSet("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
 
-        map = CommonUtil.asMap("key1", CommonUtil.asList(CommonUtil.asLinkedHashSet("val1", "val2")));
+        map = CommonUtil.asMap("key1", CommonUtil.toList(CommonUtil.toLinkedHashSet("val1", "val2")));
         assertEquals("val2", Maps.getByPath(map, "key1[0][1]"));
 
-        map = CommonUtil.asMap("key1", CommonUtil.asSet(CommonUtil.asList(CommonUtil.asSet("val1"))));
+        map = CommonUtil.asMap("key1", CommonUtil.toSet(CommonUtil.toList(CommonUtil.toSet("val1"))));
         assertEquals("val1", Maps.getByPath(map, "key1[0][0][0]"));
 
-        map = CommonUtil.asMap("key1", CommonUtil.asList(CommonUtil.asLinkedHashSet("val1", CommonUtil.asMap("key2", "val22"))));
+        map = CommonUtil.asMap("key1", CommonUtil.toList(CommonUtil.toLinkedHashSet("val1", CommonUtil.asMap("key2", "val22"))));
         assertEquals("val22", Maps.getByPath(map, "key1[0][1].key2"));
 
         map = CommonUtil.asMap("key1",
-                CommonUtil.asList(CommonUtil.asLinkedHashSet("val1", CommonUtil.asMap("key2", CommonUtil.asList("val22", CommonUtil.asMap("key3", "val33"))))));
+                CommonUtil.toList(CommonUtil.toLinkedHashSet("val1", CommonUtil.asMap("key2", CommonUtil.toList("val22", CommonUtil.asMap("key3", "val33"))))));
         assertEquals("val33", Maps.getByPath(map, "key1[0][1].key2[1].key3"));
 
         map = CommonUtil.asMap("key1",
-                CommonUtil.asList(CommonUtil.asLinkedHashSet("val1", CommonUtil.asMap("key2", CommonUtil.asList("val22", CommonUtil.asMap("key3", "val33"))))));
+                CommonUtil.toList(CommonUtil.toLinkedHashSet("val1", CommonUtil.asMap("key2", CommonUtil.toList("val22", CommonUtil.asMap("key3", "val33"))))));
         assertNull(Maps.getByPath(map, "key1[0][2].key2[1].key3"));
 
         map = CommonUtil.asMap("key1",
-                CommonUtil.asList(CommonUtil.asLinkedHashSet("val1", CommonUtil.asMap("key2", CommonUtil.asList("val22", CommonUtil.asMap("key3", "val33"))))));
+                CommonUtil.toList(CommonUtil.toLinkedHashSet("val1", CommonUtil.asMap("key2", CommonUtil.toList("val22", CommonUtil.asMap("key3", "val33"))))));
         assertNull(Maps.getByPath(map, "key1[0][1].key22[1].key3"));
 
         map = CommonUtil.asMap("key1", CommonUtil.asMap("key2", null));
@@ -153,8 +153,8 @@ public class MapsTest extends AbstractTest {
         assertEquals(1, Maps.getOrDefaultIfAbsent(map, "a", 0).intValue());
         assertEquals(0, Maps.getOrDefaultIfAbsent(map, "d", 0).intValue());
 
-        assertEquals(CommonUtil.asList(1, 0), Maps.getValuesOrDefault(map, CommonUtil.asList("a", "d"), 0));
+        assertEquals(CommonUtil.toList(1, 0), Maps.getValuesOrDefault(map, CommonUtil.toList("a", "d"), 0));
 
-        assertEquals(CommonUtil.asList(1), Maps.getValuesIfPresent(map, CommonUtil.asList("a", "d")));
+        assertEquals(CommonUtil.toList(1), Maps.getValuesIfPresent(map, CommonUtil.toList("a", "d")));
     }
 }

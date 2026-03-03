@@ -153,6 +153,8 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      */
     @Override
     public int read() throws IOException {
+        ensureOpen();
+
         if (str == null) {
             do {
                 if (nextChar >= nChars) {
@@ -259,6 +261,8 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      */
     @Override
     public int read(final char[] cbuf, final int off, final int len) throws IOException {
+        ensureOpen();
+
         if ((off < 0) || (len < 0) || (off > cbuf.length) || (len > cbuf.length - off)) {
             throw new IndexOutOfBoundsException();
         } else if (len == 0) {
@@ -306,6 +310,8 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * @throws IOException if an I/O error occurs
      */
     String readLine(final boolean ignoreLF) throws IOException {
+        ensureOpen();
+
         StringBuilder sb = null;
         int startChar;
 
@@ -406,6 +412,8 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
     @MayReturnNull
     @Override
     public String readLine() throws IOException {
+        ensureOpen();
+
         if (str == null) {
             return readLine(false);
         } else {
@@ -463,6 +471,8 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      */
     @Override
     public long skip(final long n) throws IllegalArgumentException, IOException {
+        ensureOpen();
+
         N.checkArgNotNegative(n, cs.n);
 
         if (str == null) {
@@ -533,6 +543,8 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      */
     @Override
     public boolean ready() throws IOException {
+        ensureOpen();
+
         if (str == null) {
             /*
              * If newline needs to be skipped and the next char to be read is a newline character, then skip it
@@ -681,6 +693,8 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * @throws IOException if an I/O error occurs
      */
     void fill() throws IOException { // NOSONAR
+        ensureOpen();
+
         if (_cbuf == null) {
             _cbuf = Objectory.createCharArrayBuffer();
         }
@@ -698,6 +712,17 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
 
         if (n > 0) {
             nChars += n;
+        }
+    }
+
+    /**
+     * Ensures the reader is open before an I/O operation.
+     *
+     * @throws IOException if the reader has been closed
+     */
+    void ensureOpen() throws IOException {
+        if (isClosed) {
+            throw new IOException("Stream closed");
         }
     }
 

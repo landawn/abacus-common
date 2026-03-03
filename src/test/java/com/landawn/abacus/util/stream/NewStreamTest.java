@@ -13,7 +13,7 @@ public class NewStreamTest {
     @Test
     public void test_peek_last() throws Exception {
         Stream.of("a", "b", "c").peekLast(Fn.println()).forEach(Fn.println());
-        Stream.of(N.asList("a", "b", "c").iterator()).peekLast(Fn.println()).forEach(Fn.println());
+        Stream.of(N.toList("a", "b", "c").iterator()).peekLast(Fn.println()).forEach(Fn.println());
         Seq.of("a", "b", "c").peekLast(Fnn.println()).forEach(Fn.println());
     }
 
@@ -42,9 +42,9 @@ public class NewStreamTest {
     @Test
     public void test_cartesianProduct() {
 
-        StreamEx.<Object> of("a", "b", "c").cartesianProduct(N.asList("1", 2, 3), N.asList('x', 'y', 'z')).limit(5).forEach(Fn.println());
+        StreamEx.<Object> of("a", "b", "c").cartesianProduct(N.toList("1", 2, 3), N.toList('x', 'y', 'z')).limit(5).forEach(Fn.println());
         N.println("----------------------");
-        StreamEx.<Object> of("a", "b", "c").cartesianProduct(N.asList("1", 2, 3), N.asList('x', 'y', 'z')).skip(3).limit(5).forEach(Fn.println());
+        StreamEx.<Object> of("a", "b", "c").cartesianProduct(N.toList("1", 2, 3), N.toList('x', 'y', 'z')).skip(3).limit(5).forEach(Fn.println());
     }
 
 }

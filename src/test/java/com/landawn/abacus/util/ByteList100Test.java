@@ -606,13 +606,13 @@ public class ByteList100Test extends TestBase {
         list.add((byte) 3);
         list.add((byte) 1);
 
-        assertEquals(3, list.occurrencesOf((byte) 1));
-        assertEquals(1, list.occurrencesOf((byte) 2));
-        assertEquals(1, list.occurrencesOf((byte) 3));
-        assertEquals(0, list.occurrencesOf((byte) 4));
+        assertEquals(3, list.frequency((byte) 1));
+        assertEquals(1, list.frequency((byte) 2));
+        assertEquals(1, list.frequency((byte) 3));
+        assertEquals(0, list.frequency((byte) 4));
 
         list.clear();
-        assertEquals(0, list.occurrencesOf((byte) 1));
+        assertEquals(0, list.frequency((byte) 1));
     }
 
     @Test
@@ -1248,7 +1248,7 @@ public class ByteList100Test extends TestBase {
         list.add((byte) 2);
         list.add((byte) 3);
 
-        byte[] array = list.array();
+        byte[] array = list.internalArray();
         assertEquals((byte) 1, array[0]);
         assertEquals((byte) 2, array[1]);
         assertEquals((byte) 3, array[2]);

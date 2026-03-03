@@ -19,6 +19,9 @@ import java.sql.SQLException;
 
 import com.landawn.abacus.util.Numbers;
 
+/**
+ * Type handler for primitive {@code short} values, providing conversion between short and its string representation.
+ */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveShortType extends AbstractShortType {
 

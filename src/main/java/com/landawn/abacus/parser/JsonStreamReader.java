@@ -24,6 +24,10 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.WD;
 
+/**
+ * A stream-based JSON reader that reads from {@link Reader}/{@link java.io.InputStream} sources.
+ * Extends {@link JsonStringReader} to support reading JSON data from character streams.
+ */
 class JsonStreamReader extends JsonStringReader {
 
     JsonStreamReader(final Reader reader, final char[] rbuf, final char[] cbuf) {
@@ -86,15 +90,15 @@ class JsonStreamReader extends JsonStringReader {
         nextChar = 0;
         startIndexForText = strBeginIndex;
 
-        if (nextEvent == START_QUOTATION_D || nextEvent == START_QUOTATION_S) {
-            final char quoteChar = nextEvent == START_QUOTATION_D ? WD._QUOTATION_D : WD._QUOTATION_S;
+        if (nextEvent == START_DOUBLE_QUOTE || nextEvent == START_SINGLE_QUOTE) {
+            final char quoteChar = nextEvent == START_DOUBLE_QUOTE ? WD._DOUBLE_QUOTE : WD._SINGLE_QUOTE;
 
             for (int ch = 0; strBeginIndex < strEndIndex;) {
                 ch = strValue[strBeginIndex++];
 
                 if (ch == quoteChar) {
                     endIndexForText = strBeginIndex - 1;
-                    nextEvent = quoteChar == WD._QUOTATION_D ? END_QUOTATION_D : END_QUOTATION_S;
+                    nextEvent = quoteChar == WD._DOUBLE_QUOTE ? END_DOUBLE_QUOTE : END_SINGLE_QUOTE;
 
                     return nextEvent;
                 }
@@ -372,7 +376,7 @@ class JsonStreamReader extends JsonStringReader {
                     } else if ((c >= 'A') && (c <= 'F')) {
                         result += (char) (c - 'A' + 10);
                     } else {
-                        throw new ParsingException("Number format exception: \\u" + String.valueOf(cbuf));
+                        throw new ParsingException("Number format exception: invalid hex digit '" + (char) c + "' in unicode escape sequence");
                     }
                 }
 

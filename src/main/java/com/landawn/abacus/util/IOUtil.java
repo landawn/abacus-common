@@ -298,7 +298,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>{@link com.landawn.abacus.util.stream.Stream}:</b> Enhanced stream processing</li>
  * </ul>
  *
- * <p><b>Example: Complete File Processing Pipeline</b>
+ * <p><b>Usage Examples: Complete File Processing Pipeline</b>
  * <pre>{@code
  * // Process large log files with parallel processing
  * File logDirectory = new File("/var/logs");
@@ -8403,14 +8403,14 @@ public final class IOUtil {
 
     /**
      * Tests whether the specified {@link File} is a directory or not. Implemented as a
-     * null-safe delegate to {@link Files#isDirectory(Path path, LinkOption... options)}.
+     * null-safe delegate to {@link Files#isDirectory(Path, LinkOption...)}.
      *
      * @param   file the path to the file.
      * @param   options options indicating how symbolic links are handled.
-     * @return  {@code true} if the file is a directory; {@code false} if.
+     * @return  {@code true} if the file is a directory; {@code false} if
      *          the path is {@code null}, the file does not exist, is not a directory, or it cannot
      *          be determined if the file is a directory or not.
-     * @throws SecurityException     In the case of the default provider, and a security manager is installed, the.
+     * @throws SecurityException     In the case of the default provider, and a security manager is installed, the
      *                               {@link SecurityManager#checkRead(String) checkRead} method is invoked to check read
      *                               access to the directory.
      *
@@ -8427,14 +8427,14 @@ public final class IOUtil {
 
     /**
      * Tests whether the specified {@link File} is a regular file or not. Implemented as a
-     * null-safe delegate to {@link Files#isRegularFile(Path path, LinkOption... options)}.
+     * null-safe delegate to {@link Files#isRegularFile(Path, LinkOption...)}.
      *
      * @param   file the path to the file.
      * @param   options options indicating how symbolic links are handled.
-     * @return  {@code true} if the file is a regular file; {@code false} if.
+     * @return  {@code true} if the file is a regular file; {@code false} if
      *          the path is {@code null}, the file does not exist, is not a regular file, or it cannot
      *          be determined if the file is a regular file or not.
-     * @throws SecurityException     In the case of the default provider, and a security manager is installed, the.
+     * @throws SecurityException     In the case of the default provider, and a security manager is installed, the
      *                               {@link SecurityManager#checkRead(String) checkRead} method is invoked to check read
      *                               access to the directory.
      *
@@ -8924,8 +8924,6 @@ public final class IOUtil {
                     os = null;
                 }
             }
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
         } finally {
             Objectory.recycle(buf);
 
@@ -9235,13 +9233,17 @@ public final class IOUtil {
 
             br = Objectory.createBufferedReader(is);
 
-            String subFileName = destDir.getAbsolutePath() + IOUtil.DIR_SEPARATOR + prefix + "_" + Strings.padStart(N.stringOf(fileSerNum++), suffixLen, '0')
-                    + postfix;
-            bw = Objectory.createBufferedWriter(IOUtil.newFileWriter(new File(subFileName)));
+            String subFileName = null;
 
             int lineCounter = 0;
 
             for (String line = br.readLine(); line != null; line = br.readLine()) {
+                if (bw == null) {
+                    subFileName = destDir.getAbsolutePath() + IOUtil.DIR_SEPARATOR + prefix + "_" + Strings.padStart(N.stringOf(fileSerNum++), suffixLen, '0')
+                            + postfix;
+                    bw = Objectory.createBufferedWriter(IOUtil.newFileWriter(new File(subFileName)));
+                }
+
                 bw.write(line);
                 bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                 lineCounter++;
@@ -9250,10 +9252,6 @@ public final class IOUtil {
                     close(bw);
                     Objectory.recycle(bw);
                     bw = null;
-
-                    subFileName = destDir.getAbsolutePath() + IOUtil.DIR_SEPARATOR + prefix + "_" + Strings.padStart(N.stringOf(fileSerNum++), suffixLen, '0')
-                            + postfix;
-                    bw = Objectory.createBufferedWriter(IOUtil.newFileWriter(new File(subFileName)));
                 }
             }
 
@@ -9298,7 +9296,7 @@ public final class IOUtil {
             String line = null;
             long bytes = 0;
             while (cnt < byReadingLineNum && (line = br.readLine()) != null) {
-                bytes += line.getBytes(DEFAULT_CHARSET).length;
+                bytes += line.getBytes(DEFAULT_CHARSET).length + 1; // +1 for line separator stripped by readLine()
 
                 cnt++;
             }
@@ -9772,11 +9770,11 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File file = new File("data.txt");
-     * URL url = IOUtil.toURL(file);
+     * URL url = IOUtil.toUrl(file);
      * }</pre>
      * @see URI#toURL()
      */
-    public static URL toURL(final File file) throws UncheckedIOException {
+    public static URL toUrl(final File file) throws UncheckedIOException {
         try {
             return file.toURI().toURL();
         } catch (final IOException e) {
@@ -9795,11 +9793,11 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File[] files = {new File("file1.txt"), new File("file2.txt")};
-     * URL[] urls = IOUtil.toURLs(files);
+     * URL[] urls = IOUtil.toUrls(files);
      * }</pre>
      * @see URI#toURL()
      */
-    public static URL[] toURLs(final File[] files) throws UncheckedIOException {
+    public static URL[] toUrls(final File[] files) throws UncheckedIOException {
         if (N.isEmpty(files)) {
             return new URL[0];
         }
@@ -9828,11 +9826,11 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<File> files = Arrays.asList(new File("a.txt"), new File("b.txt"));
-     * List<URL> urls = IOUtil.toURLs(files);
+     * List<URL> urls = IOUtil.toUrls(files);
      * }</pre>
      * @see URI#toURL()
      */
-    public static List<URL> toURLs(final Collection<File> files) throws UncheckedIOException {
+    public static List<URL> toUrls(final Collection<File> files) throws UncheckedIOException {
         if (N.isEmpty(files)) {
             return new ArrayList<>();
         }

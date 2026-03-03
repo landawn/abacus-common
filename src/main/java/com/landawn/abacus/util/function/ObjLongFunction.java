@@ -58,6 +58,7 @@ public interface ObjLongFunction<T, R> extends Throwables.ObjLongFunction<T, R, 
      * @param u the second function argument, a primitive long value
      * @return the function result of type R
      */
+    // @ai-ignore LongObj*/ObjLong* argument order convention - intentional: class name prefix determines parameter order. LongObj* has long first; ObjLong* has object first. Do not suggest reordering.
     @Override
     R apply(T t, long u);
 

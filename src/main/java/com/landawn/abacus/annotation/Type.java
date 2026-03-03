@@ -109,8 +109,8 @@ public @interface Type {
 
     /**
      * Specifies a custom Type class to handle value conversion.
-     * The specified class must extend {@link com.landawn.abacus.type.Type} and
-     * implement the necessary conversion methods.
+     * The specified class must implement {@link com.landawn.abacus.type.Type} and
+     * provide the necessary conversion methods.
      *
      * <p>This is useful for complex custom conversions that can't be handled
      * by the built-in types. The custom type class should:</p>
@@ -138,7 +138,7 @@ public @interface Type {
      * private String sensitiveData;
      * }</pre>
      *
-     * @return the custom Type implementation class, or base Type.class for default handling
+     * @return the custom Type implementation class, or base {@code Type.class} for default handling
      */
     @SuppressWarnings("rawtypes")
     Class<? extends com.landawn.abacus.type.Type> clazz() default com.landawn.abacus.type.Type.class;
@@ -257,7 +257,7 @@ public @interface Type {
          *   <li>Converting complex types to strings for JSON</li>
          * </ul>
          *
-         * <p><b>Example:</b></p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * @Type(name = "ISO8601", scope = Scope.SERIALIZATION)
          * private Date timestamp;  // Only affects JSON/XML, not database
@@ -280,7 +280,7 @@ public @interface Type {
          *   <li>Adapting to legacy column types</li>
          * </ul>
          *
-         * <p><b>Example:</b></p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * @Type(name = "EncryptedString", scope = Scope.PERSISTENCE)
          * private String password;  // Only affects database, not JSON/XML
@@ -303,7 +303,7 @@ public @interface Type {
          *   <li>Cross-cutting concerns</li>
          * </ul>
          *
-         * <p><b>Example:</b></p>
+         * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * @Type(name = "JsonString", scope = Scope.ALL)
          * private Map<String, Object> settings;  // Affects both DB and JSON/XML

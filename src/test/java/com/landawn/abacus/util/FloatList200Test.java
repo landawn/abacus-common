@@ -36,13 +36,13 @@ public class FloatList200Test extends TestBase {
 
         FloatList list2 = new FloatList(10);
         assertEquals(0, list2.size());
-        assertTrue(list2.array().length >= 10 || list2.array().length == 0);
+        assertTrue(list2.internalArray().length >= 10 || list2.internalArray().length == 0);
 
         float[] arr = { 1.1f, 2.2f, 3.3f };
         FloatList list3 = new FloatList(arr);
         assertEquals(3, list3.size());
         assertArrayEquals(arr, list3.toArray(), delta);
-        assertSame(arr, list3.array());
+        assertSame(arr, list3.internalArray());
 
         FloatList list4 = new FloatList(arr, 2);
         assertEquals(2, list4.size());
@@ -267,7 +267,7 @@ public class FloatList200Test extends TestBase {
         assertArrayEquals(list.toArray(), copy.toArray(), delta);
 
         float[] arr = list.toArray();
-        assertNotSame(list.array(), arr);
+        assertNotSame(list.internalArray(), arr);
 
         List<Float> boxedList = list.boxed();
         assertEquals(5, boxedList.size());

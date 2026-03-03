@@ -63,8 +63,8 @@ public class XmlParser2Test extends AbstractParserTest {
         N.println(str);
         N.println("========================================================================================================================");
 
-        str = xmlParser.serialize(N.asList(account, account), config);
-        N.println("============N.asList(account, account)===================================================================================");
+        str = xmlParser.serialize(N.toList(account, account), config);
+        N.println("============N.toList(account, account)===================================================================================");
         N.println(str);
         N.println("========================================================================================================================");
 
@@ -78,18 +78,18 @@ public class XmlParser2Test extends AbstractParserTest {
         N.println(str);
         N.println("========================================================================================================================");
 
-        str = xmlParser.serialize(N.asList(Beans.deepBeanToMap(account), account), config);
-        N.println("============N.asList(N.deepBeanToMap(account), account)================================================================");
+        str = xmlParser.serialize(N.toList(Beans.deepBeanToMap(account), account), config);
+        N.println("============N.toList(N.deepBeanToMap(account), account)================================================================");
         N.println(str);
         N.println("========================================================================================================================");
 
-        str = xmlParser.serialize(new Object[] { N.asArray(account, account), N.asList(account, account) }, config);
-        N.println("============Array.of(Array.of(account, account), N.asList(account, account))==========================================");
+        str = xmlParser.serialize(new Object[] { N.asArray(account, account), N.toList(account, account) }, config);
+        N.println("============Array.of(Array.of(account, account), N.toList(account, account))==========================================");
         N.println(str);
         N.println("========================================================================================================================");
 
-        str = xmlParser.serialize(N.asList(N.asArray(account, account), N.asList(account, account)), config);
-        N.println("============N.asList(Array.of(account, account), N.asList(account, account))===========================================");
+        str = xmlParser.serialize(N.toList(N.asArray(account, account), N.toList(account, account)), config);
+        N.println("============N.toList(Array.of(account, account), N.toList(account, account))===========================================");
         N.println(str);
         N.println("========================================================================================================================");
 
@@ -134,7 +134,7 @@ public class XmlParser2Test extends AbstractParserTest {
         N.println(str);
         N.println("========================================================================================================================");
 
-        str = xmlParser.serialize(N.asList("abc", "123"), config);
+        str = xmlParser.serialize(N.toList("abc", "123"), config);
 
         N.println("========================================================================================================================");
         N.println(str);
@@ -280,7 +280,7 @@ public class XmlParser2Test extends AbstractParserTest {
     @Test
     public void testSerialize1() {
         Bean bean = new Bean();
-        bean.setTypeList(N.asList(
+        bean.setTypeList(N.toList(
                 "‰β,『�?★业€ > \n sfd \r ds \' f d // \\  \\\\ /// /////// \\\\\\\\  \\\\\\\\n \\\\\\\\r  \t sd \" fe stri‰β,『�?★业€ ng黎< > </ <//、\n", '★', '\n',
                 '\r', '\t', '\"', '\'', ' ', new char[] { '\r', '\t', '\"', '\'', ' ' },
                 new String[] {
@@ -380,8 +380,8 @@ public class XmlParser2Test extends AbstractParserTest {
         xBean.setTypeChar('<');
         xBean.setTypeChar2('>');
         xBean.setTypeGenericList(
-                N.asList(Dates.createDate(System.currentTimeMillis() / 1000 * 1000), Dates.createDate(System.currentTimeMillis() / 1000 * 1000)));
-        xBean.setTypeGenericSet(N.asSet(1L, 2L));
+                N.toList(Dates.createDate(System.currentTimeMillis() / 1000 * 1000), Dates.createDate(System.currentTimeMillis() / 1000 * 1000)));
+        xBean.setTypeGenericSet(N.toSet(1L, 2L));
 
         String jsonStr = jsonParser.serialize(xBean);
         println(jsonStr);
@@ -442,7 +442,7 @@ public class XmlParser2Test extends AbstractParserTest {
         typeGenericList.add(null);
         xBean.setTypeGenericList(typeGenericList);
 
-        Set<Long> typeGenericSet = N.asSortedSet();
+        Set<Long> typeGenericSet = N.toSortedSet();
         typeGenericSet.add(1332333L);
         typeGenericSet.add(Long.MAX_VALUE);
         typeGenericSet.add(Long.MIN_VALUE);
@@ -489,14 +489,14 @@ public class XmlParser2Test extends AbstractParserTest {
         typeGenericMap2.put(account.getFirstName(), createAccount(Account.class));
         typeGenericMap2.put(account.getLastName(), createAccount(Account.class));
         typeGenericMap2.put("null", null);
-        typeGenericMap2.put("bookList", N.asList(createAccount(Account.class)));
+        typeGenericMap2.put("bookList", N.toList(createAccount(Account.class)));
         xBean.setTypeGenericMap2(typeGenericMap2);
 
         Map<Object, Object> typeGenericMap4 = new ConcurrentHashMap<>();
         typeGenericMap4.put(createAccount(Account.class), createAccount(Account.class));
         typeGenericMap4.put(createAccount(Account.class), createAccount(Account.class));
         typeGenericMap4.put("aaabbbccc", "");
-        typeGenericMap4.put("bookList", N.asList(createAccount(Account.class)));
+        typeGenericMap4.put("bookList", N.toList(createAccount(Account.class)));
         typeGenericMap4.put("edse", " ");
         typeGenericMap4.put(new HashMap<>(), " ");
         typeGenericMap4.put(new ArrayList<>(), new HashSet<>());
@@ -510,7 +510,7 @@ public class XmlParser2Test extends AbstractParserTest {
         }
 
         typeMap.put("null", null);
-        typeMap.put("bookList", N.asList(createAccount(Account.class)));
+        typeMap.put("bookList", N.toList(createAccount(Account.class)));
         typeMap.put(" ", " ");
         typeMap.put(new HashMap<>(), " ");
         typeMap.put(new ArrayList<>(), new HashSet<>());
@@ -637,11 +637,11 @@ public class XmlParser2Test extends AbstractParserTest {
             this.shortList = shortList;
         }
 
-        public XMLGregorianCalendar getXmlGregorianCalendar() {
+        public XMLGregorianCalendar getXMLGregorianCalendar() {
             return xmlGregorianCalendar;
         }
 
-        public void setXmlGregorianCalendar(XMLGregorianCalendar xmlGregorianCalendar) {
+        public void setXMLGregorianCalendar(XMLGregorianCalendar xmlGregorianCalendar) {
             this.xmlGregorianCalendar = xmlGregorianCalendar;
         }
 

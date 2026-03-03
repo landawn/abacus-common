@@ -77,7 +77,9 @@ public final class ShortType extends AbstractShortType {
      */
     @Override
     public Short get(ResultSet rs, int columnIndex) throws SQLException {
-        return super.get(rs, columnIndex);
+        final short value = rs.getShort(columnIndex);
+
+        return rs.wasNull() ? null : value;
     }
 
     /**
@@ -98,6 +100,8 @@ public final class ShortType extends AbstractShortType {
      */
     @Override
     public Short get(ResultSet rs, String columnName) throws SQLException {
-        return super.get(rs, columnName);
+        final short value = rs.getShort(columnName);
+
+        return rs.wasNull() ? null : value;
     }
 }

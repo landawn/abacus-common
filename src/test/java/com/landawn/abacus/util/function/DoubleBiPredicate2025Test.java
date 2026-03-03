@@ -75,10 +75,10 @@ public class DoubleBiPredicate2025Test extends TestBase {
     }
 
     @Test
-    public void testGreaterEqual() {
-        assertTrue(DoubleBiPredicate.GREATER_EQUAL.test(5.0, 3.0));
-        assertTrue(DoubleBiPredicate.GREATER_EQUAL.test(5.0, 5.0));
-        assertFalse(DoubleBiPredicate.GREATER_EQUAL.test(3.0, 5.0));
+    public void testGreaterThanOrEqual() {
+        assertTrue(DoubleBiPredicate.GREATER_THAN_OR_EQUAL.test(5.0, 3.0));
+        assertTrue(DoubleBiPredicate.GREATER_THAN_OR_EQUAL.test(5.0, 5.0));
+        assertFalse(DoubleBiPredicate.GREATER_THAN_OR_EQUAL.test(3.0, 5.0));
     }
 
     @Test
@@ -89,10 +89,10 @@ public class DoubleBiPredicate2025Test extends TestBase {
     }
 
     @Test
-    public void testLessEqual() {
-        assertTrue(DoubleBiPredicate.LESS_EQUAL.test(3.0, 5.0));
-        assertTrue(DoubleBiPredicate.LESS_EQUAL.test(5.0, 5.0));
-        assertFalse(DoubleBiPredicate.LESS_EQUAL.test(5.0, 3.0));
+    public void testLessThanOrEqual() {
+        assertTrue(DoubleBiPredicate.LESS_THAN_OR_EQUAL.test(3.0, 5.0));
+        assertTrue(DoubleBiPredicate.LESS_THAN_OR_EQUAL.test(5.0, 5.0));
+        assertFalse(DoubleBiPredicate.LESS_THAN_OR_EQUAL.test(5.0, 3.0));
     }
 
     @Test

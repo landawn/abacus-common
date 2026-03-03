@@ -748,7 +748,7 @@ public class StringsTest extends AbstractTest {
         N.println(Strings.substringsBetween("3[a2[c]]2[a]", '[', ']'));
 
         assertEquals("[[2, 6], [10, 11]]", CommonUtil.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']')));
-        assertEquals(CommonUtil.asList("a2[c", "a"), Strings.substringsBetween("3[a2[c]]2[a]", '[', ']'));
+        assertEquals(CommonUtil.toList("a2[c", "a"), Strings.substringsBetween("3[a2[c]]2[a]", '[', ']'));
 
         N.println(Strings.toCamelCase("a_B_c_D"));
         N.println(Strings.toCamelCase("B_B_c_d"));

@@ -37,12 +37,12 @@ public interface BooleanBiFunction<R> extends Throwables.BooleanBiFunction<R, Ru
      * String result = formatter.apply(true, false);   // Returns "AND: false, OR: true"
      * }</pre>
      *
-     * @param t the first function argument (boolean value)
-     * @param u the second function argument (boolean value)
+     * @param a the first function argument (boolean value)
+     * @param b the second function argument (boolean value)
      * @return the function result
      */
     @Override
-    R apply(boolean t, boolean u);
+    R apply(boolean a, boolean b);
 
     /**
      * Returns a composed function that first applies this function to its input, and then applies the {@code after} function to the result.
@@ -60,6 +60,6 @@ public interface BooleanBiFunction<R> extends Throwables.BooleanBiFunction<R, Ru
      * @return a composed function that first applies this function and then applies the {@code after} function
      */
     default <V> BooleanBiFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        return (t, u) -> after.apply(apply(t, u));
+        return (a, b) -> after.apply(apply(a, b));
     }
 }

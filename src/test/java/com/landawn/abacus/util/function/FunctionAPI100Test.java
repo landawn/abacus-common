@@ -883,12 +883,12 @@ public class FunctionAPI100Test extends TestBase {
             assertFalse(ByteBiPredicate.NOT_EQUAL.test((byte) 5, (byte) 5));
             assertTrue(ByteBiPredicate.GREATER_THAN.test((byte) 6, (byte) 5));
             assertFalse(ByteBiPredicate.GREATER_THAN.test((byte) 5, (byte) 5));
-            assertTrue(ByteBiPredicate.GREATER_EQUAL.test((byte) 5, (byte) 5));
-            assertFalse(ByteBiPredicate.GREATER_EQUAL.test((byte) 4, (byte) 5));
+            assertTrue(ByteBiPredicate.GREATER_THAN_OR_EQUAL.test((byte) 5, (byte) 5));
+            assertFalse(ByteBiPredicate.GREATER_THAN_OR_EQUAL.test((byte) 4, (byte) 5));
             assertTrue(ByteBiPredicate.LESS_THAN.test((byte) 4, (byte) 5));
             assertFalse(ByteBiPredicate.LESS_THAN.test((byte) 5, (byte) 5));
-            assertTrue(ByteBiPredicate.LESS_EQUAL.test((byte) 5, (byte) 5));
-            assertFalse(ByteBiPredicate.LESS_EQUAL.test((byte) 6, (byte) 5));
+            assertTrue(ByteBiPredicate.LESS_THAN_OR_EQUAL.test((byte) 5, (byte) 5));
+            assertFalse(ByteBiPredicate.LESS_THAN_OR_EQUAL.test((byte) 6, (byte) 5));
         }
 
         @Test
@@ -1054,9 +1054,9 @@ public class FunctionAPI100Test extends TestBase {
             assertFalse(BytePredicate.equal((byte) 10).test((byte) 11));
             assertTrue(BytePredicate.notEqual((byte) 10).test((byte) 11));
             assertTrue(BytePredicate.greaterThan((byte) 10).test((byte) 11));
-            assertTrue(BytePredicate.greaterEqual((byte) 10).test((byte) 10));
+            assertTrue(BytePredicate.greaterThanOrEqual((byte) 10).test((byte) 10));
             assertTrue(BytePredicate.lessThan((byte) 10).test((byte) 9));
-            assertTrue(BytePredicate.lessEqual((byte) 10).test((byte) 10));
+            assertTrue(BytePredicate.lessThanOrEqual((byte) 10).test((byte) 10));
             assertTrue(BytePredicate.between((byte) 10, (byte) 20).test((byte) 15));
             assertFalse(BytePredicate.between((byte) 10, (byte) 20).test((byte) 10));
             assertFalse(BytePredicate.between((byte) 10, (byte) 20).test((byte) 20));
@@ -1360,9 +1360,9 @@ public class FunctionAPI100Test extends TestBase {
             assertFalse(CharBiPredicate.EQUAL.test('x', 'y'));
             assertTrue(CharBiPredicate.NOT_EQUAL.test('x', 'y'));
             assertTrue(CharBiPredicate.GREATER_THAN.test('b', 'a'));
-            assertTrue(CharBiPredicate.GREATER_EQUAL.test('b', 'b'));
+            assertTrue(CharBiPredicate.GREATER_THAN_OR_EQUAL.test('b', 'b'));
             assertTrue(CharBiPredicate.LESS_THAN.test('a', 'b'));
-            assertTrue(CharBiPredicate.LESS_EQUAL.test('a', 'a'));
+            assertTrue(CharBiPredicate.LESS_THAN_OR_EQUAL.test('a', 'a'));
         }
 
         @Test
@@ -1479,9 +1479,9 @@ public class FunctionAPI100Test extends TestBase {
             assertTrue(CharPredicate.equal('a').test('a'));
             assertTrue(CharPredicate.notEqual('a').test('b'));
             assertTrue(CharPredicate.greaterThan('b').test('c'));
-            assertTrue(CharPredicate.greaterEqual('b').test('b'));
+            assertTrue(CharPredicate.greaterThanOrEqual('b').test('b'));
             assertTrue(CharPredicate.lessThan('b').test('a'));
-            assertTrue(CharPredicate.lessEqual('b').test('b'));
+            assertTrue(CharPredicate.lessThanOrEqual('b').test('b'));
             assertTrue(CharPredicate.between('a', 'e').test('c'));
             assertFalse(CharPredicate.between('a', 'e').test('a'));
             assertFalse(CharPredicate.between('a', 'e').test('e'));
@@ -1802,11 +1802,11 @@ public class FunctionAPI100Test extends TestBase {
             assertTrue(DoubleBiPredicate.GREATER_THAN.test(2.0, 1.0));
             assertFalse(DoubleBiPredicate.GREATER_THAN.test(1.0, 1.0));
 
-            assertTrue(DoubleBiPredicate.GREATER_EQUAL.test(1.0, 1.0));
-            assertFalse(DoubleBiPredicate.GREATER_EQUAL.test(0.0, 1.0));
+            assertTrue(DoubleBiPredicate.GREATER_THAN_OR_EQUAL.test(1.0, 1.0));
+            assertFalse(DoubleBiPredicate.GREATER_THAN_OR_EQUAL.test(0.0, 1.0));
 
             assertTrue(DoubleBiPredicate.LESS_THAN.test(1.0, 2.0));
-            assertTrue(DoubleBiPredicate.LESS_EQUAL.test(1.0, 1.0));
+            assertTrue(DoubleBiPredicate.LESS_THAN_OR_EQUAL.test(1.0, 1.0));
         }
 
         @Test
@@ -2026,9 +2026,9 @@ public class FunctionAPI100Test extends TestBase {
             assertTrue(DoublePredicate.equal(10.5).test(10.5));
             assertTrue(DoublePredicate.notEqual(10.5).test(10.6));
             assertTrue(DoublePredicate.greaterThan(10.5).test(10.6));
-            assertTrue(DoublePredicate.greaterEqual(10.5).test(10.5));
+            assertTrue(DoublePredicate.greaterThanOrEqual(10.5).test(10.5));
             assertTrue(DoublePredicate.lessThan(10.5).test(10.4));
-            assertTrue(DoublePredicate.lessEqual(10.5).test(10.5));
+            assertTrue(DoublePredicate.lessThanOrEqual(10.5).test(10.5));
             assertTrue(DoublePredicate.between(10.0, 20.0).test(15.0));
             assertFalse(DoublePredicate.between(10.0, 20.0).test(10.0));
         }
@@ -2276,9 +2276,9 @@ public class FunctionAPI100Test extends TestBase {
             assertFalse(FloatBiPredicate.NOT_EQUAL.test(Float.NaN, Float.NaN));
 
             assertTrue(FloatBiPredicate.GREATER_THAN.test(2.0f, 1.0f));
-            assertTrue(FloatBiPredicate.GREATER_EQUAL.test(1.0f, 1.0f));
+            assertTrue(FloatBiPredicate.GREATER_THAN_OR_EQUAL.test(1.0f, 1.0f));
             assertTrue(FloatBiPredicate.LESS_THAN.test(1.0f, 2.0f));
-            assertTrue(FloatBiPredicate.LESS_EQUAL.test(1.0f, 1.0f));
+            assertTrue(FloatBiPredicate.LESS_THAN_OR_EQUAL.test(1.0f, 1.0f));
         }
 
         @Test
@@ -2400,9 +2400,9 @@ public class FunctionAPI100Test extends TestBase {
             assertTrue(FloatPredicate.equal(10.5f).test(10.5f));
             assertTrue(FloatPredicate.notEqual(10.5f).test(10.6f));
             assertTrue(FloatPredicate.greaterThan(10.5f).test(10.6f));
-            assertTrue(FloatPredicate.greaterEqual(10.5f).test(10.5f));
+            assertTrue(FloatPredicate.greaterThanOrEqual(10.5f).test(10.5f));
             assertTrue(FloatPredicate.lessThan(10.5f).test(10.4f));
-            assertTrue(FloatPredicate.lessEqual(10.5f).test(10.5f));
+            assertTrue(FloatPredicate.lessThanOrEqual(10.5f).test(10.5f));
             assertTrue(FloatPredicate.between(10f, 20f).test(15f));
             assertFalse(FloatPredicate.between(10f, 20f).test(10f));
         }
@@ -2703,9 +2703,9 @@ public class FunctionAPI100Test extends TestBase {
             assertTrue(IntBiPredicate.EQUAL.test(2, 2));
             assertTrue(IntBiPredicate.NOT_EQUAL.test(1, 2));
             assertTrue(IntBiPredicate.GREATER_THAN.test(2, 1));
-            assertTrue(IntBiPredicate.GREATER_EQUAL.test(2, 2));
+            assertTrue(IntBiPredicate.GREATER_THAN_OR_EQUAL.test(2, 2));
             assertTrue(IntBiPredicate.LESS_THAN.test(1, 2));
-            assertTrue(IntBiPredicate.LESS_EQUAL.test(2, 2));
+            assertTrue(IntBiPredicate.LESS_THAN_OR_EQUAL.test(2, 2));
         }
 
         @Test
@@ -2902,9 +2902,9 @@ public class FunctionAPI100Test extends TestBase {
             assertTrue(IntPredicate.equal(10).test(10));
             assertTrue(IntPredicate.notEqual(10).test(11));
             assertTrue(IntPredicate.greaterThan(10).test(11));
-            assertTrue(IntPredicate.greaterEqual(10).test(10));
+            assertTrue(IntPredicate.greaterThanOrEqual(10).test(10));
             assertTrue(IntPredicate.lessThan(10).test(9));
-            assertTrue(IntPredicate.lessEqual(10).test(10));
+            assertTrue(IntPredicate.lessThanOrEqual(10).test(10));
             assertTrue(IntPredicate.between(10, 20).test(15));
             assertFalse(IntPredicate.between(10, 20).test(10));
         }
@@ -3187,9 +3187,9 @@ public class FunctionAPI100Test extends TestBase {
             assertTrue(LongBiPredicate.EQUAL.test(2L, 2L));
             assertTrue(LongBiPredicate.NOT_EQUAL.test(1L, 2L));
             assertTrue(LongBiPredicate.GREATER_THAN.test(2L, 1L));
-            assertTrue(LongBiPredicate.GREATER_EQUAL.test(2L, 2L));
+            assertTrue(LongBiPredicate.GREATER_THAN_OR_EQUAL.test(2L, 2L));
             assertTrue(LongBiPredicate.LESS_THAN.test(1L, 2L));
-            assertTrue(LongBiPredicate.LESS_EQUAL.test(2L, 2L));
+            assertTrue(LongBiPredicate.LESS_THAN_OR_EQUAL.test(2L, 2L));
         }
 
         @Test
@@ -3375,9 +3375,9 @@ public class FunctionAPI100Test extends TestBase {
             assertTrue(LongPredicate.equal(10L).test(10L));
             assertTrue(LongPredicate.notEqual(10L).test(11L));
             assertTrue(LongPredicate.greaterThan(10L).test(11L));
-            assertTrue(LongPredicate.greaterEqual(10L).test(10L));
+            assertTrue(LongPredicate.greaterThanOrEqual(10L).test(10L));
             assertTrue(LongPredicate.lessThan(10L).test(9L));
-            assertTrue(LongPredicate.lessEqual(10L).test(10L));
+            assertTrue(LongPredicate.lessThanOrEqual(10L).test(10L));
             assertTrue(LongPredicate.between(10L, 20L).test(15L));
             assertFalse(LongPredicate.between(10L, 20L).test(10L));
         }
@@ -4069,9 +4069,9 @@ public class FunctionAPI100Test extends TestBase {
             assertTrue(ShortBiPredicate.EQUAL.test((short) 2, (short) 2));
             assertTrue(ShortBiPredicate.NOT_EQUAL.test((short) 1, (short) 2));
             assertTrue(ShortBiPredicate.GREATER_THAN.test((short) 2, (short) 1));
-            assertTrue(ShortBiPredicate.GREATER_EQUAL.test((short) 2, (short) 2));
+            assertTrue(ShortBiPredicate.GREATER_THAN_OR_EQUAL.test((short) 2, (short) 2));
             assertTrue(ShortBiPredicate.LESS_THAN.test((short) 1, (short) 2));
-            assertTrue(ShortBiPredicate.LESS_EQUAL.test((short) 2, (short) 2));
+            assertTrue(ShortBiPredicate.LESS_THAN_OR_EQUAL.test((short) 2, (short) 2));
         }
 
         @Test
@@ -4177,9 +4177,9 @@ public class FunctionAPI100Test extends TestBase {
             assertTrue(ShortPredicate.equal((short) 10).test((short) 10));
             assertTrue(ShortPredicate.notEqual((short) 10).test((short) 11));
             assertTrue(ShortPredicate.greaterThan((short) 10).test((short) 11));
-            assertTrue(ShortPredicate.greaterEqual((short) 10).test((short) 10));
+            assertTrue(ShortPredicate.greaterThanOrEqual((short) 10).test((short) 10));
             assertTrue(ShortPredicate.lessThan((short) 10).test((short) 9));
-            assertTrue(ShortPredicate.lessEqual((short) 10).test((short) 10));
+            assertTrue(ShortPredicate.lessThanOrEqual((short) 10).test((short) 10));
             assertTrue(ShortPredicate.between((short) 10, (short) 20).test((short) 15));
             assertFalse(ShortPredicate.between((short) 10, (short) 20).test((short) 10));
         }

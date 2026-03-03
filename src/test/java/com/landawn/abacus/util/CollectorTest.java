@@ -21,7 +21,7 @@ public class CollectorTest extends AbstractTest {
 
     @Test
     public void test_combine() {
-        List<Collector<? super String, ?, ?>> downstreams = CommonUtil.asList(Collectors.summingInt(String::length),
+        List<Collector<? super String, ?, ?>> downstreams = CommonUtil.toList(Collectors.summingInt(String::length),
                 Collectors.averagingDoubleOrEmpty(String::length), Collectors.toList(), Collectors.toSet(), Collectors.minMax(), Collectors.commonPrefix(),
                 Collectors.counting());
 

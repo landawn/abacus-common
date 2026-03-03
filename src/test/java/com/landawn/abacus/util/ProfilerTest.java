@@ -33,7 +33,7 @@ public class ProfilerTest extends AbstractTest {
     @Test
     public void test_error() {
         Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "error", Object.class);
-        Profiler.run(this, method, CommonUtil.asList("a", "b"), 2, 2, 1).printResult();
+        Profiler.run(this, method, CommonUtil.toList("a", "b"), 2, 2, 1).printResult();
         Profiler.run(this, method, null, 2, 2, 1).printResult();
         Profiler.run(this, method, null, 2, 2, 1).writeHtmlResult(System.out);
         Profiler.run(this, method, new ArrayList<>(), 2, 2, 1).writeXmlResult(System.out);

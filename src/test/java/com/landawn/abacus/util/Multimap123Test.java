@@ -616,7 +616,7 @@ public class Multimap123Test extends TestBase {
         listMultimap.put("key1", 20);
         listMultimap.put("key2", 30);
 
-        assertTrue(listMultimap.replaceValues("key1", N.asList(99)));
+        assertTrue(listMultimap.replaceValues("key1", N.toList(99)));
         List<Integer> values = listMultimap.get("key1");
         assertEquals(1, values.size());
         assertTrue(values.contains(99));
@@ -663,14 +663,14 @@ public class Multimap123Test extends TestBase {
         Collection<Integer> oldValues = Arrays.asList(10, 20);
         Predicate<String> keyFilter = key -> key.startsWith("replace_");
 
-        assertTrue(listMultimap.replaceValuesIf(keyFilter, N.asList(99)));
+        assertTrue(listMultimap.replaceValuesIf(keyFilter, N.toList(99)));
 
         Collection<Integer> values = listMultimap.get("replace_key");
         assertEquals(1, values.size());
         assertTrue(values.contains(99));
         assertTrue(listMultimap.containsEntry("keep_key", 10));
 
-        assertTrue(listMultimap.replaceValuesIf(keyFilter, N.asList(99)));
+        assertTrue(listMultimap.replaceValuesIf(keyFilter, N.toList(99)));
     }
 
     @Test
@@ -682,14 +682,14 @@ public class Multimap123Test extends TestBase {
         Collection<Integer> oldValues = Arrays.asList(10, 20);
         BiPredicate<String, Collection<Integer>> filter = (key, values) -> values.size() > 1;
 
-        assertTrue(listMultimap.replaceValuesIf(filter, N.asList(99)));
+        assertTrue(listMultimap.replaceValuesIf(filter, N.toList(99)));
 
         List<Integer> values = listMultimap.get("key1");
         assertEquals(1, values.size());
         assertTrue(values.contains(99));
         assertTrue(listMultimap.containsEntry("key2", 30));
 
-        assertFalse(listMultimap.replaceValuesIf(filter, N.asList(99)));
+        assertFalse(listMultimap.replaceValuesIf(filter, N.toList(99)));
     }
 
     //    @Test

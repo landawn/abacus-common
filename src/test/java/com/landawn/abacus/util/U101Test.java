@@ -837,18 +837,18 @@ public class U101Test extends TestBase {
             assertEquals("Nullable.empty", empty.toString());
         }
 
-        @Test
-        @DisplayName("Test __()")
-        public void testDoubleUnderscore() {
-            u.Optional<String> present = u.Optional.of("test");
-            java.util.Optional<String> jdkOpt = present.__();
-            assertTrue(jdkOpt.isPresent());
-            assertEquals("test", jdkOpt.get());
-
-            u.Optional<String> empty = u.Optional.empty();
-            java.util.Optional<String> emptyJdkOpt = empty.__();
-            assertFalse(emptyJdkOpt.isPresent());
-        }
+        //    @Test
+        //    @DisplayName("Test __()")
+        //    public void testDoubleUnderscore() {
+        //        u.Optional<String> present = u.Optional.of("test");
+        //        java.util.Optional<String> jdkOpt = present.__();
+        //        assertTrue(jdkOpt.isPresent());
+        //        assertEquals("test", jdkOpt.get());
+        //
+        //        u.Optional<String> empty = u.Optional.empty();
+        //        java.util.Optional<String> emptyJdkOpt = empty.__();
+        //        assertFalse(emptyJdkOpt.isPresent());
+        //    }
     }
 
     @Nested

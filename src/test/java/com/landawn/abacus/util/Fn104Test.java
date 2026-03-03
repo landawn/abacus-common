@@ -998,8 +998,8 @@ public class Fn104Test extends TestBase {
     }
 
     @Test
-    public void testGreaterEqual() {
-        Predicate<Integer> pred = Fn.greaterEqual(5);
+    public void testGreaterThanOrEqual() {
+        Predicate<Integer> pred = Fn.greaterThanOrEqual(5);
         assertTrue(pred.test(6));
         assertTrue(pred.test(5));
         assertFalse(pred.test(4));
@@ -1014,8 +1014,8 @@ public class Fn104Test extends TestBase {
     }
 
     @Test
-    public void testLessEqual() {
-        Predicate<Integer> pred = Fn.lessEqual(5);
+    public void testLessThanOrEqual() {
+        Predicate<Integer> pred = Fn.lessThanOrEqual(5);
         assertTrue(pred.test(4));
         assertTrue(pred.test(5));
         assertFalse(pred.test(6));
@@ -1193,8 +1193,8 @@ public class Fn104Test extends TestBase {
     }
 
     @Test
-    public void testGreaterEqualBiPredicate() {
-        BiPredicate<Integer, Integer> pred = Fn.greaterEqual();
+    public void testGreaterThanOrEqualBiPredicate() {
+        BiPredicate<Integer, Integer> pred = Fn.greaterThanOrEqual();
         assertTrue(pred.test(5, 3));
         assertFalse(pred.test(3, 5));
         assertTrue(pred.test(3, 3));
@@ -1209,8 +1209,8 @@ public class Fn104Test extends TestBase {
     }
 
     @Test
-    public void testLessEqualBiPredicate() {
-        BiPredicate<Integer, Integer> pred = Fn.lessEqual();
+    public void testLessThanOrEqualBiPredicate() {
+        BiPredicate<Integer, Integer> pred = Fn.lessThanOrEqual();
         assertTrue(pred.test(3, 5));
         assertFalse(pred.test(5, 3));
         assertTrue(pred.test(3, 3));

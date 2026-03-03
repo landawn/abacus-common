@@ -143,8 +143,8 @@ public class FloatPredicate2025Test extends TestBase {
     }
 
     @Test
-    public void testGreaterEqual() {
-        final FloatPredicate predicate = FloatPredicate.greaterEqual(10.0f);
+    public void testGreaterThanOrEqual() {
+        final FloatPredicate predicate = FloatPredicate.greaterThanOrEqual(10.0f);
         assertTrue(predicate.test(11.0f));
         assertTrue(predicate.test(10.0f));
         assertFalse(predicate.test(9.0f));
@@ -158,8 +158,8 @@ public class FloatPredicate2025Test extends TestBase {
     }
 
     @Test
-    public void testLessEqual() {
-        final FloatPredicate predicate = FloatPredicate.lessEqual(10.0f);
+    public void testLessThanOrEqual() {
+        final FloatPredicate predicate = FloatPredicate.lessThanOrEqual(10.0f);
         assertTrue(predicate.test(9.0f));
         assertTrue(predicate.test(10.0f));
         assertFalse(predicate.test(11.0f));

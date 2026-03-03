@@ -595,18 +595,18 @@ public class IteratorStream100Test extends TestBase {
     public void testToMultiset() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 2, 3, 3, 3));
         Multiset<Integer> result = stream.toMultiset();
-        assertEquals(1, result.occurrencesOf(1));
-        assertEquals(2, result.occurrencesOf(2));
-        assertEquals(3, result.occurrencesOf(3));
+        assertEquals(1, result.getCount(1));
+        assertEquals(2, result.getCount(2));
+        assertEquals(3, result.getCount(3));
     }
 
     @Test
     public void testToMultisetWithSupplier() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 2, 3, 3, 3));
         Multiset<Integer> result = stream.toMultiset(Multiset::new);
-        assertEquals(1, result.occurrencesOf(1));
-        assertEquals(2, result.occurrencesOf(2));
-        assertEquals(3, result.occurrencesOf(3));
+        assertEquals(1, result.getCount(1));
+        assertEquals(2, result.getCount(2));
+        assertEquals(3, result.getCount(3));
     }
 
     @Test
@@ -801,12 +801,12 @@ public class IteratorStream100Test extends TestBase {
     @Test
     public void testNMatch() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5));
-        assertTrue(stream.countMatchBetween(2, 3, x -> x % 2 == 0));
+        assertTrue(stream.isMatchCountBetween(2, 3, x -> x % 2 == 0));
 
         Stream<Integer> stream2 = createStream(Arrays.asList(1, 2, 3, 4, 5));
-        assertFalse(stream2.countMatchBetween(3, 4, x -> x % 2 == 0));
+        assertFalse(stream2.isMatchCountBetween(3, 4, x -> x % 2 == 0));
 
-        assertTrue(emptyStream.countMatchBetween(0, 0, x -> true));
+        assertTrue(emptyStream.isMatchCountBetween(0, 0, x -> true));
     }
 
     @Test

@@ -15,7 +15,7 @@ public class MultisetTest extends AbstractTest {
 
     @Test
     public void test_01() {
-        Multiset<String> set = CommonUtil.asMultiset("a", "b", "c", "C");
+        Multiset<String> set = CommonUtil.toMultiset("a", "b", "c", "C");
         N.println(set);
         set.add("a");
 
@@ -44,7 +44,7 @@ public class MultisetTest extends AbstractTest {
 
     @Test
     public void test_02() {
-        Multiset<String> set = CommonUtil.asMultiset("a", "b", "c");
+        Multiset<String> set = CommonUtil.toMultiset("a", "b", "c");
         N.println(set);
 
         set.setCount("a", 0);
@@ -83,11 +83,11 @@ public class MultisetTest extends AbstractTest {
         assertTrue(set.contains("a"));
         assertFalse(set.contains("e"));
 
-        assertTrue(set.containsAll(CommonUtil.asList("a", "b")));
-        assertFalse(set.contains(CommonUtil.asList("b", "e")));
+        assertTrue(set.containsAll(CommonUtil.toList("a", "b")));
+        assertFalse(set.contains(CommonUtil.toList("b", "e")));
 
-        assertTrue(set.containsAll(CommonUtil.asList("a")));
-        assertFalse(set.contains(CommonUtil.asList("e")));
+        assertTrue(set.containsAll(CommonUtil.toList("a")));
+        assertFalse(set.contains(CommonUtil.toList("e")));
 
         try {
             set.remove("a", -1);
@@ -105,27 +105,27 @@ public class MultisetTest extends AbstractTest {
         set.add("a", 3);
         assertEquals(3, set.getCount("a"));
 
-        CommonUtil.asList("a").forEach(e -> set.remove(e));
+        CommonUtil.toList("a").forEach(e -> set.remove(e));
         assertEquals(2, set.getCount("a"));
         assertEquals(1, set.getCount("b"));
 
-        CommonUtil.asList("a", "b", "e").forEach(e -> set.remove(e, 2));
+        CommonUtil.toList("a", "b", "e").forEach(e -> set.remove(e, 2));
         assertEquals(0, set.getCount("a"));
         assertEquals(0, set.getCount("b"));
 
         set.add("a", 3);
         set.add("b", 3);
 
-        set.retainAll(CommonUtil.asList("a", "b", "e"));
+        set.retainAll(CommonUtil.toList("a", "b", "e"));
 
         assertEquals(3, set.getCount("a"));
         assertEquals(3, set.getCount("b"));
 
-        Multiset<String> set2 = CommonUtil.asMultiset();
+        Multiset<String> set2 = CommonUtil.toMultiset();
         set2.setCount("a", 3);
         set2.setCount("b", 3);
 
-        assertTrue(CommonUtil.asSet(set).contains(set2));
+        assertTrue(CommonUtil.toSet(set).contains(set2));
 
         set.clear();
         assertTrue(set.isEmpty());

@@ -1572,9 +1572,10 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
             return true;
         }
 
-        val.clear();
+        final List<E> copiedValues = new ArrayList<>(newValues);
 
-        val.addAll(newValues);
+        val.clear();
+        val.addAll(copiedValues);
 
         return true;
     }
@@ -1873,9 +1874,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
                 keyToRemove.add(entry.getKey());
             } else {
+                final List<E> copiedValues = new ArrayList<>(newValue);
+
                 value.clear();
 
-                if (!value.addAll(newValue)) {
+                if (!value.addAll(copiedValues)) {
                     throw new IllegalStateException("Failed to add the new value: " + newValue + " for key: " + entry.getKey() + " for replacement");
                 }
             }
@@ -2009,8 +2012,10 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         if (newValue == oldValue) {
             ret = oldValue;
         } else if (N.notEmpty(newValue)) {
+            final List<E> copiedValues = new ArrayList<>(newValue);
+
             oldValue.clear();
-            oldValue.addAll(newValue);
+            oldValue.addAll(copiedValues);
 
             ret = oldValue;
         } else {
@@ -2071,8 +2076,10 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
                 putValues(key, newValue);
                 ret = get(key);
             } else {
+                final List<E> copiedValues = new ArrayList<>(newValue);
+
                 oldValue.clear();
-                oldValue.addAll(newValue);
+                oldValue.addAll(copiedValues);
 
                 ret = oldValue;
             }

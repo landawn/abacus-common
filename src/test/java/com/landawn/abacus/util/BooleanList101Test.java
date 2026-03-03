@@ -524,8 +524,8 @@ public class BooleanList101Test extends TestBase {
         list.add(true);
         list.add(false);
 
-        boolean[] array1 = list.array();
-        boolean[] array2 = list.array();
+        boolean[] array1 = list.internalArray();
+        boolean[] array2 = list.internalArray();
 
         assertSame(array1, array2);
 
@@ -590,7 +590,7 @@ public class BooleanList101Test extends TestBase {
         assertFalse(list.contains(false));
         assertEquals(-1, list.indexOf(true));
         assertEquals(-1, list.lastIndexOf(false));
-        assertEquals(0, list.occurrencesOf(true));
+        assertEquals(0, list.frequency(true));
 
         assertTrue(list.toArray().length == 0);
         assertTrue(list.boxed().isEmpty());

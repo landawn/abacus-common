@@ -33,6 +33,7 @@ import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -124,17 +125,12 @@ public final class XmlUtil {
     private static final SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
 
     static {
-        try {
-            saxParserFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-            saxParserFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-            saxParserFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-            saxParserFactory.setXIncludeAware(false);
-        } catch (Exception e) { // NOSONAR
-            // ignore - these security features may not be supported on all platforms
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to set SAX parser security features: " + e.getMessage());
-            }
-        }
+        setSaxParserFactoryFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        setSaxParserFactoryFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        setSaxParserFactoryFeature("http://xml.org/sax/features/external-general-entities", false);
+        setSaxParserFactoryFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        setSaxParserFactoryFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        setSaxParserFactoryXIncludeAware(false);
     }
 
     private static final Queue<SAXParser> saxParserPool = new ArrayBlockingQueue<>(POOL_SIZE);
@@ -143,18 +139,15 @@ public final class XmlUtil {
     private static final DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
 
     static {
-        try {
-            docBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-            docBuilderFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-            docBuilderFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-            docBuilderFactory.setXIncludeAware(false);
-            docBuilderFactory.setExpandEntityReferences(false);
-        } catch (Exception e) { // NOSONAR
-            // ignore - these security features may not be supported on all platforms
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to set DocumentBuilder security features: " + e.getMessage());
-            }
-        }
+        setDocumentBuilderFactoryFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        setDocumentBuilderFactoryFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        setDocumentBuilderFactoryFeature("http://xml.org/sax/features/external-general-entities", false);
+        setDocumentBuilderFactoryFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        setDocumentBuilderFactoryFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        setDocumentBuilderFactoryXIncludeAware(false);
+        setDocumentBuilderFactoryExpandEntityReferences(false);
+        setDocumentBuilderFactoryAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        setDocumentBuilderFactoryAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
     }
 
     private static final Queue<DocumentBuilder> contentDocBuilderPool = new ArrayBlockingQueue<>(POOL_SIZE);
@@ -163,6 +156,11 @@ public final class XmlUtil {
     private static final XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
 
     static {
+        setXmlInputFactoryProperty(XMLInputFactory.SUPPORT_DTD, false);
+        setXmlInputFactoryProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+        setXmlInputFactoryProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, false);
+        setXmlInputFactoryResolver();
+
         try {
             if (Class.forName("com.ctc.wstx.stax.WstxInputFactory").isAssignableFrom(xmlInputFactory.getClass())) {
                 // xmlInputFactory.setProperty("com.ctc.wstx.inputBufferLength", BUFFER_SIZE);
@@ -190,6 +188,19 @@ public final class XmlUtil {
     private static final TransformerFactory transferFactory = TransformerFactory.newInstance();
     // private static final Queue<DocumentBuilder> xmlTransferPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
+    static {
+        try {
+            transferFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        } catch (Exception e) { // NOSONAR
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to enable secure processing for TransformerFactory: " + e.getMessage());
+            }
+        }
+
+        setTransformerFactoryAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        setTransformerFactoryAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+    }
+
     // ...
     private static final Map<String, JAXBContext> pathJaxbContextPool = new ConcurrentHashMap<>(POOL_SIZE);
 
@@ -209,6 +220,98 @@ public final class XmlUtil {
 
     private XmlUtil() {
         // singleton.
+    }
+
+    private static void setSaxParserFactoryFeature(final String featureName, final boolean value) {
+        try {
+            saxParserFactory.setFeature(featureName, value);
+        } catch (Exception e) { // NOSONAR
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to set SAXParserFactory feature '" + featureName + "': " + e.getMessage());
+            }
+        }
+    }
+
+    private static void setSaxParserFactoryXIncludeAware(final boolean value) {
+        try {
+            saxParserFactory.setXIncludeAware(value);
+        } catch (Exception e) { // NOSONAR
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to set SAXParserFactory XIncludeAware: " + e.getMessage());
+            }
+        }
+    }
+
+    private static void setDocumentBuilderFactoryFeature(final String featureName, final boolean value) {
+        try {
+            docBuilderFactory.setFeature(featureName, value);
+        } catch (Exception e) { // NOSONAR
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to set DocumentBuilderFactory feature '" + featureName + "': " + e.getMessage());
+            }
+        }
+    }
+
+    private static void setDocumentBuilderFactoryXIncludeAware(final boolean value) {
+        try {
+            docBuilderFactory.setXIncludeAware(value);
+        } catch (Exception e) { // NOSONAR
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to set DocumentBuilderFactory XIncludeAware: " + e.getMessage());
+            }
+        }
+    }
+
+    private static void setDocumentBuilderFactoryExpandEntityReferences(final boolean value) {
+        try {
+            docBuilderFactory.setExpandEntityReferences(value);
+        } catch (Exception e) { // NOSONAR
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to set DocumentBuilderFactory expandEntityReferences: " + e.getMessage());
+            }
+        }
+    }
+
+    private static void setDocumentBuilderFactoryAttribute(final String attributeName, final String value) {
+        try {
+            docBuilderFactory.setAttribute(attributeName, value);
+        } catch (Exception e) { // NOSONAR
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to set DocumentBuilderFactory attribute '" + attributeName + "': " + e.getMessage());
+            }
+        }
+    }
+
+    private static void setXmlInputFactoryProperty(final String propertyName, final Object value) {
+        try {
+            xmlInputFactory.setProperty(propertyName, value);
+        } catch (Exception e) { // NOSONAR
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to set XMLInputFactory property '" + propertyName + "': " + e.getMessage());
+            }
+        }
+    }
+
+    private static void setXmlInputFactoryResolver() {
+        try {
+            xmlInputFactory.setXMLResolver((publicID, systemID, baseURI, namespace) -> {
+                throw new XMLStreamException("External entity resolution is disabled");
+            });
+        } catch (Exception e) { // NOSONAR
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to set XMLInputFactory XMLResolver: " + e.getMessage());
+            }
+        }
+    }
+
+    private static void setTransformerFactoryAttribute(final String attributeName, final String value) {
+        try {
+            transferFactory.setAttribute(attributeName, value);
+        } catch (Exception e) { // NOSONAR
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to set TransformerFactory attribute '" + attributeName + "': " + e.getMessage());
+            }
+        }
     }
 
     /**

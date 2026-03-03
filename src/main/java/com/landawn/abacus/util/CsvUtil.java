@@ -379,7 +379,7 @@ public final class CsvUtil {
     }
 
     @SuppressWarnings("deprecation")
-    static final JsonSerializationConfig config = JSC.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP).setStringQuotation(WD._QUOTATION_D);
+    static final JsonSerializationConfig config = JSC.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP).setStringQuotation(WD._DOUBLE_QUOTE);
     static final Type<String> strType = Type.of(String.class);
 
     /**
@@ -405,11 +405,11 @@ public final class CsvUtil {
 
         if (value == null) {
             writer.write(Strings.NULL_CHAR_ARRAY);
-        } else if (valType.isNonQuotableCsvType()) {
+        } else if (valType.isCsvQuoteRequired()) {
+            strType.writeCharacter(writer, valType.stringOf(value), config);
+        } else {
             // writer.write(valType.stringOf(value));
             valType.writeCharacter(writer, value, config);
-        } else {
-            strType.writeCharacter(writer, valType.stringOf(value), config);
         }
     }
 

@@ -336,7 +336,6 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      * @param v8 the eighth value.
      * @return an ImmutableMap containing the specified key-value pairs.
      */
-    @SuppressWarnings("deprecation")
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) {
         return new ImmutableMap<>(N.asLinkedHashMap(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8), false);
@@ -378,56 +377,9 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      * @param v9 the ninth value.
      * @return an ImmutableMap containing the specified key-value pairs.
      */
-    @SuppressWarnings("deprecation")
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9) {
         return new ImmutableMap<>(N.asLinkedHashMap(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8, k9, v9), false);
-    }
-
-    /**
-     * Returns an ImmutableMap containing exactly ten key-value mappings.
-     * The returned map is immutable and will have a size of 10.
-     * The iteration order is guaranteed to match the order of insertion.
-     * If duplicate keys are provided, an IllegalArgumentException may be thrown.
-     * Unlike some map implementations, this method supports {@code null} keys and values.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ImmutableMap<String, Integer> map = ImmutableMap.of(
-     *     "zero", 0, "one", 1, "two", 2, "three", 3, "four", 4,
-     *     "five", 5, "six", 6, "seven", 7, "eight", 8, "nine", 9
-     * );
-     * }</pre>
-     *
-     * @param <K> the type of the keys.
-     * @param <V> the type of the values.
-     * @param k1 the first key.
-     * @param v1 the first value.
-     * @param k2 the second key.
-     * @param v2 the second value.
-     * @param k3 the third key.
-     * @param v3 the third value.
-     * @param k4 the fourth key.
-     * @param v4 the fourth value.
-     * @param k5 the fifth key.
-     * @param v5 the fifth value.
-     * @param k6 the sixth key.
-     * @param v6 the sixth value.
-     * @param k7 the seventh key.
-     * @param v7 the seventh value.
-     * @param k8 the eighth key.
-     * @param v8 the eighth value.
-     * @param k9 the ninth key.
-     * @param v9 the ninth value.
-     * @param k10 the tenth key.
-     * @param v10 the tenth value.
-     * @return an ImmutableMap containing the specified key-value pairs.
-     */
-    @SuppressWarnings("deprecation")
-    public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
-            final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9, final K k10, final V v10) {
-        // return new ImmutableMap<>(Map.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8, k9, v9, k10, v10), true);   // Doesn't support null key/value
-        return new ImmutableMap<>(N.asLinkedHashMap(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8, k9, v9, k10, v10), false);
     }
 
     /**

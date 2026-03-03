@@ -2799,7 +2799,7 @@ public interface NoCachingNoUpdating {
         /**
          * Returns the wrapped value.
          *
-         * @return the value
+         * @return the wrapped value
          */
         public T value() {
             return value;

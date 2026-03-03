@@ -192,7 +192,13 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * @throws IndexOutOfBoundsException if off or len are invalid
      */
     public void writeCharacter(final char[] cbuf, final int off, int len) throws IOException {
-        len = Math.min(cbuf.length - off, len);
+        ensureOpen();
+
+        if ((off < 0) || (len < 0) || (off > cbuf.length) || (len > cbuf.length - off)) {
+            throw new IndexOutOfBoundsException();
+        } else if (len == 0) {
+            return;
+        }
 
         char ch = 0;
         int i = off;

@@ -36,7 +36,7 @@ public class PrimitiveList100Test extends TestBase {
     @Test
     @DisplayName("Test array() method")
     public void testArray() {
-        int[] array = list.array();
+        int[] array = list.internalArray();
         assertNotNull(array);
         assertTrue(array.length >= list.size());
     }
@@ -618,9 +618,9 @@ public class PrimitiveList100Test extends TestBase {
         IntList withDups = IntList.of(1, 2, 2, 3, 3, 3);
         Multiset<Integer> multiset = withDups.toMultiset();
 
-        assertEquals(1, multiset.occurrencesOf(1));
-        assertEquals(2, multiset.occurrencesOf(2));
-        assertEquals(3, multiset.occurrencesOf(3));
+        assertEquals(1, multiset.getCount(1));
+        assertEquals(2, multiset.getCount(2));
+        assertEquals(3, multiset.getCount(3));
     }
 
     @Test
@@ -629,9 +629,9 @@ public class PrimitiveList100Test extends TestBase {
         IntList withDups = IntList.of(1, 2, 2, 3, 3, 3);
         Multiset<Integer> multiset = withDups.toMultiset(1, 5);
 
-        assertEquals(2, multiset.occurrencesOf(2));
-        assertEquals(2, multiset.occurrencesOf(3));
-        assertEquals(0, multiset.occurrencesOf(1));
+        assertEquals(2, multiset.getCount(2));
+        assertEquals(2, multiset.getCount(3));
+        assertEquals(0, multiset.getCount(1));
     }
 
     @Test
@@ -639,8 +639,8 @@ public class PrimitiveList100Test extends TestBase {
     public void testToMultisetWithSupplier() {
         Multiset<Integer> multiset = list.toMultiset(size -> new Multiset<>());
 
-        assertEquals(1, multiset.occurrencesOf(1));
-        assertEquals(1, multiset.occurrencesOf(5));
+        assertEquals(1, multiset.getCount(1));
+        assertEquals(1, multiset.getCount(5));
     }
 
     @Test
@@ -648,10 +648,10 @@ public class PrimitiveList100Test extends TestBase {
     public void testToMultisetRangeWithSupplier() {
         Multiset<Integer> multiset = list.toMultiset(1, 4, size -> new Multiset<>());
 
-        assertEquals(1, multiset.occurrencesOf(2));
-        assertEquals(1, multiset.occurrencesOf(3));
-        assertEquals(1, multiset.occurrencesOf(4));
-        assertEquals(0, multiset.occurrencesOf(1));
+        assertEquals(1, multiset.getCount(2));
+        assertEquals(1, multiset.getCount(3));
+        assertEquals(1, multiset.getCount(4));
+        assertEquals(0, multiset.getCount(1));
     }
 
     @Test

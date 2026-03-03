@@ -42,10 +42,9 @@ package com.landawn.abacus.util.function;
  * sumAndPrint.accept(1, 2, 3, 4, 5);
  * }</pre>
  *
- * @param <T> the type of the input to the operation
- *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @param <T> the type of the input to the operation
  *
  * @see java.util.function.Consumer
  * @see java.util.function.BiConsumer

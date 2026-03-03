@@ -273,11 +273,11 @@ public class XmlParserImpl100Test extends TestBase {
         mapEntity.set("byteValue", (byte) 1);
         mapEntity.set("shortValue", (short) 2);
         mapEntity.set("mapValue", N.asMap("key1", 1.0f, "key2", 2.0f));
-        mapEntity.set("listValue", N.asList(1L, 2L, 3));
+        mapEntity.set("listValue", N.toList(1L, 2L, 3));
         mapEntity.set("arrayValue", new String[] { "a", "b", longString });
         mapEntity.set("mapEntityValue", N.asMap("key1", 1.0d, "key2", 2.0d));
         mapEntity.set("beanValue", new Person("Alice", 30));
-        mapEntity.set("collectionValues", N.asList(new Person(longString, 30), new Person("Bob", 35)));
+        mapEntity.set("collectionValues", N.toList(new Person(longString, 30), new Person("Bob", 35)));
 
         String xml = staxParser.serialize(mapEntity, XSC.create().writeTypeInfo(true));
         assertNotNull(xml);
@@ -308,7 +308,7 @@ public class XmlParserImpl100Test extends TestBase {
         }
 
         {
-            List<String> coll = N.asList("a", "b", longString);
+            List<String> coll = N.toList("a", "b", longString);
 
             String xml = staxParser.serialize(coll, XSC.create().writeTypeInfo(true));
             assertNotNull(xml);
@@ -319,7 +319,7 @@ public class XmlParserImpl100Test extends TestBase {
         }
 
         {
-            Set<String> coll = N.asSet("a", "b", longString);
+            Set<String> coll = N.toSet("a", "b", longString);
 
             String xml = staxParser.serialize(coll, XSC.create().writeTypeInfo(true));
             assertNotNull(xml);
@@ -330,7 +330,7 @@ public class XmlParserImpl100Test extends TestBase {
         }
 
         {
-            Queue<String> coll = N.asQueue("a", "b", longString);
+            Queue<String> coll = N.toQueue("a", "b", longString);
 
             String xml = staxParser.serialize(coll, XSC.create().writeTypeInfo(true));
             assertNotNull(xml);
@@ -342,7 +342,7 @@ public class XmlParserImpl100Test extends TestBase {
 
         {
             Map<String, Object> map = N.asMap("a", 1, "b", "2", "c", longString, "map", map = N.asMap("a", 1, "b", "2", "c", longString), "list",
-                    N.asList("a", "b", longString), "listMap", N.asMap("a", N.asList("1", "2", longString), "b", N.asList("3", "4")));
+                    N.toList("a", "b", longString), "listMap", N.asMap("a", N.toList("1", "2", longString), "b", N.toList("3", "4")));
 
             String xml = staxParser.serialize(map, XSC.create().writeTypeInfo(true));
             assertNotNull(xml);

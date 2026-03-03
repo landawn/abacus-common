@@ -243,7 +243,7 @@ import com.landawn.abacus.util.Strings.StrUtil;
  *   <li><b>{@link java.math.RoundingMode}:</b> Standard rounding mode enumeration</li>
  * </ul>
  *
- * <p><b>Example: Financial Calculations</b>
+ * <p><b>Usage Examples: Financial Calculations</b>
  * <pre>{@code
  * // Financial calculation with proper rounding
  * double principal = 10000.0;
@@ -272,7 +272,7 @@ import com.landawn.abacus.util.Strings.StrUtil;
  * String formattedInterest = String.format("$%.2f", totalInterest);
  * }</pre>
  *
- * <p><b>Example: Scientific Calculations</b>
+ * <p><b>Usage Examples: Scientific Calculations</b>
  * <pre>{@code
  * // Hyperbolic function calculations
  * double x           = 2.0;
@@ -2954,7 +2954,7 @@ public final class Numbers {
      * @param str the string to convert; must not be {@code null} or empty
      * @return the Integer value represented by the string, or {@code null} if the input string is {@code null}
      * @throws NumberFormatException if the string is empty or cannot be parsed as a valid integer
-     * @see #isCreatable(String)
+     * @see #isConvertibleToNumber(String)
      * @see Integer#decode(String)
      * @see StrUtil#createInteger(String)
      */
@@ -2997,7 +2997,7 @@ public final class Numbers {
      * @param str the string to convert; must not be {@code null} or empty
      * @return the Long value represented by the string, or {@code null} if the input string is {@code null}
      * @throws NumberFormatException if the string is empty or cannot be parsed as a valid long
-     * @see #isCreatable(String)
+     * @see #isConvertibleToNumber(String)
      * @see Long#decode(String)
      * @see StrUtil#createLong(String)
      */
@@ -3041,7 +3041,7 @@ public final class Numbers {
      * @param str the string to convert; must not be {@code null} or empty
      * @return the Float value represented by the string, or {@code null} if the input string is {@code null}
      * @throws NumberFormatException if the string is empty or cannot be parsed as a valid float
-     * @see #isCreatable(String)
+     * @see #isConvertibleToNumber(String)
      * @see Float#valueOf(String)
      * @see StrUtil#createFloat(String)
      */
@@ -3075,7 +3075,7 @@ public final class Numbers {
      * @param str the string to convert; must not be {@code null} or empty
      * @return the Double value represented by the string, or {@code null} if the input string is {@code null}
      * @throws NumberFormatException if the string is empty or cannot be parsed as a valid double
-     * @see #isCreatable(String)
+     * @see #isConvertibleToNumber(String)
      * @see Double#valueOf(String)
      * @see StrUtil#createDouble(String)
      */
@@ -3116,7 +3116,7 @@ public final class Numbers {
      * @param str the string to convert; must not be {@code null} or empty
      * @return the BigInteger value represented by the string, or {@code null} if the input string is {@code null}
      * @throws NumberFormatException if the string is empty or not a valid BigInteger representation
-     * @see #isCreatable(String)
+     * @see #isConvertibleToNumber(String)
      * @see BigInteger#BigInteger(String, int)
      * @see Long#decode(String)
      * @see StrUtil#createBigInteger(String)
@@ -3127,7 +3127,7 @@ public final class Numbers {
             return null;
         }
 
-        if (!quickCheckForIsCreatable(str)) {
+        if (!quickCheckForIsConvertibleToNumber(str)) {
             throw new NumberFormatException(str + " is not a valid BigInteger.");
         }
 
@@ -3185,7 +3185,7 @@ public final class Numbers {
      * @param str the string to convert; must not be {@code null} or empty
      * @return the BigDecimal value represented by the string, or {@code null} if the input string is {@code null}
      * @throws NumberFormatException if the string is empty or not a valid BigDecimal representation
-     * @see #isCreatable(String)
+     * @see #isConvertibleToNumber(String)
      * @see BigDecimal#BigDecimal(String)
      * @see StrUtil#createBigDecimal(String)
      */
@@ -3196,7 +3196,7 @@ public final class Numbers {
         }
 
         // handle JDK1.3.1 bug where "" throws IndexOutOfBoundsException
-        if (!quickCheckForIsCreatable(str)) {
+        if (!quickCheckForIsConvertibleToNumber(str)) {
             throw new NumberFormatException(str + " is not a valid BigDecimal.");
         }
 
@@ -3240,7 +3240,7 @@ public final class Numbers {
      * @param str the string to convert; must not be {@code null} or empty
      * @return the parsed Number value, or {@code null} if the input string is {@code null}
      * @throws NumberFormatException if the string is empty or the value cannot be converted
-     * @see #isCreatable(String)
+     * @see #isConvertibleToNumber(String)
      * @see #createInteger(String)
      * @see #createLong(String)
      * @see #createFloat(String)
@@ -3257,7 +3257,7 @@ public final class Numbers {
             return null;
         }
 
-        if (!quickCheckForIsCreatable(str)) {
+        if (!quickCheckForIsConvertibleToNumber(str)) {
             throw new NumberFormatException(str + " is not a valid number.");
         }
 
@@ -3303,9 +3303,9 @@ public final class Numbers {
         String dec;
         String exp;
         final int decPos = str.indexOf('.');
-        final int expPos = str.indexOf('e') + str.indexOf('E') + 1; // assumes both not present
-        // if both e and E are present, this is caught by the checks on expPos (which prevent IOOBE)
-        // and the parsing which will detect if e or E appear in a number due to using the wrong offset
+        final int ePos = str.indexOf('e');
+        final int bigEPos = str.indexOf('E');
+        final int expPos = (ePos >= 0 && bigEPos >= 0) ? Math.min(ePos, bigEPos) : (ePos >= 0 ? ePos : bigEPos);
 
         // Detect if the return type has been requested
         final boolean requestType = !Character.isDigit(lastChar) && lastChar != '.';
@@ -3528,7 +3528,7 @@ public final class Numbers {
      *
      * <p>Note: It's copied from NumberUtils in Apache Commons Lang under Apache License 2.0</p>
      *
-     * <p>It's same as {@code Numbers.isCreatable(String)}.</p>
+     * <p>It's same as {@code Numbers.isConvertibleToNumber(String)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3544,12 +3544,12 @@ public final class Numbers {
      *
      * @param str the string to check
      * @return {@code true} if the string is a valid number, otherwise {@code false}
-     * @see #isCreatable(String)
+     * @see #isConvertibleToNumber(String)
      * @see #isParsable(String)
      * @see #isDigits(String)
      */
     public static boolean isNumber(final String str) {
-        return isCreatable(str);
+        return isConvertibleToNumber(str);
     }
 
     private static final boolean[] alphanumerics = new boolean[128];
@@ -3609,7 +3609,7 @@ public final class Numbers {
         alphanumerics['D'] = true;
     }
 
-    static boolean quickCheckForIsCreatable(final String str) {
+    static boolean quickCheckForIsConvertibleToNumber(final String str) {
         if (Strings.isEmpty(str)) {
             return false;
         }
@@ -3639,26 +3639,26 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.isCreatable("123")       = true
-     * Numbers.isCreatable("123.45")    = true
-     * Numbers.isCreatable("1.23e10")   = true
-     * Numbers.isCreatable("0xFF")      = true   // hexadecimal
-     * Numbers.isCreatable("0X1A")      = true   // hexadecimal
-     * Numbers.isCreatable("010")       = true   // octal
-     * Numbers.isCreatable("09")        = false  // invalid octal (9 not valid in octal)
-     * Numbers.isCreatable("123L")      = true   // long type qualifier
-     * Numbers.isCreatable("123.45f")   = true   // float type qualifier
-     * Numbers.isCreatable("abc")       = false
-     * Numbers.isCreatable(null)        = false
-     * Numbers.isCreatable("")          = false
+     * Numbers.isConvertibleToNumber("123")       = true
+     * Numbers.isConvertibleToNumber("123.45")    = true
+     * Numbers.isConvertibleToNumber("1.23e10")   = true
+     * Numbers.isConvertibleToNumber("0xFF")      = true   // hexadecimal
+     * Numbers.isConvertibleToNumber("0X1A")      = true   // hexadecimal
+     * Numbers.isConvertibleToNumber("010")       = true   // octal
+     * Numbers.isConvertibleToNumber("09")        = false  // invalid octal (9 not valid in octal)
+     * Numbers.isConvertibleToNumber("123L")      = true   // long type qualifier
+     * Numbers.isConvertibleToNumber("123.45f")   = true   // float type qualifier
+     * Numbers.isConvertibleToNumber("abc")       = false
+     * Numbers.isConvertibleToNumber(null)        = false
+     * Numbers.isConvertibleToNumber("")          = false
      * }</pre>
      * @param str the string to check
      * @return {@code true} if the string is a correctly formatted number
      * @see #isNumber(String)
      * @see #isParsable(String)
      */
-    public static boolean isCreatable(final String str) {
-        if (!quickCheckForIsCreatable(str)) {
+    public static boolean isConvertibleToNumber(final String str) {
+        if (!quickCheckForIsConvertibleToNumber(str)) {
             return false;
         }
 
@@ -3770,6 +3770,33 @@ public final class Numbers {
     }
 
     /**
+     * <p>Checks whether the String a valid Java number.</p>
+     *
+     * <p>Valid numbers include hexadecimal marked with the {@code 0x} or
+     * {@code 0X} qualifier, octal numbers, scientific notation and
+     * numbers marked with a type qualifier (e.g., 123L).</p>
+     *
+     * <p>Non-hexadecimal strings beginning with a leading zero are
+     * treated as octal values. Thus the string {@code 09} will return
+     * {@code false}, since {@code 9} is not a valid octal value.
+     * However, numbers beginning with {@code 0.} are treated as decimal.</p>
+     *
+     * <p>{@code null} and empty/blank {@code String} will return {@code false}.</p>
+     *
+     * <p>Note, {@link #createNumber(String)} should return a number for every input resulting in {@code true}.</p>
+     * @param str the string to check
+     * @return {@code true} if the string is a correctly formatted number
+     * @see #isNumber(String)
+     * @see #isParsable(String)
+     * @see #isConvertibleToNumber(String)
+     * @deprecated replaced by {@code isConvertibleToNumber}
+     */
+    @Deprecated
+    public static boolean isCreatable(final String str) {
+        return isConvertibleToNumber(str);
+    }
+
+    /**
      * Checks whether the given String is a parsable number.
      *
      * <p>Parsable numbers include those Strings understood by {@link Integer#parseInt(String)},
@@ -3777,7 +3804,7 @@ public final class Numbers {
      * {@link Double#parseDouble(String)}. This method can be used instead of catching {@link NumberFormatException} when calling one of those methods.</p>
      *
      * <p>Hexadecimal and scientific notations are <strong>not</strong> considered parsable.
-     * See {@link #isCreatable(String)} on those cases.</p>
+     * See {@link #isConvertibleToNumber(String)} on those cases.</p>
      *
      * <p>{@code Null} and empty String will return {@code false}.</p>
      *
@@ -3795,7 +3822,7 @@ public final class Numbers {
      *
      * @param str the String to check
      * @return {@code true} if the string is a parsable number.
-     * @see #isCreatable(String)
+     * @see #isConvertibleToNumber(String)
      * @see #isNumber(String)
      * @see #isDigits(String)
      */
@@ -7323,8 +7350,10 @@ public final class Numbers {
     public static float round(final float x, final DecimalFormat decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
+        final DecimalFormat df = (DecimalFormat) decimalFormat.clone();
+
         try {
-            return decimalFormat.parse(decimalFormat.format(x)).floatValue();
+            return df.parse(df.format(x)).floatValue();
         } catch (ParseException e) {
             throw new IllegalArgumentException(e);
         }
@@ -7358,8 +7387,10 @@ public final class Numbers {
     public static double round(final double x, final DecimalFormat decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
+        final DecimalFormat df = (DecimalFormat) decimalFormat.clone();
+
         try {
-            return decimalFormat.parse(decimalFormat.format(x)).doubleValue();
+            return df.parse(df.format(x)).doubleValue();
         } catch (ParseException e) {
             throw new IllegalArgumentException(e);
         }

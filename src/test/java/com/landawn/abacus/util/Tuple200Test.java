@@ -42,42 +42,42 @@ public class Tuple200Test extends TestBase {
     @Test
     public void testCreateFromMapEntry() {
         Map.Entry<String, Integer> entry = new HashMap.SimpleEntry<>("key", 100);
-        Tuple.Tuple2<String, Integer> t2 = Tuple.create(entry);
+        Tuple.Tuple2<String, Integer> t2 = Tuple.from(entry);
         assertEquals("key", t2._1);
         assertEquals(100, t2._2);
     }
 
     @Test
     public void testCreateFromObjectArray() {
-        assertTrue(Tuple.create(new Object[0]) instanceof Tuple);
-        assertEquals(1, Tuple.create(new Object[] { 1 }).arity());
-        assertEquals(2, Tuple.create(new Object[] { 1, 2 }).arity());
-        assertEquals(3, Tuple.create(new Object[] { 1, 2, 3 }).arity());
-        assertEquals(4, Tuple.create(new Object[] { 1, 2, 3, 4 }).arity());
-        assertEquals(5, Tuple.create(new Object[] { 1, 2, 3, 4, 5 }).arity());
-        assertEquals(6, Tuple.create(new Object[] { 1, 2, 3, 4, 5, 6 }).arity());
-        assertEquals(7, Tuple.create(new Object[] { 1, 2, 3, 4, 5, 6, 7 }).arity());
-        assertEquals(8, Tuple.create(new Object[] { 1, 2, 3, 4, 5, 6, 7, 8 }).arity());
-        assertEquals(9, Tuple.create(new Object[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }).arity());
+        assertTrue(Tuple.from(new Object[0]) instanceof Tuple);
+        assertEquals(1, Tuple.from(new Object[] { 1 }).arity());
+        assertEquals(2, Tuple.from(new Object[] { 1, 2 }).arity());
+        assertEquals(3, Tuple.from(new Object[] { 1, 2, 3 }).arity());
+        assertEquals(4, Tuple.from(new Object[] { 1, 2, 3, 4 }).arity());
+        assertEquals(5, Tuple.from(new Object[] { 1, 2, 3, 4, 5 }).arity());
+        assertEquals(6, Tuple.from(new Object[] { 1, 2, 3, 4, 5, 6 }).arity());
+        assertEquals(7, Tuple.from(new Object[] { 1, 2, 3, 4, 5, 6, 7 }).arity());
+        assertEquals(8, Tuple.from(new Object[] { 1, 2, 3, 4, 5, 6, 7, 8 }).arity());
+        assertEquals(9, Tuple.from(new Object[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }).arity());
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> Tuple.create(new Object[10]));
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> Tuple.from(new Object[10]));
         assertEquals("Too many elements((10) to fill in Tuple.", exception.getMessage());
     }
 
     @Test
     public void testCreateFromCollection() {
-        assertTrue(Tuple.create(Collections.emptyList()) instanceof Tuple);
-        assertEquals(1, Tuple.create(Arrays.asList(1)).arity());
-        assertEquals(2, Tuple.create(Arrays.asList(1, 2)).arity());
-        assertEquals(3, Tuple.create(Arrays.asList(1, 2, 3)).arity());
-        assertEquals(4, Tuple.create(Arrays.asList(1, 2, 3, 4)).arity());
-        assertEquals(5, Tuple.create(Arrays.asList(1, 2, 3, 4, 5)).arity());
-        assertEquals(6, Tuple.create(Arrays.asList(1, 2, 3, 4, 5, 6)).arity());
-        assertEquals(7, Tuple.create(Arrays.asList(1, 2, 3, 4, 5, 6, 7)).arity());
-        assertEquals(8, Tuple.create(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8)).arity());
-        assertEquals(9, Tuple.create(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9)).arity());
+        assertTrue(Tuple.from(Collections.emptyList()) instanceof Tuple);
+        assertEquals(1, Tuple.from(Arrays.asList(1)).arity());
+        assertEquals(2, Tuple.from(Arrays.asList(1, 2)).arity());
+        assertEquals(3, Tuple.from(Arrays.asList(1, 2, 3)).arity());
+        assertEquals(4, Tuple.from(Arrays.asList(1, 2, 3, 4)).arity());
+        assertEquals(5, Tuple.from(Arrays.asList(1, 2, 3, 4, 5)).arity());
+        assertEquals(6, Tuple.from(Arrays.asList(1, 2, 3, 4, 5, 6)).arity());
+        assertEquals(7, Tuple.from(Arrays.asList(1, 2, 3, 4, 5, 6, 7)).arity());
+        assertEquals(8, Tuple.from(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8)).arity());
+        assertEquals(9, Tuple.from(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9)).arity());
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> Tuple.create(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> Tuple.from(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
         assertEquals("Too many elements((10) to fill in Tuple.", exception.getMessage());
     }
 
@@ -130,7 +130,7 @@ public class Tuple200Test extends TestBase {
 
         assertEquals(Pair.of("a", 1), t2.toPair());
 
-        assertEquals(ImmutableEntry.of("a", 1), t2.toEntry());
+        assertEquals(ImmutableEntry.of("a", 1), t2.toImmutableEntry());
 
         assertEquals(Tuple.of(1, "a"), t2.reverse());
 
@@ -166,7 +166,7 @@ public class Tuple200Test extends TestBase {
 
     @Test
     public void testArity() {
-        assertEquals(0, Tuple.create(new Object[0]).arity());
+        assertEquals(0, Tuple.from(new Object[0]).arity());
         assertEquals(1, Tuple.of(1).arity());
         assertEquals(2, Tuple.of(1, 2).arity());
         assertEquals(3, Tuple.of(1, 2, 3).arity());

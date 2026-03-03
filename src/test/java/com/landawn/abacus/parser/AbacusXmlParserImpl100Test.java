@@ -277,7 +277,7 @@ public class AbacusXmlParserImpl100Test extends TestBase {
         }
 
         {
-            List<String> coll = N.asList("a", "b", longString);
+            List<String> coll = N.toList("a", "b", longString);
 
             String xml = staxParser.serialize(coll, XSC.create().writeTypeInfo(true));
             assertNotNull(xml);
@@ -288,7 +288,7 @@ public class AbacusXmlParserImpl100Test extends TestBase {
         }
 
         {
-            Set<String> coll = N.asSet("a", "b", longString);
+            Set<String> coll = N.toSet("a", "b", longString);
 
             String xml = staxParser.serialize(coll, XSC.create().writeTypeInfo(true));
             assertNotNull(xml);
@@ -299,7 +299,7 @@ public class AbacusXmlParserImpl100Test extends TestBase {
         }
 
         {
-            Queue<String> coll = N.asQueue("a", "b", longString);
+            Queue<String> coll = N.toQueue("a", "b", longString);
 
             String xml = staxParser.serialize(coll, XSC.create().writeTypeInfo(true));
             assertNotNull(xml);
@@ -311,7 +311,7 @@ public class AbacusXmlParserImpl100Test extends TestBase {
 
         {
             Map<String, Object> map = N.asMap("a", 1, "b", "2", "c", longString, "map", map = N.asMap("a", 1, "b", "2", "c", longString), "list",
-                    N.asList("a", "b", longString), "listMap", N.asMap("a", N.asList("1", "2", longString), "b", N.asList("3", "4")));
+                    N.toList("a", "b", longString), "listMap", N.asMap("a", N.toList("1", "2", longString), "b", N.toList("3", "4")));
 
             String xml = staxParser.serialize(map, XSC.create().writeTypeInfo(true));
             assertNotNull(xml);

@@ -66,14 +66,14 @@ public class Iterators100Test extends TestBase {
     @Test
     public void testOccurrencesOf() {
         List<Integer> numbers = Arrays.asList(1, 2, 3, 2, 4, 2, 5);
-        assertEquals(3, Iterators.occurrencesOf(numbers.iterator(), 2));
-        assertEquals(1, Iterators.occurrencesOf(numbers.iterator(), 5));
-        assertEquals(0, Iterators.occurrencesOf(numbers.iterator(), 6));
+        assertEquals(3, Iterators.frequency(numbers.iterator(), 2));
+        assertEquals(1, Iterators.frequency(numbers.iterator(), 5));
+        assertEquals(0, Iterators.frequency(numbers.iterator(), 6));
 
         List<String> withNulls = Arrays.asList("a", null, "b", null, "c");
-        assertEquals(2, Iterators.occurrencesOf(withNulls.iterator(), null));
+        assertEquals(2, Iterators.frequency(withNulls.iterator(), null));
 
-        assertEquals(0, Iterators.occurrencesOf(null, "test"));
+        assertEquals(0, Iterators.frequency(null, "test"));
     }
 
     @Test
@@ -885,8 +885,8 @@ public class Iterators100Test extends TestBase {
 
     @Test
     public void testTriIteratorConcat() {
-        TriIterator<String, Integer, Boolean> tri1 = TriIterator.zip(CommonUtil.asList("a"), CommonUtil.asList(1), CommonUtil.asList(true));
-        TriIterator<String, Integer, Boolean> tri2 = TriIterator.zip(CommonUtil.asList("b"), CommonUtil.asList(2), CommonUtil.asList(false));
+        TriIterator<String, Integer, Boolean> tri1 = TriIterator.zip(CommonUtil.toList("a"), CommonUtil.toList(1), CommonUtil.toList(true));
+        TriIterator<String, Integer, Boolean> tri2 = TriIterator.zip(CommonUtil.toList("b"), CommonUtil.toList(2), CommonUtil.toList(false));
 
         TriIterator<String, Integer, Boolean> result = Iterators.concat(tri1, tri2);
 

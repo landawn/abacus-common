@@ -23,7 +23,7 @@ import static com.landawn.abacus.util.Numbers.floorPowerOfTwo;
 import static com.landawn.abacus.util.Numbers.fuzzyCompare;
 import static com.landawn.abacus.util.Numbers.fuzzyEquals;
 import static com.landawn.abacus.util.Numbers.gcd;
-import static com.landawn.abacus.util.Numbers.isCreatable;
+import static com.landawn.abacus.util.Numbers.isConvertibleToNumber;
 import static com.landawn.abacus.util.Numbers.isDigits;
 import static com.landawn.abacus.util.Numbers.isMathematicalInteger;
 import static com.landawn.abacus.util.Numbers.isParsable;
@@ -318,24 +318,24 @@ public class Numbers101Test extends TestBase {
 
         @ParameterizedTest
         @ValueSource(strings = { "42", "-42", "42.5", "-42.5", "1.23e10", "0xFF", "010" })
-        @DisplayName("isCreatable should return true for valid numbers")
+        @DisplayName("isConvertibleToNumber should return true for valid numbers")
         public void testIsCreatableValid(String input) {
-            assertTrue(isCreatable(input));
+            assertTrue(isConvertibleToNumber(input));
         }
 
         @ParameterizedTest
         @ValueSource(strings = { "", "abc", "42.5.6", "1.23e", "0x", "--42" })
-        @DisplayName("isCreatable should return false for invalid numbers")
+        @DisplayName("isConvertibleToNumber should return false for invalid numbers")
         public void testIsCreatableInvalid(String input) {
-            assertFalse(isCreatable(input));
+            assertFalse(isConvertibleToNumber(input));
         }
 
         @Test
-        @DisplayName("isCreatable should handle null and empty")
+        @DisplayName("isConvertibleToNumber should handle null and empty")
         public void testIsCreatableNullEmpty() {
-            assertFalse(isCreatable(null));
-            assertFalse(isCreatable(""));
-            assertFalse(isCreatable("   "));
+            assertFalse(isConvertibleToNumber(null));
+            assertFalse(isConvertibleToNumber(""));
+            assertFalse(isConvertibleToNumber("   "));
         }
 
         @ParameterizedTest
@@ -971,7 +971,7 @@ public class Numbers101Test extends TestBase {
             assertEquals(0.0f, toFloat(""), 1e-10f);
             assertEquals(0.0, toDouble(""), 1e-10);
 
-            assertFalse(isCreatable(""));
+            assertFalse(isConvertibleToNumber(""));
             assertFalse(isParsable(""));
         }
 

@@ -69,15 +69,15 @@ public class Iterators101Test extends TestBase {
     @Test
     public void testOccurrencesOf() {
         Iterator<String> iter = Arrays.asList("a", "b", "a", "c", "a").iterator();
-        assertEquals(3, Iterators.occurrencesOf(iter, "a"));
+        assertEquals(3, Iterators.frequency(iter, "a"));
 
         iter = Arrays.asList("a", "b", "c").iterator();
-        assertEquals(0, Iterators.occurrencesOf(iter, "x"));
+        assertEquals(0, Iterators.frequency(iter, "x"));
 
         iter = Arrays.asList("a", null, "b", null).iterator();
-        assertEquals(2, Iterators.occurrencesOf(iter, null));
+        assertEquals(2, Iterators.frequency(iter, null));
 
-        assertEquals(0, Iterators.occurrencesOf(null, "a"));
+        assertEquals(0, Iterators.frequency(null, "a"));
     }
 
     @Test

@@ -503,10 +503,10 @@ public class DoubleStream100Test extends TestBase {
         double[] result = DoubleStream.concat(a, b).toArray();
         assertArrayEquals(new double[] { 1.0d, 2.0d, 3.0d, 4.0d, 5.0d, 6.0d }, result);
 
-        result = DoubleStream.concat(N.asList(a, b)).toArray();
+        result = DoubleStream.concat(N.toList(a, b)).toArray();
         assertArrayEquals(new double[] { 1.0d, 2.0d, 3.0d, 4.0d, 5.0d, 6.0d }, result);
 
-        result = DoubleStream.concatIterators(N.asList(DoubleIterator.of(a), DoubleIterator.of(b))).toArray();
+        result = DoubleStream.concatIterators(N.toList(DoubleIterator.of(a), DoubleIterator.of(b))).toArray();
         assertArrayEquals(new double[] { 1.0d, 2.0d, 3.0d, 4.0d, 5.0d, 6.0d }, result);
     }
 
@@ -524,15 +524,15 @@ public class DoubleStream100Test extends TestBase {
         double[] a = { 1.0d, 2.0d, 3.0d };
         double[] b = { 4.0d, 5.0d, 6.0d };
         double[] c = { 7.0d, 8.0d, 9.0d };
-        double[] result = DoubleStream.merge(N.asList(DoubleStream.of(a)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray();
+        double[] result = DoubleStream.merge(N.toList(DoubleStream.of(a)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray();
         assertArrayEquals(new double[] { 1.0d, 2.0d, 3.0d }, result);
 
-        result = DoubleStream.merge(N.asList(DoubleStream.of(a), DoubleStream.of(b)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+        result = DoubleStream.merge(N.toList(DoubleStream.of(a), DoubleStream.of(b)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
                 .toArray();
         assertArrayEquals(new double[] { 1.0d, 2.0d, 3.0d, 4.0d, 5.0d, 6.0d }, result);
 
         result = DoubleStream
-                .merge(N.asList(DoubleStream.of(a), DoubleStream.of(b), DoubleStream.of(c)),
+                .merge(N.toList(DoubleStream.of(a), DoubleStream.of(b), DoubleStream.of(c)),
                         (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
                 .toArray();
         assertArrayEquals(new double[] { 1.0d, 2.0d, 3.0d, 4.0d, 5.0d, 6.0d, 7.0d, 8.0d, 9.0d }, result);

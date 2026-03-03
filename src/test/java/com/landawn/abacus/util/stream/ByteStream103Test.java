@@ -17,8 +17,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.ByteIterator;
@@ -562,14 +562,14 @@ public class ByteStream103Test extends TestBase {
         assertArrayEquals(new int[] { 10, 20, 30 }, intStream.toArray());
     }
 
-    @Test
-    public void testDoubleUnderscore() {
-        ByteStream stream = createByteStream((byte) 1, (byte) 2, (byte) 3);
-
-        IntStream intStream = stream.__(s -> s.mapToInt(b -> b * 10));
-
-        assertArrayEquals(new int[] { 10, 20, 30 }, intStream.toArray());
-    }
+    //    @Test
+    //    public void testDoubleUnderscore() {
+    //        ByteStream stream = createByteStream((byte) 1, (byte) 2, (byte) 3);
+    //
+    //        IntStream intStream = stream.__(s -> s.mapToInt(b -> b * 10));
+    //
+    //        assertArrayEquals(new int[] { 10, 20, 30 }, intStream.toArray());
+    //    }
 
     @Test
     public void testApplyIfNotEmpty() {

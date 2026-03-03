@@ -21,6 +21,9 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ShortList;
 import com.landawn.abacus.util.Strings;
 
+/**
+ * Type handler for {@link ShortList} objects, providing serialization and deserialization support.
+ */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveShortListType extends AbstractPrimitiveListType<ShortList> {
 

@@ -1129,14 +1129,14 @@ public class DoubleList2025Test extends TestBase {
     @Test
     public void testOccurrencesOf() {
         list.addAll(new double[] { 1.1, 2.2, 1.1, 3.3, 1.1 });
-        assertEquals(3, list.occurrencesOf(1.1));
-        assertEquals(1, list.occurrencesOf(2.2));
-        assertEquals(0, list.occurrencesOf(4.4));
+        assertEquals(3, list.frequency(1.1));
+        assertEquals(1, list.frequency(2.2));
+        assertEquals(0, list.frequency(4.4));
     }
 
     @Test
     public void testOccurrencesOfEmpty() {
-        assertEquals(0, list.occurrencesOf(1.1));
+        assertEquals(0, list.frequency(1.1));
     }
 
     @Test
@@ -1816,7 +1816,7 @@ public class DoubleList2025Test extends TestBase {
     @Test
     public void testArrayMethod() {
         list.addAll(new double[] { 1.1, 2.2, 3.3 });
-        double[] array = list.array();
+        double[] array = list.internalArray();
         assertNotNull(array);
         assertTrue(array.length >= 3);
     }

@@ -339,8 +339,6 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
                     if (!isBufferedWriter) {
                         bw.flush();
                     }
-                } catch (final IOException e) {
-                    throw new UncheckedIOException(e);
                 } finally {
                     if (!isBufferedWriter) {
                         Objectory.recycle((BufferedWriter) bw);
@@ -382,27 +380,22 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            try {
-                writer.write(WD._BRACKET_L);
+            writer.write(WD._BRACKET_L);
 
-                int i = 0;
-                for (final E element : x) {
-                    if (i++ > 0) {
-                        writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-                    }
-
-                    if (element == null) {
-                        writer.write(NULL_CHAR_ARRAY);
-                    } else {
-                        elementType.writeCharacter(writer, element, config);
-                    }
+            int i = 0;
+            for (final E element : x) {
+                if (i++ > 0) {
+                    writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                 }
 
-                writer.write(WD._BRACKET_R);
-
-            } catch (final IOException ioException) {
-                throw new UncheckedIOException(ioException);
+                if (element == null) {
+                    writer.write(NULL_CHAR_ARRAY);
+                } else {
+                    elementType.writeCharacter(writer, element, config);
+                }
             }
+
+            writer.write(WD._BRACKET_R);
         }
     }
 

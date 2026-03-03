@@ -688,7 +688,7 @@ public class ParallelArrayStream102Test extends TestBase {
         public void testNMatch() {
             Predicate<Integer> even = x -> x % 2 == 0;
 
-            boolean result = stream.countMatchBetween(3, 7, even);
+            boolean result = stream.isMatchCountBetween(3, 7, even);
 
             assertTrue(result);
         }
@@ -698,7 +698,7 @@ public class ParallelArrayStream102Test extends TestBase {
         public void testNMatchOutsideRange() {
             Predicate<Integer> even = x -> x % 2 == 0;
 
-            boolean result = stream.countMatchBetween(1, 3, even);
+            boolean result = stream.isMatchCountBetween(1, 3, even);
 
             assertFalse(result);
         }

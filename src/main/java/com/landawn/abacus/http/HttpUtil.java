@@ -1123,13 +1123,7 @@ public final class HttpUtil {
         try {
             return N.defaultIfNull(wrapInputStream(connection.getInputStream(), contentFormat), N.emptyInputStream());
         } catch (final IOException e) {
-            final InputStream errorStream = connection.getErrorStream();
-
-            if (errorStream == null) {
-                return N.emptyInputStream();
-            }
-
-            return N.defaultIfNull(wrapInputStream(errorStream, contentFormat), N.emptyInputStream());
+            return N.defaultIfNull(wrapInputStream(connection.getErrorStream(), contentFormat), N.emptyInputStream());
         }
     }
 
@@ -1252,7 +1246,7 @@ public final class HttpUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Test-only setup for self-signed certificates
-     * HttpUtil.turnOffCertificateValidation();
+     * HttpUtil.disableCertificateValidation();
      * HttpsURLConnection conn = (HttpsURLConnection) new URL("https://localhost:8443").openConnection();
      * }</pre>
      *
@@ -1262,7 +1256,7 @@ public final class HttpUtil {
      * @throws RuntimeException if SSL context initialization fails
      */
     @Deprecated
-    public static void turnOffCertificateValidation() {
+    public static void disableCertificateValidation() {
         // Create a trust manager that does not validate certificate chains
         final TrustManager[] trustAllCerts = { new X509TrustManager() {
             @Override

@@ -60,9 +60,9 @@ public abstract class JsonXmlSerializationConfig<C extends JsonXmlSerializationC
 
     protected static final String defaultIndentation = "    ";
 
-    char charQuotation = WD._QUOTATION_D;
+    char charQuotation = WD._DOUBLE_QUOTE;
 
-    char stringQuotation = WD._QUOTATION_D;
+    char stringQuotation = WD._DOUBLE_QUOTE;
 
     DateTimeFormat dateTimeFormat = defaultDateTimeFormat;
 
@@ -107,7 +107,7 @@ public abstract class JsonXmlSerializationConfig<C extends JsonXmlSerializationC
      * @throws IllegalArgumentException if an unsupported character is provided
      */
     public C setCharQuotation(final char charQuotation) {
-        if (charQuotation == 0 || charQuotation == WD._QUOTATION_S || charQuotation == WD._QUOTATION_D) {
+        if (charQuotation == 0 || charQuotation == WD._SINGLE_QUOTE || charQuotation == WD._DOUBLE_QUOTE) {
             this.charQuotation = charQuotation;
         } else {
             throw new IllegalArgumentException("Only ''', '\"', 0(value is zero) chars are supported");
@@ -142,7 +142,7 @@ public abstract class JsonXmlSerializationConfig<C extends JsonXmlSerializationC
      * @throws IllegalArgumentException if an unsupported character is provided
      */
     public C setStringQuotation(final char stringQuotation) {
-        if (stringQuotation == 0 || stringQuotation == WD._QUOTATION_S || stringQuotation == WD._QUOTATION_D) {
+        if (stringQuotation == 0 || stringQuotation == WD._SINGLE_QUOTE || stringQuotation == WD._DOUBLE_QUOTE) {
             this.stringQuotation = stringQuotation;
         } else {
             throw new IllegalArgumentException("Only '\"', 0(value is zero) chars are supported");

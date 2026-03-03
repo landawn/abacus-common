@@ -148,9 +148,9 @@ public class Multiset123Test extends TestBase {
         multiset.add("apple", 3);
         multiset.add("banana", 2);
 
-        assertEquals(3, multiset.occurrencesOf("apple"));
-        assertEquals(2, multiset.occurrencesOf("banana"));
-        assertEquals(0, multiset.occurrencesOf("cherry"));
+        assertEquals(3, multiset.getCount("apple"));
+        assertEquals(2, multiset.getCount("banana"));
+        assertEquals(0, multiset.getCount("cherry"));
     }
 
     @Test

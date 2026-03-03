@@ -117,7 +117,7 @@ public class ExcelUtil2025Test extends TestBase {
     @Test
     public void test_loadSheet_File_SheetName_RowExtractor() throws Exception {
         File tempFile = createTempFile(".xlsx");
-        Dataset dataset = N.newDataset(N.asList("col1", "col2"), N.asList(N.asList("a", "b"), N.asList("c", "d")));
+        Dataset dataset = N.newDataset(N.toList("col1", "col2"), N.toList(N.toList("a", "b"), N.toList("c", "d")));
         ExcelUtil.writeSheet("TestSheet", dataset, tempFile);
 
         Dataset loaded = ExcelUtil.loadSheet(tempFile, "TestSheet", RowExtractors.DEFAULT);
@@ -317,7 +317,7 @@ public class ExcelUtil2025Test extends TestBase {
     @Test
     public void test_writeSheet_WithDataset() throws Exception {
         File tempFile = createTempFile(".xlsx");
-        Dataset dataset = N.newDataset(N.asList("column1", "column2"), N.asList(N.asList("ab", "cd"), N.asList("ef", "gh")));
+        Dataset dataset = N.newDataset(N.toList("column1", "column2"), N.toList(N.toList("ab", "cd"), N.toList("ef", "gh")));
 
         ExcelUtil.writeSheet("DatasetSheet", dataset, tempFile);
 
@@ -329,7 +329,7 @@ public class ExcelUtil2025Test extends TestBase {
     @Test
     public void test_writeSheet_Dataset_SheetCreateOptions() throws Exception {
         File tempFile = createTempFile(".xlsx");
-        Dataset dataset = N.newDataset(N.asList("A", "B"), N.asList(N.asList(1, 2)));
+        Dataset dataset = N.newDataset(N.toList("A", "B"), N.toList(N.toList(1, 2)));
 
         SheetCreateOptions options = SheetCreateOptions.builder().autoSizeColumn(true).build();
 
@@ -342,7 +342,7 @@ public class ExcelUtil2025Test extends TestBase {
     @Test
     public void test_writeSheet_Dataset_SheetSetter() throws Exception {
         File tempFile = createTempFile(".xlsx");
-        Dataset dataset = N.newDataset(N.asList("C"), N.asList(N.asList(3)));
+        Dataset dataset = N.newDataset(N.toList("C"), N.toList(N.toList(3)));
 
         Consumer<Sheet> setter = sheet -> sheet.setDefaultRowHeight((short) 400);
 
@@ -724,8 +724,8 @@ public class ExcelUtil2025Test extends TestBase {
     @Test
     public void test_RoundTrip_WriteAndLoad() throws Exception {
         File tempFile = createTempFile(".xlsx");
-        Dataset original = N.newDataset(N.asList("name", "value", "flag"),
-                N.asList(N.asList("A", 10, true), N.asList("B", 20, false), N.asList("C", 30, true)));
+        Dataset original = N.newDataset(N.toList("name", "value", "flag"),
+                N.toList(N.toList("A", 10, true), N.toList("B", 20, false), N.toList("C", 30, true)));
 
         ExcelUtil.writeSheet("Data", original, tempFile);
         Dataset loaded = ExcelUtil.loadSheet(tempFile);

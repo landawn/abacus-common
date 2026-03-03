@@ -579,18 +579,18 @@ public class ParallelArrayStream100Test extends TestBase {
 
                 Stream.of(TEST_INTEGER_ARRAY)
                         .parallel(PS.create(Splitor.ITERATOR))
-                        .forEach(it -> N.asList(it * 2, it * 2), Fn.sc(results, (a, b) -> results.add(a)));
+                        .forEach(it -> N.toList(it * 2, it * 2), Fn.sc(results, (a, b) -> results.add(a)));
 
-                assertHaveSameElements(N.cycle(N.asList(TEST_INTEGER_ARRAY), 2), results);
+                assertHaveSameElements(N.cycle(N.toList(TEST_INTEGER_ARRAY), 2), results);
             }
             {
                 List<Integer> results = new ArrayList<>();
 
                 Stream.of(TEST_INTEGER_ARRAY)
                         .parallel(PS.create(Splitor.ARRAY))
-                        .forEach(it -> N.asList(it * 2, it * 2), Fn.sc(results, (a, b) -> results.add(a)));
+                        .forEach(it -> N.toList(it * 2, it * 2), Fn.sc(results, (a, b) -> results.add(a)));
 
-                assertHaveSameElements(N.cycle(N.asList(TEST_INTEGER_ARRAY), 2), results);
+                assertHaveSameElements(N.cycle(N.toList(TEST_INTEGER_ARRAY), 2), results);
 
             }
 
@@ -599,9 +599,9 @@ public class ParallelArrayStream100Test extends TestBase {
 
                 Stream.of(TEST_INTEGER_ARRAY)
                         .parallel(PS.create(Splitor.ITERATOR))
-                        .forEach(it -> N.asList(it * 2, it * 2), it -> N.asList(it * 3, it * 3), Fn.sc(results, (a, b, c) -> results.add(a)));
+                        .forEach(it -> N.toList(it * 2, it * 2), it -> N.toList(it * 3, it * 3), Fn.sc(results, (a, b, c) -> results.add(a)));
 
-                assertHaveSameElements(N.cycle(N.asList(TEST_INTEGER_ARRAY), 4), results);
+                assertHaveSameElements(N.cycle(N.toList(TEST_INTEGER_ARRAY), 4), results);
             }
 
             {
@@ -609,9 +609,9 @@ public class ParallelArrayStream100Test extends TestBase {
 
                 Stream.of(TEST_INTEGER_ARRAY)
                         .parallel(PS.create(Splitor.ARRAY))
-                        .forEach(it -> N.asList(it * 2, it * 2), it -> N.asList(it * 3, it * 3), Fn.sc(results, (a, b, c) -> results.add(a)));
+                        .forEach(it -> N.toList(it * 2, it * 2), it -> N.toList(it * 3, it * 3), Fn.sc(results, (a, b, c) -> results.add(a)));
 
-                assertHaveSameElements(N.cycle(N.asList(TEST_INTEGER_ARRAY), 4), results);
+                assertHaveSameElements(N.cycle(N.toList(TEST_INTEGER_ARRAY), 4), results);
             }
         }
 
@@ -623,14 +623,14 @@ public class ParallelArrayStream100Test extends TestBase {
 
                 Stream.of(TEST_INTEGER_ARRAY).limit(5).parallel(PS.create(Splitor.ITERATOR)).forEachPair(Fn.sc(results, (a, b) -> results.add(a + "->" + b)));
 
-                assertHaveSameElements(N.asList("1->2", "2->3", "3->4", "4->5"), results);
+                assertHaveSameElements(N.toList("1->2", "2->3", "3->4", "4->5"), results);
             }
             {
                 List<String> results = new ArrayList<>();
 
                 Stream.of(TEST_INTEGER_ARRAY).limit(5).parallel(PS.create(Splitor.ARRAY)).forEachPair(Fn.sc(results, (a, b) -> results.add(a + "->" + b)));
 
-                assertHaveSameElements(N.asList("1->2", "2->3", "3->4", "4->5"), results);
+                assertHaveSameElements(N.toList("1->2", "2->3", "3->4", "4->5"), results);
             }
             {
                 List<String> results = new ArrayList<>();
@@ -640,7 +640,7 @@ public class ParallelArrayStream100Test extends TestBase {
                         .parallel(PS.create(Splitor.ITERATOR))
                         .forEachPair(2, Fn.sc(results, (a, b) -> results.add(a + "->" + b)));
 
-                assertHaveSameElements(N.asList("1->2", "3->4", "5->null"), results);
+                assertHaveSameElements(N.toList("1->2", "3->4", "5->null"), results);
             }
         }
 
@@ -655,7 +655,7 @@ public class ParallelArrayStream100Test extends TestBase {
                         .parallel(PS.create(Splitor.ITERATOR))
                         .forEachTriple(Fn.sc(results, (a, b, c) -> results.add(a + "->" + b + "->" + c)));
 
-                assertHaveSameElements(N.asList("1->2->3", "2->3->4", "3->4->5"), results);
+                assertHaveSameElements(N.toList("1->2->3", "2->3->4", "3->4->5"), results);
             }
             {
                 List<String> results = new ArrayList<>();
@@ -665,7 +665,7 @@ public class ParallelArrayStream100Test extends TestBase {
                         .parallel(PS.create(Splitor.ARRAY))
                         .forEachTriple(Fn.sc(results, (a, b, c) -> results.add(a + "->" + b + "->" + c)));
 
-                assertHaveSameElements(N.asList("1->2->3", "2->3->4", "3->4->5"), results);
+                assertHaveSameElements(N.toList("1->2->3", "2->3->4", "3->4->5"), results);
             }
             {
                 List<String> results = new ArrayList<>();
@@ -675,7 +675,7 @@ public class ParallelArrayStream100Test extends TestBase {
                         .parallel(PS.create(Splitor.ARRAY))
                         .forEachTriple(2, Fn.sc(results, (a, b, c) -> results.add(a + "->" + b + "->" + c)));
 
-                assertHaveSameElements(N.asList("1->2->3", "3->4->5"), results);
+                assertHaveSameElements(N.toList("1->2->3", "3->4->5"), results);
             }
         }
     }
@@ -796,7 +796,7 @@ public class ParallelArrayStream100Test extends TestBase {
         public void testNMatch() {
             Predicate<Integer> even = x -> x % 2 == 0;
 
-            boolean result = stream.countMatchBetween(3, 7, even);
+            boolean result = stream.isMatchCountBetween(3, 7, even);
 
             assertTrue(result);
         }
@@ -806,7 +806,7 @@ public class ParallelArrayStream100Test extends TestBase {
         public void testNMatchOutsideRange() {
             Predicate<Integer> even = x -> x % 2 == 0;
 
-            boolean result = stream.countMatchBetween(1, 3, even);
+            boolean result = stream.isMatchCountBetween(1, 3, even);
 
             assertFalse(result);
         }

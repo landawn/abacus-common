@@ -20,6 +20,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Type handler for {@link java.sql.Array} objects, providing conversion between SQL Array and its string representation.
+ */
 public class SQLArrayType extends AbstractType<Array> {
 
     static final String SQL_ARRAY = "SQLArray";

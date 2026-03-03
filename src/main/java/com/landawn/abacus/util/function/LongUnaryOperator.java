@@ -64,8 +64,8 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
      * long negated = negate.applyAsLong(10L);   // Returns -10L
      * }</pre>
      *
-     * @param operand the operand
-     * @return the operator result
+     * @param operand the input operand
+     * @return the result of applying this operator
      */
     @Override
     long applyAsLong(long operand);

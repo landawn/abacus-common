@@ -40,7 +40,7 @@ package com.landawn.abacus.parser;
 public class XmlConstants {
 
     /**
-     * Private constructor to prevent instantiation of this utility class.
+     * Protected constructor to prevent direct instantiation of this utility class.
      */
     protected XmlConstants() {
         // singleton.

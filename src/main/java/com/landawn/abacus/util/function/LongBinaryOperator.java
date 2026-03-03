@@ -66,10 +66,10 @@ public interface LongBinaryOperator extends Throwables.LongBinaryOperator<Runtim
      * long maximum = max.applyAsLong(10L, 20L);   // Returns 20L
      * }</pre>
      *
-     * @param left the first operand, typically the accumulator in reduction operations
-     * @param right the second operand, typically the next element in reduction operations
+     * @param a the first operand, typically the accumulator in reduction operations
+     * @param b the second operand, typically the next element in reduction operations
      * @return the operator result, a long value computed from the two operands
      */
     @Override
-    long applyAsLong(long left, long right);
+    long applyAsLong(long a, long b);
 }

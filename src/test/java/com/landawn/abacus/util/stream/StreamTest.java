@@ -296,7 +296,7 @@ public class StreamTest extends AbstractTest {
     @Test
     public void test_splitAt() {
         for (int j = 0; j < 10; j++) {
-            final int[] a = IntList.random(10_000).array();
+            final int[] a = IntList.random(10_000).internalArray();
             int n = a.length / 2;
 
             for (int i = 0, len = a.length; i < len; i++) {
@@ -374,35 +374,35 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void test_04() {
-        Iterator<List<String>> iter = PermutationIterator.of(N.asList("a"));
+        Iterator<List<String>> iter = PermutationIterator.of(N.toList("a"));
         while (iter.hasNext()) {
             N.println(iter.next());
         }
 
         N.println("=========================================================");
 
-        iter = PermutationIterator.of(N.asList("a", "b"));
+        iter = PermutationIterator.of(N.toList("a", "b"));
         while (iter.hasNext()) {
             N.println(iter.next());
         }
 
         N.println("=========================================================");
 
-        iter = PermutationIterator.of(N.asList("a", "a"));
+        iter = PermutationIterator.of(N.toList("a", "a"));
         while (iter.hasNext()) {
             N.println(iter.next());
         }
 
         N.println("=========================================================");
 
-        iter = PermutationIterator.of(N.asList("a", "b", "c"));
+        iter = PermutationIterator.of(N.toList("a", "b", "c"));
         while (iter.hasNext()) {
             N.println(iter.next());
         }
 
         N.println("=========================================================");
 
-        iter = PermutationIterator.of(N.asList("a", "b", "a"));
+        iter = PermutationIterator.of(N.toList("a", "b", "a"));
         while (iter.hasNext()) {
             N.println(iter.next());
         }
@@ -416,35 +416,35 @@ public class StreamTest extends AbstractTest {
 
         N.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 
-        iter = PermutationIterator.ordered(N.asList("a"));
+        iter = PermutationIterator.ordered(N.toList("a"));
         while (iter.hasNext()) {
             N.println(iter.next());
         }
 
         N.println("=========================================================");
 
-        iter = PermutationIterator.ordered(N.asList("a", "b"));
+        iter = PermutationIterator.ordered(N.toList("a", "b"));
         while (iter.hasNext()) {
             N.println(iter.next());
         }
 
         N.println("=========================================================");
 
-        iter = PermutationIterator.ordered(N.asList("a", "a"));
+        iter = PermutationIterator.ordered(N.toList("a", "a"));
         while (iter.hasNext()) {
             N.println(iter.next());
         }
 
         N.println("=========================================================");
 
-        iter = PermutationIterator.ordered(N.asList("a", "b", "c"));
+        iter = PermutationIterator.ordered(N.toList("a", "b", "c"));
         while (iter.hasNext()) {
             N.println(iter.next());
         }
 
         N.println("=========================================================");
 
-        iter = PermutationIterator.ordered(N.asList("a", "b", "a"));
+        iter = PermutationIterator.ordered(N.toList("a", "b", "a"));
         while (iter.hasNext()) {
             N.println(iter.next());
         }
@@ -458,28 +458,28 @@ public class StreamTest extends AbstractTest {
 
         N.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 
-        iter = PermutationIterator.of(N.asList("1", "2", "2", "1"));
+        iter = PermutationIterator.of(N.toList("1", "2", "2", "1"));
         while (iter.hasNext()) {
             N.println(iter.next());
         }
 
         N.println("=========================================================");
 
-        iter = PermutationIterator.ordered(N.asList("a", "b", "c"));
+        iter = PermutationIterator.ordered(N.toList("a", "b", "c"));
         while (iter.hasNext()) {
             N.println(iter.next());
         }
 
         N.println("=========================================================");
 
-        iter = PermutationIterator.ordered(N.asList("1", "2", "2", "1"));
+        iter = PermutationIterator.ordered(N.toList("1", "2", "2", "1"));
         while (iter.hasNext()) {
             N.println(iter.next());
         }
 
         N.println("=========================================================");
 
-        iter = PermutationIterator.ordered(N.asList("a", "b", "a"));
+        iter = PermutationIterator.ordered(N.toList("a", "b", "a"));
         while (iter.hasNext()) {
             N.println(iter.next());
         }

@@ -34,10 +34,10 @@ public interface ByteBinaryOperator extends Throwables.ByteBinaryOperator<Runtim
      * byte result = adder.applyAsByte((byte)5, (byte)3);   // Returns 8
      * }</pre>
      *
-     * @param left the first operand
-     * @param right the second operand
+     * @param a the first operand
+     * @param b the second operand
      * @return the operator result
      */
     @Override
-    byte applyAsByte(byte left, byte right);
+    byte applyAsByte(byte a, byte b);
 }

@@ -579,10 +579,12 @@ public final class ExceptionUtil {
      */
     public static Throwable firstCause(final Throwable e) {
         int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
+        Throwable prevCause = e;
         Throwable cause = e;
         Throwable result = e;
 
-        while (maxDepth-- > 0 && (cause = cause.getCause()) != null && cause != result) {
+        while (maxDepth-- > 0 && (cause = cause.getCause()) != null && cause != prevCause && cause != e) {
+            prevCause = result;
             result = cause;
         }
 

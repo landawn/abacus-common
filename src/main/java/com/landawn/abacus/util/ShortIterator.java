@@ -539,7 +539,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      */
     @SuppressWarnings("deprecation")
     public short[] toArray() {
-        return toList().trimToSize().array();
+        return toList().trimToSize().internalArray();
     }
 
     /**
@@ -698,6 +698,8 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntShortConsumer<E> action) throws IllegalArgumentException, E {
+        N.checkArgNotNull(action);
+
         int idx = 0;
 
         while (hasNext()) {

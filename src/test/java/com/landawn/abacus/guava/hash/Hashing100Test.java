@@ -351,6 +351,16 @@ public class Hashing100Test extends TestBase {
     }
 
     @Test
+    public void testConcatenatingRejectsUnsupportedHashFunctionImplementation() {
+        final HashFunction unsupported = (HashFunction) java.lang.reflect.Proxy.newProxyInstance(HashFunction.class.getClassLoader(),
+                new Class<?>[] { HashFunction.class }, (proxy, method, args) -> {
+                    throw new UnsupportedOperationException("Proxy hash function should not be invoked");
+                });
+
+        assertThrows(IllegalArgumentException.class, () -> Hashing.concatenating(Arrays.asList(Hashing.sha256(), unsupported)));
+    }
+
+    @Test
     public void testCombineOrderedTwo() {
         HashCode hash1 = Hashing.sha256().hash("first".getBytes());
         HashCode hash2 = Hashing.sha256().hash("second".getBytes());

@@ -64,11 +64,11 @@ public class IntBiPredicate2025Test extends TestBase {
     }
 
     @Test
-    public void test_GREATER_EQUAL() {
-        assertTrue(IntBiPredicate.GREATER_EQUAL.test(20, 10));
-        assertTrue(IntBiPredicate.GREATER_EQUAL.test(10, 10));
-        assertTrue(IntBiPredicate.GREATER_EQUAL.test(5, -5));
-        assertFalse(IntBiPredicate.GREATER_EQUAL.test(10, 20));
+    public void test_GREATER_THAN_OR_EQUAL() {
+        assertTrue(IntBiPredicate.GREATER_THAN_OR_EQUAL.test(20, 10));
+        assertTrue(IntBiPredicate.GREATER_THAN_OR_EQUAL.test(10, 10));
+        assertTrue(IntBiPredicate.GREATER_THAN_OR_EQUAL.test(5, -5));
+        assertFalse(IntBiPredicate.GREATER_THAN_OR_EQUAL.test(10, 20));
     }
 
     @Test
@@ -80,11 +80,11 @@ public class IntBiPredicate2025Test extends TestBase {
     }
 
     @Test
-    public void test_LESS_EQUAL() {
-        assertTrue(IntBiPredicate.LESS_EQUAL.test(10, 20));
-        assertTrue(IntBiPredicate.LESS_EQUAL.test(10, 10));
-        assertTrue(IntBiPredicate.LESS_EQUAL.test(-5, 5));
-        assertFalse(IntBiPredicate.LESS_EQUAL.test(20, 10));
+    public void test_LESS_THAN_OR_EQUAL() {
+        assertTrue(IntBiPredicate.LESS_THAN_OR_EQUAL.test(10, 20));
+        assertTrue(IntBiPredicate.LESS_THAN_OR_EQUAL.test(10, 10));
+        assertTrue(IntBiPredicate.LESS_THAN_OR_EQUAL.test(-5, 5));
+        assertFalse(IntBiPredicate.LESS_THAN_OR_EQUAL.test(20, 10));
     }
 
     @Test

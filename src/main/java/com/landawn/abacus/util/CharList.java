@@ -222,7 +222,7 @@ import com.landawn.abacus.util.stream.CharStream;
  *
  * <p><b>Text Processing Operations:</b>
  * <ul>
- *   <li><b>Character Counting:</b> {@code occurrencesOf()} for frequency analysis</li>
+ *   <li><b>Character Counting:</b> {@code frequency()} for frequency analysis</li>
  *   <li><b>Case Analysis:</b> Integration with Character.isUpperCase(), isLowerCase()</li>
  *   <li><b>Character Classification:</b> Letter, digit, whitespace detection via streams</li>
  *   <li><b>Duplicate Detection:</b> {@code hasDuplicates()}, {@code removeDuplicates()}</li>
@@ -272,7 +272,7 @@ import com.landawn.abacus.util.stream.CharStream;
  *   <li><b>{@link CharStream}:</b> Functional processing of character sequences</li>
  * </ul>
  *
- * <p><b>Example: Text Processing</b>
+ * <p><b>Usage Examples: Text Processing</b>
  * <pre>{@code
  * // Process text document
  * String document = "The Quick Brown Fox Jumps Over The Lazy Dog";
@@ -611,7 +611,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     @Beta
     @Deprecated
     @Override
-    public char[] array() {
+    public char[] internalArray() {
         return elementData;
     }
 
@@ -707,7 +707,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
         ensureCapacity(size + numNew);
 
-        N.copy(c.array(), 0, elementData, size, numNew);
+        N.copy(c.internalArray(), 0, elementData, size, numNew);
 
         size += numNew;
 
@@ -742,7 +742,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
             N.copy(elementData, index, elementData, index + numNew, numMoved);
         }
 
-        N.copy(c.array(), 0, elementData, index, numNew);
+        N.copy(c.internalArray(), 0, elementData, index, numNew);
 
         size += numNew;
 
@@ -1705,7 +1705,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param valueToFind the value whose occurrences are to be counted
      * @return the number of times the specified value appears in this list
      */
-    public int occurrencesOf(final char valueToFind) {
+    public int frequency(final char valueToFind) {
         if (size == 0) {
             return 0;
         }

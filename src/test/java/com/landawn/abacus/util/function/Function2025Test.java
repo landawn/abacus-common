@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
@@ -52,6 +53,12 @@ public class Function2025Test extends TestBase {
     }
 
     @Test
+    public void testComposeRejectsNullFunctionImmediately() {
+        Function<Integer, String> toString = n -> String.valueOf(n);
+        assertThrows(NullPointerException.class, () -> toString.compose(null));
+    }
+
+    @Test
     public void testAndThen() {
         Function<String, Integer> length = String::length;
         Function<Integer, Integer> doubleIt = n -> n * 2;
@@ -60,6 +67,12 @@ public class Function2025Test extends TestBase {
         Integer result = composed.apply("hello");
 
         assertEquals(10, result); // "hello".length() = 5, then 5 * 2 = 10
+    }
+
+    @Test
+    public void testAndThenRejectsNullFunctionImmediately() {
+        Function<String, Integer> length = String::length;
+        assertThrows(NullPointerException.class, () -> length.andThen(null));
     }
 
     @Test

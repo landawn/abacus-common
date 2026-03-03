@@ -56,18 +56,18 @@ public class Iterators103Test extends TestBase {
 
     @Test
     public void testOccurrencesOf() {
-        assertEquals(0, Iterators.occurrencesOf(null, "test"));
+        assertEquals(0, Iterators.frequency(null, "test"));
 
-        assertEquals(0, Iterators.occurrencesOf(Collections.emptyIterator(), "test"));
+        assertEquals(0, Iterators.frequency(Collections.emptyIterator(), "test"));
 
         List<String> list = Arrays.asList("a", "b", "a", "c", "a");
-        assertEquals(3, Iterators.occurrencesOf(list.iterator(), "a"));
-        assertEquals(1, Iterators.occurrencesOf(list.iterator(), "b"));
-        assertEquals(0, Iterators.occurrencesOf(list.iterator(), "d"));
+        assertEquals(3, Iterators.frequency(list.iterator(), "a"));
+        assertEquals(1, Iterators.frequency(list.iterator(), "b"));
+        assertEquals(0, Iterators.frequency(list.iterator(), "d"));
 
         List<String> listWithNulls = Arrays.asList("a", null, "b", null, null);
-        assertEquals(3, Iterators.occurrencesOf(listWithNulls.iterator(), null));
-        assertEquals(1, Iterators.occurrencesOf(listWithNulls.iterator(), "a"));
+        assertEquals(3, Iterators.frequency(listWithNulls.iterator(), null));
+        assertEquals(1, Iterators.frequency(listWithNulls.iterator(), "a"));
     }
 
     @Test

@@ -25,6 +25,11 @@ import java.time.LocalTime;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 
+/**
+ * Type handler for {@link LocalTime} values.
+ * Provides serialization, deserialization, and database operations for LocalTime objects,
+ * supporting conversion to/from strings and JDBC ResultSet/PreparedStatement operations.
+ */
 public class LocalTimeType extends AbstractTemporalType<LocalTime> {
 
     public static final String LOCAL_TIME = LocalTime.class.getSimpleName();

@@ -323,6 +323,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * @throws IOException if an I/O error occurs
      */
     public void write(final char c) throws IOException {
+        ensureOpen();
+
         if (value == null) {
             if (nextChar >= Objectory.BUFFER_SIZE) {
                 flushBufferToWriter();
@@ -407,9 +409,15 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      */
     @Internal
     void writeNonNull(final String str, final int off, int len) throws IOException {
-        // write(InternalUtil.getCharsForReadOnly(str), off, len);
+        ensureOpen();
 
-        len = Math.min(str.length() - off, len);
+        if ((off < 0) || (len < 0) || (off > str.length()) || (len > str.length() - off)) {
+            throw new IndexOutOfBoundsException();
+        } else if (len == 0) {
+            return;
+        }
+
+        // write(InternalUtil.getCharsForReadOnly(str), off, len);
 
         if (value == null) {
             if (len > (Objectory.BUFFER_SIZE - nextChar)) {
@@ -450,6 +458,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      */
     @Override
     public void write(final char[] cbuf) throws IOException {
+        ensureOpen();
+
         final int len = cbuf.length;
 
         if (value == null) {
@@ -494,7 +504,13 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      */
     @Override
     public void write(final char[] cbuf, final int off, int len) throws IOException {
-        len = Math.min(cbuf.length - off, len);
+        ensureOpen();
+
+        if ((off < 0) || (len < 0) || (off > cbuf.length) || (len > cbuf.length - off)) {
+            throw new IndexOutOfBoundsException();
+        } else if (len == 0) {
+            return;
+        }
 
         if (value == null) {
             if (len > (Objectory.BUFFER_SIZE - nextChar)) {
@@ -615,6 +631,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      */
     @Override
     public void flush() throws IOException {
+        ensureOpen();
+
         flushBufferToWriter();
 
         if (value == null) {
@@ -624,6 +642,17 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
         Objectory.recycle(_cbuf);
         _cbuf = null;
         nextChar = 0;
+    }
+
+    /**
+     * Ensures the writer is open before an I/O operation.
+     *
+     * @throws IOException if the writer has been closed
+     */
+    void ensureOpen() throws IOException {
+        if (isClosed) {
+            throw new IOException("Stream closed");
+        }
     }
 
     /**

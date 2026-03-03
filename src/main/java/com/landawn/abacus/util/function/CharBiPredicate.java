@@ -38,7 +38,7 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * boolean result2 = CharBiPredicate.ALWAYS_TRUE.test('x', 'x');   // Always returns true
      * }</pre>
      */
-    CharBiPredicate ALWAYS_TRUE = (t, u) -> true;
+    CharBiPredicate ALWAYS_TRUE = (a, b) -> true;
     /**
      * A predicate that always evaluates to {@code false}, regardless of the two char input values.
      *
@@ -48,7 +48,7 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * boolean result2 = CharBiPredicate.ALWAYS_FALSE.test('x', 'x');   // Always returns false
      * }</pre>
      */
-    CharBiPredicate ALWAYS_FALSE = (t, u) -> false;
+    CharBiPredicate ALWAYS_FALSE = (a, b) -> false;
     /**
      * A predicate that tests if the two char values are equal.
      *
@@ -58,7 +58,7 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * boolean result2 = CharBiPredicate.EQUAL.test('a', 'b');   // Returns false
      * }</pre>
      */
-    CharBiPredicate EQUAL = (t, u) -> t == u;
+    CharBiPredicate EQUAL = (a, b) -> a == b;
     /**
      * A predicate that tests if the two char values are not equal.
      *
@@ -68,7 +68,7 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * boolean result2 = CharBiPredicate.NOT_EQUAL.test('a', 'a');   // Returns false
      * }</pre>
      */
-    CharBiPredicate NOT_EQUAL = (t, u) -> t != u;
+    CharBiPredicate NOT_EQUAL = (a, b) -> a != b;
     /**
      * A predicate that tests if the first char value is greater than the second.
      *
@@ -78,18 +78,18 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * boolean result2 = CharBiPredicate.GREATER_THAN.test('a', 'b');   // Returns false
      * }</pre>
      */
-    CharBiPredicate GREATER_THAN = (t, u) -> t > u;
+    CharBiPredicate GREATER_THAN = (a, b) -> a > b;
     /**
      * A predicate that tests if the first char value is greater than or equal to the second.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean result = CharBiPredicate.GREATER_EQUAL.test('b', 'a');    // Returns true
-     * boolean result2 = CharBiPredicate.GREATER_EQUAL.test('a', 'a');   // Returns true
-     * boolean result3 = CharBiPredicate.GREATER_EQUAL.test('a', 'b');   // Returns false
+     * boolean result = CharBiPredicate.GREATER_THAN_OR_EQUAL.test('b', 'a');    // Returns true
+     * boolean result2 = CharBiPredicate.GREATER_THAN_OR_EQUAL.test('a', 'a');   // Returns true
+     * boolean result3 = CharBiPredicate.GREATER_THAN_OR_EQUAL.test('a', 'b');   // Returns false
      * }</pre>
      */
-    CharBiPredicate GREATER_EQUAL = (t, u) -> t >= u;
+    CharBiPredicate GREATER_THAN_OR_EQUAL = (a, b) -> a >= b;
     /**
      * A predicate that tests if the first char value is less than the second.
      *
@@ -99,18 +99,18 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * boolean result2 = CharBiPredicate.LESS_THAN.test('b', 'a');   // Returns false
      * }</pre>
      */
-    CharBiPredicate LESS_THAN = (t, u) -> t < u;
+    CharBiPredicate LESS_THAN = (a, b) -> a < b;
     /**
      * A predicate that tests if the first char value is less than or equal to the second.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean result = CharBiPredicate.LESS_EQUAL.test('a', 'b');    // Returns true
-     * boolean result2 = CharBiPredicate.LESS_EQUAL.test('a', 'a');   // Returns true
-     * boolean result3 = CharBiPredicate.LESS_EQUAL.test('b', 'a');   // Returns false
+     * boolean result = CharBiPredicate.LESS_THAN_OR_EQUAL.test('a', 'b');    // Returns true
+     * boolean result2 = CharBiPredicate.LESS_THAN_OR_EQUAL.test('a', 'a');   // Returns true
+     * boolean result3 = CharBiPredicate.LESS_THAN_OR_EQUAL.test('b', 'a');   // Returns false
      * }</pre>
      */
-    CharBiPredicate LESS_EQUAL = (t, u) -> t <= u;
+    CharBiPredicate LESS_THAN_OR_EQUAL = (a, b) -> a <= b;
 
     /**
      * Evaluates this predicate on the given char arguments.
@@ -124,12 +124,12 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * boolean result2 = areBothLetters.test('a', 'b');   // Returns true
      * }</pre>
      *
-     * @param t the first char input argument
-     * @param u the second char input argument
+     * @param a the first char input argument
+     * @param b the second char input argument
      * @return {@code true} if the two input arguments match the predicate, otherwise {@code false}
      */
     @Override
-    boolean test(char t, char u);
+    boolean test(char a, char b);
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
@@ -146,7 +146,7 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * @return a predicate that represents the logical negation of this predicate
      */
     default CharBiPredicate negate() {
-        return (t, u) -> !test(t, u);
+        return (a, b) -> !test(a, b);
     }
 
     /**
@@ -169,7 +169,7 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      *         and the {@code other} predicate
      */
     default CharBiPredicate and(final CharBiPredicate other) {
-        return (t, u) -> test(t, u) && other.test(t, u);
+        return (a, b) -> test(a, b) && other.test(a, b);
     }
 
     /**
@@ -192,6 +192,6 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      *         and the {@code other} predicate
      */
     default CharBiPredicate or(final CharBiPredicate other) {
-        return (t, u) -> test(t, u) || other.test(t, u);
+        return (a, b) -> test(a, b) || other.test(a, b);
     }
 }

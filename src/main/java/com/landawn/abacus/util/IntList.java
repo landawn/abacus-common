@@ -213,7 +213,7 @@ import com.landawn.abacus.util.stream.IntStream;
  * <ul>
  *   <li><b>Aggregation:</b> Sum, min, max operations via stream API</li>
  *   <li><b>Central Tendency:</b> Median calculation with efficient sorting</li>
- *   <li><b>Occurrence Counting:</b> {@code occurrencesOf()} for frequency analysis</li>
+ *   <li><b>Occurrence Counting:</b> {@code frequency()} for frequency analysis</li>
  *   <li><b>Duplicate Detection:</b> {@code hasDuplicates()}, {@code removeDuplicates()}</li>
  * </ul>
  *
@@ -261,7 +261,7 @@ import com.landawn.abacus.util.stream.IntStream;
  *   <li><b>{@link IntStream}:</b> Functional processing of int sequences</li>
  * </ul>
  *
- * <p><b>Example: Mathematical Computation</b>
+ * <p><b>Usage Examples: Mathematical Computation</b>
  * <pre>{@code
  * // Generate and analyze a dataset
  * IntList dataset = IntList.random(1, 1000, 10000);   // 10K random numbers
@@ -592,7 +592,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     @Beta
     @Deprecated
     @Override
-    public int[] array() {
+    public int[] internalArray() {
         return elementData;
     }
 
@@ -688,7 +688,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
         ensureCapacity(size + numNew);
 
-        N.copy(c.array(), 0, elementData, size, numNew);
+        N.copy(c.internalArray(), 0, elementData, size, numNew);
 
         size += numNew;
 
@@ -724,7 +724,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
             N.copy(elementData, index, elementData, index + numNew, numMoved);
         }
 
-        N.copy(c.array(), 0, elementData, index, numNew);
+        N.copy(c.internalArray(), 0, elementData, index, numNew);
 
         size += numNew;
 
@@ -1778,7 +1778,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param valueToFind the value whose frequency is to be determined
      * @return the number of times the value appears in this list
      */
-    public int occurrencesOf(final int valueToFind) {
+    public int frequency(final int valueToFind) {
         if (size == 0) {
             return 0;
         }

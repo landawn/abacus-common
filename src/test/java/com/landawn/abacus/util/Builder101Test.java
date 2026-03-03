@@ -37,11 +37,11 @@ public class Builder101Test extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        columnNames = CommonUtil.asList("name", "age", "city");
+        columnNames = CommonUtil.toList("name", "age", "city");
         data = new ArrayList<>();
-        data.add(CommonUtil.asList("John", 25, "NYC"));
-        data.add(CommonUtil.asList("Jane", 30, "LA"));
-        data.add(CommonUtil.asList("Bob", 35, "Chicago"));
+        data.add(CommonUtil.toList("John", 25, "NYC"));
+        data.add(CommonUtil.toList("Jane", 30, "LA"));
+        data.add(CommonUtil.toList("Bob", 35, "Chicago"));
         testDataset = new RowDataset(columnNames, data);
     }
 

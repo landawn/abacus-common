@@ -51,12 +51,12 @@ public interface IntBiFunction<R> extends Throwables.IntBiFunction<R, RuntimeExc
      * Point point = pointCreator.apply(5, 10);   // Creates Point(5, 10)
      * }</pre>
      *
-     * @param t the first {@code int} argument
-     * @param u the second {@code int} argument
+     * @param a the first {@code int} argument
+     * @param b the second {@code int} argument
      * @return the function result
      */
     @Override
-    R apply(int t, int u);
+    R apply(int a, int b);
 
     /**
      * Returns a composed function that first applies this function to its input, and then applies
@@ -77,6 +77,6 @@ public interface IntBiFunction<R> extends Throwables.IntBiFunction<R, RuntimeExc
      *         function
      */
     default <V> IntBiFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        return (t, u) -> after.apply(apply(t, u));
+        return (a, b) -> after.apply(apply(a, b));
     }
 }

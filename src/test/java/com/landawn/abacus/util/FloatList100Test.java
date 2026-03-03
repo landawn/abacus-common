@@ -574,9 +574,9 @@ public class FloatList100Test extends TestBase {
     public void testOccurrencesOf() {
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f, 2.2f, 2.2f, 4.4f });
 
-        assertEquals(3, list.occurrencesOf(2.2f));
-        assertEquals(1, list.occurrencesOf(1.1f));
-        assertEquals(0, list.occurrencesOf(5.5f));
+        assertEquals(3, list.frequency(2.2f));
+        assertEquals(1, list.frequency(1.1f));
+        assertEquals(0, list.frequency(5.5f));
     }
 
     @Test
@@ -1124,7 +1124,7 @@ public class FloatList100Test extends TestBase {
     public void testArray() {
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f });
 
-        float[] array = list.array();
+        float[] array = list.internalArray();
         assertEquals(1.1f, array[0], DELTA);
         assertEquals(2.2f, array[1], DELTA);
         assertEquals(3.3f, array[2], DELTA);

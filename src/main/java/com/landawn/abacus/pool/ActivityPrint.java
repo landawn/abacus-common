@@ -371,7 +371,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      */
     @Override
     public String toString() {
-        return "{createdTime=" + createdTime + ", liveTime=" + liveTime + ", maxIdleTime=" + maxIdleTime + ", lastAccessedTime=" + lastAccessTime
+        return "{createdTime=" + createdTime + ", liveTime=" + liveTime + ", maxIdleTime=" + maxIdleTime + ", lastAccessTime=" + lastAccessTime
                 + ", accessCount=" + accessCount + "}";
     }
 }

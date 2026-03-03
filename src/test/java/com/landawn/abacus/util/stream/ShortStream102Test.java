@@ -758,12 +758,12 @@ public class ShortStream102Test extends TestBase {
         ShortStream streamWithDuplicates = createShortStream((short) 1, (short) 2, (short) 2, (short) 3, (short) 3, (short) 3);
 
         Multiset<Short> multiset1 = streamWithDuplicates.toMultiset();
-        assertEquals(1, multiset1.occurrencesOf((short) 1));
-        assertEquals(2, multiset1.occurrencesOf((short) 2));
-        assertEquals(3, multiset1.occurrencesOf((short) 3));
+        assertEquals(1, multiset1.getCount((short) 1));
+        assertEquals(2, multiset1.getCount((short) 2));
+        assertEquals(3, multiset1.getCount((short) 3));
 
         Multiset<Short> multiset2 = createShortStream((short) 1, (short) 2, (short) 2, (short) 3, (short) 3, (short) 3).toMultiset(Multiset::new);
-        assertEquals(1, multiset2.occurrencesOf((short) 1));
+        assertEquals(1, multiset2.getCount((short) 1));
     }
 
     @Test

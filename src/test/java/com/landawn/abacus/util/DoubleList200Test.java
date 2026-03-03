@@ -36,13 +36,13 @@ public class DoubleList200Test extends TestBase {
 
         DoubleList list2 = new DoubleList(10);
         assertEquals(0, list2.size());
-        assertTrue(list2.array().length >= 10 || list2.array().length == 0);
+        assertTrue(list2.internalArray().length >= 10 || list2.internalArray().length == 0);
 
         double[] arr = { 1.1, 2.2, 3.3 };
         DoubleList list3 = new DoubleList(arr);
         assertEquals(3, list3.size());
         assertArrayEquals(arr, list3.toArray(), delta);
-        assertSame(arr, list3.array());
+        assertSame(arr, list3.internalArray());
 
         DoubleList list4 = new DoubleList(arr, 2);
         assertEquals(2, list4.size());
@@ -274,7 +274,7 @@ public class DoubleList200Test extends TestBase {
         assertArrayEquals(list.toArray(), copy.toArray(), delta);
 
         double[] arr = list.toArray();
-        assertNotSame(list.array(), arr);
+        assertNotSame(list.internalArray(), arr);
 
         List<Double> boxedList = list.boxed();
         assertEquals(5, boxedList.size());

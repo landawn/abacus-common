@@ -237,7 +237,7 @@ import com.landawn.abacus.util.u.Optional;
  *   <li><b>{@link Comparable}:</b> Foundation for all range element comparison operations</li>
  * </ul>
  *
- * <p><b>Example: Time Range Processing</b>
+ * <p><b>Usage Examples: Time Range Processing</b>
  * <pre>{@code
  * public class TimeRangeProcessor {
  *     public List<Range<LocalDateTime>> findOverlappingMeetings(

@@ -33,41 +33,41 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
     /**
      * A predicate that always evaluates to {@code true}, regardless of the input values.
      */
-    DoubleBiPredicate ALWAYS_TRUE = (t, u) -> true;
+    DoubleBiPredicate ALWAYS_TRUE = (a, b) -> true;
     /**
      * A predicate that always evaluates to {@code false}, regardless of the input values.
      */
-    DoubleBiPredicate ALWAYS_FALSE = (t, u) -> false;
+    DoubleBiPredicate ALWAYS_FALSE = (a, b) -> false;
     /**
      * A predicate that tests if two double values are equal using {@link Double#compare(double, double)}.
      * Returns {@code true} if the comparison result is 0.
      */
-    DoubleBiPredicate EQUAL = (t, u) -> Double.compare(t, u) == 0;
+    DoubleBiPredicate EQUAL = (a, b) -> Double.compare(a, b) == 0;
     /**
      * A predicate that tests if two double values are not equal using {@link Double#compare(double, double)}.
      * Returns {@code true} if the comparison result is not 0.
      */
-    DoubleBiPredicate NOT_EQUAL = (t, u) -> Double.compare(t, u) != 0;
+    DoubleBiPredicate NOT_EQUAL = (a, b) -> Double.compare(a, b) != 0;
     /**
      * A predicate that tests if the first double value is greater than the second using {@link Double#compare(double, double)}.
      * Returns {@code true} if the first value is greater than the second.
      */
-    DoubleBiPredicate GREATER_THAN = (t, u) -> Double.compare(t, u) > 0;
+    DoubleBiPredicate GREATER_THAN = (a, b) -> Double.compare(a, b) > 0;
     /**
      * A predicate that tests if the first double value is greater than or equal to the second using {@link Double#compare(double, double)}.
      * Returns {@code true} if the first value is greater than or equal to the second.
      */
-    DoubleBiPredicate GREATER_EQUAL = (t, u) -> Double.compare(t, u) >= 0;
+    DoubleBiPredicate GREATER_THAN_OR_EQUAL = (a, b) -> Double.compare(a, b) >= 0;
     /**
      * A predicate that tests if the first double value is less than the second using {@link Double#compare(double, double)}.
      * Returns {@code true} if the first value is less than the second.
      */
-    DoubleBiPredicate LESS_THAN = (t, u) -> Double.compare(t, u) < 0;
+    DoubleBiPredicate LESS_THAN = (a, b) -> Double.compare(a, b) < 0;
     /**
      * A predicate that tests if the first double value is less than or equal to the second using {@link Double#compare(double, double)}.
      * Returns {@code true} if the first value is less than or equal to the second.
      */
-    DoubleBiPredicate LESS_EQUAL = (t, u) -> Double.compare(t, u) <= 0;
+    DoubleBiPredicate LESS_THAN_OR_EQUAL = (a, b) -> Double.compare(a, b) <= 0;
 
     /**
      * Evaluates this predicate on the given arguments.
@@ -81,12 +81,12 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
      * boolean result2 = firstGreater.test(5.5, 3.3);   // Returns true
      * }</pre>
      *
-     * @param t the first double input argument
-     * @param u the second double input argument
+     * @param a the first double input argument
+     * @param b the second double input argument
      * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
      */
     @Override
-    boolean test(double t, double u);
+    boolean test(double a, double b);
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
@@ -101,7 +101,7 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
      * @return a predicate that represents the logical negation of this predicate
      */
     default DoubleBiPredicate negate() {
-        return (t, u) -> !test(t, u);
+        return (a, b) -> !test(a, b);
     }
 
     /**
@@ -120,7 +120,7 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
      */
     default DoubleBiPredicate and(final DoubleBiPredicate other) {
-        return (t, u) -> test(t, u) && other.test(t, u);
+        return (a, b) -> test(a, b) && other.test(a, b);
     }
 
     /**
@@ -139,6 +139,6 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
      */
     default DoubleBiPredicate or(final DoubleBiPredicate other) {
-        return (t, u) -> test(t, u) || other.test(t, u);
+        return (a, b) -> test(a, b) || other.test(a, b);
     }
 }

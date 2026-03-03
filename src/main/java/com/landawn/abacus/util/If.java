@@ -238,7 +238,7 @@ import com.landawn.abacus.annotation.Beta;
  *   <li><b>{@link N#ifNotEmpty}:</b> Emptiness-aware conditional execution</li>
  * </ul>
  *
- * <p><b>Example: User Validation Workflow</b>
+ * <p><b>Usage Examples: User Validation Workflow</b>
  * <pre>{@code
  * public class UserValidator {
  *     public void validateAndProcess(User user, UserContext context) {

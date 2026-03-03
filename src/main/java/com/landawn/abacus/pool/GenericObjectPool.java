@@ -270,11 +270,11 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                         return false;
                     }
 
-                    if (elementMemorySize > maxMemorySize - totalDataSize.get()) {
+                    if (maxMemorySize > 0 && elementMemorySize > maxMemorySize - totalDataSize.get()) {
                         if (autoBalance) {
                             evict();
 
-                            if (elementMemorySize > maxMemorySize - totalDataSize.get()) {
+                            if (maxMemorySize > 0 && elementMemorySize > maxMemorySize - totalDataSize.get()) {
                                 // ignore.
                                 return false;
                             }
@@ -394,11 +394,11 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                             return false;
                         }
 
-                        if (elementMemorySize > maxMemorySize - totalDataSize.get()) {
+                        if (maxMemorySize > 0 && elementMemorySize > maxMemorySize - totalDataSize.get()) {
                             if (autoBalance) {
                                 evict();
 
-                                if (elementMemorySize > maxMemorySize - totalDataSize.get()) {
+                                if (maxMemorySize > 0 && elementMemorySize > maxMemorySize - totalDataSize.get()) {
                                     // ignore. 
                                     return false;
                                 }
@@ -718,7 +718,12 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     public int size() throws IllegalStateException {
         assertNotClosed();
 
-        return pool.size();
+        lock.lock();
+        try {
+            return pool.size();
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -729,7 +734,12 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      */
     @Override
     public int hashCode() {
-        return pool.hashCode();
+        lock.lock();
+        try {
+            return pool.hashCode();
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -742,7 +752,20 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     @SuppressWarnings("unchecked")
     @Override
     public boolean equals(final Object obj) {
-        return this == obj || (obj instanceof GenericObjectPool && N.equals(((GenericObjectPool<E>) obj).pool, pool));
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof GenericObjectPool)) {
+            return false;
+        }
+
+        lock.lock();
+        try {
+            return N.equals(((GenericObjectPool<E>) obj).pool, pool);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**

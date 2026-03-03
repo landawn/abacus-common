@@ -38,10 +38,9 @@ import com.landawn.abacus.util.Throwables;
  *     from >= 0 && to <= list.size() && from <= to;
  * }</pre>
  *
- * @param <T> the type of the object argument to the predicate
- *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @param <T> the type of the object argument to the predicate
  *
  * @see java.util.function.Predicate
  * @see java.util.function.BiPredicate

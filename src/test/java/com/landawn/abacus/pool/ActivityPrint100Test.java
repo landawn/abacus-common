@@ -226,7 +226,7 @@ public class ActivityPrint100Test extends TestBase {
         assertTrue(str.contains("createdTime="));
         assertTrue(str.contains("liveTime=" + LIVE_TIME));
         assertTrue(str.contains("maxIdleTime=" + MAX_IDLE_TIME));
-        assertTrue(str.contains("lastAccessedTime="));
+        assertTrue(str.contains("lastAccessTime="));
         assertTrue(str.contains("accessCount=0"));
     }
 

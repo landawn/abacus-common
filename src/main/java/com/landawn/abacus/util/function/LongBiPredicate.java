@@ -39,42 +39,42 @@ public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeExcep
      * A predicate that always evaluates to {@code true} regardless of the input values.
      * This can be useful as a default predicate or in testing scenarios.
      */
-    LongBiPredicate ALWAYS_TRUE = (t, u) -> true;
+    LongBiPredicate ALWAYS_TRUE = (a, b) -> true;
     /**
      * A predicate that always evaluates to {@code false} regardless of the input values.
      * This can be useful as a default predicate or in testing scenarios.
      */
-    LongBiPredicate ALWAYS_FALSE = (t, u) -> false;
+    LongBiPredicate ALWAYS_FALSE = (a, b) -> false;
     /**
      * A predicate that tests if two long values are equal.
-     * Returns {@code true} if {@code t == u}, {@code false} otherwise.
+     * Returns {@code true} if {@code a == b}, {@code false} otherwise.
      */
-    LongBiPredicate EQUAL = (t, u) -> t == u;
+    LongBiPredicate EQUAL = (a, b) -> a == b;
     /**
      * A predicate that tests if two long values are not equal.
-     * Returns {@code true} if {@code t != u}, {@code false} otherwise.
+     * Returns {@code true} if {@code a != b}, {@code false} otherwise.
      */
-    LongBiPredicate NOT_EQUAL = (t, u) -> t != u;
+    LongBiPredicate NOT_EQUAL = (a, b) -> a != b;
     /**
      * A predicate that tests if the first long value is greater than the second.
-     * Returns {@code true} if {@code t > u}, {@code false} otherwise.
+     * Returns {@code true} if {@code a > b}, {@code false} otherwise.
      */
-    LongBiPredicate GREATER_THAN = (t, u) -> t > u;
+    LongBiPredicate GREATER_THAN = (a, b) -> a > b;
     /**
      * A predicate that tests if the first long value is greater than or equal to the second.
-     * Returns {@code true} if {@code t >= u}, {@code false} otherwise.
+     * Returns {@code true} if {@code a >= b}, {@code false} otherwise.
      */
-    LongBiPredicate GREATER_EQUAL = (t, u) -> t >= u;
+    LongBiPredicate GREATER_THAN_OR_EQUAL = (a, b) -> a >= b;
     /**
      * A predicate that tests if the first long value is less than the second.
-     * Returns {@code true} if {@code t < u}, {@code false} otherwise.
+     * Returns {@code true} if {@code a < b}, {@code false} otherwise.
      */
-    LongBiPredicate LESS_THAN = (t, u) -> t < u;
+    LongBiPredicate LESS_THAN = (a, b) -> a < b;
     /**
      * A predicate that tests if the first long value is less than or equal to the second.
-     * Returns {@code true} if {@code t <= u}, {@code false} otherwise.
+     * Returns {@code true} if {@code a <= b}, {@code false} otherwise.
      */
-    LongBiPredicate LESS_EQUAL = (t, u) -> t <= u;
+    LongBiPredicate LESS_THAN_OR_EQUAL = (a, b) -> a <= b;
 
     /**
      * Evaluates this predicate on the given arguments.
@@ -95,12 +95,12 @@ public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeExcep
      * boolean result = sumGreaterThan100.test(50L, 60L);   // Returns true
      * }</pre>
      *
-     * @param t the first input argument
-     * @param u the second input argument
+     * @param a the first input argument
+     * @param b the second input argument
      * @return {@code true} if the input arguments match the predicate, {@code false} otherwise
      */
     @Override
-    boolean test(long t, long u);
+    boolean test(long a, long b);
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
@@ -111,7 +111,7 @@ public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeExcep
      * @return a predicate that represents the logical negation of this predicate
      */
     default LongBiPredicate negate() {
-        return (t, u) -> !test(t, u);
+        return (a, b) -> !test(a, b);
     }
 
     /**
@@ -138,7 +138,7 @@ public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeExcep
      *         AND of this predicate and the {@code other} predicate
      */
     default LongBiPredicate and(final LongBiPredicate other) {
-        return (t, u) -> test(t, u) && other.test(t, u);
+        return (a, b) -> test(a, b) && other.test(a, b);
     }
 
     /**
@@ -165,6 +165,6 @@ public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeExcep
      *         OR of this predicate and the {@code other} predicate
      */
     default LongBiPredicate or(final LongBiPredicate other) {
-        return (t, u) -> test(t, u) || other.test(t, u);
+        return (a, b) -> test(a, b) || other.test(a, b);
     }
 }

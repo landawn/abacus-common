@@ -137,10 +137,10 @@ public class ByteBiPredicate2025Test extends TestBase {
     }
 
     @Test
-    public void testGreaterEqual() {
-        assertTrue(ByteBiPredicate.GREATER_EQUAL.test((byte) 10, (byte) 5));
-        assertFalse(ByteBiPredicate.GREATER_EQUAL.test((byte) 5, (byte) 10));
-        assertTrue(ByteBiPredicate.GREATER_EQUAL.test((byte) 5, (byte) 5));
+    public void testGreaterThanOrEqual() {
+        assertTrue(ByteBiPredicate.GREATER_THAN_OR_EQUAL.test((byte) 10, (byte) 5));
+        assertFalse(ByteBiPredicate.GREATER_THAN_OR_EQUAL.test((byte) 5, (byte) 10));
+        assertTrue(ByteBiPredicate.GREATER_THAN_OR_EQUAL.test((byte) 5, (byte) 5));
     }
 
     @Test
@@ -151,10 +151,10 @@ public class ByteBiPredicate2025Test extends TestBase {
     }
 
     @Test
-    public void testLessEqual() {
-        assertFalse(ByteBiPredicate.LESS_EQUAL.test((byte) 10, (byte) 5));
-        assertTrue(ByteBiPredicate.LESS_EQUAL.test((byte) 5, (byte) 10));
-        assertTrue(ByteBiPredicate.LESS_EQUAL.test((byte) 5, (byte) 5));
+    public void testLessThanOrEqual() {
+        assertFalse(ByteBiPredicate.LESS_THAN_OR_EQUAL.test((byte) 10, (byte) 5));
+        assertTrue(ByteBiPredicate.LESS_THAN_OR_EQUAL.test((byte) 5, (byte) 10));
+        assertTrue(ByteBiPredicate.LESS_THAN_OR_EQUAL.test((byte) 5, (byte) 5));
     }
 
     @Test

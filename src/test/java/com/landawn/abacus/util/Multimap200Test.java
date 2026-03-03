@@ -837,7 +837,7 @@ public class Multimap200Test extends TestBase {
     //        mm.put("b", 2);
     //        Set<String> keys = new HashSet<>();
     //        mm.forEachKey(keys::add);
-    //        assertEquals(CommonUtil.asSet("a", "b"), keys);
+    //        assertEquals(CommonUtil.toSet("a", "b"), keys);
     //        assertThrows(IllegalArgumentException.class, () -> mm.forEachKey(null));
     //    }
     //
@@ -873,7 +873,7 @@ public class Multimap200Test extends TestBase {
         Multimap<String, Integer, List<Integer>> mm = getTestMultimap();
         mm.put("a", 1);
         mm.put("b", 2);
-        assertEquals(CommonUtil.asSet("a", "b"), mm.keySet());
+        assertEquals(CommonUtil.toSet("a", "b"), mm.keySet());
         mm.keySet().remove("a");
         assertFalse(mm.containsKey("a"));
     }
@@ -1418,8 +1418,8 @@ public class Multimap200Test extends TestBase {
         List<String> data = Arrays.asList("apple", "apricot", "banana", "apple");
         SetMultimap<Character, String> sm = SetMultimap.fromCollection(data, s -> s.charAt(0));
         assertEquals(3, sm.totalValueCount());
-        assertEquals(CommonUtil.asSet("apple", "apricot"), sm.get('a'));
-        assertEquals(CommonUtil.asSet("banana"), sm.get('b'));
+        assertEquals(CommonUtil.toSet("apple", "apricot"), sm.get('a'));
+        assertEquals(CommonUtil.toSet("banana"), sm.get('b'));
     }
 
     @Test
@@ -1428,8 +1428,8 @@ public class Multimap200Test extends TestBase {
                 Pair.of("fruit", "apple"));
         SetMultimap<String, String> sm = SetMultimap.fromCollection(data, Pair::left, Pair::right);
         assertEquals(3, sm.totalValueCount());
-        assertEquals(CommonUtil.asSet("apple", "banana"), sm.get("fruit"));
-        assertEquals(CommonUtil.asSet("carrot"), sm.get("vegetable"));
+        assertEquals(CommonUtil.toSet("apple", "banana"), sm.get("fruit"));
+        assertEquals(CommonUtil.toSet("carrot"), sm.get("vegetable"));
     }
 
     @Test
@@ -1454,14 +1454,14 @@ public class Multimap200Test extends TestBase {
         sourceMap.put("a", setA);
 
         SetMultimap<String, Integer> sm = SetMultimap.wrap(sourceMap);
-        assertEquals(CommonUtil.asSet(1, 2), sm.get("a"));
+        assertEquals(CommonUtil.toSet(1, 2), sm.get("a"));
         assertSame(setA, sm.get("a"), "Wrapped map should share the same value collection instance");
 
         sm.put("a", 3);
-        assertEquals(CommonUtil.asSet(1, 2, 3), sourceMap.get("a"));
+        assertEquals(CommonUtil.toSet(1, 2, 3), sourceMap.get("a"));
 
         sourceMap.get("a").add(4);
-        assertEquals(CommonUtil.asSet(1, 2, 3, 4), sm.get("a"));
+        assertEquals(CommonUtil.toSet(1, 2, 3, 4), sm.get("a"));
 
         assertThrows(IllegalArgumentException.class, () -> SetMultimap.wrap(null));
         Map<String, Set<Integer>> mapWithNullValue = new HashMap<>();
@@ -1478,8 +1478,8 @@ public class Multimap200Test extends TestBase {
 
         SetMultimap<Integer, String> inverted = setMultimap.invert();
         assertEquals(3, inverted.totalValueCount());
-        assertEquals(CommonUtil.asSet("k1", "k2"), inverted.get(100));
-        assertEquals(CommonUtil.asSet("k1"), inverted.get(200));
+        assertEquals(CommonUtil.toSet("k1", "k2"), inverted.get(100));
+        assertEquals(CommonUtil.toSet("k1"), inverted.get(200));
         assertTrue(inverted.get(100) instanceof Set);
     }
 
@@ -1566,6 +1566,6 @@ public class Multimap200Test extends TestBase {
         assertEquals(1, setMultimap.get("key1").size());
 
         assertTrue(setMultimap.put("key1", 200));
-        assertEquals(CommonUtil.asSet(100, 200), setMultimap.get("key1"));
+        assertEquals(CommonUtil.toSet(100, 200), setMultimap.get("key1"));
     }
 }

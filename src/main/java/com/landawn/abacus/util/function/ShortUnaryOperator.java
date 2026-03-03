@@ -45,8 +45,8 @@ public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<Runtim
      * short result4 = abs.applyAsShort((short) -25);   // returns 25
      * }</pre>
      *
-     * @param operand the operand
-     * @return the operator result
+     * @param operand the input operand
+     * @return the result of applying this operator
      */
     @Override
     short applyAsShort(short operand);

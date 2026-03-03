@@ -51,10 +51,11 @@ public interface ObjIntConsumer<T> extends Throwables.ObjIntConsumer<T, RuntimeE
      * }</pre>
      *
      * @param t the first input argument of type T
-     * @param value the second input argument, a primitive int value
+     * @param i the second input argument, a primitive int value
      */
+    // @ai-ignore IntObj*/ObjInt* argument order convention - intentional: class name prefix determines parameter order. IntObj* has int first; ObjInt* has object first. Do not suggest reordering.
     @Override
-    void accept(T t, int value);
+    void accept(T t, int i);
 
     /**
      * Returns a composed {@code ObjIntConsumer} that performs, in sequence, this

@@ -52,6 +52,7 @@ public interface ObjShortConsumer<T> extends Throwables.ObjShortConsumer<T, Runt
      * @param t the first input argument of type T
      * @param value the second input argument, a primitive short value
      */
+    // @ai-ignore Obj* argument order convention - intentional: class name prefix determines parameter order. ObjShort* has object first, short second. Do not suggest reordering.
     @Override
     void accept(T t, short value);
 }

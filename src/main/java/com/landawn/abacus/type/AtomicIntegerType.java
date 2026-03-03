@@ -133,7 +133,9 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      */
     @Override
     public AtomicInteger get(final ResultSet rs, final int columnIndex) throws SQLException {
-        return new AtomicInteger(rs.getInt(columnIndex));
+        final int value = rs.getInt(columnIndex);
+
+        return rs.wasNull() ? null : new AtomicInteger(value);
     }
 
     /**
@@ -156,7 +158,9 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      */
     @Override
     public AtomicInteger get(final ResultSet rs, final String columnName) throws SQLException {
-        return new AtomicInteger(rs.getInt(columnName));
+        final int value = rs.getInt(columnName);
+
+        return rs.wasNull() ? null : new AtomicInteger(value);
     }
 
     /**
@@ -182,7 +186,11 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final AtomicInteger x) throws SQLException {
-        stmt.setInt(columnIndex, (x == null) ? 0 : x.get());
+        if (x == null) {
+            stmt.setNull(columnIndex, java.sql.Types.INTEGER);
+        } else {
+            stmt.setInt(columnIndex, x.get());
+        }
     }
 
     /**
@@ -207,7 +215,11 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final AtomicInteger x) throws SQLException {
-        stmt.setInt(parameterName, (x == null) ? 0 : x.get());
+        if (x == null) {
+            stmt.setNull(parameterName, java.sql.Types.INTEGER);
+        } else {
+            stmt.setInt(parameterName, x.get());
+        }
     }
 
     /**

@@ -569,7 +569,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      */
     @SuppressWarnings("deprecation")
     public float[] toArray() {
-        return toList().trimToSize().array();
+        return toList().trimToSize().internalArray();
     }
 
     /**

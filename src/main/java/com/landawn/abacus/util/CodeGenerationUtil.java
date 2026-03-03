@@ -49,7 +49,7 @@ import lombok.experimental.Accessors;
  *   <li>Optional write-back to source files</li>
  * </ul>
  *
- * <p><b>Usage Example:</b></p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Generate an inner interface for one entity
  * String innerCode = CodeGenerationUtil.generatePropNameTableClass(User.class);
@@ -524,7 +524,7 @@ public final class CodeGenerationUtil {
                             continue;
                         }
 
-                        propNameInSnakeCase = propNameConverterForSnakeCase.apply(cls, propName);
+                        propNameInSnakeCase = propNameConverterForSnakeCase.apply(cls, newPropName);
 
                         if (Strings.isEmpty(propNameInSnakeCase)) {
                             continue;
@@ -634,7 +634,7 @@ public final class CodeGenerationUtil {
                             continue;
                         }
 
-                        propNameInScreamingSnakeCase = propNameConverterForScreamingSnakeCase.apply(cls, propName);
+                        propNameInScreamingSnakeCase = propNameConverterForScreamingSnakeCase.apply(cls, newPropName);
 
                         if (Strings.isEmpty(propNameInScreamingSnakeCase)) {
                             continue;

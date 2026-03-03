@@ -419,8 +419,8 @@ public class ByteList101Test extends TestBase {
         list.add((byte) 1);
         list.add((byte) 2);
 
-        byte[] array1 = list.array();
-        byte[] array2 = list.array();
+        byte[] array1 = list.internalArray();
+        byte[] array2 = list.internalArray();
 
         assertSame(array1, array2);
 
@@ -484,7 +484,7 @@ public class ByteList101Test extends TestBase {
         assertFalse(list.contains((byte) 0));
         assertEquals(-1, list.indexOf((byte) 0));
         assertEquals(-1, list.lastIndexOf((byte) 0));
-        assertEquals(0, list.occurrencesOf((byte) 0));
+        assertEquals(0, list.frequency((byte) 0));
 
         assertFalse(list.min().isPresent());
         assertFalse(list.max().isPresent());

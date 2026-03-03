@@ -1,6 +1,7 @@
 package com.landawn.abacus.http;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -520,6 +521,30 @@ public class HttpClient100Test extends TestBase {
         HttpURLConnection connection = client.openConnection(HttpMethod.GET, null, false, String.class);
         assertNotNull(connection);
         assertEquals("GET", connection.getRequestMethod());
+    }
+
+    @Test
+    public void testCreateCopiesSettingsDefensively() throws IOException {
+        HttpSettings settings = HttpSettings.create().useCaches(false).header("X-Test", "initial");
+        HttpClient client = HttpClient.create(baseUrl, 16, 5000L, 10000L, settings);
+
+        settings.useCaches(true).header("X-Test", "mutated");
+
+        HttpURLConnection connection = client.openConnection(HttpMethod.GET, null, false, String.class);
+        assertFalse(connection.getUseCaches());
+        assertEquals("initial", connection.getRequestProperty("X-Test"));
+        connection.disconnect();
+    }
+
+    @Test
+    public void testOpenConnectionRequestSettingsOverrideBaseUseCaches() throws IOException {
+        HttpSettings baseSettings = HttpSettings.create().useCaches(false);
+        HttpClient client = HttpClient.create(baseUrl, 16, 5000L, 10000L, baseSettings);
+        HttpSettings requestSettings = HttpSettings.create().useCaches(true);
+
+        HttpURLConnection connection = client.openConnection(HttpMethod.GET, requestSettings, false, String.class);
+        assertTrue(connection.getUseCaches());
+        connection.disconnect();
     }
 
     @Test

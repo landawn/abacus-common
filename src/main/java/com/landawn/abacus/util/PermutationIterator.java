@@ -106,7 +106,7 @@ public final class PermutationIterator {
         }
 
         return new ObjIteratorEx<>() {
-            final T[] items = (T[]) elements.toArray();
+            final T[] items = elements.toArray((T[]) new Object[elements.size()]);
             final int[] c = Array.repeat(0, items.length);
             final int[] o = Array.repeat(1, items.length);
             int j = Integer.MAX_VALUE;
@@ -133,7 +133,7 @@ public final class PermutationIterator {
                 }
 
                 hasNext = 0;
-                return N.asList(items);
+                return N.toList(items);
             }
 
             private void computeNext() {
@@ -236,6 +236,7 @@ public final class PermutationIterator {
      */
     public static <T> ObjIterator<List<T>> ordered(final Collection<T> elements, final Comparator<? super T> comparator) {
         N.checkArgNotNull(elements, cs.elements);
+        N.checkArgNotNull(comparator, cs.comparator);
 
         if (elements.isEmpty()) {
             return new ObjIteratorEx<>() {
@@ -260,7 +261,7 @@ public final class PermutationIterator {
         }
 
         return new ObjIteratorEx<>() {
-            T[] next = (T[]) elements.toArray();
+            T[] next = elements.toArray((T[]) new Object[elements.size()]);
 
             { //NOSONAR
                 N.sort(next, comparator);
@@ -289,7 +290,7 @@ public final class PermutationIterator {
                 }
 
                 hasNext = 0;
-                return N.asList(next);
+                return N.toList(next);
             }
 
             private void computeNext() {

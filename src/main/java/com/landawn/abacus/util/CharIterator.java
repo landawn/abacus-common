@@ -560,7 +560,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      */
     @SuppressWarnings("deprecation")
     public char[] toArray() {
-        return toList().trimToSize().array();
+        return toList().trimToSize().internalArray();
     }
 
     /**

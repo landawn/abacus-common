@@ -45,11 +45,11 @@ public interface CharBiConsumer extends Throwables.CharBiConsumer<RuntimeExcepti
      * appender.accept('H', 'i');
      * }</pre>
      *
-     * @param t the first char input argument
-     * @param u the second char input argument
+     * @param a the first char input argument
+     * @param b the second char input argument
      */
     @Override
-    void accept(char t, char u);
+    void accept(char a, char b);
 
     /**
      * Returns a composed {@code CharBiConsumer} that performs, in sequence, this operation
@@ -70,9 +70,9 @@ public interface CharBiConsumer extends Throwables.CharBiConsumer<RuntimeExcepti
      *         followed by the {@code after} operation
      */
     default CharBiConsumer andThen(final CharBiConsumer after) {
-        return (t, u) -> {
-            accept(t, u);
-            after.accept(t, u);
+        return (a, b) -> {
+            accept(a, b);
+            after.accept(a, b);
         };
     }
 }

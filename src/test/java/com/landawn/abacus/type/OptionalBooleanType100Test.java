@@ -50,8 +50,8 @@ public class OptionalBooleanType100Test extends TestBase {
     }
 
     @Test
-    public void testIsNonQuotableCsvType() {
-        assertTrue(optionalBooleanType.isNonQuotableCsvType());
+    public void test_isCsvQuoteRequired() {
+        assertFalse(optionalBooleanType.isCsvQuoteRequired());
     }
 
     @Test

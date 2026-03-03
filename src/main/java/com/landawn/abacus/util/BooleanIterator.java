@@ -546,7 +546,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      */
     @SuppressWarnings("deprecation")
     public boolean[] toArray() {
-        return toList().trimToSize().array();
+        return toList().trimToSize().internalArray();
     }
 
     /**

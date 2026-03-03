@@ -3,6 +3,7 @@ package com.landawn.abacus.type;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -73,6 +74,11 @@ public class ImmutableMapEntryType100Test extends TestBase {
         assertNull(immutableMapEntryType.valueOf(""));
         assertNull(immutableMapEntryType.valueOf("{}"));
 
+    }
+
+    @Test
+    public void testValueOfWithMultipleEntriesThrowsException() {
+        assertThrows(IllegalArgumentException.class, () -> immutableMapEntryType.valueOf("{\"a\":1,\"b\":2}"));
     }
 
     @Test

@@ -144,148 +144,148 @@ public class N200Test extends TestBase {
 
     @Test
     public void testOccurrencesOf_booleanArray() {
-        assertEquals(0, N.occurrencesOf((boolean[]) null, true));
-        assertEquals(0, N.occurrencesOf(EMPTY_BOOLEAN_ARRAY_CONST, true));
-        assertEquals(2, N.occurrencesOf(new boolean[] { true, false, true }, true));
-        assertEquals(1, N.occurrencesOf(new boolean[] { true, false, true }, false));
-        assertEquals(0, N.occurrencesOf(new boolean[] { false, false }, true));
-        assertEquals(3, N.occurrencesOf(new boolean[] { true, true, true }, true));
+        assertEquals(0, N.frequency((boolean[]) null, true));
+        assertEquals(0, N.frequency(EMPTY_BOOLEAN_ARRAY_CONST, true));
+        assertEquals(2, N.frequency(new boolean[] { true, false, true }, true));
+        assertEquals(1, N.frequency(new boolean[] { true, false, true }, false));
+        assertEquals(0, N.frequency(new boolean[] { false, false }, true));
+        assertEquals(3, N.frequency(new boolean[] { true, true, true }, true));
     }
 
     @Test
     public void testOccurrencesOf_charArray() {
-        assertEquals(0, N.occurrencesOf((char[]) null, 'a'));
-        assertEquals(0, N.occurrencesOf(EMPTY_CHAR_ARRAY_CONST, 'a'));
-        assertEquals(2, N.occurrencesOf(new char[] { 'a', 'b', 'a' }, 'a'));
-        assertEquals(1, N.occurrencesOf(new char[] { 'a', 'b', 'c' }, 'b'));
-        assertEquals(0, N.occurrencesOf(new char[] { 'b', 'c' }, 'a'));
+        assertEquals(0, N.frequency((char[]) null, 'a'));
+        assertEquals(0, N.frequency(EMPTY_CHAR_ARRAY_CONST, 'a'));
+        assertEquals(2, N.frequency(new char[] { 'a', 'b', 'a' }, 'a'));
+        assertEquals(1, N.frequency(new char[] { 'a', 'b', 'c' }, 'b'));
+        assertEquals(0, N.frequency(new char[] { 'b', 'c' }, 'a'));
     }
 
     @Test
     public void testOccurrencesOf_byteArray() {
-        assertEquals(0, N.occurrencesOf((byte[]) null, (byte) 1));
-        assertEquals(0, N.occurrencesOf(EMPTY_BYTE_ARRAY_CONST, (byte) 1));
-        assertEquals(2, N.occurrencesOf(new byte[] { 1, 2, 1 }, (byte) 1));
-        assertEquals(1, N.occurrencesOf(new byte[] { 1, 2, 3 }, (byte) 2));
-        assertEquals(0, N.occurrencesOf(new byte[] { 2, 3 }, (byte) 1));
+        assertEquals(0, N.frequency((byte[]) null, (byte) 1));
+        assertEquals(0, N.frequency(EMPTY_BYTE_ARRAY_CONST, (byte) 1));
+        assertEquals(2, N.frequency(new byte[] { 1, 2, 1 }, (byte) 1));
+        assertEquals(1, N.frequency(new byte[] { 1, 2, 3 }, (byte) 2));
+        assertEquals(0, N.frequency(new byte[] { 2, 3 }, (byte) 1));
     }
 
     @Test
     public void testOccurrencesOf_shortArray() {
-        assertEquals(0, N.occurrencesOf((short[]) null, (short) 1));
-        assertEquals(0, N.occurrencesOf(EMPTY_SHORT_ARRAY_CONST, (short) 1));
-        assertEquals(2, N.occurrencesOf(new short[] { 1, 2, 1 }, (short) 1));
-        assertEquals(1, N.occurrencesOf(new short[] { 1, 2, 3 }, (short) 2));
-        assertEquals(0, N.occurrencesOf(new short[] { 2, 3 }, (short) 1));
+        assertEquals(0, N.frequency((short[]) null, (short) 1));
+        assertEquals(0, N.frequency(EMPTY_SHORT_ARRAY_CONST, (short) 1));
+        assertEquals(2, N.frequency(new short[] { 1, 2, 1 }, (short) 1));
+        assertEquals(1, N.frequency(new short[] { 1, 2, 3 }, (short) 2));
+        assertEquals(0, N.frequency(new short[] { 2, 3 }, (short) 1));
     }
 
     @Test
     public void testOccurrencesOf_intArray() {
-        assertEquals(0, N.occurrencesOf((int[]) null, 1));
-        assertEquals(0, N.occurrencesOf(EMPTY_INT_ARRAY_CONST, 1));
-        assertEquals(2, N.occurrencesOf(new int[] { 1, 2, 1 }, 1));
-        assertEquals(1, N.occurrencesOf(new int[] { 1, 2, 3 }, 2));
-        assertEquals(0, N.occurrencesOf(new int[] { 2, 3 }, 1));
+        assertEquals(0, N.frequency((int[]) null, 1));
+        assertEquals(0, N.frequency(EMPTY_INT_ARRAY_CONST, 1));
+        assertEquals(2, N.frequency(new int[] { 1, 2, 1 }, 1));
+        assertEquals(1, N.frequency(new int[] { 1, 2, 3 }, 2));
+        assertEquals(0, N.frequency(new int[] { 2, 3 }, 1));
     }
 
     @Test
     public void testOccurrencesOf_longArray() {
-        assertEquals(0, N.occurrencesOf((long[]) null, 1L));
-        assertEquals(0, N.occurrencesOf(EMPTY_LONG_ARRAY_CONST, 1L));
-        assertEquals(2, N.occurrencesOf(new long[] { 1L, 2L, 1L }, 1L));
-        assertEquals(1, N.occurrencesOf(new long[] { 1L, 2L, 3L }, 2L));
-        assertEquals(0, N.occurrencesOf(new long[] { 2L, 3L }, 1L));
+        assertEquals(0, N.frequency((long[]) null, 1L));
+        assertEquals(0, N.frequency(EMPTY_LONG_ARRAY_CONST, 1L));
+        assertEquals(2, N.frequency(new long[] { 1L, 2L, 1L }, 1L));
+        assertEquals(1, N.frequency(new long[] { 1L, 2L, 3L }, 2L));
+        assertEquals(0, N.frequency(new long[] { 2L, 3L }, 1L));
     }
 
     @Test
     public void testOccurrencesOf_floatArray() {
-        assertEquals(0, N.occurrencesOf((float[]) null, 1.0f));
-        assertEquals(0, N.occurrencesOf(EMPTY_FLOAT_ARRAY_CONST, 1.0f));
-        assertEquals(2, N.occurrencesOf(new float[] { 1.0f, 2.0f, 1.0f }, 1.0f));
-        assertEquals(1, N.occurrencesOf(new float[] { 1.0f, 2.0f, 3.0f }, 2.0f));
-        assertEquals(0, N.occurrencesOf(new float[] { 2.0f, 3.0f }, 1.0f));
-        assertEquals(1, N.occurrencesOf(new float[] { Float.NaN, 1.0f }, Float.NaN));
+        assertEquals(0, N.frequency((float[]) null, 1.0f));
+        assertEquals(0, N.frequency(EMPTY_FLOAT_ARRAY_CONST, 1.0f));
+        assertEquals(2, N.frequency(new float[] { 1.0f, 2.0f, 1.0f }, 1.0f));
+        assertEquals(1, N.frequency(new float[] { 1.0f, 2.0f, 3.0f }, 2.0f));
+        assertEquals(0, N.frequency(new float[] { 2.0f, 3.0f }, 1.0f));
+        assertEquals(1, N.frequency(new float[] { Float.NaN, 1.0f }, Float.NaN));
     }
 
     @Test
     public void testOccurrencesOf_doubleArray() {
-        assertEquals(0, N.occurrencesOf((double[]) null, 1.0));
-        assertEquals(0, N.occurrencesOf(EMPTY_DOUBLE_ARRAY_CONST, 1.0));
-        assertEquals(2, N.occurrencesOf(new double[] { 1.0, 2.0, 1.0 }, 1.0));
-        assertEquals(1, N.occurrencesOf(new double[] { 1.0, 2.0, 3.0 }, 2.0));
-        assertEquals(0, N.occurrencesOf(new double[] { 2.0, 3.0 }, 1.0));
-        assertEquals(1, N.occurrencesOf(new double[] { Double.NaN, 1.0 }, Double.NaN));
+        assertEquals(0, N.frequency((double[]) null, 1.0));
+        assertEquals(0, N.frequency(EMPTY_DOUBLE_ARRAY_CONST, 1.0));
+        assertEquals(2, N.frequency(new double[] { 1.0, 2.0, 1.0 }, 1.0));
+        assertEquals(1, N.frequency(new double[] { 1.0, 2.0, 3.0 }, 2.0));
+        assertEquals(0, N.frequency(new double[] { 2.0, 3.0 }, 1.0));
+        assertEquals(1, N.frequency(new double[] { Double.NaN, 1.0 }, Double.NaN));
     }
 
     @Test
     public void testOccurrencesOf_objectArray() {
-        assertEquals(0, N.occurrencesOf((Object[]) null, "a"));
-        assertEquals(0, N.occurrencesOf(EMPTY_OBJECT_ARRAY_CONST, "a"));
-        assertEquals(2, N.occurrencesOf(new Object[] { "a", "b", "a" }, "a"));
-        assertEquals(1, N.occurrencesOf(new Object[] { "a", "b", "c" }, "b"));
-        assertEquals(0, N.occurrencesOf(new Object[] { "b", "c" }, "a"));
-        assertEquals(2, N.occurrencesOf(new Object[] { "a", null, "a", null }, null));
-        assertEquals(1, N.occurrencesOf(new Object[] { null }, null));
-        assertEquals(0, N.occurrencesOf(new Object[] { "a" }, null));
+        assertEquals(0, N.frequency((Object[]) null, "a"));
+        assertEquals(0, N.frequency(EMPTY_OBJECT_ARRAY_CONST, "a"));
+        assertEquals(2, N.frequency(new Object[] { "a", "b", "a" }, "a"));
+        assertEquals(1, N.frequency(new Object[] { "a", "b", "c" }, "b"));
+        assertEquals(0, N.frequency(new Object[] { "b", "c" }, "a"));
+        assertEquals(2, N.frequency(new Object[] { "a", null, "a", null }, null));
+        assertEquals(1, N.frequency(new Object[] { null }, null));
+        assertEquals(0, N.frequency(new Object[] { "a" }, null));
     }
 
     @Test
     public void testOccurrencesOf_iterable() {
-        assertEquals(0, N.occurrencesOf((Iterable<?>) null, "a"));
-        assertEquals(0, N.occurrencesOf(Collections.emptyList(), "a"));
-        assertEquals(2, N.occurrencesOf(Arrays.asList("a", "b", "a"), "a"));
-        assertEquals(1, N.occurrencesOf(Arrays.asList("a", "b", "c"), "b"));
-        assertEquals(0, N.occurrencesOf(Arrays.asList("b", "c"), "a"));
-        assertEquals(2, N.occurrencesOf(Arrays.asList("a", null, "a", null), null));
-        assertEquals(1, N.occurrencesOf(Collections.singletonList(null), null));
+        assertEquals(0, N.frequency((Iterable<?>) null, "a"));
+        assertEquals(0, N.frequency(Collections.emptyList(), "a"));
+        assertEquals(2, N.frequency(Arrays.asList("a", "b", "a"), "a"));
+        assertEquals(1, N.frequency(Arrays.asList("a", "b", "c"), "b"));
+        assertEquals(0, N.frequency(Arrays.asList("b", "c"), "a"));
+        assertEquals(2, N.frequency(Arrays.asList("a", null, "a", null), null));
+        assertEquals(1, N.frequency(Collections.singletonList(null), null));
     }
 
     @Test
     public void testOccurrencesOf_iterator() {
-        assertEquals(0, N.occurrencesOf((Iterator<?>) null, "a"));
-        assertEquals(0, N.occurrencesOf(Collections.emptyIterator(), "a"));
-        assertEquals(2, N.occurrencesOf(Arrays.asList("a", "b", "a").iterator(), "a"));
-        assertEquals(1, N.occurrencesOf(Arrays.asList("a", "b", "c").iterator(), "b"));
-        assertEquals(0, N.occurrencesOf(Arrays.asList("b", "c").iterator(), "a"));
-        assertEquals(2, N.occurrencesOf(Arrays.asList("a", null, "a", null).iterator(), null));
+        assertEquals(0, N.frequency((Iterator<?>) null, "a"));
+        assertEquals(0, N.frequency(Collections.emptyIterator(), "a"));
+        assertEquals(2, N.frequency(Arrays.asList("a", "b", "a").iterator(), "a"));
+        assertEquals(1, N.frequency(Arrays.asList("a", "b", "c").iterator(), "b"));
+        assertEquals(0, N.frequency(Arrays.asList("b", "c").iterator(), "a"));
+        assertEquals(2, N.frequency(Arrays.asList("a", null, "a", null).iterator(), null));
 
     }
 
     @Test
     public void testOccurrencesOf_stringChar() {
-        assertEquals(0, N.occurrencesOf((String) null, 'a'));
-        assertEquals(0, N.occurrencesOf("", 'a'));
-        assertEquals(2, N.occurrencesOf("aba", 'a'));
-        assertEquals(1, N.occurrencesOf("abc", 'b'));
-        assertEquals(0, N.occurrencesOf("bc", 'a'));
+        assertEquals(0, N.frequency((String) null, 'a'));
+        assertEquals(0, N.frequency("", 'a'));
+        assertEquals(2, N.frequency("aba", 'a'));
+        assertEquals(1, N.frequency("abc", 'b'));
+        assertEquals(0, N.frequency("bc", 'a'));
     }
 
     @Test
     public void testOccurrencesOf_stringString() {
-        assertEquals(0, N.occurrencesOf((String) null, "a"));
-        assertEquals(0, N.occurrencesOf("", "a"));
-        assertEquals(2, N.occurrencesOf("ababa", "ab"));
-        assertEquals(1, N.occurrencesOf("abcab", "bca"));
-        assertEquals(0, N.occurrencesOf("def", "abc"));
-        assertEquals(0, N.occurrencesOf("abc", ""));
-        assertEquals(0, N.occurrencesOf("abc", ""));
-        assertEquals(0, N.occurrencesOf("", ""));
+        assertEquals(0, N.frequency((String) null, "a"));
+        assertEquals(0, N.frequency("", "a"));
+        assertEquals(2, N.frequency("ababa", "ab"));
+        assertEquals(1, N.frequency("abcab", "bca"));
+        assertEquals(0, N.frequency("def", "abc"));
+        assertEquals(0, N.frequency("abc", ""));
+        assertEquals(0, N.frequency("abc", ""));
+        assertEquals(0, N.frequency("", ""));
     }
 
     @Test
     public void testOccurrencesMap_array() {
         Map<String, Integer> expected = new HashMap<>();
-        assertMapEquals(expected, N.occurrencesMap((String[]) null));
-        assertMapEquals(expected, N.occurrencesMap(new String[] {}));
+        assertMapEquals(expected, N.frequencyMap((String[]) null));
+        assertMapEquals(expected, N.frequencyMap(new String[] {}));
 
         expected.put("a", 2);
         expected.put("b", 1);
-        assertMapEquals(expected, N.occurrencesMap(new String[] { "a", "b", "a" }));
+        assertMapEquals(expected, N.frequencyMap(new String[] { "a", "b", "a" }));
 
         expected.clear();
         expected.put(null, 2);
         expected.put("a", 1);
-        assertMapEquals(expected, N.occurrencesMap(new String[] { null, "a", null }));
+        assertMapEquals(expected, N.frequencyMap(new String[] { null, "a", null }));
     }
 
     @Test
@@ -293,19 +293,19 @@ public class N200Test extends TestBase {
         Supplier<Map<String, Integer>> supplier = LinkedHashMap::new;
 
         Map<String, Integer> expected = new LinkedHashMap<>();
-        assertMapEquals(expected, N.occurrencesMap((String[]) null, supplier));
-        assertMapEquals(expected, N.occurrencesMap(new String[] {}, supplier));
+        assertMapEquals(expected, N.frequencyMap((String[]) null, supplier));
+        assertMapEquals(expected, N.frequencyMap(new String[] {}, supplier));
 
         expected.put("a", 2);
         expected.put("b", 1);
-        Map<String, Integer> actual = N.occurrencesMap(new String[] { "a", "b", "a" }, supplier);
+        Map<String, Integer> actual = N.frequencyMap(new String[] { "a", "b", "a" }, supplier);
         assertMapEquals(expected, actual);
         assertTrue(actual instanceof LinkedHashMap);
 
         expected.clear();
         expected.put(null, 2);
         expected.put("a", 1);
-        actual = N.occurrencesMap(new String[] { null, "a", null }, supplier);
+        actual = N.frequencyMap(new String[] { null, "a", null }, supplier);
         assertMapEquals(expected, actual);
         assertTrue(actual instanceof LinkedHashMap);
     }
@@ -313,17 +313,17 @@ public class N200Test extends TestBase {
     @Test
     public void testOccurrencesMap_iterable() {
         Map<String, Integer> expected = new HashMap<>();
-        assertMapEquals(expected, N.occurrencesMap((Iterable<String>) null));
-        assertMapEquals(expected, N.occurrencesMap(Collections.<String> emptyList()));
+        assertMapEquals(expected, N.frequencyMap((Iterable<String>) null));
+        assertMapEquals(expected, N.frequencyMap(Collections.<String> emptyList()));
 
         expected.put("a", 2);
         expected.put("b", 1);
-        assertMapEquals(expected, N.occurrencesMap(Arrays.asList("a", "b", "a")));
+        assertMapEquals(expected, N.frequencyMap(Arrays.asList("a", "b", "a")));
 
         expected.clear();
         expected.put(null, 2);
         expected.put("a", 1);
-        assertMapEquals(expected, N.occurrencesMap(Arrays.asList(null, "a", null)));
+        assertMapEquals(expected, N.frequencyMap(Arrays.asList(null, "a", null)));
     }
 
     @Test
@@ -331,12 +331,12 @@ public class N200Test extends TestBase {
         Supplier<Map<String, Integer>> supplier = TreeMap::new;
 
         Map<String, Integer> expected = new TreeMap<>();
-        assertMapEquals(expected, N.occurrencesMap((Iterable<String>) null, supplier));
-        assertMapEquals(expected, N.occurrencesMap(Collections.<String> emptyList(), supplier));
+        assertMapEquals(expected, N.frequencyMap((Iterable<String>) null, supplier));
+        assertMapEquals(expected, N.frequencyMap(Collections.<String> emptyList(), supplier));
 
         expected.put("a", 2);
         expected.put("b", 1);
-        Map<String, Integer> actual = N.occurrencesMap(Arrays.asList("a", "b", "a"), supplier);
+        Map<String, Integer> actual = N.frequencyMap(Arrays.asList("a", "b", "a"), supplier);
         assertMapEquals(expected, actual);
         assertTrue(actual instanceof TreeMap);
 
@@ -345,7 +345,7 @@ public class N200Test extends TestBase {
         Map<String, Integer> expectedNull = new HashMap<>();
         expectedNull.put(null, 2);
         expectedNull.put("a", 1);
-        Map<String, Integer> actualNull = N.occurrencesMap(Arrays.asList(null, "a", null), hashMapSupplier);
+        Map<String, Integer> actualNull = N.frequencyMap(Arrays.asList(null, "a", null), hashMapSupplier);
         assertMapEquals(expectedNull, actualNull);
         assertTrue(actualNull instanceof HashMap);
     }
@@ -353,17 +353,17 @@ public class N200Test extends TestBase {
     @Test
     public void testOccurrencesMap_iterator() {
         Map<String, Integer> expected = new HashMap<>();
-        assertMapEquals(expected, N.occurrencesMap((Iterator<String>) null));
-        assertMapEquals(expected, N.occurrencesMap(Collections.<String> emptyIterator()));
+        assertMapEquals(expected, N.frequencyMap((Iterator<String>) null));
+        assertMapEquals(expected, N.frequencyMap(Collections.<String> emptyIterator()));
 
         expected.put("a", 2);
         expected.put("b", 1);
-        assertMapEquals(expected, N.occurrencesMap(Arrays.asList("a", "b", "a").iterator()));
+        assertMapEquals(expected, N.frequencyMap(Arrays.asList("a", "b", "a").iterator()));
 
         expected.clear();
         expected.put(null, 2);
         expected.put("a", 1);
-        assertMapEquals(expected, N.occurrencesMap(Arrays.asList(null, "a", null).iterator()));
+        assertMapEquals(expected, N.frequencyMap(Arrays.asList(null, "a", null).iterator()));
     }
 
     @Test
@@ -371,12 +371,12 @@ public class N200Test extends TestBase {
         Supplier<Map<String, Integer>> supplier = ConcurrentHashMap::new;
 
         Map<String, Integer> expected = new ConcurrentHashMap<>();
-        assertMapEquals(expected, N.occurrencesMap((Iterator<String>) null, supplier));
-        assertMapEquals(expected, N.occurrencesMap(Collections.<String> emptyIterator(), supplier));
+        assertMapEquals(expected, N.frequencyMap((Iterator<String>) null, supplier));
+        assertMapEquals(expected, N.frequencyMap(Collections.<String> emptyIterator(), supplier));
 
         expected.put("a", 2);
         expected.put("b", 1);
-        Map<String, Integer> actual = N.occurrencesMap(Arrays.asList("a", "b", "a").iterator(), supplier);
+        Map<String, Integer> actual = N.frequencyMap(Arrays.asList("a", "b", "a").iterator(), supplier);
         assertMapEquals(expected, actual);
         assertTrue(actual instanceof ConcurrentHashMap);
     }

@@ -263,7 +263,7 @@ public class IntList2025Test extends TestBase {
     @Test
     public void test_array() {
         IntList list = IntList.of(1, 2, 3);
-        int[] arr = list.array();
+        int[] arr = list.internalArray();
         assertNotNull(arr);
         assertTrue(arr.length >= 3);
     }
@@ -935,17 +935,17 @@ public class IntList2025Test extends TestBase {
     }
 
     @Test
-    public void test_occurrencesOf() {
+    public void test_frequency() {
         IntList list = IntList.of(1, 2, 3, 2, 4, 2);
-        assertEquals(3, list.occurrencesOf(2));
-        assertEquals(1, list.occurrencesOf(1));
-        assertEquals(0, list.occurrencesOf(42));
+        assertEquals(3, list.frequency(2));
+        assertEquals(1, list.frequency(1));
+        assertEquals(0, list.frequency(42));
     }
 
     @Test
-    public void test_occurrencesOf_empty() {
+    public void test_frequency_empty() {
         IntList list = new IntList();
-        assertEquals(0, list.occurrencesOf(1));
+        assertEquals(0, list.frequency(1));
     }
 
     @Test

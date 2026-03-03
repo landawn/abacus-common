@@ -126,7 +126,9 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      */
     @Override
     public AtomicBoolean get(final ResultSet rs, final int columnIndex) throws SQLException {
-        return new AtomicBoolean(rs.getBoolean(columnIndex));
+        final boolean value = rs.getBoolean(columnIndex);
+
+        return rs.wasNull() ? null : new AtomicBoolean(value);
     }
 
     /**
@@ -141,7 +143,9 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      */
     @Override
     public AtomicBoolean get(final ResultSet rs, final String columnName) throws SQLException {
-        return new AtomicBoolean(rs.getBoolean(columnName));
+        final boolean value = rs.getBoolean(columnName);
+
+        return rs.wasNull() ? null : new AtomicBoolean(value);
     }
 
     /**
@@ -156,7 +160,11 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final AtomicBoolean x) throws SQLException {
-        stmt.setBoolean(columnIndex, x != null && x.get());
+        if (x == null) {
+            stmt.setNull(columnIndex, java.sql.Types.BOOLEAN);
+        } else {
+            stmt.setBoolean(columnIndex, x.get());
+        }
     }
 
     /**
@@ -171,7 +179,11 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final AtomicBoolean x) throws SQLException {
-        stmt.setBoolean(parameterName, x != null && x.get());
+        if (x == null) {
+            stmt.setNull(parameterName, java.sql.Types.BOOLEAN);
+        } else {
+            stmt.setBoolean(parameterName, x.get());
+        }
     }
 
     /**

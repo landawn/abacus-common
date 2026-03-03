@@ -64,10 +64,10 @@ public interface ShortBinaryOperator extends Throwables.ShortBinaryOperator<Runt
      *     .reduce((short) 0, add);   // Sum all values
      * }</pre>
      *
-     * @param left the first operand
-     * @param right the second operand
+     * @param a the first operand
+     * @param b the second operand
      * @return the operator result
      */
     @Override
-    short applyAsShort(short left, short right);
+    short applyAsShort(short a, short b);
 }

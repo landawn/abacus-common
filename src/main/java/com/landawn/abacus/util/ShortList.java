@@ -215,7 +215,7 @@ import com.landawn.abacus.util.stream.ShortStream;
  * <ul>
  *   <li><b>Aggregation:</b> Sum, min, max operations via stream API</li>
  *   <li><b>Central Tendency:</b> Median calculation with efficient sorting</li>
- *   <li><b>Occurrence Counting:</b> {@code occurrencesOf()} for frequency analysis</li>
+ *   <li><b>Occurrence Counting:</b> {@code frequency()} for frequency analysis</li>
  *   <li><b>Duplicate Detection:</b> {@code hasDuplicates()}, {@code removeDuplicates()}</li>
  * </ul>
  *
@@ -264,7 +264,7 @@ import com.landawn.abacus.util.stream.ShortStream;
  *   <li><b>{@link ShortStream}:</b> Functional processing of short sequences</li>
  * </ul>
  *
- * <p><b>Example: Audio Sample Processing</b>
+ * <p><b>Usage Examples: Audio Sample Processing</b>
  * <pre>{@code
  * // Process 16-bit audio samples
  * ShortList leftChannel = new ShortList(44100);   // 1 second at 44.1kHz
@@ -542,7 +542,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     @Beta
     @Deprecated
     @Override
-    public short[] array() {
+    public short[] internalArray() {
         return elementData;
     }
 
@@ -639,7 +639,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
         ensureCapacity(size + numNew);
 
-        N.copy(c.array(), 0, elementData, size, numNew);
+        N.copy(c.internalArray(), 0, elementData, size, numNew);
 
         size += numNew;
 
@@ -675,7 +675,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
             N.copy(elementData, index, elementData, index + numNew, numMoved);
         }
 
-        N.copy(c.array(), 0, elementData, index, numNew);
+        N.copy(c.internalArray(), 0, elementData, index, numNew);
 
         size += numNew;
 
@@ -1714,7 +1714,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param valueToFind the value to count occurrences of
      * @return the number of times the specified value appears in this list
      */
-    public int occurrencesOf(final short valueToFind) {
+    public int frequency(final short valueToFind) {
         if (size == 0) {
             return 0;
         }

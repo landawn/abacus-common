@@ -199,20 +199,6 @@ public final class Charsets {
      * @see StandardCharsets
      */
     public static Charset get(final String charsetName) {
-        Charset charset = charsetPool.get(charsetName);
-
-        if (charset == null) {
-            synchronized (charsetPool) {
-                // Double-check pattern: verify charset is still null after acquiring lock
-                charset = charsetPool.get(charsetName);
-
-                if (charset == null) {
-                    charset = Charset.forName(charsetName);
-                    charsetPool.put(charsetName, charset);
-                }
-            }
-        }
-
-        return charset;
+        return charsetPool.computeIfAbsent(charsetName, Charset::forName);
     }
 }

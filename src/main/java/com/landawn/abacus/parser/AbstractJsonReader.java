@@ -59,8 +59,8 @@ abstract class AbstractJsonReader implements JsonReader { //NOSONAR
     static {
         charEvents[','] = COMMA;
         charEvents[':'] = COLON;
-        charEvents['"'] = START_QUOTATION_D;
-        charEvents['\''] = START_QUOTATION_S;
+        charEvents['"'] = START_DOUBLE_QUOTE;
+        charEvents['\''] = START_SINGLE_QUOTE;
         charEvents['{'] = START_BRACE;
         charEvents['}'] = END_BRACE;
         charEvents['['] = START_BRACKET;
@@ -118,10 +118,10 @@ abstract class AbstractJsonReader implements JsonReader { //NOSONAR
         eventChars[END_BRACE] = '}';
         eventChars[START_BRACKET] = '[';
         eventChars[END_BRACKET] = ']';
-        eventChars[START_QUOTATION_D] = '"';
-        eventChars[END_QUOTATION_D] = '"';
-        eventChars[START_QUOTATION_S] = '\'';
-        eventChars[END_QUOTATION_S] = '\'';
+        eventChars[START_DOUBLE_QUOTE] = '"';
+        eventChars[END_DOUBLE_QUOTE] = '"';
+        eventChars[START_SINGLE_QUOTE] = '\'';
+        eventChars[END_SINGLE_QUOTE] = '\'';
         eventChars[COLON] = ':';
         eventChars[COMMA] = ',';
     }

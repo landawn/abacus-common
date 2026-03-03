@@ -107,9 +107,9 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
                 sb.append(ELEMENT_SEPARATOR);
             }
 
-            sb.append(WD.QUOTATION_S);
+            sb.append(WD.SINGLE_QUOTE);
             sb.append(x[i]);
-            sb.append(WD.QUOTATION_S);
+            sb.append(WD.SINGLE_QUOTE);
         }
 
         sb.append(WD._BRACKET_R);
@@ -143,7 +143,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
         final char[] a = new char[len];
 
         if (len > 0) {
-            boolean isQuoted = (strs[0].length() > 1) && ((strs[0].charAt(0) == WD._QUOTATION_S) || (strs[0].charAt(0) == WD._QUOTATION_D));
+            boolean isQuoted = (strs[0].length() > 1) && ((strs[0].charAt(0) == WD._SINGLE_QUOTE) || (strs[0].charAt(0) == WD._DOUBLE_QUOTE));
 
             if (isQuoted) {
                 for (int i = 0; i < len; i++) {

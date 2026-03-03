@@ -410,6 +410,16 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     }
 
     private static Class<?> getEnumClass(final Class<?> clazz) {
-        return clazz.isEnum() ? clazz : clazz.getEnclosingClass();
+        if (clazz.isEnum()) {
+            return clazz;
+        }
+
+        final Class<?> enclosing = clazz.getEnclosingClass();
+
+        if (enclosing != null && enclosing.isEnum()) {
+            return enclosing;
+        }
+
+        throw new IllegalArgumentException("Not an enum class: " + clazz);
     }
 }

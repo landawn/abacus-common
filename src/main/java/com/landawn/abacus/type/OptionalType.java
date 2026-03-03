@@ -100,16 +100,16 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
     }
 
     /**
-     * Indicates whether this type is a generic type.
-     * OptionalType is always generic as it is parameterized with a type T.
+     * Indicates whether this type is a parameterized type.
+     * OptionalType is always parameterized as it is parameterized with a type T.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Optional<String>> type = TypeFactory.getType("Optional<String>");
-     * boolean isGeneric = type.isGenericType();   // Returns true
+     * boolean isParameterized = type.isParameterizedType();   // Returns true
      * }</pre>
      *
-     * @return {@code true}, indicating this is a generic type
+     * @return {@code true}, indicating this is a parameterized type
      */
     @Override
     public boolean isParameterizedType() {

@@ -3,6 +3,7 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,6 +66,14 @@ public class Consumer2025Test extends TestBase {
         assertEquals(2, results.size());
         assertEquals("first:test", results.get(0));
         assertEquals("second:test", results.get(1));
+    }
+
+    @Test
+    public void testAndThenRejectsNullConsumerImmediately() {
+        Consumer<String> consumer = s -> {
+        };
+
+        assertThrows(NullPointerException.class, () -> consumer.andThen(null));
     }
 
     @Test

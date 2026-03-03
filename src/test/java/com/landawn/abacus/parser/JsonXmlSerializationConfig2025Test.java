@@ -24,7 +24,7 @@ public class JsonXmlSerializationConfig2025Test extends TestBase {
     @Test
     public void test_getCharQuotation() {
         TestConfig config = new TestConfig();
-        assertEquals(WD._QUOTATION_D, config.getCharQuotation());
+        assertEquals(WD._DOUBLE_QUOTE, config.getCharQuotation());
     }
 
     @Test
@@ -50,7 +50,7 @@ public class JsonXmlSerializationConfig2025Test extends TestBase {
     @Test
     public void test_getStringQuotation() {
         TestConfig config = new TestConfig();
-        assertEquals(WD._QUOTATION_D, config.getStringQuotation());
+        assertEquals(WD._DOUBLE_QUOTE, config.getStringQuotation());
     }
 
     @Test

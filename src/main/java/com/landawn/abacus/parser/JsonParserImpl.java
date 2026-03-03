@@ -19,13 +19,13 @@ import static com.landawn.abacus.parser.JsonReader.COLON;
 import static com.landawn.abacus.parser.JsonReader.COMMA;
 import static com.landawn.abacus.parser.JsonReader.END_BRACE;
 import static com.landawn.abacus.parser.JsonReader.END_BRACKET;
-import static com.landawn.abacus.parser.JsonReader.END_QUOTATION_D;
-import static com.landawn.abacus.parser.JsonReader.END_QUOTATION_S;
+import static com.landawn.abacus.parser.JsonReader.END_DOUBLE_QUOTE;
+import static com.landawn.abacus.parser.JsonReader.END_SINGLE_QUOTE;
 import static com.landawn.abacus.parser.JsonReader.EOF;
 import static com.landawn.abacus.parser.JsonReader.START_BRACE;
 import static com.landawn.abacus.parser.JsonReader.START_BRACKET;
-import static com.landawn.abacus.parser.JsonReader.START_QUOTATION_D;
-import static com.landawn.abacus.parser.JsonReader.START_QUOTATION_S;
+import static com.landawn.abacus.parser.JsonReader.START_DOUBLE_QUOTE;
+import static com.landawn.abacus.parser.JsonReader.START_SINGLE_QUOTE;
 import static com.landawn.abacus.parser.JsonReader.UNDEFINED;
 
 import java.io.File;
@@ -859,9 +859,9 @@ final class JsonParserImpl extends AbstractJsonParser {
             }
 
             if (config.quotePropName()) {
-                bw.write(_D_QUOTATION);
+                bw.write(_DOUBLE_QUOTE);
                 bw.write(ClassUtil.getSimpleClassName(cls));
-                bw.write(_D_QUOTATION);
+                bw.write(_DOUBLE_QUOTE);
             } else {
                 bw.write(ClassUtil.getSimpleClassName(cls));
             }
@@ -1018,15 +1018,21 @@ final class JsonParserImpl extends AbstractJsonParser {
             }
 
             if (key == null) {
-                bw.write(NULL_CHAR_ARRAY);
+                if (isQuoteMapKey) {
+                    bw.write(_DOUBLE_QUOTE);
+                    bw.write(NULL_CHAR_ARRAY);
+                    bw.write(_DOUBLE_QUOTE);
+                } else {
+                    bw.write(NULL_CHAR_ARRAY);
+                }
             } else {
                 keyType = Type.of(key.getClass());
 
                 if (keyType.isSerializable() && !(keyType.isArray() || keyType.isCollection() || keyType.clazz().isEnum())) {
                     if (isQuoteMapKey || !(keyType.isNumber() || keyType.isBoolean())) {
-                        bw.write(_D_QUOTATION);
+                        bw.write(_DOUBLE_QUOTE);
                         bw.writeCharacter(keyType.stringOf(key));
-                        bw.write(_D_QUOTATION);
+                        bw.write(_DOUBLE_QUOTE);
                     } else {
                         bw.writeCharacter(keyType.stringOf(key));
                     }
@@ -1191,9 +1197,9 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
 
         if (quotePropName) {
-            bw.write(_D_QUOTATION);
+            bw.write(_DOUBLE_QUOTE);
             bw.write(mapEntity.entityName());
-            bw.write(_D_QUOTATION);
+            bw.write(_DOUBLE_QUOTE);
         } else {
             bw.write(mapEntity.entityName());
         }
@@ -1223,9 +1229,9 @@ final class JsonParserImpl extends AbstractJsonParser {
                 }
 
                 if (quotePropName) {
-                    bw.write(_D_QUOTATION);
+                    bw.write(_DOUBLE_QUOTE);
                     bw.write(jsonXmlNamingPolicy == null ? propName : jsonXmlNamingPolicy.convert(propName));
-                    bw.write(_D_QUOTATION);
+                    bw.write(_DOUBLE_QUOTE);
                 } else {
                     bw.write(jsonXmlNamingPolicy == null ? propName : jsonXmlNamingPolicy.convert(propName));
                 }
@@ -1291,9 +1297,9 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
 
         if (quotePropName) {
-            bw.write(_D_QUOTATION);
+            bw.write(_DOUBLE_QUOTE);
             bw.write(entityId.entityName());
-            bw.write(_D_QUOTATION);
+            bw.write(_DOUBLE_QUOTE);
         } else {
             bw.write(entityId.entityName());
         }
@@ -1323,9 +1329,9 @@ final class JsonParserImpl extends AbstractJsonParser {
                 }
 
                 if (quotePropName) {
-                    bw.write(_D_QUOTATION);
+                    bw.write(_DOUBLE_QUOTE);
                     bw.write(jsonXmlNamingPolicy == null ? propName : jsonXmlNamingPolicy.convert(propName));
-                    bw.write(_D_QUOTATION);
+                    bw.write(_DOUBLE_QUOTE);
                 } else {
                     bw.write(jsonXmlNamingPolicy == null ? propName : jsonXmlNamingPolicy.convert(propName));
                 }
@@ -1400,9 +1406,9 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
 
         if (quotePropName) {
-            bw.write(_D_QUOTATION);
+            bw.write(_DOUBLE_QUOTE);
             bw.write(COLUMN_NAMES);
-            bw.write(_D_QUOTATION);
+            bw.write(_DOUBLE_QUOTE);
         } else {
             bw.write(COLUMN_NAMES);
         }
@@ -1431,9 +1437,9 @@ final class JsonParserImpl extends AbstractJsonParser {
             }
 
             if (quotePropName) {
-                bw.write(_D_QUOTATION);
+                bw.write(_DOUBLE_QUOTE);
                 bw.write(COLUMN_TYPES);
-                bw.write(_D_QUOTATION);
+                bw.write(_DOUBLE_QUOTE);
             } else {
                 bw.write(COLUMN_TYPES);
             }
@@ -1474,9 +1480,9 @@ final class JsonParserImpl extends AbstractJsonParser {
             }
 
             if (quotePropName) {
-                bw.write(_D_QUOTATION);
+                bw.write(_DOUBLE_QUOTE);
                 bw.write(PROPERTIES);
-                bw.write(_D_QUOTATION);
+                bw.write(_DOUBLE_QUOTE);
             } else {
                 bw.write(PROPERTIES);
             }
@@ -1506,9 +1512,9 @@ final class JsonParserImpl extends AbstractJsonParser {
             }
 
             if (quotePropName) {
-                bw.write(_D_QUOTATION);
+                bw.write(_DOUBLE_QUOTE);
                 bw.write(IS_FROZEN);
-                bw.write(_D_QUOTATION);
+                bw.write(_DOUBLE_QUOTE);
             } else {
                 bw.write(IS_FROZEN);
             }
@@ -1537,9 +1543,9 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
 
         if (quotePropName) {
-            bw.write(_D_QUOTATION);
+            bw.write(_DOUBLE_QUOTE);
             bw.write(COLUMNS);
-            bw.write(_D_QUOTATION);
+            bw.write(_DOUBLE_QUOTE);
         } else {
             bw.write(COLUMNS);
         }
@@ -1571,9 +1577,9 @@ final class JsonParserImpl extends AbstractJsonParser {
                 }
 
                 if (quotePropName) {
-                    bw.write(_D_QUOTATION);
+                    bw.write(_DOUBLE_QUOTE);
                     bw.write(columnName);
-                    bw.write(_D_QUOTATION);
+                    bw.write(_DOUBLE_QUOTE);
                 } else {
                     bw.write(columnName);
                 }
@@ -1643,9 +1649,9 @@ final class JsonParserImpl extends AbstractJsonParser {
             }
 
             if (quotePropName) {
-                bw.write(_D_QUOTATION);
+                bw.write(_DOUBLE_QUOTE);
                 bw.write(ROW_KEY_TYPE);
-                bw.write(_D_QUOTATION);
+                bw.write(_DOUBLE_QUOTE);
             } else {
                 bw.write(ROW_KEY_TYPE);
             }
@@ -1656,9 +1662,9 @@ final class JsonParserImpl extends AbstractJsonParser {
             final String rowKeyTypeName = eleTypeClass == null ? null : Type.of(eleTypeClass).name();
 
             if (rowKeyTypeName != null) {
-                bw.write(_D_QUOTATION);
+                bw.write(_DOUBLE_QUOTE);
                 bw.write(rowKeyTypeName);
-                bw.write(_D_QUOTATION);
+                bw.write(_DOUBLE_QUOTE);
             } else {
                 bw.write(NULL_CHAR_ARRAY);
             }
@@ -1682,9 +1688,9 @@ final class JsonParserImpl extends AbstractJsonParser {
             }
 
             if (quotePropName) {
-                bw.write(_D_QUOTATION);
+                bw.write(_DOUBLE_QUOTE);
                 bw.write(COLUMN_KEY_TYPE);
-                bw.write(_D_QUOTATION);
+                bw.write(_DOUBLE_QUOTE);
             } else {
                 bw.write(COLUMN_KEY_TYPE);
             }
@@ -1695,9 +1701,9 @@ final class JsonParserImpl extends AbstractJsonParser {
             final String columnKeyTypeName = eleTypeClass == null ? null : Type.of(eleTypeClass).name();
 
             if (columnKeyTypeName != null) {
-                bw.write(_D_QUOTATION);
+                bw.write(_DOUBLE_QUOTE);
                 bw.write(columnKeyTypeName);
-                bw.write(_D_QUOTATION);
+                bw.write(_DOUBLE_QUOTE);
             } else {
                 bw.write(NULL_CHAR_ARRAY);
             }
@@ -1722,9 +1728,9 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
 
         if (quotePropName) {
-            bw.write(_D_QUOTATION);
+            bw.write(_DOUBLE_QUOTE);
             bw.write(ROW_KEY_SET);
-            bw.write(_D_QUOTATION);
+            bw.write(_DOUBLE_QUOTE);
         } else {
             bw.write(ROW_KEY_SET);
         }
@@ -1752,9 +1758,9 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
 
         if (quotePropName) {
-            bw.write(_D_QUOTATION);
+            bw.write(_DOUBLE_QUOTE);
             bw.write(COLUMN_KEY_SET);
-            bw.write(_D_QUOTATION);
+            bw.write(_DOUBLE_QUOTE);
         } else {
             bw.write(COLUMN_KEY_SET);
         }
@@ -1783,9 +1789,9 @@ final class JsonParserImpl extends AbstractJsonParser {
             }
 
             if (quotePropName) {
-                bw.write(_D_QUOTATION);
+                bw.write(_DOUBLE_QUOTE);
                 bw.write(COLUMN_TYPES);
-                bw.write(_D_QUOTATION);
+                bw.write(_DOUBLE_QUOTE);
             } else {
                 bw.write(COLUMN_TYPES);
             }
@@ -1825,9 +1831,9 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
 
         if (quotePropName) {
-            bw.write(_D_QUOTATION);
+            bw.write(_DOUBLE_QUOTE);
             bw.write(COLUMNS);
-            bw.write(_D_QUOTATION);
+            bw.write(_DOUBLE_QUOTE);
         } else {
             bw.write(COLUMNS);
         }
@@ -1860,9 +1866,9 @@ final class JsonParserImpl extends AbstractJsonParser {
                 }
 
                 if (quotePropName) {
-                    bw.write(_D_QUOTATION);
+                    bw.write(_DOUBLE_QUOTE);
                     bw.write(columnName);
-                    bw.write(_D_QUOTATION);
+                    bw.write(_DOUBLE_QUOTE);
                 } else {
                     bw.write(columnName);
                 }
@@ -2367,11 +2373,11 @@ final class JsonParserImpl extends AbstractJsonParser {
         // which has less comparison. Fuck???!!!...
         for (int token = firstToken == START_BRACE ? jr.nextToken() : firstToken;; token = jr.nextToken(propInfo == null ? strType : propInfo.jsonXmlType)) {
             switch (token) {
-                case START_QUOTATION_D, START_QUOTATION_S:
+                case START_DOUBLE_QUOTE, START_SINGLE_QUOTE:
 
                     break;
 
-                case END_QUOTATION_D, END_QUOTATION_S:
+                case END_DOUBLE_QUOTE, END_SINGLE_QUOTE:
 
                     if (isPropName) {
                         // propName = jr.getText();
@@ -2684,11 +2690,11 @@ final class JsonParserImpl extends AbstractJsonParser {
 
         for (int token = firstToken == START_BRACE ? jr.nextToken() : firstToken;; token = jr.nextToken()) {
             switch (token) {
-                case START_QUOTATION_D, START_QUOTATION_S:
+                case START_DOUBLE_QUOTE, START_SINGLE_QUOTE:
 
                     break;
 
-                case END_QUOTATION_D, END_QUOTATION_S:
+                case END_DOUBLE_QUOTE, END_SINGLE_QUOTE:
 
                     if (isKey) {
                         key = readValue(jr, readNullToEmpty, keyType);
@@ -2872,11 +2878,11 @@ final class JsonParserImpl extends AbstractJsonParser {
                 for (int preToken = firstToken,
                         token = firstToken == START_BRACKET ? jr.nextToken() : firstToken;; preToken = token, token = jr.nextToken(eleType)) {
                     switch (token) {
-                        case START_QUOTATION_D, START_QUOTATION_S:
+                        case START_DOUBLE_QUOTE, START_SINGLE_QUOTE:
 
                             break;
 
-                        case END_QUOTATION_D, END_QUOTATION_S:
+                        case END_DOUBLE_QUOTE, END_SINGLE_QUOTE:
 
                             value = readValue(jr, readNullToEmpty, eleType);
 
@@ -2946,11 +2952,11 @@ final class JsonParserImpl extends AbstractJsonParser {
             for (int preToken = firstToken,
                     token = firstToken == START_BRACKET ? jr.nextToken() : firstToken;; preToken = token, token = jr.nextToken(eleType)) {
                 switch (token) {
-                    case START_QUOTATION_D, START_QUOTATION_S:
+                    case START_DOUBLE_QUOTE, START_SINGLE_QUOTE:
 
                         break;
 
-                    case END_QUOTATION_D, END_QUOTATION_S:
+                    case END_DOUBLE_QUOTE, END_SINGLE_QUOTE:
 
                         value = readValue(jr, readNullToEmpty, eleType);
 
@@ -3061,11 +3067,11 @@ final class JsonParserImpl extends AbstractJsonParser {
 
         for (int preToken = firstToken, token = firstToken == START_BRACKET ? jr.nextToken() : firstToken;; preToken = token, token = jr.nextToken(eleType)) {
             switch (token) {
-                case START_QUOTATION_D, START_QUOTATION_S:
+                case START_DOUBLE_QUOTE, START_SINGLE_QUOTE:
 
                     break;
 
-                case END_QUOTATION_D, END_QUOTATION_S:
+                case END_DOUBLE_QUOTE, END_SINGLE_QUOTE:
 
                     value = readValue(jr, readNullToEmpty, eleType);
 
@@ -3149,11 +3155,11 @@ final class JsonParserImpl extends AbstractJsonParser {
 
         for (int token = firstToken == START_BRACE ? jr.nextToken() : firstToken;; token = jr.nextToken()) {
             switch (token) {
-                case START_QUOTATION_D, START_QUOTATION_S:
+                case START_DOUBLE_QUOTE, START_SINGLE_QUOTE:
 
                     break;
 
-                case END_QUOTATION_D, END_QUOTATION_S, COLON:
+                case END_DOUBLE_QUOTE, END_SINGLE_QUOTE, COLON:
 
                     if (jr.hasText()) {
                         if (mapEntity == null) {
@@ -3208,11 +3214,11 @@ final class JsonParserImpl extends AbstractJsonParser {
 
         for (int token = firstToken == START_BRACE ? jr.nextToken() : firstToken;; token = jr.nextToken()) {
             switch (token) {
-                case START_QUOTATION_D, START_QUOTATION_S:
+                case START_DOUBLE_QUOTE, START_SINGLE_QUOTE:
 
                     break;
 
-                case END_QUOTATION_D, END_QUOTATION_S, COLON:
+                case END_DOUBLE_QUOTE, END_SINGLE_QUOTE, COLON:
 
                     if (jr.hasText()) {
                         if (entityId == null) {
@@ -3292,11 +3298,11 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                 for (;; token = jr.nextToken()) {
                     switch (token) {
-                        case START_QUOTATION_D, START_QUOTATION_S:
+                        case START_DOUBLE_QUOTE, START_SINGLE_QUOTE:
 
                             break;
 
-                        case END_QUOTATION_D, END_QUOTATION_S:
+                        case END_DOUBLE_QUOTE, END_SINGLE_QUOTE:
                             if (isKey) {
                                 key = (String) readValue(jr, readNullToEmpty, keyType);
                                 valueType = hasValueTypes ? config.getValueType(key, objType) : objType;
@@ -3448,11 +3454,11 @@ final class JsonParserImpl extends AbstractJsonParser {
 
             for (int token = firstToken == START_BRACE ? jr.nextToken() : firstToken;; token = jr.nextToken()) {
                 switch (token) {
-                    case START_QUOTATION_D, START_QUOTATION_S:
+                    case START_DOUBLE_QUOTE, START_SINGLE_QUOTE:
 
                         break;
 
-                    case END_QUOTATION_D, END_QUOTATION_S:
+                    case END_DOUBLE_QUOTE, END_SINGLE_QUOTE:
 
                         if (isKey) {
                             columnName = jr.getText();
@@ -3542,11 +3548,11 @@ final class JsonParserImpl extends AbstractJsonParser {
                                 token = jr.nextToken();
 
                                 switch (token) {
-                                    case START_QUOTATION_D, START_QUOTATION_S:
+                                    case START_DOUBLE_QUOTE, START_SINGLE_QUOTE:
 
                                         break;
 
-                                    case END_QUOTATION_D, END_QUOTATION_S:
+                                    case END_DOUBLE_QUOTE, END_SINGLE_QUOTE:
                                         if (isKey) {
                                             columnName = jr.getText();
                                         } else {
@@ -3711,11 +3717,11 @@ final class JsonParserImpl extends AbstractJsonParser {
 
         for (int token = firstToken == START_BRACE ? jr.nextToken() : firstToken;; token = jr.nextToken()) {
             switch (token) {
-                case START_QUOTATION_D, START_QUOTATION_S:
+                case START_DOUBLE_QUOTE, START_SINGLE_QUOTE:
 
                     break;
 
-                case END_QUOTATION_D, END_QUOTATION_S:
+                case END_DOUBLE_QUOTE, END_SINGLE_QUOTE:
                     if (isKey) {
                         columnName = jr.getText();
                     } else {
@@ -3823,11 +3829,11 @@ final class JsonParserImpl extends AbstractJsonParser {
                             token = jr.nextToken();
 
                             switch (token) {
-                                case START_QUOTATION_D, START_QUOTATION_S:
+                                case START_DOUBLE_QUOTE, START_SINGLE_QUOTE:
 
                                     break;
 
-                                case END_QUOTATION_D, END_QUOTATION_S:
+                                case END_DOUBLE_QUOTE, END_SINGLE_QUOTE:
                                     if (isKey) {
                                         columnName = jr.getText();
                                     } else {
@@ -4309,7 +4315,7 @@ final class JsonParserImpl extends AbstractJsonParser {
         } else if (type.isMap()) {
             bw.write("{}");
         } else if (type.isCharSequence()) {
-            bw.write("");
+            bw.write("\"\"");
         } else {
             bw.write(NULL_CHAR_ARRAY);
         }
@@ -4424,16 +4430,16 @@ final class JsonParserImpl extends AbstractJsonParser {
             case END_BRACKET:
                 return "Error on parsing at ']' with " + jr.getText();
 
-            case START_QUOTATION_D:
+            case START_DOUBLE_QUOTE:
                 return "Error on parsing at starting '\"' with " + jr.getText();
 
-            case END_QUOTATION_D:
+            case END_DOUBLE_QUOTE:
                 return "Error on parsing at ending '\"' with " + jr.getText();
 
-            case START_QUOTATION_S:
+            case START_SINGLE_QUOTE:
                 return "Error on parsing at starting ''' with " + jr.getText();
 
-            case END_QUOTATION_S:
+            case END_SINGLE_QUOTE:
                 return "Error on parsing at ending ''' with " + jr.getText();
 
             case COLON:

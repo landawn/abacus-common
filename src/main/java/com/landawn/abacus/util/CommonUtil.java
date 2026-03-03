@@ -100,6 +100,7 @@ import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Builder.ComparisonBuilder;
+import com.landawn.abacus.util.Iterables.Slice;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalInt;
@@ -261,7 +262,7 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  *   <li><b>{@link com.landawn.abacus.util.IOUtil}:</b> Input/output stream utilities</li>
  * </ul>
  *
- * <p><b>Example: Comprehensive Usage</b>
+ * <p><b>Usage Examples: Comprehensive Usage</b>
  * <pre>{@code
  * // Working with collections safely
  * List<String> names = Arrays.asList("Alice", null, "Bob", "", "Charlie");
@@ -9834,7 +9835,7 @@ sealed class CommonUtil permits N {
      * Type<String> type = typeOf("java.lang.String");
      * }</pre>
      *
-     * @param <T> the type parameter
+     * @param <T> the Java type represented by the returned {@code Type} instance
      * @param typeName the name of the type to be retrieved.
      * @return the Type corresponding to the given type name.
      * @throws IllegalArgumentException if the specified {@code typeName} is {@code null}.
@@ -9856,8 +9857,8 @@ sealed class CommonUtil permits N {
      * }</pre>
      *
      * @param <T> the type represented by the class
-     * @param cls the name of the type to be retrieved.
-     * @return the Type corresponding to the given type name.
+     * @param cls the class for which to retrieve the {@code Type}.
+     * @return the Type corresponding to the given class.
      * @throws IllegalArgumentException if the specified {@code Class} is {@code null}.
      * @see Type#of(Class)
      */
@@ -10582,7 +10583,7 @@ sealed class CommonUtil permits N {
         ImmutableList<E> enumList = (ImmutableList<E>) enumListPool.get(enumClass);
 
         if (enumList == null) {
-            enumList = ImmutableList.wrap(asList(enumClass.getEnumConstants()));
+            enumList = ImmutableList.wrap(toList(enumClass.getEnumConstants()));
 
             enumListPool.put(enumClass, enumList);
         }
@@ -10802,27 +10803,39 @@ sealed class CommonUtil permits N {
         }
 
         final int sizeBefore = c.size();
+        Object obj = null;
+        boolean probeAdded = false;
 
         try {
-            final Object obj = null; // N.NULL_MASK; class cast issue with some Collections
+            obj = new Object();
 
-            c.add(obj);
-
-            final int sizeAfter = c.size();
-
-            if (sizeAfter > sizeBefore) {
-                if (c instanceof List) {
-                    ((List<?>) c).remove(c.size() - 1); // remove last element (the one just added) to avoid corrupting order
-                } else {
-                    c.remove(obj);
-                }
+            try {
+                c.add(obj);
+            } catch (ClassCastException | IllegalArgumentException e) {
+                // Fall back to null for collections enforcing runtime element types.
+                obj = null;
+                c.add(obj);
             }
+
+            probeAdded = c.size() > sizeBefore;
 
             b = false;
         } catch (UnsupportedOperationException e) {
             b = true;
         } catch (Exception e) {
             b = false;
+        } finally {
+            if (probeAdded) {
+                try {
+                    if (c instanceof List) {
+                        ((List<?>) c).remove(c.size() - 1); // remove last element (the one just added) to avoid corrupting order
+                    } else {
+                        c.remove(obj);
+                    }
+                } catch (Exception e) {
+                    throw new IllegalStateException("Failed to rollback collection mutation in isUnmodifiable(Collection)", e);
+                }
+            }
         }
 
         UNMODIFIABLE_CLASSES.put(cls, b);
@@ -10922,20 +10935,26 @@ sealed class CommonUtil permits N {
         }
 
         final int sizeBefore = m.size();
+        Object key = null;
+        Object oldValue = null;
+        boolean keyExistedBefore = false;
+        boolean probeApplied = false;
 
         try {
+            key = new Object();
+            Object value = new Object();
 
-            final Object key = null; // N.NULL_MASK cause class cast issue with some Maps
-            final Object value = null; // N.NULL_MASK class cast issue with some Maps
-
-            final Object oldValue = m.put(key, value);
-
-            final int sizeAfter = m.size();
-
-            if (oldValue != null) {
-                m.put(key, oldValue);
-            } else if (sizeAfter > sizeBefore) {
-                m.remove(key);
+            try {
+                keyExistedBefore = m.containsKey(key);
+                oldValue = m.put(key, value);
+                probeApplied = true;
+            } catch (ClassCastException | IllegalArgumentException e) {
+                // Fall back to null for maps enforcing runtime key/value types.
+                key = null;
+                value = null;
+                keyExistedBefore = m.containsKey(key);
+                oldValue = m.put(key, value);
+                probeApplied = true;
             }
 
             b = false;
@@ -10943,6 +10962,18 @@ sealed class CommonUtil permits N {
             b = true;
         } catch (Exception e) {
             b = false;
+        } finally {
+            if (probeApplied) {
+                try {
+                    if (keyExistedBefore) {
+                        m.put(key, oldValue);
+                    } else if (m.size() > sizeBefore || m.containsKey(key)) {
+                        m.remove(key);
+                    }
+                } catch (Exception e) {
+                    throw new IllegalStateException("Failed to rollback map mutation in isUnmodifiable(Map)", e);
+                }
+            }
         }
 
         UNMODIFIABLE_CLASSES.put(cls, b);
@@ -11905,8 +11936,8 @@ sealed class CommonUtil permits N {
      * multiset.add("apple");
      * multiset.add("apple");
      * multiset.add("banana");
-     * multiset.occurrencesOf("apple");    // returns 2
-     * multiset.occurrencesOf("banana");   // returns 1
+     * multiset.frequency("apple");    // returns 2
+     * multiset.frequency("banana");   // returns 1
      * }</pre>
      *
      * @param <T> the type of elements in the multiset
@@ -13109,7 +13140,7 @@ sealed class CommonUtil permits N {
             }
         }
 
-        return newDataset(columnNames, asList(rows));
+        return newDataset(columnNames, Array.asList(rows));
     }
 
     /**
@@ -13231,7 +13262,7 @@ sealed class CommonUtil permits N {
      * // ds has 1 column "Name" with 3 rows: Alice, Bob, Charlie
      *
      * // Empty collection creates dataset with column but no rows
-     * Dataset empty = N.newDataset("Value", N.asList());
+     * Dataset empty = N.newDataset("Value", N.emptyList());
      * // empty has column "Value" but 0 rows
      * }</pre>
      *
@@ -13384,6 +13415,141 @@ sealed class CommonUtil permits N {
                 && b.columnNames().containsAll(a.columnNames()))) {
             throw new IllegalArgumentException("These two Datasets do not have the same column names: " + a.columnNames() + ", " + b.columnNames());
         }
+    }
+
+    /**
+     * Returns an immutable slice of the array from the specified range [fromIndex, toIndex).
+     * Returns ImmutableList.empty() if the array is {@code null} or empty.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] words = {"apple", "banana", "cherry", "date", "elderberry"};
+     * ImmutableList<String> slice = N.slice(words, 1, 4);
+     * // Returns ["banana", "cherry", "date"]
+     * }</pre>
+     *
+     * @param <T> the type of elements in the array
+     * @param a the array to slice
+     * @param fromIndex the start index (inclusive)
+     * @param toIndex the end index (exclusive)
+     * @return an immutable list containing the slice, or ImmutableList.empty() if the array is {@code null} or empty
+     * @throws IndexOutOfBoundsException if the range is invalid
+     * @see #slice(List, int, int)
+     * @see #toList(Object...)
+     * @see #toList(Object[], int, int)
+     * @see #toSet(Object...)
+     * @see #toSet(Object[], int, int)
+     */
+    public static <T> ImmutableList<T> slice(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        if (isEmpty(a)) {
+            return ImmutableList.empty();
+        }
+
+        return slice(Array.asList(a), fromIndex, toIndex);
+    }
+
+    /**
+     * Returns an immutable slice of the list from the specified range [fromIndex, toIndex).
+     * Returns ImmutableList.empty() if the list is {@code null} or empty.
+     * Uses List.subList() for O(1) view creation without copying elements.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> words = Arrays.asList("apple", "banana", "cherry", "date", "elderberry");
+     * ImmutableList<String> slice = N.slice(words, 1, 4);
+     * // Returns ["banana", "cherry", "date"]
+     * }</pre>
+     *
+     * @param <T> the type of elements in the list
+     * @param c the list to slice
+     * @param fromIndex the start index (inclusive)
+     * @param toIndex the end index (exclusive)
+     * @return an immutable list containing the slice, or ImmutableList.empty() if the list is {@code null} or empty
+     * @throws IndexOutOfBoundsException if the range is invalid
+     * @see #slice(Object[], int, int)
+     * @see #toList(Object[], int, int)
+     * @see #toSet(Object...)
+     * @see #toSet(Object[], int, int)
+     * @see List#subList(int, int)
+     */
+    public static <T> ImmutableList<T> slice(final List<? extends T> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, size(c));
+
+        if (isEmpty(c)) {
+            return ImmutableList.empty();
+        } else if (fromIndex == 0 && toIndex == size(c)) {
+            return ImmutableList.wrap(c);
+        }
+
+        return ImmutableList.wrap(((List<T>) c).subList(fromIndex, toIndex));
+    }
+
+    /**
+     * Returns an immutable slice of the collection from the specified range [fromIndex, toIndex).
+     * Returns ImmutableList.empty() if the collection is {@code null} or empty.
+     * For List collections, uses List.subList() for O(1) view creation.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "b", "c", "d", "e");
+     * ImmutableCollection<String> slice = N.slice(list, 1, 4);
+     * // Returns ["b", "c", "d"]
+     * }</pre>
+     *
+     * @param <T> the type of elements in the collection
+     * @param c the collection to slice
+     * @param fromIndex the start index (inclusive)
+     * @param toIndex the end index (exclusive)
+     * @return an immutable collection containing the slice, or ImmutableList.empty() if the collection is {@code null} or empty
+     * @throws IndexOutOfBoundsException if the range is invalid
+     * @see #slice(List, int, int)
+     */
+    public static <T> ImmutableCollection<T> slice(final Collection<? extends T> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, size(c));
+
+        if (isEmpty(c)) {
+            return ImmutableList.empty();
+        }
+
+        if (c instanceof List) {
+            return slice((List<T>) c, fromIndex, toIndex);
+        }
+
+        return new Slice<>(c, fromIndex, toIndex);
+    }
+
+    /**
+     * Returns a slice of the iterator from the specified range [fromIndex, toIndex).
+     * Returns an empty iterator if iter is {@code null} or fromIndex equals toIndex.
+     * This method consumes elements from the iterator up to toIndex.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+    * com.landawn.abacus.util.stream.Stream<Integer> stream = com.landawn.abacus.util.stream.Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+     * ObjIterator<Integer> slice = N.slice(stream.iterator(), 2, 7);
+     * // Returns [3, 4, 5, 6, 7]
+     * }</pre>
+     *
+     * @param <T> the type of elements in the iterator
+     * @param iter the iterator to slice
+     * @param fromIndex the start index (inclusive)
+     * @param toIndex the end index (exclusive)
+     * @return an iterator containing the slice, or an empty iterator if iter is {@code null} or fromIndex equals toIndex
+     * @throws IllegalArgumentException if fromIndex is negative or fromIndex &gt; toIndex
+     * @see Iterators#skipAndLimit(Iterator, long, long)
+     */
+    public static <T> ObjIterator<T> slice(final Iterator<? extends T> iter, final int fromIndex, final int toIndex) {
+        if (fromIndex < 0 || fromIndex > toIndex) {
+            throw new IllegalArgumentException("Invalid fromIndex/toIndex: [" + fromIndex + ", " + toIndex + "]");
+        }
+
+        if (iter == null || fromIndex == toIndex) {
+            return ObjIterator.empty();
+        }
+
+        return Iterators.skipAndLimit(iter, fromIndex, toIndex - fromIndex); // NOSONAR
     }
 
     /**
@@ -14966,13 +15132,17 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the array
      * @param a the array to be converted
      * @return a modifiable List of objects containing the values from the array
+     * @see #slice(Object[], int, int)
+     * @see #slice(List, int, int)
      */
-    public static <T> List<T> toList(final T[] a) {
+    @SafeVarargs
+    @NullSafe
+    public static <T> List<T> toList(@NullSafe final T... a) {
         if (isEmpty(a)) {
             return new ArrayList<>();
         }
 
-        return asList(a);
+        return new ArrayList<>(Array.asList(a));
     }
 
     /**
@@ -14984,6 +15154,8 @@ sealed class CommonUtil permits N {
      * @param toIndex the ending (exclusive) index of the range to be converted
      * @return a modifiable List of objects containing the values from the specified range of the array
      * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
+     * @see #slice(Object[], int, int)
+     * @see #slice(List, int, int)
      */
     public static <T> List<T> toList(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -14991,7 +15163,7 @@ sealed class CommonUtil permits N {
         if (fromIndex == toIndex) {
             return new ArrayList<>();
         } else if (fromIndex == 0 && toIndex == a.length) {
-            return asList(a);
+            return toList(a);
         }
 
         final List<T> result = new ArrayList<>(toIndex - fromIndex);
@@ -15036,6 +15208,32 @@ sealed class CommonUtil permits N {
         }
 
         return result;
+    }
+
+    /**
+     * Returns a modifiable {@code LinkedList} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code List} is returned
+     * 
+     * <p>This method creates a new {@code LinkedList} and populates it with all elements from the
+     * provided array. Unlike {@link Arrays#asList(Object...)}, this method returns a fully
+     * modifiable list that is not backed by the original array, meaning modifications to the returned
+     * list will not affect the original array and vice versa.</p>
+     *
+     * @param <T> the type of elements in the list
+     * @param a the array of elements to be placed in the List
+     * @return a List containing the specified elements
+     * @see Array#asList(Object...)
+     * @see Arrays#asList(Object...)
+     * @see List#of(Object...)
+     */
+    @SafeVarargs
+    @NullSafe
+    public static <T> LinkedList<T> toLinkedList(final T... a) { //NOSONAR
+        if (isEmpty(a)) {
+            return new LinkedList<>();
+        }
+
+        return new LinkedList<>(Array.asList(a));
     }
 
     /**
@@ -15339,13 +15537,17 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the array
      * @param a the array to be converted
      * @return a modifiable Set of objects containing the values from the array
+     * @see #slice(Object[], int, int)
+     * @see #slice(List, int, int)
      */
-    public static <T> Set<T> toSet(final T[] a) {
+    @SafeVarargs
+    @NullSafe
+    public static <T> Set<T> toSet(@NullSafe final T... a) {
         if (isEmpty(a)) {
             return newHashSet();
         }
 
-        return asSet(a);
+        return new HashSet<>(Array.asList(a));
     }
 
     /**
@@ -15357,6 +15559,8 @@ sealed class CommonUtil permits N {
      * @param toIndex the ending (exclusive) index of the range to be converted
      * @return a modifiable Set of objects containing the values from the specified range of the array
      * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
+     * @see #slice(Object[], int, int)
+     * @see #slice(List, int, int)
      */
     public static <T> Set<T> toSet(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -15408,6 +15612,254 @@ sealed class CommonUtil permits N {
         }
 
         return result;
+    }
+
+    /**
+     * Returns a modifiable {@code LinkedHashSet} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code LinkedHashSet} is returned.
+     *
+     * @param <T> the type of elements in the set
+     * @param a the array of elements to be placed in the set
+     * @return a Set containing the specified elements
+     */
+    @SafeVarargs
+    @NullSafe
+    public static <T> Set<T> toLinkedHashSet(final T... a) {
+        if (isEmpty(a)) {
+            return newLinkedHashSet();
+        }
+
+        return new LinkedHashSet<>(Array.asList(a));
+    }
+
+    /**
+     * Returns a modifiable {@code SortedSet} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code SortedSet} is returned.
+     *
+     * @param <T> the type of elements in the set
+     * @param a the array of elements to be placed in the set
+     * @return a Set containing the specified elements
+     */
+    @SafeVarargs
+    @NullSafe
+    public static <T extends Comparable<T>> SortedSet<T> toSortedSet(final T... a) {
+        if (isEmpty(a)) {
+            return new TreeSet<>();
+        }
+
+        return new TreeSet<>(Array.asList(a));
+    }
+
+    /**
+     * Returns a modifiable {@code NavigableSet} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code NavigableSet} is returned.
+     *
+     * @param <T> the type of elements in the set
+     * @param a the array of elements to be placed in the set
+     * @return a Set containing the specified elements
+     */
+    @SafeVarargs
+    public static <T extends Comparable<T>> NavigableSet<T> toNavigableSet(final T... a) {
+        if (isEmpty(a)) {
+            return new TreeSet<>();
+        }
+
+        return new TreeSet<>(Array.asList(a));
+    }
+
+    /**
+     * Returns a modifiable {@code Queue} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code Queue} is returned.
+     *
+     * @param <T> the type of elements in the queue
+     * @param a the array of elements to be placed in the queue
+     * @return a queue containing the specified elements
+     */
+    @SafeVarargs
+    public static <T> Queue<T> toQueue(final T... a) {
+        return toArrayDeque(a);
+    }
+
+    /**
+     * Returns a modifiable {@code ArrayBlockingQueue} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code ArrayBlockingQueue} is returned.
+     *
+     * @param <T> the type of elements in the queue
+     * @param a the array of elements to be placed in the queue
+     * @return a queue containing the specified elements
+     */
+    @SafeVarargs
+    public static <T> ArrayBlockingQueue<T> toArrayBlockingQueue(final T... a) {
+        if (isEmpty(a)) {
+            return new ArrayBlockingQueue<>(1);
+        }
+
+        final ArrayBlockingQueue<T> queue = new ArrayBlockingQueue<>(a.length);
+
+        queue.addAll(Array.asList(a));
+
+        return queue;
+    }
+
+    /**
+     * Returns a modifiable {@code LinkedBlockingQueue} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code LinkedBlockingQueue} is returned.
+     *
+     * @param <T> the type of elements in the queue
+     * @param a the array of elements to be placed in the queue
+     * @return a queue containing the specified elements
+     */
+    @SafeVarargs
+    public static <T> LinkedBlockingQueue<T> toLinkedBlockingQueue(final T... a) {
+        if (isEmpty(a)) {
+            return new LinkedBlockingQueue<>();
+        }
+
+        final LinkedBlockingQueue<T> queue = new LinkedBlockingQueue<>(a.length);
+
+        queue.addAll(Array.asList(a));
+
+        return queue;
+    }
+
+    /**
+     * Returns a modifiable {@code ConcurrentLinkedQueue} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code ConcurrentLinkedQueue} is returned.
+     *
+     * @param <T> the type of elements in the queue
+     * @param a the array of elements to be placed in the queue
+     * @return a queue containing the specified elements
+     */
+    @SafeVarargs
+    public static <T> ConcurrentLinkedQueue<T> toConcurrentLinkedQueue(final T... a) { //NOSONAR
+        if (isEmpty(a)) {
+            return new ConcurrentLinkedQueue<>();
+        }
+
+        return new ConcurrentLinkedQueue<>(Array.asList(a));
+    }
+
+    /**
+     * Returns a modifiable {@code DelayQueue} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code DelayQueue} is returned.
+     *
+     * @param <T> the type of elements in the queue
+     * @param a the array of elements to be placed in the queue
+     * @return a queue containing the specified elements
+     */
+    @SafeVarargs
+    public static <T extends Delayed> DelayQueue<T> toDelayQueue(final T... a) {
+        if (isEmpty(a)) {
+            return new DelayQueue<>();
+        }
+
+        return new DelayQueue<>(Array.asList(a));
+    }
+
+    /**
+     * Returns a modifiable {@code PriorityQueue} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code PriorityQueue} is returned.
+     *
+     * @param <T> the type of elements in the queue
+     * @param a the array of elements to be placed in the queue
+     * @return a queue containing the specified elements
+     */
+    @SafeVarargs
+    public static <T> PriorityQueue<T> toPriorityQueue(final T... a) {
+        if (isEmpty(a)) {
+            return new PriorityQueue<>();
+        }
+
+        final PriorityQueue<T> queue = new PriorityQueue<>(a.length);
+
+        queue.addAll(Array.asList(a));
+
+        return queue;
+    }
+
+    /**
+     * Returns a modifiable {@code Deque} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code Deque} is returned.
+     *
+     * @param <T> the type of elements in the deque
+     * @param a the array of elements to be placed in the deque
+     * @return a deque containing the specified elements
+     */
+    @SafeVarargs
+    public static <T> Deque<T> toDeque(final T... a) {
+        return toArrayDeque(a);
+    }
+
+    /**
+     * Returns a modifiable {@code ArrayDeque} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code ArrayDeque} is returned.
+     *
+     * @param <T> the type of elements in the deque
+     * @param a the array of elements to be placed in the deque
+     * @return a deque containing the specified elements
+     */
+    @SafeVarargs
+    public static <T> ArrayDeque<T> toArrayDeque(final T... a) { //NOSONAR
+        if (isEmpty(a)) {
+            return new ArrayDeque<>();
+        }
+
+        final ArrayDeque<T> arrayDeque = new ArrayDeque<>(a.length);
+
+        arrayDeque.addAll(Array.asList(a));
+
+        return arrayDeque;
+    }
+
+    /**
+     * Returns a modifiable {@code LinkedBlockingDeque} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code LinkedBlockingDeque} is returned.
+     *
+     * @param <T> the type of elements in the deque
+     * @param a the array of elements to be placed in the deque
+     * @return a deque containing the specified elements
+     */
+    @SafeVarargs
+    public static <T> LinkedBlockingDeque<T> toLinkedBlockingDeque(final T... a) {
+        if (isEmpty(a)) {
+            return new LinkedBlockingDeque<>();
+        }
+
+        final LinkedBlockingDeque<T> deque = new LinkedBlockingDeque<>(a.length);
+
+        deque.addAll(Array.asList(a));
+
+        return deque;
+    }
+
+    /**
+     * Returns a modifiable {@code ConcurrentLinkedDeque} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code ConcurrentLinkedDeque} is returned.
+     *
+     * @param <T> the type of elements in the deque
+     * @param a the array of elements to be placed in the deque
+     * @return a deque containing the specified elements
+     */
+    @SafeVarargs
+    public static <T> ConcurrentLinkedDeque<T> toConcurrentLinkedDeque(final T... a) { //NOSONAR
+        if (isEmpty(a)) {
+            return new ConcurrentLinkedDeque<>();
+        }
+
+        return new ConcurrentLinkedDeque<>(Array.asList(a));
+    }
+
+    /**
+     * Returns a modifiable {@code Multiset} with the specified elements.
+     * If the specified array is {@code null} or empty, an empty modifiable {@code Multiset} is returned.
+     *
+     * @param <T> the type of elements in the multiset
+     * @param a the array of elements to be placed in the multiset
+     * @return a Multiset containing the specified elements
+     */
+    @SafeVarargs
+    public static <T> Multiset<T> toMultiset(final T... a) {
+        return Multiset.of(a);
     }
 
     /**
@@ -15878,13 +16330,13 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Iterator<String> iter = N.asList("a", "b", "c").iterator();
+     * Iterator<String> iter = N.toList("a", "b", "c").iterator();
      *
      * // Convert to ArrayList
      * List<String> list = N.toCollection(iter, ArrayList::new);
      *
      * // Convert to LinkedHashSet (maintains insertion order)
-     * Iterator<String> iter2 = N.asList("a", "b", "a").iterator();
+     * Iterator<String> iter2 = N.toList("a", "b", "a").iterator();
      * Set<String> set = N.toCollection(iter2, LinkedHashSet::new);
      * // Result: ["a", "b"]
      * }</pre>
@@ -15920,11 +16372,11 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<String> names = N.asList("Alice", "Bob", "Charlie");
+     * List<String> names = N.toList("Alice", "Bob", "Charlie");
      * Map<Integer, String> lengthToName = N.toMap(names, String::length);
      * // Result: {5=Alice (or Charlie), 3=Bob}
      *
-     * List<User> users = N.asList(new User(1, "Alice"), new User(2, "Bob"));
+     * List<User> users = N.toList(new User(1, "Alice"), new User(2, "Bob"));
      * Map<Integer, User> idToUser = N.toMap(users, User::getId);
      * // Result: {1=User(1, Alice), 2=User(2, Bob)}
      * }</pre>
@@ -15957,11 +16409,11 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<User> users = N.asList(new User(1, "Alice"), new User(2, "Bob"));
+     * List<User> users = N.toList(new User(1, "Alice"), new User(2, "Bob"));
      * Map<Integer, String> idToName = N.toMap(users, User::getId, User::getName);
      * // Result: {1="Alice", 2="Bob"}
      *
-     * List<String> words = N.asList("apple", "banana", "cherry");
+     * List<String> words = N.toList("apple", "banana", "cherry");
      * Map<String, Integer> wordToLength = N.toMap(words, s -> s, String::length);
      * // Result: {"apple"=5, "banana"=6, "cherry"=6}
      * }</pre>
@@ -15997,7 +16449,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<User> users = N.asList(new User(1, "Alice"), new User(2, "Bob"));
+     * List<User> users = N.toList(new User(1, "Alice"), new User(2, "Bob"));
      *
      * // Using LinkedHashMap to maintain insertion order
      * LinkedHashMap<Integer, String> orderedMap = N.toMap(users, User::getId, User::getName,
@@ -16043,7 +16495,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Summing values for duplicate keys
-     * List<Transaction> transactions = N.asList(
+     * List<Transaction> transactions = N.toList(
      *     new Transaction("A", 100), new Transaction("B", 200), new Transaction("A", 50));
      * Map<String, Integer> totalByAccount = N.toMap(transactions,
      *     Transaction::getAccount,
@@ -16053,7 +16505,7 @@ sealed class CommonUtil permits N {
      * // Result: {"A"=150, "B"=200}
      *
      * // Concatenating strings for duplicate keys
-     * List<Pair<String, String>> pairs = N.asList(Pair.of("k1", "a"), Pair.of("k1", "b"));
+     * List<Pair<String, String>> pairs = N.toList(Pair.of("k1", "a"), Pair.of("k1", "b"));
      * Map<String, String> merged = N.toMap(pairs, Pair::getLeft, Pair::getRight,
      *     (v1, v2) -> v1 + "," + v2, size -> new LinkedHashMap<>(size));
      * // Result: {"k1"="a,b"}
@@ -16106,7 +16558,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Iterator<String> iter = N.asList("Alice", "Bob", "Charlie").iterator();
+     * Iterator<String> iter = N.toList("Alice", "Bob", "Charlie").iterator();
      * Map<Integer, String> lengthToName = N.toMap(iter, String::length);
      * // Result: {5="Charlie", 3="Bob"} (later values overwrite earlier for same key)
      * }</pre>
@@ -16140,7 +16592,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<String> words = N.asList("apple", "banana", "cherry");
+     * List<String> words = N.toList("apple", "banana", "cherry");
      * Iterator<String> iter = words.iterator();
      * Map<Integer, String> lengthToWord = N.toMap(iter, String::length, s -> s.toUpperCase());
      * // Result: {5="APPLE" or "CHERRY", 6="BANANA"} (later values overwrite earlier for same key)
@@ -16182,7 +16634,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<String> words = N.asList("apple", "banana", "cherry");
+     * List<String> words = N.toList("apple", "banana", "cherry");
      * Iterator<String> iter = words.iterator();
      *
      * // Using LinkedHashMap to maintain insertion order
@@ -16297,52 +16749,14 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the array elements
      * @param a the input array. Can be {@code null}.
      * @return the input array unchanged (same reference). Returns {@code null} if {@code a} is {@code null}.
+     * @see Array#asList(Object[])
      * @see Arrays#asList(Object[])
      * @see N#copyOf(Object[], int)
-     * @see N#asList(Object[])
+     * @see N#toList(Object[])
      */
     @SafeVarargs
     public static <T> T[] asArray(final T... a) {
         return a;
-    }
-
-    /**
-     * Creates a new Map by populating it with the provided key-value pairs or another Map.
-     *
-     * @param <K> the type of keys in the Map
-     * @param <V> the type of values in the Map
-     * @param <T> the type of Map to be returned
-     * @param m the Map to be populated
-     * @param a an array of key-value pairs or a single Map to populate the Map
-     * @return the populated Map
-     */
-    @SuppressWarnings("unchecked")
-    static <K, V, T extends Map<K, V>> T newMap(final T m, final Object... a) {
-        if (isEmpty(a)) {
-            return m;
-        }
-
-        if (a.length == 1) {
-            if (a[0] instanceof Map) {
-                m.putAll((Map<K, V>) a[0]);
-            } else if (Beans.isBeanClass(a[0].getClass())) {
-                Beans.beanToMap(a[0], (Map<String, Object>) m);
-            } else {
-                throw new IllegalArgumentException(
-                        "The parameters must be the pairs of property name and value, or Map, or a bean class with getter/setter methods.");
-            }
-        } else {
-            if (0 != (a.length % 2)) {
-                throw new IllegalArgumentException(
-                        "The parameters must be the pairs of property name and value, or Map, or a bean class with getter/setter methods.");
-            }
-
-            for (int i = 0; i < a.length; i++) {
-                m.put((K) a[i], (V) a[++i]);
-            }
-        }
-
-        return m;
     }
 
     /**
@@ -16527,22 +16941,80 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code Map} with specified key/value pairs.
+     * Returns a modifiable {@code Map} with specified keys/values.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param a an array of key/value pairs
-     * @return a Map containing the specified key/value pairs
-     * @deprecated
+     * @param k1 the first key to be placed in the Map
+     * @param v1 the value to be associated with the first key in the Map
+     * @param k2 the second key to be placed in the Map
+     * @param v2 the value to be associated with the second key in the Map
+     * @param k3 the third key to be placed in the Map
+     * @param v3 the value to be associated with the third key in the Map
+     * @param k4 the fourth key to be placed in the Map
+     * @param v4 the value to be associated with the fourth key in the Map
+     * @param k5 the fifth key to be placed in the Map
+     * @param v5 the value to be associated with the fifth key in the Map
+     * @param k6 the sixth key to be placed in the Map
+     * @param v6 the value to be associated with the sixth key in the Map
+     * @param k7 the seventh key to be placed in the Map
+     * @param v7 the value to be associated with the seventh key in the Map
+     * @param k8 the eighth key to be placed in the Map
+     * @param v8 the value to be associated with the eighth key in the Map
+     * @return a Map containing the specified keys and values
      */
-    @Deprecated
-    @NullSafe
-    public static <K, V> Map<K, V> asMap(final Object... a) {
-        if (isEmpty(a)) {
-            return new HashMap<>();
-        }
+    public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
+            final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) {
+        final Map<K, V> map = newHashMap(8);
+        map.put(k1, v1);
+        map.put(k2, v2);
+        map.put(k3, v3);
+        map.put(k4, v4);
+        map.put(k5, v5);
+        map.put(k6, v6);
+        map.put(k7, v7);
+        map.put(k8, v8);
+        return map;
+    }
 
-        return newMap(newHashMap(a.length / 2), a);
+    /**
+     * Returns a modifiable {@code Map} with specified keys/values.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param k1 the first key to be placed in the Map
+     * @param v1 the value to be associated with the first key in the Map
+     * @param k2 the second key to be placed in the Map
+     * @param v2 the value to be associated with the second key in the Map
+     * @param k3 the third key to be placed in the Map
+     * @param v3 the value to be associated with the third key in the Map
+     * @param k4 the fourth key to be placed in the Map
+     * @param v4 the value to be associated with the fourth key in the Map
+     * @param k5 the fifth key to be placed in the Map
+     * @param v5 the value to be associated with the fifth key in the Map
+     * @param k6 the sixth key to be placed in the Map
+     * @param v6 the value to be associated with the sixth key in the Map
+     * @param k7 the seventh key to be placed in the Map
+     * @param v7 the value to be associated with the seventh key in the Map
+     * @param k8 the eighth key to be placed in the Map
+     * @param v8 the value to be associated with the eighth key in the Map
+     * @param k9 the ninth key to be placed in the Map
+     * @param v9 the value to be associated with the ninth key in the Map
+     * @return a Map containing the specified keys and values
+     */
+    public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
+            final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9) {
+        final Map<K, V> map = newHashMap(9);
+        map.put(k1, v1);
+        map.put(k2, v2);
+        map.put(k3, v3);
+        map.put(k4, v4);
+        map.put(k5, v5);
+        map.put(k6, v6);
+        map.put(k7, v7);
+        map.put(k8, v8);
+        map.put(k9, v9);
+        return map;
     }
 
     /**
@@ -16729,23 +17201,80 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code LinkedHashMap} with specified key/value pairs.
+     * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param a an array of key/value pairs
-     * @return a Map containing the specified key/value pairs
-     * @deprecated Use {@link #newLinkedHashMap()} or specific overloads with explicit key-value parameters instead.
-     *             This method uses varargs which makes the API less type-safe and more error-prone.
+     * @param k1 the first key to be placed in the Map
+     * @param v1 the value to be associated with the first key in the Map
+     * @param k2 the second key to be placed in the Map
+     * @param v2 the value to be associated with the second key in the Map
+     * @param k3 the third key to be placed in the Map
+     * @param v3 the value to be associated with the third key in the Map
+     * @param k4 the fourth key to be placed in the Map
+     * @param v4 the value to be associated with the fourth key in the Map
+     * @param k5 the fifth key to be placed in the Map
+     * @param v5 the value to be associated with the fifth key in the Map
+     * @param k6 the sixth key to be placed in the Map
+     * @param v6 the value to be associated with the sixth key in the Map
+     * @param k7 the seventh key to be placed in the Map
+     * @param v7 the value to be associated with the seventh key in the Map
+     * @param k8 the eighth key to be placed in the Map
+     * @param v8 the value to be associated with the eighth key in the Map
+     * @return a Map containing the specified keys and values
      */
-    @Deprecated
-    @NullSafe
-    public static <K, V> Map<K, V> asLinkedHashMap(final Object... a) {
-        if (isEmpty(a)) {
-            return newLinkedHashMap();
-        }
+    public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
+            final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) {
+        final Map<K, V> map = newLinkedHashMap(8);
+        map.put(k1, v1);
+        map.put(k2, v2);
+        map.put(k3, v3);
+        map.put(k4, v4);
+        map.put(k5, v5);
+        map.put(k6, v6);
+        map.put(k7, v7);
+        map.put(k8, v8);
+        return map;
+    }
 
-        return newMap(newLinkedHashMap(a.length / 2), a);
+    /**
+     * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param k1 the first key to be placed in the Map
+     * @param v1 the value to be associated with the first key in the Map
+     * @param k2 the second key to be placed in the Map
+     * @param v2 the value to be associated with the second key in the Map
+     * @param k3 the third key to be placed in the Map
+     * @param v3 the value to be associated with the third key in the Map
+     * @param k4 the fourth key to be placed in the Map
+     * @param v4 the value to be associated with the fourth key in the Map
+     * @param k5 the fifth key to be placed in the Map
+     * @param v5 the value to be associated with the fifth key in the Map
+     * @param k6 the sixth key to be placed in the Map
+     * @param v6 the value to be associated with the sixth key in the Map
+     * @param k7 the seventh key to be placed in the Map
+     * @param v7 the value to be associated with the seventh key in the Map
+     * @param k8 the eighth key to be placed in the Map
+     * @param v8 the value to be associated with the eighth key in the Map
+     * @param k9 the ninth key to be placed in the Map
+     * @param v9 the value to be associated with the ninth key in the Map
+     * @return a Map containing the specified keys and values
+     */
+    public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
+            final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9) {
+        final Map<K, V> map = newLinkedHashMap(9);
+        map.put(k1, v1);
+        map.put(k2, v2);
+        map.put(k3, v3);
+        map.put(k4, v4);
+        map.put(k5, v5);
+        map.put(k6, v6);
+        map.put(k7, v7);
+        map.put(k8, v8);
+        map.put(k9, v9);
+        return map;
     }
 
     /**
@@ -16862,23 +17391,6 @@ sealed class CommonUtil permits N {
         props.put(propName5, propValue5);
 
         return props;
-    }
-
-    /**
-     * Returns a modifiable {@code Map} with specified key/value pairs.
-     *
-     * @param a an array of key/value pairs
-     * @return a Map containing the specified key/value pairs
-     * @deprecated Use {@link #newLinkedHashMap()} or specific {@code asProps} overloads with explicit parameter pairs instead.
-     *             This method uses varargs which makes the API less type-safe and more error-prone.
-     */
-    @Deprecated
-    public static Map<String, Object> asProps(final Object... a) {
-        if (isEmpty(a)) {
-            return newLinkedHashMap();
-        }
-
-        return newMap(newLinkedHashMap(a.length / 2), a);
     }
 
     /**
@@ -17114,21 +17626,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code List} containing the elements from the specified array.
-     * If the specified array is {@code null} or empty, an empty {@code List} is returned.
+     * Converts an array of objects to a modifiable List, which is NOT backed with the input array.
      *
-     * <p>This method creates a new {@code ArrayList} and populates it with all elements from the
-     * provided array. Unlike {@link Arrays#asList(Object...)}, this method returns a fully
-     * modifiable list that is not backed by the original array, meaning modifications to the returned
-     * list will not affect the original array and vice versa.</p>
-     *
-     * @param <T> the type of elements in the list
-     * @param a the array of elements to be placed in the List
-     * @return a List containing the specified elements
-     * @see Array#asList(Object...)
-     * @see Arrays#asList(Object...)
-     * @see List#of(Object...)
+     * @param <T> the type of elements in the array
+     * @param a the array to be converted
+     * @return a modifiable List of objects containing the values from the array
+     * @see #toList(Object[])
+     * @deprecated use {@code toList(Object[]} instead
      */
+    @Deprecated
     @SafeVarargs
     @NullSafe
     public static <T> List<T> asList(@NullSafe final T... a) {
@@ -17273,29 +17779,59 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code LinkedList} with specified elements. And it's not backed by the specified array.
-     * If the specified array is {@code null} or empty, an empty {@code List} is returned
-     * 
-     * <p>This method creates a new {@code LinkedList} and populates it with all elements from the
-     * provided array. Unlike {@link Arrays#asList(Object...)}, this method returns a fully
-     * modifiable list that is not backed by the original array, meaning modifications to the returned
-     * list will not affect the original array and vice versa.</p>
+     * Returns a modifiable {@code LinkedList} with specified elements.
      *
      * @param <T> the type of elements in the list
-     * @param a the array of elements to be placed in the List
+     * @param e1 the first element to be placed in the List
+     * @param e2 the second element to be placed in the List
+     * @param e3 the third element to be placed in the List
+     * @param e4 the fourth element to be placed in the List
+     * @param e5 the fifth ele aced in the List
+     * @param e6 the sixth element to be placed in the List
+     * @param e7 the seventh element to be placed in the List
+     * @param e8 the eighth element to be placed in the List
      * @return a List containing the specified elements
-     * @see Array#asList(Object...)
-     * @see Arrays#asList(Object...)
-     * @see List#of(Object...)
      */
-    @SafeVarargs
-    @NullSafe
-    public static <T> LinkedList<T> asLinkedList(final T... a) { //NOSONAR
-        if (isEmpty(a)) {
-            return new LinkedList<>();
-        }
+    public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8) { //NOSONAR
+        final LinkedList<T> list = new LinkedList<>();
+        list.add(e1);
+        list.add(e2);
+        list.add(e3);
+        list.add(e4);
+        list.add(e5);
+        list.add(e6);
+        list.add(e7);
+        list.add(e8);
+        return list;
+    }
 
-        return new LinkedList<>(Array.asList(a));
+    /**
+     * Returns a modifiable {@code LinkedList} with specified elements.
+     *
+     * @param <T> the type of elements in the list
+     * @param e1 the first element to be placed in the List
+     * @param e2 the second element to be placed in the List
+     * @param e3 the third element to be placed in the List
+     * @param e4 the fourth element to be placed in the List
+     * @param e5 the fifth element to be placed in the List
+     * @param e6 the sixth ele aced in the List
+     * @param e7 the seventh element to be placed in the List
+     * @param e8 the eighth element to be placed in the List
+     * @param e9 the ninth element to be placed in the List
+     * @return a List containing the specified elements
+     */
+    public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8, final T e9) { //NOSONAR
+        final LinkedList<T> list = new LinkedList<>();
+        list.add(e1);
+        list.add(e2);
+        list.add(e3);
+        list.add(e4);
+        list.add(e5);
+        list.add(e6);
+        list.add(e7);
+        list.add(e8);
+        list.add(e9);
+        return list;
     }
 
     /**
@@ -17488,16 +18024,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code Set} with specified elements. And it's not backed by the specified array.
-     * If the specified array is {@code null} or empty, an empty {@code Set} is returned.
+     * Converts an array of objects to a modifiable Set, which is NOT backed with the input array.
      *
-     * @param <T> the type of elements in the set
-     * @param a the array of elements to be placed in the set
-     * @return a Set containing the specified elements
+     * @param <T> the type of elements in the array
+     * @param a the array to be converted
+     * @return a modifiable Set of objects containing the values from the array
+     * @see #toSet(Object[])
+     * @deprecated use {@code toSet(Object[])} instead.
      */
+    @Deprecated
     @SafeVarargs
     @NullSafe
-    public static <T> Set<T> asSet(final T... a) {
+    public static <T> Set<T> asSet(@NullSafe final T... a) {
         if (isEmpty(a)) {
             return newHashSet();
         }
@@ -17639,251 +18177,59 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code LinkedHashSet} with specified elements. And it's not backed by the specified array.
-     * If the specified array is {@code null} or empty, an empty {@code LinkedHashSet} is returned.
+     * Returns a modifiable {@code LinkedHashSet} with the specified elements.
      *
      * @param <T> the type of elements in the set
-     * @param a the array of elements to be placed in the set
+     * @param e1 the first element to be placed in the Set
+     * @param e2 the second element to be placed in the Set
+     * @param e3 the third element to be placed in the Set
+     * @param e4 the fourth element to be placed in the Set
+     * @param e5 the fifth element to be placed in the Set
+     * @param e6 the sixth element to be placed in the Set
+     * @param e7 the seventh element to be placed in the Set
+     * @param e8 the eighth element to be placed in the Set
      * @return a Set containing the specified elements
      */
-    @SafeVarargs
-    @NullSafe
-    public static <T> Set<T> asLinkedHashSet(final T... a) {
-        if (isEmpty(a)) {
-            return newLinkedHashSet();
-        }
-
-        return new LinkedHashSet<>(Array.asList(a));
+    public static <T> Set<T> asLinkedHashSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8) {
+        final Set<T> set = newLinkedHashSet(8);
+        set.add(e1);
+        set.add(e2);
+        set.add(e3);
+        set.add(e4);
+        set.add(e5);
+        set.add(e6);
+        set.add(e7);
+        set.add(e8);
+        return set;
     }
 
     /**
-     * Returns a modifiable {@code SortedSet} with specified elements. And it's not backed by the specified array.
-     * If the specified array is {@code null} or empty, an empty {@code SortedSet} is returned.
+     * Returns a modifiable {@code LinkedHashSet} with the specified elements.
      *
      * @param <T> the type of elements in the set
-     * @param a the array of elements to be placed in the set
+     * @param e1 the first element to be placed in the Set
+     * @param e2 the second element to be placed in the Set
+     * @param e3 the third element to be placed in the Set
+     * @param e4 the fourth element to be placed in the Set
+     * @param e5 the fifth element to be placed in the Set
+     * @param e6 the sixth element to be placed in the Set
+     * @param e7 the seventh element to be placed in the Set
+     * @param e8 the eighth element to be placed in the Set
+     * @param e9 the ninth element to be placed in the Set
      * @return a Set containing the specified elements
      */
-    @SafeVarargs
-    @NullSafe
-    public static <T extends Comparable<T>> SortedSet<T> asSortedSet(final T... a) {
-        if (isEmpty(a)) {
-            return new TreeSet<>();
-        }
-
-        return new TreeSet<>(Array.asList(a));
-    }
-
-    /**
-     * Returns a modifiable {@code NavigableSet} with specified elements. And it's not backed by the specified array.
-     * If the specified array is {@code null} or empty, an empty {@code NavigableSet} is returned.
-     *
-     * @param <T> the type of elements in the set
-     * @param a the array of elements to be placed in the set
-     * @return a Set containing the specified elements
-     */
-    @SafeVarargs
-    public static <T extends Comparable<T>> NavigableSet<T> asNavigableSet(final T... a) {
-        if (isEmpty(a)) {
-            return new TreeSet<>();
-        }
-
-        return new TreeSet<>(Array.asList(a));
-    }
-
-    /**
-     * Returns a modifiable {@code Queue} with specified elements. And it's not backed by the specified array.
-     * If the specified array is {@code null} or empty, an empty {@code Queue} is returned.
-     *
-     * @param <T> the type of elements in the queue
-     * @param a the array of elements to be placed in the queue
-     * @return a queue containing the specified elements
-     */
-    @SafeVarargs
-    public static <T> Queue<T> asQueue(final T... a) {
-        return asArrayDeque(a);
-    }
-
-    /**
-     * Returns a modifiable {@code ArrayBlockingQueue} with specified elements. And it's not backed by the specified array.
-     * If the specified array is {@code null} or empty, an empty {@code ArrayBlockingQueue} is returned.
-     *
-     * @param <T> the type of elements in the queue
-     * @param a the array of elements to be placed in the queue
-     * @return a queue containing the specified elements
-     */
-    @SafeVarargs
-    public static <T> ArrayBlockingQueue<T> asArrayBlockingQueue(final T... a) {
-        if (isEmpty(a)) {
-            return new ArrayBlockingQueue<>(1);
-        }
-
-        final ArrayBlockingQueue<T> queue = new ArrayBlockingQueue<>(a.length);
-
-        queue.addAll(Array.asList(a));
-
-        return queue;
-    }
-
-    /**
-     * Returns a modifiable {@code LinkedBlockingQueue} with specified elements. And it's not backed by the specified array.
-     * If the specified array is {@code null} or empty, an empty {@code LinkedBlockingQueue} is returned.
-     *
-     * @param <T> the type of elements in the queue
-     * @param a the array of elements to be placed in the queue
-     * @return a queue containing the specified elements
-     */
-    @SafeVarargs
-    public static <T> LinkedBlockingQueue<T> asLinkedBlockingQueue(final T... a) {
-        if (isEmpty(a)) {
-            return new LinkedBlockingQueue<>();
-        }
-
-        final LinkedBlockingQueue<T> queue = new LinkedBlockingQueue<>(a.length);
-
-        queue.addAll(Array.asList(a));
-
-        return queue;
-    }
-
-    /**
-     * Returns a modifiable {@code ConcurrentLinkedQueue} with specified elements. And it's not backed by the specified array.
-     * If the specified array is {@code null} or empty, an empty {@code ConcurrentLinkedQueue} is returned.
-     *
-     * @param <T> the type of elements in the queue
-     * @param a the array of elements to be placed in the queue
-     * @return a queue containing the specified elements
-     */
-    @SafeVarargs
-    public static <T> ConcurrentLinkedQueue<T> asConcurrentLinkedQueue(final T... a) { //NOSONAR
-        if (isEmpty(a)) {
-            return new ConcurrentLinkedQueue<>();
-        }
-
-        return new ConcurrentLinkedQueue<>(Array.asList(a));
-    }
-
-    /**
-     * Returns a modifiable {@code DelayQueue} with specified elements. And it's not backed by the specified array.
-     * If the specified array is {@code null} or empty, an empty {@code DelayQueue} is returned.
-     *
-     * @param <T> the type of elements in the queue
-     * @param a the array of elements to be placed in the queue
-     * @return a queue containing the specified elements
-     */
-    @SafeVarargs
-    public static <T extends Delayed> DelayQueue<T> asDelayQueue(final T... a) {
-        if (isEmpty(a)) {
-            return new DelayQueue<>();
-        }
-
-        return new DelayQueue<>(Array.asList(a));
-    }
-
-    /**
-     * Returns a modifiable {@code PriorityQueue} with specified elements. And it's not backed by the specified array.
-     * If the specified array is {@code null} or empty, an empty {@code PriorityQueue} is returned.
-     *
-     * @param <T> the type of elements in the queue
-     * @param a the array of elements to be placed in the queue
-     * @return a queue containing the specified elements
-     */
-    @SafeVarargs
-    public static <T> PriorityQueue<T> asPriorityQueue(final T... a) {
-        if (isEmpty(a)) {
-            return new PriorityQueue<>();
-        }
-
-        final PriorityQueue<T> queue = new PriorityQueue<>(a.length);
-
-        queue.addAll(Array.asList(a));
-
-        return queue;
-    }
-
-    /**
-     * Returns a modifiable {@code Deque} with specified elements. And it's not backed by the specified array.
-     * If the specified array is {@code null} or empty, an empty {@code Deque} is returned.
-     *
-     * @param <T> the type of elements in the deque
-     * @param a the array of elements to be placed in the deque
-     * @return a deque containing the specified elements
-     */
-    @SafeVarargs
-    public static <T> Deque<T> asDeque(final T... a) {
-        return asArrayDeque(a);
-    }
-
-    /**
-     * Returns a modifiable {@code ArrayDeque} with specified elements. And it's not backed by the specified array.
-     * If the specified array is {@code null} or empty, an empty {@code ArrayDeque} is returned.
-     *
-     * @param <T> the type of elements in the deque
-     * @param a the array of elements to be placed in the deque
-     * @return a deque containing the specified elements
-     */
-    @SafeVarargs
-    public static <T> ArrayDeque<T> asArrayDeque(final T... a) { //NOSONAR
-        if (isEmpty(a)) {
-            return new ArrayDeque<>();
-        }
-
-        final ArrayDeque<T> arrayDeque = new ArrayDeque<>(a.length);
-
-        arrayDeque.addAll(Array.asList(a));
-
-        return arrayDeque;
-    }
-
-    /**
-     * Returns a modifiable {@code LinkedBlockingDeque} with specified elements. And it's not backed by the specified array.
-     * If the specified array is {@code null} or empty, an empty {@code LinkedBlockingDeque} is returned.
-     *
-     * @param <T> the type of elements in the deque
-     * @param a the array of elements to be placed in the deque
-     * @return a deque containing the specified elements
-     */
-    @SafeVarargs
-    public static <T> LinkedBlockingDeque<T> asLinkedBlockingDeque(final T... a) {
-        if (isEmpty(a)) {
-            return new LinkedBlockingDeque<>();
-        }
-
-        final LinkedBlockingDeque<T> deque = new LinkedBlockingDeque<>(a.length);
-
-        deque.addAll(Array.asList(a));
-
-        return deque;
-    }
-
-    /**
-     * Returns a modifiable {@code ConcurrentLinkedDeque} with specified elements. And it's not backed by the specified array.
-     * If the specified array is {@code null} or empty, an empty {@code ConcurrentLinkedDeque} is returned.
-     *
-     * @param <T> the type of elements in the deque
-     * @param a the array of elements to be placed in the deque
-     * @return a deque containing the specified elements
-     */
-    @SafeVarargs
-    public static <T> ConcurrentLinkedDeque<T> asConcurrentLinkedDeque(final T... a) { //NOSONAR
-        if (isEmpty(a)) {
-            return new ConcurrentLinkedDeque<>();
-        }
-
-        return new ConcurrentLinkedDeque<>(Array.asList(a));
-    }
-
-    /**
-     * Returns a modifiable {@code Multiset} with the specified elements.
-     * If the specified array is {@code null} or empty, an empty modifiable {@code Multiset} is returned.
-     *
-     * @param <T> the type of elements in the multiset
-     * @param a the array of elements to be placed in the multiset
-     * @return a Multiset containing the specified elements
-     */
-    @SafeVarargs
-    public static <T> Multiset<T> asMultiset(final T... a) {
-        return Multiset.of(a);
+    public static <T> Set<T> asLinkedHashSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8, final T e9) {
+        final Set<T> set = newLinkedHashSet(9);
+        set.add(e1);
+        set.add(e2);
+        set.add(e3);
+        set.add(e4);
+        set.add(e5);
+        set.add(e6);
+        set.add(e7);
+        set.add(e8);
+        set.add(e9);
+        return set;
     }
 
     /**
@@ -19574,8 +19920,9 @@ sealed class CommonUtil permits N {
      * @param a the first object to compare, may be {@code null}
      * @param b the second object to compare, may be {@code null}
      * @return {@code true} if the first object is less than or equal to the second, {@code false} otherwise
+     * @see #le(Comparable, Comparable)
      */
-    public static <T extends Comparable<? super T>> boolean lessEqual(final T a, final T b) {
+    public static <T extends Comparable<? super T>> boolean lessThanOrEqual(final T a, final T b) {
         return compare(a, b) <= 0;
     }
 
@@ -19587,11 +19934,39 @@ sealed class CommonUtil permits N {
      * @param b the second object to compare, may be {@code null}
      * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
      * @return {@code true} if the first object is less than or equal to the second, {@code false} otherwise
+     * @see #le(Object, Object, Comparator)
      */
-    public static <T> boolean lessEqual(final T a, final T b, Comparator<? super T> cmp) {
+    public static <T> boolean lessThanOrEqual(final T a, final T b, Comparator<? super T> cmp) {
         cmp = checkComparator(cmp);
 
         return cmp.compare(a, b) <= 0;
+    }
+
+    /**
+     * Alias for {@link #lessThanOrEqual(Comparable, Comparable)}.
+     *
+     * @param <T> the type of the objects being compared, which must be comparable
+     * @param a the first object to compare, may be {@code null}
+     * @param b the second object to compare, may be {@code null}
+     * @return {@code true} if the first object is less than or equal to the second, {@code false} otherwise
+     * @see #lessThanOrEqual(Comparable, Comparable)
+     */
+    public static <T extends Comparable<? super T>> boolean le(final T a, final T b) {
+        return lessThanOrEqual(a, b);
+    }
+
+    /**
+     * Alias for {@link #lessThanOrEqual(Object, Object, Comparator)}.
+     *
+     * @param <T> the type of the objects being compared
+     * @param a the first object to compare, may be {@code null}
+     * @param b the second object to compare, may be {@code null}
+     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @return {@code true} if the first object is less than or equal to the second, {@code false} otherwise
+     * @see #lessThanOrEqual(Object, Object, Comparator)
+     */
+    public static <T> boolean le(final T a, final T b, Comparator<? super T> cmp) {
+        return lessThanOrEqual(a, b, cmp);
     }
 
     /**
@@ -19628,8 +20003,9 @@ sealed class CommonUtil permits N {
      * @param a the first object to compare, may be {@code null}
      * @param b the second object to compare, may be {@code null}
      * @return {@code true} if the first object is greater than or equal to the second, {@code false} otherwise
+     * @see #ge(Comparable, Comparable)
      */
-    public static <T extends Comparable<? super T>> boolean greaterEqual(final T a, final T b) {
+    public static <T extends Comparable<? super T>> boolean greaterThanOrEqual(final T a, final T b) {
         return compare(a, b) >= 0;
     }
 
@@ -19641,11 +20017,39 @@ sealed class CommonUtil permits N {
      * @param b the second object to compare, may be {@code null}
      * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
      * @return {@code true} if the first object is greater than or equal to the second, {@code false} otherwise
+     * @see #ge(Object, Object, Comparator)
      */
-    public static <T> boolean greaterEqual(final T a, final T b, Comparator<? super T> cmp) {
+    public static <T> boolean greaterThanOrEqual(final T a, final T b, Comparator<? super T> cmp) {
         cmp = checkComparator(cmp);
 
         return cmp.compare(a, b) >= 0;
+    }
+
+    /**
+     * Alias for {@link #greaterThanOrEqual(Comparable, Comparable)}.
+     *
+     * @param <T> the type of the objects being compared, which must be comparable
+     * @param a the first object to compare, may be {@code null}
+     * @param b the second object to compare, may be {@code null}
+     * @return {@code true} if the first object is greater than or equal to the second, {@code false} otherwise
+     * @see #greaterThanOrEqual(Comparable, Comparable)
+     */
+    public static <T extends Comparable<? super T>> boolean ge(final T a, final T b) {
+        return greaterThanOrEqual(a, b);
+    }
+
+    /**
+     * Alias for {@link #greaterThanOrEqual(Object, Object, Comparator)}.
+     *
+     * @param <T> the type of the objects being compared
+     * @param a the first object to compare, may be {@code null}
+     * @param b the second object to compare, may be {@code null}
+     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @return {@code true} if the first object is greater than or equal to the second, {@code false} otherwise
+     * @see #greaterThanOrEqual(Object, Object, Comparator)
+     */
+    public static <T> boolean ge(final T a, final T b, Comparator<? super T> cmp) {
+        return greaterThanOrEqual(a, b, cmp);
     }
 
     /**
@@ -21552,7 +21956,8 @@ sealed class CommonUtil permits N {
         T[] a = null;
 
         if (c instanceof Collection) {
-            a = (T[]) ((Collection<T>) c).toArray();
+            final Collection<T> coll = (Collection<T>) c;
+            a = coll.toArray((T[]) new Object[coll.size()]);
         } else {
             final List<T> tmp = new ArrayList<>();
 
@@ -21560,7 +21965,7 @@ sealed class CommonUtil permits N {
                 tmp.add(t);
             }
 
-            a = (T[]) tmp.toArray();
+            a = tmp.toArray((T[]) new Object[tmp.size()]);
         }
 
         for (int i = a.length - 1; i >= 0; i--) {
@@ -25718,7 +26123,7 @@ sealed class CommonUtil permits N {
             return new ArrayList<>();
         }
 
-        final List<T> result = new ArrayList<>(c.size() * n);
+        final List<T> result = new ArrayList<>((int) Math.min((long) c.size() * n, Integer.MAX_VALUE));
 
         for (final T e : c) {
             for (int i = 0; i < n; i++) {
@@ -25794,7 +26199,7 @@ sealed class CommonUtil permits N {
             return new ArrayList<>();
         }
 
-        final List<T> result = new ArrayList<>(c.size() * n);
+        final List<T> result = new ArrayList<>((int) Math.min((long) c.size() * n, Integer.MAX_VALUE));
 
         for (int i = 0; i < n; i++) {
             result.addAll(c);
@@ -27123,7 +27528,7 @@ sealed class CommonUtil permits N {
                 result.add(c.get(j));
             }
         } else {
-            final T[] a = (T[]) c.toArray();
+            final T[] a = c.toArray((T[]) new Object[c.size()]);
             result = InternalUtil.createList(copyOfRange(a, fromIndex, toIndex, step));
         }
 
@@ -28981,7 +29386,7 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        final T[] array = (T[]) list.toArray();
+        final T[] array = list.toArray((T[]) new Object[list.size()]);
         Arrays.sort(array, fromIndex, toIndex, cmp);
         final ListIterator<T> i = (ListIterator<T>) list.listIterator();
 
@@ -29122,8 +29527,8 @@ sealed class CommonUtil permits N {
 
     // Retained comment for previous benchmark behavior:
     // Tested by ArrayUtilTest.test_parallel_sort_perf
-    private static final int PARALLEL_SORT_PRIMITIVE_THRESHOLD = 3000;
-    private static final int PARALLEL_SORT_OBJECT_THRESHOLD = 2000;
+    private static final int DOUBLE_PIPE_SORT_PRIMITIVE_THRESHOLD = 3000;
+    private static final int DOUBLE_PIPE_SORT_OBJECT_THRESHOLD = 2000;
 
     /**
      * Sorts the specified array into ascending numerical order using multiple threads.
@@ -29134,7 +29539,7 @@ sealed class CommonUtil permits N {
      *
      * <p>The array is sorted in place, modifying the original array.
      *
-     * <p><b>Implementation Note:</b> For arrays smaller than {@code PARALLEL_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * <p><b>Implementation Note:</b> For arrays smaller than {@code DOUBLE_PIPE_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
      * or when only one CPU core is available, this method falls back to single-threaded sorting using {@link Arrays#sort(char[])}.
      * Otherwise, it uses {@link Arrays#parallelSort(char[])} for parallel execution.
      *
@@ -29174,7 +29579,7 @@ sealed class CommonUtil permits N {
      * half-open: {@code [fromIndex, toIndex)}, meaning it includes the element at {@code fromIndex}
      * but excludes the element at {@code toIndex}.
      *
-     * <p><b>Implementation Note:</b> For ranges smaller than {@code PARALLEL_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * <p><b>Implementation Note:</b> For ranges smaller than {@code DOUBLE_PIPE_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
      * or when only one CPU core is available, this method uses {@link Arrays#sort(char[], int, int)} for single-threaded sorting.
      * Otherwise, it uses {@link Arrays#parallelSort(char[], int, int)} for parallel execution.
      *
@@ -29206,7 +29611,7 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        if (toIndex - fromIndex <= PARALLEL_SORT_PRIMITIVE_THRESHOLD || IOUtil.CPU_CORES == 1) {
+        if (toIndex - fromIndex <= DOUBLE_PIPE_SORT_PRIMITIVE_THRESHOLD || IOUtil.CPU_CORES == 1) {
             Arrays.sort(a, fromIndex, toIndex);
         } else {
             Arrays.parallelSort(a, fromIndex, toIndex);
@@ -29222,7 +29627,7 @@ sealed class CommonUtil permits N {
      *
      * <p>The array is sorted in place, modifying the original array.
      *
-     * <p><b>Implementation Note:</b> For arrays smaller than {@code PARALLEL_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * <p><b>Implementation Note:</b> For arrays smaller than {@code DOUBLE_PIPE_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
      * or when only one CPU core is available, this method falls back to single-threaded sorting.
      * Otherwise, it uses {@link Arrays#parallelSort(byte[])} for parallel execution.
      *
@@ -29257,7 +29662,7 @@ sealed class CommonUtil permits N {
      * half-open: {@code [fromIndex, toIndex)}, meaning it includes the element at {@code fromIndex}
      * but excludes the element at {@code toIndex}.
      *
-     * <p><b>Implementation Note:</b> For ranges smaller than {@code PARALLEL_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * <p><b>Implementation Note:</b> For ranges smaller than {@code DOUBLE_PIPE_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
      * or when only one CPU core is available, this method uses {@link Arrays#sort(byte[], int, int)} for single-threaded sorting.
      * Otherwise, it uses {@link Arrays#parallelSort(byte[], int, int)} for parallel execution.
      *
@@ -29285,7 +29690,7 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        if (toIndex - fromIndex <= PARALLEL_SORT_PRIMITIVE_THRESHOLD || IOUtil.CPU_CORES == 1) {
+        if (toIndex - fromIndex <= DOUBLE_PIPE_SORT_PRIMITIVE_THRESHOLD || IOUtil.CPU_CORES == 1) {
             Arrays.sort(a, fromIndex, toIndex);
         } else {
             Arrays.parallelSort(a, fromIndex, toIndex);
@@ -29301,7 +29706,7 @@ sealed class CommonUtil permits N {
      *
      * <p>The array is sorted in place, modifying the original array.
      *
-     * <p><b>Implementation Note:</b> For arrays smaller than {@code PARALLEL_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * <p><b>Implementation Note:</b> For arrays smaller than {@code DOUBLE_PIPE_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
      * or when only one CPU core is available, this method falls back to single-threaded sorting.
      * Otherwise, it uses {@link Arrays#parallelSort(short[])} for parallel execution.
      *
@@ -29329,7 +29734,7 @@ sealed class CommonUtil permits N {
      * half-open: {@code [fromIndex, toIndex)}, meaning it includes the element at {@code fromIndex}
      * but excludes the element at {@code toIndex}.
      *
-     * <p><b>Implementation Note:</b> For ranges smaller than {@code PARALLEL_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * <p><b>Implementation Note:</b> For ranges smaller than {@code DOUBLE_PIPE_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
      * or when only one CPU core is available, this method uses {@link Arrays#sort(short[], int, int)} for single-threaded sorting.
      * Otherwise, it uses {@link Arrays#parallelSort(short[], int, int)} for parallel execution.
      *
@@ -29348,7 +29753,7 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        if (toIndex - fromIndex <= PARALLEL_SORT_PRIMITIVE_THRESHOLD || IOUtil.CPU_CORES == 1) {
+        if (toIndex - fromIndex <= DOUBLE_PIPE_SORT_PRIMITIVE_THRESHOLD || IOUtil.CPU_CORES == 1) {
             Arrays.sort(a, fromIndex, toIndex);
         } else {
             Arrays.parallelSort(a, fromIndex, toIndex);
@@ -29358,7 +29763,7 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified array into ascending numerical order using multiple threads.
      * <p>This method modifies the original array in-place.
-     * <p><b>Implementation Note:</b> For arrays smaller than {@code PARALLEL_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * <p><b>Implementation Note:</b> For arrays smaller than {@code DOUBLE_PIPE_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
      * or when only one CPU core is available, this method falls back to single-threaded sorting.
      * Otherwise, it uses {@link Arrays#parallelSort(int[])} for parallel execution.</p>
      *
@@ -29399,7 +29804,7 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        if (toIndex - fromIndex <= PARALLEL_SORT_PRIMITIVE_THRESHOLD || IOUtil.CPU_CORES == 1) {
+        if (toIndex - fromIndex <= DOUBLE_PIPE_SORT_PRIMITIVE_THRESHOLD || IOUtil.CPU_CORES == 1) {
             Arrays.sort(a, fromIndex, toIndex);
         } else {
             Arrays.parallelSort(a, fromIndex, toIndex);
@@ -29415,7 +29820,7 @@ sealed class CommonUtil permits N {
      *
      * <p>The array is sorted in place, modifying the original array.
      *
-     * <p><b>Implementation Note:</b> For arrays smaller than {@code PARALLEL_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * <p><b>Implementation Note:</b> For arrays smaller than {@code DOUBLE_PIPE_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
      * or when only one CPU core is available, this method falls back to single-threaded sorting.
      * Otherwise, it uses {@link Arrays#parallelSort(long[])} for parallel execution.
      *
@@ -29443,7 +29848,7 @@ sealed class CommonUtil permits N {
      * half-open: {@code [fromIndex, toIndex)}, meaning it includes the element at {@code fromIndex}
      * but excludes the element at {@code toIndex}.
      *
-     * <p><b>Implementation Note:</b> For ranges smaller than {@code PARALLEL_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * <p><b>Implementation Note:</b> For ranges smaller than {@code DOUBLE_PIPE_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
      * or when only one CPU core is available, this method uses {@link Arrays#sort(long[], int, int)} for single-threaded sorting.
      * Otherwise, it uses {@link Arrays#parallelSort(long[], int, int)} for parallel execution.
      *
@@ -29462,7 +29867,7 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        if (toIndex - fromIndex <= PARALLEL_SORT_PRIMITIVE_THRESHOLD || IOUtil.CPU_CORES == 1) {
+        if (toIndex - fromIndex <= DOUBLE_PIPE_SORT_PRIMITIVE_THRESHOLD || IOUtil.CPU_CORES == 1) {
             Arrays.sort(a, fromIndex, toIndex);
         } else {
             Arrays.parallelSort(a, fromIndex, toIndex);
@@ -29478,7 +29883,7 @@ sealed class CommonUtil permits N {
      *
      * <p>The array is sorted in place, modifying the original array.
      *
-     * <p><b>Implementation Note:</b> For arrays smaller than {@code PARALLEL_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * <p><b>Implementation Note:</b> For arrays smaller than {@code DOUBLE_PIPE_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
      * or when only one CPU core is available, this method falls back to single-threaded sorting.
      * Otherwise, it uses {@link Arrays#parallelSort(float[])} for parallel execution.
      *
@@ -29506,7 +29911,7 @@ sealed class CommonUtil permits N {
      * half-open: {@code [fromIndex, toIndex)}, meaning it includes the element at {@code fromIndex}
      * but excludes the element at {@code toIndex}.
      *
-     * <p><b>Implementation Note:</b> For ranges smaller than {@code PARALLEL_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * <p><b>Implementation Note:</b> For ranges smaller than {@code DOUBLE_PIPE_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
      * or when only one CPU core is available, this method uses {@link Arrays#sort(float[], int, int)} for single-threaded sorting.
      * Otherwise, it uses {@link Arrays#parallelSort(float[], int, int)} for parallel execution.
      *
@@ -29525,7 +29930,7 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        if (toIndex - fromIndex <= PARALLEL_SORT_PRIMITIVE_THRESHOLD || IOUtil.CPU_CORES == 1) {
+        if (toIndex - fromIndex <= DOUBLE_PIPE_SORT_PRIMITIVE_THRESHOLD || IOUtil.CPU_CORES == 1) {
             Arrays.sort(a, fromIndex, toIndex);
         } else {
             Arrays.parallelSort(a, fromIndex, toIndex);
@@ -29541,7 +29946,7 @@ sealed class CommonUtil permits N {
      *
      * <p>The array is sorted in place, modifying the original array.
      *
-     * <p><b>Implementation Note:</b> For arrays smaller than {@code PARALLEL_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * <p><b>Implementation Note:</b> For arrays smaller than {@code DOUBLE_PIPE_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
      * or when only one CPU core is available, this method falls back to single-threaded sorting.
      * Otherwise, it uses {@link Arrays#parallelSort(double[])} for parallel execution.
      *
@@ -29569,7 +29974,7 @@ sealed class CommonUtil permits N {
      * half-open: {@code [fromIndex, toIndex)}, meaning it includes the element at {@code fromIndex}
      * but excludes the element at {@code toIndex}.
      *
-     * <p><b>Implementation Note:</b> For ranges smaller than {@code PARALLEL_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
+     * <p><b>Implementation Note:</b> For ranges smaller than {@code DOUBLE_PIPE_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
      * or when only one CPU core is available, this method uses {@link Arrays#sort(double[], int, int)} for single-threaded sorting.
      * Otherwise, it uses {@link Arrays#parallelSort(double[], int, int)} for parallel execution.
      *
@@ -29588,7 +29993,7 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        if (toIndex - fromIndex <= PARALLEL_SORT_PRIMITIVE_THRESHOLD || IOUtil.CPU_CORES == 1) {
+        if (toIndex - fromIndex <= DOUBLE_PIPE_SORT_PRIMITIVE_THRESHOLD || IOUtil.CPU_CORES == 1) {
             Arrays.sort(a, fromIndex, toIndex);
         } else {
             Arrays.parallelSort(a, fromIndex, toIndex);
@@ -29688,7 +30093,7 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        if (toIndex - fromIndex <= PARALLEL_SORT_OBJECT_THRESHOLD || IOUtil.CPU_CORES == 1) {
+        if (toIndex - fromIndex <= DOUBLE_PIPE_SORT_OBJECT_THRESHOLD || IOUtil.CPU_CORES == 1) {
             Arrays.sort(a, fromIndex, toIndex, cmp);
         } else {
             Arrays.parallelSort(a, fromIndex, toIndex, cmp);
@@ -29782,7 +30187,7 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        if ((fromIndex == 0 && toIndex == list.size()) && (toIndex - fromIndex <= PARALLEL_SORT_OBJECT_THRESHOLD || IOUtil.CPU_CORES == 1)) {
+        if ((fromIndex == 0 && toIndex == list.size()) && (toIndex - fromIndex <= DOUBLE_PIPE_SORT_OBJECT_THRESHOLD || IOUtil.CPU_CORES == 1)) {
             list.sort(cmp);
         } else {
             @SuppressWarnings("deprecation")
@@ -29794,7 +30199,7 @@ sealed class CommonUtil permits N {
                 return;
             }
 
-            final T[] array = (T[]) list.toArray();
+            final T[] array = list.toArray((T[]) new Object[list.size()]);
 
             parallelSort(array, fromIndex, toIndex, cmp);
 
@@ -32333,7 +32738,7 @@ sealed class CommonUtil permits N {
             return OptionalInt.empty();
         }
 
-        final T[] a = (T[]) c.toArray();
+        final T[] a = c.toArray((T[]) new Object[c.size()]);
 
         for (int i = a.length - 1; i >= 0; i--) {
             if (predicate.test(a[i])) {
