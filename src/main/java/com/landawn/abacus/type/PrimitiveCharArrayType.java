@@ -28,7 +28,7 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 /**
  * Type handler for primitive char arrays (char[]).
@@ -100,19 +100,19 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
 
         final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 5));
 
-        sb.append(WD._BRACKET_L);
+        sb.append(SK._BRACKET_L);
 
         for (int i = 0, len = x.length; i < len; i++) {
             if (i > 0) {
                 sb.append(ELEMENT_SEPARATOR);
             }
 
-            sb.append(WD.SINGLE_QUOTE);
+            sb.append(SK.SINGLE_QUOTE);
             sb.append(x[i]);
-            sb.append(WD.SINGLE_QUOTE);
+            sb.append(SK.SINGLE_QUOTE);
         }
 
-        sb.append(WD._BRACKET_R);
+        sb.append(SK._BRACKET_R);
 
         final String str = sb.toString();
 
@@ -143,7 +143,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
         final char[] a = new char[len];
 
         if (len > 0) {
-            boolean isQuoted = (strs[0].length() > 1) && ((strs[0].charAt(0) == WD._SINGLE_QUOTE) || (strs[0].charAt(0) == WD._DOUBLE_QUOTE));
+            boolean isQuoted = (strs[0].length() > 1) && ((strs[0].charAt(0) == SK._SINGLE_QUOTE) || (strs[0].charAt(0) == SK._DOUBLE_QUOTE));
 
             if (isQuoted) {
                 for (int i = 0; i < len; i++) {
@@ -216,7 +216,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            appendable.append(WD._BRACKET_L);
+            appendable.append(SK._BRACKET_L);
 
             for (int i = 0, len = x.length; i < len; i++) {
                 if (i > 0) {
@@ -226,7 +226,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
                 appendable.append(x[i]);
             }
 
-            appendable.append(WD._BRACKET_R);
+            appendable.append(SK._BRACKET_R);
         }
     }
 
@@ -246,9 +246,9 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            writer.write(WD._BRACKET_L);
+            writer.write(SK._BRACKET_L);
 
-            final char charQuotation = (config == null) ? WD.CHAR_ZERO : config.getCharQuotation();
+            final char charQuotation = (config == null) ? SK.CHAR_ZERO : config.getCharQuotation();
 
             if (charQuotation > 0) {
                 for (int i = 0, len = x.length; i < len; i++) {
@@ -275,7 +275,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
                 }
             }
 
-            writer.write(WD._BRACKET_R);
+            writer.write(SK._BRACKET_R);
         }
     }
 
@@ -364,6 +364,6 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
             return NULL_STRING;
         }
 
-        return Strings.join(x, 0, x.length, ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
+        return Strings.join(x, 0, x.length, ELEMENT_SEPARATOR, SK.BRACKET_L, SK.BRACKET_R);
     }
 }

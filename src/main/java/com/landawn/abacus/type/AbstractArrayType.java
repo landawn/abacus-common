@@ -18,7 +18,7 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 /**
  * Abstract base class for array types in the type system.
@@ -131,8 +131,8 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
     protected static String[] split(final String str) {
         String[] elements = str.split(ELEMENT_SEPARATOR); // NOSONAR
 
-        if ((elements.length == 1) && (str.indexOf(WD._COMMA) >= 0)) {
-            elements = str.split(WD.COMMA);
+        if ((elements.length == 1) && (str.indexOf(SK._COMMA) >= 0)) {
+            elements = str.split(SK.COMMA);
         }
 
         final int len = elements.length;
@@ -140,8 +140,8 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
         if (len > 0) {
             final int lastIndex = len - 1;
 
-            if (!elements[0].isEmpty() && !elements[lastIndex].isEmpty() && (elements[0].charAt(0) == WD._BRACKET_L)
-                    && (elements[lastIndex].charAt(elements[lastIndex].length() - 1) == WD._BRACKET_R)) {
+            if (!elements[0].isEmpty() && !elements[lastIndex].isEmpty() && (elements[0].charAt(0) == SK._BRACKET_L)
+                    && (elements[lastIndex].charAt(elements[lastIndex].length() - 1) == SK._BRACKET_R)) {
                 elements[0] = elements[0].substring(1);
 
                 elements[lastIndex] = elements[lastIndex].substring(0, elements[lastIndex].length() - 1);

@@ -28,7 +28,7 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.Timed;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 /**
  * Type handler for {@link Timed} objects. This class provides serialization and
@@ -155,13 +155,13 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
                 try {
-                    bw.write(WD._BRACKET_L);
+                    bw.write(SK._BRACKET_L);
 
                     bw.write(String.valueOf(x.timestamp()));
                     bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                     valueType.appendTo(bw, x.value());
 
-                    bw.write(WD._BRACKET_R);
+                    bw.write(SK._BRACKET_R);
 
                     if (!isBufferedWriter) {
                         bw.flush();
@@ -174,13 +174,13 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
                     }
                 }
             } else {
-                appendable.append(WD._BRACKET_L);
+                appendable.append(SK._BRACKET_L);
 
                 appendable.append(String.valueOf(x.timestamp()));
                 appendable.append(ELEMENT_SEPARATOR);
                 valueType.appendTo(appendable, x.value());
 
-                appendable.append(WD._BRACKET_R);
+                appendable.append(SK._BRACKET_R);
             }
         }
     }
@@ -200,13 +200,13 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
             writer.write(NULL_CHAR_ARRAY);
         } else {
             try {
-                writer.write(WD._BRACKET_L);
+                writer.write(SK._BRACKET_L);
 
                 writer.write(String.valueOf(x.timestamp()));
                 writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                 valueType.writeCharacter(writer, x.value(), config);
 
-                writer.write(WD._BRACKET_R);
+                writer.write(SK._BRACKET_R);
 
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
@@ -223,9 +223,9 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
      */
     protected static String getTypeName(final String valueTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
-            return ClassUtil.getSimpleClassName(Timed.class) + WD.LESS_THAN + TypeFactory.getType(valueTypeName).declaringName() + WD.GREATER_THAN;
+            return ClassUtil.getSimpleClassName(Timed.class) + SK.LESS_THAN + TypeFactory.getType(valueTypeName).declaringName() + SK.GREATER_THAN;
         } else {
-            return ClassUtil.getCanonicalClassName(Timed.class) + WD.LESS_THAN + TypeFactory.getType(valueTypeName).name() + WD.GREATER_THAN;
+            return ClassUtil.getCanonicalClassName(Timed.class) + SK.LESS_THAN + TypeFactory.getType(valueTypeName).name() + SK.GREATER_THAN;
         }
     }
 }

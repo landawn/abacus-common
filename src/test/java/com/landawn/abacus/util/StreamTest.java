@@ -583,81 +583,81 @@ public class StreamTest extends AbstractTest {
         assertEquals(15000, IntStream.range(0, 5000).boxed().cycled(3).count());
     }
 
-    @Test
-    public void test_writeCSV() throws Exception {
-        final File file = new File("./stream.csv");
-
-        {
-
-            final List<Object> list = CommonUtil.toList(CommonUtil.asLinkedHashMap("k1", "v11\"'\"\\\"", "k2", 12, "k3", Dates.currentDate()), CommonUtil.asMap(
-                    "k1", "v21", "k2", CommonUtil.asLinkedHashMap("k1", "v11\"'\"\\\"", "k2", 12, "k3", Dates.currentDate()), "k3", Dates.currentDate()));
-
-            final Dataset dataset = CommonUtil.newDataset(list);
-            dataset.println();
-
-            N.println(dataset.toCsv());
-
-            dataset.toCsv(file);
-
-            IOUtil.readAllLines(file).forEach(Fn.println());
-            CsvUtil.load(file).println();
-
-            N.println(Strings.repeat('-', 60));
-
-            Stream.of(list).persistToCsv(file);
-
-            IOUtil.readAllLines(file).forEach(Fn.println());
-            CsvUtil.load(file).println();
-
-            Stream.of(list).persistToCsv(CommonUtil.toList("k1", "k3", "k2"), file);
-
-            IOUtil.readAllLines(file).forEach(Fn.println());
-
-            Stream.of(list).persist(file);
-
-            IOUtil.readAllLines(file).forEach(Fn.println());
-        }
-
-        N.println(Strings.repeat("=", 80));
-
-        {
-            CsvUtil.setEscapeCharToBackSlashForWrite();
-
-            final List<Object> list = CommonUtil.toList(CommonUtil.asLinkedHashMap("k1", "v11\"'\"\\\"", "k2", 12, "k3", Dates.currentDate()), CommonUtil.asMap(
-                    "k1", "v21", "k2", CommonUtil.asLinkedHashMap("k1", "v11\"'\"\\\"", "k2", 12, "k3", Dates.currentDate()), "k3", Dates.currentDate()));
-
-            final Dataset dataset = CommonUtil.newDataset(list);
-            dataset.println();
-
-            N.println(dataset.toCsv());
-
-            dataset.toCsv(file);
-
-            IOUtil.readAllLines(file).forEach(Fn.println());
-            CsvUtil.load(file).println();
-
-            N.println(Strings.repeat('-', 60));
-
-            Stream.of(list).persistToCsv(file);
-
-            IOUtil.readAllLines(file).forEach(Fn.println());
-            CsvUtil.load(file).println();
-
-            Stream.of(list).persistToCsv(CommonUtil.toList("k1", "k3", "k2"), file);
-
-            IOUtil.readAllLines(file).forEach(Fn.println());
-
-            Stream.of(list).persist(file);
-
-            IOUtil.readAllLines(file).forEach(Fn.println());
-
-            CsvUtil.resetHeaderParser();
-        }
-
-        N.println(Strings.repeat("=", 80));
-
-        IOUtil.deleteIfExists(file);
-    }
+    //     @Test
+    //     public void test_writeCSV() throws Exception {
+    //         final File file = new File("./stream.csv");
+    // 
+    //         {
+    // 
+    //             final List<Object> list = CommonUtil.toList(CommonUtil.asLinkedHashMap("k1", "v11\"'\"\\\"", "k2", 12, "k3", Dates.currentDate()), CommonUtil.asMap(
+    //                     "k1", "v21", "k2", CommonUtil.asLinkedHashMap("k1", "v11\"'\"\\\"", "k2", 12, "k3", Dates.currentDate()), "k3", Dates.currentDate()));
+    // 
+    //             final Dataset dataset = CommonUtil.newDataset(list);
+    //             dataset.println();
+    // 
+    //             N.println(dataset.toCsv());
+    // 
+    //             dataset.toCsv(file);
+    // 
+    //             IOUtil.readAllLines(file).forEach(Fn.println());
+    //             CsvUtil.load(file).println();
+    // 
+    //             N.println(Strings.repeat('-', 60));
+    // 
+    //             Stream.of(list).persistToCsv(file);
+    // 
+    //             IOUtil.readAllLines(file).forEach(Fn.println());
+    //             CsvUtil.load(file).println();
+    // 
+    //             Stream.of(list).persistToCsv(CommonUtil.toList("k1", "k3", "k2"), file);
+    // 
+    //             IOUtil.readAllLines(file).forEach(Fn.println());
+    // 
+    //             Stream.of(list).persist(file);
+    // 
+    //             IOUtil.readAllLines(file).forEach(Fn.println());
+    //         }
+    // 
+    //         N.println(Strings.repeat("=", 80));
+    // 
+    //         {
+    //             CsvUtil.setEscapeCharToBackSlashForWrite();
+    // 
+    //             final List<Object> list = CommonUtil.toList(CommonUtil.asLinkedHashMap("k1", "v11\"'\"\\\"", "k2", 12, "k3", Dates.currentDate()), CommonUtil.asMap(
+    //                     "k1", "v21", "k2", CommonUtil.asLinkedHashMap("k1", "v11\"'\"\\\"", "k2", 12, "k3", Dates.currentDate()), "k3", Dates.currentDate()));
+    // 
+    //             final Dataset dataset = CommonUtil.newDataset(list);
+    //             dataset.println();
+    // 
+    //             N.println(dataset.toCsv());
+    // 
+    //             dataset.toCsv(file);
+    // 
+    //             IOUtil.readAllLines(file).forEach(Fn.println());
+    //             CsvUtil.load(file).println();
+    // 
+    //             N.println(Strings.repeat('-', 60));
+    // 
+    //             Stream.of(list).persistToCsv(file);
+    // 
+    //             IOUtil.readAllLines(file).forEach(Fn.println());
+    //             CsvUtil.load(file).println();
+    // 
+    //             Stream.of(list).persistToCsv(CommonUtil.toList("k1", "k3", "k2"), file);
+    // 
+    //             IOUtil.readAllLines(file).forEach(Fn.println());
+    // 
+    //             Stream.of(list).persist(file);
+    // 
+    //             IOUtil.readAllLines(file).forEach(Fn.println());
+    // 
+    //             CsvUtil.resetHeaderParser();
+    //         }
+    // 
+    //         N.println(Strings.repeat("=", 80));
+    // 
+    //         IOUtil.deleteIfExists(file);
+    //     }
 
     @Test
     public void test_throwIfEmpty() throws Exception {

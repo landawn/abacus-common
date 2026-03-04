@@ -28,7 +28,7 @@ import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalBoolean;
@@ -207,14 +207,14 @@ class JsonStringReader extends AbstractJsonReader {
         startIndexForText = strBeginIndex;
 
         if (nextEvent == START_DOUBLE_QUOTE || nextEvent == START_SINGLE_QUOTE) {
-            final char quoteChar = nextEvent == START_DOUBLE_QUOTE ? WD._DOUBLE_QUOTE : WD._SINGLE_QUOTE;
+            final char quoteChar = nextEvent == START_DOUBLE_QUOTE ? SK._DOUBLE_QUOTE : SK._SINGLE_QUOTE;
 
             for (int ch = 0; strBeginIndex < strEndIndex;) {
                 ch = strValue[strBeginIndex++];
 
                 if (ch == quoteChar) {
                     endIndexForText = strBeginIndex - 1;
-                    nextEvent = quoteChar == WD._DOUBLE_QUOTE ? END_DOUBLE_QUOTE : END_SINGLE_QUOTE;
+                    nextEvent = quoteChar == SK._DOUBLE_QUOTE ? END_DOUBLE_QUOTE : END_SINGLE_QUOTE;
 
                     return nextEvent;
                 }
@@ -224,9 +224,9 @@ class JsonStringReader extends AbstractJsonReader {
                         enlargeCharBuffer();
                     }
 
-                    cbuf[nextChar++] = (ch == WD._BACKSLASH) ? readEscapeCharacter() : (char) ch;
+                    cbuf[nextChar++] = (ch == SK._BACKSLASH) ? readEscapeCharacter() : (char) ch;
                 } else {
-                    if (ch == WD._BACKSLASH) {
+                    if (ch == SK._BACKSLASH) {
                         saveToBuffer();
 
                         // strStart++;
@@ -464,7 +464,7 @@ class JsonStringReader extends AbstractJsonReader {
      */
     protected int saveChar(int ch) {
         if (nextChar > 0) {
-            if (ch == WD._BACKSLASH) {
+            if (ch == SK._BACKSLASH) {
                 ch = readEscapeCharacter();
             }
 
@@ -486,7 +486,7 @@ class JsonStringReader extends AbstractJsonReader {
 
                     saveToBuffer();
                 }
-            } else if (ch == WD._BACKSLASH) {
+            } else if (ch == SK._BACKSLASH) {
                 saveToBuffer();
                 // strStart++;
                 ch = readEscapeCharacter();

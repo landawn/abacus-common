@@ -15,6 +15,7 @@
 package com.landawn.abacus.util;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -173,7 +174,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @return a List containing the HBaseColumn
      */
     public static <T> List<HBaseColumn<T>> asList(final T value) {
-        return N.asList(new HBaseColumn<>(value));
+        return N.toList(new HBaseColumn<>(value));
     }
 
     /**
@@ -185,7 +186,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @return a List containing the HBaseColumn
      */
     public static <T> List<HBaseColumn<T>> asList(final T value, final long version) {
-        return N.asList(new HBaseColumn<>(value, version));
+        return N.toList(new HBaseColumn<>(value, version));
     }
 
     /**
@@ -196,7 +197,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @return a Set containing the HBaseColumn
      */
     public static <T> Set<HBaseColumn<T>> asSet(final T value) {
-        return N.asSet(new HBaseColumn<>(value));
+        return N.toSet(new HBaseColumn<>(value));
     }
 
     /**
@@ -208,7 +209,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @return a Set containing the HBaseColumn
      */
     public static <T> Set<HBaseColumn<T>> asSet(final T value, final long version) {
-        return N.asSet(new HBaseColumn<>(value, version));
+        return N.toSet(new HBaseColumn<>(value, version));
     }
 
     /**
@@ -282,7 +283,10 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     public static <T> Map<Long, HBaseColumn<T>> asMap(final T value) {
         final HBaseColumn<T> hbaseColumn = HBaseColumn.valueOf(value);
 
-        return N.asMap(hbaseColumn.version(), hbaseColumn);
+        // return N.toMap(hbaseColumn.version(), hbaseColumn);
+        final Map<Long, HBaseColumn<T>> map = new HashMap<>();
+        map.put(hbaseColumn.version(), hbaseColumn);
+        return map;
     }
 
     /**
@@ -297,7 +301,9 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     public static <T> Map<Long, HBaseColumn<T>> asMap(final T value, final long version) {
         final HBaseColumn<T> hbaseColumn = HBaseColumn.valueOf(value, version);
 
-        return N.asMap(hbaseColumn.version(), hbaseColumn);
+        final Map<Long, HBaseColumn<T>> map = new HashMap<>();
+        map.put(hbaseColumn.version(), hbaseColumn);
+        return map;
     }
 
     /**

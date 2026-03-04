@@ -31,7 +31,7 @@ import com.landawn.abacus.util.ImmutableEntry;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 /**
  * Type handler for immutable Map.Entry objects.
@@ -200,13 +200,13 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);
 
                 try {
-                    bw.write(WD._BRACE_L);
+                    bw.write(SK._BRACE_L);
 
                     keyType.appendTo(bw, x.getKey());
-                    bw.write(WD._COLON);
+                    bw.write(SK._COLON);
                     valueType.appendTo(bw, x.getValue());
 
-                    bw.write(WD._BRACE_R);
+                    bw.write(SK._BRACE_R);
 
                     if (!isBufferedWriter) {
                         bw.flush();
@@ -219,13 +219,13 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
                     }
                 }
             } else {
-                appendable.append(WD._BRACE_L);
+                appendable.append(SK._BRACE_L);
 
                 keyType.appendTo(appendable, x.getKey());
-                appendable.append(WD._COLON);
+                appendable.append(SK._COLON);
                 valueType.appendTo(appendable, x.getValue());
 
-                appendable.append(WD._BRACE_R);
+                appendable.append(SK._BRACE_R);
             }
         }
     }
@@ -260,13 +260,13 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
             writer.write(NULL_CHAR_ARRAY);
         } else {
             try {
-                writer.write(WD._BRACE_L);
+                writer.write(SK._BRACE_L);
 
                 keyType.writeCharacter(writer, x.getKey(), config);
-                writer.write(WD._COLON);
+                writer.write(SK._COLON);
                 valueType.writeCharacter(writer, x.getValue(), config);
 
-                writer.write(WD._BRACE_R);
+                writer.write(SK._BRACE_R);
 
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
@@ -285,11 +285,11 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      */
     protected static String getTypeName(final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
-            return MAP_IMMUTABLE_ENTRY + WD.LESS_THAN + TypeFactory.getType(keyTypeName).declaringName() + WD.COMMA_SPACE
-                    + TypeFactory.getType(valueTypeName).declaringName() + WD.GREATER_THAN;
+            return MAP_IMMUTABLE_ENTRY + SK.LESS_THAN + TypeFactory.getType(keyTypeName).declaringName() + SK.COMMA_SPACE
+                    + TypeFactory.getType(valueTypeName).declaringName() + SK.GREATER_THAN;
         } else {
-            return MAP_IMMUTABLE_ENTRY + WD.LESS_THAN + TypeFactory.getType(keyTypeName).name() + WD.COMMA_SPACE + TypeFactory.getType(valueTypeName).name()
-                    + WD.GREATER_THAN;
+            return MAP_IMMUTABLE_ENTRY + SK.LESS_THAN + TypeFactory.getType(keyTypeName).name() + SK.COMMA_SPACE + TypeFactory.getType(valueTypeName).name()
+                    + SK.GREATER_THAN;
         }
     }
 }

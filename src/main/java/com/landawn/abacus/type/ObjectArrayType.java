@@ -31,7 +31,7 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 /**
  * Type handler for object arrays, providing serialization, deserialization,
@@ -173,7 +173,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
             final BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
 
             try {
-                bw.write(WD._BRACKET_L);
+                bw.write(SK._BRACKET_L);
 
                 for (int i = 0, len = x.length; i < len; i++) {
                     if (i > 0) {
@@ -187,7 +187,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
                     }
                 }
 
-                bw.write(WD._BRACKET_R);
+                bw.write(SK._BRACKET_R);
 
                 return bw.toString();
             } catch (final IOException e) {
@@ -237,7 +237,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
                 try {
-                    bw.write(WD._BRACKET_L);
+                    bw.write(SK._BRACKET_L);
 
                     for (int i = 0, len = x.length; i < len; i++) {
                         if (i > 0) {
@@ -251,7 +251,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
                         }
                     }
 
-                    bw.write(WD._BRACKET_R);
+                    bw.write(SK._BRACKET_R);
 
                     if (!isBufferedWriter) {
                         bw.flush();
@@ -262,7 +262,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
                     }
                 }
             } else {
-                appendable.append(WD._BRACKET_L);
+                appendable.append(SK._BRACKET_L);
 
                 int i = 0;
                 for (final T element : x) {
@@ -277,7 +277,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
                     }
                 }
 
-                appendable.append(WD._BRACKET_R);
+                appendable.append(SK._BRACKET_R);
             }
         }
     }
@@ -296,7 +296,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            writer.write(WD._BRACKET_L);
+            writer.write(SK._BRACKET_L);
 
             for (int i = 0, len = x.length; i < len; i++) {
                 if (i > 0) {
@@ -310,7 +310,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
                 }
             }
 
-            writer.write(WD._BRACKET_R);
+            writer.write(SK._BRACKET_R);
         }
     }
 

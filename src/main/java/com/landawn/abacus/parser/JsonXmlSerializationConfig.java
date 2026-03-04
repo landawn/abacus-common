@@ -16,7 +16,7 @@ package com.landawn.abacus.parser;
 
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.NamingPolicy;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 /**
  * Base configuration class for JSON and XML serialization operations.
@@ -60,9 +60,9 @@ public abstract class JsonXmlSerializationConfig<C extends JsonXmlSerializationC
 
     protected static final String defaultIndentation = "    ";
 
-    char charQuotation = WD._DOUBLE_QUOTE;
+    char charQuotation = SK._DOUBLE_QUOTE;
 
-    char stringQuotation = WD._DOUBLE_QUOTE;
+    char stringQuotation = SK._DOUBLE_QUOTE;
 
     DateTimeFormat dateTimeFormat = defaultDateTimeFormat;
 
@@ -107,7 +107,7 @@ public abstract class JsonXmlSerializationConfig<C extends JsonXmlSerializationC
      * @throws IllegalArgumentException if an unsupported character is provided
      */
     public C setCharQuotation(final char charQuotation) {
-        if (charQuotation == 0 || charQuotation == WD._SINGLE_QUOTE || charQuotation == WD._DOUBLE_QUOTE) {
+        if (charQuotation == 0 || charQuotation == SK._SINGLE_QUOTE || charQuotation == SK._DOUBLE_QUOTE) {
             this.charQuotation = charQuotation;
         } else {
             throw new IllegalArgumentException("Only ''', '\"', 0(value is zero) chars are supported");
@@ -142,7 +142,7 @@ public abstract class JsonXmlSerializationConfig<C extends JsonXmlSerializationC
      * @throws IllegalArgumentException if an unsupported character is provided
      */
     public C setStringQuotation(final char stringQuotation) {
-        if (stringQuotation == 0 || stringQuotation == WD._SINGLE_QUOTE || stringQuotation == WD._DOUBLE_QUOTE) {
+        if (stringQuotation == 0 || stringQuotation == SK._SINGLE_QUOTE || stringQuotation == SK._DOUBLE_QUOTE) {
             this.stringQuotation = stringQuotation;
         } else {
             throw new IllegalArgumentException("Only '\"', 0(value is zero) chars are supported");

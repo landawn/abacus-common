@@ -28,7 +28,7 @@ import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple1;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 /**
  * Type handler for {@link Tuple1} objects. This class provides serialization and
@@ -182,11 +182,11 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
                 try {
-                    bw.write(WD._BRACKET_L);
+                    bw.write(SK._BRACKET_L);
 
                     type1.appendTo(bw, x._1);
 
-                    bw.write(WD._BRACKET_R);
+                    bw.write(SK._BRACKET_R);
 
                     if (!isBufferedWriter) {
                         bw.flush();
@@ -199,11 +199,11 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
                     }
                 }
             } else {
-                appendable.append(WD._BRACKET_L);
+                appendable.append(SK._BRACKET_L);
 
                 type1.appendTo(appendable, x._1);
 
-                appendable.append(WD._BRACKET_R);
+                appendable.append(SK._BRACKET_R);
             }
         }
     }
@@ -223,11 +223,11 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
             writer.write(NULL_CHAR_ARRAY);
         } else {
             try {
-                writer.write(WD._BRACKET_L);
+                writer.write(SK._BRACKET_L);
 
                 type1.writeCharacter(writer, x._1, config);
 
-                writer.write(WD._BRACKET_R);
+                writer.write(SK._BRACKET_R);
 
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
@@ -244,9 +244,9 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
      */
     protected static String getTypeName(final String t1TypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
-            return ClassUtil.getSimpleClassName(Tuple1.class) + WD.LESS_THAN + TypeFactory.getType(t1TypeName).declaringName() + WD.GREATER_THAN;
+            return ClassUtil.getSimpleClassName(Tuple1.class) + SK.LESS_THAN + TypeFactory.getType(t1TypeName).declaringName() + SK.GREATER_THAN;
         } else {
-            return ClassUtil.getCanonicalClassName(Tuple1.class) + WD.LESS_THAN + TypeFactory.getType(t1TypeName).name() + WD.GREATER_THAN;
+            return ClassUtil.getCanonicalClassName(Tuple1.class) + SK.LESS_THAN + TypeFactory.getType(t1TypeName).name() + SK.GREATER_THAN;
         }
     }
 }

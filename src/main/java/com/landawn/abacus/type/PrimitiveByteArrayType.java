@@ -30,7 +30,7 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 /**
  * Type handler for primitive byte arrays (byte[]).
@@ -114,7 +114,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
             return STR_FOR_EMPTY_ARRAY;
         }
 
-        return Strings.join(x, 0, x.length, ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
+        return Strings.join(x, 0, x.length, ELEMENT_SEPARATOR, SK.BRACKET_L, SK.BRACKET_R);
     }
 
     /**
@@ -282,7 +282,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            appendable.append(WD._BRACKET_L);
+            appendable.append(SK._BRACKET_L);
 
             for (int i = 0, len = x.length; i < len; i++) {
                 if (i > 0) {
@@ -292,7 +292,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
                 appendable.append(N.stringOf(x[i]));
             }
 
-            appendable.append(WD._BRACKET_R);
+            appendable.append(SK._BRACKET_R);
         }
     }
 
@@ -311,7 +311,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            writer.write(WD._BRACKET_L);
+            writer.write(SK._BRACKET_L);
 
             for (int i = 0, len = x.length; i < len; i++) {
                 if (i > 0) {
@@ -321,7 +321,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
                 writer.write(x[i]);
             }
 
-            writer.write(WD._BRACKET_R);
+            writer.write(SK._BRACKET_R);
         }
     }
 

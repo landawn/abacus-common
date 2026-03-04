@@ -19,7 +19,7 @@ import java.util.Map;
 
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 /**
  * Type implementation for XML serialization and deserialization of objects.
@@ -49,9 +49,9 @@ public class XMLType<T> extends AbstractType<T> {
      */
     @SuppressWarnings("unchecked")
     XMLType(final String clsName) {
-        super(XML + WD.LESS_THAN + TypeFactory.getType(clsName).name() + WD.GREATER_THAN);
+        super(XML + SK.LESS_THAN + TypeFactory.getType(clsName).name() + SK.GREATER_THAN);
 
-        declaringName = XML + WD.LESS_THAN + TypeFactory.getType(clsName).declaringName() + WD.GREATER_THAN;
+        declaringName = XML + SK.LESS_THAN + TypeFactory.getType(clsName).declaringName() + SK.GREATER_THAN;
         typeClass = (Class<T>) ("Map".equalsIgnoreCase(clsName) ? Map.class : ("List".equalsIgnoreCase(clsName) ? List.class : ClassUtil.forName(clsName)));
         //        this.parameterTypes = new Type[] { TypeFactory.getType(clsName) };
         //        this.elementType = parameterTypes[0];

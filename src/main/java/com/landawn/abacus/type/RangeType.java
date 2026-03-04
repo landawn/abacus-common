@@ -29,7 +29,7 @@ import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Range;
 import com.landawn.abacus.util.Range.BoundType;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 /**
  * Type handler for Range objects containing comparable values.
@@ -77,9 +77,9 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      */
     @SuppressWarnings("rawtypes")
     RangeType(final String parameterTypeName) {
-        super(RANGE + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).name() + WD.GREATER_THAN);
+        super(RANGE + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).name() + SK.GREATER_THAN);
 
-        declaringName = RANGE + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + WD.GREATER_THAN;
+        declaringName = RANGE + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + SK.GREATER_THAN;
         typeClass = (Class) Range.class;
         parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
         elementType = parameterTypes[0];

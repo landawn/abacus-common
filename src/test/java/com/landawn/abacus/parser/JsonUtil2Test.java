@@ -120,7 +120,7 @@ public class JsonUtil2Test extends AbstractTest {
 
     @Test
     public void test_02() {
-        Map<String, Object> map = N.asMap("abc", 123);
+        Map<String, Object> map = N.toMap("abc", 123);
 
         Account account = new Account();
         account.setId(123);

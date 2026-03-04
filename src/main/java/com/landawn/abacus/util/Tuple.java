@@ -959,7 +959,7 @@ public abstract class Tuple<TP> implements Immutable {
      */
     @Beta
     public static <T> List<T> toList(final Tuple1<? extends T> tp) {
-        return N.asList(tp._1);
+        return N.toList(tp._1);
     }
 
     /**
@@ -981,7 +981,7 @@ public abstract class Tuple<TP> implements Immutable {
      */
     @Beta
     public static <T> List<T> toList(final Tuple2<? extends T, ? extends T> tp) {
-        return N.asList(tp._1, tp._2);
+        return N.toList(tp._1, tp._2);
     }
 
     /**
@@ -1003,7 +1003,7 @@ public abstract class Tuple<TP> implements Immutable {
      */
     @Beta
     public static <T> List<T> toList(final Tuple3<? extends T, ? extends T, ? extends T> tp) {
-        return N.asList(tp._1, tp._2, tp._3);
+        return N.toList(tp._1, tp._2, tp._3);
     }
 
     /**
@@ -1025,7 +1025,7 @@ public abstract class Tuple<TP> implements Immutable {
      */
     @Beta
     public static <T> List<T> toList(final Tuple4<? extends T, ? extends T, ? extends T, ? extends T> tp) {
-        return N.asList(tp._1, tp._2, tp._3, tp._4);
+        return N.toList(tp._1, tp._2, tp._3, tp._4);
     }
 
     /**
@@ -1048,7 +1048,7 @@ public abstract class Tuple<TP> implements Immutable {
      */
     @Beta
     public static <T> List<T> toList(final Tuple5<? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
-        return N.asList(tp._1, tp._2, tp._3, tp._4, tp._5);
+        return N.toList(tp._1, tp._2, tp._3, tp._4, tp._5);
     }
 
     /**
@@ -1071,7 +1071,7 @@ public abstract class Tuple<TP> implements Immutable {
      */
     @Beta
     public static <T> List<T> toList(final Tuple6<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
-        return N.asList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6);
+        return N.toList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6);
     }
 
     /**
@@ -1094,7 +1094,7 @@ public abstract class Tuple<TP> implements Immutable {
      */
     @Beta
     public static <T> List<T> toList(final Tuple7<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
-        return N.asList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6, tp._7);
+        return N.toList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6, tp._7);
     }
 
     /**
@@ -1117,7 +1117,7 @@ public abstract class Tuple<TP> implements Immutable {
      */
     @Beta
     public static <T> List<T> toList(final Tuple8<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
-        return N.asList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6, tp._7, tp._8);
+        return N.toList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6, tp._7, tp._8);
     }
 
     /**
@@ -1141,7 +1141,7 @@ public abstract class Tuple<TP> implements Immutable {
     @Beta
     public static <T> List<T> toList(
             final Tuple9<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
-        return N.asList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6, tp._7, tp._8, tp._9);
+        return N.toList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6, tp._7, tp._8, tp._9);
     }
 
     /**

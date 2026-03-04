@@ -22,7 +22,7 @@ import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 /**
  * A stream-based JSON reader that reads from {@link Reader}/{@link java.io.InputStream} sources.
@@ -91,14 +91,14 @@ class JsonStreamReader extends JsonStringReader {
         startIndexForText = strBeginIndex;
 
         if (nextEvent == START_DOUBLE_QUOTE || nextEvent == START_SINGLE_QUOTE) {
-            final char quoteChar = nextEvent == START_DOUBLE_QUOTE ? WD._DOUBLE_QUOTE : WD._SINGLE_QUOTE;
+            final char quoteChar = nextEvent == START_DOUBLE_QUOTE ? SK._DOUBLE_QUOTE : SK._SINGLE_QUOTE;
 
             for (int ch = 0; strBeginIndex < strEndIndex;) {
                 ch = strValue[strBeginIndex++];
 
                 if (ch == quoteChar) {
                     endIndexForText = strBeginIndex - 1;
-                    nextEvent = quoteChar == WD._DOUBLE_QUOTE ? END_DOUBLE_QUOTE : END_SINGLE_QUOTE;
+                    nextEvent = quoteChar == SK._DOUBLE_QUOTE ? END_DOUBLE_QUOTE : END_SINGLE_QUOTE;
 
                     return nextEvent;
                 }
@@ -108,9 +108,9 @@ class JsonStreamReader extends JsonStringReader {
                         enlargeCharBuffer();
                     }
 
-                    cbuf[nextChar++] = (ch == WD._BACKSLASH) ? readEscapeCharacter() : (char) ch;
+                    cbuf[nextChar++] = (ch == SK._BACKSLASH) ? readEscapeCharacter() : (char) ch;
                 } else {
-                    if (ch == WD._BACKSLASH) {
+                    if (ch == SK._BACKSLASH) {
                         saveToBuffer();
 
                         // strStart++;

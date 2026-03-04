@@ -22,7 +22,7 @@ import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ImmutableMap;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 /**
  * Type handler for ImmutableMap objects with generic key and value types.
@@ -243,11 +243,11 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
      */
     protected static String getTypeName(final Class<?> typeClass, final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
-            return ClassUtil.getSimpleClassName(typeClass) + WD.LESS_THAN + TypeFactory.getType(keyTypeName).declaringName() + WD.COMMA_SPACE
-                    + TypeFactory.getType(valueTypeName).declaringName() + WD.GREATER_THAN;
+            return ClassUtil.getSimpleClassName(typeClass) + SK.LESS_THAN + TypeFactory.getType(keyTypeName).declaringName() + SK.COMMA_SPACE
+                    + TypeFactory.getType(valueTypeName).declaringName() + SK.GREATER_THAN;
         } else {
-            return ClassUtil.getCanonicalClassName(typeClass) + WD.LESS_THAN + TypeFactory.getType(keyTypeName).name() + WD.COMMA_SPACE
-                    + TypeFactory.getType(valueTypeName).name() + WD.GREATER_THAN;
+            return ClassUtil.getCanonicalClassName(typeClass) + SK.LESS_THAN + TypeFactory.getType(keyTypeName).name() + SK.COMMA_SPACE
+                    + TypeFactory.getType(valueTypeName).name() + SK.GREATER_THAN;
         }
     }
 }

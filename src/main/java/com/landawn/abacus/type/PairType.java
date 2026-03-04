@@ -27,7 +27,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 /**
  * Type handler for {@link Pair} objects, providing serialization and deserialization capabilities.
@@ -181,13 +181,13 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
                 try {
-                    bw.write(WD._BRACKET_L);
+                    bw.write(SK._BRACKET_L);
 
                     leftType.appendTo(bw, x.left());
                     bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                     rightType.appendTo(bw, x.right());
 
-                    bw.write(WD._BRACKET_R);
+                    bw.write(SK._BRACKET_R);
 
                     if (!isBufferedWriter) {
                         bw.flush();
@@ -200,13 +200,13 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
                     }
                 }
             } else {
-                appendable.append(WD._BRACKET_L);
+                appendable.append(SK._BRACKET_L);
 
                 leftType.appendTo(appendable, x.left());
                 appendable.append(ELEMENT_SEPARATOR);
                 rightType.appendTo(appendable, x.right());
 
-                appendable.append(WD._BRACKET_R);
+                appendable.append(SK._BRACKET_R);
             }
         }
     }
@@ -227,13 +227,13 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
             writer.write(NULL_CHAR_ARRAY);
         } else {
             try {
-                writer.write(WD._BRACKET_L);
+                writer.write(SK._BRACKET_L);
 
                 leftType.writeCharacter(writer, x.left(), config);
                 writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                 rightType.writeCharacter(writer, x.right(), config);
 
-                writer.write(WD._BRACKET_R);
+                writer.write(SK._BRACKET_R);
 
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
@@ -251,11 +251,11 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
      */
     protected static String getTypeName(final String leftTypeName, final String rightTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
-            return ClassUtil.getSimpleClassName(Pair.class) + WD.LESS_THAN + TypeFactory.getType(leftTypeName).declaringName() + WD.COMMA_SPACE
-                    + TypeFactory.getType(rightTypeName).declaringName() + WD.GREATER_THAN;
+            return ClassUtil.getSimpleClassName(Pair.class) + SK.LESS_THAN + TypeFactory.getType(leftTypeName).declaringName() + SK.COMMA_SPACE
+                    + TypeFactory.getType(rightTypeName).declaringName() + SK.GREATER_THAN;
         } else {
-            return ClassUtil.getCanonicalClassName(Pair.class) + WD.LESS_THAN + TypeFactory.getType(leftTypeName).name() + WD.COMMA_SPACE
-                    + TypeFactory.getType(rightTypeName).name() + WD.GREATER_THAN;
+            return ClassUtil.getCanonicalClassName(Pair.class) + SK.LESS_THAN + TypeFactory.getType(leftTypeName).name() + SK.COMMA_SPACE
+                    + TypeFactory.getType(rightTypeName).name() + SK.GREATER_THAN;
         }
     }
 }

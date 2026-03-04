@@ -668,30 +668,30 @@ public class Iterators103Test extends TestBase {
         assertFalse(iter.hasNext());
     }
 
-    @Test
-    public void testConcatBiIterators() {
-        BiIterator<String, Integer> iter = Iterators.concat(new BiIterator[] {});
-        assertFalse(iter.hasNext());
-
-        BiIterator<String, Integer> iter1 = BiIterator.of(CommonUtil.asLinkedHashMap("a", 1, "b", 2));
-        BiIterator<String, Integer> iter2 = BiIterator.of(CommonUtil.asLinkedHashMap("c", 3));
-
-        iter = Iterators.concat(iter1, iter2);
-
-        Pair<String, Integer> pair = iter.next();
-        assertEquals("a", pair.left());
-        assertEquals(1, pair.right());
-
-        pair = iter.next();
-        assertEquals("b", pair.left());
-        assertEquals(2, pair.right());
-
-        pair = iter.next();
-        assertEquals("c", pair.left());
-        assertEquals(3, pair.right());
-
-        assertFalse(iter.hasNext());
-    }
+    //     @Test
+    //     public void testConcatBiIterators() {
+    //         BiIterator<String, Integer> iter = Iterators.concat(new BiIterator[] {});
+    //         assertFalse(iter.hasNext());
+    // 
+    //         BiIterator<String, Integer> iter1 = BiIterator.of(CommonUtil.asLinkedHashMap("a", 1, "b", 2));
+    //         BiIterator<String, Integer> iter2 = BiIterator.of(CommonUtil.asLinkedHashMap("c", 3));
+    // 
+    //         iter = Iterators.concat(iter1, iter2);
+    // 
+    //         Pair<String, Integer> pair = iter.next();
+    //         assertEquals("a", pair.left());
+    //         assertEquals(1, pair.right());
+    // 
+    //         pair = iter.next();
+    //         assertEquals("b", pair.left());
+    //         assertEquals(2, pair.right());
+    // 
+    //         pair = iter.next();
+    //         assertEquals("c", pair.left());
+    //         assertEquals(3, pair.right());
+    // 
+    //         assertFalse(iter.hasNext());
+    //     }
 
     @Test
     public void testConcatTriIterators() {

@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.DateTimeFormat;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 @Tag("2025")
 public class XmlSerializationConfig2025Test extends TestBase {
@@ -26,8 +26,8 @@ public class XmlSerializationConfig2025Test extends TestBase {
     public void test_constructor() {
         XmlSerializationConfig config = new XmlSerializationConfig();
         assertNotNull(config);
-        assertEquals(WD.CHAR_ZERO, config.getCharQuotation());
-        assertEquals(WD.CHAR_ZERO, config.getStringQuotation());
+        assertEquals(SK.CHAR_ZERO, config.getCharQuotation());
+        assertEquals(SK.CHAR_ZERO, config.getStringQuotation());
         assertTrue(config.tagByPropertyName());
         assertFalse(config.writeTypeInfo());
     }
@@ -85,7 +85,7 @@ public class XmlSerializationConfig2025Test extends TestBase {
         XmlSerializationConfig config = new XmlSerializationConfig();
         XmlSerializationConfig result = config.noCharQuotation();
         assertSame(config, result);
-        assertEquals(WD.CHAR_ZERO, config.getCharQuotation());
+        assertEquals(SK.CHAR_ZERO, config.getCharQuotation());
     }
 
     @Test
@@ -93,7 +93,7 @@ public class XmlSerializationConfig2025Test extends TestBase {
         XmlSerializationConfig config = new XmlSerializationConfig();
         XmlSerializationConfig result = config.noStringQuotation();
         assertSame(config, result);
-        assertEquals(WD.CHAR_ZERO, config.getStringQuotation());
+        assertEquals(SK.CHAR_ZERO, config.getStringQuotation());
     }
 
     @Test
@@ -101,8 +101,8 @@ public class XmlSerializationConfig2025Test extends TestBase {
         XmlSerializationConfig config = new XmlSerializationConfig();
         XmlSerializationConfig result = config.noQuotation();
         assertSame(config, result);
-        assertEquals(WD.CHAR_ZERO, config.getCharQuotation());
-        assertEquals(WD.CHAR_ZERO, config.getStringQuotation());
+        assertEquals(SK.CHAR_ZERO, config.getCharQuotation());
+        assertEquals(SK.CHAR_ZERO, config.getStringQuotation());
     }
 
     @Test

@@ -1062,7 +1062,7 @@ sealed class CommonUtil permits N {
 
     private static boolean isArgNameOnly(final String argNameOrErrorMsg) {
         // shortest message: "it is null"
-        return !(argNameOrErrorMsg.length() > 9 && argNameOrErrorMsg.indexOf(WD._SPACE) > 0); //NOSONAR
+        return !(argNameOrErrorMsg.length() > 9 && argNameOrErrorMsg.indexOf(SK._SPACE) > 0); //NOSONAR
     }
 
     /**
@@ -5865,7 +5865,7 @@ sealed class CommonUtil permits N {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
 
-        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
+        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, SK.BRACKET_L, SK.BRACKET_R);
     }
 
     static void toString(final StringBuilder sb, final boolean[] a) {
@@ -5879,7 +5879,7 @@ sealed class CommonUtil permits N {
     }
 
     static void toString(final StringBuilder sb, final boolean[] a, final int fromIndex, final int toIndex) {
-        sb.append(WD._BRACKET_L);
+        sb.append(SK._BRACKET_L);
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (i > fromIndex) {
@@ -5889,7 +5889,7 @@ sealed class CommonUtil permits N {
             sb.append(a[i]);
         }
 
-        sb.append(WD._BRACKET_R);
+        sb.append(SK._BRACKET_R);
     }
 
     /**
@@ -5939,7 +5939,7 @@ sealed class CommonUtil permits N {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
 
-        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
+        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, SK.BRACKET_L, SK.BRACKET_R);
 
         // return String.valueOf(a, fromIndex, toIndex - fromIndex);   // NOSONAR)
     }
@@ -5955,7 +5955,7 @@ sealed class CommonUtil permits N {
     }
 
     static void toString(final StringBuilder sb, final char[] a, final int fromIndex, final int toIndex) {
-        sb.append(WD._BRACKET_L);
+        sb.append(SK._BRACKET_L);
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (i > fromIndex) {
@@ -5965,7 +5965,7 @@ sealed class CommonUtil permits N {
             sb.append(a[i]);
         }
 
-        sb.append(WD._BRACKET_R);
+        sb.append(SK._BRACKET_R);
     }
 
     /**
@@ -6015,7 +6015,7 @@ sealed class CommonUtil permits N {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
 
-        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
+        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, SK.BRACKET_L, SK.BRACKET_R);
     }
 
     static void toString(final StringBuilder sb, final byte[] a) {
@@ -6029,7 +6029,7 @@ sealed class CommonUtil permits N {
     }
 
     static void toString(final StringBuilder sb, final byte[] a, final int fromIndex, final int toIndex) {
-        sb.append(WD._BRACKET_L);
+        sb.append(SK._BRACKET_L);
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (i > fromIndex) {
@@ -6039,7 +6039,7 @@ sealed class CommonUtil permits N {
             sb.append(a[i]);
         }
 
-        sb.append(WD._BRACKET_R);
+        sb.append(SK._BRACKET_R);
     }
 
     /**
@@ -6089,7 +6089,7 @@ sealed class CommonUtil permits N {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
 
-        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
+        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, SK.BRACKET_L, SK.BRACKET_R);
     }
 
     static void toString(final StringBuilder sb, final short[] a) {
@@ -6103,7 +6103,7 @@ sealed class CommonUtil permits N {
     }
 
     static void toString(final StringBuilder sb, final short[] a, final int fromIndex, final int toIndex) {
-        sb.append(WD._BRACKET_L);
+        sb.append(SK._BRACKET_L);
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (i > fromIndex) {
@@ -6113,7 +6113,7 @@ sealed class CommonUtil permits N {
             sb.append(a[i]);
         }
 
-        sb.append(WD._BRACKET_R);
+        sb.append(SK._BRACKET_R);
     }
 
     /**
@@ -6163,7 +6163,7 @@ sealed class CommonUtil permits N {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
 
-        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
+        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, SK.BRACKET_L, SK.BRACKET_R);
     }
 
     static void toString(final StringBuilder sb, final int[] a) {
@@ -6177,7 +6177,7 @@ sealed class CommonUtil permits N {
     }
 
     static void toString(final StringBuilder sb, final int[] a, final int fromIndex, final int toIndex) {
-        sb.append(WD._BRACKET_L);
+        sb.append(SK._BRACKET_L);
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (i > fromIndex) {
@@ -6187,7 +6187,7 @@ sealed class CommonUtil permits N {
             sb.append(a[i]);
         }
 
-        sb.append(WD._BRACKET_R);
+        sb.append(SK._BRACKET_R);
     }
 
     /**
@@ -6237,7 +6237,7 @@ sealed class CommonUtil permits N {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
 
-        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
+        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, SK.BRACKET_L, SK.BRACKET_R);
     }
 
     static void toString(final StringBuilder sb, final long[] a) {
@@ -6251,7 +6251,7 @@ sealed class CommonUtil permits N {
     }
 
     static void toString(final StringBuilder sb, final long[] a, final int fromIndex, final int toIndex) {
-        sb.append(WD._BRACKET_L);
+        sb.append(SK._BRACKET_L);
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (i > fromIndex) {
@@ -6261,7 +6261,7 @@ sealed class CommonUtil permits N {
             sb.append(a[i]);
         }
 
-        sb.append(WD._BRACKET_R);
+        sb.append(SK._BRACKET_R);
     }
 
     /**
@@ -6311,7 +6311,7 @@ sealed class CommonUtil permits N {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
 
-        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
+        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, SK.BRACKET_L, SK.BRACKET_R);
     }
 
     static void toString(final StringBuilder sb, final float[] a) {
@@ -6325,7 +6325,7 @@ sealed class CommonUtil permits N {
     }
 
     static void toString(final StringBuilder sb, final float[] a, final int fromIndex, final int toIndex) {
-        sb.append(WD._BRACKET_L);
+        sb.append(SK._BRACKET_L);
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (i > fromIndex) {
@@ -6335,7 +6335,7 @@ sealed class CommonUtil permits N {
             sb.append(a[i]);
         }
 
-        sb.append(WD._BRACKET_R);
+        sb.append(SK._BRACKET_R);
     }
 
     /**
@@ -6385,7 +6385,7 @@ sealed class CommonUtil permits N {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
 
-        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
+        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, SK.BRACKET_L, SK.BRACKET_R);
     }
 
     /**
@@ -6415,7 +6415,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the ending index (exclusive) of the range to convert
      */
     static void toString(final StringBuilder sb, final double[] a, final int fromIndex, final int toIndex) {
-        sb.append(WD._BRACKET_L);
+        sb.append(SK._BRACKET_L);
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (i > fromIndex) {
@@ -6425,7 +6425,7 @@ sealed class CommonUtil permits N {
             sb.append(a[i]);
         }
 
-        sb.append(WD._BRACKET_R);
+        sb.append(SK._BRACKET_R);
     }
 
     /**
@@ -6475,7 +6475,7 @@ sealed class CommonUtil permits N {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
 
-        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R, false);
+        return Strings.join(a, fromIndex, toIndex, Strings.ELEMENT_SEPARATOR, SK.BRACKET_L, SK.BRACKET_R, false);
     }
 
     /**
@@ -6505,7 +6505,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the ending index (exclusive) of the range to convert
      */
     static void toString(final StringBuilder sb, final Object[] a, final int fromIndex, final int toIndex) {
-        sb.append(WD._BRACKET_L);
+        sb.append(SK._BRACKET_L);
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (i > fromIndex) {
@@ -6515,7 +6515,7 @@ sealed class CommonUtil permits N {
             sb.append(toString(a[i]));
         }
 
-        sb.append(WD._BRACKET_R);
+        sb.append(SK._BRACKET_R);
     }
 
     /**
@@ -6662,7 +6662,7 @@ sealed class CommonUtil permits N {
     static void deepToString(final StringBuilder sb, final Object[] a, final int fromIndex, final int toIndex, final Set<Object> processedElements) {
         processedElements.add(a);
 
-        sb.append(WD._BRACKET_L);
+        sb.append(SK._BRACKET_L);
 
         Object element = null;
         Class<?> eClass = null;
@@ -6736,7 +6736,7 @@ sealed class CommonUtil permits N {
             }
         }
 
-        sb.append(WD._BRACKET_R);
+        sb.append(SK._BRACKET_R);
 
         processedElements.remove(a);
     }
@@ -13198,7 +13198,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, List<Object>> data = N.asLinkedHashMap(
+     * Map<String, List<Object>> data = N.asMap(
      *     "Name", N.asList("Alice", "Bob", "Charlie"),
      *     "Age", N.asList(25, 30, 35),
      *     "City", N.asList("NYC", "LA")  // shorter column
@@ -16721,52 +16721,119 @@ sealed class CommonUtil permits N {
         return result;
     }
 
-    //    @SafeVarargs
-    //    public static <T> T[] arrayOf(final T... a) {
-    //        return a;
-    //    }
-
     /**
-     * Returns the input array as-is without any modification or copying.
-     * This is a type-safe varargs method that allows creating arrays inline.
-     * Note: No defensive copy is made, so the returned array is the same instance as the input.
+     * Returns a new modifiable {@code HashMap} containing the specified key-value pair.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * // Create an array inline
-     * String[] array = N.asArray("a", "b", "c");
-     * // array is ["a", "b", "c"]
+     * <p>Unlike {@link Map#of(Object, Object)}, this method supports {@code null} keys and values.</p>
      *
-     * // Pass varargs to methods expecting arrays
-     * void processArray(String[] arr) { }
-     * processArray(N.asArray("x", "y", "z"));
-     *
-     * // Returns null for null input
-     * String[] nullArray = N.asArray((String[]) null);
-     * // nullArray is null
-     * }</pre>
-     *
-     * @param <T> the type of the array elements
-     * @param a the input array. Can be {@code null}.
-     * @return the input array unchanged (same reference). Returns {@code null} if {@code a} is {@code null}.
-     * @see Array#asList(Object[])
-     * @see Arrays#asList(Object[])
-     * @see N#copyOf(Object[], int)
-     * @see N#toList(Object[])
+     * @param <K> the type of keys in the Map
+     * @param <V> the type of values in the Map
+     * @param k1 the key to be placed in the Map. Can be {@code null}.
+     * @param v1 the value to be associated with {@code k1}. Can be {@code null}.
+     * @return a new modifiable {@code HashMap} containing {@code k1} and {@code v1}
      */
-    @SafeVarargs
-    public static <T> T[] asArray(final T... a) {
-        return a;
+    @Beta
+    public static <K, V> Map<K, V> toMap(final K k1, final V v1) {
+        final Map<K, V> map = new HashMap<>();
+        map.put(k1, v1);
+        return map;
     }
 
     /**
-     * Returns a modifiable {@code HashMap} with the specified key and value.
-     * This is a convenient factory method for creating a single-entry map.
+     * Returns a new modifiable {@code HashMap} containing the specified key-value pairs.
+     *
+     * <p>Unlike {@link Map#of(Object, Object, Object, Object)}, this method supports {@code null} keys and values.</p>
+     *
+     * <p>If duplicate keys are provided, the later value overwrites the earlier value.</p>
+     *
+     * @param <K> the type of keys in the Map
+     * @param <V> the type of values in the Map
+     * @param k1 the first key to be placed in the Map. Can be {@code null}.
+     * @param v1 the value to be associated with {@code k1}. Can be {@code null}.
+     * @param k2 the second key to be placed in the Map. Can be {@code null}.
+     * @param v2 the value to be associated with {@code k2}. Can be {@code null}.
+     * @return a new modifiable {@code HashMap} containing the specified entries
+     */
+    @Beta
+    public static <K, V> Map<K, V> toMap(final K k1, final V v1, final K k2, final V v2) {
+        final Map<K, V> map = new HashMap<>();
+        map.put(k1, v1);
+        map.put(k2, v2);
+        return map;
+    }
+
+    /**
+     * Returns a new modifiable {@code HashMap} containing the specified key-value pairs.
+     *
+     * <p>Unlike {@link Map#of(Object, Object, Object, Object, Object, Object)}, this method supports {@code null} keys and values.</p>
+     *
+     * <p>If duplicate keys are provided, the later value overwrites the earlier value.</p>
+     *
+     * @param <K> the type of keys in the Map
+     * @param <V> the type of values in the Map
+     * @param k1 the first key to be placed in the Map. Can be {@code null}.
+     * @param v1 the value to be associated with {@code k1}. Can be {@code null}.
+     * @param k2 the second key to be placed in the Map. Can be {@code null}.
+     * @param v2 the value to be associated with {@code k2}. Can be {@code null}.
+     * @param k3 the third key to be placed in the Map. Can be {@code null}.
+     * @param v3 the value to be associated with {@code k3}. Can be {@code null}.
+     * @return a new modifiable {@code HashMap} containing the specified entries
+     */
+    @Beta
+    public static <K, V> Map<K, V> toMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
+        final Map<K, V> map = new HashMap<>();
+        map.put(k1, v1);
+        map.put(k2, v2);
+        map.put(k3, v3);
+        return map;
+    }
+
+    /**
+     * Returns a new modifiable {@code HashMap} containing the specified key-value pairs.
+     *
+     * <p>The first entry is {@code (k1, v1)}. Additional entries are supplied in {@code keyValuePairs}
+     * as alternating key and value elements: {@code key2, value2, key3, value3, ...}.</p>
+     *
+     * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
+     *
+     * <p>If duplicate keys are provided, the later value overwrites the earlier value.</p>
+     *
+     * @param <K> the type of keys in the Map
+     * @param <V> the type of values in the Map
+     * @param k1 the first key to be placed in the Map. Can be {@code null}.
+     * @param v1 the value to be associated with {@code k1}. Can be {@code null}.
+     * @param keyValuePairs additional keys and values in alternating order: key, value, key, value...
+     * @return a new modifiable {@code HashMap} containing the specified entries
+     * @throws IllegalArgumentException if {@code keyValuePairs} does not contain a valid sequence of key-value elements
+     */
+    @Beta
+    public static <K, V> Map<K, V> toMap(final K k1, final V v1, final Object... keyValuePairs) {
+        final int len = len(keyValuePairs);
+
+        if (len % 2 != 0) {
+            throw new IllegalArgumentException("The length of keyValuePairs array must be even: " + len);
+        }
+
+        final Map<K, V> map = new HashMap<>(len / 2 + 1);
+        map.put(k1, v1);
+
+        for (int i = 0; i < len; i += 2) {
+            map.put((K) keyValuePairs[i], (V) keyValuePairs[i + 1]);
+        }
+
+        return map;
+    }
+
+    /**
+     * Returns an unmodifiable {@code ImmutableMap} with the specified key and value.
+     *
+     * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
+     *
+     * <p>This is a convenient factory method for creating a single-entry map.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = N.asMap("age", 25);
-     * map.put("name", "John");  // Can add more entries
      *
      * // Both key and value can be null
      * Map<String, String> mapWithNull = N.asMap("key", null);
@@ -16776,1461 +16843,1306 @@ sealed class CommonUtil permits N {
      * @param <V> the type of values in the Map
      * @param k1 the key to be placed in the Map. Can be {@code null}.
      * @param v1 the value to be associated with the key in the Map. Can be {@code null}.
-     * @return a modifiable HashMap containing the specified key and value
+     * @return an unmodifiable {@code ImmutableMap} containing the specified key and value
      */
-    public static <K, V> Map<K, V> asMap(final K k1, final V v1) {
-        final Map<K, V> map = newHashMap(1);
-        map.put(k1, v1);
-        return map;
+    public static <K, V> ImmutableMap<K, V> asMap(final K k1, final V v1) {
+        return ImmutableMap.of(k1, v1);
     }
 
     /**
-     * Returns a modifiable {@code Map} with the specified keys and values.
+     * Returns an unmodifiable {@code ImmutableMap} with the specified keys and values.
+     *
+     * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
      *
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
-     * @param k1 the first key to be placed in the Map
-     * @param v1 the value to be associated with the first key in the Map
-     * @param k2 the second key to be placed in the Map
-     * @param v2 the value to be associated with the second key in the Map
-     * @return a Map containing the specified keys and values
+     * @param k1 the first key to be placed in the Map. Can be {@code null}.
+     * @param v1 the value to be associated with the first key in the Map. Can be {@code null}.
+     * @param k2 the second key to be placed in the Map. Can be {@code null}.
+     * @param v2 the value to be associated with the second key in the Map. Can be {@code null}.
+     * @return an unmodifiable {@code ImmutableMap} containing the specified keys and values
      */
-    public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2) {
-        final Map<K, V> map = newHashMap(2);
-        map.put(k1, v1);
-        map.put(k2, v2);
-        return map;
+    public static <K, V> ImmutableMap<K, V> asMap(final K k1, final V v1, final K k2, final V v2) {
+        return ImmutableMap.of(k1, v1, k2, v2);
     }
 
     /**
-     * Returns a modifiable {@code Map} with specified keys/values.
+     * Returns an unmodifiable {@code ImmutableMap} with the specified keys and values.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param k1 the first key to be placed in the Map
-     * @param v1 the value to be associated with the first key in the Map
-     * @param k2 the second key to be placed in the Map
-     * @param v2 the value to be associated with the second key in the Map
-     * @param k3 the third key to be placed in the Map
-     * @param v3 the value to be associated with the third key in the Map
-     * @return a Map containing the specified keys and values
-     */
-    public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
-        final Map<K, V> map = newHashMap(3);
-        map.put(k1, v1);
-        map.put(k2, v2);
-        map.put(k3, v3);
-        return map;
-    }
-
-    /**
-     * Returns a modifiable {@code Map} with specified keys/values.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param k1 the first key to be placed in the Map
-     * @param v1 the value to be associated with the first key in the Map
-     * @param k2 the second key to be placed in the Map
-     * @param v2 the value to be associated with the second key in the Map
-     * @param k3 the third key to be placed in the Map
-     * @param v3 the value to be associated with the third key in the Map
-     * @param k4 the fourth key to be placed in the Map
-     * @param v4 the value to be associated with the fourth key in the Map
-     * @return a Map containing the specified keys and values
-     */
-    public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
-        final Map<K, V> map = newHashMap(4);
-        map.put(k1, v1);
-        map.put(k2, v2);
-        map.put(k3, v3);
-        map.put(k4, v4);
-        return map;
-    }
-
-    /**
-     * Returns a modifiable {@code Map} with specified keys/values.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param k1 the first key to be placed in the Map
-     * @param v1 the value to be associated with the first key in the Map
-     * @param k2 the second key to be placed in the Map
-     * @param v2 the value to be associated with the second key in the Map
-     * @param k3 the third key to be placed in the Map
-     * @param v3 the value to be associated with the third key in the Map
-     * @param k4 the fourth key to be placed in the Map
-     * @param v4 the value to be associated with the fourth key in the Map
-     * @param k5 the fifth key to be placed in the Map
-     * @param v5 the value to be associated with the fifth key in the Map
-     * @return a Map containing the specified keys and values
-     */
-    public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
-            final V v5) {
-        final Map<K, V> map = newHashMap(5);
-        map.put(k1, v1);
-        map.put(k2, v2);
-        map.put(k3, v3);
-        map.put(k4, v4);
-        map.put(k5, v5);
-        return map;
-    }
-
-    /**
-     * Returns a modifiable {@code Map} with specified keys/values.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param k1 the first key to be placed in the Map
-     * @param v1 the value to be associated with the first key in the Map
-     * @param k2 the second key to be placed in the Map
-     * @param v2 the value to be associated with the second key in the Map
-     * @param k3 the third key to be placed in the Map
-     * @param v3 the value to be associated with the third key in the Map
-     * @param k4 the fourth key to be placed in the Map
-     * @param v4 the value to be associated with the fourth key in the Map
-     * @param k5 the fifth key to be placed in the Map
-     * @param v5 the value to be associated with the fifth key in the Map
-     * @param k6 the sixth key to be placed in the Map
-     * @param v6 the value to be associated with the sixth key in the Map
-     * @return a Map containing the specified keys and values
-     */
-    public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
-            final K k6, final V v6) {
-        final Map<K, V> map = newHashMap(6);
-        map.put(k1, v1);
-        map.put(k2, v2);
-        map.put(k3, v3);
-        map.put(k4, v4);
-        map.put(k5, v5);
-        map.put(k6, v6);
-        return map;
-    }
-
-    /**
-     * Returns a modifiable {@code Map} with specified keys/values.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param k1 the first key to be placed in the Map
-     * @param v1 the value to be associated with the first key in the Map
-     * @param k2 the second key to be placed in the Map
-     * @param v2 the value to be associated with the second key in the Map
-     * @param k3 the third key to be placed in the Map
-     * @param v3 the value to be associated with the third key in the Map
-     * @param k4 the fourth key to be placed in the Map
-     * @param v4 the value to be associated with the fourth key in the Map
-     * @param k5 the fifth key to be placed in the Map
-     * @param v5 the value to be associated with the fifth key in the Map
-     * @param k6 the sixth key to be placed in the Map
-     * @param v6 the value to be associated with the sixth key in the Map
-     * @param k7 the seventh key to be placed in the Map
-     * @param v7 the value to be associated with the seventh key in the Map
-     * @return a Map containing the specified keys and values
-     */
-    public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
-            final K k6, final V v6, final K k7, final V v7) {
-        final Map<K, V> map = newHashMap(7);
-        map.put(k1, v1);
-        map.put(k2, v2);
-        map.put(k3, v3);
-        map.put(k4, v4);
-        map.put(k5, v5);
-        map.put(k6, v6);
-        map.put(k7, v7);
-        return map;
-    }
-
-    /**
-     * Returns a modifiable {@code Map} with specified keys/values.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param k1 the first key to be placed in the Map
-     * @param v1 the value to be associated with the first key in the Map
-     * @param k2 the second key to be placed in the Map
-     * @param v2 the value to be associated with the second key in the Map
-     * @param k3 the third key to be placed in the Map
-     * @param v3 the value to be associated with the third key in the Map
-     * @param k4 the fourth key to be placed in the Map
-     * @param v4 the value to be associated with the fourth key in the Map
-     * @param k5 the fifth key to be placed in the Map
-     * @param v5 the value to be associated with the fifth key in the Map
-     * @param k6 the sixth key to be placed in the Map
-     * @param v6 the value to be associated with the sixth key in the Map
-     * @param k7 the seventh key to be placed in the Map
-     * @param v7 the value to be associated with the seventh key in the Map
-     * @param k8 the eighth key to be placed in the Map
-     * @param v8 the value to be associated with the eighth key in the Map
-     * @return a Map containing the specified keys and values
-     */
-    public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
-            final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) {
-        final Map<K, V> map = newHashMap(8);
-        map.put(k1, v1);
-        map.put(k2, v2);
-        map.put(k3, v3);
-        map.put(k4, v4);
-        map.put(k5, v5);
-        map.put(k6, v6);
-        map.put(k7, v7);
-        map.put(k8, v8);
-        return map;
-    }
-
-    /**
-     * Returns a modifiable {@code Map} with specified keys/values.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param k1 the first key to be placed in the Map
-     * @param v1 the value to be associated with the first key in the Map
-     * @param k2 the second key to be placed in the Map
-     * @param v2 the value to be associated with the second key in the Map
-     * @param k3 the third key to be placed in the Map
-     * @param v3 the value to be associated with the third key in the Map
-     * @param k4 the fourth key to be placed in the Map
-     * @param v4 the value to be associated with the fourth key in the Map
-     * @param k5 the fifth key to be placed in the Map
-     * @param v5 the value to be associated with the fifth key in the Map
-     * @param k6 the sixth key to be placed in the Map
-     * @param v6 the value to be associated with the sixth key in the Map
-     * @param k7 the seventh key to be placed in the Map
-     * @param v7 the value to be associated with the seventh key in the Map
-     * @param k8 the eighth key to be placed in the Map
-     * @param v8 the value to be associated with the eighth key in the Map
-     * @param k9 the ninth key to be placed in the Map
-     * @param v9 the value to be associated with the ninth key in the Map
-     * @return a Map containing the specified keys and values
-     */
-    public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
-            final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9) {
-        final Map<K, V> map = newHashMap(9);
-        map.put(k1, v1);
-        map.put(k2, v2);
-        map.put(k3, v3);
-        map.put(k4, v4);
-        map.put(k5, v5);
-        map.put(k6, v6);
-        map.put(k7, v7);
-        map.put(k8, v8);
-        map.put(k9, v9);
-        return map;
-    }
-
-    /**
-     * Returns a modifiable {@code LinkedHashMap} with specified key and value.
-     * A LinkedHashMap maintains insertion order, making it useful when iteration order matters.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Map<String, Integer> map = N.asLinkedHashMap("first", 1);
-     * map.put("second", 2);
-     * map.put("third", 3);
-     * // Iteration order: first, second, third (insertion order preserved)
-     *
-     * // Both key and value can be null
-     * Map<String, String> mapWithNull = N.asLinkedHashMap("key", null);
-     * }</pre>
+     * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
      *
      * @param <K> the key type
      * @param <V> the value type
      * @param k1 the first key to be placed in the Map. Can be {@code null}.
      * @param v1 the value to be associated with the first key in the Map. Can be {@code null}.
-     * @return a modifiable LinkedHashMap containing the specified key and value, preserving insertion order
+     * @param k2 the second key to be placed in the Map. Can be {@code null}.
+     * @param v2 the value to be associated with the second key in the Map. Can be {@code null}.
+     * @param k3 the third key to be placed in the Map. Can be {@code null}.
+     * @param v3 the value to be associated with the third key in the Map. Can be {@code null}.
+     * @return an unmodifiable {@code ImmutableMap} containing the specified keys and values
      */
-    public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1) {
-        final Map<K, V> map = newLinkedHashMap(1);
-        map.put(k1, v1);
-        return map;
+    public static <K, V> ImmutableMap<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
+        return ImmutableMap.of(k1, v1, k2, v2, k3, v3);
     }
 
     /**
-     * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
+     * Returns an unmodifiable {@code ImmutableMap} with the specified keys and values.
+     *
+     * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 the first key to be placed in the Map
-     * @param v1 the value to be associated with the first key in the Map
-     * @param k2 the second key to be placed in the Map
-     * @param v2 the value to be associated with the second key in the Map
-     * @return a Map containing the specified keys and values
+     * @param k1 the first key to be placed in the Map. Can be {@code null}.
+     * @param v1 the value to be associated with the first key in the Map. Can be {@code null}.
+     * @param k2 the second key to be placed in the Map. Can be {@code null}.
+     * @param v2 the value to be associated with the second key in the Map. Can be {@code null}.
+     * @param k3 the third key to be placed in the Map. Can be {@code null}.
+     * @param v3 the value to be associated with the third key in the Map. Can be {@code null}.
+     * @param k4 the fourth key to be placed in the Map. Can be {@code null}.
+     * @param v4 the value to be associated with the fourth key in the Map. Can be {@code null}.
+     * @return an unmodifiable {@code ImmutableMap} containing the specified keys and values
      */
-    public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2) {
-        final Map<K, V> map = newLinkedHashMap(2);
-        map.put(k1, v1);
-        map.put(k2, v2);
-        return map;
+    public static <K, V> ImmutableMap<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
+        return ImmutableMap.of(k1, v1, k2, v2, k3, v3, k4, v4);
     }
 
     /**
-     * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
+     * Returns an unmodifiable {@code ImmutableMap} with the specified keys and values.
+     *
+     * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 the first key to be placed in the Map
-     * @param v1 the value to be associated with the first key in the Map
-     * @param k2 the second key to be placed in the Map
-     * @param v2 the value to be associated with the second key in the Map
-     * @param k3 the third key to be placed in the Map
-     * @param v3 the value to be associated with the third key in the Map
-     * @return a Map containing the specified keys and values
+     * @param k1 the first key to be placed in the Map. Can be {@code null}.
+     * @param v1 the value to be associated with the first key in the Map. Can be {@code null}.
+     * @param k2 the second key to be placed in the Map. Can be {@code null}.
+     * @param v2 the value to be associated with the second key in the Map. Can be {@code null}.
+     * @param k3 the third key to be placed in the Map. Can be {@code null}.
+     * @param v3 the value to be associated with the third key in the Map. Can be {@code null}.
+     * @param k4 the fourth key to be placed in the Map. Can be {@code null}.
+     * @param v4 the value to be associated with the fourth key in the Map. Can be {@code null}.
+     * @param k5 the fifth key to be placed in the Map. Can be {@code null}.
+     * @param v5 the value to be associated with the fifth key in the Map. Can be {@code null}.
+     * @return an unmodifiable {@code ImmutableMap} containing the specified keys and values
      */
-    public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
-        final Map<K, V> map = newLinkedHashMap(3);
-        map.put(k1, v1);
-        map.put(k2, v2);
-        map.put(k3, v3);
-        return map;
-    }
-
-    /**
-     * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param k1 the first key to be placed in the Map
-     * @param v1 the value to be associated with the first key in the Map
-     * @param k2 the second key to be placed in the Map
-     * @param v2 the value to be associated with the second key in the Map
-     * @param k3 the third key to be placed in the Map
-     * @param v3 the value to be associated with the third key in the Map
-     * @param k4 the fourth key to be placed in the Map
-     * @param v4 the value to be associated with the fourth key in the Map
-     * @return a Map containing the specified keys and values
-     */
-    public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
-        final Map<K, V> map = newLinkedHashMap(4);
-        map.put(k1, v1);
-        map.put(k2, v2);
-        map.put(k3, v3);
-        map.put(k4, v4);
-        return map;
-    }
-
-    /**
-     * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param k1 the first key to be placed in the Map
-     * @param v1 the value to be associated with the first key in the Map
-     * @param k2 the second key to be placed in the Map
-     * @param v2 the value to be associated with the second key in the Map
-     * @param k3 the third key to be placed in the Map
-     * @param v3 the value to be associated with the third key in the Map
-     * @param k4 the fourth key to be placed in the Map
-     * @param v4 the value to be associated with the fourth key in the Map
-     * @param k5 the fifth key to be placed in the Map
-     * @param v5 the value to be associated with the fifth key in the Map
-     * @return a Map containing the specified keys and values
-     */
-    public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
+    public static <K, V> ImmutableMap<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5) {
-        final Map<K, V> map = newLinkedHashMap(5);
-        map.put(k1, v1);
-        map.put(k2, v2);
-        map.put(k3, v3);
-        map.put(k4, v4);
-        map.put(k5, v5);
-        return map;
+        return ImmutableMap.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5);
     }
 
     /**
-     * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
+     * Returns an unmodifiable {@code ImmutableMap} with the specified keys and values.
+     *
+     * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 the first key to be placed in the Map
-     * @param v1 the value to be associated with the first key in the Map
-     * @param k2 the second key to be placed in the Map
-     * @param v2 the value to be associated with the second key in the Map
-     * @param k3 the third key to be placed in the Map
-     * @param v3 the value to be associated with the third key in the Map
-     * @param k4 the fourth key to be placed in the Map
-     * @param v4 the value to be associated with the fourth key in the Map
-     * @param k5 the fifth key to be placed in the Map
-     * @param v5 the value to be associated with the fifth key in the Map
-     * @param k6 the sixth key to be placed in the Map
-     * @param v6 the value to be associated with the sixth key in the Map
-     * @return a Map containing the specified keys and values
+     * @param k1 the first key to be placed in the Map. Can be {@code null}.
+     * @param v1 the value to be associated with the first key in the Map. Can be {@code null}.
+     * @param k2 the second key to be placed in the Map. Can be {@code null}.
+     * @param v2 the value to be associated with the second key in the Map. Can be {@code null}.
+     * @param k3 the third key to be placed in the Map. Can be {@code null}.
+     * @param v3 the value to be associated with the third key in the Map. Can be {@code null}.
+     * @param k4 the fourth key to be placed in the Map. Can be {@code null}.
+     * @param v4 the value to be associated with the fourth key in the Map. Can be {@code null}.
+     * @param k5 the fifth key to be placed in the Map. Can be {@code null}.
+     * @param v5 the value to be associated with the fifth key in the Map. Can be {@code null}.
+     * @param k6 the sixth key to be placed in the Map. Can be {@code null}.
+     * @param v6 the value to be associated with the sixth key in the Map. Can be {@code null}.
+     * @return an unmodifiable {@code ImmutableMap} containing the specified keys and values
      */
-    public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
+    public static <K, V> ImmutableMap<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6) {
-        final Map<K, V> map = newLinkedHashMap(6);
-        map.put(k1, v1);
-        map.put(k2, v2);
-        map.put(k3, v3);
-        map.put(k4, v4);
-        map.put(k5, v5);
-        map.put(k6, v6);
-        return map;
+        return ImmutableMap.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6);
     }
 
     /**
-     * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
+     * Returns an unmodifiable {@code ImmutableMap} with the specified keys and values.
+     *
+     * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 the first key to be placed in the Map
-     * @param v1 the value to be associated with the first key in the Map
-     * @param k2 the second key to be placed in the Map
-     * @param v2 the value to be associated with the second key in the Map
-     * @param k3 the third key to be placed in the Map
-     * @param v3 the value to be associated with the third key in the Map
-     * @param k4 the fourth key to be placed in the Map
-     * @param v4 the value to be associated with the fourth key in the Map
-     * @param k5 the fifth key to be placed in the Map
-     * @param v5 the value to be associated with the fifth key in the Map
-     * @param k6 the sixth key to be placed in the Map
-     * @param v6 the value to be associated with the sixth key in the Map
-     * @param k7 the seventh key to be placed in the Map
-     * @param v7 the value to be associated with the seventh key in the Map
-     * @return a Map containing the specified keys and values
+     * @param k1 the first key to be placed in the Map. Can be {@code null}.
+     * @param v1 the value to be associated with the first key in the Map. Can be {@code null}.
+     * @param k2 the second key to be placed in the Map. Can be {@code null}.
+     * @param v2 the value to be associated with the second key in the Map. Can be {@code null}.
+     * @param k3 the third key to be placed in the Map. Can be {@code null}.
+     * @param v3 the value to be associated with the third key in the Map. Can be {@code null}.
+     * @param k4 the fourth key to be placed in the Map. Can be {@code null}.
+     * @param v4 the value to be associated with the fourth key in the Map. Can be {@code null}.
+     * @param k5 the fifth key to be placed in the Map. Can be {@code null}.
+     * @param v5 the value to be associated with the fifth key in the Map. Can be {@code null}.
+     * @param k6 the sixth key to be placed in the Map. Can be {@code null}.
+     * @param v6 the value to be associated with the sixth key in the Map. Can be {@code null}.
+     * @param k7 the seventh key to be placed in the Map. Can be {@code null}.
+     * @param v7 the value to be associated with the seventh key in the Map. Can be {@code null}.
+     * @return an unmodifiable {@code ImmutableMap} containing the specified keys and values
      */
-    public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
+    public static <K, V> ImmutableMap<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7) {
-        final Map<K, V> map = newLinkedHashMap(7);
-        map.put(k1, v1);
-        map.put(k2, v2);
-        map.put(k3, v3);
-        map.put(k4, v4);
-        map.put(k5, v5);
-        map.put(k6, v6);
-        map.put(k7, v7);
-        return map;
+        return ImmutableMap.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7);
     }
 
     /**
-     * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
+     * Returns an unmodifiable {@code ImmutableMap} with the specified keys and values.
+     *
+     * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 the first key to be placed in the Map
-     * @param v1 the value to be associated with the first key in the Map
-     * @param k2 the second key to be placed in the Map
-     * @param v2 the value to be associated with the second key in the Map
-     * @param k3 the third key to be placed in the Map
-     * @param v3 the value to be associated with the third key in the Map
-     * @param k4 the fourth key to be placed in the Map
-     * @param v4 the value to be associated with the fourth key in the Map
-     * @param k5 the fifth key to be placed in the Map
-     * @param v5 the value to be associated with the fifth key in the Map
-     * @param k6 the sixth key to be placed in the Map
-     * @param v6 the value to be associated with the sixth key in the Map
-     * @param k7 the seventh key to be placed in the Map
-     * @param v7 the value to be associated with the seventh key in the Map
-     * @param k8 the eighth key to be placed in the Map
-     * @param v8 the value to be associated with the eighth key in the Map
-     * @return a Map containing the specified keys and values
+     * @param k1 the first key to be placed in the Map. Can be {@code null}.
+     * @param v1 the value to be associated with the first key in the Map. Can be {@code null}.
+     * @param k2 the second key to be placed in the Map. Can be {@code null}.
+     * @param v2 the value to be associated with the second key in the Map. Can be {@code null}.
+     * @param k3 the third key to be placed in the Map. Can be {@code null}.
+     * @param v3 the value to be associated with the third key in the Map. Can be {@code null}.
+     * @param k4 the fourth key to be placed in the Map. Can be {@code null}.
+     * @param v4 the value to be associated with the fourth key in the Map. Can be {@code null}.
+     * @param k5 the fifth key to be placed in the Map. Can be {@code null}.
+     * @param v5 the value to be associated with the fifth key in the Map. Can be {@code null}.
+     * @param k6 the sixth key to be placed in the Map. Can be {@code null}.
+     * @param v6 the value to be associated with the sixth key in the Map. Can be {@code null}.
+     * @param k7 the seventh key to be placed in the Map. Can be {@code null}.
+     * @param v7 the value to be associated with the seventh key in the Map. Can be {@code null}.
+     * @param k8 the eighth key to be placed in the Map. Can be {@code null}.
+     * @param v8 the value to be associated with the eighth key in the Map. Can be {@code null}.
+     * @return an unmodifiable {@code ImmutableMap} containing the specified keys and values
      */
-    public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
+    public static <K, V> ImmutableMap<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) {
-        final Map<K, V> map = newLinkedHashMap(8);
-        map.put(k1, v1);
-        map.put(k2, v2);
-        map.put(k3, v3);
-        map.put(k4, v4);
-        map.put(k5, v5);
-        map.put(k6, v6);
-        map.put(k7, v7);
-        map.put(k8, v8);
-        return map;
+        return ImmutableMap.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8);
     }
 
     /**
-     * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
+     * Returns an unmodifiable {@code ImmutableMap} with the specified keys and values.
+     *
+     * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 the first key to be placed in the Map
-     * @param v1 the value to be associated with the first key in the Map
-     * @param k2 the second key to be placed in the Map
-     * @param v2 the value to be associated with the second key in the Map
-     * @param k3 the third key to be placed in the Map
-     * @param v3 the value to be associated with the third key in the Map
-     * @param k4 the fourth key to be placed in the Map
-     * @param v4 the value to be associated with the fourth key in the Map
-     * @param k5 the fifth key to be placed in the Map
-     * @param v5 the value to be associated with the fifth key in the Map
-     * @param k6 the sixth key to be placed in the Map
-     * @param v6 the value to be associated with the sixth key in the Map
-     * @param k7 the seventh key to be placed in the Map
-     * @param v7 the value to be associated with the seventh key in the Map
-     * @param k8 the eighth key to be placed in the Map
-     * @param v8 the value to be associated with the eighth key in the Map
-     * @param k9 the ninth key to be placed in the Map
-     * @param v9 the value to be associated with the ninth key in the Map
-     * @return a Map containing the specified keys and values
+     * @param k1 the first key to be placed in the Map. Can be {@code null}.
+     * @param v1 the value to be associated with the first key in the Map. Can be {@code null}.
+     * @param k2 the second key to be placed in the Map. Can be {@code null}.
+     * @param v2 the value to be associated with the second key in the Map. Can be {@code null}.
+     * @param k3 the third key to be placed in the Map. Can be {@code null}.
+     * @param v3 the value to be associated with the third key in the Map. Can be {@code null}.
+     * @param k4 the fourth key to be placed in the Map. Can be {@code null}.
+     * @param v4 the value to be associated with the fourth key in the Map. Can be {@code null}.
+     * @param k5 the fifth key to be placed in the Map. Can be {@code null}.
+     * @param v5 the value to be associated with the fifth key in the Map. Can be {@code null}.
+     * @param k6 the sixth key to be placed in the Map. Can be {@code null}.
+     * @param v6 the value to be associated with the sixth key in the Map. Can be {@code null}.
+     * @param k7 the seventh key to be placed in the Map. Can be {@code null}.
+     * @param v7 the value to be associated with the seventh key in the Map. Can be {@code null}.
+     * @param k8 the eighth key to be placed in the Map. Can be {@code null}.
+     * @param v8 the value to be associated with the eighth key in the Map. Can be {@code null}.
+     * @param k9 the ninth key to be placed in the Map. Can be {@code null}.
+     * @param v9 the value to be associated with the ninth key in the Map. Can be {@code null}.
+     * @return an unmodifiable {@code ImmutableMap} containing the specified keys and values
      */
-    public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
+    public static <K, V> ImmutableMap<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9) {
-        final Map<K, V> map = newLinkedHashMap(9);
-        map.put(k1, v1);
-        map.put(k2, v2);
-        map.put(k3, v3);
-        map.put(k4, v4);
-        map.put(k5, v5);
-        map.put(k6, v6);
-        map.put(k7, v7);
-        map.put(k8, v8);
-        map.put(k9, v9);
-        return map;
+        return ImmutableMap.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8, k9, v9);
     }
 
+    // /**
+    // * Returns a modifiable {@code LinkedHashMap} with specified key and value.
+    // * A LinkedHashMap maintains insertion order, making it useful when iteration order matters.
+    // *
+    // * <p><b>Usage Examples:</b></p>
+    // * <pre>{@code
+    // * Map<String, Integer> map = N.asLinkedHashMap("first", 1);
+    // * map.put("second", 2);
+    // * map.put("third", 3);
+    // * // Iteration order: first, second, third (insertion order preserved)
+    // *
+    // * // Both key and value can be null
+    // * Map<String, String> mapWithNull = N.asLinkedHashMap("key", null);
+    // * }</pre>
+    // *
+    // * @param <K> the key type
+    // * @param <V> the value type
+    // * @param k1 the first key to be placed in the Map. Can be {@code null}.
+    // * @param v1 the value to be associated with the first key in the Map. Can be {@code null}.
+    // * @return a modifiable LinkedHashMap containing the specified key and value, preserving insertion order
+    // */
+    //     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1) {
+    //         final Map<K, V> map = newLinkedHashMap(1);
+    //         map.put(k1, v1);
+    //         return map;
+    //     }
+
+    // /**
+    // * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
+    // *
+    // * @param <K> the key type
+    // * @param <V> the value type
+    // * @param k1 the first key to be placed in the Map
+    // * @param v1 the value to be associated with the first key in the Map
+    // * @param k2 the second key to be placed in the Map
+    // * @param v2 the value to be associated with the second key in the Map
+    // * @return a Map containing the specified keys and values
+    // */
+    //     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2) {
+    //         final Map<K, V> map = newLinkedHashMap(2);
+    //         map.put(k1, v1);
+    //         map.put(k2, v2);
+    //         return map;
+    //     }
+
+    // /**
+    // * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
+    // *
+    // * @param <K> the key type
+    // * @param <V> the value type
+    // * @param k1 the first key to be placed in the Map
+    // * @param v1 the value to be associated with the first key in the Map
+    // * @param k2 the second key to be placed in the Map
+    // * @param v2 the value to be associated with the second key in the Map
+    // * @param k3 the third key to be placed in the Map
+    // * @param v3 the value to be associated with the third key in the Map
+    // * @return a Map containing the specified keys and values
+    // */
+    //     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
+    //         final Map<K, V> map = newLinkedHashMap(3);
+    //         map.put(k1, v1);
+    //         map.put(k2, v2);
+    //         map.put(k3, v3);
+    //         return map;
+    //     }
+
+    // /**
+    // * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
+    // *
+    // * @param <K> the key type
+    // * @param <V> the value type
+    // * @param k1 the first key to be placed in the Map
+    // * @param v1 the value to be associated with the first key in the Map
+    // * @param k2 the second key to be placed in the Map
+    // * @param v2 the value to be associated with the second key in the Map
+    // * @param k3 the third key to be placed in the Map
+    // * @param v3 the value to be associated with the third key in the Map
+    // * @param k4 the fourth key to be placed in the Map
+    // * @param v4 the value to be associated with the fourth key in the Map
+    // * @return a Map containing the specified keys and values
+    // */
+    //     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
+    //         final Map<K, V> map = newLinkedHashMap(4);
+    //         map.put(k1, v1);
+    //         map.put(k2, v2);
+    //         map.put(k3, v3);
+    //         map.put(k4, v4);
+    //         return map;
+    //     }
+
+    // /**
+    // * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
+    // *
+    // * @param <K> the key type
+    // * @param <V> the value type
+    // * @param k1 the first key to be placed in the Map
+    // * @param v1 the value to be associated with the first key in the Map
+    // * @param k2 the second key to be placed in the Map
+    // * @param v2 the value to be associated with the second key in the Map
+    // * @param k3 the third key to be placed in the Map
+    // * @param v3 the value to be associated with the third key in the Map
+    // * @param k4 the fourth key to be placed in the Map
+    // * @param v4 the value to be associated with the fourth key in the Map
+    // * @param k5 the fifth key to be placed in the Map
+    // * @param v5 the value to be associated with the fifth key in the Map
+    // * @return a Map containing the specified keys and values
+    // */
+    //     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
+    //             final V v5) {
+    //         final Map<K, V> map = newLinkedHashMap(5);
+    //         map.put(k1, v1);
+    //         map.put(k2, v2);
+    //         map.put(k3, v3);
+    //         map.put(k4, v4);
+    //         map.put(k5, v5);
+    //         return map;
+    //     }
+
+    // /**
+    // * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
+    // *
+    // * @param <K> the key type
+    // * @param <V> the value type
+    // * @param k1 the first key to be placed in the Map
+    // * @param v1 the value to be associated with the first key in the Map
+    // * @param k2 the second key to be placed in the Map
+    // * @param v2 the value to be associated with the second key in the Map
+    // * @param k3 the third key to be placed in the Map
+    // * @param v3 the value to be associated with the third key in the Map
+    // * @param k4 the fourth key to be placed in the Map
+    // * @param v4 the value to be associated with the fourth key in the Map
+    // * @param k5 the fifth key to be placed in the Map
+    // * @param v5 the value to be associated with the fifth key in the Map
+    // * @param k6 the sixth key to be placed in the Map
+    // * @param v6 the value to be associated with the sixth key in the Map
+    // * @return a Map containing the specified keys and values
+    // */
+    //     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
+    //             final V v5, final K k6, final V v6) {
+    //         final Map<K, V> map = newLinkedHashMap(6);
+    //         map.put(k1, v1);
+    //         map.put(k2, v2);
+    //         map.put(k3, v3);
+    //         map.put(k4, v4);
+    //         map.put(k5, v5);
+    //         map.put(k6, v6);
+    //         return map;
+    //     }
+
+    // /**
+    // * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
+    // *
+    // * @param <K> the key type
+    // * @param <V> the value type
+    // * @param k1 the first key to be placed in the Map
+    // * @param v1 the value to be associated with the first key in the Map
+    // * @param k2 the second key to be placed in the Map
+    // * @param v2 the value to be associated with the second key in the Map
+    // * @param k3 the third key to be placed in the Map
+    // * @param v3 the value to be associated with the third key in the Map
+    // * @param k4 the fourth key to be placed in the Map
+    // * @param v4 the value to be associated with the fourth key in the Map
+    // * @param k5 the fifth key to be placed in the Map
+    // * @param v5 the value to be associated with the fifth key in the Map
+    // * @param k6 the sixth key to be placed in the Map
+    // * @param v6 the value to be associated with the sixth key in the Map
+    // * @param k7 the seventh key to be placed in the Map
+    // * @param v7 the value to be associated with the seventh key in the Map
+    // * @return a Map containing the specified keys and values
+    // */
+    //     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
+    //             final V v5, final K k6, final V v6, final K k7, final V v7) {
+    //         final Map<K, V> map = newLinkedHashMap(7);
+    //         map.put(k1, v1);
+    //         map.put(k2, v2);
+    //         map.put(k3, v3);
+    //         map.put(k4, v4);
+    //         map.put(k5, v5);
+    //         map.put(k6, v6);
+    //         map.put(k7, v7);
+    //         return map;
+    //     }
+
+    // /**
+    // * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
+    // *
+    // * @param <K> the key type
+    // * @param <V> the value type
+    // * @param k1 the first key to be placed in the Map
+    // * @param v1 the value to be associated with the first key in the Map
+    // * @param k2 the second key to be placed in the Map
+    // * @param v2 the value to be associated with the second key in the Map
+    // * @param k3 the third key to be placed in the Map
+    // * @param v3 the value to be associated with the third key in the Map
+    // * @param k4 the fourth key to be placed in the Map
+    // * @param v4 the value to be associated with the fourth key in the Map
+    // * @param k5 the fifth key to be placed in the Map
+    // * @param v5 the value to be associated with the fifth key in the Map
+    // * @param k6 the sixth key to be placed in the Map
+    // * @param v6 the value to be associated with the sixth key in the Map
+    // * @param k7 the seventh key to be placed in the Map
+    // * @param v7 the value to be associated with the seventh key in the Map
+    // * @param k8 the eighth key to be placed in the Map
+    // * @param v8 the value to be associated with the eighth key in the Map
+    // * @return a Map containing the specified keys and values
+    // */
+    //     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
+    //             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) {
+    //         final Map<K, V> map = newLinkedHashMap(8);
+    //         map.put(k1, v1);
+    //         map.put(k2, v2);
+    //         map.put(k3, v3);
+    //         map.put(k4, v4);
+    //         map.put(k5, v5);
+    //         map.put(k6, v6);
+    //         map.put(k7, v7);
+    //         map.put(k8, v8);
+    //         return map;
+    //     }
+
+    // /**
+    // * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
+    // *
+    // * @param <K> the key type
+    // * @param <V> the value type
+    // * @param k1 the first key to be placed in the Map
+    // * @param v1 the value to be associated with the first key in the Map
+    // * @param k2 the second key to be placed in the Map
+    // * @param v2 the value to be associated with the second key in the Map
+    // * @param k3 the third key to be placed in the Map
+    // * @param v3 the value to be associated with the third key in the Map
+    // * @param k4 the fourth key to be placed in the Map
+    // * @param v4 the value to be associated with the fourth key in the Map
+    // * @param k5 the fifth key to be placed in the Map
+    // * @param v5 the value to be associated with the fifth key in the Map
+    // * @param k6 the sixth key to be placed in the Map
+    // * @param v6 the value to be associated with the sixth key in the Map
+    // * @param k7 the seventh key to be placed in the Map
+    // * @param v7 the value to be associated with the seventh key in the Map
+    // * @param k8 the eighth key to be placed in the Map
+    // * @param v8 the value to be associated with the eighth key in the Map
+    // * @param k9 the ninth key to be placed in the Map
+    // * @param v9 the value to be associated with the ninth key in the Map
+    // * @return a Map containing the specified keys and values
+    // */
+    //     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
+    //             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9) {
+    //         final Map<K, V> map = newLinkedHashMap(9);
+    //         map.put(k1, v1);
+    //         map.put(k2, v2);
+    //         map.put(k3, v3);
+    //         map.put(k4, v4);
+    //         map.put(k5, v5);
+    //         map.put(k6, v6);
+    //         map.put(k7, v7);
+    //         map.put(k8, v8);
+    //         map.put(k9, v9);
+    //         return map;
+    //     }
+
+    // /**
+    // * Returns a modifiable {@code LinkedHashMap} with a specified property name and value.
+    // * This is a type-safe convenience method for creating property maps commonly used in configuration.
+    // * The returned map uses String keys and Object values.
+    // *
+    // * <p><b>Usage Examples:</b></p>
+    // * <pre>{@code
+    // * Map<String, Object> props = N.asProps("timeout", 5000);
+    // * props.put("retryCount", 3);
+    // * props.put("enabled", true);
+    // *
+    // * // Property value can be null
+    // * Map<String, Object> propsWithNull = N.asProps("optionalValue", null);
+    // * }</pre>
+    // *
+    // * @param propName the name of the property to be placed in the Map. Can be {@code null}.
+    // * @param propValue the value to be associated with the property name in the Map. Can be {@code null}.
+    // * @return a modifiable LinkedHashMap containing the specified property name and value, preserving insertion order
+    // */
+    //     @Beta
+    //     public static Map<String, Object> asProps(final String propName, final Object propValue) {
+    //         final Map<String, Object> props = newLinkedHashMap(1);
+    //         props.put(propName, propValue);
+    // 
+    //         return props;
+    //     }
+
+    // /**
+    // * Returns a modifiable {@code Map} with specified keys/values.
+    // *
+    // * @param propName1 the first property name to be placed in the Map
+    // * @param propValue1 the value to be associated with the first property name in the Map
+    // * @param propName2 the second property name to be placed in the Map
+    // * @param propValue2 the value to be associated with the second property name in the Map
+    // * @return a Map containing the specified property names and values
+    // */
+    //     public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2) {
+    //         final Map<String, Object> props = newLinkedHashMap(2);
+    //         props.put(propName1, propValue1);
+    //         props.put(propName2, propValue2);
+    // 
+    //         return props;
+    //     }
+
+    // /**
+    // * Returns a modifiable {@code Map} with specified keys/values.
+    // *
+    // * @param propName1 the first property name to be placed in the Map
+    // * @param propValue1 the value to be associated with the first property name in the Map
+    // * @param propName2 the second property name to be placed in the Map
+    // * @param propValue2 the value to be associated with the second property name in the Map
+    // * @param propName3 the third property name to be placed in the Map
+    // * @param propValue3 the value to be associated with the third property name in the Map
+    // * @return a Map containing the specified property names and values
+    // */
+    //     public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2,
+    //             final String propName3, final Object propValue3) {
+    //         final Map<String, Object> props = newLinkedHashMap(3);
+    //         props.put(propName1, propValue1);
+    //         props.put(propName2, propValue2);
+    //         props.put(propName3, propValue3);
+    // 
+    //         return props;
+    //     }
+
+    // /**
+    // * Returns a modifiable {@code Map} with specified keys/values.
+    // *
+    // * @param propName1 the first property name to be placed in the Map
+    // * @param propValue1 the value to be associated with the first property name in the Map
+    // * @param propName2 the second property name to be placed in the Map
+    // * @param propValue2 the value to be associated with the second property name in the Map
+    // * @param propName3 the third property name to be placed in the Map
+    // * @param propValue3 the value to be associated with the third property name in the Map
+    // * @param propName4 the fourth property name to be placed in the Map
+    // * @param propValue4 the value to be associated with the fourth property name in the Map
+    // * @return a Map containing the specified property names and values
+    // */
+    //     public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2,
+    //             final String propName3, final Object propValue3, final String propName4, final Object propValue4) {
+    //         final Map<String, Object> props = newLinkedHashMap(4);
+    //         props.put(propName1, propValue1);
+    //         props.put(propName2, propValue2);
+    //         props.put(propName3, propValue3);
+    //         props.put(propName4, propValue4);
+    // 
+    //         return props;
+    //     }
+
+    // /**
+    // * Returns a modifiable {@code Map} with specified keys/values.
+    // *
+    // * @param propName1 the first property name to be placed in the Map
+    // * @param propValue1 the value to be associated with the first property name in the Map
+    // * @param propName2 the second property name to be placed in the Map
+    // * @param propValue2 the value to be associated with the second property name in the Map
+    // * @param propName3 the third property name to be placed in the Map
+    // * @param propValue3 the value to be associated with the third property name in the Map
+    // * @param propName4 the fourth property name to be placed in the Map
+    // * @param propValue4 the value to be associated with the fourth property name in the Map
+    // * @param propName5 the fifth property name to be placed in the Map
+    // * @param propValue5 the value to be associated with the fifth property name in the Map
+    // * @return a Map containing the specified property names and values
+    // */
+    //     public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2,
+    //             final String propName3, final Object propValue3, final String propName4, final Object propValue4, final String propName5, final Object propValue5) {
+    //         final Map<String, Object> props = newLinkedHashMap(5);
+    //         props.put(propName1, propValue1);
+    //         props.put(propName2, propValue2);
+    //         props.put(propName3, propValue3);
+    //         props.put(propName4, propValue4);
+    //         props.put(propName5, propValue5);
+    // 
+    //         return props;
+    //     }
+
     /**
-     * Returns a modifiable {@code LinkedHashMap} with a specified property name and value.
-     * This is a type-safe convenience method for creating property maps commonly used in configuration.
-     * The returned map uses String keys and Object values.
+     * Returns an unmodifiable {@code ImmutableList} with the specified element.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Map<String, Object> props = N.asProps("timeout", 5000);
-     * props.put("retryCount", 3);
-     * props.put("enabled", true);
-     *
-     * // Property value can be null
-     * Map<String, Object> propsWithNull = N.asProps("optionalValue", null);
-     * }</pre>
-     *
-     * @param propName the name of the property to be placed in the Map. Can be {@code null}.
-     * @param propValue the value to be associated with the property name in the Map. Can be {@code null}.
-     * @return a modifiable LinkedHashMap containing the specified property name and value, preserving insertion order
-     */
-    @Beta
-    public static Map<String, Object> asProps(final String propName, final Object propValue) {
-        final Map<String, Object> props = newLinkedHashMap(1);
-        props.put(propName, propValue);
-
-        return props;
-    }
-
-    /**
-     * Returns a modifiable {@code Map} with specified keys/values.
-     *
-     * @param propName1 the first property name to be placed in the Map
-     * @param propValue1 the value to be associated with the first property name in the Map
-     * @param propName2 the second property name to be placed in the Map
-     * @param propValue2 the value to be associated with the second property name in the Map
-     * @return a Map containing the specified property names and values
-     */
-    public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2) {
-        final Map<String, Object> props = newLinkedHashMap(2);
-        props.put(propName1, propValue1);
-        props.put(propName2, propValue2);
-
-        return props;
-    }
-
-    /**
-     * Returns a modifiable {@code Map} with specified keys/values.
-     *
-     * @param propName1 the first property name to be placed in the Map
-     * @param propValue1 the value to be associated with the first property name in the Map
-     * @param propName2 the second property name to be placed in the Map
-     * @param propValue2 the value to be associated with the second property name in the Map
-     * @param propName3 the third property name to be placed in the Map
-     * @param propValue3 the value to be associated with the third property name in the Map
-     * @return a Map containing the specified property names and values
-     */
-    public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2,
-            final String propName3, final Object propValue3) {
-        final Map<String, Object> props = newLinkedHashMap(3);
-        props.put(propName1, propValue1);
-        props.put(propName2, propValue2);
-        props.put(propName3, propValue3);
-
-        return props;
-    }
-
-    /**
-     * Returns a modifiable {@code Map} with specified keys/values.
-     *
-     * @param propName1 the first property name to be placed in the Map
-     * @param propValue1 the value to be associated with the first property name in the Map
-     * @param propName2 the second property name to be placed in the Map
-     * @param propValue2 the value to be associated with the second property name in the Map
-     * @param propName3 the third property name to be placed in the Map
-     * @param propValue3 the value to be associated with the third property name in the Map
-     * @param propName4 the fourth property name to be placed in the Map
-     * @param propValue4 the value to be associated with the fourth property name in the Map
-     * @return a Map containing the specified property names and values
-     */
-    public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2,
-            final String propName3, final Object propValue3, final String propName4, final Object propValue4) {
-        final Map<String, Object> props = newLinkedHashMap(4);
-        props.put(propName1, propValue1);
-        props.put(propName2, propValue2);
-        props.put(propName3, propValue3);
-        props.put(propName4, propValue4);
-
-        return props;
-    }
-
-    /**
-     * Returns a modifiable {@code Map} with specified keys/values.
-     *
-     * @param propName1 the first property name to be placed in the Map
-     * @param propValue1 the value to be associated with the first property name in the Map
-     * @param propName2 the second property name to be placed in the Map
-     * @param propValue2 the value to be associated with the second property name in the Map
-     * @param propName3 the third property name to be placed in the Map
-     * @param propValue3 the value to be associated with the third property name in the Map
-     * @param propName4 the fourth property name to be placed in the Map
-     * @param propValue4 the value to be associated with the fourth property name in the Map
-     * @param propName5 the fifth property name to be placed in the Map
-     * @param propValue5 the value to be associated with the fifth property name in the Map
-     * @return a Map containing the specified property names and values
-     */
-    public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2,
-            final String propName3, final Object propValue3, final String propName4, final Object propValue4, final String propName5, final Object propValue5) {
-        final Map<String, Object> props = newLinkedHashMap(5);
-        props.put(propName1, propValue1);
-        props.put(propName2, propValue2);
-        props.put(propName3, propValue3);
-        props.put(propName4, propValue4);
-        props.put(propName5, propValue5);
-
-        return props;
-    }
-
-    /**
-     * Returns a modifiable {@code ArrayList} with the specified element.
-     * This is a convenient factory method for creating a single-element list.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<String> list = N.asList("hello");
-     * list.add("world");  // Can add more elements
-     * // list is now ["hello", "world"]
-     *
-     * // Element can be null
-     * List<String> listWithNull = N.asList(null);
-     * // listWithNull is [null]
-     * }</pre>
+     * <p>Unlike {@link List#of(Object)}, this method supports {@code null} elements.</p>
      *
      * @param <T> the type of the element
      * @param e the element to be placed in the List. Can be {@code null}.
-     * @return a modifiable ArrayList containing the specified element
+     * @return an unmodifiable {@code ImmutableList} containing the specified element
      */
-    public static <T> List<T> asList(final T e) {
-        final List<T> list = new ArrayList<>(1);
-        list.add(e);
-        return list;
+    public static <T> ImmutableList<T> asList(final T e) {
+        return ImmutableList.of(e);
     }
 
     /**
-     * Returns a modifiable {@code ArrayList} with specified elements.
-     * This is a convenient factory method for creating a two-element list.
+     * Returns an unmodifiable {@code ImmutableList} with the specified elements.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<String> list = N.asList("hello", "world");
-     * list.add("!");  // Can add more elements
-     * // list is now ["hello", "world", "!"]
-     *
-     * // Elements can be null
-     * List<String> listWithNull = N.asList("first", null);
-     * // listWithNull is ["first", null]
-     * }</pre>
+     * <p>Unlike {@link List#of(Object...)}, this method supports {@code null} elements.</p>
      *
      * @param <T> the type of elements in the list
      * @param e1 the first element to be placed in the List. Can be {@code null}.
      * @param e2 the second element to be placed in the List. Can be {@code null}.
-     * @return a modifiable ArrayList containing the specified elements in order
+     * @return an unmodifiable {@code ImmutableList} containing the specified elements in order
      */
-    public static <T> List<T> asList(final T e1, final T e2) {
-        final List<T> list = new ArrayList<>(2);
-        list.add(e1);
-        list.add(e2);
-        return list;
+    public static <T> ImmutableList<T> asList(final T e1, final T e2) {
+        return ImmutableList.of(e1, e2);
     }
 
     /**
-     * Returns a modifiable {@code ArrayList} with specified elements.
-     * This is a convenient factory method for creating a three-element list.
+     * Returns an unmodifiable {@code ImmutableList} with the specified elements.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<Integer> list = N.asList(1, 2, 3);
-     * list.add(4);  // Can add more elements
-     * // list is now [1, 2, 3, 4]
-     *
-     * // Elements can be null
-     * List<String> listWithNull = N.asList("first", null, "third");
-     * // listWithNull is ["first", null, "third"]
-     * }</pre>
+     * <p>Unlike {@link List#of(Object...)}, this method supports {@code null} elements.</p>
      *
      * @param <T> the type of elements in the list
      * @param e1 the first element to be placed in the List. Can be {@code null}.
      * @param e2 the second element to be placed in the List. Can be {@code null}.
      * @param e3 the third element to be placed in the List. Can be {@code null}.
-     * @return a modifiable ArrayList containing the specified elements in order
+     * @return an unmodifiable {@code ImmutableList} containing the specified elements in order
      */
-    public static <T> List<T> asList(final T e1, final T e2, final T e3) {
-        final List<T> list = new ArrayList<>(3);
-        list.add(e1);
-        list.add(e2);
-        list.add(e3);
-        return list;
+    public static <T> ImmutableList<T> asList(final T e1, final T e2, final T e3) {
+        return ImmutableList.of(e1, e2, e3);
     }
 
     /**
-     * Returns a modifiable {@code List} with specified elements.
+     * Returns an unmodifiable {@code ImmutableList} with the specified elements.
+     *
+     * <p>Unlike {@link List#of(Object...)}, this method supports {@code null} elements.</p>
      *
      * @param <T> the type of elements in the list
-     * @param e1 the first element to be placed in the List
-     * @param e2 the second element to be placed in the List
-     * @param e3 the third element to be placed in the List
-     * @param e4 the fourth element to be placed in the List
-     * @return a List containing the specified elements
+     * @param e1 the first element to be placed in the List. Can be {@code null}.
+     * @param e2 the second element to be placed in the List. Can be {@code null}.
+     * @param e3 the third element to be placed in the List. Can be {@code null}.
+     * @param e4 the fourth element to be placed in the List. Can be {@code null}.
+     * @return an unmodifiable {@code ImmutableList} containing the specified elements in order
      */
-    public static <T> List<T> asList(final T e1, final T e2, final T e3, final T e4) {
-        final List<T> list = new ArrayList<>(4);
-        list.add(e1);
-        list.add(e2);
-        list.add(e3);
-        list.add(e4);
-        return list;
+    public static <T> ImmutableList<T> asList(final T e1, final T e2, final T e3, final T e4) {
+        return ImmutableList.of(e1, e2, e3, e4);
     }
 
     /**
-     * Returns a modifiable {@code List} with specified elements.
+     * Returns an unmodifiable {@code ImmutableList} with the specified elements.
+     *
+     * <p>Unlike {@link List#of(Object...)}, this method supports {@code null} elements.</p>
      *
      * @param <T> the type of elements in the list
-     * @param e1 the first element to be placed in the List
-     * @param e2 the second element to be placed in the List
-     * @param e3 the third element to be placed in the List
-     * @param e4 the fourth element to be placed in the List
-     * @param e5 the fifth element to be placed in the List
-     * @return a List containing the specified elements
+     * @param e1 the first element to be placed in the List. Can be {@code null}.
+     * @param e2 the second element to be placed in the List. Can be {@code null}.
+     * @param e3 the third element to be placed in the List. Can be {@code null}.
+     * @param e4 the fourth element to be placed in the List. Can be {@code null}.
+     * @param e5 the fifth element to be placed in the List. Can be {@code null}.
+     * @return an unmodifiable {@code ImmutableList} containing the specified elements in order
      */
-    public static <T> List<T> asList(final T e1, final T e2, final T e3, final T e4, final T e5) {
-        final List<T> list = new ArrayList<>(5);
-        list.add(e1);
-        list.add(e2);
-        list.add(e3);
-        list.add(e4);
-        list.add(e5);
-        return list;
+    public static <T> ImmutableList<T> asList(final T e1, final T e2, final T e3, final T e4, final T e5) {
+        return ImmutableList.of(e1, e2, e3, e4, e5);
     }
 
     /**
-     * Returns a modifiable {@code List} with specified elements.
+     * Returns an unmodifiable {@code ImmutableList} with the specified elements.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<String> list = N.asList("a", "b", "c", "d", "e", "f");
-     * list.add("g");   // modifiable
-     * // list is ["a", "b", "c", "d", "e", "f", "g"]
-     * }</pre>
+     * <p>Unlike {@link List#of(Object...)}, this method supports {@code null} elements.</p>
      *
      * @param <T> the type of elements in the list
-     * @param e1 the first element to be placed in the List
-     * @param e2 the second element to be placed in the List
-     * @param e3 the third element to be placed in the List
-     * @param e4 the fourth element to be placed in the List
-     * @param e5 the fifth element to be placed in the List
-     * @param e6 the sixth element to be placed in the List
-     * @return a List containing the specified elements
+     * @param e1 the first element to be placed in the List. Can be {@code null}.
+     * @param e2 the second element to be placed in the List. Can be {@code null}.
+     * @param e3 the third element to be placed in the List. Can be {@code null}.
+     * @param e4 the fourth element to be placed in the List. Can be {@code null}.
+     * @param e5 the fifth element to be placed in the List. Can be {@code null}.
+     * @param e6 the sixth element to be placed in the List. Can be {@code null}.
+     * @return an unmodifiable {@code ImmutableList} containing the specified elements in order
      */
-    public static <T> List<T> asList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
-        final List<T> list = new ArrayList<>(6);
-        list.add(e1);
-        list.add(e2);
-        list.add(e3);
-        list.add(e4);
-        list.add(e5);
-        list.add(e6);
-        return list;
+    public static <T> ImmutableList<T> asList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
+        return ImmutableList.of(e1, e2, e3, e4, e5, e6);
     }
 
     /**
-     * Returns a modifiable {@code List} with specified elements.
+     * Returns an unmodifiable {@code ImmutableList} with the specified elements.
+     *
+     * <p>Unlike {@link List#of(Object...)}, this method supports {@code null} elements.</p>
      *
      * @param <T> the type of elements in the list
-     * @param e1 the first element to be placed in the List
-     * @param e2 the second element to be placed in the List
-     * @param e3 the third element to be placed in the List
-     * @param e4 the fourth element to be placed in the List
-     * @param e5 the fifth element to be placed in the List
-     * @param e6 the sixth element to be placed in the List
-     * @param e7 the seventh element to be placed in the List
-     * @return a List containing the specified elements
+     * @param e1 the first element to be placed in the List. Can be {@code null}.
+     * @param e2 the second element to be placed in the List. Can be {@code null}.
+     * @param e3 the third element to be placed in the List. Can be {@code null}.
+     * @param e4 the fourth element to be placed in the List. Can be {@code null}.
+     * @param e5 the fifth element to be placed in the List. Can be {@code null}.
+     * @param e6 the sixth element to be placed in the List. Can be {@code null}.
+     * @param e7 the seventh element to be placed in the List. Can be {@code null}.
+     * @return an unmodifiable {@code ImmutableList} containing the specified elements in order
      */
-    public static <T> List<T> asList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) {
-        final List<T> list = new ArrayList<>(7);
-        list.add(e1);
-        list.add(e2);
-        list.add(e3);
-        list.add(e4);
-        list.add(e5);
-        list.add(e6);
-        list.add(e7);
-        return list;
+    public static <T> ImmutableList<T> asList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) {
+        return ImmutableList.of(e1, e2, e3, e4, e5, e6, e7);
     }
 
     /**
-     * Returns a modifiable {@code List} with specified elements.
+     * Returns an unmodifiable {@code ImmutableList} with the specified elements.
+     *
+     * <p>Unlike {@link List#of(Object...)}, this method supports {@code null} elements.</p>
      *
      * @param <T> the type of elements in the list
-     * @param e1 the first element to be placed in the List
-     * @param e2 the second element to be placed in the List
-     * @param e3 the third element to be placed in the List
-     * @param e4 the fourth element to be placed in the List
-     * @param e5 the fifth element to be placed in the List
-     * @param e6 the sixth element to be placed in the List
-     * @param e7 the seventh element to be placed in the List
-     * @param e8 the eighth element to be placed in the List
-     * @return a List containing the specified elements
+     * @param e1 the first element to be placed in the List. Can be {@code null}.
+     * @param e2 the second element to be placed in the List. Can be {@code null}.
+     * @param e3 the third element to be placed in the List. Can be {@code null}.
+     * @param e4 the fourth element to be placed in the List. Can be {@code null}.
+     * @param e5 the fifth element to be placed in the List. Can be {@code null}.
+     * @param e6 the sixth element to be placed in the List. Can be {@code null}.
+     * @param e7 the seventh element to be placed in the List. Can be {@code null}.
+     * @param e8 the eighth element to be placed in the List. Can be {@code null}.
+     * @return an unmodifiable {@code ImmutableList} containing the specified elements in order
      */
-    public static <T> List<T> asList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8) {
-        final List<T> list = new ArrayList<>(8);
-        list.add(e1);
-        list.add(e2);
-        list.add(e3);
-        list.add(e4);
-        list.add(e5);
-        list.add(e6);
-        list.add(e7);
-        list.add(e8);
-        return list;
+    public static <T> ImmutableList<T> asList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8) {
+        return ImmutableList.of(e1, e2, e3, e4, e5, e6, e7, e8);
     }
 
     /**
-     * Returns a modifiable {@code List} with specified elements.
+     * Returns an unmodifiable {@code ImmutableList} with the specified elements.
+     *
+     * <p>Unlike {@link List#of(Object...)}, this method supports {@code null} elements.</p>
      *
      * @param <T> the type of elements in the list
-     * @param e1 the first element to be placed in the List
-     * @param e2 the second element to be placed in the List
-     * @param e3 the third element to be placed in the List
-     * @param e4 the fourth element to be placed in the List
-     * @param e5 the fifth element to be placed in the List
-     * @param e6 the sixth element to be placed in the List
-     * @param e7 the seventh element to be placed in the List
-     * @param e8 the eighth element to be placed in the List
-     * @param e9 the ninth element to be placed in the List
-     * @return a List containing the specified elements
+     * @param e1 the first element to be placed in the List. Can be {@code null}.
+     * @param e2 the second element to be placed in the List. Can be {@code null}.
+     * @param e3 the third element to be placed in the List. Can be {@code null}.
+     * @param e4 the fourth element to be placed in the List. Can be {@code null}.
+     * @param e5 the fifth element to be placed in the List. Can be {@code null}.
+     * @param e6 the sixth element to be placed in the List. Can be {@code null}.
+     * @param e7 the seventh element to be placed in the List. Can be {@code null}.
+     * @param e8 the eighth element to be placed in the List. Can be {@code null}.
+     * @param e9 the ninth element to be placed in the List. Can be {@code null}.
+     * @return an unmodifiable {@code ImmutableList} containing the specified elements in order
      */
-    public static <T> List<T> asList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8, final T e9) {
-        final List<T> list = new ArrayList<>(9);
-        list.add(e1);
-        list.add(e2);
-        list.add(e3);
-        list.add(e4);
-        list.add(e5);
-        list.add(e6);
-        list.add(e7);
-        list.add(e8);
-        list.add(e9);
-        return list;
+    public static <T> ImmutableList<T> asList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8, final T e9) {
+        return ImmutableList.of(e1, e2, e3, e4, e5, e6, e7, e8, e9);
     }
 
     /**
-     * Converts an array of objects to a modifiable List, which is NOT backed with the input array.
+     * Converts an array of objects to an unmodifiable {@code ImmutableList}, which is NOT backed with the input array.
+     *
+     * <p>Unlike {@link List#of(Object...)}, this method supports {@code null} elements.</p>
      *
      * @param <T> the type of elements in the array
      * @param a the array to be converted
-     * @return a modifiable List of objects containing the values from the array
+     * @return an unmodifiable {@code ImmutableList} containing the values from the array
      * @see #toList(Object[])
-     * @deprecated use {@code toList(Object[]} instead
+     * @see ImmutableList#copyOf(Object[])
+     * @deprecated use {@link ImmutableList#copyOf(Object...)} instead.
      */
     @Deprecated
     @SafeVarargs
     @NullSafe
-    public static <T> List<T> asList(@NullSafe final T... a) {
-        if (isEmpty(a)) {
-            return new ArrayList<>();
-        }
-
-        return new ArrayList<>(Array.asList(a));
+    public static <T> ImmutableList<T> asList(@NullSafe final T... a) {
+        return ImmutableList.copyOf(a);
     }
 
+    // /**
+    // * Returns a modifiable {@code LinkedList} with the specified element.
+    // *
+    // * @param <T> the type of the element
+    // * @param e the element to be placed in the List
+    // * @return a List containing the specified element
+    // */
+    //     public static <T> LinkedList<T> asLinkedList(final T e) { //NOSONAR
+    //         final LinkedList<T> list = new LinkedList<>();
+    //         list.add(e);
+    //         return list;
+    //     }
+
+    // /**
+    // * Returns a modifiable {@code LinkedList} with specified elements.
+    // *
+    // * @param <T> the type of elements in the list
+    // * @param e1 the first element to be placed in the List
+    // * @param e2 the second element to be placed in the List
+    // * @return a List containing the specified elements
+    // */
+    //     public static <T> LinkedList<T> asLinkedList(final T e1, final T e2) { //NOSONAR
+    //         final LinkedList<T> list = new LinkedList<>();
+    //         list.add(e1);
+    //         list.add(e2);
+    //         return list;
+    //     }
+
+    // /**
+    // * Returns a modifiable {@code LinkedList} with specified elements.
+    // *
+    // * @param <T> the type of elements in the list
+    // * @param e1 the first element to be placed in the List
+    // * @param e2 the second element to be placed in the List
+    // * @param e3 the third element to be placed in the List
+    // * @return a List containing the specified elements
+    // */
+    //     public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3) { //NOSONAR
+    //         final LinkedList<T> list = new LinkedList<>();
+    //         list.add(e1);
+    //         list.add(e2);
+    //         list.add(e3);
+    //         return list;
+    //     }
+
+    // /**
+    // * Returns a modifiable {@code LinkedList} with specified elements.
+    // *
+    // * @param <T> the type of elements in the list
+    // * @param e1 the first element to be placed in the List
+    // * @param e2 the second element to be placed in the List
+    // * @param e3 the third element to be placed in the List
+    // * @param e4 the fourth element to be placed in the List
+    // * @return a List containing the specified elements
+    // */
+    //     public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4) { //NOSONAR
+    //         final LinkedList<T> list = new LinkedList<>();
+    //         list.add(e1);
+    //         list.add(e2);
+    //         list.add(e3);
+    //         list.add(e4);
+    //         return list;
+    //     }
+
+    // /**
+    // * Returns a modifiable {@code LinkedList} with specified elements.
+    // *
+    // * @param <T> the type of elements in the list
+    // * @param e1 the first element to be placed in the List
+    // * @param e2 the second element to be placed in the List
+    // * @param e3 the third element to be placed in the List
+    // * @param e4 the fourth element to be placed in the List
+    // * @param e5 the fifth element to be placed in the List
+    // * @return a List containing the specified elements
+    // */
+    //     public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4, final T e5) { //NOSONAR
+    //         final LinkedList<T> list = new LinkedList<>();
+    //         list.add(e1);
+    //         list.add(e2);
+    //         list.add(e3);
+    //         list.add(e4);
+    //         list.add(e5);
+    //         return list;
+    //     }
+
+    // /**
+    // * Returns a modifiable {@code LinkedList} with specified elements.
+    // *
+    // * @param <T> the type of elements in the list
+    // * @param e1 the first element to be placed in the List
+    // * @param e2 the second element to be placed in the List
+    // * @param e3 the third element to be placed in the List
+    // * @param e4 the fourth element to be placed in the List
+    // * @param e5 the fifth element to be placed in the List
+    // * @param e6 the sixth element to be placed in the List
+    // * @return a List containing the specified elements
+    // */
+    //     public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) { //NOSONAR
+    //         final LinkedList<T> list = new LinkedList<>();
+    //         list.add(e1);
+    //         list.add(e2);
+    //         list.add(e3);
+    //         list.add(e4);
+    //         list.add(e5);
+    //         list.add(e6);
+    //         return list;
+    //     }
+
+    // /**
+    // * Returns a modifiable {@code LinkedList} with specified elements.
+    // *
+    // * @param <T> the type of elements in the list
+    // * @param e1 the first element to be placed in the List
+    // * @param e2 the second element to be placed in the List
+    // * @param e3 the third element to be placed in the List
+    // * @param e4 the fourth element to be placed in the List
+    // * @param e5 the fifth element to be placed in the List
+    // * @param e6 the sixth element to be placed in the List
+    // * @param e7 the seventh element to be placed in the List
+    // * @return a List containing the specified elements
+    // */
+    //     public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) { //NOSONAR
+    //         final LinkedList<T> list = new LinkedList<>();
+    //         list.add(e1);
+    //         list.add(e2);
+    //         list.add(e3);
+    //         list.add(e4);
+    //         list.add(e5);
+    //         list.add(e6);
+    //         list.add(e7);
+    //         return list;
+    //     }
+
+    // /**
+    // * Returns a modifiable {@code LinkedList} with specified elements.
+    // *
+    // * @param <T> the type of elements in the list
+    // * @param e1 the first element to be placed in the List
+    // * @param e2 the second element to be placed in the List
+    // * @param e3 the third element to be placed in the List
+    // * @param e4 the fourth element to be placed in the List
+    // * @param e5 the fifth element to be placed in the List
+    // * @param e6 the sixth element to be placed in the List
+    // * @param e7 the seventh element to be placed in the List
+    // * @param e8 the eighth element to be placed in the List
+    // * @return a List containing the specified elements
+    // */
+    //     public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8) { //NOSONAR
+    //         final LinkedList<T> list = new LinkedList<>();
+    //         list.add(e1);
+    //         list.add(e2);
+    //         list.add(e3);
+    //         list.add(e4);
+    //         list.add(e5);
+    //         list.add(e6);
+    //         list.add(e7);
+    //         list.add(e8);
+    //         return list;
+    //     }
+
+    // /**
+    // * Returns a modifiable {@code LinkedList} with specified elements.
+    // *
+    // * @param <T> the type of elements in the list
+    // * @param e1 the first element to be placed in the List
+    // * @param e2 the second element to be placed in the List
+    // * @param e3 the third element to be placed in the List
+    // * @param e4 the fourth element to be placed in the List
+    // * @param e5 the fifth element to be placed in the List
+    // * @param e6 the sixth element to be placed in the List
+    // * @param e7 the seventh element to be placed in the List
+    // * @param e8 the eighth element to be placed in the List
+    // * @param e9 the ninth element to be placed in the List
+    // * @return a List containing the specified elements
+    // */
+    //     public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8, final T e9) { //NOSONAR
+    //         final LinkedList<T> list = new LinkedList<>();
+    //         list.add(e1);
+    //         list.add(e2);
+    //         list.add(e3);
+    //         list.add(e4);
+    //         list.add(e5);
+    //         list.add(e6);
+    //         list.add(e7);
+    //         list.add(e8);
+    //         list.add(e9);
+    //         return list;
+    //     }
+
     /**
-     * Returns a modifiable {@code LinkedList} with the specified element.
+     * Returns an unmodifiable {@code ImmutableSet} with the specified element.
      *
-     * @param <T> the type of the element
-     * @param e the element to be placed in the List
-     * @return a List containing the specified element
-     */
-    public static <T> LinkedList<T> asLinkedList(final T e) { //NOSONAR
-        final LinkedList<T> list = new LinkedList<>();
-        list.add(e);
-        return list;
-    }
-
-    /**
-     * Returns a modifiable {@code LinkedList} with specified elements.
-     *
-     * @param <T> the type of elements in the list
-     * @param e1 the first element to be placed in the List
-     * @param e2 the second element to be placed in the List
-     * @return a List containing the specified elements
-     */
-    public static <T> LinkedList<T> asLinkedList(final T e1, final T e2) { //NOSONAR
-        final LinkedList<T> list = new LinkedList<>();
-        list.add(e1);
-        list.add(e2);
-        return list;
-    }
-
-    /**
-     * Returns a modifiable {@code LinkedList} with specified elements.
-     *
-     * @param <T> the type of elements in the list
-     * @param e1 the first element to be placed in the List
-     * @param e2 the second element to be placed in the List
-     * @param e3 the third element to be placed in the List
-     * @return a List containing the specified elements
-     */
-    public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3) { //NOSONAR
-        final LinkedList<T> list = new LinkedList<>();
-        list.add(e1);
-        list.add(e2);
-        list.add(e3);
-        return list;
-    }
-
-    /**
-     * Returns a modifiable {@code LinkedList} with specified elements.
-     *
-     * @param <T> the type of elements in the list
-     * @param e1 the first element to be placed in the List
-     * @param e2 the second element to be placed in the List
-     * @param e3 the third element to be placed in the List
-     * @param e4 the fourth element to be placed in the List
-     * @return a List containing the specified elements
-     */
-    public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4) { //NOSONAR
-        final LinkedList<T> list = new LinkedList<>();
-        list.add(e1);
-        list.add(e2);
-        list.add(e3);
-        list.add(e4);
-        return list;
-    }
-
-    /**
-     * Returns a modifiable {@code LinkedList} with specified elements.
-     *
-     * @param <T> the type of elements in the list
-     * @param e1 the first element to be placed in the List
-     * @param e2 the second element to be placed in the List
-     * @param e3 the third element to be placed in the List
-     * @param e4 the fourth element to be placed in the List
-     * @param e5 the fifth element to be placed in the List
-     * @return a List containing the specified elements
-     */
-    public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4, final T e5) { //NOSONAR
-        final LinkedList<T> list = new LinkedList<>();
-        list.add(e1);
-        list.add(e2);
-        list.add(e3);
-        list.add(e4);
-        list.add(e5);
-        return list;
-    }
-
-    /**
-     * Returns a modifiable {@code LinkedList} with specified elements.
-     *
-     * @param <T> the type of elements in the list
-     * @param e1 the first element to be placed in the List
-     * @param e2 the second element to be placed in the List
-     * @param e3 the third element to be placed in the List
-     * @param e4 the fourth element to be placed in the List
-     * @param e5 the fifth element to be placed in the List
-     * @param e6 the sixth element to be placed in the List
-     * @return a List containing the specified elements
-     */
-    public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) { //NOSONAR
-        final LinkedList<T> list = new LinkedList<>();
-        list.add(e1);
-        list.add(e2);
-        list.add(e3);
-        list.add(e4);
-        list.add(e5);
-        list.add(e6);
-        return list;
-    }
-
-    /**
-     * Returns a modifiable {@code LinkedList} with specified elements.
-     *
-     * @param <T> the type of elements in the list
-     * @param e1 the first element to be placed in the List
-     * @param e2 the second element to be placed in the List
-     * @param e3 the third element to be placed in the List
-     * @param e4 the fourth element to be placed in the List
-     * @param e5 the fifth element to be placed in the List
-     * @param e6 the sixth element to be placed in the List
-     * @param e7 the seventh element to be placed in the List
-     * @return a List containing the specified elements
-     */
-    public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) { //NOSONAR
-        final LinkedList<T> list = new LinkedList<>();
-        list.add(e1);
-        list.add(e2);
-        list.add(e3);
-        list.add(e4);
-        list.add(e5);
-        list.add(e6);
-        list.add(e7);
-        return list;
-    }
-
-    /**
-     * Returns a modifiable {@code LinkedList} with specified elements.
-     *
-     * @param <T> the type of elements in the list
-     * @param e1 the first element to be placed in the List
-     * @param e2 the second element to be placed in the List
-     * @param e3 the third element to be placed in the List
-     * @param e4 the fourth element to be placed in the List
-     * @param e5 the fifth ele aced in the List
-     * @param e6 the sixth element to be placed in the List
-     * @param e7 the seventh element to be placed in the List
-     * @param e8 the eighth element to be placed in the List
-     * @return a List containing the specified elements
-     */
-    public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8) { //NOSONAR
-        final LinkedList<T> list = new LinkedList<>();
-        list.add(e1);
-        list.add(e2);
-        list.add(e3);
-        list.add(e4);
-        list.add(e5);
-        list.add(e6);
-        list.add(e7);
-        list.add(e8);
-        return list;
-    }
-
-    /**
-     * Returns a modifiable {@code LinkedList} with specified elements.
-     *
-     * @param <T> the type of elements in the list
-     * @param e1 the first element to be placed in the List
-     * @param e2 the second element to be placed in the List
-     * @param e3 the third element to be placed in the List
-     * @param e4 the fourth element to be placed in the List
-     * @param e5 the fifth element to be placed in the List
-     * @param e6 the sixth ele aced in the List
-     * @param e7 the seventh element to be placed in the List
-     * @param e8 the eighth element to be placed in the List
-     * @param e9 the ninth element to be placed in the List
-     * @return a List containing the specified elements
-     */
-    public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8, final T e9) { //NOSONAR
-        final LinkedList<T> list = new LinkedList<>();
-        list.add(e1);
-        list.add(e2);
-        list.add(e3);
-        list.add(e4);
-        list.add(e5);
-        list.add(e6);
-        list.add(e7);
-        list.add(e8);
-        list.add(e9);
-        return list;
-    }
-
-    /**
-     * Returns a modifiable {@code Set} with the specified element.
+     * <p>Unlike {@link Set#of(Object)}, this method supports {@code null} elements.</p>
      *
      * @param <T> the type of elements in the set
-     * @param e the element to be placed in the Set
-     * @return a Set containing the specified element
+     * @param e the element to be placed in the Set. Can be {@code null}.
+     * @return an unmodifiable {@code ImmutableSet} containing the specified element
      */
-    public static <T> Set<T> asSet(final T e) {
-        final Set<T> set = newHashSet(1);
-        set.add(e);
-        return set;
+    public static <T> ImmutableSet<T> asSet(final T e) {
+        return ImmutableSet.of(e);
     }
 
     /**
-     * Returns a modifiable {@code Set} with the specified elements.
+     * Returns an unmodifiable {@code ImmutableSet} with the specified elements.
+     *
+     * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
      *
      * @param <T> the type of elements in the set
-     * @param e1 the first element to be placed in the Set
-     * @param e2 the second element to be placed in the Set
-     * @return a Set containing the specified elements
+     * @param e1 the first element to be placed in the Set. Can be {@code null}.
+     * @param e2 the second element to be placed in the Set. Can be {@code null}.
+     * @return an unmodifiable {@code ImmutableSet} containing the specified elements
      */
-    public static <T> Set<T> asSet(final T e1, final T e2) {
-        final Set<T> set = newHashSet(2);
-        set.add(e1);
-        set.add(e2);
-        return set;
+    public static <T> ImmutableSet<T> asSet(final T e1, final T e2) {
+        return ImmutableSet.of(e1, e2);
     }
 
     /**
-     * Returns a modifiable {@code Set} with the specified elements.
+     * Returns an unmodifiable {@code ImmutableSet} with the specified elements.
+     *
+     * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
      *
      * @param <T> the type of elements in the set
-     * @param e1 the first element to be placed in the Set
-     * @param e2 the second element to be placed in the Set
-     * @param e3 the third element to be placed in the Set
-     * @return a Set containing the specified elements
+     * @param e1 the first element to be placed in the Set. Can be {@code null}.
+     * @param e2 the second element to be placed in the Set. Can be {@code null}.
+     * @param e3 the third element to be placed in the Set. Can be {@code null}.
+     * @return an unmodifiable {@code ImmutableSet} containing the specified elements
      */
-    public static <T> Set<T> asSet(final T e1, final T e2, final T e3) {
-        final Set<T> set = newHashSet(3);
-        set.add(e1);
-        set.add(e2);
-        set.add(e3);
-        return set;
+    public static <T> ImmutableSet<T> asSet(final T e1, final T e2, final T e3) {
+        return ImmutableSet.of(e1, e2, e3);
     }
 
     /**
-     * Returns a modifiable {@code Set} with the specified elements.
+     * Returns an unmodifiable {@code ImmutableSet} with the specified elements.
+     *
+     * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
      *
      * @param <T> the type of elements in the set
-     * @param e1 the first element to be placed in the Set
-     * @param e2 the second element to be placed in the Set
-     * @param e3 the third element to be placed in the Set
-     * @param e4 the fourth element to be placed in the Set
-     * @return a Set containing the specified elements
+     * @param e1 the first element to be placed in the Set. Can be {@code null}.
+     * @param e2 the second element to be placed in the Set. Can be {@code null}.
+     * @param e3 the third element to be placed in the Set. Can be {@code null}.
+     * @param e4 the fourth element to be placed in the Set. Can be {@code null}.
+     * @return an unmodifiable {@code ImmutableSet} containing the specified elements
      */
-    public static <T> Set<T> asSet(final T e1, final T e2, final T e3, final T e4) {
-        final Set<T> set = newHashSet(4);
-        set.add(e1);
-        set.add(e2);
-        set.add(e3);
-        set.add(e4);
-        return set;
+    public static <T> ImmutableSet<T> asSet(final T e1, final T e2, final T e3, final T e4) {
+        return ImmutableSet.of(e1, e2, e3, e4);
     }
 
     /**
-     * Returns a modifiable {@code Set} with the specified elements.
+     * Returns an unmodifiable {@code ImmutableSet} with the specified elements.
+     *
+     * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
      *
      * @param <T> the type of elements in the set
-     * @param e1 the first element to be placed in the Set
-     * @param e2 the second element to be placed in the Set
-     * @param e3 the third element to be placed in the Set
-     * @param e4 the fourth element to be placed in the Set
-     * @param e5 the fifth element to be placed in the Set
-     * @return a Set containing the specified elements
+     * @param e1 the first element to be placed in the Set. Can be {@code null}.
+     * @param e2 the second element to be placed in the Set. Can be {@code null}.
+     * @param e3 the third element to be placed in the Set. Can be {@code null}.
+     * @param e4 the fourth element to be placed in the Set. Can be {@code null}.
+     * @param e5 the fifth element to be placed in the Set. Can be {@code null}.
+     * @return an unmodifiable {@code ImmutableSet} containing the specified elements
      */
-    public static <T> Set<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5) {
-        final Set<T> set = newHashSet(5);
-        set.add(e1);
-        set.add(e2);
-        set.add(e3);
-        set.add(e4);
-        set.add(e5);
-        return set;
+    public static <T> ImmutableSet<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5) {
+        return ImmutableSet.of(e1, e2, e3, e4, e5);
     }
 
     /**
-     * Returns a modifiable {@code Set} with the specified elements.
+     * Returns an unmodifiable {@code ImmutableSet} with the specified elements.
+     *
+     * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
      *
      * @param <T> the type of elements in the set
-     * @param e1 the first element to be placed in the Set
-     * @param e2 the second element to be placed in the Set
-     * @param e3 the third element to be placed in the Set
-     * @param e4 the fourth element to be placed in the Set
-     * @param e5 the fifth element to be placed in the Set
-     * @param e6 the sixth element to be placed in the Set
-     * @return a Set containing the specified elements
+     * @param e1 the first element to be placed in the Set. Can be {@code null}.
+     * @param e2 the second element to be placed in the Set. Can be {@code null}.
+     * @param e3 the third element to be placed in the Set. Can be {@code null}.
+     * @param e4 the fourth element to be placed in the Set. Can be {@code null}.
+     * @param e5 the fifth element to be placed in the Set. Can be {@code null}.
+     * @param e6 the sixth element to be placed in the Set. Can be {@code null}.
+     * @return an unmodifiable {@code ImmutableSet} containing the specified elements
      */
-    public static <T> Set<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
-        final Set<T> set = newHashSet(6);
-        set.add(e1);
-        set.add(e2);
-        set.add(e3);
-        set.add(e4);
-        set.add(e5);
-        set.add(e6);
-        return set;
+    public static <T> ImmutableSet<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
+        return ImmutableSet.of(e1, e2, e3, e4, e5, e6);
     }
 
     /**
-     * Returns a modifiable {@code Set} with the specified elements.
+     * Returns an unmodifiable {@code ImmutableSet} with the specified elements.
+     *
+     * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
      *
      * @param <T> the type of elements in the set
-     * @param e1 the first element to be placed in the Set
-     * @param e2 the second element to be placed in the Set
-     * @param e3 the third element to be placed in the Set
-     * @param e4 the fourth element to be placed in the Set
-     * @param e5 the fifth element to be placed in the Set
-     * @param e6 the sixth element to be placed in the Set
-     * @param e7 the seventh element to be placed in the Set
-     * @return a Set containing the specified elements
+     * @param e1 the first element to be placed in the Set. Can be {@code null}.
+     * @param e2 the second element to be placed in the Set. Can be {@code null}.
+     * @param e3 the third element to be placed in the Set. Can be {@code null}.
+     * @param e4 the fourth element to be placed in the Set. Can be {@code null}.
+     * @param e5 the fifth element to be placed in the Set. Can be {@code null}.
+     * @param e6 the sixth element to be placed in the Set. Can be {@code null}.
+     * @param e7 the seventh element to be placed in the Set. Can be {@code null}.
+     * @return an unmodifiable {@code ImmutableSet} containing the specified elements
      */
-    public static <T> Set<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) {
-        final Set<T> set = newHashSet(7);
-        set.add(e1);
-        set.add(e2);
-        set.add(e3);
-        set.add(e4);
-        set.add(e5);
-        set.add(e6);
-        set.add(e7);
-        return set;
+    public static <T> ImmutableSet<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) {
+        return ImmutableSet.of(e1, e2, e3, e4, e5, e6, e7);
     }
 
     /**
-     * Returns a modifiable {@code Set} with the specified elements.
+     * Returns an unmodifiable {@code ImmutableSet} with the specified elements.
+     *
+     * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
      *
      * @param <T> the type of elements in the set
-     * @param e1 the first element to be placed in the Set
-     * @param e2 the second element to be placed in the Set
-     * @param e3 the third element to be placed in the Set
-     * @param e4 the fourth element to be placed in the Set
-     * @param e5 the fifth element to be placed in the Set
-     * @param e6 the sixth element to be placed in the Set
-     * @param e7 the seventh element to be placed in the Set
-     * @param e8 the eighth element to be placed in the Set
-     * @return a Set containing the specified elements
+     * @param e1 the first element to be placed in the Set. Can be {@code null}.
+     * @param e2 the second element to be placed in the Set. Can be {@code null}.
+     * @param e3 the third element to be placed in the Set. Can be {@code null}.
+     * @param e4 the fourth element to be placed in the Set. Can be {@code null}.
+     * @param e5 the fifth element to be placed in the Set. Can be {@code null}.
+     * @param e6 the sixth element to be placed in the Set. Can be {@code null}.
+     * @param e7 the seventh element to be placed in the Set. Can be {@code null}.
+     * @param e8 the eighth element to be placed in the Set. Can be {@code null}.
+     * @return an unmodifiable {@code ImmutableSet} containing the specified elements
      */
-    public static <T> Set<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8) {
-        final Set<T> set = newHashSet(8);
-        set.add(e1);
-        set.add(e2);
-        set.add(e3);
-        set.add(e4);
-        set.add(e5);
-        set.add(e6);
-        set.add(e7);
-        set.add(e8);
-        return set;
+    public static <T> ImmutableSet<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8) {
+        return ImmutableSet.of(e1, e2, e3, e4, e5, e6, e7, e8);
     }
 
     /**
-     * Returns a modifiable {@code Set} with the specified elements.
+     * Returns an unmodifiable {@code ImmutableSet} with the specified elements.
+     *
+     * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
      *
      * @param <T> the type of elements in the set
-     * @param e1 the first element to be placed in the Set
-     * @param e2 the second element to be placed in the Set
-     * @param e3 the third element to be placed in the Set
-     * @param e4 the fourth element to be placed in the Set
-     * @param e5 the fifth element to be placed in the Set
-     * @param e6 the sixth element to be placed in the Set
-     * @param e7 the seventh element to be placed in the Set
-     * @param e8 the eighth element to be placed in the Set
-     * @param e9 the ninth element to be placed in the Set
-     * @return a Set containing the specified elements
+     * @param e1 the first element to be placed in the Set. Can be {@code null}.
+     * @param e2 the second element to be placed in the Set. Can be {@code null}.
+     * @param e3 the third element to be placed in the Set. Can be {@code null}.
+     * @param e4 the fourth element to be placed in the Set. Can be {@code null}.
+     * @param e5 the fifth element to be placed in the Set. Can be {@code null}.
+     * @param e6 the sixth element to be placed in the Set. Can be {@code null}.
+     * @param e7 the seventh element to be placed in the Set. Can be {@code null}.
+     * @param e8 the eighth element to be placed in the Set. Can be {@code null}.
+     * @param e9 the ninth element to be placed in the Set. Can be {@code null}.
+     * @return an unmodifiable {@code ImmutableSet} containing the specified elements
      */
-    public static <T> Set<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8, final T e9) {
-        final Set<T> set = newHashSet(9);
-        set.add(e1);
-        set.add(e2);
-        set.add(e3);
-        set.add(e4);
-        set.add(e5);
-        set.add(e6);
-        set.add(e7);
-        set.add(e8);
-        set.add(e9);
-        return set;
+    public static <T> ImmutableSet<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8, final T e9) {
+        return ImmutableSet.of(e1, e2, e3, e4, e5, e6, e7, e8, e9);
     }
 
     /**
-     * Converts an array of objects to a modifiable Set, which is NOT backed with the input array.
+     * Converts an array of objects to an unmodifiable {@code ImmutableSet}, which is NOT backed with the input array.
+     *
+     * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
      *
      * @param <T> the type of elements in the array
      * @param a the array to be converted
-     * @return a modifiable Set of objects containing the values from the array
+     * @return an unmodifiable {@code ImmutableSet} containing the values from the array
      * @see #toSet(Object[])
-     * @deprecated use {@code toSet(Object[])} instead.
+     * @see ImmutableSet#copyOf(Object[])
+     * @deprecated use {@link ImmutableSet#copyOf(Object...)} instead.
      */
     @Deprecated
     @SafeVarargs
     @NullSafe
-    public static <T> Set<T> asSet(@NullSafe final T... a) {
-        if (isEmpty(a)) {
-            return newHashSet();
-        }
-
-        return new HashSet<>(Array.asList(a));
+    public static <T> ImmutableSet<T> asSet(@NullSafe final T... a) {
+        return ImmutableSet.copyOf(a);
     }
 
-    /**
-     * Returns a modifiable {@code LinkedHashSet} with specified element.
-     *
-     * @param <T> the type of elements in the set
-     * @param e the element to be placed in the Set
-     * @return a Set containing the specified element
-     */
-    public static <T> Set<T> asLinkedHashSet(final T e) {
-        final Set<T> set = newLinkedHashSet(1);
-        set.add(e);
-        return set;
-    }
+    // /**
+    // * Returns a modifiable {@code LinkedHashSet} with specified element.
+    // *
+    // * @param <T> the type of elements in the set
+    // * @param e the element to be placed in the Set
+    // * @return a Set containing the specified element
+    // */
+    //     public static <T> Set<T> asLinkedHashSet(final T e) {
+    //         final Set<T> set = newLinkedHashSet(1);
+    //         set.add(e);
+    //         return set;
+    //     }
 
-    /**
-     * Returns a modifiable {@code LinkedHashSet} with the specified elements.
-     *
-     * @param <T> the type of elements in the set
-     * @param e1 the first element to be placed in the Set
-     * @param e2 the second element to be placed in the Set
-     * @return a Set containing the specified elements
-     */
-    public static <T> Set<T> asLinkedHashSet(final T e1, final T e2) {
-        final Set<T> set = newLinkedHashSet(2);
-        set.add(e1);
-        set.add(e2);
-        return set;
-    }
+    // /**
+    // * Returns a modifiable {@code LinkedHashSet} with the specified elements.
+    // *
+    // * @param <T> the type of elements in the set
+    // * @param e1 the first element to be placed in the Set
+    // * @param e2 the second element to be placed in the Set
+    // * @return a Set containing the specified elements
+    // */
+    //     public static <T> Set<T> asLinkedHashSet(final T e1, final T e2) {
+    //         final Set<T> set = newLinkedHashSet(2);
+    //         set.add(e1);
+    //         set.add(e2);
+    //         return set;
+    //     }
 
-    /**
-     * Returns a modifiable {@code LinkedHashSet} with the specified elements.
-     *
-     * @param <T> the type of elements in the set
-     * @param e1 the first element to be placed in the Set
-     * @param e2 the second element to be placed in the Set
-     * @param e3 the third element to be placed in the Set
-     * @return a Set containing the specified elements
-     */
-    public static <T> Set<T> asLinkedHashSet(final T e1, final T e2, final T e3) {
-        final Set<T> set = newLinkedHashSet(3);
-        set.add(e1);
-        set.add(e2);
-        set.add(e3);
-        return set;
-    }
+    // /**
+    // * Returns a modifiable {@code LinkedHashSet} with the specified elements.
+    // *
+    // * @param <T> the type of elements in the set
+    // * @param e1 the first element to be placed in the Set
+    // * @param e2 the second element to be placed in the Set
+    // * @param e3 the third element to be placed in the Set
+    // * @return a Set containing the specified elements
+    // */
+    //     public static <T> Set<T> asLinkedHashSet(final T e1, final T e2, final T e3) {
+    //         final Set<T> set = newLinkedHashSet(3);
+    //         set.add(e1);
+    //         set.add(e2);
+    //         set.add(e3);
+    //         return set;
+    //     }
 
-    /**
-     * Returns a modifiable {@code LinkedHashSet} with the specified elements.
-     *
-     * @param <T> the type of elements in the set
-     * @param e1 the first element to be placed in the Set
-     * @param e2 the second element to be placed in the Set
-     * @param e3 the third element to be placed in the Set
-     * @param e4 the fourth element to be placed in the Set
-     * @return a Set containing the specified elements
-     */
-    public static <T> Set<T> asLinkedHashSet(final T e1, final T e2, final T e3, final T e4) {
-        final Set<T> set = newLinkedHashSet(4);
-        set.add(e1);
-        set.add(e2);
-        set.add(e3);
-        set.add(e4);
-        return set;
-    }
+    // /**
+    // * Returns a modifiable {@code LinkedHashSet} with the specified elements.
+    // *
+    // * @param <T> the type of elements in the set
+    // * @param e1 the first element to be placed in the Set
+    // * @param e2 the second element to be placed in the Set
+    // * @param e3 the third element to be placed in the Set
+    // * @param e4 the fourth element to be placed in the Set
+    // * @return a Set containing the specified elements
+    // */
+    //     public static <T> Set<T> asLinkedHashSet(final T e1, final T e2, final T e3, final T e4) {
+    //         final Set<T> set = newLinkedHashSet(4);
+    //         set.add(e1);
+    //         set.add(e2);
+    //         set.add(e3);
+    //         set.add(e4);
+    //         return set;
+    //     }
 
-    /**
-     * Returns a modifiable {@code LinkedHashSet} with the specified elements.
-     *
-     * @param <T> the type of elements in the set
-     * @param e1 the first element to be placed in the Set
-     * @param e2 the second element to be placed in the Set
-     * @param e3 the third element to be placed in the Set
-     * @param e4 the fourth element to be placed in the Set
-     * @param e5 the fifth element to be placed in the Set
-     * @return a Set containing the specified elements
-     */
-    public static <T> Set<T> asLinkedHashSet(final T e1, final T e2, final T e3, final T e4, final T e5) {
-        final Set<T> set = newLinkedHashSet(5);
-        set.add(e1);
-        set.add(e2);
-        set.add(e3);
-        set.add(e4);
-        set.add(e5);
-        return set;
-    }
+    // /**
+    // * Returns a modifiable {@code LinkedHashSet} with the specified elements.
+    // *
+    // * @param <T> the type of elements in the set
+    // * @param e1 the first element to be placed in the Set
+    // * @param e2 the second element to be placed in the Set
+    // * @param e3 the third element to be placed in the Set
+    // * @param e4 the fourth element to be placed in the Set
+    // * @param e5 the fifth element to be placed in the Set
+    // * @return a Set containing the specified elements
+    // */
+    //     public static <T> Set<T> asLinkedHashSet(final T e1, final T e2, final T e3, final T e4, final T e5) {
+    //         final Set<T> set = newLinkedHashSet(5);
+    //         set.add(e1);
+    //         set.add(e2);
+    //         set.add(e3);
+    //         set.add(e4);
+    //         set.add(e5);
+    //         return set;
+    //     }
 
-    /**
-     * Returns a modifiable {@code LinkedHashSet} with the specified elements.
-     *
-     * @param <T> the type of elements in the set
-     * @param e1 the first element to be placed in the Set
-     * @param e2 the second element to be placed in the Set
-     * @param e3 the third element to be placed in the Set
-     * @param e4 the fourth element to be placed in the Set
-     * @param e5 the fifth element to be placed in the Set
-     * @param e6 the sixth element to be placed in the Set
-     * @return a Set containing the specified elements
-     */
-    public static <T> Set<T> asLinkedHashSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
-        final Set<T> set = newLinkedHashSet(6);
-        set.add(e1);
-        set.add(e2);
-        set.add(e3);
-        set.add(e4);
-        set.add(e5);
-        set.add(e6);
-        return set;
-    }
+    // /**
+    // * Returns a modifiable {@code LinkedHashSet} with the specified elements.
+    // *
+    // * @param <T> the type of elements in the set
+    // * @param e1 the first element to be placed in the Set
+    // * @param e2 the second element to be placed in the Set
+    // * @param e3 the third element to be placed in the Set
+    // * @param e4 the fourth element to be placed in the Set
+    // * @param e5 the fifth element to be placed in the Set
+    // * @param e6 the sixth element to be placed in the Set
+    // * @return a Set containing the specified elements
+    // */
+    //     public static <T> Set<T> asLinkedHashSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
+    //         final Set<T> set = newLinkedHashSet(6);
+    //         set.add(e1);
+    //         set.add(e2);
+    //         set.add(e3);
+    //         set.add(e4);
+    //         set.add(e5);
+    //         set.add(e6);
+    //         return set;
+    //     }
 
-    /**
-     * Returns a modifiable {@code LinkedHashSet} with the specified elements.
-     *
-     * @param <T> the type of elements in the set
-     * @param e1 the first element to be placed in the Set
-     * @param e2 the second element to be placed in the Set
-     * @param e3 the third element to be placed in the Set
-     * @param e4 the fourth element to be placed in the Set
-     * @param e5 the fifth element to be placed in the Set
-     * @param e6 the sixth element to be placed in the Set
-     * @param e7 the seventh element to be placed in the Set
-     * @return a Set containing the specified elements
-     */
-    public static <T> Set<T> asLinkedHashSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) {
-        final Set<T> set = newLinkedHashSet(7);
-        set.add(e1);
-        set.add(e2);
-        set.add(e3);
-        set.add(e4);
-        set.add(e5);
-        set.add(e6);
-        set.add(e7);
-        return set;
-    }
+    // /**
+    // * Returns a modifiable {@code LinkedHashSet} with the specified elements.
+    // *
+    // * @param <T> the type of elements in the set
+    // * @param e1 the first element to be placed in the Set
+    // * @param e2 the second element to be placed in the Set
+    // * @param e3 the third element to be placed in the Set
+    // * @param e4 the fourth element to be placed in the Set
+    // * @param e5 the fifth element to be placed in the Set
+    // * @param e6 the sixth element to be placed in the Set
+    // * @param e7 the seventh element to be placed in the Set
+    // * @return a Set containing the specified elements
+    // */
+    //     public static <T> Set<T> asLinkedHashSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) {
+    //         final Set<T> set = newLinkedHashSet(7);
+    //         set.add(e1);
+    //         set.add(e2);
+    //         set.add(e3);
+    //         set.add(e4);
+    //         set.add(e5);
+    //         set.add(e6);
+    //         set.add(e7);
+    //         return set;
+    //     }
 
-    /**
-     * Returns a modifiable {@code LinkedHashSet} with the specified elements.
-     *
-     * @param <T> the type of elements in the set
-     * @param e1 the first element to be placed in the Set
-     * @param e2 the second element to be placed in the Set
-     * @param e3 the third element to be placed in the Set
-     * @param e4 the fourth element to be placed in the Set
-     * @param e5 the fifth element to be placed in the Set
-     * @param e6 the sixth element to be placed in the Set
-     * @param e7 the seventh element to be placed in the Set
-     * @param e8 the eighth element to be placed in the Set
-     * @return a Set containing the specified elements
-     */
-    public static <T> Set<T> asLinkedHashSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8) {
-        final Set<T> set = newLinkedHashSet(8);
-        set.add(e1);
-        set.add(e2);
-        set.add(e3);
-        set.add(e4);
-        set.add(e5);
-        set.add(e6);
-        set.add(e7);
-        set.add(e8);
-        return set;
-    }
+    // /**
+    // * Returns a modifiable {@code LinkedHashSet} with the specified elements.
+    // *
+    // * @param <T> the type of elements in the set
+    // * @param e1 the first element to be placed in the Set
+    // * @param e2 the second element to be placed in the Set
+    // * @param e3 the third element to be placed in the Set
+    // * @param e4 the fourth element to be placed in the Set
+    // * @param e5 the fifth element to be placed in the Set
+    // * @param e6 the sixth element to be placed in the Set
+    // * @param e7 the seventh element to be placed in the Set
+    // * @param e8 the eighth element to be placed in the Set
+    // * @return a Set containing the specified elements
+    // */
+    //     public static <T> Set<T> asLinkedHashSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8) {
+    //         final Set<T> set = newLinkedHashSet(8);
+    //         set.add(e1);
+    //         set.add(e2);
+    //         set.add(e3);
+    //         set.add(e4);
+    //         set.add(e5);
+    //         set.add(e6);
+    //         set.add(e7);
+    //         set.add(e8);
+    //         return set;
+    //     }
 
-    /**
-     * Returns a modifiable {@code LinkedHashSet} with the specified elements.
-     *
-     * @param <T> the type of elements in the set
-     * @param e1 the first element to be placed in the Set
-     * @param e2 the second element to be placed in the Set
-     * @param e3 the third element to be placed in the Set
-     * @param e4 the fourth element to be placed in the Set
-     * @param e5 the fifth element to be placed in the Set
-     * @param e6 the sixth element to be placed in the Set
-     * @param e7 the seventh element to be placed in the Set
-     * @param e8 the eighth element to be placed in the Set
-     * @param e9 the ninth element to be placed in the Set
-     * @return a Set containing the specified elements
-     */
-    public static <T> Set<T> asLinkedHashSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8, final T e9) {
-        final Set<T> set = newLinkedHashSet(9);
-        set.add(e1);
-        set.add(e2);
-        set.add(e3);
-        set.add(e4);
-        set.add(e5);
-        set.add(e6);
-        set.add(e7);
-        set.add(e8);
-        set.add(e9);
-        return set;
-    }
+    // /**
+    // * Returns a modifiable {@code LinkedHashSet} with the specified elements.
+    // *
+    // * @param <T> the type of elements in the set
+    // * @param e1 the first element to be placed in the Set
+    // * @param e2 the second element to be placed in the Set
+    // * @param e3 the third element to be placed in the Set
+    // * @param e4 the fourth element to be placed in the Set
+    // * @param e5 the fifth element to be placed in the Set
+    // * @param e6 the sixth element to be placed in the Set
+    // * @param e7 the seventh element to be placed in the Set
+    // * @param e8 the eighth element to be placed in the Set
+    // * @param e9 the ninth element to be placed in the Set
+    // * @return a Set containing the specified elements
+    // */
+    //     public static <T> Set<T> asLinkedHashSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8, final T e9) {
+    //         final Set<T> set = newLinkedHashSet(9);
+    //         set.add(e1);
+    //         set.add(e2);
+    //         set.add(e3);
+    //         set.add(e4);
+    //         set.add(e5);
+    //         set.add(e6);
+    //         set.add(e7);
+    //         set.add(e8);
+    //         set.add(e9);
+    //         return set;
+    //     }
 
     /**
      * Returns an immutable list containing only the specified element.
@@ -18271,6 +18183,44 @@ sealed class CommonUtil permits N {
     @com.landawn.abacus.annotation.Immutable
     public static <K, V> Map<K, V> asSingletonMap(final K key, final V value) {
         return Collections.singletonMap(key, value);
+    }
+
+    //    @SafeVarargs
+    //    public static <T> T[] arrayOf(final T... a) {
+    //        return a;
+    //    }
+
+    /**
+     * Returns the input array as-is without any modification or copying.
+     * This is a type-safe varargs method that allows creating arrays inline.
+     * Note: No defensive copy is made, so the returned array is the same instance as the input.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Create an array inline
+     * String[] array = N.asArray("a", "b", "c");
+     * // array is ["a", "b", "c"]
+     *
+     * // Pass varargs to methods expecting arrays
+     * void processArray(String[] arr) { }
+     * processArray(N.asArray("x", "y", "z"));
+     *
+     * // Returns null for null input
+     * String[] nullArray = N.asArray((String[]) null);
+     * // nullArray is null
+     * }</pre>
+     *
+     * @param <T> the type of the array elements
+     * @param a the input array. Can be {@code null}.
+     * @return the input array unchanged (same reference). Returns {@code null} if {@code a} is {@code null}.
+     * @see Array#asList(Object[])
+     * @see Arrays#asList(Object[])
+     * @see N#copyOf(Object[], int)
+     * @see N#toList(Object[])
+     */
+    @SafeVarargs
+    public static <T> T[] asArray(final T... a) {
+        return a;
     }
 
     /**

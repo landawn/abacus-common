@@ -480,7 +480,7 @@ public class EventBus {
                     final Set<SubIdentifier> eventSubs = registeredEventIdSubMap.get(sub.eventId);
 
                     if (eventSubs == null) {
-                        registeredEventIdSubMap.put(sub.eventId, N.asLinkedHashSet(sub));
+                        registeredEventIdSubMap.put(sub.eventId, N.toLinkedHashSet(sub));
                     } else {
                         eventSubs.add(sub);
                     }

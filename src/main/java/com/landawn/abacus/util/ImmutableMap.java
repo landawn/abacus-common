@@ -109,7 +109,9 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      * @return an ImmutableMap containing only the specified key-value pair.
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1) {
-        return new ImmutableMap<>(N.asLinkedHashMap(k1, v1), false);
+        final Map<K, V> map = N.newLinkedHashMap(1);
+        map.put(k1, v1);
+        return new ImmutableMap<>(map, false);
     }
 
     /**
@@ -135,7 +137,10 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      * @return an ImmutableMap containing the specified key-value pairs.
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2) {
-        return new ImmutableMap<>(N.asLinkedHashMap(k1, v1, k2, v2), false);
+        final Map<K, V> map = N.newLinkedHashMap(2);
+        map.put(k1, v1);
+        map.put(k2, v2);
+        return new ImmutableMap<>(map, false);
     }
 
     /**
@@ -164,7 +169,11 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      * @return an ImmutableMap containing the specified key-value pairs.
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
-        return new ImmutableMap<>(N.asLinkedHashMap(k1, v1, k2, v2, k3, v3), false);
+        final Map<K, V> map = N.newLinkedHashMap(3);
+        map.put(k1, v1);
+        map.put(k2, v2);
+        map.put(k3, v3);
+        return new ImmutableMap<>(map, false);
     }
 
     /**
@@ -193,7 +202,12 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      * @return an ImmutableMap containing the specified key-value pairs.
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
-        return new ImmutableMap<>(N.asLinkedHashMap(k1, v1, k2, v2, k3, v3, k4, v4), false);
+        final Map<K, V> map = N.newLinkedHashMap(4);
+        map.put(k1, v1);
+        map.put(k2, v2);
+        map.put(k3, v3);
+        map.put(k4, v4);
+        return new ImmutableMap<>(map, false);
     }
 
     /**
@@ -226,7 +240,13 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5) {
-        return new ImmutableMap<>(N.asLinkedHashMap(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5), false);
+        final Map<K, V> map = N.newLinkedHashMap(5);
+        map.put(k1, v1);
+        map.put(k2, v2);
+        map.put(k3, v3);
+        map.put(k4, v4);
+        map.put(k5, v5);
+        return new ImmutableMap<>(map, false);
     }
 
     /**
@@ -261,7 +281,14 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6) {
-        return new ImmutableMap<>(N.asLinkedHashMap(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6), false);
+        final Map<K, V> map = N.newLinkedHashMap(6);
+        map.put(k1, v1);
+        map.put(k2, v2);
+        map.put(k3, v3);
+        map.put(k4, v4);
+        map.put(k5, v5);
+        map.put(k6, v6);
+        return new ImmutableMap<>(map, false);
     }
 
     /**
@@ -299,7 +326,15 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7) {
-        return new ImmutableMap<>(N.asLinkedHashMap(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7), false);
+        final Map<K, V> map = N.newLinkedHashMap(7);
+        map.put(k1, v1);
+        map.put(k2, v2);
+        map.put(k3, v3);
+        map.put(k4, v4);
+        map.put(k5, v5);
+        map.put(k6, v6);
+        map.put(k7, v7);
+        return new ImmutableMap<>(map, false);
     }
 
     /**
@@ -338,7 +373,16 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) {
-        return new ImmutableMap<>(N.asLinkedHashMap(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8), false);
+        final Map<K, V> map = N.newLinkedHashMap(8);
+        map.put(k1, v1);
+        map.put(k2, v2);
+        map.put(k3, v3);
+        map.put(k4, v4);
+        map.put(k5, v5);
+        map.put(k6, v6);
+        map.put(k7, v7);
+        map.put(k8, v8);
+        return new ImmutableMap<>(map, false);
     }
 
     /**
@@ -379,7 +423,17 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9) {
-        return new ImmutableMap<>(N.asLinkedHashMap(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8, k9, v9), false);
+        final Map<K, V> map = N.newLinkedHashMap(9);
+        map.put(k1, v1);
+        map.put(k2, v2);
+        map.put(k3, v3);
+        map.put(k4, v4);
+        map.put(k5, v5);
+        map.put(k6, v6);
+        map.put(k7, v7);
+        map.put(k8, v8);
+        map.put(k9, v9);
+        return new ImmutableMap<>(map, false);
     }
 
     /**

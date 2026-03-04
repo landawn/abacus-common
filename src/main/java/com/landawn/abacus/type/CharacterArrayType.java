@@ -21,7 +21,7 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 /**
  * Type handler for Character array (Character[]) values.
@@ -64,7 +64,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
         }
 
         final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 5));
-        sb.append(WD._BRACKET_L);
+        sb.append(SK._BRACKET_L);
 
         for (int i = 0, len = x.length; i < len; i++) {
             if (i > 0) {
@@ -74,13 +74,13 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
             if (x[i] == null) {
                 sb.append(NULL_CHAR_ARRAY);
             } else {
-                sb.append(WD.SINGLE_QUOTE);
+                sb.append(SK.SINGLE_QUOTE);
                 sb.append(x[i]);
-                sb.append(WD.SINGLE_QUOTE);
+                sb.append(SK.SINGLE_QUOTE);
             }
         }
 
-        sb.append(WD._BRACKET_R);
+        sb.append(SK._BRACKET_R);
 
         final String str = sb.toString();
 
@@ -132,7 +132,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
             if (element.length() >= 2) {
                 final char quoteChar = element.charAt(0);
 
-                if ((quoteChar == WD._SINGLE_QUOTE || quoteChar == WD._DOUBLE_QUOTE) && element.charAt(element.length() - 1) == quoteChar) {
+                if ((quoteChar == SK._SINGLE_QUOTE || quoteChar == SK._DOUBLE_QUOTE) && element.charAt(element.length() - 1) == quoteChar) {
                     array[i] = elementType.valueOf(element.substring(1, element.length() - 1));
                     continue;
                 }
@@ -158,7 +158,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            appendable.append(WD._BRACKET_L);
+            appendable.append(SK._BRACKET_L);
 
             for (int i = 0, len = x.length; i < len; i++) {
                 if (i > 0) {
@@ -172,7 +172,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
                 }
             }
 
-            appendable.append(WD._BRACKET_R);
+            appendable.append(SK._BRACKET_R);
         }
     }
 
@@ -193,9 +193,9 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            writer.write(WD._BRACKET_L);
+            writer.write(SK._BRACKET_L);
 
-            final char charQuotation = (config == null) ? WD.CHAR_ZERO : config.getCharQuotation();
+            final char charQuotation = (config == null) ? SK.CHAR_ZERO : config.getCharQuotation();
 
             if (charQuotation > 0) {
                 for (int i = 0, len = x.length; i < len; i++) {
@@ -230,7 +230,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
                 }
             }
 
-            writer.write(WD._BRACKET_R);
+            writer.write(SK._BRACKET_R);
         }
     }
 
@@ -250,6 +250,6 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
             return STR_FOR_EMPTY_ARRAY;
         }
 
-        return Strings.join(x, ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
+        return Strings.join(x, ELEMENT_SEPARATOR, SK.BRACKET_L, SK.BRACKET_R);
     }
 }

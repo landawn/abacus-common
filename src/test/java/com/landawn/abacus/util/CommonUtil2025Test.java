@@ -3236,66 +3236,82 @@ public class CommonUtil2025Test extends TestBase {
 
     @Test
     public void testAsList() {
-        List<String> list = CommonUtil.toList("a", "b", "c");
+        List<String> list = CommonUtil.asList("a", "b", "c");
+        assertTrue(list instanceof ImmutableList);
         assertEquals(3, list.size());
         assertEquals("a", list.get(0));
         assertEquals("b", list.get(1));
         assertEquals("c", list.get(2));
+
+        List<String> listWithNull = CommonUtil.asList("a", null, "c");
+        assertEquals(3, listWithNull.size());
+        assertNull(listWithNull.get(1));
+
+        assertThrows(UnsupportedOperationException.class, () -> list.add("d"));
     }
 
-    @Test
-    public void testAsLinkedList() {
-        LinkedList<String> list = CommonUtil.asLinkedList("a", "b", "c", "d", "e", "f", "g", "h", "i");
-        assertEquals(9, list.size());
-        assertEquals("a", list.getFirst());
-        assertEquals("i", list.getLast());
-    }
+    //     @Test
+    //     public void testAsLinkedList() {
+    //         LinkedList<String> list = CommonUtil.asLinkedList("a", "b", "c", "d", "e", "f", "g", "h", "i");
+    //         assertEquals(9, list.size());
+    //         assertEquals("a", list.getFirst());
+    //         assertEquals("i", list.getLast());
+    //     }
 
     @Test
     public void testAsSet() {
-        Set<String> set = CommonUtil.toSet("a", "b", "c", "a");
+        Set<String> set = CommonUtil.asSet("a", "b", "c", "a");
+        assertTrue(set instanceof ImmutableSet);
         assertEquals(3, set.size());
         assertTrue(set.contains("a"));
         assertTrue(set.contains("b"));
         assertTrue(set.contains("c"));
+
+        Set<String> setWithNull = CommonUtil.asSet("a", null, "a");
+        assertEquals(2, setWithNull.size());
+        assertTrue(setWithNull.contains(null));
+
+        assertThrows(UnsupportedOperationException.class, () -> set.add("d"));
     }
 
-    @Test
-    public void testAsLinkedHashSet() {
-        Set<String> set = CommonUtil.asLinkedHashSet("c", "b", "a", "d", "e", "f", "g", "h", "i");
-        assertEquals(9, set.size());
-        Iterator<String> it = set.iterator();
-        assertEquals("c", it.next());
-        assertEquals("b", it.next());
-        assertEquals("a", it.next());
-    }
+    //     @Test
+    //     public void testAsLinkedHashSet() {
+    //         Set<String> set = CommonUtil.asLinkedHashSet("c", "b", "a", "d", "e", "f", "g", "h", "i");
+    //         assertEquals(9, set.size());
+    //         Iterator<String> it = set.iterator();
+    //         assertEquals("c", it.next());
+    //         assertEquals("b", it.next());
+    //         assertEquals("a", it.next());
+    //     }
 
-    @Test
-    public void testAsLinkedHashMap() {
-        Map<String, Integer> map = CommonUtil.asLinkedHashMap("a", 1, "b", 2, "c", 3, "d", 4, "e", 5, "f", 6, "g", 7, "h", 8, "i", 9);
-        assertEquals(9, map.size());
-        assertEquals(Integer.valueOf(1), map.get("a"));
-        assertEquals(Integer.valueOf(2), map.get("b"));
-        assertEquals(Integer.valueOf(9), map.get("i"));
-    }
+    //     @Test
+    //     public void testAsLinkedHashMap() {
+    //         Map<String, Integer> map = CommonUtil.asLinkedHashMap("a", 1, "b", 2, "c", 3, "d", 4, "e", 5, "f", 6, "g", 7, "h", 8, "i", 9);
+    //         assertEquals(9, map.size());
+    //         assertEquals(Integer.valueOf(1), map.get("a"));
+    //         assertEquals(Integer.valueOf(2), map.get("b"));
+    //         assertEquals(Integer.valueOf(9), map.get("i"));
+    //     }
 
     @Test
     public void testAsMap() {
         Map<String, Integer> map = CommonUtil.asMap("a", 1, "b", 2, "c", 3, "d", 4, "e", 5, "f", 6, "g", 7, "h", 8, "i", 9);
+        assertTrue(map instanceof ImmutableMap);
         assertEquals(9, map.size());
         assertEquals(Integer.valueOf(1), map.get("a"));
         assertEquals(Integer.valueOf(2), map.get("b"));
         assertEquals(Integer.valueOf(3), map.get("c"));
         assertEquals(Integer.valueOf(9), map.get("i"));
+        assertThrows(UnsupportedOperationException.class, () -> map.put("j", 10));
     }
 
-    @Test
-    public void testAsProps() {
-        Map<String, Object> props = CommonUtil.asProps("name", "John", "age", 30);
-        assertEquals(2, props.size());
-        assertEquals("John", props.get("name"));
-        assertEquals(30, props.get("age"));
-    }
+    //     @Test
+    //     public void testAsProps() {
+    //         Map<String, Object> props = CommonUtil.asProps("name", "John", "age", 30);
+    //         assertEquals(2, props.size());
+    //         assertEquals("John", props.get("name"));
+    //         assertEquals(30, props.get("age"));
+    //     }
 
     @Test
     public void testAsSingletonList() {

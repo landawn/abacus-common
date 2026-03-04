@@ -87,7 +87,7 @@ import com.landawn.abacus.util.ObjectPool;
 import com.landawn.abacus.util.Splitter;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.Tuple.Tuple3;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Stream;
 
@@ -1677,8 +1677,8 @@ public final class ParserUtil {
 
             inputPropName = inputPropName.trim();
 
-            return inputPropName.equalsIgnoreCase(propNameByMethod) || inputPropName.replace(WD.UNDERSCORE, Strings.EMPTY).equalsIgnoreCase(propNameByMethod)
-                    || inputPropName.equalsIgnoreCase(ClassUtil.getSimpleClassName(cls) + WD._PERIOD + propNameByMethod)
+            return inputPropName.equalsIgnoreCase(propNameByMethod) || inputPropName.replace(SK.UNDERSCORE, Strings.EMPTY).equalsIgnoreCase(propNameByMethod)
+                    || inputPropName.equalsIgnoreCase(ClassUtil.getSimpleClassName(cls) + SK._PERIOD + propNameByMethod)
                     || (inputPropName.startsWith(GET) && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
                     || (inputPropName.startsWith(SET) && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
                     || (inputPropName.startsWith(IS) && inputPropName.substring(2).equalsIgnoreCase(propNameByMethod))

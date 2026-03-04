@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -24,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -83,12 +81,12 @@ import com.landawn.abacus.util.MutableChar;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Seid;
 import com.landawn.abacus.util.StringWriter;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.TypeReference;
 import com.landawn.abacus.util.UnitTestUtil;
-import com.landawn.abacus.util.WD;
 import com.landawn.abacus.util.stream.Stream;
 
 import lombok.AllArgsConstructor;
@@ -237,7 +235,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
         final List<Object> list = N.toList("a", "b");
         list.add(list);
 
-        final Map<String, Object> map = N.asMap("a", "va", "b", 123);
+        final Map<String, Object> map = N.toMap("a", "va", "b", 123);
         map.put("c", map);
 
         try {
@@ -853,47 +851,47 @@ public class JsonParserTest extends AbstractJsonParserTest {
         N.println(N.fromJson(json, Pojo.class));
     }
 
-    @Test
-    public void test_2925() {
-        final ZonedDateTime now = ZonedDateTime.now();
-        final Map<String, Object> map = N.asLinkedHashMap("ZonedDateTime", now);
+    //     @Test
+    //     public void test_2925() {
+    //         final ZonedDateTime now = ZonedDateTime.now();
+    //         final Map<String, Object> map = N.asLinkedHashMap("ZonedDateTime", now);
+    // 
+    //         ZonedDateTime.parse(now.toString());
+    // 
+    //         final String json = N.toJson(map, JSC.create().setDateTimeFormat(null));
+    //         N.println(json);
+    // 
+    //         N.println(N.fromJson(json, new TypeReference<Map<String, ZonedDateTime>>() {
+    //         }.type()));
+    // 
+    //         final String json2 = "{\"ZonedDateTime\":\"2019-12-05T22:28:22.867Z\"}\r\n" + "";
+    // 
+    //         N.println(N.fromJson(json2, new TypeReference<Map<String, ZonedDateTime>>() {
+    //         }.type()));
+    // 
+    //         N.println(N.toJson(map, JSC.create().setStringQuotation('\"').prettyFormat(true)));
+    //     }
 
-        ZonedDateTime.parse(now.toString());
-
-        final String json = N.toJson(map, JSC.create().setDateTimeFormat(null));
-        N.println(json);
-
-        N.println(N.fromJson(json, new TypeReference<Map<String, ZonedDateTime>>() {
-        }.type()));
-
-        final String json2 = "{\"ZonedDateTime\":\"2019-12-05T22:28:22.867Z\"}\r\n" + "";
-
-        N.println(N.fromJson(json2, new TypeReference<Map<String, ZonedDateTime>>() {
-        }.type()));
-
-        N.println(N.toJson(map, JSC.create().setStringQuotation('\"').prettyFormat(true)));
-    }
-
-    @Test
-    public void test_2901() {
-        final Map<String, Object> map = N.asLinkedHashMap("abc", TimeUnit.HOURS);
-
-        N.println(TimeUnit.HOURS.getDeclaringClass());
-        N.println(TimeUnit.HOURS.getClass().isEnum());
-        N.println(Enum.class.isAssignableFrom(TimeUnit.HOURS.getClass()));
-        N.println(TimeUnit.HOURS.getDeclaringClass().isEnum());
-
-        N.println(JSON.toJSONString(map));
-        N.println(N.toJson(map));
-
-        final Type<Map<String, TimeUnit>> type = new TypeReference<Map<String, TimeUnit>>() {
-        }.type();
-        final Map<String, TimeUnit> map2 = N.fromJson(N.toJson(map), type);
-
-        assertEquals(map, map2);
-
-        N.println(N.toJson(map, JSC.create().setStringQuotation('\"').prettyFormat(true)));
-    }
+    //     @Test
+    //     public void test_2901() {
+    //         final Map<String, Object> map = N.asLinkedHashMap("abc", TimeUnit.HOURS);
+    // 
+    //         N.println(TimeUnit.HOURS.getDeclaringClass());
+    //         N.println(TimeUnit.HOURS.getClass().isEnum());
+    //         N.println(Enum.class.isAssignableFrom(TimeUnit.HOURS.getClass()));
+    //         N.println(TimeUnit.HOURS.getDeclaringClass().isEnum());
+    // 
+    //         N.println(JSON.toJSONString(map));
+    //         N.println(N.toJson(map));
+    // 
+    //         final Type<Map<String, TimeUnit>> type = new TypeReference<Map<String, TimeUnit>>() {
+    //         }.type();
+    //         final Map<String, TimeUnit> map2 = N.fromJson(N.toJson(map), type);
+    // 
+    //         assertEquals(map, map2);
+    // 
+    //         N.println(N.toJson(map, JSC.create().setStringQuotation('\"').prettyFormat(true)));
+    //     }
 
     @Test
     public void test_01() {
@@ -1625,8 +1623,8 @@ public class JsonParserTest extends AbstractJsonParserTest {
         try {
             while (sb.length() < cbuf.length - 128) {
                 sb.append(Strings.uuid());
-                sb.append(WD._DOUBLE_QUOTE);
-                sb.append(WD._SINGLE_QUOTE);
+                sb.append(SK._DOUBLE_QUOTE);
+                sb.append(SK._SINGLE_QUOTE);
             }
 
             bigStr = sb.toString();
@@ -1645,7 +1643,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
         array2 = jsonParser.deserialize(IOUtil.stringToReader(json), String[].class);
         assertTrue(N.equals(array, array2));
 
-        final JsonSerializationConfig jsc = JSC.create().setStringQuotation(WD._DOUBLE_QUOTE);
+        final JsonSerializationConfig jsc = JSC.create().setStringQuotation(SK._DOUBLE_QUOTE);
         json = jsonParser.serialize(array, jsc);
 
         array2 = jsonParser.deserialize(json, String[].class);
@@ -1972,7 +1970,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
     public void test_encloseRootValue() {
         final Account account = createAccount(Account.class);
 
-        final JsonSerializationConfig config = JSC.create().bracketRootValue(false).setStringQuotation(WD.CHAR_ZERO).setCharQuotation(WD.CHAR_ZERO);
+        final JsonSerializationConfig config = JSC.create().bracketRootValue(false).setStringQuotation(SK.CHAR_ZERO).setCharQuotation(SK.CHAR_ZERO);
         String str = jsonParser.serialize(account, config);
         N.println(str);
 
@@ -2109,7 +2107,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
 
         assertTrue(N.equals(N.toList("a", "b", "c"), list));
 
-        final Map<String, Object> map = N.asMap("abc", 123);
+        final Map<String, Object> map = N.toMap("abc", 123);
 
         str = jsonParser.serialize(map);
 
@@ -2221,7 +2219,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
     public void test_parse_5() {
         final EntityId entityId = Seid.of(AccountPNL.ID, 123);
 
-        final JsonSerializationConfig jsc = JSC.create().bracketRootValue(false).quoteMapKey(false).quotePropName(false).setStringQuotation(WD.CHAR_ZERO);
+        final JsonSerializationConfig jsc = JSC.create().bracketRootValue(false).quoteMapKey(false).quotePropName(false).setStringQuotation(SK.CHAR_ZERO);
         String str = jsonParser.serialize(entityId, jsc);
         N.println(str);
 

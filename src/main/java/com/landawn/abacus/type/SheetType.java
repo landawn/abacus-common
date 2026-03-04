@@ -17,7 +17,7 @@ package com.landawn.abacus.type;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Sheet;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 /**
  * Type handler for Sheet, which represents a two-dimensional table structure with row keys,
@@ -234,12 +234,12 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
     protected static String getTypeName(final Class<?> typeClass, final String rowKeyTypeName, final String columnKeyTypeName, final String elementTypeName,
             final boolean isDeclaringName) {
         if (isDeclaringName) {
-            return ClassUtil.getSimpleClassName(typeClass) + WD.LESS_THAN + TypeFactory.getType(rowKeyTypeName).declaringName() + WD.COMMA_SPACE
-                    + TypeFactory.getType(columnKeyTypeName).declaringName() + WD.COMMA_SPACE + TypeFactory.getType(elementTypeName).declaringName()
-                    + WD.GREATER_THAN;
+            return ClassUtil.getSimpleClassName(typeClass) + SK.LESS_THAN + TypeFactory.getType(rowKeyTypeName).declaringName() + SK.COMMA_SPACE
+                    + TypeFactory.getType(columnKeyTypeName).declaringName() + SK.COMMA_SPACE + TypeFactory.getType(elementTypeName).declaringName()
+                    + SK.GREATER_THAN;
         } else {
-            return ClassUtil.getCanonicalClassName(typeClass) + WD.LESS_THAN + TypeFactory.getType(rowKeyTypeName).name() + WD.COMMA_SPACE
-                    + TypeFactory.getType(columnKeyTypeName).name() + WD.COMMA_SPACE + TypeFactory.getType(elementTypeName).name() + WD.GREATER_THAN;
+            return ClassUtil.getCanonicalClassName(typeClass) + SK.LESS_THAN + TypeFactory.getType(rowKeyTypeName).name() + SK.COMMA_SPACE
+                    + TypeFactory.getType(columnKeyTypeName).name() + SK.COMMA_SPACE + TypeFactory.getType(elementTypeName).name() + SK.GREATER_THAN;
 
         }
     }

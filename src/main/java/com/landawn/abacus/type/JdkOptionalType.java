@@ -14,7 +14,7 @@ import java.util.Optional;
 import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 /**
  * Type handler for java.util.Optional with generic type parameter.
@@ -36,9 +36,9 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
     private final Type<T> elementType;
 
     protected JdkOptionalType(final String parameterTypeName) {
-        super(OPTIONAL + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).name() + WD.GREATER_THAN);
+        super(OPTIONAL + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).name() + SK.GREATER_THAN);
 
-        declaringName = OPTIONAL + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + WD.GREATER_THAN;
+        declaringName = OPTIONAL + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + SK.GREATER_THAN;
         parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
         elementType = parameterTypes[0];
     }

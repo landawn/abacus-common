@@ -28,7 +28,7 @@ import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 /**
  * Type handler for Google Guava Multiset implementations.
@@ -267,9 +267,9 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      */
     protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
-            return ClassUtil.getCanonicalClassName(typeClass) + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + WD.GREATER_THAN;
+            return ClassUtil.getCanonicalClassName(typeClass) + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + SK.GREATER_THAN;
         } else {
-            return ClassUtil.getCanonicalClassName(typeClass) + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).name() + WD.GREATER_THAN;
+            return ClassUtil.getCanonicalClassName(typeClass) + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).name() + SK.GREATER_THAN;
         }
     }
 

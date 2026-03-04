@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.NamingPolicy;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 @Tag("2025")
 public class JsonXmlSerializationConfig2025Test extends TestBase {
@@ -24,7 +24,7 @@ public class JsonXmlSerializationConfig2025Test extends TestBase {
     @Test
     public void test_getCharQuotation() {
         TestConfig config = new TestConfig();
-        assertEquals(WD._DOUBLE_QUOTE, config.getCharQuotation());
+        assertEquals(SK._DOUBLE_QUOTE, config.getCharQuotation());
     }
 
     @Test
@@ -50,7 +50,7 @@ public class JsonXmlSerializationConfig2025Test extends TestBase {
     @Test
     public void test_getStringQuotation() {
         TestConfig config = new TestConfig();
-        assertEquals(WD._DOUBLE_QUOTE, config.getStringQuotation());
+        assertEquals(SK._DOUBLE_QUOTE, config.getStringQuotation());
     }
 
     @Test

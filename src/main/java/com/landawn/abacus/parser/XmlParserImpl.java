@@ -54,7 +54,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.XmlUtil;
 
 /**
@@ -580,14 +580,14 @@ final class XmlParserImpl extends AbstractXmlParser {
             }
 
             if (value == null) {
-                bw.write(WD._LESS_THAN);
+                bw.write(SK._LESS_THAN);
                 bw.write(strKey);
                 bw.write(XmlConstants.IS_NULL_ATTR);
                 bw.write(XmlConstants.END_ELEMENT);
             } else {
                 valueType = Type.of(value.getClass());
 
-                bw.write(WD._LESS_THAN);
+                bw.write(SK._LESS_THAN);
                 bw.write(strKey);
 
                 if (writeTypeInfo) {
@@ -595,15 +595,15 @@ final class XmlParserImpl extends AbstractXmlParser {
                     bw.write(valueType.xmlName());
                     bw.write(XmlConstants.CLOSE_ATTR_AND_ELE);
                 } else {
-                    bw.write(WD._GREATER_THAN);
+                    bw.write(SK._GREATER_THAN);
                 }
 
                 writeValue(value, config, isPrettyFormat, propIndentation, nextIndentation, serializedObjects, null, valueType, bw);
 
-                bw.write(WD._LESS_THAN);
-                bw.write(WD._SLASH);
+                bw.write(SK._LESS_THAN);
+                bw.write(SK._SLASH);
                 bw.write(strKey);
-                bw.write(WD._GREATER_THAN);
+                bw.write(SK._GREATER_THAN);
             }
         }
 
@@ -636,7 +636,7 @@ final class XmlParserImpl extends AbstractXmlParser {
             bw.write(indentation);
         }
 
-        bw.write(WD._LESS_THAN);
+        bw.write(SK._LESS_THAN);
         bw.write(mapEntity.entityName());
 
         if (writeTypeInfo) {
@@ -644,7 +644,7 @@ final class XmlParserImpl extends AbstractXmlParser {
             bw.write(Type.of(cls).xmlName());
             bw.write(XmlConstants.CLOSE_ATTR_AND_ELE);
         } else {
-            bw.write(WD._GREATER_THAN);
+            bw.write(SK._GREATER_THAN);
         }
 
         final String propIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY : indentation) + config.getIndentation()) : null;
@@ -672,14 +672,14 @@ final class XmlParserImpl extends AbstractXmlParser {
             key = jsonXmlNamingPolicy == null ? key : jsonXmlNamingPolicy.convert(key);
 
             if (value == null) {
-                bw.write(WD._LESS_THAN);
+                bw.write(SK._LESS_THAN);
                 bw.write(key);
                 bw.write(XmlConstants.IS_NULL_ATTR);
                 bw.write(XmlConstants.END_ELEMENT);
             } else {
                 valueType = Type.of(value.getClass());
 
-                bw.write(WD._LESS_THAN);
+                bw.write(SK._LESS_THAN);
                 bw.write(key);
 
                 if (writeTypeInfo) {
@@ -687,15 +687,15 @@ final class XmlParserImpl extends AbstractXmlParser {
                     bw.write(valueType.xmlName());
                     bw.write(XmlConstants.CLOSE_ATTR_AND_ELE);
                 } else {
-                    bw.write(WD._GREATER_THAN);
+                    bw.write(SK._GREATER_THAN);
                 }
 
                 writeValue(value, config, isPrettyFormat, propIndentation, nextIndentation, serializedObjects, null, valueType, bw);
 
-                bw.write(WD._LESS_THAN);
-                bw.write(WD._SLASH);
+                bw.write(SK._LESS_THAN);
+                bw.write(SK._SLASH);
                 bw.write(key);
-                bw.write(WD._GREATER_THAN);
+                bw.write(SK._GREATER_THAN);
             }
         }
 
@@ -707,10 +707,10 @@ final class XmlParserImpl extends AbstractXmlParser {
             }
         }
 
-        bw.write(WD._LESS_THAN);
-        bw.write(WD._SLASH);
+        bw.write(SK._LESS_THAN);
+        bw.write(SK._SLASH);
         bw.write(mapEntity.entityName());
-        bw.write(WD._GREATER_THAN);
+        bw.write(SK._GREATER_THAN);
     }
 
     protected void writeArray(final Object obj, final XmlSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,

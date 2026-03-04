@@ -13,7 +13,7 @@ import java.sql.SQLException;
 import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.u.Optional;
 
 /**
@@ -43,9 +43,9 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
      * @param parameterTypeName the name of the type parameter for the Optional (e.g., "String", "Integer")
      */
     protected OptionalType(final String parameterTypeName) {
-        super(OPTIONAL + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).name() + WD.GREATER_THAN);
+        super(OPTIONAL + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).name() + SK.GREATER_THAN);
 
-        declaringName = OPTIONAL + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + WD.GREATER_THAN;
+        declaringName = OPTIONAL + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + SK.GREATER_THAN;
         parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
         elementType = parameterTypes[0];
     }

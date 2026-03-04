@@ -183,6 +183,6 @@ public final class BufferedXmlWriter extends CharacterWriter {
      */
     @SuppressWarnings("SameReturnValue")
     char getCharQuotation() {
-        return WD.CHAR_ZERO;
+        return SK.CHAR_ZERO;
     }
 }

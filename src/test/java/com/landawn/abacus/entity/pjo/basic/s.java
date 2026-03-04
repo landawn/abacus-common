@@ -266,7 +266,8 @@ public interface s { // NOSONAR
     String zipCode = "zipCode";
 
     /** Unmodifiable property(field) name list for class: {@code "Account"}. */
-    List<String> accountPropNameList = List.of(birthDate, contact, createdTime, devices, emailAddress, firstName, gui, id, lastName, lastUpdateTime, middleName, status);
+    List<String> accountPropNameList = List.of(birthDate, contact, createdTime, devices, emailAddress, firstName, gui, id, lastName, lastUpdateTime, middleName,
+            status);
 
     /** Unmodifiable property(field) name list for class: {@code "AclUgTargetRelationship"}. */
     List<String> aclUgTargetRelationshipPropNameList = List.of(createdTime, description, id, lastUpdateTime, privilege, status, targetGui, ugGui);
@@ -275,16 +276,23 @@ public interface s { // NOSONAR
     List<String> aclTargetPropNameList = List.of(category, createdTime, description, gui, id, lastUpdateTime, name, status, subCategory, subType, type);
 
     /** Unmodifiable property(field) name list for class: {@code "AccountDevice"}. */
-    List<String> accountDevicePropNameList = List.of(accountId, category, createdTime, description, id, lastUpdateTime, manufacturer, model, name, platform, produceTime, status, udid);
+    List<String> accountDevicePropNameList = List.of(accountId, category, createdTime, description, id, lastUpdateTime, manufacturer, model, name, platform,
+            produceTime, status, udid);
 
     /** Unmodifiable property(field) name list for class: {@code "DataType"}. */
-    List<String> dataTypePropNameList = List.of(bigDecimalArrayListType, bigDecimalHashMapType, bigDecimalHashSetType, bigDecimalType, bigIntegerType, binaryStreamType, blobType, booleanLinkedHashMapType, booleanLinkedHashSetType, booleanLinkedListType, booleanType, byteArrayType, byteType, charType, characterStreamType, clobType, dateArrayListType, dateHashMapType, dateHashSetType, dateType, doubleListType, doubleType, enumType, floatHashMapType, floatType, intType, jsonType, longDateType, longTimeType, longTimestampType, longType, shortType, stringArrayListType, stringConcurrentHashMapType, stringHashMapType, stringHashSetType, stringType, stringVectorType, timeType, timestampArrayListType, timestampHashMapType, timestampHashSetType, timestampType, xmlType);
+    List<String> dataTypePropNameList = List.of(bigDecimalArrayListType, bigDecimalHashMapType, bigDecimalHashSetType, bigDecimalType, bigIntegerType,
+            binaryStreamType, blobType, booleanLinkedHashMapType, booleanLinkedHashSetType, booleanLinkedListType, booleanType, byteArrayType, byteType,
+            charType, characterStreamType, clobType, dateArrayListType, dateHashMapType, dateHashSetType, dateType, doubleListType, doubleType, enumType,
+            floatHashMapType, floatType, intType, jsonType, longDateType, longTimeType, longTimestampType, longType, shortType, stringArrayListType,
+            stringConcurrentHashMapType, stringHashMapType, stringHashSetType, stringType, stringVectorType, timeType, timestampArrayListType,
+            timestampHashMapType, timestampHashSetType, timestampType, xmlType);
 
     /** Unmodifiable property(field) name list for class: {@code "AclUser"}. */
     List<String> aclUserPropNameList = List.of(createdTime, description, groupList, gui, id, lastUpdateTime, name, status);
 
     /** Unmodifiable property(field) name list for class: {@code "AccountContact"}. */
-    List<String> accountContactPropNameList = List.of(accountId, address, address2, category, city, country, createdTime, description, email, id, lastUpdateTime, mobile, state, status, telephone, zipCode);
+    List<String> accountContactPropNameList = List.of(accountId, address, address2, category, city, country, createdTime, description, email, id,
+            lastUpdateTime, mobile, state, status, telephone, zipCode);
 
     /** Unmodifiable property(field) name list for class: {@code "AclGroup"}. */
     List<String> aclGroupPropNameList = List.of(createdTime, description, gui, id, lastUpdateTime, name, status, userList);
@@ -559,7 +567,8 @@ public interface s { // NOSONAR
         String zipCode = "zip_code";
 
         /** Unmodifiable property(field) name list for class: {@code "Account"}. */
-        List<String> accountPropNameList = List.of(birthDate, contact, createdTime, devices, emailAddress, firstName, gui, id, lastName, lastUpdateTime, middleName, status);
+        List<String> accountPropNameList = List.of(birthDate, contact, createdTime, devices, emailAddress, firstName, gui, id, lastName, lastUpdateTime,
+                middleName, status);
 
         /** Unmodifiable property(field) name list for class: {@code "AclUgTargetRelationship"}. */
         List<String> aclUgTargetRelationshipPropNameList = List.of(createdTime, description, id, lastUpdateTime, privilege, status, targetGui, ugGui);
@@ -568,16 +577,23 @@ public interface s { // NOSONAR
         List<String> aclTargetPropNameList = List.of(category, createdTime, description, gui, id, lastUpdateTime, name, status, subCategory, subType, type);
 
         /** Unmodifiable property(field) name list for class: {@code "AccountDevice"}. */
-        List<String> accountDevicePropNameList = List.of(accountId, category, createdTime, description, id, lastUpdateTime, manufacturer, model, name, platform, produceTime, status, udid);
+        List<String> accountDevicePropNameList = List.of(accountId, category, createdTime, description, id, lastUpdateTime, manufacturer, model, name, platform,
+                produceTime, status, udid);
 
         /** Unmodifiable property(field) name list for class: {@code "DataType"}. */
-        List<String> dataTypePropNameList = List.of(bigDecimalArrayListType, bigDecimalHashMapType, bigDecimalHashSetType, bigDecimalType, bigIntegerType, binaryStreamType, blobType, booleanLinkedHashMapType, booleanLinkedHashSetType, booleanLinkedListType, booleanType, byteArrayType, byteType, charType, characterStreamType, clobType, dateArrayListType, dateHashMapType, dateHashSetType, dateType, doubleListType, doubleType, enumType, floatHashMapType, floatType, intType, jsonType, longDateType, longTimeType, longTimestampType, longType, shortType, stringArrayListType, stringConcurrentHashMapType, stringHashMapType, stringHashSetType, stringType, stringVectorType, timeType, timestampArrayListType, timestampHashMapType, timestampHashSetType, timestampType, xmlType);
+        List<String> dataTypePropNameList = List.of(bigDecimalArrayListType, bigDecimalHashMapType, bigDecimalHashSetType, bigDecimalType, bigIntegerType,
+                binaryStreamType, blobType, booleanLinkedHashMapType, booleanLinkedHashSetType, booleanLinkedListType, booleanType, byteArrayType, byteType,
+                charType, characterStreamType, clobType, dateArrayListType, dateHashMapType, dateHashSetType, dateType, doubleListType, doubleType, enumType,
+                floatHashMapType, floatType, intType, jsonType, longDateType, longTimeType, longTimestampType, longType, shortType, stringArrayListType,
+                stringConcurrentHashMapType, stringHashMapType, stringHashSetType, stringType, stringVectorType, timeType, timestampArrayListType,
+                timestampHashMapType, timestampHashSetType, timestampType, xmlType);
 
         /** Unmodifiable property(field) name list for class: {@code "AclUser"}. */
         List<String> aclUserPropNameList = List.of(createdTime, description, groupList, gui, id, lastUpdateTime, name, status);
 
         /** Unmodifiable property(field) name list for class: {@code "AccountContact"}. */
-        List<String> accountContactPropNameList = List.of(accountId, address, address2, category, city, country, createdTime, description, email, id, lastUpdateTime, mobile, state, status, telephone, zipCode);
+        List<String> accountContactPropNameList = List.of(accountId, address, address2, category, city, country, createdTime, description, email, id,
+                lastUpdateTime, mobile, state, status, telephone, zipCode);
 
         /** Unmodifiable property(field) name list for class: {@code "AclGroup"}. */
         List<String> aclGroupPropNameList = List.of(createdTime, description, gui, id, lastUpdateTime, name, status, userList);
@@ -854,7 +870,8 @@ public interface s { // NOSONAR
         String zipCode = "ZIP_CODE";
 
         /** Unmodifiable property(field) name list for class: {@code "Account"}. */
-        List<String> accountPropNameList = List.of(birthDate, contact, createdTime, devices, emailAddress, firstName, gui, id, lastName, lastUpdateTime, middleName, status);
+        List<String> accountPropNameList = List.of(birthDate, contact, createdTime, devices, emailAddress, firstName, gui, id, lastName, lastUpdateTime,
+                middleName, status);
 
         /** Unmodifiable property(field) name list for class: {@code "AclUgTargetRelationship"}. */
         List<String> aclUgTargetRelationshipPropNameList = List.of(createdTime, description, id, lastUpdateTime, privilege, status, targetGui, ugGui);
@@ -863,16 +880,23 @@ public interface s { // NOSONAR
         List<String> aclTargetPropNameList = List.of(category, createdTime, description, gui, id, lastUpdateTime, name, status, subCategory, subType, type);
 
         /** Unmodifiable property(field) name list for class: {@code "AccountDevice"}. */
-        List<String> accountDevicePropNameList = List.of(accountId, category, createdTime, description, id, lastUpdateTime, manufacturer, model, name, platform, produceTime, status, udid);
+        List<String> accountDevicePropNameList = List.of(accountId, category, createdTime, description, id, lastUpdateTime, manufacturer, model, name, platform,
+                produceTime, status, udid);
 
         /** Unmodifiable property(field) name list for class: {@code "DataType"}. */
-        List<String> dataTypePropNameList = List.of(bigDecimalArrayListType, bigDecimalHashMapType, bigDecimalHashSetType, bigDecimalType, bigIntegerType, binaryStreamType, blobType, booleanLinkedHashMapType, booleanLinkedHashSetType, booleanLinkedListType, booleanType, byteArrayType, byteType, charType, characterStreamType, clobType, dateArrayListType, dateHashMapType, dateHashSetType, dateType, doubleListType, doubleType, enumType, floatHashMapType, floatType, intType, jsonType, longDateType, longTimeType, longTimestampType, longType, shortType, stringArrayListType, stringConcurrentHashMapType, stringHashMapType, stringHashSetType, stringType, stringVectorType, timeType, timestampArrayListType, timestampHashMapType, timestampHashSetType, timestampType, xmlType);
+        List<String> dataTypePropNameList = List.of(bigDecimalArrayListType, bigDecimalHashMapType, bigDecimalHashSetType, bigDecimalType, bigIntegerType,
+                binaryStreamType, blobType, booleanLinkedHashMapType, booleanLinkedHashSetType, booleanLinkedListType, booleanType, byteArrayType, byteType,
+                charType, characterStreamType, clobType, dateArrayListType, dateHashMapType, dateHashSetType, dateType, doubleListType, doubleType, enumType,
+                floatHashMapType, floatType, intType, jsonType, longDateType, longTimeType, longTimestampType, longType, shortType, stringArrayListType,
+                stringConcurrentHashMapType, stringHashMapType, stringHashSetType, stringType, stringVectorType, timeType, timestampArrayListType,
+                timestampHashMapType, timestampHashSetType, timestampType, xmlType);
 
         /** Unmodifiable property(field) name list for class: {@code "AclUser"}. */
         List<String> aclUserPropNameList = List.of(createdTime, description, groupList, gui, id, lastUpdateTime, name, status);
 
         /** Unmodifiable property(field) name list for class: {@code "AccountContact"}. */
-        List<String> accountContactPropNameList = List.of(accountId, address, address2, category, city, country, createdTime, description, email, id, lastUpdateTime, mobile, state, status, telephone, zipCode);
+        List<String> accountContactPropNameList = List.of(accountId, address, address2, category, city, country, createdTime, description, email, id,
+                lastUpdateTime, mobile, state, status, telephone, zipCode);
 
         /** Unmodifiable property(field) name list for class: {@code "AclGroup"}. */
         List<String> aclGroupPropNameList = List.of(createdTime, description, gui, id, lastUpdateTime, name, status, userList);

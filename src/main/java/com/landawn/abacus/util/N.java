@@ -7641,12 +7641,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * A fake/unsupported method defined to remind user to use {@code replaceAll} when {@code update/updateAll/updateIf} is searched.
+     * A placeholder/unsupported method defined to remind users to use {@code replaceAll}
+     * when searching for {@code update/updateAll/updateIf}.
      *
      * @throws UnsupportedOperationException always thrown to indicate this method is not supported
      * @see #replaceAll(Object[], UnaryOperator)
      * @see #replaceAll(Object[], Object, Object)
-     * @deprecated use {@code replaceAll}
+     * @deprecated Use {@link #replaceAll(Object[], UnaryOperator)} or
+     *             {@link #replaceAll(Object[], Object, Object)} instead.
      */
     @Deprecated
     public static void updateAllUsingReplaceAllInstead() throws UnsupportedOperationException {
@@ -7654,11 +7656,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * A fake/unsupported method defined to remind user to use {@code replaceIf} when {@code update/updateAll/updateIf} is searched.
+     * A placeholder/unsupported method defined to remind users to use {@code replaceIf}
+     * when searching for {@code update/updateAll/updateIf}.
      *
      * @throws UnsupportedOperationException always thrown to indicate this method is not supported
      * @see #replaceIf(Object[], Predicate, Object)
-     * @deprecated use {@code replaceIf}
+     * @deprecated Use {@link #replaceIf(Object[], Predicate, Object)} instead.
      */
     @Deprecated
     public static void updateIfUsingReplaceIfInstead() throws UnsupportedOperationException {
@@ -31625,7 +31628,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see TriIterator#unzip(Iterable, BiConsumer)
      * @see TriIterator#toMultiList(Supplier)
      * @see TriIterator#toMultiSet(Supplier)
-     * @deprecated replaced by {@link TriIterator#unzip(Iterable, BiConsumer)}
+     * @deprecated Use {@link TriIterator#unzip(Iterable, BiConsumer)} instead.
      */
     @Deprecated
     public static <T, A, B, C> Triple<List<A>, List<B>, List<C>> unzip3(final Iterable<? extends T> c, final BiConsumer<? super T, Triple<A, B, C>> unzip) {
@@ -31649,7 +31652,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see TriIterator#unzip(Iterable, BiConsumer)
      * @see TriIterator#toMultiList(Supplier)
      * @see TriIterator#toMultiSet(Supplier)
-     * @deprecated replaced by {@link TriIterator#unzip(Iterable, BiConsumer)}
+     * @deprecated Use {@link TriIterator#unzip(Iterable, BiConsumer)} instead.
      */
     @Deprecated
     public static <T, A, B, C, LC extends Collection<A>, MC extends Collection<B>, RC extends Collection<C>> Triple<LC, MC, RC> unzip3(
@@ -39569,7 +39572,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param actionForFalse the action to execute if condition is {@code false} (may be {@code null})
      * @throws E1 if condition is {@code true} and actionForTrue throws an exception
      * @throws E2 if condition is {@code false} and actionForFalse throws an exception
-     * @deprecated it's not a good idea? if-else is better?
+     * @deprecated Prefer a standard {@code if-else} statement for better readability.
      */
     @Deprecated
     public static <E1 extends Exception, E2 extends Exception> void ifOrElse(final boolean b, final Throwables.Runnable<E1> actionForTrue,

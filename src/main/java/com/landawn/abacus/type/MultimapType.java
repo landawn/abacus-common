@@ -26,7 +26,7 @@ import com.landawn.abacus.util.Multimap;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.SetMultimap;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 /**
  * Type handler for Multimap objects with generic key, element, and collection value types.
@@ -269,13 +269,13 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
     protected static String getTypeName(final Class<?> typeClass, final String keyTypeName, final String valueElementTypeName, final String valueTypeName,
             final boolean isDeclaringName) {
         if (isDeclaringName) {
-            return ClassUtil.getSimpleClassName(typeClass) + WD.LESS_THAN + TypeFactory.getType(keyTypeName).declaringName()
-                    + (Strings.isEmpty(valueElementTypeName) ? "" : (WD.COMMA_SPACE + TypeFactory.getType(valueElementTypeName).declaringName()))
-                    + (Strings.isEmpty(valueTypeName) ? "" : (WD.COMMA_SPACE + TypeFactory.getType(valueTypeName).declaringName())) + WD.GREATER_THAN;
+            return ClassUtil.getSimpleClassName(typeClass) + SK.LESS_THAN + TypeFactory.getType(keyTypeName).declaringName()
+                    + (Strings.isEmpty(valueElementTypeName) ? "" : (SK.COMMA_SPACE + TypeFactory.getType(valueElementTypeName).declaringName()))
+                    + (Strings.isEmpty(valueTypeName) ? "" : (SK.COMMA_SPACE + TypeFactory.getType(valueTypeName).declaringName())) + SK.GREATER_THAN;
         } else {
-            return ClassUtil.getCanonicalClassName(typeClass) + WD.LESS_THAN + TypeFactory.getType(keyTypeName).name()
-                    + (Strings.isEmpty(valueElementTypeName) ? "" : (WD.COMMA_SPACE + TypeFactory.getType(valueElementTypeName).name()))
-                    + (Strings.isEmpty(valueTypeName) ? "" : (WD.COMMA_SPACE + TypeFactory.getType(valueTypeName).name())) + WD.GREATER_THAN;
+            return ClassUtil.getCanonicalClassName(typeClass) + SK.LESS_THAN + TypeFactory.getType(keyTypeName).name()
+                    + (Strings.isEmpty(valueElementTypeName) ? "" : (SK.COMMA_SPACE + TypeFactory.getType(valueElementTypeName).name()))
+                    + (Strings.isEmpty(valueTypeName) ? "" : (SK.COMMA_SPACE + TypeFactory.getType(valueTypeName).name())) + SK.GREATER_THAN;
 
         }
     }

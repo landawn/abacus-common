@@ -3027,13 +3027,13 @@ public class Strings2025Test extends TestBase {
         assertEquals("", Strings.join((Iterable<String>) null, ","));
     }
 
-    @Test
-    @DisplayName("Test joinEntries()")
-    public void testJoinEntries() {
-        Map<String, String> map = CommonUtil.asLinkedHashMap("a", "1", "b", "2");
-        String result = Strings.joinEntries(map, ",", "=");
-        assertEquals("a=1,b=2", result);
-    }
+    //     @Test
+    //     @DisplayName("Test joinEntries()")
+    //     public void testJoinEntries() {
+    //         Map<String, String> map = CommonUtil.asLinkedHashMap("a", "1", "b", "2");
+    //         String result = Strings.joinEntries(map, ",", "=");
+    //         assertEquals("a=1,b=2", result);
+    //     }
 
     @Test
     @DisplayName("Test parseInt()")

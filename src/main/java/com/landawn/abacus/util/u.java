@@ -880,7 +880,7 @@ public class u { // NOSONAR
          */
         public List<Boolean> toList() {
             if (isPresent()) {
-                return N.asList(value);
+                return N.toList(value);
             } else {
                 return new ArrayList<>();
             }
@@ -894,7 +894,7 @@ public class u { // NOSONAR
          */
         public Set<Boolean> toSet() {
             if (isPresent()) {
-                return N.asSet(value);
+                return N.toSet(value);
             } else {
                 return N.newHashSet();
             }
@@ -1608,7 +1608,7 @@ public class u { // NOSONAR
          */
         public List<Character> toList() {
             if (isPresent()) {
-                return N.asList(value);
+                return N.toList(value);
             } else {
                 return new ArrayList<>();
             }
@@ -1624,7 +1624,7 @@ public class u { // NOSONAR
          */
         public Set<Character> toSet() {
             if (isPresent()) {
-                return N.asSet(value);
+                return N.toSet(value);
             } else {
                 return N.newHashSet();
             }
@@ -2309,7 +2309,7 @@ public class u { // NOSONAR
          */
         public List<Byte> toList() {
             if (isPresent()) {
-                return N.asList(value);
+                return N.toList(value);
             } else {
                 return new ArrayList<>();
             }
@@ -2337,7 +2337,7 @@ public class u { // NOSONAR
          */
         public Set<Byte> toSet() {
             if (isPresent()) {
-                return N.asSet(value);
+                return N.toSet(value);
             } else {
                 return N.newHashSet();
             }
@@ -2949,7 +2949,7 @@ public class u { // NOSONAR
          */
         public List<Short> toList() {
             if (isPresent()) {
-                return N.asList(value);
+                return N.toList(value);
             } else {
                 return new ArrayList<>();
             }
@@ -2963,7 +2963,7 @@ public class u { // NOSONAR
          */
         public Set<Short> toSet() {
             if (isPresent()) {
-                return N.asSet(value);
+                return N.toSet(value);
             } else {
                 return N.newHashSet();
             }
@@ -3677,7 +3677,7 @@ public class u { // NOSONAR
          */
         public List<Integer> toList() {
             if (isPresent()) {
-                return N.asList(value);
+                return N.toList(value);
             } else {
                 return new ArrayList<>();
             }
@@ -3690,7 +3690,7 @@ public class u { // NOSONAR
          */
         public Set<Integer> toSet() {
             if (isPresent()) {
-                return N.asSet(value);
+                return N.toSet(value);
             } else {
                 return N.newHashSet();
             }
@@ -4335,7 +4335,7 @@ public class u { // NOSONAR
          */
         public List<Long> toList() {
             if (isPresent()) {
-                return N.asList(value);
+                return N.toList(value);
             } else {
                 return new ArrayList<>();
             }
@@ -4348,7 +4348,7 @@ public class u { // NOSONAR
          */
         public Set<Long> toSet() {
             if (isPresent()) {
-                return N.asSet(value);
+                return N.toSet(value);
             } else {
                 return N.newHashSet();
             }
@@ -4963,7 +4963,7 @@ public class u { // NOSONAR
          */
         public List<Float> toList() {
             if (isPresent()) {
-                return N.asList(value);
+                return N.toList(value);
             } else {
                 return new ArrayList<>();
             }
@@ -4976,7 +4976,7 @@ public class u { // NOSONAR
          */
         public Set<Float> toSet() {
             if (isPresent()) {
-                return N.asSet(value);
+                return N.toSet(value);
             } else {
                 return N.newHashSet();
             }
@@ -5625,7 +5625,7 @@ public class u { // NOSONAR
          */
         public List<Double> toList() {
             if (isPresent()) {
-                return N.asList(value);
+                return N.toList(value);
             } else {
                 return new ArrayList<>();
             }
@@ -5638,7 +5638,7 @@ public class u { // NOSONAR
          */
         public Set<Double> toSet() {
             if (isPresent()) {
-                return N.asSet(value);
+                return N.toSet(value);
             } else {
                 return N.newHashSet();
             }
@@ -6432,7 +6432,7 @@ public class u { // NOSONAR
          */
         public List<T> toList() {
             if (isPresent()) {
-                return N.asList(value);
+                return N.toList(value);
             } else {
                 return new ArrayList<>();
             }
@@ -6445,7 +6445,7 @@ public class u { // NOSONAR
          */
         public Set<T> toSet() {
             if (isPresent()) {
-                return N.asSet(value);
+                return N.toSet(value);
             } else {
                 return N.newHashSet();
             }
@@ -7774,7 +7774,7 @@ public class u { // NOSONAR
          */
         public List<T> toList() {
             if (isPresent()) {
-                return N.asList(value);
+                return N.toList(value);
             } else {
                 return new ArrayList<>();
             }
@@ -7792,7 +7792,7 @@ public class u { // NOSONAR
          */
         public List<T> toListIfNotNull() {
             if (isNotNull()) {
-                return N.asList(value);
+                return N.toList(value);
             } else {
                 return new ArrayList<>();
             }
@@ -7809,7 +7809,7 @@ public class u { // NOSONAR
          */
         public Set<T> toSet() {
             if (isPresent()) {
-                return N.asSet(value);
+                return N.toSet(value);
             } else {
                 return N.newHashSet();
             }
@@ -7827,7 +7827,7 @@ public class u { // NOSONAR
          */
         public Set<T> toSetIfNotNull() {
             if (isNotNull()) {
-                return N.asSet(value);
+                return N.toSet(value);
             } else {
                 return N.newHashSet();
             }

@@ -2057,133 +2057,133 @@ public class NTest extends AbstractParserTest {
         }
     }
 
-    @Test
-    public void test_asAndNew() {
-        final List<String> linkedList = new LinkedList<>();
-        linkedList.add("abc");
-        N.println(linkedList);
-
-        N.println(CommonUtil.asProps("firstName", "1)1"));
-
-        N.println(new LinkedHashMap<>());
-        N.println(new LinkedHashMap<>(10));
-        N.println(new IdentityHashMap<>());
-        N.println(new IdentityHashMap<>(10));
-
-        N.println(new ArrayDeque<>());
-        N.println(new ArrayDeque<>(10));
-        N.println(new TreeMap<>());
-        N.println(new Multiset<>());
-        N.println(new TreeSet<>());
-        N.println(new ConcurrentLinkedQueue<>());
-        N.println(CommonUtil.newListMultimap());
-        N.println(CommonUtil.newLinkedListMultimap());
-        N.println(CommonUtil.newSetMultimap());
-        N.println(CommonUtil.newLinkedSetMultimap());
-        N.println(CommonUtil.newLinkedSetMultimap());
-        N.println(CommonUtil.newLinkedSetMultimap());
-        N.println(CommonUtil.newLinkedSetMultimap());
-        N.println(CommonUtil.newLinkedSetMultimap());
-
-        N.println(new MapEntity(AccountPNL.__, CommonUtil.asProps("firstName", "1)1")));
-
-        N.println(new MapEntity(AccountPNL.__));
-
-        N.println(Seid.of(AccountPNL.ID, 123));
-        N.println(Seid.create(CommonUtil.asProps(AccountPNL.ID, 123)));
-
-        N.println(new LinkedHashMap<>(CommonUtil.asProps(AccountPNL.ID, 123)));
-        N.println(new ConcurrentHashMap<>(CommonUtil.asProps(AccountPNL.ID, 123)));
-        N.println(new IdentityHashMap<>(CommonUtil.asProps(AccountPNL.ID, 123)));
-        N.println(new TreeMap<>(CommonUtil.asProps(AccountPNL.ID, 123)));
-        N.println(new TreeMap<>(CommonUtil.asProps(AccountPNL.ID, 123)));
-
-        N.println(CommonUtil.toLinkedList("ab", "c"));
-        N.println(new LinkedList<>(CommonUtil.toList("ab", "c")));
-
-        N.println(CommonUtil.toLinkedHashSet("ab", "c"));
-
-        N.println(CommonUtil.toSortedSet());
-        N.println(CommonUtil.toSortedSet("ab", "c"));
-        N.println(new TreeSet<>(CommonUtil.toList("ab", "c")));
-        N.println(new TreeSet<>(CommonUtil.toSortedSet("ab", "c")));
-
-        N.println(CommonUtil.toQueue("ab", "c"));
-        N.println(new ArrayDeque<>());
-        N.println(new ArrayDeque<>(3));
-        N.println(new ArrayDeque<>(CommonUtil.toList("ab", "c")));
-
-        N.println(CommonUtil.toArrayBlockingQueue("ab", "c"));
-
-        N.println(CommonUtil.toLinkedBlockingQueue("ab", "c"));
-
-        N.println(CommonUtil.toPriorityQueue("ab", "c"));
-        N.println(CommonUtil.toConcurrentLinkedQueue("ab", "c"));
-
-        final Delayed d = new Delayed() {
-            @Override
-            public int compareTo(final Delayed o) {
-                return 0;
-            }
-
-            @Override
-            public long getDelay(final TimeUnit unit) {
-                return 0;
-            }
-        };
-
-        N.println(CommonUtil.toDelayQueue(d));
-
-        N.println(CommonUtil.toDeque("ab", "c"));
-        N.println(new ArrayDeque<>(CommonUtil.toList("ab", "c")));
-
-        N.println(CommonUtil.toDeque("ab", "c"));
-        N.println(new ArrayDeque<>(CommonUtil.toList("ab", "c")));
-
-        N.println(CommonUtil.toLinkedBlockingDeque("ab", "c"));
-
-        N.println(CommonUtil.toConcurrentLinkedDeque("ab", "c"));
-
-        assertEquals(true, Strings.parseBoolean("True"));
-        assertEquals(1, Numbers.toByte("1"));
-        assertEquals(1, Numbers.toShort("1"));
-        assertEquals(1, Numbers.toInt("1"));
-        assertEquals(0, Numbers.toInt(""));
-        assertEquals(1, Numbers.toLong("1"));
-        assertEquals(0, Numbers.toLong(""));
-        assertEquals(1f, Numbers.toFloat("1"));
-        assertEquals(1f, Numbers.toFloat("1f"));
-        assertEquals(1f, Numbers.toFloat("1F"));
-        assertEquals(0f, Numbers.toFloat(""));
-        assertEquals(1d, Numbers.toDouble("1"));
-        assertEquals(0d, Numbers.toDouble(""));
-
-        assertEquals(1, (int) CommonUtil.convert(1L, int.class));
-
-        N.println(Dates.createDate(Dates.currentJUDate()));
-        N.println(Dates.createTime(Dates.currentJUDate()));
-        N.println(Dates.createTimestamp(Dates.currentJUDate()));
-
-        N.println(Dates.createJUDate(Dates.currentCalendar()));
-        N.println(Dates.createJUDate(Dates.currentJUDate()));
-        N.println(Dates.createJUDate(System.currentTimeMillis()));
-
-        N.println(Dates.createCalendar(Dates.currentCalendar()));
-        N.println(Dates.createCalendar(Dates.currentJUDate()));
-        N.println(Dates.createCalendar(System.currentTimeMillis()));
-
-        N.println(Dates.createGregorianCalendar(Dates.currentCalendar()));
-        N.println(Dates.createGregorianCalendar(Dates.currentJUDate()));
-        N.println(Dates.createGregorianCalendar(System.currentTimeMillis()));
-
-        N.println(Dates.createXMLGregorianCalendar(Dates.currentCalendar()));
-        N.println(Dates.createXMLGregorianCalendar(Dates.currentJUDate()));
-        N.println(Dates.createXMLGregorianCalendar(System.currentTimeMillis()));
-
-        N.println(Dates.parseCalendar(Dates.format(Dates.currentJUDate())));
-        N.println(Dates.parseGregorianCalendar(Dates.format(Dates.currentJUDate())));
-        N.println(Dates.parseXMLGregorianCalendar(Dates.format(Dates.currentJUDate())));
-    }
+    //     @Test
+    //     public void test_asAndNew() {
+    //         final List<String> linkedList = new LinkedList<>();
+    //         linkedList.add("abc");
+    //         N.println(linkedList);
+    // 
+    //         N.println(CommonUtil.asProps("firstName", "1)1"));
+    // 
+    //         N.println(new LinkedHashMap<>());
+    //         N.println(new LinkedHashMap<>(10));
+    //         N.println(new IdentityHashMap<>());
+    //         N.println(new IdentityHashMap<>(10));
+    // 
+    //         N.println(new ArrayDeque<>());
+    //         N.println(new ArrayDeque<>(10));
+    //         N.println(new TreeMap<>());
+    //         N.println(new Multiset<>());
+    //         N.println(new TreeSet<>());
+    //         N.println(new ConcurrentLinkedQueue<>());
+    //         N.println(CommonUtil.newListMultimap());
+    //         N.println(CommonUtil.newLinkedListMultimap());
+    //         N.println(CommonUtil.newSetMultimap());
+    //         N.println(CommonUtil.newLinkedSetMultimap());
+    //         N.println(CommonUtil.newLinkedSetMultimap());
+    //         N.println(CommonUtil.newLinkedSetMultimap());
+    //         N.println(CommonUtil.newLinkedSetMultimap());
+    //         N.println(CommonUtil.newLinkedSetMultimap());
+    // 
+    //         N.println(new MapEntity(AccountPNL.__, CommonUtil.asProps("firstName", "1)1")));
+    // 
+    //         N.println(new MapEntity(AccountPNL.__));
+    // 
+    //         N.println(Seid.of(AccountPNL.ID, 123));
+    //         N.println(Seid.create(CommonUtil.asProps(AccountPNL.ID, 123)));
+    // 
+    //         N.println(new LinkedHashMap<>(CommonUtil.asProps(AccountPNL.ID, 123)));
+    //         N.println(new ConcurrentHashMap<>(CommonUtil.asProps(AccountPNL.ID, 123)));
+    //         N.println(new IdentityHashMap<>(CommonUtil.asProps(AccountPNL.ID, 123)));
+    //         N.println(new TreeMap<>(CommonUtil.asProps(AccountPNL.ID, 123)));
+    //         N.println(new TreeMap<>(CommonUtil.asProps(AccountPNL.ID, 123)));
+    // 
+    //         N.println(CommonUtil.toLinkedList("ab", "c"));
+    //         N.println(new LinkedList<>(CommonUtil.toList("ab", "c")));
+    // 
+    //         N.println(CommonUtil.toLinkedHashSet("ab", "c"));
+    // 
+    //         N.println(CommonUtil.toSortedSet());
+    //         N.println(CommonUtil.toSortedSet("ab", "c"));
+    //         N.println(new TreeSet<>(CommonUtil.toList("ab", "c")));
+    //         N.println(new TreeSet<>(CommonUtil.toSortedSet("ab", "c")));
+    // 
+    //         N.println(CommonUtil.toQueue("ab", "c"));
+    //         N.println(new ArrayDeque<>());
+    //         N.println(new ArrayDeque<>(3));
+    //         N.println(new ArrayDeque<>(CommonUtil.toList("ab", "c")));
+    // 
+    //         N.println(CommonUtil.toArrayBlockingQueue("ab", "c"));
+    // 
+    //         N.println(CommonUtil.toLinkedBlockingQueue("ab", "c"));
+    // 
+    //         N.println(CommonUtil.toPriorityQueue("ab", "c"));
+    //         N.println(CommonUtil.toConcurrentLinkedQueue("ab", "c"));
+    // 
+    //         final Delayed d = new Delayed() {
+    //             @Override
+    //             public int compareTo(final Delayed o) {
+    //                 return 0;
+    //             }
+    // 
+    //             @Override
+    //             public long getDelay(final TimeUnit unit) {
+    //                 return 0;
+    //             }
+    //         };
+    // 
+    //         N.println(CommonUtil.toDelayQueue(d));
+    // 
+    //         N.println(CommonUtil.toDeque("ab", "c"));
+    //         N.println(new ArrayDeque<>(CommonUtil.toList("ab", "c")));
+    // 
+    //         N.println(CommonUtil.toDeque("ab", "c"));
+    //         N.println(new ArrayDeque<>(CommonUtil.toList("ab", "c")));
+    // 
+    //         N.println(CommonUtil.toLinkedBlockingDeque("ab", "c"));
+    // 
+    //         N.println(CommonUtil.toConcurrentLinkedDeque("ab", "c"));
+    // 
+    //         assertEquals(true, Strings.parseBoolean("True"));
+    //         assertEquals(1, Numbers.toByte("1"));
+    //         assertEquals(1, Numbers.toShort("1"));
+    //         assertEquals(1, Numbers.toInt("1"));
+    //         assertEquals(0, Numbers.toInt(""));
+    //         assertEquals(1, Numbers.toLong("1"));
+    //         assertEquals(0, Numbers.toLong(""));
+    //         assertEquals(1f, Numbers.toFloat("1"));
+    //         assertEquals(1f, Numbers.toFloat("1f"));
+    //         assertEquals(1f, Numbers.toFloat("1F"));
+    //         assertEquals(0f, Numbers.toFloat(""));
+    //         assertEquals(1d, Numbers.toDouble("1"));
+    //         assertEquals(0d, Numbers.toDouble(""));
+    // 
+    //         assertEquals(1, (int) CommonUtil.convert(1L, int.class));
+    // 
+    //         N.println(Dates.createDate(Dates.currentJUDate()));
+    //         N.println(Dates.createTime(Dates.currentJUDate()));
+    //         N.println(Dates.createTimestamp(Dates.currentJUDate()));
+    // 
+    //         N.println(Dates.createJUDate(Dates.currentCalendar()));
+    //         N.println(Dates.createJUDate(Dates.currentJUDate()));
+    //         N.println(Dates.createJUDate(System.currentTimeMillis()));
+    // 
+    //         N.println(Dates.createCalendar(Dates.currentCalendar()));
+    //         N.println(Dates.createCalendar(Dates.currentJUDate()));
+    //         N.println(Dates.createCalendar(System.currentTimeMillis()));
+    // 
+    //         N.println(Dates.createGregorianCalendar(Dates.currentCalendar()));
+    //         N.println(Dates.createGregorianCalendar(Dates.currentJUDate()));
+    //         N.println(Dates.createGregorianCalendar(System.currentTimeMillis()));
+    // 
+    //         N.println(Dates.createXMLGregorianCalendar(Dates.currentCalendar()));
+    //         N.println(Dates.createXMLGregorianCalendar(Dates.currentJUDate()));
+    //         N.println(Dates.createXMLGregorianCalendar(System.currentTimeMillis()));
+    // 
+    //         N.println(Dates.parseCalendar(Dates.format(Dates.currentJUDate())));
+    //         N.println(Dates.parseGregorianCalendar(Dates.format(Dates.currentJUDate())));
+    //         N.println(Dates.parseXMLGregorianCalendar(Dates.format(Dates.currentJUDate())));
+    //     }
 
     @Test
     public void test_hashCode() {

@@ -15,9 +15,9 @@
  */
 package com.landawn.abacus.util;
 
-import static com.landawn.abacus.util.WD._BACKSLASH;
-import static com.landawn.abacus.util.WD._DOUBLE_QUOTE;
-import static com.landawn.abacus.util.WD._SINGLE_QUOTE;
+import static com.landawn.abacus.util.SK._BACKSLASH;
+import static com.landawn.abacus.util.SK._DOUBLE_QUOTE;
+import static com.landawn.abacus.util.SK._SINGLE_QUOTE;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -342,7 +342,7 @@ public final class Strings {
     /**
      * A String for a space character: {@code " "}.
      */
-    public static final String SPACE = WD.SPACE;
+    public static final String SPACE = SK.SPACE;
 
     /**
      * A String for linefeed LF ("\n").
@@ -375,7 +375,7 @@ public final class Strings {
      * The space character ' '.
      */
     @Beta
-    public static final char CHAR_SPACE = WD._SPACE;
+    public static final char CHAR_SPACE = SK._SPACE;
 
     /**
      * The line feed character '\n' (newline on Unix systems).
@@ -392,7 +392,7 @@ public final class Strings {
     /**
      * Field COMMA_SPACE (value is {@code ", "})
      */
-    public static final String COMMA_SPACE = WD.COMMA_SPACE;
+    public static final String COMMA_SPACE = SK.COMMA_SPACE;
 
     /**
      * Value is {@code ", "}
@@ -2481,7 +2481,7 @@ public final class Strings {
      *         If the original string is already greater than or equal to the specified minimum length, the original string is returned.
      */
     public static String padStart(final String str, final int minLength) {
-        return padStart(str, minLength, WD._SPACE);
+        return padStart(str, minLength, SK._SPACE);
     }
 
     /**
@@ -2592,7 +2592,7 @@ public final class Strings {
      *         If the original string is already greater than or equal to the specified minimum length, the original string is returned.
      */
     public static String padEnd(final String str, final int minLength) {
-        return padEnd(str, minLength, WD._SPACE);
+        return padEnd(str, minLength, SK._SPACE);
     }
 
     /**
@@ -3480,8 +3480,8 @@ public final class Strings {
 
                 if (Character.isUpperCase(ch)) {
                     if (i > 0 && (Character.isLowerCase(str.charAt(i - 1)) || (i < len - 1 && Character.isLowerCase(str.charAt(i + 1))))) {
-                        if (!sb.isEmpty() && sb.charAt(sb.length() - 1) != WD._UNDERSCORE) {//NOSONAR
-                            sb.append(WD._UNDERSCORE);
+                        if (!sb.isEmpty() && sb.charAt(sb.length() - 1) != SK._UNDERSCORE) {//NOSONAR
+                            sb.append(SK._UNDERSCORE);
                         }
                     }
 
@@ -3537,8 +3537,8 @@ public final class Strings {
 
                 if (Character.isUpperCase(ch)) {
                     if (i > 0 && (Character.isLowerCase(str.charAt(i - 1)) || (i < len - 1 && Character.isLowerCase(str.charAt(i + 1))))) {
-                        if (!sb.isEmpty() && sb.charAt(sb.length() - 1) != WD._UNDERSCORE) {//NOSONAR
-                            sb.append(WD._UNDERSCORE);
+                        if (!sb.isEmpty() && sb.charAt(sb.length() - 1) != SK._UNDERSCORE) {//NOSONAR
+                            sb.append(SK._UNDERSCORE);
                         }
                     }
 
@@ -3595,8 +3595,8 @@ public final class Strings {
 
                 if (Character.isUpperCase(ch)) {
                     if (i > 0 && (Character.isLowerCase(str.charAt(i - 1)) || (i < len - 1 && Character.isLowerCase(str.charAt(i + 1))))) {
-                        if (!sb.isEmpty() && sb.charAt(sb.length() - 1) != WD._HYPHEN) {//NOSONAR
-                            sb.append(WD._HYPHEN);
+                        if (!sb.isEmpty() && sb.charAt(sb.length() - 1) != SK._HYPHEN) {//NOSONAR
+                            sb.append(SK._HYPHEN);
                         }
                     }
 
@@ -4231,7 +4231,7 @@ public final class Strings {
             return str;
         }
 
-        return WHITESPACE_PATTERN.matcher(str.trim()).replaceAll(WD.SPACE);
+        return WHITESPACE_PATTERN.matcher(str.trim()).replaceAll(SK.SPACE);
     }
 
     /**
@@ -17838,7 +17838,7 @@ public final class Strings {
      * @see #joinEntries(Map, int, int, String, String, String, String, boolean)
      */
     public static String joinEntries(final Map<?, ?> m, final int fromIndex, final int toIndex, final String entryDelimiter, final boolean trim) {
-        return joinEntries(m, fromIndex, toIndex, entryDelimiter, WD.EQUAL, null, null, trim);
+        return joinEntries(m, fromIndex, toIndex, entryDelimiter, SK.EQUAL, null, null, trim);
     }
 
     /**

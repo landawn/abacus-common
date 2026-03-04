@@ -379,7 +379,7 @@ public final class CsvUtil {
     }
 
     @SuppressWarnings("deprecation")
-    static final JsonSerializationConfig config = JSC.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP).setStringQuotation(WD._DOUBLE_QUOTE);
+    static final JsonSerializationConfig config = JSC.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP).setStringQuotation(SK._DOUBLE_QUOTE);
     static final Type<String> strType = Type.of(String.class);
 
     /**
@@ -2979,7 +2979,7 @@ public final class CsvUtil {
              final BufferedCsvWriter bw = Objectory.createBufferedCsvWriter(csvWriter)) {
             final List<String> headers = N.newArrayList(selectCsvHeaders);
 
-            final char separator = WD._COMMA;
+            final char separator = SK._COMMA;
             Map<String, Object> row = null;
             long cnt = 0;
 

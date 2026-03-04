@@ -148,7 +148,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing only the specified element.
      */
     public static <E> ImmutableSet<E> of(final E e1) {
-        return new ImmutableSet<>(N.asLinkedHashSet(e1), false);
+        return new ImmutableSet<>(N.toLinkedHashSet(e1), false);
     }
 
     /**
@@ -172,7 +172,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2) {
-        return new ImmutableSet<>(N.asLinkedHashSet(e1, e2), false);
+        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2), false);
     }
 
     /**
@@ -193,7 +193,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3) {
-        return new ImmutableSet<>(N.asLinkedHashSet(e1, e2, e3), false);
+        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3), false);
     }
 
     /**
@@ -215,7 +215,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4) {
-        return new ImmutableSet<>(N.asLinkedHashSet(e1, e2, e3, e4), false);
+        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4), false);
     }
 
     /**
@@ -238,7 +238,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5) {
-        return new ImmutableSet<>(N.asLinkedHashSet(e1, e2, e3, e4, e5), false);
+        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4, e5), false);
     }
 
     /**
@@ -262,7 +262,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6) {
-        return new ImmutableSet<>(N.asLinkedHashSet(e1, e2, e3, e4, e5, e6), false);
+        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4, e5, e6), false);
     }
 
     /**
@@ -287,7 +287,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7) {
-        return new ImmutableSet<>(N.asLinkedHashSet(e1, e2, e3, e4, e5, e6, e7), false);
+        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4, e5, e6, e7), false);
     }
 
     /**
@@ -313,7 +313,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8) {
-        return new ImmutableSet<>(N.asLinkedHashSet(e1, e2, e3, e4, e5, e6, e7, e8), false);
+        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4, e5, e6, e7, e8), false);
     }
 
     /**
@@ -340,7 +340,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9) {
-        return new ImmutableSet<>(N.asLinkedHashSet(e1, e2, e3, e4, e5, e6, e7, e8, e9), false);
+        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4, e5, e6, e7, e8, e9), false);
     }
 
     //    /**

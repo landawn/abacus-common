@@ -61,7 +61,7 @@ import com.landawn.abacus.util.MapEntity;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple2;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 /**
  * Abstract base class providing common functionality for parser implementations.
@@ -86,15 +86,15 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractParser.class);
 
-    static final char _COLON = WD._COLON;
+    static final char _COLON = SK._COLON;
 
-    static final String COLON_SPACE = WD.COLON_SPACE;
+    static final String COLON_SPACE = SK.COLON_SPACE;
 
     static final char[] COLON_SPACE_CHAR_ARRAY = COLON_SPACE.toCharArray();
 
-    static final char _COMMA = WD._COMMA;
+    static final char _COMMA = SK._COMMA;
 
-    static final String COMMA_SPACE = WD.COMMA_SPACE;
+    static final String COMMA_SPACE = SK.COMMA_SPACE;
 
     static final char[] COMMA_SPACE_CHAR_ARRAY = COMMA_SPACE.toCharArray();
 

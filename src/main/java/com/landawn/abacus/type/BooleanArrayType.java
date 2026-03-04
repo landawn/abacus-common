@@ -20,7 +20,7 @@ import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 /**
  * Type handler for Boolean array operations.
@@ -64,7 +64,7 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
             return STR_FOR_EMPTY_ARRAY;
         }
 
-        return Strings.join(x, ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
+        return Strings.join(x, ELEMENT_SEPARATOR, SK.BRACKET_L, SK.BRACKET_R);
     }
 
     /**
@@ -128,7 +128,7 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            appendable.append(WD._BRACKET_L);
+            appendable.append(SK._BRACKET_L);
 
             for (int i = 0, len = x.length; i < len; i++) {
                 if (i > 0) {
@@ -142,7 +142,7 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
                 }
             }
 
-            appendable.append(WD._BRACKET_R);
+            appendable.append(SK._BRACKET_R);
         }
     }
 
@@ -161,7 +161,7 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            writer.write(WD._BRACKET_L);
+            writer.write(SK._BRACKET_L);
 
             for (int i = 0, len = x.length; i < len; i++) {
                 if (i > 0) {
@@ -175,7 +175,7 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
                 }
             }
 
-            writer.write(WD._BRACKET_R);
+            writer.write(SK._BRACKET_R);
         }
     }
 }

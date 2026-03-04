@@ -55,7 +55,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.RowDataset;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.function.TriConsumer;
 import com.landawn.abacus.util.stream.Stream;
 
@@ -1341,7 +1341,7 @@ public final class ExcelUtil {
 
     private static void saveSheetAsCsv(final Sheet sheet, List<String> csvHeaders, final Writer output) throws IOException {
         final Type<Object> strType = Type.of(String.class);
-        final char separator = WD._COMMA;
+        final char separator = SK._COMMA;
 
         final BufferedCsvWriter bw = Objectory.createBufferedCsvWriter(output);
 

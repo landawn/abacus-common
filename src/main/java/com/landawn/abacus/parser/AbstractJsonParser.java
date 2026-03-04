@@ -24,7 +24,7 @@ import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
@@ -51,17 +51,17 @@ import com.landawn.abacus.util.stream.Stream;
  */
 abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig, JsonDeserializationConfig> implements JsonParser {
 
-    protected static final char _BRACE_L = WD._BRACE_L;
+    protected static final char _BRACE_L = SK._BRACE_L;
 
-    protected static final char _BRACE_R = WD._BRACE_R;
+    protected static final char _BRACE_R = SK._BRACE_R;
 
-    protected static final char _BRACKET_L = WD._BRACKET_L;
+    protected static final char _BRACKET_L = SK._BRACKET_L;
 
-    protected static final char _BRACKET_R = WD._BRACKET_R;
+    protected static final char _BRACKET_R = SK._BRACKET_R;
 
-    protected static final char _DOUBLE_QUOTE = WD._DOUBLE_QUOTE;
+    protected static final char _DOUBLE_QUOTE = SK._DOUBLE_QUOTE;
 
-    protected static final char _SINGLE_QUOTE = WD._SINGLE_QUOTE;
+    protected static final char _SINGLE_QUOTE = SK._SINGLE_QUOTE;
 
     protected static final Type<Object> objType = TypeFactory.getType(Object.class);
 

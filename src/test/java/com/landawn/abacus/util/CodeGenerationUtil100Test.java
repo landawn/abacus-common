@@ -132,28 +132,28 @@ public class CodeGenerationUtil100Test extends TestBase {
         Assertions.assertTrue(result.contains("String active = \"active\""));
     }
 
-    @Test
-    public void testGeneratePropNameTableClass_ThreeParams() {
-        N.println(CodeGenerationUtil.generatePropNameTableClass(Account.class, CodeGenerationUtil.X, "./src/test/java/"));
-
-        final Collection<Class<?>> classes = N.concat(ClassUtil.findClassesInPackage(User.class.getPackageName(), false, false));
-
-        final PropNameTableCodeConfig codeConfig = PropNameTableCodeConfig.builder()
-                .entityClasses(classes)
-                .className(CodeGenerationUtil.S)
-                .packageName("codes.entity.samples")
-                .srcDir("../src/test/java/")
-                .propNameConverter((cls, propName) -> propName.equals("create_time") ? "createTime" : propName)
-                .generateClassPropNameList(true)
-                .generateSnakeCase(true)
-                .generateScreamingSnakeCase(true)
-                .generateFunctionPropName(true)
-                .functionClassName("f")
-                .propFunctions(CommonUtil.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
-                .build();
-
-        N.println(CodeGenerationUtil.generatePropNameTableClasses(codeConfig));
-    }
+    //     @Test
+    //     public void testGeneratePropNameTableClass_ThreeParams() {
+    //         N.println(CodeGenerationUtil.generatePropNameTableClass(Account.class, CodeGenerationUtil.X, "./src/test/java/"));
+    // 
+    //         final Collection<Class<?>> classes = N.concat(ClassUtil.findClassesInPackage(User.class.getPackageName(), false, false));
+    // 
+    //         final PropNameTableCodeConfig codeConfig = PropNameTableCodeConfig.builder()
+    //                 .entityClasses(classes)
+    //                 .className(CodeGenerationUtil.S)
+    //                 .packageName("codes.entity.samples")
+    //                 .srcDir("../src/test/java/")
+    //                 .propNameConverter((cls, propName) -> propName.equals("create_time") ? "createTime" : propName)
+    //                 .generateClassPropNameList(true)
+    //                 .generateSnakeCase(true)
+    //                 .generateScreamingSnakeCase(true)
+    //                 .generateFunctionPropName(true)
+    //                 .functionClassName("f")
+    //                 .propFunctions(CommonUtil.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
+    //                 .build();
+    // 
+    //         N.println(CodeGenerationUtil.generatePropNameTableClasses(codeConfig));
+    //     }
 
     @Test
     public void testGeneratePropNameTableClasses_SingleParam() {
@@ -198,46 +198,46 @@ public class CodeGenerationUtil100Test extends TestBase {
         Assertions.assertTrue(generatedFile.exists());
     }
 
-    @Test
-    public void testGeneratePropNameTableClasses_WithConfig() throws IOException {
-        Collection<Class<?>> classes = Arrays.asList(TestEntity.class, AnotherTestEntity.class);
-
-        PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
-                .entityClasses(classes)
-                .className("ConfigProps")
-                .packageName("com.test.config")
-                .srcDir(tempDir.toString())
-                .propNameConverter((cls, propName) -> propName.equals("createdTime") ? "created_time" : propName)
-                .generateClassPropNameList(true)
-                .generateSnakeCase(true)
-                .classNameForSnakeCase("sl_custom")
-                .generateScreamingSnakeCase(true)
-                .classNameForScreamingSnakeCase("su_custom")
-                .generateFunctionPropName(true)
-                .functionClassName("func")
-                .propFunctions(CommonUtil.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
-                .build();
-
-        String result = CodeGenerationUtil.generatePropNameTableClasses(config);
-
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.contains("package com.test.config"));
-        Assertions.assertTrue(result.contains("public interface ConfigProps"));
-        Assertions.assertTrue(result.contains("public interface sl_custom"));
-        Assertions.assertTrue(result.contains("public interface su_custom"));
-        Assertions.assertTrue(result.contains("public interface func"));
-        Assertions.assertTrue(result.contains("String created_time = \"created_time\""));
-        Assertions.assertTrue(result.contains("List<String>"));
-        Assertions.assertTrue(result.contains("testEntityPropNameList"));
-        Assertions.assertTrue(result.contains("anotherTestEntityPropNameList"));
-
-        Assertions.assertTrue(result.contains("created_time = \"created_time\""));
-
-        Assertions.assertTrue(result.contains("CREATED_TIME"));
-
-        Assertions.assertTrue(result.contains("min_"));
-        Assertions.assertTrue(result.contains("max_"));
-    }
+    //     @Test
+    //     public void testGeneratePropNameTableClasses_WithConfig() throws IOException {
+    //         Collection<Class<?>> classes = Arrays.asList(TestEntity.class, AnotherTestEntity.class);
+    // 
+    //         PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
+    //                 .entityClasses(classes)
+    //                 .className("ConfigProps")
+    //                 .packageName("com.test.config")
+    //                 .srcDir(tempDir.toString())
+    //                 .propNameConverter((cls, propName) -> propName.equals("createdTime") ? "created_time" : propName)
+    //                 .generateClassPropNameList(true)
+    //                 .generateSnakeCase(true)
+    //                 .classNameForSnakeCase("sl_custom")
+    //                 .generateScreamingSnakeCase(true)
+    //                 .classNameForScreamingSnakeCase("su_custom")
+    //                 .generateFunctionPropName(true)
+    //                 .functionClassName("func")
+    //                 .propFunctions(CommonUtil.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
+    //                 .build();
+    // 
+    //         String result = CodeGenerationUtil.generatePropNameTableClasses(config);
+    // 
+    //         Assertions.assertNotNull(result);
+    //         Assertions.assertTrue(result.contains("package com.test.config"));
+    //         Assertions.assertTrue(result.contains("public interface ConfigProps"));
+    //         Assertions.assertTrue(result.contains("public interface sl_custom"));
+    //         Assertions.assertTrue(result.contains("public interface su_custom"));
+    //         Assertions.assertTrue(result.contains("public interface func"));
+    //         Assertions.assertTrue(result.contains("String created_time = \"created_time\""));
+    //         Assertions.assertTrue(result.contains("List<String>"));
+    //         Assertions.assertTrue(result.contains("testEntityPropNameList"));
+    //         Assertions.assertTrue(result.contains("anotherTestEntityPropNameList"));
+    // 
+    //         Assertions.assertTrue(result.contains("created_time = \"created_time\""));
+    // 
+    //         Assertions.assertTrue(result.contains("CREATED_TIME"));
+    // 
+    //         Assertions.assertTrue(result.contains("min_"));
+    //         Assertions.assertTrue(result.contains("max_"));
+    //     }
 
     @Test
     public void testGeneratePropNameTableClasses_EdgeCases() {

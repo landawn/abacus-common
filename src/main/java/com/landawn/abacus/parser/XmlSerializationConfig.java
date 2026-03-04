@@ -20,7 +20,7 @@ import java.util.Set;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 /**
  * Configuration class for XML serialization settings.
@@ -65,8 +65,8 @@ public class XmlSerializationConfig extends JsonXmlSerializationConfig<XmlSerial
      * </ul>
      */
     public XmlSerializationConfig() {
-        setCharQuotation(WD.CHAR_ZERO); // NOSONAR
-        setStringQuotation(WD.CHAR_ZERO); // NOSONAR
+        setCharQuotation(SK.CHAR_ZERO); // NOSONAR
+        setStringQuotation(SK.CHAR_ZERO); // NOSONAR
     }
 
     /**

@@ -14,9 +14,9 @@
 
 package com.landawn.abacus.util;
 
-import static com.landawn.abacus.util.WD.COMMA;
-import static com.landawn.abacus.util.WD._PARENTHESES_L;
-import static com.landawn.abacus.util.WD._PARENTHESES_R;
+import static com.landawn.abacus.util.SK.COMMA;
+import static com.landawn.abacus.util.SK._PARENTHESIS_L;
+import static com.landawn.abacus.util.SK._PARENTHESIS_R;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -202,14 +202,14 @@ public final class TypeAttrParser {
             beginIndex = endIndex;
         }
 
-        beginIndex = attr.indexOf(_PARENTHESES_L, N.max(0, beginIndex));
+        beginIndex = attr.indexOf(_PARENTHESIS_L, N.max(0, beginIndex));
 
         if (beginIndex >= 0) {
             if (className == null) {
                 className = attr.substring(0, beginIndex).trim();
             }
 
-            final String str = attr.substring(beginIndex + 1, attr.lastIndexOf(_PARENTHESES_R)).trim();
+            final String str = attr.substring(beginIndex + 1, attr.lastIndexOf(_PARENTHESIS_R)).trim();
             parameters = str.isEmpty() ? N.EMPTY_STRING_ARRAY : (COMMA.equals(str) ? new String[] { COMMA } : CsvUtil.CSV_HEADER_PARSER.apply(str));
         }
 

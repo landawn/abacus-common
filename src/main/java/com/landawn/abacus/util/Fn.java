@@ -8525,11 +8525,11 @@ public final class Fn {
 
         /** The Constant PAIR_TO_LIST. */
         @SuppressWarnings("rawtypes")
-        private static final Function<Pair, List> PAIR_TO_LIST = t -> N.asList(t.left(), t.right());
+        private static final Function<Pair, List> PAIR_TO_LIST = t -> N.toList(t.left(), t.right());
 
         /** The Constant PAIR_TO_SET. */
         @SuppressWarnings("rawtypes")
-        private static final Function<Pair, Set> PAIR_TO_SET = t -> N.asSet(t.left(), t.right());
+        private static final Function<Pair, Set> PAIR_TO_SET = t -> N.toSet(t.left(), t.right());
 
         private Pairs() {
         }
@@ -8568,11 +8568,11 @@ public final class Fn {
 
         /** The Constant TRIPLE_TO_LIST. */
         @SuppressWarnings("rawtypes")
-        private static final Function<Triple, List> TRIPLE_TO_LIST = t -> N.asList(t.left(), t.middle(), t.right());
+        private static final Function<Triple, List> TRIPLE_TO_LIST = t -> N.toList(t.left(), t.middle(), t.right());
 
         /** The Constant TRIPLE_TO_SET. */
         @SuppressWarnings("rawtypes")
-        private static final Function<Triple, Set> TRIPLE_TO_SET = t -> N.asSet(t.left(), t.middle(), t.right());
+        private static final Function<Triple, Set> TRIPLE_TO_SET = t -> N.toSet(t.left(), t.middle(), t.right());
 
         private Triples() {
         }

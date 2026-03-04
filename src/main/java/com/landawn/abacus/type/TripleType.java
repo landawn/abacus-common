@@ -27,7 +27,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.Triple;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 /**
  * Type handler for {@link Triple} objects. This class provides serialization and
@@ -193,7 +193,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
                 try {
-                    bw.write(WD._BRACKET_L);
+                    bw.write(SK._BRACKET_L);
 
                     leftType.appendTo(bw, x.left());
                     bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
@@ -201,7 +201,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
                     bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                     rightType.appendTo(bw, x.right());
 
-                    bw.write(WD._BRACKET_R);
+                    bw.write(SK._BRACKET_R);
 
                     if (!isBufferedWriter) {
                         bw.flush();
@@ -214,7 +214,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
                     }
                 }
             } else {
-                appendable.append(WD._BRACKET_L);
+                appendable.append(SK._BRACKET_L);
 
                 leftType.appendTo(appendable, x.left());
                 appendable.append(ELEMENT_SEPARATOR);
@@ -222,7 +222,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
                 appendable.append(ELEMENT_SEPARATOR);
                 rightType.appendTo(appendable, x.right());
 
-                appendable.append(WD._BRACKET_R);
+                appendable.append(SK._BRACKET_R);
             }
         }
     }
@@ -242,7 +242,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
             writer.write(NULL_CHAR_ARRAY);
         } else {
             try {
-                writer.write(WD._BRACKET_L);
+                writer.write(SK._BRACKET_L);
 
                 leftType.writeCharacter(writer, x.left(), config);
                 writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
@@ -250,7 +250,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
                 writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                 rightType.writeCharacter(writer, x.right(), config);
 
-                writer.write(WD._BRACKET_R);
+                writer.write(SK._BRACKET_R);
 
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
@@ -269,12 +269,12 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      */
     protected static String getTypeName(final String leftTypeName, final String middleTypeName, final String rightTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
-            return ClassUtil.getSimpleClassName(Triple.class) + WD.LESS_THAN + TypeFactory.getType(leftTypeName).declaringName() + WD.COMMA_SPACE
-                    + TypeFactory.getType(middleTypeName).declaringName() + WD.COMMA_SPACE + TypeFactory.getType(rightTypeName).declaringName()
-                    + WD.GREATER_THAN;
+            return ClassUtil.getSimpleClassName(Triple.class) + SK.LESS_THAN + TypeFactory.getType(leftTypeName).declaringName() + SK.COMMA_SPACE
+                    + TypeFactory.getType(middleTypeName).declaringName() + SK.COMMA_SPACE + TypeFactory.getType(rightTypeName).declaringName()
+                    + SK.GREATER_THAN;
         } else {
-            return ClassUtil.getCanonicalClassName(Triple.class) + WD.LESS_THAN + TypeFactory.getType(leftTypeName).name() + WD.COMMA_SPACE
-                    + TypeFactory.getType(middleTypeName).name() + WD.COMMA_SPACE + TypeFactory.getType(rightTypeName).name() + WD.GREATER_THAN;
+            return ClassUtil.getCanonicalClassName(Triple.class) + SK.LESS_THAN + TypeFactory.getType(leftTypeName).name() + SK.COMMA_SPACE
+                    + TypeFactory.getType(middleTypeName).name() + SK.COMMA_SPACE + TypeFactory.getType(rightTypeName).name() + SK.GREATER_THAN;
         }
     }
 }

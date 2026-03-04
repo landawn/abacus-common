@@ -3818,7 +3818,7 @@ public final class RowDataset implements Dataset, Cloneable {
         final BufferedJsonWriter bw = isBufferedWriter ? (BufferedJsonWriter) output : Objectory.createBufferedJsonWriter(output);
 
         try {
-            bw.write(WD._BRACKET_L);
+            bw.write(SK._BRACKET_L);
 
             Type<Object> type = null;
             Object element = null;
@@ -3828,7 +3828,7 @@ public final class RowDataset implements Dataset, Cloneable {
                     bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                 }
 
-                bw.write(WD._BRACE_L);
+                bw.write(SK._BRACE_L);
 
                 for (int i = 0; i < columnCount; i++) {
                     element = _columnList.get(columnIndexes[i]).get(rowIndex);
@@ -3840,7 +3840,7 @@ public final class RowDataset implements Dataset, Cloneable {
                     }
 
                     bw.write(charArrayOfColumnNames[i]);
-                    bw.write(WD._COLON);
+                    bw.write(SK._COLON);
 
                     if (type == null) {
                         bw.write(NULL_CHAR_ARRAY);
@@ -3859,10 +3859,10 @@ public final class RowDataset implements Dataset, Cloneable {
                     }
                 }
 
-                bw.write(WD._BRACE_R);
+                bw.write(SK._BRACE_R);
             }
 
-            bw.write(WD._BRACKET_R);
+            bw.write(SK._BRACKET_R);
 
             bw.flush();
         } catch (final IOException e) {
@@ -4070,9 +4070,9 @@ public final class RowDataset implements Dataset, Cloneable {
 
                     type = element == null ? null : Type.of(element.getClass());
 
-                    bw.write(WD._LESS_THAN);
+                    bw.write(SK._LESS_THAN);
                     bw.write(charArrayOfColumnNames[i]);
-                    bw.write(WD._GREATER_THAN);
+                    bw.write(SK._GREATER_THAN);
 
                     if (type == null) {
                         bw.write(NULL_CHAR_ARRAY);
@@ -4090,10 +4090,10 @@ public final class RowDataset implements Dataset, Cloneable {
                         }
                     }
 
-                    bw.write(WD._LESS_THAN);
-                    bw.write(WD._SLASH);
+                    bw.write(SK._LESS_THAN);
+                    bw.write(SK._SLASH);
                     bw.write(charArrayOfColumnNames[i]);
-                    bw.write(WD._GREATER_THAN);
+                    bw.write(SK._GREATER_THAN);
                 }
 
                 bw.write(rowElementNameTail);
@@ -4191,7 +4191,7 @@ public final class RowDataset implements Dataset, Cloneable {
         final boolean isBufferedWriter = output instanceof BufferedCsvWriter;
         final BufferedCsvWriter bw = isBufferedWriter ? (BufferedCsvWriter) output : Objectory.createBufferedCsvWriter(output);
 
-        final char separator = WD._COMMA;
+        final char separator = SK._COMMA;
 
         try {
             for (int i = 0; i < columnCount; i++) {
@@ -4410,7 +4410,7 @@ public final class RowDataset implements Dataset, Cloneable {
         }
 
         final List<String> newColumnNameList = N.toList(keyColumnName, aggregateResultColumnName);
-        final List<List<Object>> newColumnList = N.asList(keyList, new ArrayList<>(map.values()));
+        final List<List<Object>> newColumnList = N.toList(keyList, new ArrayList<>(map.values()));
 
         return new RowDataset(newColumnNameList, newColumnList);
     }
@@ -6874,7 +6874,7 @@ public final class RowDataset implements Dataset, Cloneable {
         final List<Integer> rightRowIndexList = joinColumnRightRowIndexMap.get(hashKey);
 
         if (rightRowIndexList == null) {
-            joinColumnRightRowIndexMap.put(hashKey, N.asList(rightRowIndex));
+            joinColumnRightRowIndexMap.put(hashKey, N.toList(rightRowIndex));
         } else {
             rightRowIndexList.add(rightRowIndex);
         }
@@ -6885,7 +6885,7 @@ public final class RowDataset implements Dataset, Cloneable {
         final List<Integer> rightRowIndexList = joinColumnRightRowIndexMap.get(rowWrapper);
 
         if (rightRowIndexList == null) {
-            joinColumnRightRowIndexMap.put(rowWrapper, N.asList(rightRowIndex));
+            joinColumnRightRowIndexMap.put(rowWrapper, N.toList(rightRowIndex));
             row = null;
         } else {
             rightRowIndexList.add(rightRowIndex);

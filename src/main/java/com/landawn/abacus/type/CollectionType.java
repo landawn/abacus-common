@@ -33,7 +33,7 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 /**
  * Type handler for Collection implementations including List, Set, Queue and their concrete implementations.
@@ -253,7 +253,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
             final BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
 
             try {
-                bw.write(WD._BRACKET_L);
+                bw.write(SK._BRACKET_L);
 
                 int i = 0;
                 for (final E element : x) {
@@ -268,7 +268,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
                     }
                 }
 
-                bw.write(WD._BRACKET_R);
+                bw.write(SK._BRACKET_R);
 
                 return bw.toString();
             } catch (final IOException e) {
@@ -319,7 +319,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
                 try {
-                    bw.write(WD._BRACKET_L);
+                    bw.write(SK._BRACKET_L);
 
                     int i = 0;
                     for (final E element : x) {
@@ -334,7 +334,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
                         }
                     }
 
-                    bw.write(WD._BRACKET_R);
+                    bw.write(SK._BRACKET_R);
 
                     if (!isBufferedWriter) {
                         bw.flush();
@@ -345,7 +345,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
                     }
                 }
             } else {
-                appendable.append(WD._BRACKET_L);
+                appendable.append(SK._BRACKET_L);
 
                 int i = 0;
                 for (final E element : x) {
@@ -360,7 +360,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
                     }
                 }
 
-                appendable.append(WD._BRACKET_R);
+                appendable.append(SK._BRACKET_R);
             }
         }
     }
@@ -380,7 +380,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            writer.write(WD._BRACKET_L);
+            writer.write(SK._BRACKET_L);
 
             int i = 0;
             for (final E element : x) {
@@ -395,7 +395,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
                 }
             }
 
-            writer.write(WD._BRACKET_R);
+            writer.write(SK._BRACKET_R);
         }
     }
 
@@ -411,9 +411,9 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      */
     protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
-            return ClassUtil.getSimpleClassName(typeClass) + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + WD.GREATER_THAN;
+            return ClassUtil.getSimpleClassName(typeClass) + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + SK.GREATER_THAN;
         } else {
-            return ClassUtil.getCanonicalClassName(typeClass) + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).name() + WD.GREATER_THAN;
+            return ClassUtil.getCanonicalClassName(typeClass) + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).name() + SK.GREATER_THAN;
         }
     }
 }

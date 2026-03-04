@@ -492,8 +492,9 @@ public final class Beans {
         Boolean ret = beanClassPool.get(cls);
 
         if (ret == null) {
-            ret = annotatedWithEntity(cls) || isRecordClass(cls) || (!CharSequence.class.isAssignableFrom(cls) && !Number.class.isAssignableFrom(cls)
-                    && !Map.Entry.class.isAssignableFrom(cls) && N.notEmpty(getPropNameList(cls)));
+            ret = annotatedWithEntity(cls) || isRecordClass(cls)
+                    || (!CharSequence.class.isAssignableFrom(cls) && !Number.class.isAssignableFrom(cls) && !Map.class.isAssignableFrom(cls)
+                            && !Collection.class.isAssignableFrom(cls) && !Map.Entry.class.isAssignableFrom(cls) && N.notEmpty(getPropNameList(cls)));
             beanClassPool.put(cls, ret);
         }
 
@@ -1309,8 +1310,8 @@ public final class Beans {
 
         inputPropName = inputPropName.trim();
 
-        return inputPropName.equalsIgnoreCase(propNameByMethod) || inputPropName.replace(WD.UNDERSCORE, Strings.EMPTY).equalsIgnoreCase(propNameByMethod)
-                || inputPropName.equalsIgnoreCase(ClassUtil.getSimpleClassName(cls) + WD._PERIOD + propNameByMethod)
+        return inputPropName.equalsIgnoreCase(propNameByMethod) || inputPropName.replace(SK.UNDERSCORE, Strings.EMPTY).equalsIgnoreCase(propNameByMethod)
+                || inputPropName.equalsIgnoreCase(ClassUtil.getSimpleClassName(cls) + SK._PERIOD + propNameByMethod)
                 || (inputPropName.startsWith(GET) && inputPropName.length() > 3 && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
                 || (inputPropName.startsWith(SET) && inputPropName.length() > 3 && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
                 || (inputPropName.startsWith(IS) && inputPropName.length() > 2 && inputPropName.substring(2).equalsIgnoreCase(propNameByMethod))
@@ -4620,9 +4621,9 @@ public final class Beans {
                     }
                 } else {
                     if (isCamelCaseOrNoChange) {
-                        output.put(parentPropName + WD.PERIOD + propName, propValue);
+                        output.put(parentPropName + SK.PERIOD + propName, propValue);
                     } else {
-                        output.put(parentPropName + WD.PERIOD + keyNamingPolicy.convert(propName), propValue);
+                        output.put(parentPropName + SK.PERIOD + keyNamingPolicy.convert(propName), propValue);
                     }
                 }
             } else {
@@ -4631,7 +4632,7 @@ public final class Beans {
                             output);
                 } else {
                     beanToFlatMap(propValue, ignoreNullProperty, null, keyNamingPolicy,
-                            parentPropName + WD.PERIOD + (isCamelCaseOrNoChange ? propName : keyNamingPolicy.convert(propName)), output);
+                            parentPropName + SK.PERIOD + (isCamelCaseOrNoChange ? propName : keyNamingPolicy.convert(propName)), output);
                 }
             }
         }

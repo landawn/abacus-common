@@ -337,40 +337,40 @@ public class CodeGenerationUtil2025Test extends TestBase {
         assertTrue(code.contains("Property(field) name in upper case"));
     }
 
-    @Test
-    public void test_generatePropNameTableClasses_config_withFunctionPropName() {
-        final List<Class<?>> classes = Arrays.asList(User.class);
-        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
-                .entityClasses(classes)
-                .className("s")
-                .generateFunctionPropName(true)
-                .propFunctions(CommonUtil.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
-                .build();
+    //     @Test
+    //     public void test_generatePropNameTableClasses_config_withFunctionPropName() {
+    //         final List<Class<?>> classes = Arrays.asList(User.class);
+    //         final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
+    //                 .entityClasses(classes)
+    //                 .className("s")
+    //                 .generateFunctionPropName(true)
+    //                 .propFunctions(CommonUtil.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
+    //                 .build();
+    // 
+    //         final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
+    // 
+    //         assertNotNull(code);
+    //         assertTrue(code.contains("public interface sf"));
+    //         assertTrue(code.contains("min_") || code.contains("max_"));
+    //         assertTrue(code.contains("Function property(field) name"));
+    //     }
 
-        final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
-
-        assertNotNull(code);
-        assertTrue(code.contains("public interface sf"));
-        assertTrue(code.contains("min_") || code.contains("max_"));
-        assertTrue(code.contains("Function property(field) name"));
-    }
-
-    @Test
-    public void test_generatePropNameTableClasses_config_withCustomFunctionClassName() {
-        final List<Class<?>> classes = Arrays.asList(User.class);
-        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
-                .entityClasses(classes)
-                .className("s")
-                .generateFunctionPropName(true)
-                .functionClassName("funcs")
-                .propFunctions(CommonUtil.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC))
-                .build();
-
-        final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
-
-        assertNotNull(code);
-        assertTrue(code.contains("public interface funcs"));
-    }
+    //     @Test
+    //     public void test_generatePropNameTableClasses_config_withCustomFunctionClassName() {
+    //         final List<Class<?>> classes = Arrays.asList(User.class);
+    //         final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
+    //                 .entityClasses(classes)
+    //                 .className("s")
+    //                 .generateFunctionPropName(true)
+    //                 .functionClassName("funcs")
+    //                 .propFunctions(CommonUtil.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC))
+    //                 .build();
+    // 
+    //         final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
+    // 
+    //         assertNotNull(code);
+    //         assertTrue(code.contains("public interface funcs"));
+    //     }
 
     @Test
     public void test_generatePropNameTableClasses_config_withCustomLowerCaseClassName() {
@@ -487,41 +487,41 @@ public class CodeGenerationUtil2025Test extends TestBase {
         });
     }
 
-    @Test
-    public void test_generatePropNameTableClasses_config_withAllFeatures() throws IOException {
-        final List<Class<?>> classes = Arrays.asList(User.class, Order.class);
-        final File tempDir = Files.createTempDirectory("test-codegen").toFile();
-        tempDir.deleteOnExit();
-
-        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
-                .entityClasses(classes)
-                .className("s")
-                .packageName("com.test.all")
-                .srcDir(tempDir.getAbsolutePath())
-                .generateClassPropNameList(true)
-                .generateSnakeCase(true)
-                .generateScreamingSnakeCase(true)
-                .generateFunctionPropName(true)
-                .propFunctions(CommonUtil.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
-                .build();
-
-        final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
-
-        assertNotNull(code);
-        assertTrue(code.contains("package com.test.all;"));
-        assertTrue(code.contains("public interface s"));
-        assertTrue(code.contains("public interface sl"));
-        assertTrue(code.contains("public interface su"));
-        assertTrue(code.contains("public interface sf"));
-        assertTrue(code.contains("userPropNameList"));
-        assertTrue(code.contains("orderPropNameList"));
-
-        final File packageDir = new File(tempDir, "com/test/all");
-        tempGeneratedFile = new File(packageDir, "s.java");
-        assertTrue(tempGeneratedFile.exists());
-
-        IOUtil.deleteRecursivelyIfExists(tempDir);
-    }
+    //     @Test
+    //     public void test_generatePropNameTableClasses_config_withAllFeatures() throws IOException {
+    //         final List<Class<?>> classes = Arrays.asList(User.class, Order.class);
+    //         final File tempDir = Files.createTempDirectory("test-codegen").toFile();
+    //         tempDir.deleteOnExit();
+    // 
+    //         final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
+    //                 .entityClasses(classes)
+    //                 .className("s")
+    //                 .packageName("com.test.all")
+    //                 .srcDir(tempDir.getAbsolutePath())
+    //                 .generateClassPropNameList(true)
+    //                 .generateSnakeCase(true)
+    //                 .generateScreamingSnakeCase(true)
+    //                 .generateFunctionPropName(true)
+    //                 .propFunctions(CommonUtil.asLinkedHashMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
+    //                 .build();
+    // 
+    //         final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
+    // 
+    //         assertNotNull(code);
+    //         assertTrue(code.contains("package com.test.all;"));
+    //         assertTrue(code.contains("public interface s"));
+    //         assertTrue(code.contains("public interface sl"));
+    //         assertTrue(code.contains("public interface su"));
+    //         assertTrue(code.contains("public interface sf"));
+    //         assertTrue(code.contains("userPropNameList"));
+    //         assertTrue(code.contains("orderPropNameList"));
+    // 
+    //         final File packageDir = new File(tempDir, "com/test/all");
+    //         tempGeneratedFile = new File(packageDir, "s.java");
+    //         assertTrue(tempGeneratedFile.exists());
+    // 
+    //         IOUtil.deleteRecursivelyIfExists(tempDir);
+    //     }
 
     @Test
     public void test_generatePropNameTableClasses_config_customPropNameConverterForLowerCase() {

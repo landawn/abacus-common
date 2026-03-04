@@ -13,7 +13,7 @@ import java.sql.SQLException;
 import com.landawn.abacus.parser.JsonXmlSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.u.Nullable;
 
 /**
@@ -42,9 +42,9 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * @param parameterTypeName the fully qualified or simple name of the element type contained in the Nullable
      */
     protected NullableType(final String parameterTypeName) {
-        super(NULLABLE + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).name() + WD.GREATER_THAN);
+        super(NULLABLE + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).name() + SK.GREATER_THAN);
 
-        declaringName = NULLABLE + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + WD.GREATER_THAN;
+        declaringName = NULLABLE + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + SK.GREATER_THAN;
         parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
         elementType = parameterTypes[0];
     }

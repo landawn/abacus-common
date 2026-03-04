@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Indexed;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 /**
  * Type handler for Indexed objects.
@@ -193,13 +193,13 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            appendable.append(WD._BRACKET_L);
+            appendable.append(SK._BRACKET_L);
 
             appendable.append(N.stringOf(x.longIndex()));
             appendable.append(ELEMENT_SEPARATOR);
             valueType.appendTo(appendable, x.value());
 
-            appendable.append(WD._BRACKET_R);
+            appendable.append(SK._BRACKET_R);
         }
     }
 
@@ -229,13 +229,13 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            writer.write(WD._BRACKET_L);
+            writer.write(SK._BRACKET_L);
 
             writer.write(N.stringOf(x.longIndex()));
             writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
             valueType.writeCharacter(writer, x.value(), config);
 
-            writer.write(WD._BRACKET_R);
+            writer.write(SK._BRACKET_R);
         }
     }
 
@@ -249,9 +249,9 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      */
     protected static String getTypeName(final String valueTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
-            return ClassUtil.getSimpleClassName(Indexed.class) + WD.LESS_THAN + TypeFactory.getType(valueTypeName).declaringName() + WD.GREATER_THAN;
+            return ClassUtil.getSimpleClassName(Indexed.class) + SK.LESS_THAN + TypeFactory.getType(valueTypeName).declaringName() + SK.GREATER_THAN;
         } else {
-            return ClassUtil.getCanonicalClassName(Indexed.class) + WD.LESS_THAN + TypeFactory.getType(valueTypeName).name() + WD.GREATER_THAN;
+            return ClassUtil.getCanonicalClassName(Indexed.class) + SK.LESS_THAN + TypeFactory.getType(valueTypeName).name() + SK.GREATER_THAN;
         }
     }
 }

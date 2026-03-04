@@ -2086,7 +2086,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         }
 
         final Throwables.Iterator<File, IOException> iter = new Throwables.Iterator<>() {
-            private final Queue<File> paths = N.asLinkedList(parentPath);
+            private final Queue<File> paths = N.toLinkedList(parentPath);
             private File[] subFiles = null;
             private int cursor = 0;
 

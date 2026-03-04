@@ -196,7 +196,7 @@ public final class NameUtil {
         String simplePropName = simpleNamePool.get(name);
 
         if (simplePropName == null) {
-            final int idx = name.lastIndexOf(WD._PERIOD);
+            final int idx = name.lastIndexOf(SK._PERIOD);
 
             if (idx < 0) {
                 simplePropName = getCachedName(name);
@@ -242,7 +242,7 @@ public final class NameUtil {
         String parentName = parentNamePool.get(name);
 
         if (parentName == null) {
-            final int index = name.lastIndexOf(WD._PERIOD);
+            final int index = name.lastIndexOf(SK._PERIOD);
 
             if (index < 1) {
                 parentName = Strings.EMPTY;

@@ -17,7 +17,7 @@ package com.landawn.abacus.type;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.HBaseColumn;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 /**
  * Type handler for HBaseColumn objects.
@@ -237,9 +237,9 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
     @SuppressWarnings("unused")
     protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
-            return ClassUtil.getSimpleClassName(HBaseColumn.class) + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + WD.GREATER_THAN;
+            return ClassUtil.getSimpleClassName(HBaseColumn.class) + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + SK.GREATER_THAN;
         } else {
-            return ClassUtil.getCanonicalClassName(HBaseColumn.class) + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).name() + WD.GREATER_THAN;
+            return ClassUtil.getCanonicalClassName(HBaseColumn.class) + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).name() + SK.GREATER_THAN;
         }
     }
 }

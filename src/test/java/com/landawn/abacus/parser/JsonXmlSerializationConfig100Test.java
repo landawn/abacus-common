@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.NamingPolicy;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 @Tag("new-test")
 public class JsonXmlSerializationConfig100Test extends TestBase {
@@ -31,7 +31,7 @@ public class JsonXmlSerializationConfig100Test extends TestBase {
 
     @Test
     public void testGetCharQuotation() {
-        assertEquals(WD._DOUBLE_QUOTE, config.getCharQuotation());
+        assertEquals(SK._DOUBLE_QUOTE, config.getCharQuotation());
     }
 
     @Test
@@ -54,7 +54,7 @@ public class JsonXmlSerializationConfig100Test extends TestBase {
 
     @Test
     public void testGetStringQuotation() {
-        assertEquals(WD._DOUBLE_QUOTE, config.getStringQuotation());
+        assertEquals(SK._DOUBLE_QUOTE, config.getStringQuotation());
     }
 
     @Test
@@ -260,8 +260,8 @@ public class JsonXmlSerializationConfig100Test extends TestBase {
     public void testDefaultValues() {
         TestConfig newConfig = new TestConfig();
 
-        assertEquals(WD._DOUBLE_QUOTE, newConfig.getCharQuotation());
-        assertEquals(WD._DOUBLE_QUOTE, newConfig.getStringQuotation());
+        assertEquals(SK._DOUBLE_QUOTE, newConfig.getCharQuotation());
+        assertEquals(SK._DOUBLE_QUOTE, newConfig.getStringQuotation());
         assertEquals(DateTimeFormat.LONG, newConfig.getDateTimeFormat());
         assertFalse(newConfig.prettyFormat());
         assertEquals("    ", newConfig.getIndentation());

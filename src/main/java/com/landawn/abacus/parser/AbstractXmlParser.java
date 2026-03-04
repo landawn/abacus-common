@@ -36,7 +36,7 @@ import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.XmlUtil;
 
 /**
@@ -74,17 +74,17 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerializationConfig, 
     protected static final JsonParser jsonParser = ParserFactory.createJsonParser();
 
     @SuppressWarnings("deprecation")
-    protected static final JsonSerializationConfig jsc = JSC.create().setCharQuotation(WD.CHAR_ZERO);
+    protected static final JsonSerializationConfig jsc = JSC.create().setCharQuotation(SK.CHAR_ZERO);
 
     @SuppressWarnings("deprecation")
-    protected static final JsonSerializationConfig jscWithEmptyBeanSupported = JSC.create().setCharQuotation(WD.CHAR_ZERO).failOnEmptyBean(false);
+    protected static final JsonSerializationConfig jscWithEmptyBeanSupported = JSC.create().setCharQuotation(SK.CHAR_ZERO).failOnEmptyBean(false);
 
     @SuppressWarnings("deprecation")
-    protected static final JsonSerializationConfig jscWithCircularRefSupported = JSC.create().setCharQuotation(WD.CHAR_ZERO).supportCircularReference(true);
+    protected static final JsonSerializationConfig jscWithCircularRefSupported = JSC.create().setCharQuotation(SK.CHAR_ZERO).supportCircularReference(true);
 
     @SuppressWarnings("deprecation")
     protected static final JsonSerializationConfig jscWithCircularRefAndEmptyBeanSupported = JSC.create()
-            .setCharQuotation(WD.CHAR_ZERO)
+            .setCharQuotation(SK.CHAR_ZERO)
             .failOnEmptyBean(false)
             .supportCircularReference(true);
 

@@ -28,7 +28,7 @@ import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple5;
-import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.SK;
 
 /**
  * Type handler for {@link Tuple5} objects.
@@ -202,7 +202,7 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, 
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
                 try {
-                    bw.write(WD._BRACKET_L);
+                    bw.write(SK._BRACKET_L);
 
                     type1.appendTo(bw, x._1);
                     bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
@@ -214,7 +214,7 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, 
                     bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                     type5.appendTo(bw, x._5);
 
-                    bw.write(WD._BRACKET_R);
+                    bw.write(SK._BRACKET_R);
 
                     if (!isBufferedWriter) {
                         bw.flush();
@@ -227,7 +227,7 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, 
                     }
                 }
             } else {
-                appendable.append(WD._BRACKET_L);
+                appendable.append(SK._BRACKET_L);
 
                 type1.appendTo(appendable, x._1);
                 appendable.append(ELEMENT_SEPARATOR);
@@ -239,7 +239,7 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, 
                 appendable.append(ELEMENT_SEPARATOR);
                 type5.appendTo(appendable, x._5);
 
-                appendable.append(WD._BRACKET_R);
+                appendable.append(SK._BRACKET_R);
             }
         }
     }
@@ -261,7 +261,7 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, 
             writer.write(NULL_CHAR_ARRAY);
         } else {
             try {
-                writer.write(WD._BRACKET_L);
+                writer.write(SK._BRACKET_L);
 
                 type1.writeCharacter(writer, x._1, config);
                 writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
@@ -273,7 +273,7 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, 
                 writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                 type5.writeCharacter(writer, x._5, config);
 
-                writer.write(WD._BRACKET_R);
+                writer.write(SK._BRACKET_R);
 
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
@@ -296,13 +296,13 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, 
     protected static String getTypeName(final String t1TypeName, final String t2TypeName, final String t3TypeName, final String t4TypeName,
             final String t5TypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
-            return ClassUtil.getSimpleClassName(Tuple5.class) + WD.LESS_THAN + TypeFactory.getType(t1TypeName).declaringName() + WD.COMMA_SPACE
-                    + TypeFactory.getType(t2TypeName).declaringName() + WD.COMMA_SPACE + TypeFactory.getType(t3TypeName).declaringName() + WD.COMMA_SPACE
-                    + TypeFactory.getType(t4TypeName).declaringName() + WD.COMMA_SPACE + TypeFactory.getType(t5TypeName).declaringName() + WD.GREATER_THAN;
+            return ClassUtil.getSimpleClassName(Tuple5.class) + SK.LESS_THAN + TypeFactory.getType(t1TypeName).declaringName() + SK.COMMA_SPACE
+                    + TypeFactory.getType(t2TypeName).declaringName() + SK.COMMA_SPACE + TypeFactory.getType(t3TypeName).declaringName() + SK.COMMA_SPACE
+                    + TypeFactory.getType(t4TypeName).declaringName() + SK.COMMA_SPACE + TypeFactory.getType(t5TypeName).declaringName() + SK.GREATER_THAN;
         } else {
-            return ClassUtil.getCanonicalClassName(Tuple5.class) + WD.LESS_THAN + TypeFactory.getType(t1TypeName).name() + WD.COMMA_SPACE
-                    + TypeFactory.getType(t2TypeName).name() + WD.COMMA_SPACE + TypeFactory.getType(t3TypeName).name() + WD.COMMA_SPACE
-                    + TypeFactory.getType(t4TypeName).name() + WD.COMMA_SPACE + TypeFactory.getType(t5TypeName).name() + WD.GREATER_THAN;
+            return ClassUtil.getCanonicalClassName(Tuple5.class) + SK.LESS_THAN + TypeFactory.getType(t1TypeName).name() + SK.COMMA_SPACE
+                    + TypeFactory.getType(t2TypeName).name() + SK.COMMA_SPACE + TypeFactory.getType(t3TypeName).name() + SK.COMMA_SPACE
+                    + TypeFactory.getType(t4TypeName).name() + SK.COMMA_SPACE + TypeFactory.getType(t5TypeName).name() + SK.GREATER_THAN;
         }
     }
 }

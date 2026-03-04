@@ -804,7 +804,7 @@ public final class ClassUtil {
                 } catch (final ClassNotFoundException e) {
                     String newClassName = clsName;
 
-                    if (newClassName.indexOf(WD._PERIOD) < 0) {
+                    if (newClassName.indexOf(SK._PERIOD) < 0) {
                         final int index = newClassName.indexOf("[]");
 
                         if (((index < 0) && !SYMBOL_OF_PRIMITIVE_ARRAY_CLASS_NAME.containsKey(newClassName))
@@ -868,7 +868,7 @@ public final class ClassUtil {
                             newClassName = clsName;
                             int lastIndex = -1;
 
-                            while ((lastIndex = newClassName.lastIndexOf(WD._PERIOD)) > 0) {
+                            while ((lastIndex = newClassName.lastIndexOf(SK._PERIOD)) > 0) {
                                 newClassName = newClassName.substring(0, lastIndex) + "$" + newClassName.substring(lastIndex + 1);
 
                                 try {
@@ -1299,7 +1299,7 @@ public final class ClassUtil {
                             }
                         }
                     } else if (file2.isDirectory() && isRecursive) {
-                        final String subPkgName = pkgName + WD._PERIOD + file2.getName();
+                        final String subPkgName = pkgName + SK._PERIOD + file2.getName();
                         //noinspection ConstantValue
                         classes.addAll(findClassesInPackage(subPkgName, isRecursive, skipClassLoadingException, predicate));
                     }

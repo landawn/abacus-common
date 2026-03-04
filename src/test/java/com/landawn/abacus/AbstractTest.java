@@ -66,7 +66,7 @@ public abstract class AbstractTest {
     public static Map<String, Object> createAccountProps(final String firstName, final String lastName) {
         final String uuid = Strings.uuid();
 
-        final Map<String, Object> props = N.asProps(AccountPNL.GUI, uuid, AccountPNL.FIRST_NAME, firstName, AccountPNL.LAST_NAME, lastName,
+        final Map<String, Object> props = N.toMap(AccountPNL.GUI, uuid, AccountPNL.FIRST_NAME, firstName, AccountPNL.LAST_NAME, lastName,
                 AccountPNL.MIDDLE_NAME, MIDDLE_NAME, AccountPNL.EMAIL_ADDRESS, getEmail(uuid));
         props.put(AccountPNL.BIRTH_DATE, Dates.currentTimestamp());
         props.put(AccountPNL.STATUS, 0);
@@ -83,7 +83,7 @@ public abstract class AbstractTest {
 
         for (int i = 0; i < size; i++) {
             final String uuid = Strings.uuid();
-            final Map<String, Object> props = N.asProps(AccountPNL.GUI, uuid, AccountPNL.FIRST_NAME, firstName + i, AccountPNL.LAST_NAME, lastName + i,
+            final Map<String, Object> props = N.toMap(AccountPNL.GUI, uuid, AccountPNL.FIRST_NAME, firstName + i, AccountPNL.LAST_NAME, lastName + i,
                     AccountPNL.MIDDLE_NAME, MIDDLE_NAME, AccountPNL.EMAIL_ADDRESS, getEmail(uuid));
             props.put(AccountPNL.BIRTH_DATE, Dates.currentTimestamp());
             props.put(AccountPNL.STATUS, 0);
@@ -186,7 +186,7 @@ public abstract class AbstractTest {
     }
 
     public static Map<String, Object> createAclUserProps(final String name) {
-        return N.asProps(AclUserPNL.GUI, Strings.uuid(), AclUserPNL.NAME, name, AclUserPNL.DESCRIPTION, ACL_DESCRIPTION);
+        return N.asMap(AclUserPNL.GUI, Strings.uuid(), AclUserPNL.NAME, name, AclUserPNL.DESCRIPTION, ACL_DESCRIPTION);
     }
 
     public static List<Map<String, Object>> createAclUserPropsList(final int size) {
