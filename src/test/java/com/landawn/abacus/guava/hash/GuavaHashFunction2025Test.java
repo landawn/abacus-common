@@ -403,10 +403,10 @@ public class GuavaHashFunction2025Test extends TestBase {
         GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
         String text = "Test";
 
-        HashCode hashUTF8 = hashFunc.hash(text, StandardCharsets.UTF_8);
+        HashCode hashUtf8 = hashFunc.hash(text, StandardCharsets.UTF_8);
         HashCode hashUTF16 = hashFunc.hash(text, StandardCharsets.UTF_16);
 
-        assertNotEquals(hashUTF8, hashUTF16);
+        assertNotEquals(hashUtf8, hashUTF16);
     }
 
     @Test

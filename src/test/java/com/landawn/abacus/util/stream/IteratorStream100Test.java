@@ -498,7 +498,7 @@ public class IteratorStream100Test extends TestBase {
     public void testOnEach() {
         List<Integer> sideEffect = new ArrayList<>();
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
-        List<Integer> result = stream.onEach(sideEffect::add).toList();
+        List<Integer> result = stream.peek(sideEffect::add).toList();
         assertEquals(Arrays.asList(1, 2, 3), result);
         assertEquals(Arrays.asList(1, 2, 3), sideEffect);
     }
@@ -801,12 +801,12 @@ public class IteratorStream100Test extends TestBase {
     @Test
     public void testNMatch() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5));
-        assertTrue(stream.isMatchCountBetween(2, 3, x -> x % 2 == 0));
+        assertTrue(stream.hasMatchCountBetween(2, 3, x -> x % 2 == 0));
 
         Stream<Integer> stream2 = createStream(Arrays.asList(1, 2, 3, 4, 5));
-        assertFalse(stream2.isMatchCountBetween(3, 4, x -> x % 2 == 0));
+        assertFalse(stream2.hasMatchCountBetween(3, 4, x -> x % 2 == 0));
 
-        assertTrue(emptyStream.isMatchCountBetween(0, 0, x -> true));
+        assertTrue(emptyStream.hasMatchCountBetween(0, 0, x -> true));
     }
 
     @Test

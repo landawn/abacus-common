@@ -67,9 +67,8 @@ import com.landawn.abacus.entity.extendDirty.basic.ExtendDirtyBasicPNL.AccountPN
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
-import com.landawn.abacus.parser.XmlDeserializationConfig.XDC;
-import com.landawn.abacus.parser.XmlSerializationConfig;
-import com.landawn.abacus.parser.XmlSerializationConfig.XSC;
+import com.landawn.abacus.parser.XmlDeserConfig;
+import com.landawn.abacus.parser.XmlSerConfig;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.types.JAXBean;
@@ -3453,7 +3452,7 @@ public class NTest extends AbstractParserTest {
         println(abacusXmlParser.serialize(account));
 
         final Map<Class<?>, Set<String>> ignoredPropNames = CommonUtil.asMap(Account.class, CommonUtil.toSet("lastUpdateTime"));
-        final XmlSerializationConfig config = new XmlSerializationConfig();
+        final XmlSerConfig config = new XmlSerConfig();
         config.setIgnoredPropNames(ignoredPropNames);
         println(abacusXmlParser.serialize(account, config));
 
@@ -3472,7 +3471,7 @@ public class NTest extends AbstractParserTest {
         println(abacusXMLDOMParser.serialize(account));
 
         final Map<Class<?>, Set<String>> ignoredPropNames = CommonUtil.asMap(Account.class, CommonUtil.toSet("lastUpdateTime"));
-        final XmlSerializationConfig config = new XmlSerializationConfig();
+        final XmlSerConfig config = new XmlSerConfig();
         config.setIgnoredPropNames(ignoredPropNames);
         println(abacusXMLDOMParser.serialize(account, config));
 
@@ -3522,15 +3521,15 @@ public class NTest extends AbstractParserTest {
         xmlBean = abacusXmlParser.deserialize(xml, Account.class);
         assertEquals(account, xmlBean);
 
-        final XmlSerializationConfig config = new XmlSerializationConfig();
-        config.tagByPropertyName(false);
+        final XmlSerConfig config = new XmlSerConfig();
+        config.setTagByPropertyName(false);
         xml = abacusXmlParser.serialize(account, config);
         N.println(xml);
 
         xmlBean = abacusXmlParser.deserialize(xml, Account.class);
         assertEquals(account, xmlBean);
 
-        config.writeTypeInfo(true);
+        config.setWriteTypeInfo(true);
         xml = abacusXmlParser.serialize(account, config);
         N.println(xml);
 
@@ -3564,15 +3563,15 @@ public class NTest extends AbstractParserTest {
         xmlBean = abacusXMLDOMParser.deserialize(xml, Account.class);
         assertEquals(account, xmlBean);
 
-        final XmlSerializationConfig config = new XmlSerializationConfig();
-        config.tagByPropertyName(false);
+        final XmlSerConfig config = new XmlSerConfig();
+        config.setTagByPropertyName(false);
         xml = abacusXMLDOMParser.serialize(account, config);
         N.println(xml);
 
         xmlBean = abacusXMLDOMParser.deserialize(xml, Account.class);
         assertEquals(account, xmlBean);
 
-        config.writeTypeInfo(true);
+        config.setWriteTypeInfo(true);
         xml = abacusXMLDOMParser.serialize(account, config);
         N.println(xml);
 
@@ -3668,7 +3667,7 @@ public class NTest extends AbstractParserTest {
 
         xBean.setWeekDay(WeekDay.THURSDAY);
 
-        final String xml = abacusXmlParser.serialize(xBean, XSC.create().writeTypeInfo(true));
+        final String xml = abacusXmlParser.serialize(xBean, XmlSerConfig.create().setWriteTypeInfo(true));
         println(xml);
 
         final String st = CommonUtil.stringOf(xBean);
@@ -3733,7 +3732,7 @@ public class NTest extends AbstractParserTest {
 
         xBean.setWeekDay(WeekDay.THURSDAY);
 
-        final String xml = abacusXMLDOMParser.serialize(xBean, XSC.create().writeTypeInfo(true));
+        final String xml = abacusXMLDOMParser.serialize(xBean, XmlSerConfig.create().setWriteTypeInfo(true));
         println(xml);
 
         final String st = CommonUtil.stringOf(xBean);
@@ -3805,8 +3804,8 @@ public class NTest extends AbstractParserTest {
                 CommonUtil.toList(Dates.createDate(System.currentTimeMillis() / 1000 * 1000), Dates.createDate(System.currentTimeMillis() / 1000 * 1000)));
         xBean.setTypeGenericSet(CommonUtil.toSet(1L, 2L));
 
-        final XmlSerializationConfig config = new XmlSerializationConfig();
-        config.writeTypeInfo(true);
+        final XmlSerConfig config = new XmlSerConfig();
+        config.setWriteTypeInfo(true);
 
         final String xml = abacusXmlParser.serialize(xBean, config);
         println(xml);
@@ -3825,8 +3824,8 @@ public class NTest extends AbstractParserTest {
                 CommonUtil.toList(Dates.createDate(System.currentTimeMillis() / 1000 * 1000), Dates.createDate(System.currentTimeMillis() / 1000 * 1000)));
         xBean.setTypeGenericSet(CommonUtil.toSet(1L, 2L));
 
-        final XmlSerializationConfig config = new XmlSerializationConfig();
-        config.writeTypeInfo(true);
+        final XmlSerConfig config = new XmlSerConfig();
+        config.setWriteTypeInfo(true);
 
         final String xml = abacusXMLDOMParser.serialize(xBean, config);
         println(xml);
@@ -4039,7 +4038,9 @@ public class NTest extends AbstractParserTest {
         final String xml = abacusXmlParser.serialize(accounts);
         println(xml);
 
-        final List<Account> xmlAccounts = abacusXmlParser.deserialize(xml, XDC.of(Account.class, true, null), List.class);
+        final List<Account> xmlAccounts = abacusXmlParser.deserialize(xml,
+                XmlDeserConfig.create().setElementType(Account.class).setIgnoreUnmatchedProperty(true).setIgnoredPropNames((Map<Class<?>, Set<String>>) null),
+                List.class);
 
         N.println(CommonUtil.stringOf(accounts));
         N.println(CommonUtil.stringOf(xmlAccounts));
@@ -4052,7 +4053,9 @@ public class NTest extends AbstractParserTest {
         final String xml = abacusXMLDOMParser.serialize(accounts);
         println(xml);
 
-        final List<Account> xmlAccounts = abacusXMLDOMParser.deserialize(xml, XDC.of(Account.class, true, null), List.class);
+        final List<Account> xmlAccounts = abacusXMLDOMParser.deserialize(xml,
+                XmlDeserConfig.create().setElementType(Account.class).setIgnoreUnmatchedProperty(true).setIgnoredPropNames((Map<Class<?>, Set<String>>) null),
+                List.class);
 
         N.println(CommonUtil.stringOf(accounts));
         N.println(CommonUtil.stringOf(xmlAccounts));

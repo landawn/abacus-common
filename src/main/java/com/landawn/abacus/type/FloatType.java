@@ -46,7 +46,7 @@ public final class FloatType extends AbstractFloatType {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public Class clazz() {
+    public Class javaType() {
         return Float.class;
     }
 

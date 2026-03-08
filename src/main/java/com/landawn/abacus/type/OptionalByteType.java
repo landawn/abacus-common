@@ -10,7 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
@@ -40,14 +40,14 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalByte> type = TypeFactory.getType(OptionalByte.class);
-     * Class<OptionalByte> clazz = type.clazz();
+     * Class<OptionalByte> clazz = type.javaType();
      * // clazz equals OptionalByte.class
      * }</pre>
      *
      * @return the {@link OptionalByte} class object
      */
     @Override
-    public Class<OptionalByte> clazz() {
+    public Class<OptionalByte> javaType() {
         return OptionalByte.class;
     }
 
@@ -292,7 +292,7 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final OptionalByte x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final OptionalByte x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null || x.isEmpty()) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

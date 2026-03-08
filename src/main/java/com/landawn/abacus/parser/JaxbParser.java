@@ -91,7 +91,7 @@ final class JaxbParser extends AbstractXmlParser {
      * @param xsc the XML serialization configuration
      * @param xdc the XML deserialization configuration
      */
-    JaxbParser(final XmlSerializationConfig xsc, final XmlDeserializationConfig xdc) {
+    JaxbParser(final XmlSerConfig xsc, final XmlDeserConfig xdc) {
         super(xsc, xdc);
     }
 
@@ -118,7 +118,7 @@ final class JaxbParser extends AbstractXmlParser {
      * @throws ParsingException if ignoredPropNames is specified in config or if JAXB marshalling fails
      */
     @Override
-    public String serialize(final Object obj, final XmlSerializationConfig config) {
+    public String serialize(final Object obj, final XmlSerConfig config) {
         if (obj == null) {
             return Strings.EMPTY;
         }
@@ -155,7 +155,7 @@ final class JaxbParser extends AbstractXmlParser {
      * @throws ParsingException if JAXB marshalling fails
      */
     @Override
-    public void serialize(final Object obj, final XmlSerializationConfig config, final File output) {
+    public void serialize(final Object obj, final XmlSerConfig config, final File output) {
         Writer writer = null;
 
         try {
@@ -195,7 +195,7 @@ final class JaxbParser extends AbstractXmlParser {
      * @throws ParsingException if JAXB marshalling fails
      */
     @Override
-    public void serialize(final Object obj, final XmlSerializationConfig config, final OutputStream output) {
+    public void serialize(final Object obj, final XmlSerConfig config, final OutputStream output) {
         final BufferedWriter bw = Objectory.createBufferedWriter(output);
 
         try {
@@ -231,7 +231,7 @@ final class JaxbParser extends AbstractXmlParser {
      * @throws ParsingException if JAXB marshalling fails
      */
     @Override
-    public void serialize(final Object obj, final XmlSerializationConfig config, final Writer output) {
+    public void serialize(final Object obj, final XmlSerConfig config, final Writer output) {
         final boolean isBufferedWriter = IOUtil.isBufferedWriter(output);
         final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output);
 
@@ -261,7 +261,7 @@ final class JaxbParser extends AbstractXmlParser {
      * @throws ParsingException if ignoredPropNames is specified in config or if JAXB marshalling fails
      * @throws UncheckedIOException if an I/O error occurs
      */
-    void write(final Object obj, final XmlSerializationConfig config, final Writer output) {
+    void write(final Object obj, final XmlSerConfig config, final Writer output) {
         if (config != null && N.notEmpty(config.getIgnoredPropNames())) {
             throw new ParsingException("'ignoredPropNames' is not supported");
         }
@@ -290,12 +290,12 @@ final class JaxbParser extends AbstractXmlParser {
     }
 
     @Override
-    public <T> T deserialize(final String source, final XmlDeserializationConfig config, final Type<? extends T> targetType) {
-        return deserialize(source, config, targetType.clazz());
+    public <T> T deserialize(final String source, final XmlDeserConfig config, final Type<? extends T> targetType) {
+        return deserialize(source, config, targetType.javaType());
     }
 
     @Override
-    public <T> T deserialize(final String source, final XmlDeserializationConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final String source, final XmlDeserConfig config, final Class<? extends T> targetClass) {
         if (Strings.isEmpty(source)) {
             return N.defaultValueOf(targetClass);
         }
@@ -310,12 +310,12 @@ final class JaxbParser extends AbstractXmlParser {
     }
 
     @Override
-    public <T> T deserialize(final File source, final XmlDeserializationConfig config, final Type<? extends T> targetType) {
-        return deserialize(source, config, targetType.clazz());
+    public <T> T deserialize(final File source, final XmlDeserConfig config, final Type<? extends T> targetType) {
+        return deserialize(source, config, targetType.javaType());
     }
 
     @Override
-    public <T> T deserialize(final File source, final XmlDeserializationConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final File source, final XmlDeserConfig config, final Class<? extends T> targetClass) {
         InputStream is = null;
 
         try {
@@ -328,33 +328,32 @@ final class JaxbParser extends AbstractXmlParser {
     }
 
     @Override
-    public <T> T deserialize(final InputStream source, final XmlDeserializationConfig config, final Type<? extends T> targetType) {
-        return deserialize(source, config, targetType.clazz());
+    public <T> T deserialize(final InputStream source, final XmlDeserConfig config, final Type<? extends T> targetType) {
+        return deserialize(source, config, targetType.javaType());
     }
 
     @Override
-    public <T> T deserialize(final InputStream source, final XmlDeserializationConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final InputStream source, final XmlDeserConfig config, final Class<? extends T> targetClass) {
         return read(source, config, targetClass);
     }
 
     @Override
-    public <T> T deserialize(final Reader source, final XmlDeserializationConfig config, final Type<? extends T> targetType) {
-        return deserialize(source, config, targetType.clazz());
+    public <T> T deserialize(final Reader source, final XmlDeserConfig config, final Type<? extends T> targetType) {
+        return deserialize(source, config, targetType.javaType());
     }
 
     @Override
-    public <T> T deserialize(final Reader source, final XmlDeserializationConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final Reader source, final XmlDeserConfig config, final Class<? extends T> targetClass) {
         return read(source, config, targetClass);
     }
 
     @Override
-    public <T> T deserialize(final Node source, final XmlDeserializationConfig config, final Type<? extends T> targetType) {
+    public <T> T deserialize(final Node source, final XmlDeserConfig config, final Type<? extends T> targetType) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public <T> T deserialize(final Node source, final XmlDeserializationConfig config, final Class<? extends T> targetClass)
-            throws UnsupportedOperationException {
+    public <T> T deserialize(final Node source, final XmlDeserConfig config, final Class<? extends T> targetClass) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -376,7 +375,7 @@ final class JaxbParser extends AbstractXmlParser {
      * @throws ParsingException if ignoredPropNames is specified in config or if JAXB unmarshalling fails
      */
     @SuppressWarnings("unchecked")
-    <T> T read(final InputStream source, final XmlDeserializationConfig config, final Class<? extends T> targetClass) {
+    <T> T read(final InputStream source, final XmlDeserConfig config, final Class<? extends T> targetClass) {
         if (config != null && N.notEmpty(config.getIgnoredPropNames())) {
             throw new ParsingException("'ignoredPropNames' is not supported");
         }
@@ -391,7 +390,7 @@ final class JaxbParser extends AbstractXmlParser {
     }
 
     @SuppressWarnings("unchecked")
-    <T> T read(final Reader source, final XmlDeserializationConfig config, final Class<? extends T> targetClass) {
+    <T> T read(final Reader source, final XmlDeserConfig config, final Class<? extends T> targetClass) {
         if (config != null && N.notEmpty(config.getIgnoredPropNames())) {
             throw new ParsingException("'ignoredPropNames' is not supported");
         }

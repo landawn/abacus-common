@@ -48,7 +48,7 @@ import com.landawn.abacus.util.stream.EntryStream;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * A interface representing a tabular data structure that provides comprehensive operations
+ * An interface representing a tabular data structure that provides comprehensive operations
  * for data manipulation, analysis, and transformation. Dataset serves as the core abstraction
  * for working with structured data in a table format, similar to a database table or spreadsheet,
  * with strongly-typed columns and efficient row-based operations.

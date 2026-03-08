@@ -67,7 +67,7 @@ public class JsonParser2025Test extends TestBase {
     @Test
     public void test_parse_withConfigAndClass() {
         String json = "{\"name\":\"Jane\",\"age\":25}";
-        JsonDeserializationConfig config = new JsonDeserializationConfig();
+        JsonDeserConfig config = new JsonDeserConfig();
 
         Map<?, ?> result = parser.parse(json, config, Map.class);
         Assertions.assertEquals("Jane", result.get("name"));
@@ -105,7 +105,7 @@ public class JsonParser2025Test extends TestBase {
     public void test_parse_toArrayWithConfig() {
         String json = "[10,20,30]";
         Integer[] array = new Integer[3];
-        JsonDeserializationConfig config = new JsonDeserializationConfig();
+        JsonDeserConfig config = new JsonDeserConfig();
 
         parser.parse(json, config, array);
         Assertions.assertEquals(10, array[0]);
@@ -142,7 +142,7 @@ public class JsonParser2025Test extends TestBase {
     public void test_parse_toCollectionWithConfig() {
         String json = "[\"x\",\"y\",\"z\"]";
         List<String> list = new ArrayList<>();
-        JsonDeserializationConfig config = new JsonDeserializationConfig();
+        JsonDeserConfig config = new JsonDeserConfig();
 
         parser.parse(json, config, list);
         Assertions.assertEquals(3, list.size());
@@ -177,7 +177,7 @@ public class JsonParser2025Test extends TestBase {
     public void test_parse_toMapWithConfig() {
         String json = "{\"a\":1,\"b\":2,\"c\":3}";
         Map<String, Integer> map = new LinkedHashMap<>();
-        JsonDeserializationConfig config = new JsonDeserializationConfig();
+        JsonDeserConfig config = new JsonDeserConfig();
 
         parser.parse(json, config, map);
         Assertions.assertEquals(3, map.size());
@@ -212,7 +212,7 @@ public class JsonParser2025Test extends TestBase {
         String json = "start{\"x\":100,\"y\":200}end";
         int fromIndex = 5;
         int toIndex = 23;
-        JsonDeserializationConfig config = new JsonDeserializationConfig();
+        JsonDeserConfig config = new JsonDeserConfig();
 
         Map<?, ?> result = parser.deserialize(json, fromIndex, toIndex, config, Map.class);
         Assertions.assertEquals(100, result.get("x"));
@@ -246,7 +246,7 @@ public class JsonParser2025Test extends TestBase {
     @Test
     public void test_stream_fromStringWithConfig() {
         String json = "[{\"value\":10},{\"value\":20},{\"value\":30}]";
-        JsonDeserializationConfig config = new JsonDeserializationConfig();
+        JsonDeserConfig config = new JsonDeserConfig();
 
         try (Stream<Map> stream = parser.stream(json, config, Type.of(Map.class))) {
             List<Map> list = stream.toList();
@@ -287,7 +287,7 @@ public class JsonParser2025Test extends TestBase {
             writer.write(json);
         }
 
-        JsonDeserializationConfig config = new JsonDeserializationConfig();
+        JsonDeserConfig config = new JsonDeserConfig();
         try (Stream<Map> stream = parser.stream(tempFile, config, Type.of(Map.class))) {
             List<Map> list = stream.toList();
             Assertions.assertEquals(2, list.size());
@@ -324,7 +324,7 @@ public class JsonParser2025Test extends TestBase {
     public void test_stream_fromInputStreamWithConfig() {
         String json = "[{\"val\":\"X\"},{\"val\":\"Y\"},{\"val\":\"Z\"}]";
         InputStream inputStream = new ByteArrayInputStream(json.getBytes());
-        JsonDeserializationConfig config = new JsonDeserializationConfig();
+        JsonDeserConfig config = new JsonDeserConfig();
 
         try (Stream<Map> stream = parser.stream(inputStream, true, config, Type.of(Map.class))) {
             List<Map> list = stream.toList();
@@ -364,7 +364,7 @@ public class JsonParser2025Test extends TestBase {
     public void test_stream_fromReaderWithConfig() {
         String json = "[{\"item\":\"apple\"},{\"item\":\"banana\"},{\"item\":\"cherry\"}]";
         Reader reader = new StringReader(json);
-        JsonDeserializationConfig config = new JsonDeserializationConfig();
+        JsonDeserConfig config = new JsonDeserConfig();
 
         try (Stream<Map> stream = parser.stream(reader, true, config, Type.of(Map.class))) {
             List<Map> list = stream.toList();

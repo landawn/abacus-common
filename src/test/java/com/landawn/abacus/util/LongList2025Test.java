@@ -1049,9 +1049,9 @@ public class LongList2025Test extends TestBase {
     public void testHasDuplicates() {
         list.add(1L);
         list.add(2L);
-        assertFalse(list.hasDuplicates());
+        assertFalse(list.containsDuplicates());
         list.add(1L);
-        assertTrue(list.hasDuplicates());
+        assertTrue(list.containsDuplicates());
     }
 
     @Test

@@ -89,7 +89,7 @@ public class TypeType extends AbstractType<Type> {
      * @return the Class object for Type.class
      */
     @Override
-    public Class<Type> clazz() {
+    public Class<Type> javaType() {
         return Type.class;
     }
 

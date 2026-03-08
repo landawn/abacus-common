@@ -844,13 +844,13 @@ public class Sheet100Test extends TestBase {
 
     @Test
     public void testCountOfNonNullValue() {
-        assertEquals(0, sheet.countOfNonNullValues());
+        assertEquals(0, sheet.nonNullValueCount());
 
         sheet.set("R1", "C1", 1);
         sheet.set("R2", "C2", 2);
         sheet.set("R3", "C3", 3);
 
-        assertEquals(3, sheet.countOfNonNullValues());
+        assertEquals(3, sheet.nonNullValueCount());
     }
 
     @Test
@@ -1336,7 +1336,7 @@ public class Sheet100Test extends TestBase {
     public void testEmptySheetOperations() {
         Sheet<String, String, Integer> emptySheet = new Sheet<>();
 
-        assertEquals(0, emptySheet.countOfNonNullValues());
+        assertEquals(0, emptySheet.nonNullValueCount());
         assertTrue(emptySheet.cellsH().toList().isEmpty());
         assertTrue(emptySheet.streamH().toList().isEmpty());
 
@@ -1370,7 +1370,7 @@ public class Sheet100Test extends TestBase {
             largeSheet.set(i, i, i);
         }
 
-        assertEquals(100, largeSheet.countOfNonNullValues());
+        assertEquals(100, largeSheet.nonNullValueCount());
         assertEquals(Integer.valueOf(50), largeSheet.get(50, 50));
     }
 
@@ -1529,7 +1529,7 @@ public class Sheet100Test extends TestBase {
         Sheet<String, String, Integer> uninitSheet = new Sheet<>(rowKeys, columnKeys);
 
         assertNull(uninitSheet.get("R1", "C1"));
-        assertEquals(0, uninitSheet.countOfNonNullValues());
+        assertEquals(0, uninitSheet.nonNullValueCount());
 
         List<Integer> row = uninitSheet.rowValues("R1");
         assertEquals(3, row.size());

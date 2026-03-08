@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -28,18 +28,18 @@ public class BigDecimalType100Test extends TestBase {
 
     private Type<BigDecimal> bigDecimalType;
     private CharacterWriter writer;
-    private JsonXmlSerializationConfig<?> config;
+    private JsonXmlSerConfig<?> config;
 
     @BeforeEach
     public void setUp() {
         bigDecimalType = createType(BigDecimal.class);
         writer = createCharacterWriter();
-        config = mock(JsonXmlSerializationConfig.class);
+        config = mock(JsonXmlSerConfig.class);
     }
 
     @Test
     public void testClazz() {
-        assertEquals(BigDecimal.class, bigDecimalType.clazz());
+        assertEquals(BigDecimal.class, bigDecimalType.javaType());
     }
 
     @Test
@@ -156,7 +156,7 @@ public class BigDecimalType100Test extends TestBase {
     @Test
     public void testWriteCharacterWithPlainFormat() throws IOException {
         BigDecimal value = new BigDecimal("1E+10");
-        when(config.writeBigDecimalAsPlain()).thenReturn(true);
+        when(config.isWriteBigDecimalAsPlain()).thenReturn(true);
 
         bigDecimalType.writeCharacter(writer, value, config);
         verify(writer).writeCharacter("10000000000");
@@ -165,7 +165,7 @@ public class BigDecimalType100Test extends TestBase {
     @Test
     public void testWriteCharacterScientificNotation() throws IOException {
         BigDecimal value = new BigDecimal("1E+10");
-        when(config.writeBigDecimalAsPlain()).thenReturn(false);
+        when(config.isWriteBigDecimalAsPlain()).thenReturn(false);
 
         bigDecimalType.writeCharacter(writer, value, config);
         verify(writer).writeCharacter("1E+10");

@@ -95,6 +95,43 @@ public class HttpRequest2025Test extends TestBase {
     }
 
     @Test
+    public void testQueryEmptyStringDoesNotAppendQuestionMark() throws IOException {
+        server.enqueue(new MockResponse().setBody("GET response"));
+        String response = HttpRequest.url(baseUrl).query("").get(String.class);
+
+        assertEquals("GET response", response);
+        assertEquals("/", server.takeRequest().getPath());
+    }
+
+    @Test
+    public void testQueryIsRejectedForPost() {
+        HttpRequest request = HttpRequest.url(baseUrl).query("a=b");
+
+        assertThrows(IllegalStateException.class, () -> request.post(String.class));
+    }
+
+    @Test
+    public void testQueryIsRejectedForHead() {
+        HttpRequest request = HttpRequest.url(baseUrl).query("a=b");
+
+        assertThrows(IllegalStateException.class, request::head);
+    }
+
+    @Test
+    public void testBodyIsRejectedForGet() {
+        HttpRequest request = HttpRequest.url(baseUrl).jsonBody("{\"a\":1}");
+
+        assertThrows(IllegalStateException.class, () -> request.get(String.class));
+    }
+
+    @Test
+    public void testBodyIsRejectedForDelete() {
+        HttpRequest request = HttpRequest.url(baseUrl).body("a=b");
+
+        assertThrows(IllegalStateException.class, () -> request.delete(String.class));
+    }
+
+    @Test
     public void testHead() throws IOException {
         server.enqueue(new MockResponse());
         HttpRequest request = HttpRequest.url(baseUrl);
@@ -651,6 +688,7 @@ public class HttpRequest2025Test extends TestBase {
         private ServerSocket serverSocket;
         private Thread serverThread;
         private final Queue<MockResponse> responses = new LinkedList<>();
+        private final Queue<RecordedRequest> requests = new LinkedList<>();
 
         public void start() throws IOException {
             serverSocket = new ServerSocket(0);
@@ -671,6 +709,10 @@ public class HttpRequest2025Test extends TestBase {
             PrintWriter writer = new PrintWriter(socket.getOutputStream());
 
             String requestLine = reader.readLine();
+            if (requestLine != null) {
+                requests.offer(new RecordedRequest(requestLine));
+            }
+
             String line;
             while ((line = reader.readLine()) != null && !line.isEmpty()) {
             }
@@ -697,6 +739,10 @@ public class HttpRequest2025Test extends TestBase {
             responses.offer(response);
         }
 
+        public RecordedRequest takeRequest() {
+            return requests.poll();
+        }
+
         public void shutdown() throws IOException {
             serverSocket.close();
             try {
@@ -713,6 +759,25 @@ public class HttpRequest2025Test extends TestBase {
         public MockResponse setBody(String body) {
             this.body = body;
             return this;
+        }
+    }
+
+    private static class RecordedRequest {
+        private final String method;
+        private final String path;
+
+        RecordedRequest(String requestLine) {
+            String[] parts = requestLine.split(" ");
+            method = parts.length > 0 ? parts[0] : "";
+            path = parts.length > 1 ? parts[1] : "";
+        }
+
+        public String getMethod() {
+            return method;
+        }
+
+        public String getPath() {
+            return path;
         }
     }
 }

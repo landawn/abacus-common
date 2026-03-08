@@ -46,8 +46,8 @@ public class AbacusXmlParserImpl2025Test extends TestBase {
     @Test
     public void test_constructor_withConfig() {
         if (ParserFactory.isAbacusXmlParserAvailable()) {
-            XmlSerializationConfig xsc = new XmlSerializationConfig();
-            XmlDeserializationConfig xdc = new XmlDeserializationConfig();
+            XmlSerConfig xsc = new XmlSerConfig();
+            XmlDeserConfig xdc = new XmlDeserConfig();
             XmlParser parser = new AbacusXmlParserImpl(XmlParserType.StAX, xsc, xdc);
             assertNotNull(parser);
         }

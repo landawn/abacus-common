@@ -43,7 +43,7 @@ public class XmlConstants {
      * Protected constructor to prevent direct instantiation of this utility class.
      */
     protected XmlConstants() {
-        // singleton.
+        // Utility class - prevent instantiation
     }
 
     /**
@@ -713,8 +713,9 @@ public class XmlConstants {
     public static final String SOAP_HEADER_ELE_END = "</soap:Header>";
 
     /**
-     * Field BODY (value is {@code "BODY"})
-     * XML element name for SOAP body elements.
+     * Field BODY (value is {@code "BODY"}).
+     * Constant representing the body element name in uppercase. Note that the actual SOAP body
+     * element tags use {@code "Body"} (see {@link #SOAP_BODY_ELE_START}).
      */
     public static final String BODY = "BODY";
 

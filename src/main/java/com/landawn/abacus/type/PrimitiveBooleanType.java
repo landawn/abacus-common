@@ -59,7 +59,7 @@ public final class PrimitiveBooleanType extends AbstractBooleanType {
      * @return the Class object for the primitive boolean type
      */
     @Override
-    public Class<Boolean> clazz() {
+    public Class<Boolean> javaType() {
         return boolean.class;
     }
 
@@ -70,7 +70,7 @@ public final class PrimitiveBooleanType extends AbstractBooleanType {
      * @return {@code true}, as this type handler is for primitive boolean
      */
     @Override
-    public boolean isPrimitiveType() {
+    public boolean isPrimitive() {
         return true;
     }
 

@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -44,12 +44,12 @@ public class PrimitiveCharArrayType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(char[].class, type.clazz());
+        assertEquals(char[].class, type.javaType());
     }
 
     @Test
     public void testGetElementType() {
-        Type<Character> elementType = type.getElementType();
+        Type<Character> elementType = type.elementType();
         assertNotNull(elementType);
     }
 
@@ -196,7 +196,7 @@ public class PrimitiveCharArrayType100Test extends TestBase {
     @Test
     public void testWriteCharacterWithQuotation() throws IOException {
         CharacterWriter writer = createCharacterWriter();
-        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getCharQuotation()).thenReturn('\'');
 
         type.writeCharacter(writer, new char[] { 'a', 'b' }, config);
@@ -211,7 +211,7 @@ public class PrimitiveCharArrayType100Test extends TestBase {
     @Test
     public void testWriteCharacterWithQuotationAndEscape() throws IOException {
         CharacterWriter writer = createCharacterWriter();
-        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getCharQuotation()).thenReturn('\'');
 
         type.writeCharacter(writer, new char[] { '\'' }, config);

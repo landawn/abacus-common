@@ -40,7 +40,7 @@ public class BytesType extends AbstractType<byte[]> {
      * @return The Class object representing byte[].class
      */
     @Override
-    public Class<byte[]> clazz() {
+    public Class<byte[]> javaType() {
         return byte[].class;
     }
 

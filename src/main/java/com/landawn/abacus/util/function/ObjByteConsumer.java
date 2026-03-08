@@ -64,8 +64,14 @@ public interface ObjByteConsumer<T> extends Throwables.ObjByteConsumer<T, Runtim
      * Performs this operation on the given arguments.
      * This method is expected to operate via side-effects.
      *
-     * @param t the first input argument
-     * @param value the second input argument
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ObjByteConsumer<byte[]> writeFirst = (array, value) -> array[0] = value;
+     * writeFirst.accept(new byte[1], (byte) 7);
+     * }</pre>
+     *
+     * @param t the object to receive or contextualize the side effect
+     * @param value the byte value supplied to the operation
      */
     // @ai-ignore Obj* argument order convention - intentional: class name prefix determines parameter order. ObjByte* has object first, byte second. Do not suggest reordering.
     @Override

@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
@@ -86,7 +86,7 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
      * @return the Class object for Tuple1
      */
     @Override
-    public Class<Tuple1<T1>> clazz() {
+    public Class<Tuple1<T1>> javaType() {
         return typeClass;
     }
 
@@ -97,14 +97,14 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Tuple1<String>> type = TypeFactory.getType("Tuple1<String>");
-     * Type<?>[] paramTypes = type.getParameterTypes();
+     * Type<?>[] paramTypes = type.parameterTypes();
      * // paramTypes[0] is Type<String>
      * }</pre>
      *
      * @return an array containing the element type
      */
     @Override
-    public Type<?>[] getParameterTypes() {
+    public Type<?>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -159,7 +159,7 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
             throw new IllegalArgumentException("Invalid Tuple1 format. Expected array with at least 1 element but got: " + str);
         }
 
-        final T1 t1 = a[0] == null ? null : ((T1) (type1.clazz().isAssignableFrom(a[0].getClass()) ? a[0] : N.convert(a[0], type1)));
+        final T1 t1 = a[0] == null ? null : ((T1) (type1.javaType().isAssignableFrom(a[0].getClass()) ? a[0] : N.convert(a[0], type1)));
 
         return Tuple.of(t1);
     }
@@ -218,7 +218,7 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Tuple1<T1> x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Tuple1<T1> x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

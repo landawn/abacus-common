@@ -43,7 +43,7 @@ import com.landawn.abacus.type.Type;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * Parser<JsonSerializationConfig, JsonDeserializationConfig> parser = ParserFactory.createJsonParser();
+ * Parser<JsonSerConfig, JsonDeserConfig> parser = ParserFactory.createJsonParser();
  *
  * // Serialization
  * String json = parser.serialize(myObject);
@@ -57,9 +57,9 @@ import com.landawn.abacus.type.Type;
  * @param <DC> the deserialization configuration type
  * @see JsonXmlField
  * @see SerializationConfig
- * @see DeserializationConfig
+ * @see Deserialization
  */
-public interface Parser<SC extends SerializationConfig<?>, DC extends DeserializationConfig<?>> {
+public interface Parser<SC extends SerializationConfig<?>, DC extends Deserialization<?>> {
 
     /**
      * Serializes an object to a string representation.
@@ -86,8 +86,8 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonSerializationConfig config = new JsonSerializationConfig()
-     *     .prettyFormat(true);
+     * JsonSerConfig config = new JsonSerConfig()
+     *     .setPrettyFormat(true);
      * String json = parser.serialize(myObject, config);
      * }</pre>
      *
@@ -124,7 +124,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonSerializationConfig config = new JsonSerializationConfig().prettyFormat(true);
+     * JsonSerConfig config = new JsonSerConfig().setPrettyFormat(true);
      * parser.serialize(myObject, config, new File("output.json"));
      * }</pre>
      *
@@ -165,7 +165,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonSerializationConfig config = new JsonSerializationConfig().prettyFormat(true);
+     * JsonSerConfig config = new JsonSerConfig().setPrettyFormat(true);
      * try (FileOutputStream fos = new FileOutputStream("output.json")) {
      *     parser.serialize(myObject, config, fos);
      * }
@@ -208,7 +208,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonSerializationConfig config = new JsonSerializationConfig().setIndentation("  ");
+     * JsonSerConfig config = new JsonSerConfig().setIndentation("  ");
      * try (FileWriter writer = new FileWriter("output.json")) {
      *     parser.serialize(myObject, config, writer);
      * }
@@ -272,8 +272,8 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig()
-     *     .ignoreUnmatchedProperty(true)
+     * JsonDeserConfig config = new JsonDeserConfig()
+     *     .setIgnoreUnmatchedProperty(true)
      *     .setElementType(String.class);
      * List<String> list = parser.deserialize(jsonArray, config, Type.of(new TypeReference<List<String>>() {}));
      * }</pre>
@@ -296,8 +296,8 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig()
-     *     .ignoreUnmatchedProperty(true)
+     * JsonDeserConfig config = new JsonDeserConfig()
+     *     .setIgnoreUnmatchedProperty(true)
      *     .setElementType(String.class);
      * List<String> list = parser.deserialize(jsonArray, config, List.class);
      * }</pre>
@@ -364,7 +364,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig()
+     * JsonDeserConfig config = new JsonDeserConfig()
      *     .setDateTimeFormat(DateTimeFormat.LONG);
      * MyClass obj = parser.deserialize(new File("input.json"), config, Type.of(MyClass.class));
      * }</pre>
@@ -389,7 +389,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig()
+     * JsonDeserConfig config = new JsonDeserConfig()
      *     .setDateTimeFormat(DateTimeFormat.LONG);
      * MyClass obj = parser.deserialize(new File("input.json"), config, MyClass.class);
      * }</pre>
@@ -459,7 +459,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig().ignoreUnmatchedProperty(true);
+     * JsonDeserConfig config = new JsonDeserConfig().setIgnoreUnmatchedProperty(true);
      * try (FileInputStream fis = new FileInputStream("input.json")) {
      *     MyClass obj = parser.deserialize(fis, config, Type.of(MyClass.class));
      * }
@@ -484,7 +484,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig().ignoreUnmatchedProperty(true);
+     * JsonDeserConfig config = new JsonDeserConfig().setIgnoreUnmatchedProperty(true);
      * try (FileInputStream fis = new FileInputStream("input.json")) {
      *     MyClass obj = parser.deserialize(fis, config, MyClass.class);
      * }
@@ -556,7 +556,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig()
+     * JsonDeserConfig config = new JsonDeserConfig()
      *     .setMapKeyType(String.class)
      *     .setMapValueType(Integer.class);
      * try (FileReader reader = new FileReader("input.json")) {
@@ -584,7 +584,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig()
+     * JsonDeserConfig config = new JsonDeserConfig()
      *     .setMapKeyType(String.class)
      *     .setMapValueType(Integer.class);
      * try (FileReader reader = new FileReader("input.json")) {

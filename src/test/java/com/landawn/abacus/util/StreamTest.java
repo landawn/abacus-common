@@ -146,23 +146,23 @@ public class StreamTest extends AbstractTest {
     @Test
     public void test_LazyEvaluation() {
         final MutableInt counter = MutableInt.of(0);
-        Stream.range(0, 3).onEach(it -> counter.increment()).transform(s -> s.toListThenApply(Stream::of));
+        Stream.range(0, 3).peek(it -> counter.increment()).transform(s -> s.toListThenApply(Stream::of));
         assertEquals(3, counter.value());
 
         counter.setValue(0);
-        Stream.range(0, 3).onEach(it -> counter.increment()).transform(s -> Stream.defer(() -> s.toListThenApply(Stream::of)));
+        Stream.range(0, 3).peek(it -> counter.increment()).transform(s -> Stream.defer(() -> s.toListThenApply(Stream::of)));
         assertEquals(0, counter.value());
 
         counter.setValue(0);
-        Stream.range(0, 3).onEach(it -> counter.increment()).transform(s -> Stream.defer(() -> s.toListThenApply(Stream::of))).println();
+        Stream.range(0, 3).peek(it -> counter.increment()).transform(s -> Stream.defer(() -> s.toListThenApply(Stream::of))).println();
         assertEquals(3, counter.value());
 
         counter.setValue(0);
-        Stream.range(0, 3).onEach(it -> counter.increment()).transformB(s -> s.toList().stream());
+        Stream.range(0, 3).peek(it -> counter.increment()).transformB(s -> s.toList().stream());
         assertEquals(3, counter.value());
 
         counter.setValue(0);
-        Stream.range(0, 3).onEach(it -> counter.increment()).transformB(s -> s.toList().stream(), true);
+        Stream.range(0, 3).peek(it -> counter.increment()).transformB(s -> s.toList().stream(), true);
         assertEquals(0, counter.value());
     }
 
@@ -205,7 +205,7 @@ public class StreamTest extends AbstractTest {
                         .filter(it -> it > 0)
                         .mapToObj(it -> it * 1 - 100 + 100)
                         .parallel(64)
-                        .onEach(Fn.sleep(1))
+                        .peek(Fn.sleep(1))
                         .parallel(16)
                         .flatMapArray(N::asArray)
                         .parallel(32, executor1)
@@ -216,7 +216,7 @@ public class StreamTest extends AbstractTest {
                         .mapToObj(it -> it * 1 - 100 + 100)
                         .parallel(128, executor)
                         .filter(it -> it > 0)
-                        .onEach(Fn.sleep(3))
+                        .peek(Fn.sleep(3))
                         .flatMapArray(N::asArray)
                         .parallel(6)
                         .mapToInt(it -> it * 1 - 100 + 100)
@@ -274,7 +274,7 @@ public class StreamTest extends AbstractTest {
                         .filter(it -> it > 0)
                         .mapToObj(it -> it * 1 - 100 + 100)
                         .parallel(64)
-                        .onEach(Fn.sleep(1))
+                        .peek(Fn.sleep(1))
                         .parallel(16)
                         .flatMapArray(N::asArray)
                         .parallel(32, executor1)
@@ -285,7 +285,7 @@ public class StreamTest extends AbstractTest {
                         .mapToObj(it -> it * 1 - 100 + 100)
                         .parallel(256, executor)
                         .filter(it -> it > 0)
-                        .onEach(Fn.sleep(3))
+                        .peek(Fn.sleep(3))
                         .flatMapArray(N::asArray)
                         .parallel(12)
                         .mapToInt(it -> it * 1 - 100 + 100)
@@ -344,7 +344,7 @@ public class StreamTest extends AbstractTest {
                         .sequential()
                         .mapToObj(it -> it * 1 - 100 + 100)
                         .parallel(64)
-                        .onEach(Fn.sleep(1))
+                        .peek(Fn.sleep(1))
                         .flatMapArray(N::asArray)
                         .parallel(16)
                         .mapToInt(it -> it * 1 - 100 + 100)
@@ -359,7 +359,7 @@ public class StreamTest extends AbstractTest {
                         .mapToObj(it -> it * 1 - 100 + 100)
                         .parallel(128, executor)
                         .filter(it -> it > 0)
-                        .onEach(Fn.sleep(3))
+                        .peek(Fn.sleep(3))
                         .flatMapArray(N::asArray)
                         .parallel(16)
                         .mapToInt(it -> it * 1 - 100 + 100)
@@ -367,7 +367,7 @@ public class StreamTest extends AbstractTest {
                         .filter(it -> it > 0)
                         .mapToObj(it -> it * 1 - 100 + 100)
                         .parallel(64)
-                        .onEach(Fn.sleep(1))
+                        .peek(Fn.sleep(1))
                         .flatMapArray(N::asArray)
                         .onClose(() -> {
                             if (k % 2 == 0) {
@@ -419,7 +419,7 @@ public class StreamTest extends AbstractTest {
                         .sequential()
                         .mapToObj(it -> it * 1 - 100 + 100)
                         .parallel(128)
-                        .onEach(Fn.sleep(1))
+                        .peek(Fn.sleep(1))
                         .flatMapArray(N::asArray)
                         .parallel(16)
                         .mapToInt(it -> it * 1 - 100 + 100)
@@ -434,7 +434,7 @@ public class StreamTest extends AbstractTest {
                         .mapToObj(it -> it * 1 - 100 + 100)
                         .parallel(256, executor)
                         .filter(it -> it > 0)
-                        .onEach(Fn.sleep(3))
+                        .peek(Fn.sleep(3))
                         .flatMapArray(N::asArray)
                         .parallel(16)
                         .mapToInt(it -> it * 1 - 100 + 100)
@@ -442,7 +442,7 @@ public class StreamTest extends AbstractTest {
                         .filter(it -> it > 0)
                         .mapToObj(it -> it * 1 - 100 + 100)
                         .parallel(64)
-                        .onEach(Fn.sleep(1))
+                        .peek(Fn.sleep(1))
                         .flatMapArray(N::asArray)
                         .onClose(() -> {
                             if (k % 2 == 0) {
@@ -842,11 +842,11 @@ public class StreamTest extends AbstractTest {
         N.println("java stream took: " + (System.currentTimeMillis() - startTime));
 
         startTime = System.currentTimeMillis();
-        Stream.of(CommonUtil.toList(Array.range(1, 1000))).parallel(64).map(Fn.identity()).onEach(Fn.sleep(10)).filter(Fn.alwaysTrue()).count();
+        Stream.of(CommonUtil.toList(Array.range(1, 1000))).parallel(64).map(Fn.identity()).peek(Fn.sleep(10)).filter(Fn.alwaysTrue()).count();
         N.println("abacus stream took: " + (System.currentTimeMillis() - startTime));
 
         startTime = System.currentTimeMillis();
-        Stream.of(CommonUtil.toList(Array.range(1, 1000))).map(Fn.identity()).sps(64, ss -> ss.onEach(Fn.sleep(10))).filter(Fn.alwaysTrue()).count();
+        Stream.of(CommonUtil.toList(Array.range(1, 1000))).map(Fn.identity()).sps(64, ss -> ss.peek(Fn.sleep(10))).filter(Fn.alwaysTrue()).count();
         N.println("abacus stream took: " + (System.currentTimeMillis() - startTime));
 
     }
@@ -863,7 +863,7 @@ public class StreamTest extends AbstractTest {
                     .map(it -> it - 1)
                     .filter(it -> it >= 0)
                     .buffered(1024)
-                    .onEach(it -> {
+                    .peek(it -> {
                         if (it % 37 == 0) {
                             N.sleep(3);
                         }
@@ -877,7 +877,7 @@ public class StreamTest extends AbstractTest {
                     .filter(it -> it >= 0)
                     .buffered(1024)
                     .reverseSorted()
-                    .onEach(it -> {
+                    .peek(it -> {
                         if (it % 79 == 0) {
                             N.sleep(3);
                         }
@@ -889,7 +889,7 @@ public class StreamTest extends AbstractTest {
                     .map(it -> it - 1)
                     .filter(it -> it >= 0)
                     .buffered(1024)
-                    .onEach(it -> {
+                    .peek(it -> {
                         if (it % 137 == 0) {
                             N.sleep(3);
                         }
@@ -902,7 +902,7 @@ public class StreamTest extends AbstractTest {
                     .map(it -> it - 1)
                     .filter(it -> it >= 0)
                     .buffered(137)
-                    .onEach(it -> {
+                    .peek(it -> {
                         if (it % 537 == 0) {
                             N.sleep(3);
                         }
@@ -1150,7 +1150,7 @@ public class StreamTest extends AbstractTest {
                 .flatmapToByte(i -> Array.repeat(i.byteValue(), i.intValue()))
                 .boxed()
                 .countBy(Fn.identity())
-                .onEach(it -> assertEquals(it.getKey().intValue(), it.getValue().intValue()))
+                .peek(it -> assertEquals(it.getKey().intValue(), it.getValue().intValue()))
                 .forEach(N::println);
 
         N.println(Strings.repeat('=', 90));
@@ -1162,7 +1162,7 @@ public class StreamTest extends AbstractTest {
                 .flatmapToByte(i -> Array.repeat(i.byteValue(), i.intValue()))
                 .boxed()
                 .countBy(Fn.identity())
-                .onEach(it -> assertEquals(it.getKey().intValue(), it.getValue().intValue()))
+                .peek(it -> assertEquals(it.getKey().intValue(), it.getValue().intValue()))
                 .forEach(N::println);
 
         N.println(Strings.repeat('=', 90));
@@ -1172,7 +1172,7 @@ public class StreamTest extends AbstractTest {
                 .flatmapToByte(i -> Array.repeat(i.byteValue(), i.intValue()))
                 .boxed()
                 .countBy(Fn.identity())
-                .onEach(it -> assertEquals(it.getKey().intValue(), it.getValue().intValue()))
+                .peek(it -> assertEquals(it.getKey().intValue(), it.getValue().intValue()))
                 .forEach(N::println);
 
         N.println(Strings.repeat('=', 90));
@@ -1185,7 +1185,7 @@ public class StreamTest extends AbstractTest {
                 .flatmapToByte(i -> Array.repeat(i.byteValue(), i.intValue()))
                 .boxed()
                 .countBy(Fn.identity())
-                .onEach(it -> assertEquals(it.getKey().intValue(), it.getValue().intValue()))
+                .peek(it -> assertEquals(it.getKey().intValue(), it.getValue().intValue()))
                 .forEach(N::println);
     }
 

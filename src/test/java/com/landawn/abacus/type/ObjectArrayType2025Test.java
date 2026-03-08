@@ -40,7 +40,7 @@ public class ObjectArrayType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(String[].class, type.clazz());
+        assertEquals(String[].class, type.javaType());
     }
 
     @Test

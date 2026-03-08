@@ -1554,8 +1554,8 @@ public final class ParserUtil {
 
                             if (subPropValue == null) {
                                 if (propInfo.type.isCollection()) {
-                                    subPropValue = N.newInstance(propInfo.type.getElementType().clazz());
-                                    final Collection c = N.newCollection((Class) propInfo.type.clazz());
+                                    subPropValue = N.newInstance(propInfo.type.elementType().javaType());
+                                    final Collection c = N.newCollection((Class) propInfo.type.javaType());
                                     c.add(subPropValue);
                                     propInfo.setPropValue(propBean, c);
                                 } else {
@@ -1568,7 +1568,7 @@ public final class ParserUtil {
                                 final Collection c = (Collection) subPropValue;
 
                                 if (c.size() == 0) {
-                                    subPropValue = N.newInstance(propInfo.type.getElementType().clazz());
+                                    subPropValue = N.newInstance(propInfo.type.elementType().javaType());
                                     c.add(subPropValue);
                                 } else if (propInfo.type.isList()) {
                                     subPropValue = ((List) c).get(0);
@@ -1730,7 +1730,7 @@ public final class ParserUtil {
                         propInfoQueue.add(propInfo);
 
                         if (propInfo.type.isCollection()) {
-                            propClass = propInfo.type.getElementType().clazz();
+                            propClass = propInfo.type.elementType().javaType();
                         } else {
                             propClass = propInfo.clazz;
                         }
@@ -2326,7 +2326,7 @@ public final class ParserUtil {
 
             dbType = getType(getDBAnnoType(propClass), this.field, this.getMethod, this.setMethod, declaringClass, typeParamArgMap);
 
-            clazz = type.clazz();
+            clazz = type.javaType();
 
             jsonNameTags = getJsonNameTags(propName, field);
             xmlNameTags = getXmlNameTags(propName, field, jsonXmlType.name(), false);
@@ -2429,7 +2429,7 @@ public final class ParserUtil {
 
             isMarkedAsColumn = tmpIsMarkedToColumn;
 
-            isSubEntity = !isMarkedAsColumn && (type.isBean() || (type.isCollection() && type.getElementType().isBean()));
+            isSubEntity = !isMarkedAsColumn && (type.isBean() || (type.isCollection() && type.elementType().isBean()));
 
             columnName = Strings.isEmpty(tmpColumnName) ? Optional.empty() : Optional.ofNullable(tmpColumnName);
 
@@ -3003,7 +3003,7 @@ public final class ParserUtil {
          * @throws IOException if an I/O error occurs during writing
          * @throws UnsupportedOperationException if date format is specified for unsupported types
          */
-        public void writePropValue(final CharacterWriter writer, final Object x, final JsonXmlSerializationConfig<?> config) throws IOException {
+        public void writePropValue(final CharacterWriter writer, final Object x, final JsonXmlSerConfig<?> config) throws IOException {
             if (hasFormat) {
                 if (x == null) {
                     writer.write(NULL_CHAR_ARRAY);
@@ -3287,7 +3287,7 @@ public final class ParserUtil {
 
                         return Type.<T> of(Array.newInstance(componentActual, 0).getClass());
                     } else {
-                        return Type.<T> of(Array.newInstance(getType(genericArrayType.getGenericComponentType(), typeParamArgMap).clazz(), 0).getClass());
+                        return Type.<T> of(Array.newInstance(getType(genericArrayType.getGenericComponentType(), typeParamArgMap).javaType(), 0).getClass());
                     }
                 } else if (genericType instanceof ParameterizedType parameterizedType) {
                     return getType(parameterizedType, typeParamArgMap);
@@ -3317,7 +3317,7 @@ public final class ParserUtil {
                         if (ch == '<' || ch == '>' || ch == ' ' || ch == ',') {
                             final String typeSegment = annoType.substring(start, i);
 
-                            if (!typeSegment.isEmpty() && Type.of(typeSegment).isObjectType() && !Type.of(pkgName + "." + typeSegment).isObjectType()) {
+                            if (!typeSegment.isEmpty() && Type.of(typeSegment).isObject() && !Type.of(pkgName + "." + typeSegment).isObject()) {
                                 sb.append(pkgName).append(".").append(typeSegment);
                             } else {
                                 sb.append(typeSegment);
@@ -3331,7 +3331,7 @@ public final class ParserUtil {
                     if (start < annoType.length()) {
                         final String typeSegment = annoType.substring(start);
 
-                        if (Type.of(typeSegment).isObjectType() && !Type.of(pkgName + "." + typeSegment).isObjectType()) {
+                        if (Type.of(typeSegment).isObject() && !Type.of(pkgName + "." + typeSegment).isObject()) {
                             sb.append(pkgName).append(".").append(typeSegment);
                         } else {
                             sb.append(typeSegment);
@@ -3354,7 +3354,7 @@ public final class ParserUtil {
 
                     return Type.<T> of(Array.newInstance(componentActual, 0).getClass());
                 } else {
-                    return Type.<T> of(Array.newInstance(getType(genericArrayType.getGenericComponentType(), typeParamArgMap).clazz(), 0).getClass());
+                    return Type.<T> of(Array.newInstance(getType(genericArrayType.getGenericComponentType(), typeParamArgMap).javaType(), 0).getClass());
                 }
             } else if (genericType instanceof ParameterizedType parameterizedType) {
                 final java.lang.reflect.Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();

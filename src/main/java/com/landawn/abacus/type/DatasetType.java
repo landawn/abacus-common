@@ -33,11 +33,12 @@ import com.landawn.abacus.util.Strings;
  * Type<Dataset> datasetType = TypeFactory.getType(Dataset.class);
  *
  * // Create a dataset
- * Dataset dataset = Dataset.builder()
- *     .columnNames(Arrays.asList("id", "name", "age"))
- *     .addRow(1, "Alice", 30)
- *     .addRow(2, "Bob", 25)
- *     .build();
+ * Dataset dataset = Dataset.rows(
+ *     Arrays.asList("id", "name", "age"),
+ *     Arrays.asList(
+ *         Arrays.asList(1, "Alice", 30),
+ *         Arrays.asList(2, "Bob", 25)
+ *     ));
  *
  * // Serialize dataset to JSON string
  * String json = datasetType.stringOf(dataset);
@@ -49,6 +50,7 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings("java:S2160")
 public class DatasetType extends AbstractType<Dataset> {
 
+    /** The type name constant for Dataset type identification. */
     public static final String DATA_SET = Dataset.class.getSimpleName();
 
     private final Class<Dataset> typeClass;
@@ -65,7 +67,7 @@ public class DatasetType extends AbstractType<Dataset> {
      * @return The Class object representing Dataset.class
      */
     @Override
-    public Class<Dataset> clazz() {
+    public Class<Dataset> javaType() {
         return typeClass;
     }
 
@@ -97,7 +99,7 @@ public class DatasetType extends AbstractType<Dataset> {
      * @return SerializationType.DATA_SET, indicating special Dataset serialization handling
      */
     @Override
-    public SerializationType getSerializationType() {
+    public SerializationType serializationType() {
         return SerializationType.DATA_SET;
     }
 

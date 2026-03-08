@@ -32,7 +32,7 @@ public class TimeType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(Time.class, timeType.clazz());
+        assertEquals(Time.class, timeType.javaType());
     }
 
     @Test

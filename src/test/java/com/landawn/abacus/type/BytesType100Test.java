@@ -32,7 +32,7 @@ public class BytesType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<byte[]> result = type.clazz();
+        Class<byte[]> result = type.javaType();
         assertEquals(byte[].class, result);
     }
 

@@ -96,12 +96,12 @@ public class IntStream2025Test extends TestBase {
         assertArrayEquals(new int[] { 1, 2, 3 }, stream.toArray());
     }
 
-    @Test
-    public void testOf_WithJdkStream() {
-        java.util.stream.IntStream jdkStream = java.util.stream.IntStream.of(1, 2, 3);
-        stream = IntStream.of(jdkStream);
-        assertArrayEquals(new int[] { 1, 2, 3 }, stream.toArray());
-    }
+    //    @Test
+    //    public void testOf_WithJdkStream() {
+    //        java.util.stream.IntStream jdkStream = java.util.stream.IntStream.of(1, 2, 3);
+    //        stream = IntStream.of(jdkStream);
+    //        assertArrayEquals(new int[] { 1, 2, 3 }, stream.toArray());
+    //    }
 
     @Test
     public void testOf_WithOptionalInt() {
@@ -1380,7 +1380,7 @@ public class IntStream2025Test extends TestBase {
         IntList elements = new IntList();
 
         // Generate elements with delays to span multiple windows
-        IntStream.of(1, 2, 3, 4, 5, 6).onEach(e -> {
+        IntStream.of(1, 2, 3, 4, 5, 6).peek(e -> {
             if (count.incrementAndGet() == 3) {
                 // Sleep after 3rd element to allow window to reset
                 try {

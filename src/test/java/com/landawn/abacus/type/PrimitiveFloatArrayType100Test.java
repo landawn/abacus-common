@@ -37,12 +37,12 @@ public class PrimitiveFloatArrayType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(float[].class, type.clazz());
+        assertEquals(float[].class, type.javaType());
     }
 
     @Test
     public void testGetElementType() {
-        Type<Float> elementType = type.getElementType();
+        Type<Float> elementType = type.elementType();
         assertNotNull(elementType);
     }
 

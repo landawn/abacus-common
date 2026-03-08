@@ -846,7 +846,7 @@ public class AbstractCharStream200Test extends TestBase {
         assertEquals(5, stats.getCount());
         assertEquals('a', stats.getMin());
         assertEquals('e', stats.getMax());
-        assertEquals(97 + 98 + 99 + 100 + 101, stats.getSum().intValue());
+        assertEquals(97 + 98 + 99 + 100 + 101, stats.getSum());
         assertEquals((97 + 98 + 99 + 100 + 101) / 5.0, stats.getAverage(), 0.001);
 
         Optional<Map<Percentage, Character>> percentiles = summaryPair.right();

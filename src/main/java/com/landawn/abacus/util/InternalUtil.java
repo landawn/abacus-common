@@ -184,6 +184,6 @@ public final class InternalUtil {
      * Private constructor to prevent instantiation of this utility class.
      */
     private InternalUtil() {
-        // singleton for utility class
+        // Utility class - prevent instantiation
     }
 }

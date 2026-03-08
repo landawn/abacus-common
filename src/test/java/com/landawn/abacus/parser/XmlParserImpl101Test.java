@@ -28,8 +28,8 @@ import org.w3c.dom.Node;
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.exception.ParsingException;
-import com.landawn.abacus.parser.XmlDeserializationConfig.XDC;
-import com.landawn.abacus.parser.XmlSerializationConfig.XSC;
+import com.landawn.abacus.parser.XmlDeserConfig;
+import com.landawn.abacus.parser.XmlSerConfig;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.BufferedXmlWriter;
 import com.landawn.abacus.util.MapEntity;
@@ -42,8 +42,8 @@ public class XmlParserImpl101Test extends TestBase {
 
     private XmlParserImpl staxParser;
     private XmlParserImpl domParser;
-    private XmlSerializationConfig serializationConfig;
-    private XmlDeserializationConfig deserializationConfig;
+    private XmlSerConfig serializationConfig;
+    private XmlDeserConfig deserializationConfig;
 
     @TempDir
     Path tempDir;
@@ -52,8 +52,8 @@ public class XmlParserImpl101Test extends TestBase {
     public void setUp() {
         staxParser = new XmlParserImpl(XmlParserType.StAX);
         domParser = new XmlParserImpl(XmlParserType.DOM);
-        serializationConfig = new XmlSerializationConfig();
-        deserializationConfig = new XmlDeserializationConfig();
+        serializationConfig = new XmlSerConfig();
+        deserializationConfig = new XmlDeserConfig();
     }
 
     public static class TestBean {
@@ -262,8 +262,8 @@ public class XmlParserImpl101Test extends TestBase {
 
     @Test
     public void testConstructorWithAllParameters() {
-        XmlSerializationConfig xsc = new XmlSerializationConfig();
-        XmlDeserializationConfig xdc = new XmlDeserializationConfig();
+        XmlSerConfig xsc = new XmlSerConfig();
+        XmlDeserConfig xdc = new XmlDeserConfig();
 
         XmlParserImpl parser = new XmlParserImpl(XmlParserType.StAX, xsc, xdc);
         Assertions.assertNotNull(parser);
@@ -341,8 +341,8 @@ public class XmlParserImpl101Test extends TestBase {
             staxParser.serialize(bean1);
         });
 
-        XmlSerializationConfig config = new XmlSerializationConfig();
-        config.supportCircularReference(true);
+        XmlSerConfig config = new XmlSerConfig();
+        config.setSupportCircularReference(true);
         String xml = staxParser.serialize(bean1, config);
         Assertions.assertNotNull(xml);
     }
@@ -403,8 +403,8 @@ public class XmlParserImpl101Test extends TestBase {
     public void testSerializeWithPrettyFormat() {
         TestBean bean = new TestBean("Test", 20);
 
-        XmlSerializationConfig config = new XmlSerializationConfig();
-        config.prettyFormat(true);
+        XmlSerConfig config = new XmlSerConfig();
+        config.setPrettyFormat(true);
 
         String xml = staxParser.serialize(bean, config);
         Assertions.assertNotNull(xml);
@@ -415,8 +415,8 @@ public class XmlParserImpl101Test extends TestBase {
     public void testSerializeWithwriteTypeInfo() {
         TestBean bean = new TestBean("Test", 20);
 
-        XmlSerializationConfig config = new XmlSerializationConfig();
-        config.writeTypeInfo(true);
+        XmlSerConfig config = new XmlSerConfig();
+        config.setWriteTypeInfo(true);
 
         String xml = staxParser.serialize(bean, config);
         Assertions.assertNotNull(xml);
@@ -426,8 +426,8 @@ public class XmlParserImpl101Test extends TestBase {
     public void testSerializeWithTagByPropertyName() {
         TestBean bean = new TestBean("Test", 20);
 
-        XmlSerializationConfig config = new XmlSerializationConfig();
-        config.tagByPropertyName(true);
+        XmlSerConfig config = new XmlSerConfig();
+        config.setTagByPropertyName(true);
 
         String xml = staxParser.serialize(bean, config);
         Assertions.assertNotNull(xml);
@@ -462,8 +462,8 @@ public class XmlParserImpl101Test extends TestBase {
             staxParser.serialize(bean);
         });
 
-        XmlSerializationConfig config = new XmlSerializationConfig();
-        config.failOnEmptyBean(false);
+        XmlSerConfig config = new XmlSerConfig();
+        config.setFailOnEmptyBean(false);
         String xml = staxParser.serialize(bean, config);
         Assertions.assertEquals("", xml);
     }
@@ -669,10 +669,10 @@ public class XmlParserImpl101Test extends TestBase {
         String xml = "<TestBean><name>John</name><age>30</age><unknownProp>value</unknownProp></TestBean>";
 
         Assertions.assertThrows(ParsingException.class, () -> {
-            staxParser.deserialize(xml, XDC.create().ignoreUnmatchedProperty(false), TestBean.class);
+            staxParser.deserialize(xml, XmlDeserConfig.create().setIgnoreUnmatchedProperty(false), TestBean.class);
         });
 
-        XmlDeserializationConfig config = XDC.create().ignoreUnmatchedProperty(true);
+        XmlDeserConfig config = XmlDeserConfig.create().setIgnoreUnmatchedProperty(true);
         TestBean result = staxParser.deserialize(xml, config, TestBean.class);
         Assertions.assertNotNull(result);
         Assertions.assertEquals("John", result.getName());
@@ -832,7 +832,7 @@ public class XmlParserImpl101Test extends TestBase {
         BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
 
         try {
-            staxParser.writeBean(bean, XSC.create(), null, null, N.typeOf(bean.getClass()), bw);
+            staxParser.writeBean(bean, XmlSerConfig.create(), null, null, N.typeOf(bean.getClass()), bw);
             String xml = bw.toString();
             Assertions.assertTrue(xml.contains("WriteTest"));
             Assertions.assertTrue(xml.contains("50"));
@@ -850,7 +850,7 @@ public class XmlParserImpl101Test extends TestBase {
         BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
 
         try {
-            staxParser.writeMap(map, XSC.create(), null, null, N.typeOf(map.getClass()), bw);
+            staxParser.writeMap(map, XmlSerConfig.create(), null, null, N.typeOf(map.getClass()), bw);
             String xml = bw.toString();
             Assertions.assertTrue(xml.contains("key1"));
             Assertions.assertTrue(xml.contains("value1"));
@@ -870,7 +870,7 @@ public class XmlParserImpl101Test extends TestBase {
         BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
 
         try {
-            staxParser.writeMapEntity(entity, XSC.create(), null, null, N.typeOf(entity.getClass()), bw);
+            staxParser.writeMapEntity(entity, XmlSerConfig.create(), null, null, N.typeOf(entity.getClass()), bw);
             String xml = bw.toString();
             Assertions.assertTrue(xml.contains("TestEntity"));
             Assertions.assertTrue(xml.contains("prop1"));
@@ -886,7 +886,7 @@ public class XmlParserImpl101Test extends TestBase {
         BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
 
         try {
-            staxParser.writeArray(array, XSC.create(), null, null, N.typeOf(array.getClass()), bw);
+            staxParser.writeArray(array, XmlSerConfig.create(), null, null, N.typeOf(array.getClass()), bw);
             String xml = bw.toString();
             Assertions.assertTrue(xml.contains("one"));
             Assertions.assertTrue(xml.contains("two"));
@@ -902,7 +902,7 @@ public class XmlParserImpl101Test extends TestBase {
         BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
 
         try {
-            staxParser.writeCollection(list, XSC.create(), null, null, N.typeOf(list.getClass()), bw);
+            staxParser.writeCollection(list, XmlSerConfig.create(), null, null, N.typeOf(list.getClass()), bw);
             String xml = bw.toString();
             Assertions.assertTrue(xml.contains("apple"));
             Assertions.assertTrue(xml.contains("banana"));
@@ -968,7 +968,7 @@ public class XmlParserImpl101Test extends TestBase {
         String xml = staxParser.serialize(bean);
         Assertions.assertNotNull(xml);
 
-        XmlSerializationConfig config = new XmlSerializationConfig();
+        XmlSerConfig config = new XmlSerConfig();
         config.setExclusion(Exclusion.NONE);
         xml = staxParser.serialize(bean, config);
         Assertions.assertNotNull(xml);
@@ -979,7 +979,7 @@ public class XmlParserImpl101Test extends TestBase {
     public void testSerializeWithNamingPolicy() {
         TestBean bean = new TestBean("Test", 20);
 
-        XmlSerializationConfig config = new XmlSerializationConfig();
+        XmlSerConfig config = new XmlSerConfig();
         config.setPropNamingPolicy(NamingPolicy.SCREAMING_SNAKE_CASE);
 
         String xml = staxParser.serialize(bean, config);

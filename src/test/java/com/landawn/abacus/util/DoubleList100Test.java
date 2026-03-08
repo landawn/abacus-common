@@ -780,10 +780,10 @@ public class DoubleList100Test extends TestBase {
     @Test
     public void testHasDuplicates() {
         list.addAll(new double[] { 1.1, 2.2, 3.3 });
-        assertFalse(list.hasDuplicates());
+        assertFalse(list.containsDuplicates());
 
         list.add(2.2);
-        assertTrue(list.hasDuplicates());
+        assertTrue(list.containsDuplicates());
     }
 
     @Test
@@ -1141,7 +1141,7 @@ public class DoubleList100Test extends TestBase {
         assertFalse(list.removeAllOccurrences(1.1));
         assertFalse(list.removeIf(x -> true));
         assertFalse(list.removeDuplicates());
-        assertFalse(list.hasDuplicates());
+        assertFalse(list.containsDuplicates());
         assertTrue(list.isSorted());
 
         list.sort();

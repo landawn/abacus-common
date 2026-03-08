@@ -16,7 +16,7 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ShortList;
 import com.landawn.abacus.util.Strings;
@@ -44,14 +44,14 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<ShortList> type = TypeFactory.getType(ShortList.class);
-     * Class<ShortList> clazz = type.clazz();
+     * Class<ShortList> clazz = type.javaType();
      * System.out.println(clazz.getName());   // Output: com.landawn.abacus.util.ShortList
      * }</pre>
      *
      * @return the Class object for ShortList.class
      */
     @Override
-    public Class<ShortList> clazz() {
+    public Class<ShortList> javaType() {
         return ShortList.class;
     }
 
@@ -62,14 +62,14 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<ShortList> type = TypeFactory.getType(ShortList.class);
-     * Type<Short> elementType = type.getElementType();
+     * Type<Short> elementType = type.elementType();
      * System.out.println(elementType.name());   // Output: short
      * }</pre>
      *
      * @return the Type instance representing short type for list elements
      */
     @Override
-    public Type<Short> getElementType() {
+    public Type<Short> elementType() {
         return elementType;
     }
 
@@ -79,16 +79,16 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<ShortList> type = TypeFactory.getType(ShortList.class);
-     * Type<Short>[] paramTypes = type.getParameterTypes();
+     * Type<Short>[] paramTypes = type.parameterTypes();
      * System.out.println(paramTypes.length);      // Output: 1
      * System.out.println(paramTypes[0].name());   // Output: short
      * }</pre>
      *
      * @return an array containing the Short Type that describes the elements of this list type
-     * @see #getElementType()
+     * @see #elementType()
      */
     @Override
-    public Type<Short>[] getParameterTypes() {
+    public Type<Short>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -190,7 +190,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * Type<ShortList> type = TypeFactory.getType(ShortList.class);
      * ShortList list = ShortList.of((short) 100, (short) 200, (short) 300);
      * CharacterWriter writer = new CharacterWriter();
-     * JsonXmlSerializationConfig<?> config = new JsonXmlSerializationConfig<>();
+     * JsonXmlSerConfig<?> config = new JsonXmlSerConfig<>();
      * type.writeCharacter(writer, list, config);
      * System.out.println(writer.toString());   // Output: [100, 200, 300]
      *
@@ -205,7 +205,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final ShortList x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final ShortList x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

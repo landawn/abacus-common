@@ -115,7 +115,7 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  * // Result: Person object with name="John" and age=30
  * }</pre>
  *
- * <p><b>Advanced Usage Examples:</b></p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Complex object encoding with nested properties
  * UserPreferences prefs = new UserPreferences();
@@ -246,7 +246,7 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  *   <li><b>Length Limits:</b> Consider implementing parameter length limits for DoS prevention</li>
  * </ul>
  *
- * <p><b>Usage Examples: REST API Client</b>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * public class ApiClient {
  *     private static final String BASE_URL = "https://api.example.com";
@@ -442,7 +442,7 @@ public final class URLEncodedUtil {
     private static final MapSplitter PARAMS_SPLITTER = MapSplitter.with(String.valueOf(QP_SEP_A), NAME_VALUE_SEPARATOR).trimResults();
 
     private URLEncodedUtil() {
-        // singleton.
+        // Utility class - prevent instantiation
     }
 
     /**
@@ -1249,7 +1249,7 @@ public final class URLEncodedUtil {
             if (N.isEmpty(values) || (values.length == 1 && Strings.isEmpty(values[0]))) {
                 propValue = propInfo == null ? null : propInfo.type.defaultValue();
             } else {
-                if (propInfo != null && propInfo.type.clazz().equals(String[].class)) {
+                if (propInfo != null && propInfo.type.javaType().equals(String[].class)) {
                     propValue = values;
                 } else {
                     final String mergedValue = Strings.join(values, ", ");

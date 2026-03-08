@@ -27,40 +27,40 @@ public class HARUtil2025Test extends TestBase {
     @AfterEach
     public void tearDown() {
         // Reset to defaults after each test
-        HARUtil.resetHeaderFilter();
-        HARUtil.logCurl(false);
+        HARUtil.resetThreadLocalHeaderFilter();
+        HARUtil.configureCurlLoggingForCurrentThread(false);
     }
 
     @Test
     public void testSetHttpHeaderFilterForHARRequest() {
-        HARUtil.setHeaderFilter((name, value) -> !"Authorization".equalsIgnoreCase(name));
+        HARUtil.setThreadLocalHeaderFilter((name, value) -> !"Authorization".equalsIgnoreCase(name));
         // If we get here without exception, the filter was set successfully
         assertNotNull(HARUtil.class);
     }
 
     @Test
     public void testSetHttpHeaderFilterForHARRequestWithNull() {
-        assertThrows(IllegalArgumentException.class, () -> HARUtil.setHeaderFilter(null));
+        assertThrows(IllegalArgumentException.class, () -> HARUtil.setThreadLocalHeaderFilter(null));
     }
 
     @Test
     public void testResetHeaderFilter() {
-        HARUtil.setHeaderFilter((name, value) -> false);
-        HARUtil.resetHeaderFilter();
+        HARUtil.setThreadLocalHeaderFilter((name, value) -> false);
+        HARUtil.resetThreadLocalHeaderFilter();
         // After reset, should use default filter
         assertNotNull(HARUtil.class);
     }
 
     @Test
     public void testLogRequestCurlForHARRequestBoolean() {
-        HARUtil.logCurl(true);
+        HARUtil.configureCurlLoggingForCurrentThread(true);
         // If we get here without exception, logging was enabled
         assertNotNull(HARUtil.class);
     }
 
     @Test
     public void testLogRequestCurlForHARRequestWithQuoteChar() {
-        HARUtil.logCurl(true, '"');
+        HARUtil.configureCurlLoggingForCurrentThread(true, '"');
         // If we get here without exception, logging was enabled with custom quote char
         assertNotNull(HARUtil.class);
     }
@@ -68,14 +68,14 @@ public class HARUtil2025Test extends TestBase {
     @Test
     public void testLogRequestCurlForHARRequestWithLogHandler() {
         AtomicReference<String> capturedCurl = new AtomicReference<>();
-        HARUtil.logCurl(true, '\'', capturedCurl::set);
+        HARUtil.configureCurlLoggingForCurrentThread(true, '\'', capturedCurl::set);
         // If we get here without exception, logging was configured
         assertNotNull(HARUtil.class);
     }
 
     @Test
     public void testLogRequestCurlForHARRequestDisabled() {
-        HARUtil.logCurl(false);
+        HARUtil.configureCurlLoggingForCurrentThread(false);
         // If we get here without exception, logging was disabled
         assertNotNull(HARUtil.class);
     }
@@ -85,7 +85,7 @@ public class HARUtil2025Test extends TestBase {
         Map<String, Object> requestEntry = new HashMap<>();
         requestEntry.put("url", "https://api.example.com/users");
 
-        String url = HARUtil.getUrlByRequestEntry(requestEntry);
+        String url = HARUtil.getRequestUrl(requestEntry);
         assertEquals("https://api.example.com/users", url);
     }
 
@@ -151,7 +151,7 @@ public class HARUtil2025Test extends TestBase {
 
     @Test
     public void testGetHeadersByRequestEntryWithFilter() {
-        HARUtil.setHeaderFilter((name, value) -> !"Authorization".equalsIgnoreCase(name));
+        HARUtil.setThreadLocalHeaderFilter((name, value) -> !"Authorization".equalsIgnoreCase(name));
 
         Map<String, Object> requestEntry = new HashMap<>();
         List<Map<String, String>> headersList = new ArrayList<>();
@@ -218,7 +218,7 @@ public class HARUtil2025Test extends TestBase {
     public void testGetRequestEntryByUrlFromHARWithExactMatch() {
         String har = createTestHarString("https://api.example.com/users", "GET");
 
-        Optional<Map<String, Object>> result = HARUtil.getRequestEntryByURLFromHAR(har, url -> url.equals("https://api.example.com/users"));
+        Optional<Map<String, Object>> result = HARUtil.findRequestEntry(har, url -> url.equals("https://api.example.com/users"));
         assertTrue(result.isPresent());
         assertEquals("https://api.example.com/users", result.get().get("url"));
     }
@@ -227,7 +227,7 @@ public class HARUtil2025Test extends TestBase {
     public void testGetRequestEntryByUrlFromHARWithPartialMatch() {
         String har = createTestHarString("https://api.example.com/users/123", "GET");
 
-        Optional<Map<String, Object>> result = HARUtil.getRequestEntryByURLFromHAR(har, url -> url.contains("/users"));
+        Optional<Map<String, Object>> result = HARUtil.findRequestEntry(har, url -> url.contains("/users"));
         assertTrue(result.isPresent());
         assertEquals("https://api.example.com/users/123", result.get().get("url"));
     }
@@ -236,7 +236,7 @@ public class HARUtil2025Test extends TestBase {
     public void testGetRequestEntryByUrlFromHARNoMatch() {
         String har = createTestHarString("https://api.example.com/users", "GET");
 
-        Optional<Map<String, Object>> result = HARUtil.getRequestEntryByURLFromHAR(har, url -> url.contains("/products"));
+        Optional<Map<String, Object>> result = HARUtil.findRequestEntry(har, url -> url.contains("/products"));
         assertFalse(result.isPresent());
     }
 
@@ -244,7 +244,7 @@ public class HARUtil2025Test extends TestBase {
     public void testGetRequestEntryByUrlFromHARMultipleEntries() {
         String har = createTestHarStringWithMultipleEntries();
 
-        Optional<Map<String, Object>> result = HARUtil.getRequestEntryByURLFromHAR(har, url -> url.contains("/products"));
+        Optional<Map<String, Object>> result = HARUtil.findRequestEntry(har, url -> url.contains("/products"));
         assertTrue(result.isPresent());
         assertEquals("https://api.example.com/products", result.get().get("url"));
     }
@@ -254,7 +254,7 @@ public class HARUtil2025Test extends TestBase {
         Map<String, Object> requestEntry = new HashMap<>();
         requestEntry.put("url", "https://api.example.com/search?q=test&limit=10");
 
-        String url = HARUtil.getUrlByRequestEntry(requestEntry);
+        String url = HARUtil.getRequestUrl(requestEntry);
         assertEquals("https://api.example.com/search?q=test&limit=10", url);
     }
 
@@ -342,7 +342,7 @@ public class HARUtil2025Test extends TestBase {
     @Test
     public void testLogRequestCurlForHARRequestWithCustomHandler() {
         AtomicBoolean handlerCalled = new AtomicBoolean(false);
-        HARUtil.logCurl(true, '\'', curl -> handlerCalled.set(true));
+        HARUtil.configureCurlLoggingForCurrentThread(true, '\'', curl -> handlerCalled.set(true));
         // The handler will only be called when actually sending a request
         assertNotNull(HARUtil.class);
     }
@@ -350,9 +350,9 @@ public class HARUtil2025Test extends TestBase {
     @Test
     public void testResetHttpHeaderFilterAfterCustomFilter() {
         // Set a custom filter
-        HARUtil.setHeaderFilter((name, value) -> false);
+        HARUtil.setThreadLocalHeaderFilter((name, value) -> false);
         // Reset to default
-        HARUtil.resetHeaderFilter();
+        HARUtil.resetThreadLocalHeaderFilter();
 
         Map<String, Object> requestEntry = new HashMap<>();
         List<Map<String, String>> headersList = new ArrayList<>();

@@ -36,7 +36,7 @@ public class LocalTimeType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(LocalTime.class, localTimeType.clazz());
+        assertEquals(LocalTime.class, localTimeType.javaType());
     }
 
     @Test

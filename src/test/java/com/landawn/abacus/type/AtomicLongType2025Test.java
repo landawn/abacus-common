@@ -41,7 +41,7 @@ public class AtomicLongType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(AtomicLong.class, type.clazz());
+        assertEquals(AtomicLong.class, type.javaType());
     }
 
     @Test

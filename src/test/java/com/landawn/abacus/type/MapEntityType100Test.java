@@ -24,7 +24,7 @@ public class MapEntityType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(MapEntity.class, mapEntityType.clazz());
+        assertEquals(MapEntity.class, mapEntityType.javaType());
     }
 
     @Test
@@ -39,7 +39,7 @@ public class MapEntityType100Test extends TestBase {
 
     @Test
     public void testGetSerializationType() {
-        assertEquals(Type.SerializationType.MAP_ENTITY, mapEntityType.getSerializationType());
+        assertEquals(Type.SerializationType.MAP_ENTITY, mapEntityType.serializationType());
     }
 
     @Test

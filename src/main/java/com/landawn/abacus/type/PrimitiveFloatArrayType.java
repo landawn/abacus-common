@@ -17,7 +17,7 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.util.Collection;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -49,14 +49,14 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<float[]> type = TypeFactory.getType(float[].class);
-     * Class<float[]> clazz = type.clazz();
+     * Class<float[]> clazz = type.javaType();
      * // Returns: float[].class
      * }</pre>
      *
      * @return the Class object for float[]
      */
     @Override
-    public Class<float[]> clazz() {
+    public Class<float[]> javaType() {
         return float[].class;
     }
 
@@ -66,14 +66,14 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<float[]> type = TypeFactory.getType(float[].class);
-     * Type<Float> elementType = type.getElementType();
+     * Type<Float> elementType = type.elementType();
      * // Returns: Type instance for float
      * }</pre>
      *
      * @return the Type object representing Float/float elements
      */
     @Override
-    public Type<Float> getElementType() {
+    public Type<Float> elementType() {
         return elementType;
     }
 
@@ -81,10 +81,10 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * Returns the parameter types associated with this array type.
      *
      * @return an array containing the Float Type that describes the elements of this array type
-     * @see #getElementType()
+     * @see #elementType()
      */
     @Override
-    public Type<Float>[] getParameterTypes() {
+    public Type<Float>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -220,7 +220,7 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * @throws IOException if an I/O error occurs
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final float[] x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final float[] x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

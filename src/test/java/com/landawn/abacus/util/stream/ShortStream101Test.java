@@ -616,7 +616,7 @@ public class ShortStream101Test extends TestBase {
     @Test
     public void testOnEach() {
         List<Short> collected = new ArrayList<>();
-        short[] result = createShortStream((short) 1, (short) 2, (short) 3).onEach(collected::add).toArray();
+        short[] result = createShortStream((short) 1, (short) 2, (short) 3).peek(collected::add).toArray();
 
         assertArrayEquals(new short[] { 1, 2, 3 }, result);
         assertEquals(Arrays.asList((short) 1, (short) 2, (short) 3), collected);

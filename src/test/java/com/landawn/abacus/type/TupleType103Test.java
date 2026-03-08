@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple4;
@@ -44,14 +44,14 @@ public class TupleType103Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<?> clazz = tuple4Type.clazz();
+        Class<?> clazz = tuple4Type.javaType();
         assertNotNull(clazz);
         assertEquals(Tuple4.class, clazz);
     }
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = tuple4Type.getParameterTypes();
+        Type<?>[] paramTypes = tuple4Type.parameterTypes();
         assertNotNull(paramTypes);
         assertEquals(4, paramTypes.length);
     }
@@ -133,7 +133,7 @@ public class TupleType103Test extends TestBase {
     @Test
     public void testWriteCharacter() throws IOException {
         CharacterWriter writer = createCharacterWriter();
-        JsonXmlSerializationConfig<?> config = null;
+        JsonXmlSerConfig<?> config = null;
 
         tuple4Type.writeCharacter(writer, testTuple4, config);
 
@@ -143,7 +143,7 @@ public class TupleType103Test extends TestBase {
     @Test
     public void testWriteCharacterNull() throws IOException {
         CharacterWriter writer = createCharacterWriter();
-        JsonXmlSerializationConfig<?> config = null;
+        JsonXmlSerConfig<?> config = null;
 
         tuple4Type.writeCharacter(writer, null, config);
 

@@ -155,7 +155,7 @@ public class PasswordType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(String.class, passwordType.clazz());
+        assertEquals(String.class, passwordType.javaType());
     }
 
     @Test

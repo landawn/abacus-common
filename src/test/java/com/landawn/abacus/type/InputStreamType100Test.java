@@ -23,7 +23,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -42,7 +42,7 @@ public class InputStreamType100Test extends TestBase {
     private CallableStatement callableStatement;
 
     @Mock
-    private JsonXmlSerializationConfig<?> config;
+    private JsonXmlSerConfig<?> config;
 
     @Mock
     private Blob blob;
@@ -56,7 +56,7 @@ public class InputStreamType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(InputStream.class, inputStreamType.clazz());
+        assertEquals(InputStream.class, inputStreamType.javaType());
     }
 
     @Test

@@ -40,7 +40,7 @@ public class TimestampType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(Timestamp.class, type.clazz());
+        assertEquals(Timestamp.class, type.javaType());
     }
 
     @Test

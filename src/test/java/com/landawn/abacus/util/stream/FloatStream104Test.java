@@ -533,29 +533,29 @@ public class FloatStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterOnEach() {
-        assertEquals(5, FloatStream.of(1, 2, 3, 4, 5).onEach(e -> {
+        assertEquals(5, FloatStream.of(1, 2, 3, 4, 5).peek(e -> {
         }).count());
-        assertEquals(4, FloatStream.of(1, 2, 3, 4, 5).onEach(e -> {
+        assertEquals(4, FloatStream.of(1, 2, 3, 4, 5).peek(e -> {
         }).skip(1).count());
-        assertArrayEquals(new float[] { 1, 2, 3, 4, 5 }, FloatStream.of(1, 2, 3, 4, 5).onEach(e -> {
+        assertArrayEquals(new float[] { 1, 2, 3, 4, 5 }, FloatStream.of(1, 2, 3, 4, 5).peek(e -> {
         }).toArray(), 0.001f);
-        assertArrayEquals(new float[] { 2, 3, 4, 5 }, FloatStream.of(1, 2, 3, 4, 5).onEach(e -> {
+        assertArrayEquals(new float[] { 2, 3, 4, 5 }, FloatStream.of(1, 2, 3, 4, 5).peek(e -> {
         }).skip(1).toArray(), 0.001f);
-        assertEquals(N.toList(1f, 2f, 3f, 4f, 5f), FloatStream.of(1, 2, 3, 4, 5).onEach(e -> {
+        assertEquals(N.toList(1f, 2f, 3f, 4f, 5f), FloatStream.of(1, 2, 3, 4, 5).peek(e -> {
         }).toList());
-        assertEquals(N.toList(2f, 3f, 4f, 5f), FloatStream.of(1, 2, 3, 4, 5).onEach(e -> {
+        assertEquals(N.toList(2f, 3f, 4f, 5f), FloatStream.of(1, 2, 3, 4, 5).peek(e -> {
         }).skip(1).toList());
-        assertEquals(5, FloatStream.of(1, 2, 3, 4, 5).map(e -> e).onEach(e -> {
+        assertEquals(5, FloatStream.of(1, 2, 3, 4, 5).map(e -> e).peek(e -> {
         }).count());
-        assertEquals(4, FloatStream.of(1, 2, 3, 4, 5).map(e -> e).onEach(e -> {
+        assertEquals(4, FloatStream.of(1, 2, 3, 4, 5).map(e -> e).peek(e -> {
         }).skip(1).count());
-        assertArrayEquals(new float[] { 1, 2, 3, 4, 5 }, FloatStream.of(1, 2, 3, 4, 5).map(e -> e).onEach(e -> {
+        assertArrayEquals(new float[] { 1, 2, 3, 4, 5 }, FloatStream.of(1, 2, 3, 4, 5).map(e -> e).peek(e -> {
         }).toArray(), 0.001f);
-        assertArrayEquals(new float[] { 2, 3, 4, 5 }, FloatStream.of(1, 2, 3, 4, 5).map(e -> e).onEach(e -> {
+        assertArrayEquals(new float[] { 2, 3, 4, 5 }, FloatStream.of(1, 2, 3, 4, 5).map(e -> e).peek(e -> {
         }).skip(1).toArray(), 0.001f);
-        assertEquals(N.toList(1f, 2f, 3f, 4f, 5f), FloatStream.of(1, 2, 3, 4, 5).map(e -> e).onEach(e -> {
+        assertEquals(N.toList(1f, 2f, 3f, 4f, 5f), FloatStream.of(1, 2, 3, 4, 5).map(e -> e).peek(e -> {
         }).toList());
-        assertEquals(N.toList(2f, 3f, 4f, 5f), FloatStream.of(1, 2, 3, 4, 5).map(e -> e).onEach(e -> {
+        assertEquals(N.toList(2f, 3f, 4f, 5f), FloatStream.of(1, 2, 3, 4, 5).map(e -> e).peek(e -> {
         }).skip(1).toList());
     }
 

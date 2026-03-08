@@ -39,7 +39,7 @@ public class DoubleType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(Double.class, type.clazz());
+        assertEquals(Double.class, type.javaType());
     }
 
     @Test

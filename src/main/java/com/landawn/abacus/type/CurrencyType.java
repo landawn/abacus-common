@@ -37,7 +37,7 @@ public class CurrencyType extends AbstractType<Currency> {
      * @return The Class object representing Currency.class
      */
     @Override
-    public Class<Currency> clazz() {
+    public Class<Currency> javaType() {
         return Currency.class;
     }
 

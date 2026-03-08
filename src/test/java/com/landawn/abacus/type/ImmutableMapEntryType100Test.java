@@ -17,7 +17,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -27,7 +27,7 @@ public class ImmutableMapEntryType100Test extends TestBase {
     private CharacterWriter characterWriter;
 
     @Mock
-    private JsonXmlSerializationConfig<?> config;
+    private JsonXmlSerConfig<?> config;
 
     @BeforeEach
     public void setUp() {
@@ -47,12 +47,12 @@ public class ImmutableMapEntryType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(AbstractMap.SimpleImmutableEntry.class, immutableMapEntryType.clazz());
+        assertEquals(AbstractMap.SimpleImmutableEntry.class, immutableMapEntryType.javaType());
     }
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = immutableMapEntryType.getParameterTypes();
+        Type<?>[] paramTypes = immutableMapEntryType.parameterTypes();
         assertNotNull(paramTypes);
         assertEquals(2, paramTypes.length);
     }

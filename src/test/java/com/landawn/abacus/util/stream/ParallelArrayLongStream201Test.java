@@ -231,7 +231,7 @@ public class ParallelArrayLongStream201Test extends TestBase {
                 consumed.add(it);
             }
         };
-        stream.onEach(action).forEach(l -> {
+        stream.peek(action).forEach(l -> {
         });
         assertEquals(TEST_ARRAY.length, consumed.size());
 

@@ -24,7 +24,7 @@ public class DatasetType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(Dataset.class, datasetType.clazz());
+        assertEquals(Dataset.class, datasetType.javaType());
     }
 
     @Test
@@ -39,7 +39,7 @@ public class DatasetType100Test extends TestBase {
 
     @Test
     public void testGetSerializationType() {
-        assertEquals(Type.SerializationType.DATA_SET, datasetType.getSerializationType());
+        assertEquals(Type.SerializationType.DATA_SET, datasetType.serializationType());
     }
 
     @Test

@@ -11,7 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.OptionalDouble;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
@@ -37,7 +37,7 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      * @return OptionalDouble.class
      */
     @Override
-    public Class<OptionalDouble> clazz() {
+    public Class<OptionalDouble> javaType() {
         return OptionalDouble.class;
     }
 
@@ -203,7 +203,7 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final OptionalDouble x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final OptionalDouble x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null || x.isEmpty()) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

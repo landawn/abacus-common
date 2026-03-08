@@ -700,7 +700,7 @@ public class Stream2025Test extends TestBase {
     @Test
     public void testOnEach() {
         List<Integer> processed = new ArrayList<>();
-        Stream<Integer> stream = Stream.of(1, 2, 3).onEach(processed::add);
+        Stream<Integer> stream = Stream.of(1, 2, 3).peek(processed::add);
         assertEquals(Arrays.asList(1, 2, 3), stream.toList());
         assertEquals(Arrays.asList(1, 2, 3), processed);
     }
@@ -1083,8 +1083,8 @@ public class Stream2025Test extends TestBase {
 
     @Test
     public void testNMatch() {
-        assertTrue(Stream.of(2, 4, 6, 8).isMatchCountBetween(2, 3, n -> n > 5));
-        assertFalse(Stream.of(2, 4, 6, 8).isMatchCountBetween(5, 10, n -> n > 5));
+        assertTrue(Stream.of(2, 4, 6, 8).hasMatchCountBetween(2, 3, n -> n > 5));
+        assertFalse(Stream.of(2, 4, 6, 8).hasMatchCountBetween(5, 10, n -> n > 5));
     }
 
     @Test
@@ -1473,9 +1473,9 @@ public class Stream2025Test extends TestBase {
 
     @Test
     public void testHasDuplicates() {
-        assertTrue(Stream.of(1, 2, 2, 3).hasDuplicates());
-        assertFalse(Stream.of(1, 2, 3).hasDuplicates());
-        assertFalse(Stream.<Integer> empty().hasDuplicates());
+        assertTrue(Stream.of(1, 2, 2, 3).containsDuplicates());
+        assertFalse(Stream.of(1, 2, 3).containsDuplicates());
+        assertFalse(Stream.<Integer> empty().containsDuplicates());
     }
 
     @Test
@@ -2441,22 +2441,6 @@ public class Stream2025Test extends TestBase {
     }
 
     @Test
-    public void testOnEachE() throws Exception {
-        List<Integer> collected = new ArrayList<>();
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5).onEachE(collected::add).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), collected);
-    }
-
-    @Test
-    public void testOnEachEEmpty() throws Exception {
-        List<Integer> collected = new ArrayList<>();
-        List<Integer> result = Stream.<Integer> empty().onEachE(collected::add).toList();
-        assertTrue(result.isEmpty());
-        assertTrue(collected.isEmpty());
-    }
-
-    @Test
     public void testToImmutableMap() {
         com.landawn.abacus.util.ImmutableMap<Integer, String> map = Stream.of("a", "bb", "ccc").toImmutableMap(String::length, s -> s);
         assertEquals(3, map.size());
@@ -2969,16 +2953,6 @@ public class Stream2025Test extends TestBase {
     }
 
     @Test
-    public void testSpsOnEach() {
-        AtomicInteger count = new AtomicInteger(0);
-        Stream<Integer> stream = Stream.of(1, 2, 3);
-        Stream<Integer> observed = stream.spsOnEach(n -> count.incrementAndGet());
-
-        assertHaveSameElements(Arrays.asList(1, 2, 3), observed.toList());
-        assertEquals(3, count.get());
-    }
-
-    @Test
     public void testSpsMapE() {
         Stream<Integer> stream = Stream.of(1, 2, 3);
         Stream<String> mapped = stream.spsMapE(n -> {
@@ -3010,20 +2984,6 @@ public class Stream2025Test extends TestBase {
         });
         List<Integer> result = flatMapped.toList();
         assertEquals(6, result.size());
-    }
-
-    @Test
-    public void testSpsOnEachE() {
-        AtomicInteger count = new AtomicInteger(0);
-        Stream<Integer> stream = Stream.of(1, 2, 3);
-        Stream<Integer> observed = stream.spsOnEachE(n -> {
-            if (n == null)
-                throw new IllegalArgumentException("null value");
-            count.incrementAndGet();
-        });
-
-        assertHaveSameElements(Arrays.asList(1, 2, 3), observed.toList());
-        assertEquals(3, count.get());
     }
 
     @Test
@@ -3103,7 +3063,7 @@ public class Stream2025Test extends TestBase {
         List<Integer> elements = new ArrayList<>();
 
         // Generate elements with delays to span multiple windows
-        Stream.of(1, 2, 3, 4, 5, 6).onEach(e -> {
+        Stream.of(1, 2, 3, 4, 5, 6).peek(e -> {
             if (count.incrementAndGet() == 3) {
                 // Sleep after 3rd element to allow window to reset
                 try {

@@ -243,7 +243,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
      *
      * @return the arithmetic mean of values, or zero if none
      */
-    public final Double getAverage() {
+    public final double getAverage() {
         return getCount() > 0 ? (double) getSum() / getCount() : 0.0d;
     }
 

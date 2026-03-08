@@ -177,6 +177,19 @@ public class GenericKeyedObjectPool100Test extends TestBase {
     }
 
     @Test
+    public void testPutToSmallFullPoolWithDefaultAutoBalanceFactor() {
+        GenericKeyedObjectPool<String, TestPoolable> balancePool = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f);
+        TestPoolable first = new TestPoolable("value1");
+
+        assertTrue(balancePool.put("key1", first));
+        assertTrue(balancePool.put("key2", new TestPoolable("value2")));
+        assertEquals(1, balancePool.size());
+        assertTrue(first.isDestroyed());
+
+        balancePool.close();
+    }
+
+    @Test
     public void testPutReplace() {
         TestPoolable p1 = new TestPoolable("value1");
         TestPoolable p2 = new TestPoolable("value2");
@@ -200,7 +213,8 @@ public class GenericKeyedObjectPool100Test extends TestBase {
 
         assertTrue(memPool.put("k1", new TestPoolable("v1")));
         assertTrue(memPool.put("k2", new TestPoolable("v2")));
-        assertFalse(memPool.put("k3", new TestPoolable("v3")));
+        assertTrue(memPool.put("k3", new TestPoolable("v3")));
+        assertEquals(2, memPool.size());
 
         memPool.close();
     }

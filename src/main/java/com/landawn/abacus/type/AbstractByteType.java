@@ -21,7 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
@@ -276,8 +276,8 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, Number x, final JsonXmlSerializationConfig<?> config) throws IOException {
-        x = x == null && config != null && config.writeNullNumberAsZero() ? Numbers.BYTE_ZERO : x;
+    public void writeCharacter(final CharacterWriter writer, Number x, final JsonXmlSerConfig<?> config) throws IOException {
+        x = x == null && config != null && config.isWriteNullNumberAsZero() ? Numbers.BYTE_ZERO : x;
 
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);

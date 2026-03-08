@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.u.OptionalLong;
 
@@ -31,18 +31,18 @@ public class OptionalLongType100Test extends TestBase {
 
     private OptionalLongType optionalLongType;
     private CharacterWriter writer;
-    private JsonXmlSerializationConfig<?> config;
+    private JsonXmlSerConfig<?> config;
 
     @BeforeEach
     public void setUp() {
         optionalLongType = (OptionalLongType) createType("OptionalLong");
         writer = createCharacterWriter();
-        config = mock(JsonXmlSerializationConfig.class);
+        config = mock(JsonXmlSerConfig.class);
     }
 
     @Test
     public void testClazz() {
-        assertEquals(OptionalLong.class, optionalLongType.clazz());
+        assertEquals(OptionalLong.class, optionalLongType.javaType());
     }
 
     @Test

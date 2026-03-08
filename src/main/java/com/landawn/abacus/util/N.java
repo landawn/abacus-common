@@ -82,13 +82,11 @@ import java.util.stream.Collector;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.NotNull;
-import com.landawn.abacus.parser.DeserializationConfig;
-import com.landawn.abacus.parser.JsonDeserializationConfig;
-import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
-import com.landawn.abacus.parser.JsonSerializationConfig;
-import com.landawn.abacus.parser.XmlDeserializationConfig;
-import com.landawn.abacus.parser.XmlDeserializationConfig.XDC;
-import com.landawn.abacus.parser.XmlSerializationConfig;
+import com.landawn.abacus.parser.Deserialization;
+import com.landawn.abacus.parser.JsonDeserConfig;
+import com.landawn.abacus.parser.JsonSerConfig;
+import com.landawn.abacus.parser.XmlDeserConfig;
+import com.landawn.abacus.parser.XmlSerConfig;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
@@ -380,6 +378,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the number of occurrences of the specified value in the array.
      *
+     * <p><b>Note:</b> {@code frequency()} counts occurrences of a specific <b>value</b> using equality comparison,
+     * while {@link #count(boolean[], BooleanPredicate)} counts elements matching a <b>predicate</b>.
+     * Use {@code frequency()} when you know the exact value to search for;
+     * use {@code count()} when you need a custom matching condition.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] flags = {true, false, true, true, false};
@@ -390,6 +393,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param valueToFind the boolean value to count occurrences of
      * @return the number of occurrences (0 if array is {@code null} or empty)
      * @see #frequency(char[], char)
+     * @see #count(boolean[], BooleanPredicate)
      */
     public static int frequency(final boolean[] a, final boolean valueToFind) {
         if (isEmpty(a)) {
@@ -4214,7 +4218,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * boolean[] a = {true, false, true, false};
      * boolean[] b = {true, true, false};
      * boolean[] result = N.intersection(a, b);
-     * // Returns {true, false} (min occurrences from both)
+     * // Returns {true, false, true} (min occurrences: true=2, false=1)
      * }</pre>
      *
      * @param a the first array
@@ -4915,7 +4919,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         N.checkArgument(b.containsAllColumns(keyColumnNames), "B Dataset={} does not contain all keyColumnNames={}", columnNameListB, keyColumnNames);
 
-        if (requiresSameColumns && !(columnNameListA.size() == columnNameListB.size() && columnNameListA.containsAll(columnNameListB))) {
+        if (requiresSameColumns && !(columnNameListA.size() == columnNameListB.size() && new HashSet<>(columnNameListA).containsAll(columnNameListB))) {
             throw new IllegalArgumentException("These two Datasets do not have the same column names: " + columnNameListA + ", " + columnNameListB);
         }
     }
@@ -12901,7 +12905,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         if (isSorted) {
-            boolean hasDuplicates = false;
+            boolean containsDuplicates = false;
             final Iterator<?> it = c.iterator();
             Object pre = it.next();
             Object next = null;
@@ -12909,24 +12913,24 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 next = it.next();
                 if (equals(next, pre)) {
                     it.remove();
-                    hasDuplicates = true;
+                    containsDuplicates = true;
                 } else {
                     pre = next;
                 }
             }
 
-            return hasDuplicates;
+            return containsDuplicates;
         } else {
             final List<?> list = distinct(c);
 
-            final boolean hasDuplicates = list.size() != c.size();
+            final boolean containsDuplicates = list.size() != c.size();
 
-            if (hasDuplicates) {
+            if (containsDuplicates) {
                 c.clear();
                 c.addAll((List) list);
             }
 
-            return hasDuplicates;
+            return containsDuplicates;
         }
     }
 
@@ -14469,20 +14473,20 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] flags1 = {true, false, true};
-     * boolean result1 = N.hasDuplicates(flags1);   // Returns true (two true values)
+     * boolean result1 = N.containsDuplicates(flags1);   // Returns true (two true values)
      * 
      * boolean[] flags2 = {true, false};
-     * boolean result2 = N.hasDuplicates(flags2);   // Returns false
+     * boolean result2 = N.containsDuplicates(flags2);   // Returns false
      * }</pre>
      * 
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
-    public static boolean hasDuplicates(final boolean[] a) {
+    public static boolean containsDuplicates(final boolean[] a) {
         if (isEmpty(a)) {
             return false;
         }
 
-        return hasDuplicates(a, 0, a.length);
+        return containsDuplicates(a, 0, a.length);
     }
 
     /**
@@ -14494,7 +14498,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return {@code true} if the array has duplicates within the specified range, {@code false} otherwise
      * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
      */
-    static boolean hasDuplicates(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    static boolean containsDuplicates(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || toIndex - fromIndex < 2) {
@@ -14514,16 +14518,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] letters1 = {'a', 'b', 'c'};
-     * boolean result1 = N.hasDuplicates(letters1);   // Returns false
+     * boolean result1 = N.containsDuplicates(letters1);   // Returns false
      * 
      * char[] letters2 = {'a', 'b', 'a'};
-     * boolean result2 = N.hasDuplicates(letters2);   // Returns true
+     * boolean result2 = N.containsDuplicates(letters2);   // Returns true
      * }</pre>
      * 
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
-    public static boolean hasDuplicates(final char[] a) {
-        return hasDuplicates(a, false);
+    public static boolean containsDuplicates(final char[] a) {
+        return containsDuplicates(a, false);
     }
 
     /**
@@ -14535,20 +14539,20 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] sorted = {'a', 'b', 'b', 'c'};
-     * boolean result1 = N.hasDuplicates(sorted, true);   // Returns true (using optimized sorted check)
+     * boolean result1 = N.containsDuplicates(sorted, true);   // Returns true (using optimized sorted check)
      * 
      * char[] unsorted = {'c', 'a', 'b', 'a'};
-     * boolean result2 = N.hasDuplicates(unsorted, false);   // Returns true
+     * boolean result2 = N.containsDuplicates(unsorted, false);   // Returns true
      * }</pre>
      * 
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
-    public static boolean hasDuplicates(final char[] a, final boolean isSorted) {
+    public static boolean containsDuplicates(final char[] a, final boolean isSorted) {
         if (isEmpty(a)) {
             return false;
         }
 
-        return hasDuplicates(a, 0, a.length, isSorted);
+        return containsDuplicates(a, 0, a.length, isSorted);
     }
 
     /**
@@ -14561,7 +14565,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return {@code true} if the array has duplicates within the specified range, {@code false} otherwise
      * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
      */
-    static boolean hasDuplicates(final char[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
+    static boolean containsDuplicates(final char[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || toIndex - fromIndex < 2) {
@@ -14598,16 +14602,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data1 = {1, 2, 3};
-     * boolean result1 = N.hasDuplicates(data1);   // Returns false
+     * boolean result1 = N.containsDuplicates(data1);   // Returns false
      * 
      * byte[] data2 = {1, 2, 1};
-     * boolean result2 = N.hasDuplicates(data2);   // Returns true
+     * boolean result2 = N.containsDuplicates(data2);   // Returns true
      * }</pre>
      * 
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
-    public static boolean hasDuplicates(final byte[] a) {
-        return hasDuplicates(a, false);
+    public static boolean containsDuplicates(final byte[] a) {
+        return containsDuplicates(a, false);
     }
 
     /**
@@ -14616,22 +14620,22 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] sorted = {1, 2, 2, 3};
-     * boolean result1 = N.hasDuplicates(sorted, true);   // Returns true (using optimized sorted check)
+     * boolean result1 = N.containsDuplicates(sorted, true);   // Returns true (using optimized sorted check)
      *
      * byte[] unsorted = {3, 1, 2, 1};
-     * boolean result2 = N.hasDuplicates(unsorted, false);   // Returns true
+     * boolean result2 = N.containsDuplicates(unsorted, false);   // Returns true
      * }</pre>
      *
      * @param a the array to be checked for duplicates
      * @param isSorted a boolean that indicates if the array is sorted. If {@code true}, the algorithm will be faster.
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
-    public static boolean hasDuplicates(final byte[] a, final boolean isSorted) {
+    public static boolean containsDuplicates(final byte[] a, final boolean isSorted) {
         if (isEmpty(a)) {
             return false;
         }
 
-        return hasDuplicates(a, 0, a.length, isSorted);
+        return containsDuplicates(a, 0, a.length, isSorted);
     }
 
     /**
@@ -14644,7 +14648,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return {@code true} if the array has duplicates within the specified range, {@code false} otherwise
      * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
      */
-    static boolean hasDuplicates(final byte[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
+    static boolean containsDuplicates(final byte[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || toIndex - fromIndex < 2) {
@@ -14681,16 +14685,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] values1 = {10, 20, 30};
-     * boolean result1 = N.hasDuplicates(values1);   // Returns false
+     * boolean result1 = N.containsDuplicates(values1);   // Returns false
      * 
      * short[] values2 = {10, 20, 10};
-     * boolean result2 = N.hasDuplicates(values2);   // Returns true
+     * boolean result2 = N.containsDuplicates(values2);   // Returns true
      * }</pre>
      * 
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
-    public static boolean hasDuplicates(final short[] a) {
-        return hasDuplicates(a, false);
+    public static boolean containsDuplicates(final short[] a) {
+        return containsDuplicates(a, false);
     }
 
     /**
@@ -14699,22 +14703,22 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] sorted = {1, 2, 2, 3};
-     * boolean result1 = N.hasDuplicates(sorted, true);   // Returns true (using optimized sorted check)
+     * boolean result1 = N.containsDuplicates(sorted, true);   // Returns true (using optimized sorted check)
      *
      * short[] unsorted = {3, 1, 2, 1};
-     * boolean result2 = N.hasDuplicates(unsorted, false);   // Returns true
+     * boolean result2 = N.containsDuplicates(unsorted, false);   // Returns true
      * }</pre>
      *
      * @param a the array to be checked for duplicates
      * @param isSorted a boolean that indicates if the array is sorted. If {@code true}, the algorithm will be faster.
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
-    public static boolean hasDuplicates(final short[] a, final boolean isSorted) {
+    public static boolean containsDuplicates(final short[] a, final boolean isSorted) {
         if (isEmpty(a)) {
             return false;
         }
 
-        return hasDuplicates(a, 0, a.length, isSorted);
+        return containsDuplicates(a, 0, a.length, isSorted);
     }
 
     /**
@@ -14727,7 +14731,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return {@code true} if the array has duplicates within the specified range, {@code false} otherwise
      * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
      */
-    static boolean hasDuplicates(final short[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
+    static boolean containsDuplicates(final short[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || toIndex - fromIndex < 2) {
@@ -14764,16 +14768,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] numbers1 = {1, 2, 3, 4};
-     * boolean result1 = N.hasDuplicates(numbers1);   // Returns false
+     * boolean result1 = N.containsDuplicates(numbers1);   // Returns false
      * 
      * int[] numbers2 = {1, 2, 3, 2};
-     * boolean result2 = N.hasDuplicates(numbers2);   // Returns true
+     * boolean result2 = N.containsDuplicates(numbers2);   // Returns true
      * }</pre>
      * 
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
-    public static boolean hasDuplicates(final int[] a) {
-        return hasDuplicates(a, false);
+    public static boolean containsDuplicates(final int[] a) {
+        return containsDuplicates(a, false);
     }
 
     /**
@@ -14782,22 +14786,22 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] sorted = {1, 2, 2, 3};
-     * boolean result1 = N.hasDuplicates(sorted, true);   // Returns true (using optimized sorted check)
+     * boolean result1 = N.containsDuplicates(sorted, true);   // Returns true (using optimized sorted check)
      *
      * int[] unsorted = {3, 1, 2, 1};
-     * boolean result2 = N.hasDuplicates(unsorted, false);   // Returns true
+     * boolean result2 = N.containsDuplicates(unsorted, false);   // Returns true
      * }</pre>
      *
      * @param a the array to be checked for duplicates
      * @param isSorted a boolean that indicates if the array is sorted. If {@code true}, the algorithm will be faster.
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
-    public static boolean hasDuplicates(final int[] a, final boolean isSorted) {
+    public static boolean containsDuplicates(final int[] a, final boolean isSorted) {
         if (isEmpty(a)) {
             return false;
         }
 
-        return hasDuplicates(a, 0, a.length, isSorted);
+        return containsDuplicates(a, 0, a.length, isSorted);
     }
 
     /**
@@ -14810,7 +14814,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return {@code true} if the array has duplicates within the specified range, {@code false} otherwise
      * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
      */
-    static boolean hasDuplicates(final int[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
+    static boolean containsDuplicates(final int[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || toIndex - fromIndex < 2) {
@@ -14847,16 +14851,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] ids1 = {100L, 200L, 300L};
-     * boolean result1 = N.hasDuplicates(ids1);   // Returns false
+     * boolean result1 = N.containsDuplicates(ids1);   // Returns false
      * 
      * long[] ids2 = {100L, 200L, 100L};
-     * boolean result2 = N.hasDuplicates(ids2);   // Returns true
+     * boolean result2 = N.containsDuplicates(ids2);   // Returns true
      * }</pre>
      * 
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
-    public static boolean hasDuplicates(final long[] a) {
-        return hasDuplicates(a, false);
+    public static boolean containsDuplicates(final long[] a) {
+        return containsDuplicates(a, false);
     }
 
     /**
@@ -14865,22 +14869,22 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] sorted = {1L, 2L, 2L, 3L};
-     * boolean result1 = N.hasDuplicates(sorted, true);   // Returns true (using optimized sorted check)
+     * boolean result1 = N.containsDuplicates(sorted, true);   // Returns true (using optimized sorted check)
      *
      * long[] unsorted = {3L, 1L, 2L, 1L};
-     * boolean result2 = N.hasDuplicates(unsorted, false);   // Returns true
+     * boolean result2 = N.containsDuplicates(unsorted, false);   // Returns true
      * }</pre>
      *
      * @param a the array to be checked for duplicates
      * @param isSorted a boolean that indicates if the array is sorted. If {@code true}, the algorithm will be faster.
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
-    public static boolean hasDuplicates(final long[] a, final boolean isSorted) {
+    public static boolean containsDuplicates(final long[] a, final boolean isSorted) {
         if (isEmpty(a)) {
             return false;
         }
 
-        return hasDuplicates(a, 0, a.length, isSorted);
+        return containsDuplicates(a, 0, a.length, isSorted);
     }
 
     /**
@@ -14893,7 +14897,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return {@code true} if the array has duplicates within the specified range, {@code false} otherwise
      * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
      */
-    static boolean hasDuplicates(final long[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
+    static boolean containsDuplicates(final long[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || toIndex - fromIndex < 2) {
@@ -14930,16 +14934,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] values1 = {1.5f, 2.5f, 3.5f};
-     * boolean result1 = N.hasDuplicates(values1);   // Returns false
+     * boolean result1 = N.containsDuplicates(values1);   // Returns false
      * 
      * float[] values2 = {1.5f, 2.5f, 1.5f};
-     * boolean result2 = N.hasDuplicates(values2);   // Returns true
+     * boolean result2 = N.containsDuplicates(values2);   // Returns true
      * }</pre>
      * 
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
-    public static boolean hasDuplicates(final float[] a) {
-        return hasDuplicates(a, false);
+    public static boolean containsDuplicates(final float[] a) {
+        return containsDuplicates(a, false);
     }
 
     /**
@@ -14948,22 +14952,22 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] sorted = {1.0f, 2.0f, 2.0f, 3.0f};
-     * boolean result1 = N.hasDuplicates(sorted, true);   // Returns true (using optimized sorted check)
+     * boolean result1 = N.containsDuplicates(sorted, true);   // Returns true (using optimized sorted check)
      *
      * float[] unsorted = {3.0f, 1.0f, 2.0f, 1.0f};
-     * boolean result2 = N.hasDuplicates(unsorted, false);   // Returns true
+     * boolean result2 = N.containsDuplicates(unsorted, false);   // Returns true
      * }</pre>
      *
      * @param a the array to be checked for duplicates
      * @param isSorted a boolean that indicates if the array is sorted. If {@code true}, the algorithm will be faster.
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
-    public static boolean hasDuplicates(final float[] a, final boolean isSorted) {
+    public static boolean containsDuplicates(final float[] a, final boolean isSorted) {
         if (isEmpty(a)) {
             return false;
         }
 
-        return hasDuplicates(a, 0, a.length, isSorted);
+        return containsDuplicates(a, 0, a.length, isSorted);
     }
 
     /**
@@ -14976,7 +14980,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return {@code true} if the array has duplicates within the specified range, {@code false} otherwise
      * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
      */
-    static boolean hasDuplicates(final float[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
+    static boolean containsDuplicates(final float[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || toIndex - fromIndex < 2) {
@@ -15013,16 +15017,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] prices1 = {10.99, 20.99, 30.99};
-     * boolean result1 = N.hasDuplicates(prices1);   // Returns false
+     * boolean result1 = N.containsDuplicates(prices1);   // Returns false
      * 
      * double[] prices2 = {10.99, 20.99, 10.99};
-     * boolean result2 = N.hasDuplicates(prices2);   // Returns true
+     * boolean result2 = N.containsDuplicates(prices2);   // Returns true
      * }</pre>
      * 
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
-    public static boolean hasDuplicates(final double[] a) {
-        return hasDuplicates(a, false);
+    public static boolean containsDuplicates(final double[] a) {
+        return containsDuplicates(a, false);
     }
 
     /**
@@ -15031,22 +15035,22 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] sorted = {1.0, 2.0, 2.0, 3.0};
-     * boolean result1 = N.hasDuplicates(sorted, true);   // Returns true (using optimized sorted check)
+     * boolean result1 = N.containsDuplicates(sorted, true);   // Returns true (using optimized sorted check)
      *
      * double[] unsorted = {3.0, 1.0, 2.0, 1.0};
-     * boolean result2 = N.hasDuplicates(unsorted, false);   // Returns true
+     * boolean result2 = N.containsDuplicates(unsorted, false);   // Returns true
      * }</pre>
      *
      * @param a the array to be checked for duplicates
      * @param isSorted a boolean that indicates if the array is sorted. If {@code true}, the algorithm will be faster.
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
-    public static boolean hasDuplicates(final double[] a, final boolean isSorted) {
+    public static boolean containsDuplicates(final double[] a, final boolean isSorted) {
         if (isEmpty(a)) {
             return false;
         }
 
-        return hasDuplicates(a, 0, a.length, isSorted);
+        return containsDuplicates(a, 0, a.length, isSorted);
     }
 
     /**
@@ -15059,7 +15063,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return {@code true} if the array has duplicates within the specified range, {@code false} otherwise
      * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
      */
-    static boolean hasDuplicates(final double[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
+    static boolean containsDuplicates(final double[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || toIndex - fromIndex < 2) {
@@ -15097,16 +15101,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] words1 = {"apple", "banana", "cherry"};
-     * boolean result1 = N.hasDuplicates(words1);   // Returns false
+     * boolean result1 = N.containsDuplicates(words1);   // Returns false
      * 
      * String[] words2 = {"apple", "banana", "apple"};
-     * boolean result2 = N.hasDuplicates(words2);   // Returns true
+     * boolean result2 = N.containsDuplicates(words2);   // Returns true
      * }</pre>
      * 
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
-    public static <T> boolean hasDuplicates(final T[] a) {
-        return hasDuplicates(a, false);
+    public static <T> boolean containsDuplicates(final T[] a) {
+        return containsDuplicates(a, false);
     }
 
     /**
@@ -15115,10 +15119,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr1 = {"A", "B", "C"};
-     * boolean result1 = N.hasDuplicates(arr1);   // Returns: false
+     * boolean result1 = N.containsDuplicates(arr1);   // Returns: false
      *
      * String[] arr2 = {"A", "B", "A"};
-     * boolean result2 = N.hasDuplicates(arr2);   // Returns: true
+     * boolean result2 = N.containsDuplicates(arr2);   // Returns: true
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -15126,12 +15130,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param isSorted a boolean that indicates if the array is sorted. If {@code true}, the algorithm will be faster.
      * @return {@code true} if the array has duplicates, {@code false} otherwise
      */
-    public static <T> boolean hasDuplicates(final T[] a, final boolean isSorted) {
+    public static <T> boolean containsDuplicates(final T[] a, final boolean isSorted) {
         if (isEmpty(a)) {
             return false;
         }
 
-        return hasDuplicates(a, 0, a.length, isSorted);
+        return containsDuplicates(a, 0, a.length, isSorted);
     }
 
     /**
@@ -15144,7 +15148,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return {@code true} if the array has duplicates within the specified range, {@code false} otherwise
      * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
      */
-    static <T> boolean hasDuplicates(final T[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
+    static <T> boolean containsDuplicates(final T[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || toIndex - fromIndex < 2) {
@@ -15181,19 +15185,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> list1 = Arrays.asList(1, 2, 3, 4);
-     * boolean result1 = N.hasDuplicates(list1);   // Returns false
+     * boolean result1 = N.containsDuplicates(list1);   // Returns false
      * 
      * List<Integer> list2 = Arrays.asList(1, 2, 3, 2);
-     * boolean result2 = N.hasDuplicates(list2);   // Returns true
+     * boolean result2 = N.containsDuplicates(list2);   // Returns true
      * 
      * Set<String> set = new HashSet<>(Arrays.asList("a", "b", "c"));
-     * boolean result3 = N.hasDuplicates(set);   // Returns false (Sets can't have duplicates)
+     * boolean result3 = N.containsDuplicates(set);   // Returns false (Sets can't have duplicates)
      * }</pre>
      * 
      * @return {@code true} if the collection has duplicates, {@code false} otherwise
      */
-    public static boolean hasDuplicates(final Collection<?> c) {
-        return hasDuplicates(c, false);
+    public static boolean containsDuplicates(final Collection<?> c) {
+        return containsDuplicates(c, false);
     }
 
     /**
@@ -15203,7 +15207,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param isSorted a boolean that indicates if the collection is sorted. If {@code true}, the algorithm will be faster
      * @return {@code true} if the collection has duplicates, {@code false} otherwise
      */
-    public static boolean hasDuplicates(final Collection<?> c, final boolean isSorted) {
+    public static boolean containsDuplicates(final Collection<?> c, final boolean isSorted) {
         if (isEmpty(c) || c.size() == 1 || c instanceof Set) {
             return false;
         }
@@ -16199,7 +16203,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * int sum = N.sumInt(numbers);   // Returns 60
      *
      * Double[] values = {1.5, 2.3, 3.7};
-     * int intSum = N.sumInt(values);   // Returns 7 (1 + 2 + 3)
+     * int intSum = N.sumInt(values);   // Returns 6 (1 + 2 + 3, truncated by intValue())
      * }</pre>
      *
      * @param <T> the type of the elements in the array, which must extend Number.
@@ -29411,9 +29415,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String[] words = {"apple", "apricot", "banana", "blueberry", "cherry"};
+     * String[] words = {"apple", "apricot", "banana", "avocado", "cherry"};
      * List<String> result = N.distinctBy(words, 1, 4, String::length);
-     * // Returns ["apricot", "banana"] (from range [1,4), distinct by length)
+     * // Returns ["apricot", "banana"] (from range [1,4): "apricot"(7), "banana"(6), "avocado"(7) - "avocado" excluded as length 7 already seen)
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -30196,6 +30200,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the number of elements that match the given predicate.
      *
+     * <p><b>Note:</b> {@code count()} counts elements matching a <b>predicate</b> (custom condition),
+     * while {@link #frequency(boolean[], boolean)} counts occurrences of a specific <b>value</b> using equality comparison.
+     * Use {@code count()} when you need flexible matching logic;
+     * use {@code frequency()} when you know the exact value to search for.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] flags = {true, false, true, true, false};
@@ -30207,6 +30216,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param filter the predicate to test each element
      * @return the number of elements that match the predicate (0 if array is {@code null}/empty)
      * @see #count(boolean[], int, int, BooleanPredicate)
+     * @see #frequency(boolean[], boolean)
      */
     public static int count(final boolean[] a, final BooleanPredicate filter) {
         if (isEmpty(a)) {
@@ -32703,7 +32713,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param obj the object to serialize
      * @return the JSON string representation (returns the string {@code "null"} if the object is {@code null})
      * @see #toJson(Object, boolean)
-     * @see #toJson(Object, JsonSerializationConfig)
+     * @see #toJson(Object, JsonSerConfig)
      * @see #fromJson(String, Class)
      */
     public static String toJson(final Object obj) {
@@ -32724,7 +32734,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param prettyFormat {@code true} for formatted output with indentation
      * @return the JSON string representation (returns the string {@code "null"} if the object is {@code null})
      * @see #toJson(Object)
-     * @see #toJson(Object, JsonSerializationConfig)
+     * @see #toJson(Object, JsonSerConfig)
      */
     public static String toJson(final Object obj, final boolean prettyFormat) {
         return Utils.jsonParser.serialize(obj, prettyFormat ? Utils.jscPrettyFormat : Utils.jsc);
@@ -32735,7 +32745,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonSerializationConfig config = new JsonSerializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonSerConfig config = new JsonSerConfig().setDateFormat("yyyy-MM-dd");
      * String result = N.toJson(person, config);
      * // Returns JSON with custom date formatting
      * }</pre>
@@ -32746,7 +32756,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #toJson(Object)
      * @see #toJson(Object, boolean)
      */
-    public static String toJson(final Object obj, final JsonSerializationConfig config) {
+    public static String toJson(final Object obj, final JsonSerConfig config) {
         return Utils.jsonParser.serialize(obj, config);
     }
 
@@ -32763,7 +32773,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param obj the object to serialize
      * @param output the file to write to (created if nonexistent, overwritten if exists)
-     * @see #toJson(Object, JsonSerializationConfig, File)
+     * @see #toJson(Object, JsonSerConfig, File)
      * @see #fromJson(File, Class)
      */
     public static void toJson(final Object obj, final File output) {
@@ -32775,7 +32785,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonSerializationConfig config = new JsonSerializationConfig().setPrettyFormat(true);
+     * JsonSerConfig config = new JsonSerConfig().setPrettyFormat(true);
      * File outputFile = new File("data.json");
      * N.toJson(person, config, outputFile);
      * // Writes formatted JSON to data.json
@@ -32786,7 +32796,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param output the file to write to (created if nonexistent, overwritten if exists)
      * @see #toJson(Object, File)
      */
-    public static void toJson(final Object obj, final JsonSerializationConfig config, final File output) {
+    public static void toJson(final Object obj, final JsonSerConfig config, final File output) {
         Utils.jsonParser.serialize(obj, config, output);
     }
 
@@ -32806,7 +32816,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param obj the object to serialize
      * @param output the output stream to write to
-     * @see #toJson(Object, JsonSerializationConfig, OutputStream)
+     * @see #toJson(Object, JsonSerConfig, OutputStream)
      */
     public static void toJson(final Object obj, final OutputStream output) {
         Utils.jsonParser.serialize(obj, output);
@@ -32819,7 +32829,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonSerializationConfig config = new JsonSerializationConfig().setPrettyFormat(true);
+     * JsonSerConfig config = new JsonSerConfig().setPrettyFormat(true);
      * try (OutputStream out = new FileOutputStream("data.json")) {
      *     N.toJson(person, config, out);
      * }
@@ -32831,7 +32841,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param output the output stream to write to
      * @see #toJson(Object, OutputStream)
      */
-    public static void toJson(final Object obj, final JsonSerializationConfig config, final OutputStream output) {
+    public static void toJson(final Object obj, final JsonSerConfig config, final OutputStream output) {
         Utils.jsonParser.serialize(obj, config, output);
     }
 
@@ -32851,7 +32861,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param obj the object to serialize
      * @param output the writer to write to
-     * @see #toJson(Object, JsonSerializationConfig, Writer)
+     * @see #toJson(Object, JsonSerConfig, Writer)
      */
     public static void toJson(final Object obj, final Writer output) {
         Utils.jsonParser.serialize(obj, output);
@@ -32864,7 +32874,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonSerializationConfig config = new JsonSerializationConfig().setPrettyFormat(true);
+     * JsonSerConfig config = new JsonSerConfig().setPrettyFormat(true);
      * try (Writer writer = new FileWriter("data.json")) {
      *     N.toJson(person, config, writer);
      * }
@@ -32876,7 +32886,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param output the writer to write to
      * @see #toJson(Object, Writer)
      */
-    public static void toJson(final Object obj, final JsonSerializationConfig config, final Writer output) {
+    public static void toJson(final Object obj, final JsonSerConfig config, final Writer output) {
         Utils.jsonParser.serialize(obj, config, output);
     }
 
@@ -32979,7 +32989,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
      * Person result = N.fromJson(jsonString, config, Person.class);
      * // Returns Person with custom date parsing
      * }</pre>
@@ -32990,10 +33000,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param targetType the target class type
      * @return the deserialized object ({@code null} if the input represents null)
      * @throws IllegalArgumentException if targetType is {@code null}
-     * @see #fromJson(String, JsonDeserializationConfig, Type)
+     * @see #fromJson(String, JsonDeserConfig, Type)
      * @see #fromJson(String, Class)
      */
-    public static <T> T fromJson(final String json, final JsonDeserializationConfig config, final Class<? extends T> targetType) {
+    public static <T> T fromJson(final String json, final JsonDeserConfig config, final Class<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, config, targetType);
     }
 
@@ -33002,7 +33012,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
      * List<Person> result = N.fromJson(jsonString, config, new TypeReference<List<Person>>(){}.type());
      * // Returns List with custom date parsing
      * }</pre>
@@ -33013,10 +33023,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param targetType the target Type (supports generics like {@code List<String>})
      * @return the deserialized object ({@code null} if the input represents null)
      * @throws IllegalArgumentException if targetType is {@code null}
-     * @see #fromJson(String, JsonDeserializationConfig, Class)
+     * @see #fromJson(String, JsonDeserConfig, Class)
      * @see #fromJson(String, Type)
      */
-    public static <T> T fromJson(final String json, final JsonDeserializationConfig config, final Type<? extends T> targetType) {
+    public static <T> T fromJson(final String json, final JsonDeserConfig config, final Type<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType);
     }
 
@@ -33069,7 +33079,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
      * File file = new File("person.json");
      * Person result = N.fromJson(file, config, Person.class);
      * // Returns Person with custom date parsing
@@ -33081,10 +33091,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param targetType the target class type
      * @return the deserialized object ({@code null} if file contains {@code "null"})
      * @throws IllegalArgumentException if targetType is {@code null}
-     * @see #fromJson(File, JsonDeserializationConfig, Type)
+     * @see #fromJson(File, JsonDeserConfig, Type)
      * @see #fromJson(File, Class)
      */
-    public static <T> T fromJson(final File json, final JsonDeserializationConfig config, final Class<? extends T> targetType) {
+    public static <T> T fromJson(final File json, final JsonDeserConfig config, final Class<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, config, targetType);
     }
 
@@ -33093,7 +33103,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
      * File file = new File("people.json");
      * List<Person> result = N.fromJson(file, config, new TypeReference<List<Person>>(){}.type());
      * // Returns List with custom date parsing
@@ -33105,10 +33115,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param targetType the target Type (supports generics like {@code List<String>})
      * @return the deserialized object ({@code null} if file contains {@code "null"})
      * @throws IllegalArgumentException if targetType is {@code null}
-     * @see #fromJson(File, JsonDeserializationConfig, Class)
+     * @see #fromJson(File, JsonDeserConfig, Class)
      * @see #fromJson(File, Type)
      */
-    public static <T> T fromJson(final File json, final JsonDeserializationConfig config, final Type<? extends T> targetType) {
+    public static <T> T fromJson(final File json, final JsonDeserConfig config, final Type<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType);
     }
 
@@ -33169,7 +33179,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
      * try (InputStream in = new FileInputStream("person.json")) {
      *     Person result = N.fromJson(in, config, Person.class);
      * }
@@ -33182,10 +33192,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param targetType the target class type
      * @return the deserialized object ({@code null} if stream contains {@code "null"})
      * @throws IllegalArgumentException if targetType is {@code null}
-     * @see #fromJson(InputStream, JsonDeserializationConfig, Type)
+     * @see #fromJson(InputStream, JsonDeserConfig, Type)
      * @see #fromJson(InputStream, Class)
      */
-    public static <T> T fromJson(final InputStream json, final JsonDeserializationConfig config, final Class<? extends T> targetType) {
+    public static <T> T fromJson(final InputStream json, final JsonDeserConfig config, final Class<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, config, targetType);
     }
 
@@ -33196,7 +33206,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
      * try (InputStream in = new FileInputStream("people.json")) {
      *     List<Person> result = N.fromJson(in, config, new TypeReference<List<Person>>(){}.type());
      * }
@@ -33209,10 +33219,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param targetType the target Type (supports generics like {@code List<String>})
      * @return the deserialized object ({@code null} if stream contains {@code "null"})
      * @throws IllegalArgumentException if targetType is {@code null}
-     * @see #fromJson(InputStream, JsonDeserializationConfig, Class)
+     * @see #fromJson(InputStream, JsonDeserConfig, Class)
      * @see #fromJson(InputStream, Type)
      */
-    public static <T> T fromJson(final InputStream json, final JsonDeserializationConfig config, final Type<? extends T> targetType) {
+    public static <T> T fromJson(final InputStream json, final JsonDeserConfig config, final Type<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType);
     }
 
@@ -33273,7 +33283,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
      * try (Reader reader = new FileReader("person.json")) {
      *     Person result = N.fromJson(reader, config, Person.class);
      * }
@@ -33286,10 +33296,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param targetType the target class type
      * @return the deserialized object ({@code null} if reader contains {@code "null"})
      * @throws IllegalArgumentException if targetType is {@code null}
-     * @see #fromJson(Reader, JsonDeserializationConfig, Type)
+     * @see #fromJson(Reader, JsonDeserConfig, Type)
      * @see #fromJson(Reader, Class)
      */
-    public static <T> T fromJson(final Reader json, final JsonDeserializationConfig config, final Class<? extends T> targetType) {
+    public static <T> T fromJson(final Reader json, final JsonDeserConfig config, final Class<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, config, targetType);
     }
 
@@ -33300,7 +33310,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
      * try (Reader reader = new FileReader("people.json")) {
      *     List<Person> result = N.fromJson(reader, config, new TypeReference<List<Person>>(){}.type());
      * }
@@ -33313,10 +33323,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param targetType the target Type (supports generics like {@code List<String>})
      * @return the deserialized object ({@code null} if reader contains {@code "null"})
      * @throws IllegalArgumentException if targetType is {@code null}
-     * @see #fromJson(Reader, JsonDeserializationConfig, Class)
+     * @see #fromJson(Reader, JsonDeserConfig, Class)
      * @see #fromJson(Reader, Type)
      */
-    public static <T> T fromJson(final Reader json, final JsonDeserializationConfig config, final Type<? extends T> targetType) {
+    public static <T> T fromJson(final Reader json, final JsonDeserConfig config, final Type<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType);
     }
 
@@ -33377,7 +33387,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
      * String json = "prefix{\"name\":\"Alice\",\"birth\":\"2000-01-01\"}suffix";
      * Person result = N.fromJson(json, 6, 45, config, Person.class);
      * // Returns Person with custom date parsing
@@ -33392,11 +33402,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the deserialized object ({@code null} if substring is {@code "null"})
      * @throws IllegalArgumentException if targetType is {@code null}
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > json.length() || fromIndex > toIndex}
-     * @see #fromJson(String, int, int, JsonDeserializationConfig, Type)
+     * @see #fromJson(String, int, int, JsonDeserConfig, Type)
      * @see #fromJson(String, int, int, Class)
      */
-    public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final JsonDeserializationConfig config,
-            final Class<? extends T> targetType) {
+    public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final JsonDeserConfig config, final Class<? extends T> targetType) {
         return Utils.jsonParser.deserialize(json, fromIndex, toIndex, config, targetType);
     }
 
@@ -33405,7 +33414,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
      * String json = "prefix[{\"name\":\"Alice\",\"birth\":\"2000-01-01\"}]suffix";
      * List<Person> result = N.fromJson(json, 6, 49, config, new TypeReference<List<Person>>(){}.type());
      * // Returns List with custom date parsing
@@ -33420,11 +33429,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the deserialized object ({@code null} if substring is {@code "null"})
      * @throws IllegalArgumentException if targetType is {@code null}
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > json.length() || fromIndex > toIndex}
-     * @see #fromJson(String, int, int, JsonDeserializationConfig, Class)
+     * @see #fromJson(String, int, int, JsonDeserConfig, Class)
      * @see #fromJson(String, int, int, Type)
      */
-    public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final JsonDeserializationConfig config,
-            final Type<? extends T> targetType) throws IndexOutOfBoundsException {
+    public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final JsonDeserConfig config, final Type<? extends T> targetType)
+            throws IndexOutOfBoundsException {
         return Utils.jsonParser.deserialize(json, fromIndex, toIndex, setConfig(targetType, config, true), targetType);
     }
 
@@ -33443,7 +33452,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementType the target element Type
      * @return a stream of deserialized elements (empty if string is {@code null} or represents empty array)
      * @throws IllegalArgumentException if elementType is {@code null}
-     * @see #streamJson(String, JsonDeserializationConfig, Type)
+     * @see #streamJson(String, JsonDeserConfig, Type)
      * @see #fromJson(String, Type)
      */
     public static <T> Stream<T> streamJson(final String jsonArray, final Type<? extends T> elementType) {
@@ -33455,7 +33464,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
      * String json = "[{\"name\":\"Alice\",\"birth\":\"2000-01-01\"}]";
      * Stream<Person> result = N.streamJson(json, config, new TypeReference<Person>(){}.type());
      * // Streams Person objects with custom date parsing
@@ -33469,7 +33478,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if elementType is {@code null}
      * @see #streamJson(String, Type)
      */
-    public static <T> Stream<T> streamJson(final String jsonArray, final JsonDeserializationConfig config, final Type<? extends T> elementType) {
+    public static <T> Stream<T> streamJson(final String jsonArray, final JsonDeserConfig config, final Type<? extends T> elementType) {
         return Utils.jsonParser.stream(jsonArray, setElementType(config, elementType), elementType);
     }
 
@@ -33488,7 +33497,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementType the target element Type
      * @return a stream of deserialized elements (empty if file is {@code null}/nonexistent or contains empty array)
      * @throws IllegalArgumentException if elementType is {@code null}
-     * @see #streamJson(File, JsonDeserializationConfig, Type)
+     * @see #streamJson(File, JsonDeserConfig, Type)
      * @see #fromJson(File, Type)
      */
     public static <T> Stream<T> streamJson(final File jsonArray, final Type<? extends T> elementType) {
@@ -33500,7 +33509,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
      * File file = new File("people.json");
      * Stream<Person> result = N.streamJson(file, config, new TypeReference<Person>(){}.type());
      * // Streams Person objects with custom date parsing
@@ -33514,7 +33523,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if elementType is {@code null}
      * @see #streamJson(File, Type)
      */
-    public static <T> Stream<T> streamJson(final File jsonArray, final JsonDeserializationConfig config, final Type<? extends T> elementType) {
+    public static <T> Stream<T> streamJson(final File jsonArray, final JsonDeserConfig config, final Type<? extends T> elementType) {
         return Utils.jsonParser.stream(jsonArray, setElementType(config, elementType), elementType);
     }
 
@@ -33559,7 +33568,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementType the target element Type
      * @return a stream of deserialized elements (empty if stream is {@code null} or contains empty array)
      * @throws IllegalArgumentException if elementType is {@code null}
-     * @see #streamJson(InputStream, JsonDeserializationConfig, boolean, Type)
+     * @see #streamJson(InputStream, JsonDeserConfig, boolean, Type)
      */
     public static <T> Stream<T> streamJson(final InputStream jsonArray, final boolean closeInputStreamWhenStreamIsClosed, final Type<? extends T> elementType) {
         return streamJson(jsonArray, null, closeInputStreamWhenStreamIsClosed, elementType);
@@ -33570,7 +33579,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
      * InputStream in = new FileInputStream("people.json");
      * Stream<Person> result = N.streamJson(in, config, true, new TypeReference<Person>(){}.type());
      * // Streams Person objects with custom date parsing
@@ -33585,8 +33594,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if elementType is {@code null}
      * @see #streamJson(InputStream, boolean, Type)
      */
-    public static <T> Stream<T> streamJson(final InputStream jsonArray, final JsonDeserializationConfig config,
-            final boolean closeInputStreamWhenStreamIsClosed, final Type<? extends T> elementType) {
+    public static <T> Stream<T> streamJson(final InputStream jsonArray, final JsonDeserConfig config, final boolean closeInputStreamWhenStreamIsClosed,
+            final Type<? extends T> elementType) {
         return Utils.jsonParser.stream(jsonArray, closeInputStreamWhenStreamIsClosed, setElementType(config, elementType), elementType);
     }
 
@@ -33631,7 +33640,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementType the target element Type
      * @return a stream of deserialized elements (empty if reader is {@code null} or contains empty array)
      * @throws IllegalArgumentException if elementType is {@code null}
-     * @see #streamJson(Reader, JsonDeserializationConfig, boolean, Type)
+     * @see #streamJson(Reader, JsonDeserConfig, boolean, Type)
      */
     public static <T> Stream<T> streamJson(final Reader jsonArray, final boolean closeReaderWhenStreamIsClosed, final Type<? extends T> elementType) {
         return streamJson(jsonArray, null, closeReaderWhenStreamIsClosed, elementType);
@@ -33642,7 +33651,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
      * Reader reader = new FileReader("people.json");
      * Stream<Person> result = N.streamJson(reader, config, true, new TypeReference<Person>(){}.type());
      * // Streams Person objects with custom date parsing
@@ -33657,37 +33666,37 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if elementType is {@code null}
      * @see #streamJson(Reader, boolean, Type)
      */
-    public static <T> Stream<T> streamJson(final Reader jsonArray, final JsonDeserializationConfig config, final boolean closeReaderWhenStreamIsClosed,
+    public static <T> Stream<T> streamJson(final Reader jsonArray, final JsonDeserConfig config, final boolean closeReaderWhenStreamIsClosed,
             final Type<? extends T> elementType) {
         return Utils.jsonParser.stream(jsonArray, closeReaderWhenStreamIsClosed, setElementType(config, elementType), elementType);
     }
 
-    private static JsonDeserializationConfig setElementType(final JsonDeserializationConfig config, final Type<?> elementType) {
-        final JsonDeserializationConfig configToReturn = config == null ? JDC.create() : config.copy();
+    private static JsonDeserConfig setElementType(final JsonDeserConfig config, final Type<?> elementType) {
+        final JsonDeserConfig configToReturn = config == null ? JsonDeserConfig.create() : config.copy();
 
         configToReturn.setElementType(elementType);
 
         return configToReturn;
     }
 
-    private static <C extends DeserializationConfig<C>> C setConfig(final Type<?> targetType, final C config, final boolean isJSON) {
+    private static <C extends Deserialization<C>> C setConfig(final Type<?> targetType, final C config, final boolean isJSON) {
         C configToReturn = config;
 
         if (targetType.isCollection() || targetType.isArray()) {
             if (config == null || config.getElementType() == null) {
-                configToReturn = config == null ? (C) (isJSON ? JDC.create() : XDC.create()) : config.copy();
+                configToReturn = config == null ? (C) (isJSON ? JsonDeserConfig.create() : XmlDeserConfig.create()) : config.copy();
 
-                configToReturn.setElementType(targetType.getElementType());
+                configToReturn.setElementType(targetType.elementType());
             }
         } else if (targetType.isMap() && (config == null || config.getMapKeyType() == null || config.getMapValueType() == null)) {
-            configToReturn = config == null ? (C) (isJSON ? JDC.create() : XDC.create()) : config.copy();
+            configToReturn = config == null ? (C) (isJSON ? JsonDeserConfig.create() : XmlDeserConfig.create()) : config.copy();
 
             if (configToReturn.getMapKeyType() == null) {
-                configToReturn.setMapKeyType(targetType.getParameterTypes()[0]);
+                configToReturn.setMapKeyType(targetType.parameterTypes()[0]);
             }
 
             if (configToReturn.getMapValueType() == null) {
-                configToReturn.setMapValueType(targetType.getParameterTypes()[1]);
+                configToReturn.setMapValueType(targetType.parameterTypes()[1]);
             }
         }
 
@@ -33706,7 +33715,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param json the JSON string to format
      * @return the formatted JSON string ({@code null} if input is {@code null})
-     * @see #formatJson(String, JsonSerializationConfig)
+     * @see #formatJson(String, JsonSerConfig)
      * @see #toJson(Object, boolean)
      */
     public static String formatJson(final String json) {
@@ -33758,7 +33767,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonSerializationConfig config = new JsonSerializationConfig().setIndentation("  ");
+     * JsonSerConfig config = new JsonSerConfig().setIndentation("  ");
      * String json = "{\"name\":\"Alice\"}";
      * String result = N.formatJson(json, config);
      * // Returns formatted JSON with custom indentation
@@ -33767,10 +33776,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param json the JSON string to format
      * @param config the serialization configuration (pretty formatting enabled automatically if not set)
      * @return the formatted JSON string ({@code null} if input is {@code null})
-     * @see #formatJson(String, JsonSerializationConfig, Class)
+     * @see #formatJson(String, JsonSerConfig, Class)
      * @see #formatJson(String)
      */
-    public static String formatJson(final String json, final JsonSerializationConfig config) {
+    public static String formatJson(final String json, final JsonSerConfig config) {
         return formatJson(json, config, Object.class);
     }
 
@@ -33779,7 +33788,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonSerializationConfig config = new JsonSerializationConfig().setIndentation("  ");
+     * JsonSerConfig config = new JsonSerConfig().setIndentation("  ");
      * String json = "[{\"name\":\"Alice\"}]";
      * String result = N.formatJson(json, config, new TypeReference<List<Map<String, String>>>(){}.type());
      * // Returns formatted JSON with custom indentation
@@ -33789,12 +33798,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config the serialization configuration (pretty formatting enabled automatically if not set)
      * @param transferType the Type for deserialization (supports generics like {@code List<String>})
      * @return the formatted JSON string ({@code null} if input is {@code null})
-     * @see #formatJson(String, JsonSerializationConfig, Class)
+     * @see #formatJson(String, JsonSerConfig, Class)
      * @see TypeReference
      */
-    public static String formatJson(final String json, final JsonSerializationConfig config, final Type<?> transferType) {
-        final JsonSerializationConfig configToUse = config == null ? Utils.jscPrettyFormat
-                : (!config.prettyFormat() ? config.copy().prettyFormat(true) : config);
+    public static String formatJson(final String json, final JsonSerConfig config, final Type<?> transferType) {
+        final JsonSerConfig configToUse = config == null ? Utils.jscPrettyFormat : (!config.isPrettyFormat() ? config.copy().setPrettyFormat(true) : config);
 
         return toJson(fromJson(json, transferType), configToUse);
     }
@@ -33804,7 +33812,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonSerializationConfig config = new JsonSerializationConfig().setIndentation("  ");
+     * JsonSerConfig config = new JsonSerConfig().setIndentation("  ");
      * String json = "{\"name\":\"Alice\"}";
      * String result = N.formatJson(json, config, Map.class);
      * // Returns formatted JSON with custom indentation
@@ -33814,12 +33822,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config the serialization configuration (pretty formatting enabled automatically if not set)
      * @param transferType the type for deserialization
      * @return the formatted JSON string ({@code null} if input is {@code null})
-     * @see #formatJson(String, JsonSerializationConfig, Type)
+     * @see #formatJson(String, JsonSerConfig, Type)
      * @see #formatJson(String, Class)
      */
-    public static String formatJson(final String json, final JsonSerializationConfig config, final Class<?> transferType) {
-        final JsonSerializationConfig configToUse = config == null ? Utils.jscPrettyFormat
-                : (!config.prettyFormat() ? config.copy().prettyFormat(true) : config);
+    public static String formatJson(final String json, final JsonSerConfig config, final Class<?> transferType) {
+        final JsonSerConfig configToUse = config == null ? Utils.jscPrettyFormat : (!config.isPrettyFormat() ? config.copy().setPrettyFormat(true) : config);
 
         return toJson(fromJson(json, transferType), configToUse);
     }
@@ -33837,7 +33844,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param obj the object to serialize
      * @return the XML string representation ({@code "null"} if object is {@code null})
      * @see #toXml(Object, boolean)
-     * @see #toXml(Object, XmlSerializationConfig)
+     * @see #toXml(Object, XmlSerConfig)
      * @see #fromXml(String, Class)
      */
     public static String toXml(final Object obj) {
@@ -33858,7 +33865,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param prettyFormat {@code true} to format with indentation and line breaks
      * @return the XML string representation ({@code "null"} if object is {@code null})
      * @see #toXml(Object)
-     * @see #toXml(Object, XmlSerializationConfig)
+     * @see #toXml(Object, XmlSerConfig)
      */
     public static String toXml(final Object obj, final boolean prettyFormat) {
         return Utils.xmlParser.serialize(obj, prettyFormat ? Utils.xscPrettyFormat : Utils.xsc);
@@ -33869,7 +33876,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlSerializationConfig config = new XmlSerializationConfig().setPrettyFormat(true);
+     * XmlSerConfig config = new XmlSerConfig().setPrettyFormat(true);
      * Person person = new Person("Alice", 25);
      * String result = N.toXml(person, config);
      * // Returns XML formatted according to config
@@ -33879,9 +33886,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config the XML serialization configuration
      * @return the XML string representation ({@code "null"} if object is {@code null})
      * @see #toXml(Object, boolean)
-     * @see #fromXml(String, XmlDeserializationConfig, Class)
+     * @see #fromXml(String, XmlDeserConfig, Class)
      */
-    public static String toXml(final Object obj, final XmlSerializationConfig config) {
+    public static String toXml(final Object obj, final XmlSerConfig config) {
         return Utils.xmlParser.serialize(obj, config);
     }
 
@@ -33898,7 +33905,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param obj the object to serialize
      * @param output the file to write to (created if nonexistent, overwritten if exists)
-     * @see #toXml(Object, XmlSerializationConfig, File)
+     * @see #toXml(Object, XmlSerConfig, File)
      * @see #fromXml(File, Class)
      */
     public static void toXml(final Object obj, final File output) {
@@ -33910,7 +33917,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlSerializationConfig config = new XmlSerializationConfig().setPrettyFormat(true);
+     * XmlSerConfig config = new XmlSerConfig().setPrettyFormat(true);
      * Person person = new Person("Alice", 25);
      * File outputFile = new File("person.xml");
      * N.toXml(person, config, outputFile);
@@ -33921,9 +33928,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config the XML serialization configuration
      * @param output the file to write to (created if nonexistent, overwritten if exists)
      * @see #toXml(Object, File)
-     * @see #fromXml(File, XmlDeserializationConfig, Class)
+     * @see #fromXml(File, XmlDeserConfig, Class)
      */
-    public static void toXml(final Object obj, final XmlSerializationConfig config, final File output) {
+    public static void toXml(final Object obj, final XmlSerConfig config, final File output) {
         Utils.xmlParser.serialize(obj, config, output);
     }
 
@@ -33943,7 +33950,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param obj the object to serialize
      * @param output the output stream to write to
-     * @see #toXml(Object, XmlSerializationConfig, OutputStream)
+     * @see #toXml(Object, XmlSerConfig, OutputStream)
      * @see #fromXml(InputStream, Class)
      */
     public static void toXml(final Object obj, final OutputStream output) {
@@ -33957,7 +33964,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlSerializationConfig config = new XmlSerializationConfig().setPrettyFormat(true);
+     * XmlSerConfig config = new XmlSerConfig().setPrettyFormat(true);
      * Person person = new Person("Alice", 25);
      * try (OutputStream out = new FileOutputStream("person.xml")) {
      *     N.toXml(person, config, out);
@@ -33969,9 +33976,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config the XML serialization configuration
      * @param output the output stream to write to
      * @see #toXml(Object, OutputStream)
-     * @see #fromXml(InputStream, XmlDeserializationConfig, Class)
+     * @see #fromXml(InputStream, XmlDeserConfig, Class)
      */
-    public static void toXml(final Object obj, final XmlSerializationConfig config, final OutputStream output) {
+    public static void toXml(final Object obj, final XmlSerConfig config, final OutputStream output) {
         Utils.xmlParser.serialize(obj, config, output);
     }
 
@@ -33991,7 +33998,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param obj the object to serialize
      * @param output the writer to write to
-     * @see #toXml(Object, XmlSerializationConfig, Writer)
+     * @see #toXml(Object, XmlSerConfig, Writer)
      * @see #fromXml(Reader, Class)
      */
     public static void toXml(final Object obj, final Writer output) {
@@ -34005,7 +34012,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlSerializationConfig config = new XmlSerializationConfig().setPrettyFormat(true);
+     * XmlSerConfig config = new XmlSerConfig().setPrettyFormat(true);
      * Person person = new Person("Alice", 25);
      * try (Writer writer = new FileWriter("person.xml")) {
      *     N.toXml(person, config, writer);
@@ -34017,9 +34024,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config the XML serialization configuration
      * @param output the writer to write to
      * @see #toXml(Object, Writer)
-     * @see #fromXml(Reader, XmlDeserializationConfig, Class)
+     * @see #fromXml(Reader, XmlDeserConfig, Class)
      */
-    public static void toXml(final Object obj, final XmlSerializationConfig config, final Writer output) {
+    public static void toXml(final Object obj, final XmlSerConfig config, final Writer output) {
         Utils.xmlParser.serialize(obj, config, output);
     }
 
@@ -34072,7 +34079,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlDeserializationConfig config = new XmlDeserializationConfig().setIgnoreUnknownProperty(true);
+     * XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnknownProperty(true);
      * String xml = "<Person><name>Alice</name><age>25</age></Person>";
      * Person result = N.fromXml(xml, config, Person.class);
      * // Returns a Person object with deserialization according to config
@@ -34085,9 +34092,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the deserialized object ({@code null} if the input represents null)
      * @throws IllegalArgumentException if targetType is {@code null}
      * @see #fromXml(String, Class)
-     * @see #toXml(Object, XmlSerializationConfig)
+     * @see #toXml(Object, XmlSerConfig)
      */
-    public static <T> T fromXml(final String xml, final XmlDeserializationConfig config, final Class<? extends T> targetType) {
+    public static <T> T fromXml(final String xml, final XmlDeserConfig config, final Class<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, config, targetType);
     }
 
@@ -34096,7 +34103,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlDeserializationConfig config = new XmlDeserializationConfig().setIgnoreUnknownProperty(true);
+     * XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnknownProperty(true);
      * String xml = "<list><item>Alice</item><item>Bob</item></list>";
      * List<String> result = N.fromXml(xml, config, new TypeReference<List<String>>(){}.type());
      * // Returns a List<String> with deserialization according to config
@@ -34111,7 +34118,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #fromXml(String, Type)
      * @see TypeReference
      */
-    public static <T> T fromXml(final String xml, final XmlDeserializationConfig config, final Type<? extends T> targetType) {
+    public static <T> T fromXml(final String xml, final XmlDeserConfig config, final Type<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType);
     }
 
@@ -34164,7 +34171,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlDeserializationConfig config = new XmlDeserializationConfig().setIgnoreUnknownProperty(true);
+     * XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnknownProperty(true);
      * File xmlFile = new File("person.xml");
      * Person result = N.fromXml(xmlFile, config, Person.class);
      * // Returns a Person object with deserialization according to config
@@ -34177,9 +34184,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the deserialized object ({@code null} if the input represents null)
      * @throws IllegalArgumentException if targetType is {@code null}
      * @see #fromXml(File, Class)
-     * @see #toXml(Object, XmlSerializationConfig, File)
+     * @see #toXml(Object, XmlSerConfig, File)
      */
-    public static <T> T fromXml(final File xml, final XmlDeserializationConfig config, final Class<? extends T> targetType) {
+    public static <T> T fromXml(final File xml, final XmlDeserConfig config, final Class<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, config, targetType);
     }
 
@@ -34188,7 +34195,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlDeserializationConfig config = new XmlDeserializationConfig().setIgnoreUnknownProperty(true);
+     * XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnknownProperty(true);
      * File xmlFile = new File("names.xml");
      * List<String> result = N.fromXml(xmlFile, config, new TypeReference<List<String>>(){}.type());
      * // Returns a List<String> with deserialization according to config
@@ -34203,7 +34210,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #fromXml(File, Type)
      * @see TypeReference
      */
-    public static <T> T fromXml(final File xml, final XmlDeserializationConfig config, final Type<? extends T> targetType) {
+    public static <T> T fromXml(final File xml, final XmlDeserConfig config, final Type<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType);
     }
 
@@ -34264,7 +34271,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlDeserializationConfig config = new XmlDeserializationConfig().setIgnoreUnknownProperty(true);
+     * XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnknownProperty(true);
      * try (InputStream in = new FileInputStream("person.xml")) {
      *     Person result = N.fromXml(in, config, Person.class);
      *     // Returns a Person object with deserialization according to config
@@ -34278,9 +34285,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the deserialized object ({@code null} if the input represents null)
      * @throws IllegalArgumentException if targetType is {@code null}
      * @see #fromXml(InputStream, Class)
-     * @see #toXml(Object, XmlSerializationConfig, OutputStream)
+     * @see #toXml(Object, XmlSerConfig, OutputStream)
      */
-    public static <T> T fromXml(final InputStream xml, final XmlDeserializationConfig config, final Class<? extends T> targetType) {
+    public static <T> T fromXml(final InputStream xml, final XmlDeserConfig config, final Class<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, config, targetType);
     }
 
@@ -34291,7 +34298,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlDeserializationConfig config = new XmlDeserializationConfig().setIgnoreUnknownProperty(true);
+     * XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnknownProperty(true);
      * try (InputStream in = new FileInputStream("names.xml")) {
      *     List<String> result = N.fromXml(in, config, new TypeReference<List<String>>(){}.type());
      *     // Returns a List<String> with deserialization according to config
@@ -34307,7 +34314,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #fromXml(InputStream, Type)
      * @see TypeReference
      */
-    public static <T> T fromXml(final InputStream xml, final XmlDeserializationConfig config, final Type<? extends T> targetType) {
+    public static <T> T fromXml(final InputStream xml, final XmlDeserConfig config, final Type<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType);
     }
 
@@ -34368,7 +34375,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlDeserializationConfig config = new XmlDeserializationConfig().setIgnoreUnknownProperty(true);
+     * XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnknownProperty(true);
      * try (Reader reader = new FileReader("person.xml")) {
      *     Person result = N.fromXml(reader, config, Person.class);
      *     // Returns a Person object with deserialization according to config
@@ -34382,9 +34389,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the deserialized object ({@code null} if the input represents null)
      * @throws IllegalArgumentException if targetType is {@code null}
      * @see #fromXml(Reader, Class)
-     * @see #toXml(Object, XmlSerializationConfig, Writer)
+     * @see #toXml(Object, XmlSerConfig, Writer)
      */
-    public static <T> T fromXml(final Reader xml, final XmlDeserializationConfig config, final Class<? extends T> targetType) {
+    public static <T> T fromXml(final Reader xml, final XmlDeserConfig config, final Class<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, config, targetType);
     }
 
@@ -34395,7 +34402,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlDeserializationConfig config = new XmlDeserializationConfig().setIgnoreUnknownProperty(true);
+     * XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnknownProperty(true);
      * try (Reader reader = new FileReader("names.xml")) {
      *     List<String> result = N.fromXml(reader, config, new TypeReference<List<String>>(){}.type());
      *     // Returns a List<String> with deserialization according to config
@@ -34411,7 +34418,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #fromXml(Reader, Type)
      * @see TypeReference
      */
-    public static <T> T fromXml(final Reader xml, final XmlDeserializationConfig config, final Type<? extends T> targetType) {
+    public static <T> T fromXml(final Reader xml, final XmlDeserConfig config, final Type<? extends T> targetType) {
         return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType);
     }
 
@@ -34479,7 +34486,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlSerializationConfig config = new XmlSerializationConfig().setIndentation("  ");
+     * XmlSerConfig config = new XmlSerConfig().setIndentation("  ");
      * String xml = "<Person><name>Alice</name></Person>";
      * String result = N.formatXml(xml, config);
      * // Returns formatted XML with custom indentation
@@ -34488,10 +34495,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param xml the XML string to format
      * @param config the serialization configuration (pretty formatting enabled automatically if not set)
      * @return the formatted XML string ({@code null} if the input is {@code null})
-     * @see #formatXml(String, XmlSerializationConfig, Class)
+     * @see #formatXml(String, XmlSerConfig, Class)
      * @see #formatXml(String)
      */
-    public static String formatXml(final String xml, final XmlSerializationConfig config) {
+    public static String formatXml(final String xml, final XmlSerConfig config) {
         return formatXml(xml, config, MapEntity.class);
     }
 
@@ -34500,7 +34507,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlSerializationConfig config = new XmlSerializationConfig().setIndentation("  ");
+     * XmlSerConfig config = new XmlSerConfig().setIndentation("  ");
      * String xml = "<Person><name>Alice</name></Person>";
      * String result = N.formatXml(xml, config, Person.class);
      * // Returns formatted XML with custom indentation
@@ -34510,12 +34517,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config the serialization configuration (pretty formatting enabled automatically if not set)
      * @param transferType the type for deserialization during formatting
      * @return the formatted XML string ({@code null} if the input is {@code null})
-     * @see #formatXml(String, XmlSerializationConfig, Type)
+     * @see #formatXml(String, XmlSerConfig, Type)
      * @see #formatXml(String, Class)
      */
-    public static String formatXml(final String xml, final XmlSerializationConfig config, final Class<?> transferType) {
-        final XmlSerializationConfig configToUse = config == null ? Utils.xscPrettyFormat
-                : (!config.prettyFormat() ? config.copy().prettyFormat(true) : config);
+    public static String formatXml(final String xml, final XmlSerConfig config, final Class<?> transferType) {
+        final XmlSerConfig configToUse = config == null ? Utils.xscPrettyFormat : (!config.isPrettyFormat() ? config.copy().setPrettyFormat(true) : config);
 
         return toXml(fromXml(xml, transferType), configToUse);
     }
@@ -34525,7 +34531,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlSerializationConfig config = new XmlSerializationConfig().setIndentation("  ");
+     * XmlSerConfig config = new XmlSerConfig().setIndentation("  ");
      * String xml = "<list><item>Alice</item><item>Bob</item></list>";
      * String result = N.formatXml(xml, config, new TypeReference<List<String>>(){}.type());
      * // Returns formatted XML with custom indentation
@@ -34535,12 +34541,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config the serialization configuration (pretty formatting enabled automatically if not set)
      * @param transferType the Type for deserialization during formatting with generic information
      * @return the formatted XML string ({@code null} if the input is {@code null})
-     * @see #formatXml(String, XmlSerializationConfig, Class)
+     * @see #formatXml(String, XmlSerConfig, Class)
      * @see TypeReference
      */
-    public static String formatXml(final String xml, final XmlSerializationConfig config, final Type<?> transferType) {
-        final XmlSerializationConfig configToUse = config == null ? Utils.xscPrettyFormat
-                : (!config.prettyFormat() ? config.copy().prettyFormat(true) : config);
+    public static String formatXml(final String xml, final XmlSerConfig config, final Type<?> transferType) {
+        final XmlSerConfig configToUse = config == null ? Utils.xscPrettyFormat : (!config.isPrettyFormat() ? config.copy().setPrettyFormat(true) : config);
 
         return toXml(fromXml(xml, transferType), configToUse);
     }

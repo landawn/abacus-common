@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.AbstractParserTest;
 import com.landawn.abacus.entity.extendDirty.basic.Account;
 import com.landawn.abacus.entity.extendDirty.basic.AccountContact;
-import com.landawn.abacus.parser.XmlSerializationConfig.XSC;
+import com.landawn.abacus.parser.XmlSerConfig;
 import com.landawn.abacus.types.WeekDay;
 import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.Dates;
@@ -51,7 +51,7 @@ public class XmlParser2Test extends AbstractParserTest {
         Account account = createAccountWithContact(Account.class);
         account.setId(100);
 
-        XmlSerializationConfig config = XSC.create().prettyFormat(true).setIndentation("    ");
+        XmlSerConfig config = XmlSerConfig.create().setPrettyFormat(true).setIndentation("    ");
 
         String str = xmlParser.serialize(account, config);
         N.println("============account=====================================================================================================");

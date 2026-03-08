@@ -38,13 +38,13 @@ public class StringBufferType extends AbstractCharSequenceType<StringBuffer> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<StringBuffer> type = TypeFactory.getType(StringBuffer.class);
-     * Class<StringBuffer> clazz = type.clazz();   // Returns StringBuffer.class
+     * Class<StringBuffer> clazz = type.javaType();   // Returns StringBuffer.class
      * }</pre>
      *
      * @return the Class object for StringBuffer.class
      */
     @Override
-    public Class<StringBuffer> clazz() {
+    public Class<StringBuffer> javaType() {
         return StringBuffer.class;
     }
 

@@ -30,13 +30,13 @@ public class ObjectType100Test extends TestBase {
     public void testDefaultConstructor() {
         ObjectType<Object> defaultType = (ObjectType<Object>) createType("Object");
         assertNotNull(defaultType);
-        assertEquals(Object.class, defaultType.clazz());
+        assertEquals(Object.class, defaultType.javaType());
     }
 
     @Test
     public void testConstructorWithClass() {
-        assertEquals(String.class, stringObjectType.clazz());
-        assertEquals(Integer.class, integerObjectType.clazz());
+        assertEquals(String.class, stringObjectType.javaType());
+        assertEquals(Integer.class, integerObjectType.javaType());
     }
 
     @Test
@@ -48,9 +48,9 @@ public class ObjectType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(Object.class, objectType.clazz());
-        assertEquals(String.class, stringObjectType.clazz());
-        assertEquals(Integer.class, integerObjectType.clazz());
+        assertEquals(Object.class, objectType.javaType());
+        assertEquals(String.class, stringObjectType.javaType());
+        assertEquals(Integer.class, integerObjectType.javaType());
     }
 
     @Test
@@ -68,17 +68,17 @@ public class ObjectType100Test extends TestBase {
     }
 
     @Test
-    public void testIsPrimitiveType() {
-        assertFalse(objectType.isPrimitiveType());
-        assertFalse(stringObjectType.isPrimitiveType());
-        assertFalse(integerObjectType.isPrimitiveType());
+    public void testIsPrimitive() {
+        assertFalse(objectType.isPrimitive());
+        assertFalse(stringObjectType.isPrimitive());
+        assertFalse(integerObjectType.isPrimitive());
     }
 
     @Test
-    public void testIsObjectType() {
-        assertTrue(objectType.isObjectType());
-        assertFalse(stringObjectType.isObjectType());
-        assertFalse(integerObjectType.isObjectType());
+    public void testIsObject() {
+        assertTrue(objectType.isObject());
+        assertFalse(stringObjectType.isObject());
+        assertFalse(integerObjectType.isObject());
     }
 
     @Test

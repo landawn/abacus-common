@@ -28,7 +28,7 @@ public class IntegerType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(Integer.class, integerType.clazz());
+        assertEquals(Integer.class, integerType.javaType());
     }
 
     @Test

@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -43,7 +44,7 @@ public class DurationType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(Duration.class, type.clazz());
+        assertEquals(Duration.class, type.javaType());
     }
 
     @Test
@@ -96,7 +97,19 @@ public class DurationType2025Test extends TestBase {
         verify(stmt).setLong(eq("param"), anyLong());
 
         type.set(stmt, "param2", null);
-        verify(stmt).setLong(eq("param2"), anyLong());
+        verify(stmt).setNull("param2", java.sql.Types.BIGINT);
+    }
+
+    @Test
+    public void test_set_PreparedStatement() throws SQLException {
+        PreparedStatement stmt = mock(PreparedStatement.class);
+
+        Duration duration = Duration.ofMillis(5000);
+        type.set(stmt, 1, duration);
+        verify(stmt).setLong(1, 5000L);
+
+        type.set(stmt, 2, null);
+        verify(stmt).setNull(2, java.sql.Types.BIGINT);
     }
 
     @Test

@@ -44,15 +44,7 @@ public class StreamTest extends AbstractTest {
         }
 
         try {
-            Stream.range(0, 10).onEachE(e -> {
-                throw new IOException("oooh");
-            }).forEach(Fn.println());
-            fail("Should throw UncheckedIOException");
-        } catch (UncheckedIOException e) {
-        }
-
-        try {
-            Stream.range(0, 10).onEach(e -> {
+            Stream.range(0, 10).peek(e -> {
                 throw new UncheckedIOException(new IOException("oooh"));
             }).forEach(Fn.println());
             fail("Should throw UncheckedIOException");
@@ -68,15 +60,7 @@ public class StreamTest extends AbstractTest {
         }
 
         try {
-            Stream.range(0, 10).parallel().onEachE(e -> {
-                throw new IOException("oooh");
-            }).forEach(Fn.println());
-            fail("Should throw UncheckedIOException");
-        } catch (UncheckedIOException e) {
-        }
-
-        try {
-            Stream.range(0, 10).parallel().onEach(e -> {
+            Stream.range(0, 10).parallel().peek(e -> {
                 throw new UncheckedIOException(new IOException("oooh"));
             }).forEach(Fn.println());
             fail("Should throw UncheckedIOException");

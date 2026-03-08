@@ -32,19 +32,19 @@ public class GuavaMultisetType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(Multiset.class, multisetType.clazz());
+        assertEquals(Multiset.class, multisetType.javaType());
     }
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = multisetType.getParameterTypes();
+        Type<?>[] paramTypes = multisetType.parameterTypes();
         assertNotNull(paramTypes);
         assertEquals(1, paramTypes.length);
     }
 
     @Test
     public void testGetElementType() {
-        Type<?> elementType = multisetType.getElementType();
+        Type<?> elementType = multisetType.elementType();
         assertNotNull(elementType);
     }
 

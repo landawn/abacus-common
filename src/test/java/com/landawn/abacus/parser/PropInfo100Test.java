@@ -21,7 +21,7 @@ import com.landawn.abacus.annotation.JsonXmlConfig;
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.annotation.ReadOnlyId;
 import com.landawn.abacus.annotation.Transient;
-import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
+import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.Objectory;
@@ -126,7 +126,7 @@ public class PropInfo100Test extends TestBase {
     @Test
     public void testWritePropValue() throws IOException {
         CharacterWriter writer = Objectory.createBufferedJsonWriter();
-        JsonXmlSerializationConfig<?> config = JSC.create();
+        JsonXmlSerConfig<?> config = JsonSerConfig.create();
         config.setStringQuotation('"');
 
         ParserUtil.PropInfo nameProp = beanInfo.getPropInfo("name");
@@ -162,7 +162,7 @@ public class PropInfo100Test extends TestBase {
     @Test
     public void testWritePropValueWithJsonRawValue() throws IOException {
         CharacterWriter writer = Objectory.createBufferedJsonWriter();
-        JsonXmlSerializationConfig<?> config = JSC.create();
+        JsonXmlSerConfig<?> config = JsonSerConfig.create();
 
         ParserUtil.PropInfo jsonRawProp = beanInfo.getPropInfo("jsonRawField");
 

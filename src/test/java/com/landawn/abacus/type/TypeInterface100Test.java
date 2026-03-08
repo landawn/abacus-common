@@ -49,7 +49,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.Multiset;
@@ -86,7 +86,7 @@ public class TypeInterface100Test extends TestBase {
     public void testOfReflectType() {
         Type<String> type = Type.of(String.class);
         assertNotNull(type);
-        assertEquals(String.class, type.clazz());
+        assertEquals(String.class, type.javaType());
     }
 
     @Test
@@ -103,7 +103,7 @@ public class TypeInterface100Test extends TestBase {
     public void testOfClass() {
         Type<String> type = Type.of(String.class);
         assertNotNull(type);
-        assertEquals(String.class, type.clazz());
+        assertEquals(String.class, type.javaType());
     }
 
     @Test
@@ -376,18 +376,18 @@ public class TypeInterface100Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test clazz()")
-    public void testClazz() {
-        assertEquals(String.class, stringType.clazz());
-        assertEquals(Integer.class, integerType.clazz());
+    @DisplayName("Test javaType()")
+    public void testJavaType() {
+        assertEquals(String.class, stringType.javaType());
+        assertEquals(Integer.class, integerType.javaType());
     }
 
     @Test
-    @DisplayName("Test isPrimitiveType()")
-    public void testIsPrimitiveType() {
+    @DisplayName("Test isPrimitive()")
+    public void testIsPrimitive() {
         Type<Integer> intType = createType(int.class);
-        assertTrue(intType.isPrimitiveType());
-        assertFalse(stringType.isPrimitiveType());
+        assertTrue(intType.isPrimitive());
+        assertFalse(stringType.isPrimitive());
     }
 
     @Test
@@ -589,11 +589,11 @@ public class TypeInterface100Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test isObjectType()")
-    public void testIsObjectType() {
+    @DisplayName("Test isObject()")
+    public void testIsObject() {
         Type<Object> objectType = createType(Object.class);
-        assertTrue(objectType.isObjectType());
-        assertFalse(stringType.isObjectType());
+        assertTrue(objectType.isObject());
+        assertFalse(stringType.isObject());
     }
 
     @Test
@@ -615,28 +615,28 @@ public class TypeInterface100Test extends TestBase {
     @Test
     @DisplayName("Test getSerializationType()")
     public void testGetSerializationType() {
-        assertNotNull(stringType.getSerializationType());
-        assertEquals(Type.SerializationType.SERIALIZABLE, stringType.getSerializationType());
+        assertNotNull(stringType.serializationType());
+        assertEquals(Type.SerializationType.SERIALIZABLE, stringType.serializationType());
     }
 
     @Test
     @DisplayName("Test getElementType()")
     public void testGetElementType() {
-        Type<?> elementType = listType.getElementType();
+        Type<?> elementType = listType.elementType();
         assertNotNull(elementType);
-        assertEquals(String.class, elementType.clazz());
+        assertEquals(String.class, elementType.javaType());
 
-        assertNull(stringType.getElementType());
+        assertNull(stringType.elementType());
     }
 
     @Test
     @DisplayName("Test getParameterTypes()")
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = mapType.getParameterTypes();
+        Type<?>[] paramTypes = mapType.parameterTypes();
         assertNotNull(paramTypes);
         assertEquals(2, paramTypes.length);
 
-        Type<?>[] stringParamTypes = stringType.getParameterTypes();
+        Type<?>[] stringParamTypes = stringType.parameterTypes();
         assertNotNull(stringParamTypes);
         assertEquals(0, stringParamTypes.length);
     }
@@ -776,13 +776,13 @@ public class TypeInterface100Test extends TestBase {
     @DisplayName("Test writeCharacter()")
     public void testWriteCharacter() throws IOException {
         CharacterWriter writer = createCharacterWriter();
-        JsonXmlSerializationConfig<?> config = null;
+        JsonXmlSerConfig<?> config = null;
 
         stringType.writeCharacter(writer, "test", config);
 
         stringType.writeCharacter(writer, null, config);
 
-        config = mock(JsonXmlSerializationConfig.class);
+        config = mock(JsonXmlSerConfig.class);
         when(config.getStringQuotation()).thenReturn('"');
         stringType.writeCharacter(writer, "test", config);
     }

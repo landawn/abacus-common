@@ -15,22 +15,22 @@ import com.landawn.abacus.util.N;
 @Tag("new-test")
 public class DeserializationConfig100Test extends TestBase {
 
-    private DeserializationConfig<?> config;
+    private Deserialization<?> config;
 
     @BeforeEach
     public void setUp() {
-        config = new JsonDeserializationConfig();
+        config = new JsonDeserConfig();
     }
 
     @Test
     public void testIgnoreUnmatchedProperty() {
-        Assertions.assertTrue(config.ignoreUnmatchedProperty());
+        Assertions.assertTrue(config.isIgnoreUnmatchedProperty());
 
-        config.ignoreUnmatchedProperty(false);
-        Assertions.assertFalse(config.ignoreUnmatchedProperty());
+        config.setIgnoreUnmatchedProperty(false);
+        Assertions.assertFalse(config.isIgnoreUnmatchedProperty());
 
-        config.ignoreUnmatchedProperty(true);
-        Assertions.assertTrue(config.ignoreUnmatchedProperty());
+        config.setIgnoreUnmatchedProperty(true);
+        Assertions.assertTrue(config.isIgnoreUnmatchedProperty());
     }
 
     @Test
@@ -43,7 +43,7 @@ public class DeserializationConfig100Test extends TestBase {
         config.setElementType(String.class);
         Type<?> eleType = config.getElementType();
         Assertions.assertNotNull(eleType);
-        Assertions.assertEquals(String.class, eleType.clazz());
+        Assertions.assertEquals(String.class, eleType.javaType());
     }
 
     @Test
@@ -59,7 +59,7 @@ public class DeserializationConfig100Test extends TestBase {
         config.setElementType("String");
         Type<?> eleType = config.getElementType();
         Assertions.assertNotNull(eleType);
-        Assertions.assertEquals(String.class, eleType.clazz());
+        Assertions.assertEquals(String.class, eleType.javaType());
     }
 
     @Test
@@ -72,7 +72,7 @@ public class DeserializationConfig100Test extends TestBase {
         config.setMapKeyType(Long.class);
         Type<?> keyType = config.getMapKeyType();
         Assertions.assertNotNull(keyType);
-        Assertions.assertEquals(Long.class, keyType.clazz());
+        Assertions.assertEquals(Long.class, keyType.javaType());
     }
 
     @Test
@@ -88,7 +88,7 @@ public class DeserializationConfig100Test extends TestBase {
         config.setMapKeyType("Integer");
         Type<?> keyType = config.getMapKeyType();
         Assertions.assertNotNull(keyType);
-        Assertions.assertEquals(Integer.class, keyType.clazz());
+        Assertions.assertEquals(Integer.class, keyType.javaType());
     }
 
     @Test
@@ -101,7 +101,7 @@ public class DeserializationConfig100Test extends TestBase {
         config.setMapValueType(Double.class);
         Type<?> valueType = config.getMapValueType();
         Assertions.assertNotNull(valueType);
-        Assertions.assertEquals(Double.class, valueType.clazz());
+        Assertions.assertEquals(Double.class, valueType.javaType());
     }
 
     @Test
@@ -117,7 +117,7 @@ public class DeserializationConfig100Test extends TestBase {
         config.setMapValueType("Boolean");
         Type<?> valueType = config.getMapValueType();
         Assertions.assertNotNull(valueType);
-        Assertions.assertEquals(Boolean.class, valueType.clazz());
+        Assertions.assertEquals(Boolean.class, valueType.javaType());
     }
 
     @Test
@@ -135,7 +135,7 @@ public class DeserializationConfig100Test extends TestBase {
         config.setValueType("prop1", String.class);
         Type<?> type = config.getValueType("prop1");
         Assertions.assertNotNull(type);
-        Assertions.assertEquals(String.class, type.clazz());
+        Assertions.assertEquals(String.class, type.javaType());
     }
 
     @Test
@@ -147,7 +147,7 @@ public class DeserializationConfig100Test extends TestBase {
         config.setValueType("prop1", String.class);
         Type<?> type = config.getValueType("prop1", intType);
         Assertions.assertNotEquals(intType, type);
-        Assertions.assertEquals(String.class, type.clazz());
+        Assertions.assertEquals(String.class, type.javaType());
     }
 
     @Test
@@ -155,7 +155,7 @@ public class DeserializationConfig100Test extends TestBase {
         config.setValueType("prop1", Double.class);
         Type<?> type = config.getValueType("prop1");
         Assertions.assertNotNull(type);
-        Assertions.assertEquals(Double.class, type.clazz());
+        Assertions.assertEquals(Double.class, type.javaType());
     }
 
     @Test
@@ -171,7 +171,7 @@ public class DeserializationConfig100Test extends TestBase {
         config.setValueType("prop1", "Float");
         Type<?> type = config.getValueType("prop1");
         Assertions.assertNotNull(type);
-        Assertions.assertEquals(Float.class, type.clazz());
+        Assertions.assertEquals(Float.class, type.javaType());
     }
 
     @Test
@@ -182,8 +182,8 @@ public class DeserializationConfig100Test extends TestBase {
 
         config.setValueTypes(valueTypes);
 
-        Assertions.assertEquals(String.class, config.getValueType("prop1").clazz());
-        Assertions.assertEquals(Integer.class, config.getValueType("prop2").clazz());
+        Assertions.assertEquals(String.class, config.getValueType("prop1").javaType());
+        Assertions.assertEquals(Integer.class, config.getValueType("prop2").javaType());
     }
 
     @Test
@@ -201,8 +201,8 @@ public class DeserializationConfig100Test extends TestBase {
 
     @Test
     public void testHashCode() {
-        DeserializationConfig<?> config1 = new JsonDeserializationConfig();
-        DeserializationConfig<?> config2 = new JsonDeserializationConfig();
+        Deserialization<?> config1 = new JsonDeserConfig();
+        Deserialization<?> config2 = new JsonDeserConfig();
 
         Assertions.assertEquals(config1.hashCode(), config2.hashCode());
 
@@ -212,8 +212,8 @@ public class DeserializationConfig100Test extends TestBase {
 
     @Test
     public void testEquals() {
-        DeserializationConfig<?> config1 = new JsonDeserializationConfig();
-        DeserializationConfig<?> config2 = new JsonDeserializationConfig();
+        Deserialization<?> config1 = new JsonDeserConfig();
+        Deserialization<?> config2 = new JsonDeserConfig();
 
         Assertions.assertEquals(config1, config1);
         Assertions.assertEquals(config1, config2);

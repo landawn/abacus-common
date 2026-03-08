@@ -35,9 +35,16 @@ import java.security.SecureRandom;
  * <ul>
  *   <li>Cryptographically secure nonce generation using SHA1PRNG</li>
  *   <li>SHA-1 digest computation with cached MessageDigest instance</li>
+ *   <li>Configurable digest algorithm via overloaded methods (e.g. SHA-256)</li>
  *   <li>WS-Security compliant password digest creation</li>
  *   <li>Thread-safe implementation for concurrent environments</li>
  * </ul>
+ *
+ * <p><b>Security Note:</b> The default digest methods in this class use SHA-1, which is
+ * cryptographically broken for collision resistance. SHA-1 is retained as the default for
+ * backward compatibility with the WS-Security UsernameToken Profile 1.0 specification.
+ * For new applications or when the WS-Security peer supports it, prefer the overloaded
+ * methods that accept an algorithm parameter (e.g. {@code "SHA-256"}).</p>
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -139,6 +146,10 @@ public final class WSSecurityUtil {
      *
      * <p>This method is thread-safe through class-level synchronization.</p>
      *
+     * <p><b>Security Note:</b> This method uses SHA-1, which is cryptographically broken for
+     * collision resistance. For new applications, prefer {@link #generateDigest(byte[], String)}
+     * with a stronger algorithm such as {@code "SHA-256"}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String data = "Hello World";
@@ -150,6 +161,7 @@ public final class WSSecurityUtil {
      * @return a byte array containing the SHA-1 hash of the input bytes (always 20 bytes)
      * @throws IllegalArgumentException if inputBytes is null
      * @throws RuntimeException if an unexpected error occurs during the digest operation
+     * @see #generateDigest(byte[], String)
      */
     public static byte[] generateDigest(final byte[] inputBytes) {
         if (inputBytes == null) {
@@ -167,6 +179,48 @@ public final class WSSecurityUtil {
     }
 
     /**
+     * Generates a digest (hash) of the input bytes using the specified algorithm.
+     * This method allows callers to choose a stronger algorithm than the default SHA-1.
+     *
+     * <p>Common algorithm names include:</p>
+     * <ul>
+     *   <li>{@code "SHA-256"} — 256-bit hash, recommended for most use cases</li>
+     *   <li>{@code "SHA-384"} — 384-bit hash</li>
+     *   <li>{@code "SHA-512"} — 512-bit hash</li>
+     *   <li>{@code "SHA-1"} — 160-bit hash (legacy, not recommended for new use)</li>
+     * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String data = "Hello World";
+     * byte[] hash = WSSecurityUtil.generateDigest(
+     *     data.getBytes(StandardCharsets.UTF_8), "SHA-256");
+     * String base64Hash = Base64.getEncoder().encodeToString(hash);
+     * }</pre>
+     *
+     * @param inputBytes the bytes to be digested, must not be {@code null}
+     * @param algorithm the name of the digest algorithm (e.g. {@code "SHA-256"}), must not be {@code null}
+     * @return a byte array containing the hash of the input bytes
+     * @throws IllegalArgumentException if {@code inputBytes} or {@code algorithm} is {@code null},
+     *         or if the algorithm is not available
+     */
+    public static byte[] generateDigest(final byte[] inputBytes, final String algorithm) {
+        if (inputBytes == null) {
+            throw new IllegalArgumentException("Input bytes cannot be null");
+        }
+        if (algorithm == null) {
+            throw new IllegalArgumentException("Algorithm cannot be null");
+        }
+
+        try {
+            final MessageDigest md = MessageDigest.getInstance(algorithm);
+            return md.digest(inputBytes);
+        } catch (final NoSuchAlgorithmException e) {
+            throw new IllegalArgumentException("Unsupported algorithm: " + algorithm, e);
+        }
+    }
+
+    /**
      * Creates a WS-Security compliant password digest by computing the SHA-1 hash of
      * the concatenated nonce, created timestamp, and password, then encoding the result
      * in Base64 format. This implements the password digest mechanism defined in the
@@ -180,6 +234,11 @@ public final class WSSecurityUtil {
      * <p>The three components are concatenated in the specific order: nonce, then created,
      * then password. This order is defined by the WS-Security specification and must be
      * strictly followed for interoperability.</p>
+     *
+     * <p><b>Security Note:</b> This method uses SHA-1, which is cryptographically broken for
+     * collision resistance. For new applications or when the WS-Security peer supports it,
+     * prefer {@link #computePasswordDigest(byte[], byte[], byte[], String)} with a stronger
+     * algorithm such as {@code "SHA-256"}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -200,6 +259,7 @@ public final class WSSecurityUtil {
      * @return a Base64-encoded string of the SHA-1 hash of the concatenated inputs
      * @throws IllegalArgumentException if any parameter is null
      * @throws RuntimeException if an unexpected error occurs during the digest operation
+     * @see #computePasswordDigest(byte[], byte[], byte[], String)
      * @see #computePasswordDigest(String, String, String)
      * @see #generateNonce(int)
      * @see #generateDigest(byte[])
@@ -230,6 +290,64 @@ public final class WSSecurityUtil {
     }
 
     /**
+     * Creates a password digest by computing the hash of the concatenated nonce, created timestamp,
+     * and password using the specified algorithm, then encoding the result in Base64 format.
+     *
+     * <p>This method follows the same concatenation order as the WS-Security UsernameToken
+     * password digest algorithm, but allows a stronger hash algorithm:</p>
+     * <pre>{@code
+     * PasswordDigest = Base64(Hash(nonce + created + password))
+     * }</pre>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] nonce = WSSecurityUtil.generateNonce(16);
+     * byte[] created = Instant.now().toString().getBytes(StandardCharsets.UTF_8);
+     * byte[] password = "secretPassword".getBytes(StandardCharsets.UTF_8);
+     *
+     * // Use SHA-256 instead of the default SHA-1
+     * String passwordDigest = WSSecurityUtil.computePasswordDigest(
+     *     nonce, created, password, "SHA-256");
+     * }</pre>
+     *
+     * @param nonce the nonce byte array, must not be {@code null}
+     * @param created the created timestamp byte array, must not be {@code null}
+     * @param password the password byte array to be digested, must not be {@code null}
+     * @param algorithm the name of the digest algorithm (e.g. {@code "SHA-256"}), must not be {@code null}
+     * @return a Base64-encoded string of the hash of the concatenated inputs
+     * @throws IllegalArgumentException if any parameter is {@code null}, or if the algorithm is not available
+     * @see #computePasswordDigest(byte[], byte[], byte[])
+     * @see #generateDigest(byte[], String)
+     */
+    public static String computePasswordDigest(final byte[] nonce, final byte[] created, final byte[] password, final String algorithm) {
+        if (nonce == null) {
+            throw new IllegalArgumentException("Nonce cannot be null");
+        }
+        if (created == null) {
+            throw new IllegalArgumentException("Created timestamp cannot be null");
+        }
+        if (password == null) {
+            throw new IllegalArgumentException("Password cannot be null");
+        }
+        if (algorithm == null) {
+            throw new IllegalArgumentException("Algorithm cannot be null");
+        }
+
+        final byte[] b4 = new byte[nonce.length + created.length + password.length];
+        int offset = 0;
+        N.copy(nonce, 0, b4, offset, nonce.length);
+        offset += nonce.length;
+
+        N.copy(created, 0, b4, offset, created.length);
+        offset += created.length;
+
+        N.copy(password, 0, b4, offset, password.length);
+
+        final byte[] digestBytes = generateDigest(b4, algorithm);
+        return Strings.base64Encode(digestBytes);
+    }
+
+    /**
      * Creates a WS-Security compliant password digest using string inputs. This is a convenience
      * method that converts the string parameters to bytes using the default charset before
      * processing them with the WS-Security password digest algorithm.
@@ -237,6 +355,11 @@ public final class WSSecurityUtil {
      * <p>This method internally calls {@link #computePasswordDigest(byte[], byte[], byte[])} after
      * converting all string parameters to byte arrays using the default charset. The resulting
      * digest follows the WS-Security UsernameToken specification.</p>
+     *
+     * <p><b>Security Note:</b> This method uses SHA-1, which is cryptographically broken for
+     * collision resistance. For new applications or when the WS-Security peer supports it,
+     * prefer {@link #computePasswordDigest(String, String, String, String)} with a stronger
+     * algorithm such as {@code "SHA-256"}.</p>
      *
      * <p><b>Important:</b> This method uses the default charset (Charsets.DEFAULT) for string-to-byte
      * conversion. The choice of charset affects the resulting digest, as different charsets produce
@@ -267,6 +390,7 @@ public final class WSSecurityUtil {
      * @return a Base64-encoded string of the SHA-1 hash of the concatenated inputs
      * @throws IllegalArgumentException if any parameter is null
      * @throws RuntimeException if an unexpected error occurs during the digest operation
+     * @see #computePasswordDigest(String, String, String, String)
      * @see #computePasswordDigest(byte[], byte[], byte[])
      * @see #generateNonce(int)
      * @see #generateDigest(byte[])
@@ -283,5 +407,50 @@ public final class WSSecurityUtil {
         }
 
         return computePasswordDigest(nonce.getBytes(Charsets.DEFAULT), created.getBytes(Charsets.DEFAULT), password.getBytes(Charsets.DEFAULT));
+    }
+
+    /**
+     * Creates a password digest using string inputs and the specified algorithm. This is a
+     * convenience method that converts the string parameters to bytes using the default charset
+     * before computing the digest.
+     *
+     * <p><b>Important:</b> This method uses the default charset (Charsets.DEFAULT) for string-to-byte
+     * conversion. For maximum interoperability, especially with non-ASCII characters, consider using
+     * the byte array version with {@code string.getBytes(StandardCharsets.UTF_8)}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String nonce = Base64.getEncoder().encodeToString(WSSecurityUtil.generateNonce(16));
+     * String created = Instant.now().toString();
+     * String password = "secretPassword";
+     *
+     * // Use SHA-256 instead of the default SHA-1
+     * String passwordDigest = WSSecurityUtil.computePasswordDigest(
+     *     nonce, created, password, "SHA-256");
+     * }</pre>
+     *
+     * @param nonce the nonce string, must not be {@code null}
+     * @param created the created timestamp string, must not be {@code null}
+     * @param password the password string to be digested, must not be {@code null}
+     * @param algorithm the name of the digest algorithm (e.g. {@code "SHA-256"}), must not be {@code null}
+     * @return a Base64-encoded string of the hash of the concatenated inputs
+     * @throws IllegalArgumentException if any parameter is {@code null}, or if the algorithm is not available
+     * @see #computePasswordDigest(byte[], byte[], byte[], String)
+     */
+    public static String computePasswordDigest(final String nonce, final String created, final String password, final String algorithm) {
+        if (nonce == null) {
+            throw new IllegalArgumentException("Nonce cannot be null");
+        }
+        if (created == null) {
+            throw new IllegalArgumentException("Created timestamp cannot be null");
+        }
+        if (password == null) {
+            throw new IllegalArgumentException("Password cannot be null");
+        }
+        if (algorithm == null) {
+            throw new IllegalArgumentException("Algorithm cannot be null");
+        }
+
+        return computePasswordDigest(nonce.getBytes(Charsets.DEFAULT), created.getBytes(Charsets.DEFAULT), password.getBytes(Charsets.DEFAULT), algorithm);
     }
 }

@@ -41,12 +41,12 @@ public class PrimitiveFloatType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(float.class, type.clazz());
+        assertEquals(float.class, type.javaType());
     }
 
     @Test
-    public void test_isPrimitiveType() {
-        assertTrue(type.isPrimitiveType());
+    public void test_isPrimitive() {
+        assertTrue(type.isPrimitive());
     }
 
     @Test

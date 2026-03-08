@@ -55,8 +55,8 @@ class JDKLogger extends AbstractLogger {
      *
      * <p>The name is passed directly to the underlying java.util.logging.Logger.</p>
      *
-     * <p><b>Note:</b> This constructor is package-private and should not be called directly.
-     * Use {@link LoggerFactory#getLogger(Class)} or {@link LoggerFactory#getLogger(String)} instead.</p>
+     * <p><b>Note:</b> This class is package-private and this constructor should not be called directly
+     * from outside the logging package. Use {@link LoggerFactory#getLogger(Class)} or {@link LoggerFactory#getLogger(String)} instead.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -291,7 +291,7 @@ class JDKLogger extends AbstractLogger {
      * this instance's JDK logger. The caller information is determined by walking
      * the stack trace to find the first frame outside of the logging framework.</p>
      *
-     * <p>See bug report #13 for more details about why this approach is necessary.</p>
+     * <p>See SLF4J bug report #13 for more details about why this approach is necessary.</p>
      *
      * @param callerFQCN the fully qualified class name of the caller
      * @param level the logging level
@@ -303,8 +303,7 @@ class JDKLogger extends AbstractLogger {
         final LogRecord logRecord = new LogRecord(level, msg);
         logRecord.setLoggerName(getName());
         logRecord.setThrown(t);
-        // Note: parameters in record are not set because SLF4J only
-        // supports a single formatting style
+        // Note: parameters in LogRecord are not set because formatting is handled by AbstractLogger
         fillCallerData(callerFQCN, logRecord);
         loggerImpl.log(logRecord);
     }

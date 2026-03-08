@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.u.OptionalByte;
 
@@ -31,18 +31,18 @@ public class OptionalByteType100Test extends TestBase {
 
     private OptionalByteType optionalByteType;
     private CharacterWriter writer;
-    private JsonXmlSerializationConfig<?> config;
+    private JsonXmlSerConfig<?> config;
 
     @BeforeEach
     public void setUp() {
         optionalByteType = (OptionalByteType) createType("OptionalByte");
         writer = createCharacterWriter();
-        config = mock(JsonXmlSerializationConfig.class);
+        config = mock(JsonXmlSerConfig.class);
     }
 
     @Test
     public void testClazz() {
-        assertEquals(OptionalByte.class, optionalByteType.clazz());
+        assertEquals(OptionalByte.class, optionalByteType.javaType());
     }
 
     @Test

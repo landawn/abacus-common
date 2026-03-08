@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -35,13 +35,13 @@ public class AbstractLongType100Test extends TestBase {
 
     private Type<Number> longType;
     private CharacterWriter writer;
-    private JsonXmlSerializationConfig<?> config;
+    private JsonXmlSerConfig<?> config;
 
     @BeforeEach
     public void setUp() {
         longType = createType("Long");
         writer = createCharacterWriter();
-        config = mock(JsonXmlSerializationConfig.class);
+        config = mock(JsonXmlSerConfig.class);
     }
 
     @Test
@@ -186,11 +186,11 @@ public class AbstractLongType100Test extends TestBase {
         longType.writeCharacter(writer, 123456789L, null);
         verify(writer).write(123456789L);
 
-        when(config.writeNullNumberAsZero()).thenReturn(true);
+        when(config.isWriteNullNumberAsZero()).thenReturn(true);
         longType.writeCharacter(writer, null, config);
         verify(writer).write(0L);
 
-        when(config.writeLongAsString()).thenReturn(true);
+        when(config.isWriteLongAsString()).thenReturn(true);
         when(config.getStringQuotation()).thenReturn('"');
         longType.writeCharacter(writer, 987654321L, config);
         verify(writer).write(987654321L);

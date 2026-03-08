@@ -368,6 +368,27 @@ public class Fn202Test extends TestBase {
     }
 
     @Test
+    public void testTap() {
+        AtomicInteger counter = new AtomicInteger();
+        Function<String, String> tap = Fn.tap(str -> counter.incrementAndGet());
+
+        String value = "test";
+        assertSame(value, tap.apply(value));
+        assertNull(tap.apply(null));
+        assertEquals(2, counter.get());
+    }
+
+    @Test
+    public void testTapWithEmptyConsumerReturnsCanonicalIdentity() {
+        assertSame(Fn.identity(), Fn.tap(Fn.emptyConsumer()));
+    }
+
+    @Test
+    public void testTapRejectsNull() {
+        assertThrows(IllegalArgumentException.class, () -> Fn.tap((Consumer<Object>) null));
+    }
+
+    @Test
     public void testKeyed() {
         Function<String, Keyed<Integer, String>> keyedFunc = Fn.keyed(String::length);
         Keyed<Integer, String> result = keyedFunc.apply("hello");
@@ -1018,6 +1039,27 @@ public class Fn202Test extends TestBase {
                 throw new IOException("e");
             };
             assertThrows(RuntimeException.class, () -> Fn.ss("a", func).get());
+        }
+
+        @Test
+        public void testTap() throws IOException {
+            AtomicInteger counter = new AtomicInteger();
+            Throwables.Function<String, String, IOException> tap = Fnn.tap(str -> counter.incrementAndGet());
+
+            String value = "test";
+            assertSame(value, tap.apply(value));
+            assertNull(tap.apply(null));
+            assertEquals(2, counter.get());
+        }
+
+        @Test
+        public void testTapWithDoNothingReturnsCanonicalIdentity() {
+            assertSame(Fnn.identity(), Fnn.tap(Fnn.doNothing()));
+        }
+
+        @Test
+        public void testTapRejectsNull() {
+            assertThrows(IllegalArgumentException.class, () -> Fnn.tap((Throwables.Consumer<Object, IOException>) null));
         }
 
         @Test

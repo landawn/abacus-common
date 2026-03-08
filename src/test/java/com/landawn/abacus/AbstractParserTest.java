@@ -16,8 +16,7 @@ import com.landawn.abacus.entity.PersonType;
 import com.landawn.abacus.entity.PersonsType;
 import com.landawn.abacus.entity.XBean;
 import com.landawn.abacus.parser.JsonParser;
-import com.landawn.abacus.parser.JsonSerializationConfig;
-import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
+import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.KryoParser;
 import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.parser.XmlParser;
@@ -38,7 +37,7 @@ public abstract class AbstractParserTest extends AbstractTest {
     protected static final XmlParser xmlParser = com.landawn.abacus.parser.AbstractParserTest.xmlParser;
     protected static final XmlParser xmlDOMParser = com.landawn.abacus.parser.AbstractParserTest.xmlDOMParser;
     protected static final KryoParser kryoParser = ParserFactory.createKryoParser();
-    protected static final JsonSerializationConfig jsc = JSC.of(true, true);
+    protected static final JsonSerConfig jsc = JsonSerConfig.create().setQuotePropName(true).setQuoteMapKey(true);
     protected static final XBean simpleBean = createXBean();
     protected static final BigXBean bigBean = createBigBean(100);
     static final List<ObjectMapper> objectMapperPool = new ArrayList<>(100);

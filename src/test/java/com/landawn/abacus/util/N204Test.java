@@ -50,12 +50,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonDeserializationConfig;
-import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
-import com.landawn.abacus.parser.JsonSerializationConfig;
-import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
-import com.landawn.abacus.parser.XmlSerializationConfig;
-import com.landawn.abacus.parser.XmlSerializationConfig.XSC;
+import com.landawn.abacus.parser.JsonDeserConfig;
+import com.landawn.abacus.parser.JsonSerConfig;
+import com.landawn.abacus.parser.XmlSerConfig;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.function.Supplier;
@@ -194,7 +191,7 @@ public class N204Test extends TestBase {
     @Test
     public void toJson_object_withConfig() {
         TestBean bean = createSampleBean();
-        JsonSerializationConfig config = JSC.create().prettyFormat(true);
+        JsonSerConfig config = JsonSerConfig.create().setPrettyFormat(true);
         String json = N.toJson(bean, config);
         assertEquals(getExpectedJsonForSampleBean(true), json);
     }
@@ -213,7 +210,7 @@ public class N204Test extends TestBase {
     public void toJson_object_withConfig_toFile(@TempDir Path tempDir) throws IOException {
         TestBean bean = createSampleBean();
         File outputFile = tempDir.resolve("output_pretty.json").toFile();
-        JsonSerializationConfig config = JSC.create().prettyFormat(true);
+        JsonSerConfig config = JsonSerConfig.create().setPrettyFormat(true);
         N.toJson(bean, config, outputFile);
         assertTrue(outputFile.exists());
         String fileContent = new String(Files.readAllBytes(outputFile.toPath()));
@@ -231,7 +228,7 @@ public class N204Test extends TestBase {
     @Test
     public void toJson_object_withConfig_toOutputStream() throws IOException {
         TestBean bean = createSampleBean();
-        JsonSerializationConfig config = JSC.create().prettyFormat(true);
+        JsonSerConfig config = JsonSerConfig.create().setPrettyFormat(true);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         N.toJson(bean, config, baos);
         assertEquals(getExpectedJsonForSampleBean(true), baos.toString(StandardCharsets.UTF_8.name()));
@@ -248,7 +245,7 @@ public class N204Test extends TestBase {
     @Test
     public void toJson_object_withConfig_toWriter() throws IOException {
         TestBean bean = createSampleBean();
-        JsonSerializationConfig config = JSC.create().prettyFormat(true);
+        JsonSerConfig config = JsonSerConfig.create().setPrettyFormat(true);
         StringWriter writer = new StringWriter();
         N.toJson(bean, config, writer);
         assertEquals(getExpectedJsonForSampleBean(true), writer.toString());
@@ -299,7 +296,7 @@ public class N204Test extends TestBase {
     @Test
     public void fromJson_string_withConfig_toClass() {
         String json = getExpectedJsonForSampleBean(false);
-        JsonDeserializationConfig config = JDC.create();
+        JsonDeserConfig config = JsonDeserConfig.create();
         TestBean bean = N.fromJson(json, config, TestBean.class);
         assertEquals(createSampleBean(), bean);
     }
@@ -307,7 +304,7 @@ public class N204Test extends TestBase {
     @Test
     public void fromJson_string_withConfig_toType() {
         String json = getExpectedJsonForSampleBean(false);
-        JsonDeserializationConfig config = JDC.create();
+        JsonDeserConfig config = JsonDeserConfig.create();
         Type<TestBean> type = new TypeReference<TestBean>() {
         }.type();
         TestBean bean = N.fromJson(json, config, type);
@@ -460,7 +457,7 @@ public class N204Test extends TestBase {
     @Test
     public void toXml_object_withConfig_toWriter() throws IOException {
         TestBean bean = createSampleBean();
-        XmlSerializationConfig config = XSC.create().prettyFormat(true);
+        XmlSerConfig config = XmlSerConfig.create().setPrettyFormat(true);
         StringWriter writer = new StringWriter();
         N.toXml(bean, config, writer);
         String xml = writer.toString();

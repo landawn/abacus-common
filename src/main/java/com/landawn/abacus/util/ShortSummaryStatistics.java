@@ -203,9 +203,9 @@ public class ShortSummaryStatistics implements ShortConsumer {
      * Long sum = stats.getSum();   // Returns 60
      * }</pre>
      *
-     * @return the sum of values as a Long
+     * @return the sum of values as a {@code long}
      */
-    public final Long getSum() {
+    public final long getSum() {
         return sum;
     }
 
@@ -223,7 +223,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
      *
      * @return the arithmetic mean of values, or 0.0 if none
      */
-    public final Double getAverage() {
+    public final double getAverage() {
         return getCount() > 0 ? (double) getSum() / getCount() : 0.0d;
     }
 
@@ -231,7 +231,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
      * Returns a string representation of this statistics object.
      * The format includes all computed statistics: min, max, count, sum, and average.
      * 
-     * <p><b>Example output:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * {min=10, max=50, count=5, sum=150, average=30.000000}
      * }</pre>

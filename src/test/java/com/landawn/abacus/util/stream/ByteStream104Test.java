@@ -560,52 +560,52 @@ public class ByteStream104Test extends TestBase {
     @Test
     public void testOnEach() {
         List<Byte> processed = new ArrayList<>();
-        assertEquals(5, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).onEach(processed::add).count());
+        assertEquals(5, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).peek(processed::add).count());
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), processed);
 
         processed.clear();
-        assertEquals(4, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).onEach(processed::add).skip(1).count());
+        assertEquals(4, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).peek(processed::add).skip(1).count());
 
         processed.clear();
-        assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).onEach(processed::add).toArray());
+        assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).peek(processed::add).toArray());
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), processed);
 
         processed.clear();
-        assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).onEach(processed::add).skip(1).toArray());
+        assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).peek(processed::add).skip(1).toArray());
 
         processed.clear();
         assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
-                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).onEach(processed::add).toList());
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).peek(processed::add).toList());
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), processed);
 
         processed.clear();
         assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
-                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).onEach(processed::add).skip(1).toList());
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).peek(processed::add).skip(1).toList());
 
         processed.clear();
-        assertEquals(5, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).onEach(processed::add).count());
+        assertEquals(5, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).peek(processed::add).count());
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), processed);
 
         processed.clear();
-        assertEquals(4, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).onEach(processed::add).skip(1).count());
+        assertEquals(4, ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).peek(processed::add).skip(1).count());
 
         processed.clear();
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 },
-                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).onEach(processed::add).toArray());
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).peek(processed::add).toArray());
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), processed);
 
         processed.clear();
         assertArrayEquals(new byte[] { 2, 3, 4, 5 },
-                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).onEach(processed::add).skip(1).toArray());
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).peek(processed::add).skip(1).toArray());
 
         processed.clear();
         assertEquals(N.toList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5),
-                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).onEach(processed::add).toList());
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).peek(processed::add).toList());
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), processed);
 
         processed.clear();
         assertEquals(N.toList((byte) 2, (byte) 3, (byte) 4, (byte) 5),
-                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).onEach(processed::add).skip(1).toList());
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).map(e -> e).peek(processed::add).skip(1).toList());
     }
 
     @Test

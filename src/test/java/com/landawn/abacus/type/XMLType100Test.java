@@ -35,7 +35,7 @@ public class XMLType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<?> clazz = xmlMapType.clazz();
+        Class<?> clazz = xmlMapType.javaType();
         assertNotNull(clazz);
         assertEquals(Map.class, clazz);
     }

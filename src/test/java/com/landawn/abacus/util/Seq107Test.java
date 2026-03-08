@@ -523,21 +523,21 @@ public class Seq107Test extends TestBase {
     }
 
     @Test
-    public void testOnEachWithSkipCountAndToArray() throws Exception {
+    public void testPeekWithSkipCountAndToArray() throws Exception {
         List<String> seen = new ArrayList<>();
-        assertEquals(5, Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").onEach(seen::add).count());
+        assertEquals(5, Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").peek(seen::add).count());
         assertEquals(5, seen.size());
 
         seen.clear();
-        assertEquals(3, Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").onEach(seen::add).skip(2).count());
+        assertEquals(3, Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").peek(seen::add).skip(2).count());
 
         seen.clear();
         assertArrayEquals(new String[] { "a", "b", "c", "d", "e" },
-                Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").onEach(seen::add).toArray(String[]::new));
+                Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").peek(seen::add).toArray(String[]::new));
 
         seen.clear();
         assertArrayEquals(new String[] { "c", "d", "e" },
-                Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").onEach(seen::add).skip(2).toArray(String[]::new));
+                Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").peek(seen::add).skip(2).toArray(String[]::new));
     }
 
     @Test
@@ -574,24 +574,6 @@ public class Seq107Test extends TestBase {
         seen.clear();
         assertArrayEquals(new String[] { "c", "d", "e" },
                 Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").onLast(seen::add).skip(2).toArray(String[]::new));
-    }
-
-    @Test
-    public void testPeekWithSkipCountAndToArray() throws Exception {
-        List<String> seen = new ArrayList<>();
-        assertEquals(5, Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").peek(seen::add).count());
-        assertEquals(5, seen.size());
-
-        seen.clear();
-        assertEquals(3, Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").peek(seen::add).skip(2).count());
-
-        seen.clear();
-        assertArrayEquals(new String[] { "a", "b", "c", "d", "e" },
-                Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").peek(seen::add).toArray(String[]::new));
-
-        seen.clear();
-        assertArrayEquals(new String[] { "c", "d", "e" },
-                Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").peek(seen::add).skip(2).toArray(String[]::new));
     }
 
     @Test

@@ -209,6 +209,11 @@ public class UncheckedSQLException extends UncheckedException {
         return cause.getErrorCode();
     }
 
+    /**
+     * Returns the {@link SQLException} that caused this exception.
+     *
+     * @return the wrapped {@link SQLException}, never {@code null}
+     */
     @Override
     public synchronized SQLException getCause() {
         return cause;

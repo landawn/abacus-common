@@ -57,7 +57,7 @@ package com.landawn.abacus.util;
 public final class IEEE754rUtil {
 
     private IEEE754rUtil() {
-        // singleton.
+        // Utility class - prevent instantiation
     }
 
     /**

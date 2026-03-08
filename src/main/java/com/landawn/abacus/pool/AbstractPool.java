@@ -169,6 +169,12 @@ public abstract class AbstractPool implements Pool {
     volatile boolean isClosed = false;
 
     /**
+     * The shutdown hook thread registered for this pool instance, used for cleanup during JVM shutdown.
+     * Stored so it can be removed when the pool is explicitly closed, preventing Thread leaks.
+     */
+    private transient Thread shutdownHook;
+
+    /**
      * Constructs a new AbstractPool with the specified configuration.
      * This protected constructor is used by subclasses to initialize core pool functionality.
      *
@@ -196,7 +202,7 @@ public abstract class AbstractPool implements Pool {
 
         final Class<?> cls = this.getClass();
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+        shutdownHook = new Thread(() -> {
             logger.warn("Starting pool shutdown: " + ClassUtil.getCanonicalClassName(cls));
 
             try {
@@ -204,7 +210,25 @@ public abstract class AbstractPool implements Pool {
             } finally {
                 logger.warn("Pool shutdown completed: " + ClassUtil.getCanonicalClassName(cls));
             }
-        }));
+        });
+
+        Runtime.getRuntime().addShutdownHook(shutdownHook);
+    }
+
+    /**
+     * Removes the shutdown hook for this pool if it was registered.
+     * Called during explicit close to prevent Thread leaks and allow garbage collection.
+     */
+    void removeShutdownHook() {
+        if (shutdownHook != null) {
+            try {
+                Runtime.getRuntime().removeShutdownHook(shutdownHook);
+            } catch (final IllegalStateException e) {
+                // JVM is already shutting down, ignore
+            }
+
+            shutdownHook = null;
+        }
     }
 
     /**
@@ -221,7 +245,6 @@ public abstract class AbstractPool implements Pool {
      * }
      * }</pre>
      *
-     * @throws IllegalStateException if the pool has been closed
      */
     @Override
     public void lock() {

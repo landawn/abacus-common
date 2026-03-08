@@ -2313,6 +2313,57 @@ public final class Throwables {
     }
 
     /**
+     * The Interface FloatToIntFunction.
+     *
+     * @param <E> the type of exception that may be thrown
+     */
+    @FunctionalInterface
+    public interface FloatToIntFunction<E extends Throwable> {
+        /**
+         * Applies this function to the given float argument and produces an int result.
+         *
+         * @param value the float function argument
+         * @return the int function result
+         * @throws E if an exception occurs during function application
+         */
+        double applyAsInt(float value) throws E;
+    }
+
+    /**
+     * The Interface FloatToLongFunction.
+     *
+     * @param <E> the type of exception that may be thrown
+     */
+    @FunctionalInterface
+    public interface FloatToLongFunction<E extends Throwable> {
+        /**
+         * Applies this function to the given float argument and produces a long result.
+         *
+         * @param value the float function argument
+         * @return the long function result
+         * @throws E if an exception occurs during function application
+         */
+        double applyAsLong(float value) throws E;
+    }
+
+    /**
+     * The Interface FloatToDoubleFunction.
+     *
+     * @param <E> the type of exception that may be thrown
+     */
+    @FunctionalInterface
+    public interface FloatToDoubleFunction<E extends Throwable> {
+        /**
+         * Applies this function to the given float argument and produces a double result.
+         *
+         * @param value the float function argument
+         * @return the double function result
+         * @throws E if an exception occurs during function application
+         */
+        double applyAsDouble(float value) throws E;
+    }
+
+    /**
      * The Interface FloatConsumer.
      *
      * @param <E> the type of exception that may be thrown

@@ -44,7 +44,7 @@ public interface IntMapMultiConsumer extends java.util.stream.IntStream.IntMapMu
      *   <li>Implementing custom filtering and transformation logic in one step</li>
      * </ul>
      *
-     * <p>Example usage in a stream:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntStream.of(1, 2, 3)
      *     .mapMulti((value, consumer) -> {
@@ -57,10 +57,9 @@ public interface IntMapMultiConsumer extends java.util.stream.IntStream.IntMapMu
      * // Output: 0, 0, 1, 0, 1, 2
      * }</pre>
      *
-     * @param value the input int value to be transformed
-     * @param consumer the consumer that accepts the transformed values. The implementation
-     *                 should call {@code consumer.accept(int)} for each output value. May be
-     *                 called zero or more times
+     * @param value the source value to expand, transform, or suppress
+     * @param consumer the downstream consumer that receives each produced value; implementations
+     *        may invoke it zero or more times for the same input value
      */
     @Override
     void accept(int value, java.util.function.IntConsumer consumer);

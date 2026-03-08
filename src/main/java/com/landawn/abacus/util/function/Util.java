@@ -42,7 +42,7 @@ import java.util.Random;
  */
 final class Util {
     private Util() {
-        // singleton.
+        // Utility class - prevent instantiation
     }
 
     /**

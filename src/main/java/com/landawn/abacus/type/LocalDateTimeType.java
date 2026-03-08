@@ -55,14 +55,14 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<LocalDateTime> type = TypeFactory.getType(LocalDateTime.class);
-     * Class<LocalDateTime> clazz = type.clazz();
+     * Class<LocalDateTime> clazz = type.javaType();
      * System.out.println(clazz.getName());   // Outputs: java.time.LocalDateTime
      * }</pre>
      *
      * @return The Class object for LocalDateTime
      */
     @Override
-    public Class<LocalDateTime> clazz() {
+    public Class<LocalDateTime> javaType() {
         return LocalDateTime.class;
     }
 

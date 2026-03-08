@@ -148,7 +148,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <pre>{@code
  * // Basic file operations
  * IOUtil.copyFile(sourceFile, targetFile);
- * IOUtil.moveFile(sourceFile, targetDirectory);
+ * IOUtil.move(sourceFile, targetDirectory);
  * boolean success = IOUtil.deleteIfExists(file);
  *
  * // Stream operations with automatic resource management
@@ -183,15 +183,15 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Advanced Stream Operations:</b>
  * <pre>{@code
  * // Memory-mapped file operations for large files
- * try (FileChannel channel = IOUtil.newFileChannel(file, "r")) {
+ * try (FileInputStream fis = IOUtil.newFileInputStream(file);
+ *      FileChannel channel = fis.getChannel()) {
  *     MappedByteBuffer buffer = channel.map(MapMode.READ_ONLY, 0, file.length());
  *     // Process mapped buffer efficiently
  * }
  *
  * // Parallel line processing with custom thread pool
- * IOUtil.forLines(files, 0, Long.MAX_VALUE, 4, 8, 1000,
- *     line -> processLine(line),
- *     ex -> handleException(ex));
+ * IOUtil.forLines(file, 0, Long.MAX_VALUE, 4, 1000,
+ *     line -> processLine(line));
  *
  * // Buffered stream creation with optimal sizes
  * try (BufferedReader reader = IOUtil.newBufferedReader(file, "UTF-8");
@@ -9681,6 +9681,7 @@ public final class IOUtil {
             final ByteBuffer bytes = ByteBuffer.allocate(n);
             for (int i = 0; i < n;) {
                 if (url.charAt(i) == '%') {
+                    final int startOfPercent = i;
                     try {
                         do {
                             final byte octet = (byte) Integer.parseInt(url.substring(i + 1, i + 3), 16);
@@ -9688,8 +9689,11 @@ public final class IOUtil {
                             i += 3;
                         } while (i < n && url.charAt(i) == '%');
                     } catch (final RuntimeException e) {
-                        // malformed percent-encoded octet, fall through and
-                        // append characters literally
+                        // malformed percent-encoded octet, append the '%' literally and advance past it
+                        if (i == startOfPercent) {
+                            buffer.append('%');
+                            i++;
+                        }
                     } finally {
                         if (bytes.position() > 0) {
                             bytes.flip();

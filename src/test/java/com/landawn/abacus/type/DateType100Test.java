@@ -42,7 +42,7 @@ public class DateType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(Date.class, dateType.clazz());
+        assertEquals(Date.class, dateType.javaType());
     }
 
     @Test

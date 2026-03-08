@@ -20,7 +20,7 @@ import java.io.Writer;
 import java.lang.reflect.Array;
 
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.BufferedXmlWriter;
 import com.landawn.abacus.util.CharacterWriter;
@@ -102,7 +102,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      * @return the Class object for Range.class
      */
     @Override
-    public Class<Range<T>> clazz() {
+    public Class<Range<T>> javaType() {
         return typeClass;
     }
 
@@ -113,7 +113,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      * @return the Type instance for the element type
      */
     @Override
-    public Type<T> getElementType() {
+    public Type<T> elementType() {
         return elementType;
     }
 
@@ -124,7 +124,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      * @return an array with one Type instance representing the element type of the Range
      */
     @Override
-    public Type<T>[] getParameterTypes() {
+    public Type<T>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -197,7 +197,15 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
         final String prefix = str.substring(0, 1);
         final String postfix = str.substring(str.length() - 1);
 
-        final T[] tmp = (T[]) Utils.jsonParser.deserialize(str, 1, str.length() - 1, Utils.jdc, Array.newInstance(elementType.clazz(), 0).getClass());
+        if (!("(".equals(prefix) || "[".equals(prefix)) || !(")".equals(postfix) || "]".equals(postfix))) {
+            throw new IllegalArgumentException("Invalid Range format. Expected format like '[lower, upper]' but got: " + str);
+        }
+
+        final T[] tmp = (T[]) Utils.jsonParser.deserialize(str, 1, str.length() - 1, Utils.jdc, Array.newInstance(elementType.javaType(), 0).getClass());
+
+        if ((tmp == null) || (tmp.length != 2)) {
+            throw new IllegalArgumentException("Invalid Range format. Expected exactly 2 endpoints but got: " + str);
+        }
 
         if ("(".equals(prefix)) {
             return ")".equals(postfix) ? Range.open(tmp[0], tmp[1]) : Range.openClosed(tmp[0], tmp[1]);
@@ -277,7 +285,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Range<T> x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Range<T> x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

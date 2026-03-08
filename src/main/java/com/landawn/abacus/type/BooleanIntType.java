@@ -20,7 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 /**
@@ -58,7 +58,7 @@ public final class BooleanIntType extends AbstractType<Boolean> {
      * @return the Class object for Boolean.class
      */
     @Override
-    public Class<Boolean> clazz() {
+    public Class<Boolean> javaType() {
         return Boolean.class;
     }
 
@@ -175,8 +175,8 @@ public final class BooleanIntType extends AbstractType<Boolean> {
 
     /**
      * Sets a Boolean parameter in a PreparedStatement at the specified position.
-     * Converts the Boolean to "1" (true) or "0" (false) before setting.
-     * Null values are set as SQL NULL with BOOLEAN type.
+     * Converts the Boolean to 1 (true) or 0 (false) before setting as an integer.
+     * Null values are set as SQL NULL with INTEGER type.
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
@@ -194,8 +194,8 @@ public final class BooleanIntType extends AbstractType<Boolean> {
 
     /**
      * Sets a named Boolean parameter in a CallableStatement.
-     * Converts the Boolean to "1" (true) or "0" (false) before setting.
-     * Null values are set as SQL NULL with BOOLEAN type.
+     * Converts the Boolean to 1 (true) or 0 (false) before setting as an integer.
+     * Null values are set as SQL NULL with INTEGER type.
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
@@ -242,7 +242,7 @@ public final class BooleanIntType extends AbstractType<Boolean> {
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Boolean x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Boolean x, final JsonXmlSerConfig<?> config) throws IOException {
         final char ch = config == null ? 0 : config.getCharQuotation();
 
         if (ch == 0) {

@@ -82,7 +82,7 @@ import com.landawn.abacus.util.SK;
  * @param <SC> the serialization configuration type
  * @param <DC> the deserialization configuration type
  */
-abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends DeserializationConfig<?>> implements Parser<SC, DC> {
+abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Deserialization<?>> implements Parser<SC, DC> {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractParser.class);
 
@@ -282,7 +282,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * <ol>
      *   <li>If attribute type is provided and compatible, instantiate attribute type</li>
      *   <li>If attribute type instantiation fails or is incompatible, fall back to property class</li>
-     *   <li>If both fail or are null, throw ParseException</li>
+     *   <li>If both fail or are null, throw ParsingException</li>
      * </ol>
      *
      * <p>This enables polymorphic deserialization where the serialized data contains type information
@@ -370,7 +370,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
             // looking for the right array class.
             for (final Object e : c) {
                 if (e != null) {
-                    if (targetType.getElementType().clazz().isAssignableFrom(e.getClass())) {
+                    if (targetType.elementType().javaType().isAssignableFrom(e.getClass())) {
                         return (T) targetType.collectionToArray(c);
                     } else {
                         return (T) c.toArray((Object[]) N.newArray(e.getClass(), c.size()));
@@ -427,16 +427,16 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @param obj the object to check
      * @param serializedObjects set of already serialized objects
      * @param config the serialization configuration
-     * @param bw the XML writer
+     * @param bw the character writer (currently unused)
      * @return {@code true} if circular reference was found and handled, {@code false} otherwise
      */
-    protected static boolean hasCircularReference(final Object obj, final IdentityHashSet<Object> serializedObjects, final JsonXmlSerializationConfig<?> config,
+    protected static boolean hasCircularReference(final Object obj, final IdentityHashSet<Object> serializedObjects, final JsonXmlSerConfig<?> config,
             @SuppressWarnings("unused") final CharacterWriter bw) {
         final Type<?> type = obj == null ? null : Type.of(obj.getClass());
         if (obj != null && serializedObjects != null //
                 && (type.isBean() || type.isMap() || type.isCollection() || type.isObjectArray() || type.isMapEntity())) {
             if (serializedObjects.contains(obj)) {
-                if (config == null || !config.supportCircularReference()) {
+                if (config == null || !config.isSupportCircularReference()) {
                     throw new ParsingException("Self reference found in obj: " + ClassUtil.getClassName(obj.getClass()));
                 }
 

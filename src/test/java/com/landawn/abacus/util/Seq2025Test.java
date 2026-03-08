@@ -349,13 +349,6 @@ public class Seq2025Test extends TestBase {
     }
 
     @Test
-    public void testOnEach() throws Exception {
-        AtomicInteger sum = new AtomicInteger(0);
-        Seq.of(1, 2, 3).onEach(sum::addAndGet).toList();
-        assertEquals(6, sum.get());
-    }
-
-    @Test
     public void testAppend_Single() throws Exception {
         List<Integer> result = Seq.of(1, 2).append(3).toList();
         assertEquals(Arrays.asList(1, 2, 3), result);
@@ -658,8 +651,8 @@ public class Seq2025Test extends TestBase {
 
     @Test
     public void testHasDuplicates() throws Exception {
-        assertTrue(Seq.of(1, 2, 2, 3).hasDuplicates());
-        assertFalse(Seq.of(1, 2, 3).hasDuplicates());
+        assertTrue(Seq.of(1, 2, 2, 3).containsDuplicates());
+        assertFalse(Seq.of(1, 2, 3).containsDuplicates());
     }
 
     @Test
@@ -1593,7 +1586,7 @@ public class Seq2025Test extends TestBase {
     public void testDebounce_WindowResetsAfterDuration() throws Exception {
         // After duration elapses, the window should reset and allow more elements
         List<Integer> result = new ArrayList<>();
-        Seq.of(1, 2, 3, 4, 5, 6).debounce(2, Duration.ofMillis(50)).onEach(x -> {
+        Seq.of(1, 2, 3, 4, 5, 6).debounce(2, Duration.ofMillis(50)).peek(x -> {
             result.add(x);
             if (result.size() == 2) {
                 // Sleep to allow window to reset
@@ -1617,7 +1610,7 @@ public class Seq2025Test extends TestBase {
         AtomicInteger counter = new AtomicInteger(0);
         List<Integer> passedElements = new ArrayList<>();
 
-        Seq.range(1, 10).debounce(2, Duration.ofMillis(30)).onEach(x -> {
+        Seq.range(1, 10).debounce(2, Duration.ofMillis(30)).peek(x -> {
             passedElements.add(x);
             counter.incrementAndGet();
             // Add small delay between elements to simulate processing

@@ -36,7 +36,7 @@ public class AbstractArrayType100Test extends TestBase {
 
     @Test
     public void testGetSerializationType_Serializable() {
-        assertEquals(SerializationType.ARRAY, type.getSerializationType());
+        assertEquals(SerializationType.ARRAY, type.serializationType());
     }
 
     @Test

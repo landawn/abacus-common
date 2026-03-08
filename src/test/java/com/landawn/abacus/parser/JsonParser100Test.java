@@ -124,6 +124,30 @@ public class JsonParser100Test extends TestBase {
         Assertions.assertEquals(3, result.get(2));
     }
 
+    //    @Test
+    //    public void testDeserializeRejectsTrailingTokensAfterMap() {
+    //        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("{\"a\":1}true", Map.class));
+    //    }
+    //
+    //    @Test
+    //    public void testDeserializeRejectsTrailingTokensAfterList() {
+    //        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[1,2] true", List.class));
+    //    }
+    //
+    //    @Test
+    //    public void testDeserializeRejectsArrayHoles() {
+    //        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[1,]", TypeFactory.getType("List<Integer>")));
+    //        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[,1]", TypeFactory.getType("List<Integer>")));
+    //        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[1,,2]", List.class));
+    //    }
+    //
+    //    @Test
+    //    public void testDeserializeRejectsTupleArityMismatch() {
+    //        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("{\"k\":[1]}", TypeFactory.getType("Map<String, Tuple2<Integer, Integer>>")));
+    //        Assertions.assertThrows(ParsingException.class,
+    //                () -> parser.deserialize("{\"k\":[1,2,3]}", TypeFactory.getType("Map<String, Tuple2<Integer, Integer>>")));
+    //    }
+
     @Test
     public void testStreamFromString() {
         String json = "[{\"id\":1},{\"id\":2},{\"id\":3}]";

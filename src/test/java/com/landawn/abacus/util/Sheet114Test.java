@@ -1416,11 +1416,11 @@ public class Sheet114Test extends TestBase {
 
     @Test
     public void testCountOfNonNullValue() {
-        assertEquals(9, sheet.countOfNonNullValues());
+        assertEquals(9, sheet.nonNullValueCount());
 
         Sheet<String, String, Integer> withNulls = Sheet.rows(Arrays.asList("r1", "r2"), Arrays.asList("c1", "c2"),
                 new Integer[][] { { 1, null }, { null, 4 } });
-        assertEquals(2, withNulls.countOfNonNullValues());
+        assertEquals(2, withNulls.nonNullValueCount());
     }
 
     @Test

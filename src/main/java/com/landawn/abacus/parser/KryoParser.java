@@ -194,17 +194,17 @@ import com.landawn.abacus.util.u.OptionalShort;
  * parser.register(MyCustomType.class, 100);   // with ID
  *
  * // Deep copy
- * MyObject copy = parser.clone(obj);
+ * MyObject copy = parser.deepCopy(obj);
  *
  * // Shallow copy
- * MyObject shallowCopy = parser.copy(obj);
+ * MyObject shallowCopy = parser.shallowCopy(obj);
  * }</pre>
  * 
  * @see ParserFactory#createKryoParser()
- * @see KryoSerializationConfig
- * @see KryoDeserializationConfig
+ * @see KryoSerConfig
+ * @see KryoDeserConfig
  */
-public final class KryoParser extends AbstractParser<KryoSerializationConfig, KryoDeserializationConfig> {
+public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserConfig> {
 
     private static final int BUFFER_SIZE = 8192;
 
@@ -243,7 +243,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @return the Base64 encoded string representation of the serialized object
      */
     @Override
-    public String serialize(final Object obj, final KryoSerializationConfig config) {
+    public String serialize(final Object obj, final KryoSerConfig config) {
         final ByteArrayOutputStream os = Objectory.createByteArrayOutputStream();
 
         try {
@@ -276,7 +276,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @throws UncheckedIOException if an I/O error occurs during file writing
      */
     @Override
-    public void serialize(final Object obj, final KryoSerializationConfig config, final File output) {
+    public void serialize(final Object obj, final KryoSerConfig config, final File output) {
         OutputStream os = null;
 
         try {
@@ -314,7 +314,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @throws UncheckedIOException if an I/O error occurs during stream writing
      */
     @Override
-    public void serialize(final Object obj, final KryoSerializationConfig config, final OutputStream output) {
+    public void serialize(final Object obj, final KryoSerConfig config, final OutputStream output) {
         write(obj, config, output);
     }
 
@@ -338,7 +338,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @throws UncheckedIOException if an I/O error occurs during writing
      */
     @Override
-    public void serialize(final Object obj, final KryoSerializationConfig config, final Writer output) {
+    public void serialize(final Object obj, final KryoSerConfig config, final Writer output) {
         final ByteArrayOutputStream os = Objectory.createByteArrayOutputStream();
 
         try {
@@ -373,7 +373,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @param config the serialization configuration (may be {@code null} for defaults)
      * @param output the output stream to write to
      */
-    protected void write(final Object obj, final KryoSerializationConfig config, final OutputStream output) {
+    protected void write(final Object obj, final KryoSerConfig config, final OutputStream output) {
         final Output kryoOutput = createOutput();
 
         try {
@@ -396,22 +396,22 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * <p><b>Usage Examples (for subclasses):</b></p>
      * <pre>{@code
      * Output out = new Output(new ByteArrayOutputStream());
-     * KryoSerializationConfig config = KryoSerializationConfig.create().writeClass(true);
+     * KryoSerConfig config = KryoSerConfig.create().setWriteClass(true);
      * write(myObject, config, out);
      * }</pre>
      *
      * @param obj the object to write (may be null)
-     * @param config the serialization configuration (may be {@code null} for defaults). If config.writeClass()
+     * @param config the serialization configuration (may be {@code null} for defaults). If config.isWriteClass()
      *               returns {@code true}, both class and object are written; otherwise only the object is written
      * @param output the Kryo output to write to
      */
-    protected void write(final Object obj, final KryoSerializationConfig config, final Output output) {
+    protected void write(final Object obj, final KryoSerConfig config, final Output output) {
         check(config);
 
         final Kryo kryo = createKryo();
 
         try {
-            if (config != null && config.writeClass()) {
+            if (config != null && config.isWriteClass()) {
                 kryo.writeClassAndObject(output, obj);
             } else {
                 kryo.writeObject(output, obj);
@@ -442,8 +442,8 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @return the deserialized object instance
      */
     @Override
-    public <T> T deserialize(String source, KryoDeserializationConfig config, Type<? extends T> targetType) {
-        return deserialize(source, config, targetType.clazz());
+    public <T> T deserialize(String source, KryoDeserConfig config, Type<? extends T> targetType) {
+        return deserialize(source, config, targetType.javaType());
     }
 
     /**
@@ -465,7 +465,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @return the deserialized object instance
      */
     @Override
-    public <T> T deserialize(final String source, final KryoDeserializationConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final String source, final KryoDeserConfig config, final Class<? extends T> targetClass) {
         N.checkArgNotNull(source, cs.source);
 
         final Input input = createInput();
@@ -499,8 +499,8 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @throws UncheckedIOException if an I/O error occurs or the file doesn't exist
      */
     @Override
-    public <T> T deserialize(File source, KryoDeserializationConfig config, Type<? extends T> targetType) throws UncheckedIOException {
-        return deserialize(source, config, targetType.clazz());
+    public <T> T deserialize(File source, KryoDeserConfig config, Type<? extends T> targetType) throws UncheckedIOException {
+        return deserialize(source, config, targetType.javaType());
     }
 
     /**
@@ -523,7 +523,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @throws UncheckedIOException if an I/O error occurs or the file doesn't exist
      */
     @Override
-    public <T> T deserialize(final File source, final KryoDeserializationConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final File source, final KryoDeserConfig config, final Class<? extends T> targetClass) {
         InputStream is = null;
 
         try {
@@ -556,8 +556,8 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @throws UncheckedIOException if an I/O error occurs during stream reading
      */
     @Override
-    public <T> T deserialize(InputStream source, KryoDeserializationConfig config, Type<? extends T> targetType) throws UncheckedIOException {
-        return deserialize(source, config, targetType.clazz());
+    public <T> T deserialize(InputStream source, KryoDeserConfig config, Type<? extends T> targetType) throws UncheckedIOException {
+        return deserialize(source, config, targetType.javaType());
     }
 
     /**
@@ -581,7 +581,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @throws UncheckedIOException if an I/O error occurs during stream reading
      */
     @Override
-    public <T> T deserialize(final InputStream source, final KryoDeserializationConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final InputStream source, final KryoDeserConfig config, final Class<? extends T> targetClass) {
         return read(source, config, targetClass);
     }
 
@@ -605,8 +605,8 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @throws UncheckedIOException if an I/O error occurs during reading
      */
     @Override
-    public <T> T deserialize(Reader source, KryoDeserializationConfig config, Type<? extends T> targetType) throws UncheckedIOException {
-        return deserialize(source, config, targetType.clazz());
+    public <T> T deserialize(Reader source, KryoDeserConfig config, Type<? extends T> targetType) throws UncheckedIOException {
+        return deserialize(source, config, targetType.javaType());
     }
 
     /**
@@ -629,7 +629,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @throws UncheckedIOException if an I/O error occurs during reading
      */
     @Override
-    public <T> T deserialize(final Reader source, final KryoDeserializationConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final Reader source, final KryoDeserConfig config, final Class<? extends T> targetClass) {
         return deserialize(IOUtil.readAllToString(source), config, targetClass);
     }
 
@@ -650,7 +650,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @param targetClass the target class to deserialize to (may be {@code null} if class info is in stream)
      * @return the deserialized object
      */
-    protected <T> T read(final InputStream source, final KryoDeserializationConfig config, final Class<? extends T> targetClass) {
+    protected <T> T read(final InputStream source, final KryoDeserConfig config, final Class<? extends T> targetClass) {
         final Input input = createInput();
 
         try {
@@ -681,7 +681,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @return the deserialized object
      */
     @SuppressWarnings("unchecked")
-    protected <T> T read(final Input source, final KryoDeserializationConfig config, final Class<? extends T> targetClass) {
+    protected <T> T read(final Input source, final KryoDeserConfig config, final Class<? extends T> targetClass) {
         check(config);
 
         final Kryo kryo = createKryo();
@@ -700,7 +700,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * KryoSerializationConfig config = KryoSerializationConfig.create();
+     * KryoSerConfig config = KryoSerConfig.create();
      * config = parser.check(config);   // Validates and returns config
      * }</pre>
      *
@@ -708,7 +708,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @return the validated configuration (same as input)
      */
     @SuppressWarnings("UnusedReturnValue")
-    protected KryoSerializationConfig check(final KryoSerializationConfig config) {
+    protected KryoSerConfig check(final KryoSerConfig config) {
         //        if (config != null) {
         //            throw new ParseException("No serialization configuration is supported");
         //        }
@@ -725,7 +725,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * KryoDeserializationConfig config = KryoDeserializationConfig.create();
+     * KryoDeserConfig config = KryoDeserConfig.create();
      * config = parser.check(config);   // Validates and returns config
      * }</pre>
      *
@@ -733,7 +733,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @return the validated configuration (same as input)
      */
     @SuppressWarnings("UnusedReturnValue")
-    protected KryoDeserializationConfig check(final KryoDeserializationConfig config) {
+    protected KryoDeserConfig check(final KryoDeserConfig config) {
         //        if (config != null) {
         //            throw new ParseException("No deserialization configuration is supported");
         //        }
@@ -753,16 +753,16 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * original.setName("Test");
      * original.setList(Arrays.asList("a", "b"));
      * 
-     * MyObject copy = parser.copy(original);
+     * MyObject copy = parser.shallowCopy(original);
      * // copy.getName() equals "Test"
      * // copy.getList() == original.getList() (same reference)
      * }</pre>
      *
      * @param <T> the type of the object
-     * @param source the object to copy
+     * @param source the object to shallow copy
      * @return a shallow copy of the source object
      */
-    public <T> T copy(final T source) {
+    public <T> T shallowCopy(final T source) {
         final Kryo kryo = createKryo();
 
         try {
@@ -782,17 +782,17 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * original.setName("Test");
      * original.setList(Arrays.asList("a", "b"));
      * 
-     * MyObject clone = parser.clone(original);
-     * // clone.getName() equals "Test"
-     * // clone.getList() != original.getList() (different reference)
-     * // clone.getList().equals(original.getList()) (same content)
+     * MyObject copy = parser.deepCopy(original);
+     * // copy.getName() equals "Test"
+     * // copy.getList() != original.getList() (different reference)
+     * // copy.getList().equals(original.getList()) (same content)
      * }</pre>
      *
      * @param <T> the type of the object
-     * @param source the object to clone
+     * @param source the object to deep copy
      * @return a deep copy of the source object
      */
-    public <T> T clone(final T source) {
+    public <T> T deepCopy(final T source) {
         final Kryo kryo = createKryo();
 
         try {

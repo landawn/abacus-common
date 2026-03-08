@@ -18,7 +18,7 @@ public class Poolable2025Test extends TestBase {
     @Test
     public void testWrapWithDefaultValues() {
         String testObject = "test-object";
-        PoolableWrapper<String> wrapper = Poolable.wrap(testObject);
+        PoolableAdapter<String> wrapper = Poolable.wrap(testObject);
 
         assertNotNull(wrapper);
         assertEquals(testObject, wrapper.value());
@@ -33,7 +33,7 @@ public class Poolable2025Test extends TestBase {
         long liveTime = 10000;
         long maxIdleTime = 5000;
 
-        PoolableWrapper<Integer> wrapper = Poolable.wrap(testObject, liveTime, maxIdleTime);
+        PoolableAdapter<Integer> wrapper = Poolable.wrap(testObject, liveTime, maxIdleTime);
 
         assertNotNull(wrapper);
         assertEquals(testObject, wrapper.value());
@@ -44,7 +44,7 @@ public class Poolable2025Test extends TestBase {
 
     @Test
     public void testWrapWithNullObject() {
-        PoolableWrapper<Object> wrapper = Poolable.wrap(null);
+        PoolableAdapter<Object> wrapper = Poolable.wrap(null);
 
         assertNotNull(wrapper);
         assertNull(wrapper.value());

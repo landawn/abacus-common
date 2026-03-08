@@ -135,7 +135,7 @@ public final class JsonMappers {
     }
 
     private JsonMappers() {
-        // singleton for utility class.
+        // Utility class - prevent instantiation
     }
 
     /**
@@ -1431,7 +1431,7 @@ public final class JsonMappers {
 
     /**
      * Deserializes JSON from an InputStream into a Java object of the specified generic type with custom deserialization configuration.
-     * This method allows fine-grained control over the deserialization process through a custom DeserializationConfig.
+     * This method allows fine-grained control over the deserialization process through a custom {@link DeserializationConfig}.
      * 
      * <p>This method is ideal for deserializing collections, maps, and other generic
      * types from network streams, file streams, or resources. The caller is responsible

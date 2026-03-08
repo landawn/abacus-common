@@ -199,22 +199,18 @@ import com.landawn.abacus.util.stream.Stream;
  *         Fn.applyByValue(score -> score >= 90 ? "Excellent" : "Good")
  *     ));
  *
- * // Safe type conversion with default values
- * List<String> numbers = Arrays.asList("123", "invalid", "456", null);
- * List<Integer> parsed = numbers.stream()
- *     .map(Fn.parseInt(0))  // Returns 0 for invalid/null inputs
- *     .collect(Collectors.toList());
+ * // Parsing strings to int values in streams
+ * List<String> numberStrings = Arrays.asList("10", "20", "30");
+ * int sum = numberStrings.stream()
+ *     .mapToInt(Fn.parseInt())
+ *     .sum();   // Result: 60
  *
  * // Function composition and chaining
- * Function<String, String> processor = Fn.chain(
- *     Fn.trim(),
- *     Fn.toLowerCase(),
- *     s -> s.replace(" ", "_")
- * );
+ * Function<String, String> processor = Fn.trim().andThen(Fn.toLowerCase());
  *
  * // Binary operators for reduction operations
+ * List<Integer> numbers = Arrays.asList(3, 7, 1, 9, 4);
  * Optional<Integer> maxValue = numbers.stream()
- *     .map(Fn.parseInt(0))
  *     .reduce(Fn.max());
  *
  * // Conditional consumers for side effects
@@ -230,7 +226,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Functional Interface Categories:</b>
  * <ul>
  *   <li><b>Predicates:</b> {@code isNull()}, {@code notNull()}, {@code equal()}, {@code in()}, {@code ge()}, {@code le()}</li>
- *   <li><b>Functions:</b> {@code identity()}, {@code constant()}, {@code toStr()}, {@code parseInt()}, {@code length()}</li>
+ *   <li><b>Functions:</b> {@code identity()}, {@code tap()}, {@code constant()}, {@code toStr()}, {@code parseInt()}, {@code length()}</li>
  *   <li><b>Consumers:</b> {@code doNothing()}, {@code acceptIfNotNull()}, {@code println()}</li>
  *   <li><b>Suppliers:</b> {@code supply()}, {@code random()}, {@code uuid()}</li>
  *   <li><b>Binary Operators:</b> {@code min()}, {@code max()}, {@code selectFirst()}, {@code selectSecond()}</li>
@@ -424,8 +420,7 @@ public final class Fn {
     @SuppressWarnings("rawtypes")
     private static final BiFunction<Comparable, Comparable, Integer> COMPARE = N::compare;
 
-    @SuppressWarnings("rawtypes")
-    static final Function IDENTITY = t -> t;
+    static final Function<Object, Object> IDENTITY = t -> t;
 
     private static final UnaryOperator<String> TRIM = Strings::trim;
 
@@ -1392,9 +1387,45 @@ public final class Fn {
      * @param <T> the type of the input and output
      * @return an identity Function
      * @see Function#identity()
+     * @see #tap(Consumer)
      */
+    @SuppressWarnings("unchecked")
     public static <T> Function<T, T> identity() {
-        return IDENTITY;
+        return (Function<T, T>) IDENTITY;
+    }
+
+    /**
+     * Returns an identity function that invokes the specified {@code consumer} with each input
+     * before returning that same input unchanged.
+     *
+     * <p>This is useful when side effects such as logging, tracing, validation, or metrics
+     * collection need to be inserted into a function pipeline without altering the flowing value.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Function<String, String> tracedIdentity = Fn.tap(System.out::println);
+     *
+     * String result = tracedIdentity.apply("abc"); // prints "abc", returns "abc"
+     * }</pre>
+     *
+     * @param <T> the type of the input and output
+     * @param consumer the consumer to invoke before the input value is returned
+     * @return a function that first consumes and then returns its input argument unchanged
+     * @throws IllegalArgumentException if consumer is null
+     * @see #identity()
+     */
+    @Beta
+    public static <T> Function<T, T> tap(final Consumer<? super T> consumer) throws IllegalArgumentException {
+        N.checkArgNotNull(consumer, cs.Consumer);
+
+        if (consumer == EMPTY_CONSUMER) {
+            return identity();
+        }
+
+        return t -> {
+            consumer.accept(t);
+            return t;
+        };
     }
 
     /**
@@ -4844,11 +4875,11 @@ public final class Fn {
     }
 
     /**
-     * <p>Returns the provided supplier as is - a shorthand identity method for suppliers.</p>
-     * 
+     * <b>{@code s}</b> stands for <b>Supplier</b>.
+     * Returns the provided supplier as is - a shorthand identity method for suppliers.
+     *
      * <p>This method serves as a shorthand convenience method that can help with type inference
-     * in certain contexts. It's part of a family of shorthand methods like {@code p()} for Predicate
-     * and others.</p>
+     * in certain contexts. See {@link #p(Predicate)} for the full list of shorthand abbreviations.</p>
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4898,11 +4929,27 @@ public final class Fn {
     }
 
     /**
-     * <p>Returns the provided predicate as is - a shorthand identity method for predicates.</p>
+     * <b>{@code p}</b> stands for <b>Predicate</b>.
+     * Returns the provided predicate as is - a shorthand identity method for predicates.
      *
      * <p>This method serves as a shorthand convenience method that can help with type inference
-     * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
-     * and others.</p>
+     * in certain contexts. It's part of a family of shorthand methods:</p>
+     * <ul>
+     *   <li>{@code s()} — <b>S</b>upplier</li>
+     *   <li>{@code p()} — <b>P</b>redicate / BiPredicate / TriPredicate</li>
+     *   <li>{@code c()} — <b>C</b>onsumer / BiConsumer / TriConsumer (also Callable)</li>
+     *   <li>{@code f()} — <b>F</b>unction / BiFunction / TriFunction</li>
+     *   <li>{@code r()} — <b>R</b>unnable</li>
+     *   <li>{@code rr()} — Throwable <b>R</b>unnable (converts checked exceptions to <b>R</b>untime exceptions)</li>
+     *   <li>{@code cc()} — Throwable <b>C</b>allable (converts checked exceptions)</li>
+     *   <li>{@code jr()} — <b>J</b>ava <b>R</b>unnable (java.lang.Runnable identity)</li>
+     *   <li>{@code jc()} — <b>J</b>ava <b>C</b>allable (java.util.concurrent.Callable identity)</li>
+     *   <li>{@code jr2r()} — <b>J</b>ava <b>R</b>unnable <b>to</b> abacus <b>R</b>unnable</li>
+     *   <li>{@code jc2c()} — <b>J</b>ava <b>C</b>allable <b>to</b> abacus <b>C</b>allable</li>
+     *   <li>{@code jc2r()} — <b>J</b>ava <b>C</b>allable <b>to</b> abacus <b>R</b>unnable</li>
+     *   <li>{@code r2c()} — <b>R</b>unnable <b>to</b> <b>C</b>allable</li>
+     *   <li>{@code c2r()} — <b>C</b>allable <b>to</b> <b>R</b>unnable</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5082,11 +5129,11 @@ public final class Fn {
     }
 
     /**
-     * <p>Returns the provided consumer as is - a shorthand identity method for consumers.</p>
+     * <b>{@code c}</b> stands for <b>Consumer</b>.
+     * Returns the provided consumer as is - a shorthand identity method for consumers.
      *
      * <p>This method serves as a shorthand convenience method that can help with type inference
-     * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
-     * and {@code p()} for Predicate.</p>
+     * in certain contexts. See {@link #p(Predicate)} for the full list of shorthand abbreviations.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5179,10 +5226,16 @@ public final class Fn {
 
     /**
      * Returns the provided bi-consumer as is - a shorthand identity method for bi-consumers.
-     * 
-     * <p>This method serves as a shorthand convenience method that can help with type inference
-     * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
-     * and {@code p()} for Predicate.</p>
+     *
+     * <p>This method assists with type inference in contexts where the compiler cannot determine
+     * the target type automatically. It's part of a family of shorthand methods: {@code p()} for
+     * Predicate, {@code c()} for Consumer, {@code f()} for Function, {@code s()} for Supplier.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Help the compiler infer generic types
+     * BiConsumer<String, Integer> consumer = Fn.c((name, score) -> System.out.println(name + ": " + score));
+     * }</pre>
      *
      * @param <T> the type of the first input to the bi-consumer
      * @param <U> the type of the second input to the bi-consumer
@@ -5241,11 +5294,11 @@ public final class Fn {
     }
 
     /**
+     * <b>{@code f}</b> stands for <b>Function</b>.
      * Returns the provided function as is - a shorthand identity method for functions.
-     * 
+     *
      * <p>This method serves as a shorthand convenience method that can help with type inference
-     * in certain contexts. It's part of a family of shorthand methods like {@code s()} for Supplier
-     * and {@code p()} for Predicate.</p>
+     * in certain contexts. See {@link #p(Predicate)} for the full list of shorthand abbreviations.</p>
      *
      * @param <T> the type of the input to the function
      * @param <R> the type of the result of the function
@@ -6667,10 +6720,12 @@ public final class Fn {
     }
 
     /**
+     * <b>{@code rr}</b> stands for <b>Throwable Runnable</b> (converts checked exceptions to Runtime exceptions).
      * Wraps a throwable runnable to convert checked exceptions to runtime exceptions.
-     * 
+     *
      * <p>This method allows you to use runnables that throw checked exceptions in contexts
-     * that expect standard Runnable interfaces, such as thread creation or executor services.</p>
+     * that expect standard Runnable interfaces, such as thread creation or executor services.
+     * See {@link #p(Predicate)} for the full list of shorthand abbreviations.</p>
      *
      * @param runnable the throwable runnable to wrap
      * @return a runnable that executes the throwable runnable and converts checked exceptions to runtime exceptions
@@ -6687,10 +6742,12 @@ public final class Fn {
     }
 
     /**
+     * <b>{@code cc}</b> stands for <b>Throwable Callable</b> (converts checked exceptions).
      * Wraps a throwable callable to convert checked exceptions to runtime exceptions.
-     * 
+     *
      * <p>This method allows you to use callables that throw checked exceptions beyond the standard
-     * Exception in contexts that expect standard Callable interfaces.</p>
+     * Exception in contexts that expect standard Callable interfaces.
+     * See {@link #p(Predicate)} for the full list of shorthand abbreviations.</p>
      *
      * @param <R> the type of the result
      * @param callable the throwable callable to wrap
@@ -6708,10 +6765,11 @@ public final class Fn {
     }
 
     /**
+     * <b>{@code r}</b> stands for <b>Runnable</b>.
      * Returns the provided runnable as is - a shorthand identity method for runnables.
-     * 
+     *
      * <p>This method serves as a shorthand convenience method that can help with type inference
-     * in certain contexts.</p>
+     * in certain contexts. See {@link #p(Predicate)} for the full list of shorthand abbreviations.</p>
      *
      * @param runnable the runnable to return
      * @return the runnable unchanged
@@ -6725,10 +6783,11 @@ public final class Fn {
     }
 
     /**
+     * <b>{@code c}</b> stands for <b>Callable</b> (in this overload).
      * Returns the provided callable as is - a shorthand identity method for callables.
-     * 
+     *
      * <p>This method serves as a shorthand convenience method that can help with type inference
-     * in certain contexts.</p>
+     * in certain contexts. See {@link #p(Predicate)} for the full list of shorthand abbreviations.</p>
      *
      * @param <R> the type of the result
      * @param callable the callable to return
@@ -6743,10 +6802,12 @@ public final class Fn {
     }
 
     /**
+     * <b>{@code jr}</b> stands for <b>Java Runnable</b> (java.lang.Runnable).
      * Returns the provided Java runnable as is - a shorthand identity method for Java runnables.
-     * 
+     *
      * <p>This method serves as a shorthand convenience method that can help with type inference
-     * in certain contexts when working with java.lang.Runnable.</p>
+     * in certain contexts when working with java.lang.Runnable.
+     * See {@link #p(Predicate)} for the full list of shorthand abbreviations.</p>
      *
      * @param runnable the Java runnable to return
      * @return the Java runnable unchanged
@@ -6760,10 +6821,12 @@ public final class Fn {
     }
 
     /**
+     * <b>{@code jc}</b> stands for <b>Java Callable</b> (java.util.concurrent.Callable).
      * Returns the provided Java callable as is - a shorthand identity method for Java callables.
-     * 
+     *
      * <p>This method serves as a shorthand convenience method that can help with type inference
-     * in certain contexts when working with java.util.concurrent.Callable.</p>
+     * in certain contexts when working with java.util.concurrent.Callable.
+     * See {@link #p(Predicate)} for the full list of shorthand abbreviations.</p>
      *
      * @param <R> the type of the result
      * @param callable the Java callable to return
@@ -6778,10 +6841,12 @@ public final class Fn {
     }
 
     /**
+     * <b>{@code r2c}</b> stands for <b>Runnable to Callable</b>.
      * Converts a runnable to a callable that returns void (null).
-     * 
+     *
      * <p>This method is useful when you need to use a runnable in a context that requires a callable,
-     * such as with executor services when you want to track completion but don't need a return value.</p>
+     * such as with executor services when you want to track completion but don't need a return value.
+     * See {@link #p(Predicate)} for the full list of shorthand abbreviations.</p>
      *
      * @param runnable the runnable to convert to a callable
      * @return a callable that executes the runnable and returns null
@@ -6822,10 +6887,12 @@ public final class Fn {
     }
 
     /**
+     * <b>{@code c2r}</b> stands for <b>Callable to Runnable</b>.
      * Converts a callable to a runnable by discarding the callable's return value.
-     * 
+     *
      * <p>This method is useful when you have a callable but need a runnable, and you don't care about
-     * the return value. The callable will still be executed for its side effects.</p>
+     * the return value. The callable will still be executed for its side effects.
+     * See {@link #p(Predicate)} for the full list of shorthand abbreviations.</p>
      *
      * @param <R> the type of the callable's result
      * @param callable the callable to convert to a runnable
@@ -6840,10 +6907,12 @@ public final class Fn {
     }
 
     /**
+     * <b>{@code jr2r}</b> stands for <b>Java Runnable to (abacus) Runnable</b>.
      * Converts a Java runnable to an abacus Runnable.
-     * 
+     *
      * <p>This method provides compatibility between Java's standard Runnable interface and
-     * the abacus framework's Runnable interface.</p>
+     * the abacus framework's Runnable interface.
+     * See {@link #p(Predicate)} for the full list of shorthand abbreviations.</p>
      *
      * @param runnable the Java runnable to convert
      * @return an abacus Runnable that delegates to the Java runnable
@@ -6861,10 +6930,12 @@ public final class Fn {
     }
 
     /**
+     * <b>{@code jc2c}</b> stands for <b>Java Callable to (abacus) Callable</b>.
      * Converts a Java callable to an abacus Callable.
-     * 
+     *
      * <p>This method provides compatibility between Java's standard Callable interface and
-     * the abacus framework's Callable interface, handling exception conversion.</p>
+     * the abacus framework's Callable interface, handling exception conversion.
+     * See {@link #p(Predicate)} for the full list of shorthand abbreviations.</p>
      *
      * @param <R> the type of the result
      * @param callable the Java callable to convert
@@ -6889,10 +6960,12 @@ public final class Fn {
     }
 
     /**
+     * <b>{@code jc2r}</b> stands for <b>Java Callable to (abacus) Runnable</b>.
      * Converts a callable to a Java runnable by discarding the callable's return value.
-     * 
+     *
      * <p>This method is useful when you have a callable but need a Java runnable for use with
-     * thread creation or other Java APIs that expect Runnable.</p>
+     * thread creation or other Java APIs that expect Runnable.
+     * See {@link #p(Predicate)} for the full list of shorthand abbreviations.</p>
      *
      * @param callable the Java callable to convert to a runnable
      * @return a Java runnable that executes the callable and discards its return value
@@ -6928,12 +7001,19 @@ public final class Fn {
 
     /**
      * Returns a BinaryOperator that ignores the second value when merging duplicates, keeping the first value.
-     * 
+     *
      * <p>This operator is useful in collectors and map operations where you want to keep the first
      * occurrence of duplicate keys and ignore subsequent ones.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Collect to map, keeping the first value for duplicate keys
+     * Map<String, Integer> map = stream.collect(
+     *     Collectors.toMap(Item::getName, Item::getScore, Fn.ignoringMerger()));
+     * }</pre>
+     *
      * @param <T> the type of the operands and result
-     * @return a BinaryOperator that returns the first operand
+     * @return a BinaryOperator that always returns the first operand
      * @see #throwingMerger()
      * @see #replacingMerger()
      */
@@ -6943,12 +7023,19 @@ public final class Fn {
 
     /**
      * Returns a BinaryOperator that replaces the first value with the second value when merging duplicates.
-     * 
+     *
      * <p>This operator is useful in collectors and map operations where you want to keep the last
      * occurrence of duplicate keys, replacing earlier ones.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Collect to map, keeping the last value for duplicate keys
+     * Map<String, Integer> map = stream.collect(
+     *     Collectors.toMap(Item::getName, Item::getScore, Fn.replacingMerger()));
+     * }</pre>
+     *
      * @param <T> the type of the operands and result
-     * @return a BinaryOperator that returns the second operand
+     * @return a BinaryOperator that always returns the second operand
      * @see #throwingMerger()
      * @see #ignoringMerger()
      */
@@ -6957,13 +7044,22 @@ public final class Fn {
     }
 
     /**
-     * Returns a Function that extracts the value from an Optional, returning {@code null} if the Optional is empty.
-     * 
+     * Returns a Function that extracts the value from an {@link Optional}, returning {@code null} if the Optional is empty.
+     *
      * <p>This function is useful for converting streams of Optionals to their contained values,
      * with empty Optionals becoming {@code null} values.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Unwrap a stream of Optionals
+     * List<String> values = optionalStream
+     *     .map(Fn.<String>getIfPresentOrElseNull())
+     *     .filter(Objects::nonNull)
+     *     .toList();
+     * }</pre>
+     *
      * @param <T> the type of the value in the Optional
-     * @return a Function that extracts the Optional's value or returns null
+     * @return a Function that extracts the Optional's value or returns {@code null} if empty
      * @see #getIfPresentOrElseNullJdk()
      * @see #isPresent()
      */
@@ -6976,13 +7072,22 @@ public final class Fn {
     static final Function<java.util.Optional, Object> GET_AS_IT_JDK = it -> it.orElse(null);
 
     /**
-     * Returns a Function that extracts the value from a Java Optional, returning {@code null} if the Optional is empty.
-     * 
-     * <p>This function is useful for converting streams of Java Optionals to their contained values,
-     * with empty Optionals becoming {@code null} values. This is the JDK Optional version of getIfPresentOrElseNull.</p>
+     * Returns a Function that extracts the value from a JDK {@link java.util.Optional}, returning {@code null} if the Optional is empty.
+     *
+     * <p>This is the JDK {@link java.util.Optional} version of {@link #getIfPresentOrElseNull()}.
+     * Useful for converting streams of JDK Optionals to their contained values.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Unwrap JDK Optionals in a stream
+     * List<String> values = jdkOptionalStream
+     *     .map(Fn.<String>getIfPresentOrElseNullJdk())
+     *     .filter(Objects::nonNull)
+     *     .toList();
+     * }</pre>
      *
      * @param <T> the type of the value in the Optional
-     * @return a Function that extracts the Java Optional's value or returns null
+     * @return a Function that extracts the JDK Optional's value or returns {@code null} if empty
      * @see #getIfPresentOrElseNull()
      * @see #isPresentJdk()
      */
@@ -6995,9 +7100,17 @@ public final class Fn {
     static final Predicate<Optional> IS_PRESENT_IT = Optional::isPresent;
 
     /**
-     * Returns a Predicate that tests whether an Optional contains a value.
-     * 
+     * Returns a Predicate that tests whether an {@link Optional} contains a value.
+     *
      * <p>This predicate is useful for filtering streams of Optionals to keep only those that contain values.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Filter out empty Optionals
+     * List<Optional<String>> nonEmpty = optionals.stream()
+     *     .filter(Fn.isPresent())
+     *     .toList();
+     * }</pre>
      *
      * @param <T> the type of the value in the Optional
      * @return a Predicate that returns {@code true} if the Optional contains a value
@@ -7013,13 +7126,21 @@ public final class Fn {
     static final Predicate<java.util.Optional> IS_PRESENT_IT_JDK = java.util.Optional::isPresent;
 
     /**
-     * Returns a Predicate that tests whether a Java Optional contains a value.
-     * 
-     * <p>This predicate is useful for filtering streams of Java Optionals to keep only those that contain values.
-     * This is the JDK Optional version of isPresent.</p>
+     * Returns a Predicate that tests whether a JDK {@link java.util.Optional} contains a value.
+     *
+     * <p>This is the JDK {@link java.util.Optional} version of {@link #isPresent()}.
+     * Useful for filtering streams of JDK Optionals to keep only non-empty ones.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Filter out empty JDK Optionals
+     * List<java.util.Optional<String>> nonEmpty = jdkOptionals.stream()
+     *     .filter(Fn.isPresentJdk())
+     *     .toList();
+     * }</pre>
      *
      * @param <T> the type of the value in the Optional
-     * @return a Predicate that returns {@code true} if the Java Optional contains a value
+     * @return a Predicate that returns {@code true} if the JDK Optional contains a value
      * @see #isPresent()
      * @see #getIfPresentOrElseNullJdk()
      */

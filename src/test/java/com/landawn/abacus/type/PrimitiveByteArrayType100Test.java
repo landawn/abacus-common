@@ -45,12 +45,12 @@ public class PrimitiveByteArrayType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(byte[].class, type.clazz());
+        assertEquals(byte[].class, type.javaType());
     }
 
     @Test
     public void testGetElementType() {
-        Type<Byte> elementType = type.getElementType();
+        Type<Byte> elementType = type.elementType();
         assertNotNull(elementType);
     }
 

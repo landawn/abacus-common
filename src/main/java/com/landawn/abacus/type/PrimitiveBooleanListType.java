@@ -16,7 +16,7 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BooleanList;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Strings;
@@ -51,7 +51,7 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
      * @return the Class object for BooleanList
      */
     @Override
-    public Class<BooleanList> clazz() {
+    public Class<BooleanList> javaType() {
         return BooleanList.class;
     }
 
@@ -61,7 +61,7 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
      * @return the Type object representing boolean elements
      */
     @Override
-    public Type<?> getElementType() {
+    public Type<?> elementType() {
         return elementType;
     }
 
@@ -69,10 +69,10 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
      * Returns the parameter types associated with this list type.
      *
      * @return an array containing the Boolean Type that describes the elements of this list type
-     * @see #getElementType()
+     * @see #elementType()
      */
     @Override
-    public Type<Boolean>[] getParameterTypes() {
+    public Type<Boolean>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -136,7 +136,7 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
      * @throws IOException if an I/O error occurs
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final BooleanList x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final BooleanList x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

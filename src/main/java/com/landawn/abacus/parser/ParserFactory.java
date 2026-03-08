@@ -51,8 +51,8 @@ import com.landawn.abacus.util.cs;
  * JsonParser jsonParser = ParserFactory.createJsonParser();
  * 
  * // Create XML parser with configuration
- * XmlSerializationConfig xsc = new XmlSerializationConfig();
- * XmlDeserializationConfig xdc = new XmlDeserializationConfig();
+ * XmlSerConfig xsc = new XmlSerConfig();
+ * XmlDeserConfig xdc = new XmlDeserConfig();
  * XmlParser xmlParser = ParserFactory.createXmlParser(xsc, xdc);
  * 
  * // Register Kryo classes for better performance
@@ -162,7 +162,7 @@ public final class ParserFactory {
      * Private constructor to prevent instantiation of this utility class.
      */
     private ParserFactory() {
-        // singleton
+        // Utility class - prevent instantiation
     }
 
     /**
@@ -294,11 +294,11 @@ public final class ParserFactory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonSerializationConfig jsc = new JsonSerializationConfig()
-     *     .prettyFormat(true)
-     *     .writeLongAsString(true);
-     * JsonDeserializationConfig jdc = new JsonDeserializationConfig()
-     *     .ignoreUnmatchedProperty(true);
+     * JsonSerConfig jsc = new JsonSerConfig()
+     *     .setPrettyFormat(true)
+     *     .setWriteLongAsString(true);
+     * JsonDeserConfig jdc = new JsonDeserConfig()
+     *     .setIgnoreUnmatchedProperty(true);
      *
      * JsonParser parser = ParserFactory.createJsonParser(jsc, jdc);
      * }</pre>
@@ -308,7 +308,7 @@ public final class ParserFactory {
      * @return a new {@link JsonParser} instance with the specified configurations
      * @throws NoClassDefFoundError if JSON parser implementation is not available
      */
-    public static JsonParser createJsonParser(final JsonSerializationConfig jsc, final JsonDeserializationConfig jdc) {
+    public static JsonParser createJsonParser(final JsonSerConfig jsc, final JsonDeserConfig jdc) {
         return new JsonParserImpl(jsc, jdc);
     }
 
@@ -336,11 +336,11 @@ public final class ParserFactory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlSerializationConfig xsc = new XmlSerializationConfig()
-     *     .tagByPropertyName(true)
-     *     .writeTypeInfo(false);
-     * XmlDeserializationConfig xdc = new XmlDeserializationConfig()
-     *     .ignoreUnmatchedProperty(true);
+     * XmlSerConfig xsc = new XmlSerConfig()
+     *     .setTagByPropertyName(true)
+     *     .setWriteTypeInfo(false);
+     * XmlDeserConfig xdc = new XmlDeserConfig()
+     *     .setIgnoreUnmatchedProperty(true);
      *
      * XmlParser parser = ParserFactory.createAbacusXmlParser(xsc, xdc);
      * }</pre>
@@ -350,7 +350,7 @@ public final class ParserFactory {
      * @return a new abacus-common {@link XmlParser} instance with the specified configurations
      * @throws NoClassDefFoundError if abacus-common XML support is not available
      */
-    public static XmlParser createAbacusXmlParser(final XmlSerializationConfig xsc, final XmlDeserializationConfig xdc) {
+    public static XmlParser createAbacusXmlParser(final XmlSerConfig xsc, final XmlDeserConfig xdc) {
         return new AbacusXmlParserImpl(XmlParserType.StAX, xsc, xdc);
     }
 
@@ -408,9 +408,9 @@ public final class ParserFactory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlSerializationConfig xsc = new XmlSerializationConfig()
-     *     .prettyFormat(true);
-     * XmlDeserializationConfig xdc = new XmlDeserializationConfig()
+     * XmlSerConfig xsc = new XmlSerConfig()
+     *     .setPrettyFormat(true);
+     * XmlDeserConfig xdc = new XmlDeserConfig()
      *     .setElementType(String.class);
      *
      * XmlParser parser = ParserFactory.createXmlParser(xsc, xdc);
@@ -421,7 +421,7 @@ public final class ParserFactory {
      * @return a new standard {@link XmlParser} instance with the specified configurations
      * @throws NoClassDefFoundError if XML support is not available
      */
-    public static XmlParser createXmlParser(final XmlSerializationConfig xsc, final XmlDeserializationConfig xdc) {
+    public static XmlParser createXmlParser(final XmlSerConfig xsc, final XmlDeserConfig xdc) {
         return new XmlParserImpl(XmlParserType.StAX, xsc, xdc);
     }
 
@@ -466,8 +466,8 @@ public final class ParserFactory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlSerializationConfig xsc = new XmlSerializationConfig().prettyFormat(true);
-     * XmlDeserializationConfig xdc = new XmlDeserializationConfig();
+     * XmlSerConfig xsc = new XmlSerConfig().setPrettyFormat(true);
+     * XmlDeserConfig xdc = new XmlDeserConfig();
      * XmlParser parser = ParserFactory.createJaxbParser(xsc, xdc);
      * }</pre>
      *
@@ -476,7 +476,7 @@ public final class ParserFactory {
      * @return a new JAXB {@link XmlParser} instance with the specified configurations
      * @throws NoClassDefFoundError if JAXB implementation is not available
      */
-    public static XmlParser createJaxbParser(final XmlSerializationConfig xsc, final XmlDeserializationConfig xdc) {
+    public static XmlParser createJaxbParser(final XmlSerConfig xsc, final XmlDeserConfig xdc) {
         return new JaxbParser(xsc, xdc);
     }
 

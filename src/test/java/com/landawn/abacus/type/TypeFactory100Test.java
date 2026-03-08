@@ -25,7 +25,7 @@ public class TypeFactory100Test extends TestBase {
     public void testGetTypeWithClass() {
         Type<String> type = TypeFactory.getType(String.class);
         assertNotNull(type);
-        assertEquals(String.class, type.clazz());
+        assertEquals(String.class, type.javaType());
     }
 
     @Test
@@ -127,12 +127,12 @@ public class TypeFactory100Test extends TestBase {
             }
 
             @Override
-            public Class<CustomClass3> clazz() {
+            public Class<CustomClass3> javaType() {
                 return CustomClass3.class;
             }
 
             @Override
-            public boolean isPrimitiveType() {
+            public boolean isPrimitive() {
                 return false;
             }
 
@@ -277,7 +277,7 @@ public class TypeFactory100Test extends TestBase {
             }
 
             @Override
-            public boolean isObjectType() {
+            public boolean isObject() {
                 return false;
             }
 
@@ -287,17 +287,17 @@ public class TypeFactory100Test extends TestBase {
             }
 
             @Override
-            public SerializationType getSerializationType() {
+            public SerializationType serializationType() {
                 return SerializationType.ENTITY;
             }
 
             @Override
-            public Type<?> getElementType() {
+            public Type<?> elementType() {
                 return null;
             }
 
             @Override
-            public Type<?>[] getParameterTypes() {
+            public Type<?>[] parameterTypes() {
                 return new Type[0];
             }
 
@@ -367,8 +367,7 @@ public class TypeFactory100Test extends TestBase {
             }
 
             @Override
-            public void writeCharacter(com.landawn.abacus.util.CharacterWriter writer, CustomClass3 x,
-                    com.landawn.abacus.parser.JsonXmlSerializationConfig<?> config) {
+            public void writeCharacter(com.landawn.abacus.util.CharacterWriter writer, CustomClass3 x, com.landawn.abacus.parser.JsonXmlSerConfig<?> config) {
             }
 
             @Override
@@ -471,12 +470,12 @@ public class TypeFactory100Test extends TestBase {
             }
 
             @Override
-            public Class<Object> clazz() {
+            public Class<Object> javaType() {
                 return Object.class;
             }
 
             @Override
-            public boolean isPrimitiveType() {
+            public boolean isPrimitive() {
                 return false;
             }
 
@@ -621,7 +620,7 @@ public class TypeFactory100Test extends TestBase {
             }
 
             @Override
-            public boolean isObjectType() {
+            public boolean isObject() {
                 return true;
             }
 
@@ -631,17 +630,17 @@ public class TypeFactory100Test extends TestBase {
             }
 
             @Override
-            public SerializationType getSerializationType() {
+            public SerializationType serializationType() {
                 return SerializationType.UNKNOWN;
             }
 
             @Override
-            public Type<?> getElementType() {
+            public Type<?> elementType() {
                 return null;
             }
 
             @Override
-            public Type<?>[] getParameterTypes() {
+            public Type<?>[] parameterTypes() {
                 return new Type[0];
             }
 
@@ -717,8 +716,7 @@ public class TypeFactory100Test extends TestBase {
             }
 
             @Override
-            public void writeCharacter(com.landawn.abacus.util.CharacterWriter writer, Object x,
-                    com.landawn.abacus.parser.JsonXmlSerializationConfig<?> config) {
+            public void writeCharacter(com.landawn.abacus.util.CharacterWriter writer, Object x, com.landawn.abacus.parser.JsonXmlSerConfig<?> config) {
             }
 
             @Override

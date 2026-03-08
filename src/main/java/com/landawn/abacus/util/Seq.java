@@ -6230,48 +6230,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Performs the given action on the elements pulled by downstream/terminal operation.
-     * The action is executed for each element as it is consumed by a terminal operation,
-     * allowing for side effects during sequence processing.
-     *
-     * <p>This is an intermediate operation that does not consume the sequence.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
-     * List<Integer> sideEffect = new ArrayList<>();
-     * List<Integer> result = seq.onEach(sideEffect::add)
-     *                           .filter(n -> n % 2 == 0)
-     *                           .toList();
-     * // result contains: [2, 4]
-     * // sideEffect contains: [1, 2, 3, 4, 5] (all elements were processed)
-     * }</pre>
-     *
-     * @param action the action to be performed on the elements pulled by downstream/terminal operation
-     * @return this {@code Seq} instance
-     * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if action is null
-     */
-    @IntermediateOp
-    public Seq<T, E> onEach(final Throwables.Consumer<? super T, ? extends E> action) throws IllegalStateException {
-        assertNotClosed();
-
-        return create(new Throwables.Iterator<>() {
-            @Override
-            public boolean hasNext() throws E {
-                return elements.hasNext();
-            }
-
-            @Override
-            public T next() throws E {
-                final T next = elements.next();
-                action.accept(next);
-                return next;
-            }
-        }, sorted, cmp, closeHandlers);
-    }
-
-    /**
      * Performs the given action for the first element of this {@code Seq}.
      * The action is executed only for the first element when it is consumed by a terminal operation.
      * Subsequent elements are not affected by this action.
@@ -6372,8 +6330,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Performs the given action on the elements pulled by downstream/terminal operation. Most of the time, it's used for debugging.
-     * This is an alias for {@link #onEach(Throwables.Consumer)}.
+     * Performs the given action on the elements pulled by downstream/terminal operation.
+     * The action is executed for each element as it is consumed by a terminal operation,
+     * allowing for side effects during sequence processing. Most of the time, it's used for debugging.
      *
      * <p>This is an intermediate operation that does not consume the sequence.</p>
      *
@@ -6397,11 +6356,24 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @return this {@code Seq} instance
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if action is null
-     * @see #onEach(Throwables.Consumer)
      */
     @IntermediateOp
     public Seq<T, E> peek(final Throwables.Consumer<? super T, ? extends E> action) throws IllegalStateException {
-        return onEach(action);
+        assertNotClosed();
+
+        return create(new Throwables.Iterator<>() {
+            @Override
+            public boolean hasNext() throws E {
+                return elements.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                final T next = elements.next();
+                action.accept(next);
+                return next;
+            }
+        }, sorted, cmp, closeHandlers);
     }
 
     /**
@@ -8760,7 +8732,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
         final Throwables.Consumer<T, E> action = it -> rateLimiter.acquire();
 
-        return onEach(action);
+        return peek(action);
     }
 
     /**
@@ -8796,7 +8768,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             }
         };
 
-        return onEach(action);
+        return peek(action);
     }
 
     /**
@@ -8887,6 +8859,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @IntermediateOp
     public Seq<T, E> debounce(final int maxWindowSize, final Duration duration) {
         checkArgPositive(maxWindowSize, cs.maxWindowSize);
+        checkArgNotNull(duration, cs.duration);
         checkArgPositive(duration.toMillis(), cs.duration);
 
         final Throwables.Predicate<T, E> p = new Throwables.Predicate<>() {
@@ -10763,19 +10736,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer> seq1 = Seq.of(1, 2, 3, 2, 4);
-     * boolean hasDups1 = seq1.hasDuplicates();   // true
+     * boolean hasDups1 = seq1.containsDuplicates();   // true
      * 
      * Seq<Integer> seq2 = Seq.of(1, 2, 3, 4, 5);
-     * boolean hasDups2 = seq2.hasDuplicates();   // false
+     * boolean hasDups2 = seq2.containsDuplicates();   // false
      * }</pre>
      * 
      * @return {@code true} if this sequence contains at least one duplicate element, otherwise {@code false}
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @throws E if an exception occurs during iteration
-     * @see N#hasDuplicates(Collection)
+     * @see N#containsDuplicates(Collection)
      */
     @TerminalOp
-    public boolean hasDuplicates() throws IllegalStateException, E {
+    public boolean containsDuplicates() throws IllegalStateException, E {
         assertNotClosed();
 
         try {

@@ -11,7 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -40,14 +40,14 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalChar> type = TypeFactory.getType(OptionalChar.class);
-     * Class<OptionalChar> clazz = type.clazz();
+     * Class<OptionalChar> clazz = type.javaType();
      * // Returns: OptionalChar.class
      * }</pre>
      *
      * @return the {@link OptionalChar} class object
      */
     @Override
-    public Class<OptionalChar> clazz() {
+    public Class<OptionalChar> javaType() {
         return OptionalChar.class;
     }
 
@@ -321,7 +321,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final OptionalChar x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final OptionalChar x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null || x.isEmpty()) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

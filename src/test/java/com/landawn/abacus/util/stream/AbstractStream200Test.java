@@ -759,9 +759,9 @@ public class AbstractStream200Test extends TestBase {
     }
 
     @Test
-    public void test_hasDuplicates() {
-        assertTrue(Stream.of(1, 2, 1).hasDuplicates());
-        assertFalse(Stream.of(1, 2, 3).hasDuplicates());
+    public void test_containsDuplicates() {
+        assertTrue(Stream.of(1, 2, 1).containsDuplicates());
+        assertFalse(Stream.of(1, 2, 3).containsDuplicates());
     }
 
     @Test
@@ -988,8 +988,8 @@ public class AbstractStream200Test extends TestBase {
 
     @Test
     public void test_countMatchBetween() {
-        assertTrue(Stream.of(1, 2, 3, 4, 5).isMatchCountBetween(2, 2, i -> i % 2 == 0));
-        assertFalse(Stream.of(1, 2, 3, 4, 5).isMatchCountBetween(3, 3, i -> i % 2 == 0));
+        assertTrue(Stream.of(1, 2, 3, 4, 5).hasMatchCountBetween(2, 2, i -> i % 2 == 0));
+        assertFalse(Stream.of(1, 2, 3, 4, 5).hasMatchCountBetween(3, 3, i -> i % 2 == 0));
     }
 
     @Test

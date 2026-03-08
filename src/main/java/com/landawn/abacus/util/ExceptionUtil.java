@@ -78,7 +78,7 @@ public final class ExceptionUtil {
     private static final int MAX_DEPTH_FOR_LOOP_CAUSE = 100;
 
     private ExceptionUtil() {
-        // singleton
+        // Utility class - prevent instantiation
     }
 
     private static final Map<Class<? extends Throwable>, Function<Throwable, RuntimeException>> toRuntimeExceptionFuncMap = new ConcurrentHashMap<>();
@@ -578,13 +578,12 @@ public final class ExceptionUtil {
      * @return the root cause or the input if no cause found
      */
     public static Throwable firstCause(final Throwable e) {
-        int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
-        Throwable prevCause = e;
+        final java.util.Set<Throwable> seen = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        seen.add(e);
         Throwable cause = e;
         Throwable result = e;
 
-        while (maxDepth-- > 0 && (cause = cause.getCause()) != null && cause != prevCause && cause != e) {
-            prevCause = result;
+        while ((cause = cause.getCause()) != null && seen.add(cause)) {
             result = cause;
         }
 

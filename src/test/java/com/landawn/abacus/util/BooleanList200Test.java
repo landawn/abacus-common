@@ -487,13 +487,13 @@ public class BooleanList200Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test 'hasDuplicates' method")
+    @DisplayName("Test 'containsDuplicates' method")
     public void testHasDuplicates() {
-        assertTrue(BooleanList.of(true, false, true).hasDuplicates());
-        assertTrue(BooleanList.of(true, true).hasDuplicates());
-        assertFalse(BooleanList.of(true, false).hasDuplicates());
-        assertFalse(BooleanList.of(true).hasDuplicates());
-        assertFalse(new BooleanList().hasDuplicates());
+        assertTrue(BooleanList.of(true, false, true).containsDuplicates());
+        assertTrue(BooleanList.of(true, true).containsDuplicates());
+        assertFalse(BooleanList.of(true, false).containsDuplicates());
+        assertFalse(BooleanList.of(true).containsDuplicates());
+        assertFalse(new BooleanList().containsDuplicates());
     }
 
     @Test

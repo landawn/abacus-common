@@ -67,7 +67,7 @@ public final class NameUtil {
      * Private constructor to prevent instantiation of this utility class.
      */
     private NameUtil() {
-        // singleton
+        // Utility class - prevent instantiation
     }
 
     /**

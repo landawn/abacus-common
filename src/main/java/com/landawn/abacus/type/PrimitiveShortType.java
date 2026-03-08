@@ -14,11 +14,6 @@
 
 package com.landawn.abacus.type;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import com.landawn.abacus.util.Numbers;
-
 /**
  * Type handler for primitive {@code short} values, providing conversion between short and its string representation.
  */
@@ -39,7 +34,7 @@ public final class PrimitiveShortType extends AbstractShortType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Short> type = TypeFactory.getType(short.class);
-     * Class clazz = type.clazz();
+     * Class clazz = type.javaType();
      * System.out.println(clazz.getName());       // Output: short
      * System.out.println(clazz.isPrimitive());   // Output: true
      * }</pre>
@@ -48,7 +43,7 @@ public final class PrimitiveShortType extends AbstractShortType {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public Class clazz() {
+    public Class javaType() {
         return short.class;
     }
 
@@ -59,14 +54,14 @@ public final class PrimitiveShortType extends AbstractShortType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Short> type = TypeFactory.getType(short.class);
-     * boolean isPrimitive = type.isPrimitiveType();
+     * boolean isPrimitive = type.isPrimitive();
      * System.out.println(isPrimitive);   // Output: true
      * }</pre>
      *
      * @return {@code true}, indicating this is a primitive type
      */
     @Override
-    public boolean isPrimitiveType() {
+    public boolean isPrimitive() {
         return true;
     }
 
@@ -86,81 +81,5 @@ public final class PrimitiveShortType extends AbstractShortType {
     @Override
     public Short defaultValue() {
         return DEFAULT_VALUE;
-    }
-
-    /**
-     * Retrieves a short value from the specified column in the ResultSet.
-     * This method handles various data types that can be converted to short,
-     * including direct short values, other numeric types, and string representations.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Short> type = TypeFactory.getType(short.class);
-     * // Assuming rs is a ResultSet with a short value in column 1
-     * Short value = type.get(rs, 1);
-     * System.out.println(value);   // Output: the short value from the database
-     *
-     * // If the column contains NULL
-     * Short nullValue = type.get(rs, 2);
-     * System.out.println(nullValue);   // Output: null
-     * }</pre>
-     *
-     * @param rs the ResultSet to read from
-     * @param columnIndex the 1-based index of the column to retrieve
-     * @return the short value from the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the column index is invalid
-     * @throws NumberFormatException if the column value is a string that cannot be parsed as a short
-     */
-    @Override
-    public Short get(final ResultSet rs, final int columnIndex) throws SQLException {
-        final Object result = rs.getObject(columnIndex);
-
-        if (result == null) {
-            return null; // NOSONAR
-        } else if (result instanceof Short) {
-            return (Short) result;
-        } else if (result instanceof Number) {
-            return ((Number) result).shortValue();
-        } else {
-            return Numbers.toShort(result.toString());
-        }
-    }
-
-    /**
-     * Retrieves a short value from the specified column in the ResultSet.
-     * This method handles various data types that can be converted to short,
-     * including direct short values, other numeric types, and string representations.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Short> type = TypeFactory.getType(short.class);
-     * // Assuming rs is a ResultSet with a short value in column "age"
-     * Short age = type.get(rs, "age");
-     * System.out.println(age);   // Output: the short value from the database
-     *
-     * // If the column contains NULL
-     * Short nullValue = type.get(rs, "missing_column");
-     * System.out.println(nullValue);   // Output: null
-     * }</pre>
-     *
-     * @param rs the ResultSet to read from
-     * @param columnName the label of the column to retrieve (column name or alias)
-     * @return the short value from the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the column label is not found
-     * @throws NumberFormatException if the column value is a string that cannot be parsed as a short
-     */
-    @Override
-    public Short get(final ResultSet rs, final String columnName) throws SQLException {
-        final Object result = rs.getObject(columnName);
-
-        if (result == null) {
-            return null; // NOSONAR
-        } else if (result instanceof Short) {
-            return (Short) result;
-        } else if (result instanceof Number) {
-            return ((Number) result).shortValue();
-        } else {
-            return Numbers.toShort(result.toString());
-        }
     }
 }

@@ -19,9 +19,10 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.time.Duration;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
@@ -46,7 +47,7 @@ public class JdkDurationType extends AbstractType<Duration> {
      * @return Duration.class
      */
     @Override
-    public Class<Duration> clazz() {
+    public Class<Duration> javaType() {
         return Duration.class;
     }
 
@@ -131,7 +132,11 @@ public class JdkDurationType extends AbstractType<Duration> {
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Duration x) throws SQLException {
-        stmt.setLong(columnIndex, (x == null) ? 0 : x.toMillis());
+        if (x == null) {
+            stmt.setNull(columnIndex, Types.BIGINT);
+        } else {
+            stmt.setLong(columnIndex, x.toMillis());
+        }
     }
 
     /**
@@ -146,7 +151,11 @@ public class JdkDurationType extends AbstractType<Duration> {
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Duration x) throws SQLException {
-        stmt.setLong(parameterName, (x == null) ? 0 : x.toMillis());
+        if (x == null) {
+            stmt.setNull(parameterName, Types.BIGINT);
+        } else {
+            stmt.setLong(parameterName, x.toMillis());
+        }
     }
 
     /**
@@ -177,7 +186,7 @@ public class JdkDurationType extends AbstractType<Duration> {
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Duration x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Duration x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

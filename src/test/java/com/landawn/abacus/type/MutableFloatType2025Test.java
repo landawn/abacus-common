@@ -14,12 +14,67 @@
 
 package com.landawn.abacus.type;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.MutableFloat;
 
 @Tag("2025")
 public class MutableFloatType2025Test extends TestBase {
 
     private final MutableFloatType type = new MutableFloatType();
+
+    @Test
+    public void test_get_PreservesZeroValue() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+
+        when(rs.getFloat(1)).thenReturn(0F);
+        when(rs.wasNull()).thenReturn(false);
+
+        MutableFloat result = type.get(rs, 1);
+        assertNotNull(result);
+        assertEquals(0F, result.value());
+    }
+
+    @Test
+    public void test_get_ReturnsNullWhenJdbcValueIsNull() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+
+        when(rs.getFloat("col")).thenReturn(0F);
+        when(rs.wasNull()).thenReturn(true);
+
+        assertNull(type.get(rs, "col"));
+    }
+
+    @Test
+    public void test_set_PreparedStatement_NullUsesSqlNull() throws SQLException {
+        PreparedStatement stmt = mock(PreparedStatement.class);
+
+        type.set(stmt, 1, null);
+
+        verify(stmt).setNull(1, Types.FLOAT);
+    }
+
+    @Test
+    public void test_set_CallableStatement_NullUsesSqlNull() throws SQLException {
+        CallableStatement stmt = mock(CallableStatement.class);
+
+        type.set(stmt, "param", null);
+
+        verify(stmt).setNull("param", Types.FLOAT);
+    }
 }

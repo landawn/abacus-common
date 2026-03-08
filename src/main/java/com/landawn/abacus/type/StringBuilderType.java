@@ -38,13 +38,13 @@ public class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<StringBuilder> type = TypeFactory.getType(StringBuilder.class);
-     * Class<StringBuilder> clazz = type.clazz();   // Returns StringBuilder.class
+     * Class<StringBuilder> clazz = type.javaType();   // Returns StringBuilder.class
      * }</pre>
      *
      * @return the Class object for StringBuilder.class
      */
     @Override
-    public Class<StringBuilder> clazz() {
+    public Class<StringBuilder> javaType() {
         return StringBuilder.class;
     }
 

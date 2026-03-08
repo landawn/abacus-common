@@ -193,8 +193,8 @@ class JsonStringReader extends AbstractJsonReader {
      *   <li>Structural tokens (braces, brackets, colons, commas)</li>
      * </ul>
      *
-     * @return the token identifier, or -1 if no next token is found
      * @param nextTokenValueType the expected type of the next token value
+     * @return the token identifier, or -1 if no next token is found
      * @throws UncheckedIOException if an I/O error occurs during reading
      */
     @Override
@@ -534,7 +534,7 @@ class JsonStringReader extends AbstractJsonReader {
     public <T> T readValue(final Type<? extends T> type) {
         if (nextEvent != END_DOUBLE_QUOTE && nextEvent != END_SINGLE_QUOTE) {
             if (numValue != null) {
-                if (type.isObjectType() || type.clazz().equals(numValue.getClass())) {
+                if (type.isObject() || type.javaType().equals(numValue.getClass())) {
                     return (T) numValue;
                 } else if (type.isNumber()) {
                     return (T) Numbers.convert(numValue, (Type<Number>) type);
@@ -549,15 +549,15 @@ class JsonStringReader extends AbstractJsonReader {
                 }
             } else if (text != null) {
                 if (text.equals(NULL)) {
-                    return type.isOptionalOrNullable() ? (T) defaultOptionals.get(type.clazz()) : null;
-                } else if ((text.equals(FALSE) || text.equals(TRUE)) && (type.isBoolean() || type.isObjectType())) {
+                    return type.isOptionalOrNullable() ? (T) defaultOptionals.get(type.javaType()) : null;
+                } else if ((text.equals(FALSE) || text.equals(TRUE)) && (type.isBoolean() || type.isObject())) {
                     return (T) (text.equals(FALSE) ? Boolean.FALSE : Boolean.TRUE);
                 } else {
                     return type.valueOf(text);
                 }
             }
 
-            if (type.isObjectType()) {
+            if (type.isObject()) {
                 final String numberText = String
                         .valueOf(nextChar > 0 ? N.copyOfRange(cbuf, 0, nextChar) : N.copyOfRange(strValue, startIndexForText, endIndexForText));
 

@@ -18,6 +18,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Calendar;
 
 import com.landawn.abacus.util.Dates;
@@ -66,7 +67,7 @@ public class MillisCalendarType extends CalendarType {
     public Calendar get(final ResultSet rs, final int columnIndex) throws SQLException {
         final long lng = rs.getLong(columnIndex);
 
-        return (lng == 0) ? null : Dates.createCalendar(lng);
+        return (lng == 0 && rs.wasNull()) ? null : Dates.createCalendar(lng);
     }
 
     /**
@@ -97,7 +98,7 @@ public class MillisCalendarType extends CalendarType {
     public Calendar get(final ResultSet rs, final String columnName) throws SQLException {
         final long lng = rs.getLong(columnName);
 
-        return (lng == 0) ? null : Dates.createCalendar(lng);
+        return (lng == 0 && rs.wasNull()) ? null : Dates.createCalendar(lng);
     }
 
     /**
@@ -126,7 +127,11 @@ public class MillisCalendarType extends CalendarType {
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Calendar x) throws SQLException {
-        stmt.setLong(columnIndex, (x == null) ? 0 : x.getTimeInMillis());
+        if (x == null) {
+            stmt.setNull(columnIndex, Types.BIGINT);
+        } else {
+            stmt.setLong(columnIndex, x.getTimeInMillis());
+        }
     }
 
     /**
@@ -155,6 +160,10 @@ public class MillisCalendarType extends CalendarType {
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Calendar x) throws SQLException {
-        stmt.setLong(parameterName, (x == null) ? 0 : x.getTimeInMillis());
+        if (x == null) {
+            stmt.setNull(parameterName, Types.BIGINT);
+        } else {
+            stmt.setLong(parameterName, x.getTimeInMillis());
+        }
     }
 }

@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
@@ -97,7 +97,7 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
      * @return the Class object for Pair
      */
     @Override
-    public Class<Pair<L, R>> clazz() {
+    public Class<Pair<L, R>> javaType() {
         return typeClass;
     }
 
@@ -108,7 +108,7 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
      * @return an array of Type objects representing the parameter types
      */
     @Override
-    public Type<?>[] getParameterTypes() {
+    public Type<?>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -156,8 +156,8 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
             throw new IllegalArgumentException("Invalid Pair format. Expected array with at least 2 elements but got: " + str);
         }
 
-        final L left = a[0] == null ? null : ((L) (leftType.clazz().isAssignableFrom(a[0].getClass()) ? a[0] : N.convert(a[0], leftType)));
-        final R right = a[1] == null ? null : ((R) (rightType.clazz().isAssignableFrom(a[1].getClass()) ? a[1] : N.convert(a[1], rightType)));
+        final L left = a[0] == null ? null : ((L) (leftType.javaType().isAssignableFrom(a[0].getClass()) ? a[0] : N.convert(a[0], leftType)));
+        final R right = a[1] == null ? null : ((R) (rightType.javaType().isAssignableFrom(a[1].getClass()) ? a[1] : N.convert(a[1], rightType)));
 
         return Pair.of(left, right);
     }
@@ -222,7 +222,7 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Pair<L, R> x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Pair<L, R> x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

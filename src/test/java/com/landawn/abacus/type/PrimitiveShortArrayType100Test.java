@@ -37,12 +37,12 @@ public class PrimitiveShortArrayType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(short[].class, type.clazz());
+        assertEquals(short[].class, type.javaType());
     }
 
     @Test
     public void testGetElementType() {
-        Type<Short> elementType = type.getElementType();
+        Type<Short> elementType = type.elementType();
         assertNotNull(elementType);
     }
 

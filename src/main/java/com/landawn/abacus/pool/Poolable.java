@@ -94,7 +94,7 @@ public interface Poolable {
     void destroy(Caller caller);
 
     /**
-     * Wraps the provided object in a PoolableWrapper with maximum lifetime and idle time.
+     * Wraps the provided object in a PoolableAdapter with maximum lifetime and idle time.
      * This is a convenience method for creating poolable objects from existing instances.
      *
      * <p>The wrapped object will have:
@@ -106,27 +106,27 @@ public interface Poolable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String data = "some data";
-     * PoolableWrapper<String> poolable = Poolable.wrap(data);
+     * PoolableAdapter<String> poolable = Poolable.wrap(data);
      * pool.add(poolable);
      * }</pre>
      *
      * @param <T> the type of the object to wrap
      * @param value the object to wrap, can be {@code null}
-     * @return a PoolableWrapper containing the source object
+     * @return a PoolableAdapter containing the source object
      */
-    static <T> PoolableWrapper<T> wrap(final T value) {
-        return PoolableWrapper.of(value);
+    static <T> PoolableAdapter<T> wrap(final T value) {
+        return PoolableAdapter.of(value);
     }
 
     /**
-     * Wraps the provided object in a PoolableWrapper with specified lifetime and idle time limits.
+     * Wraps the provided object in a PoolableAdapter with specified lifetime and idle time limits.
      * This allows fine-grained control over when wrapped objects expire.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Wrap a buffer that expires after 5 minutes or 1 minute of inactivity
      * ByteBuffer buffer = ByteBuffer.allocate(1024);
-     * PoolableWrapper<ByteBuffer> poolable = Poolable.wrap(buffer, 300000, 60000);
+     * PoolableAdapter<ByteBuffer> poolable = Poolable.wrap(buffer, 300000, 60000);
      * pool.add(poolable);
      * }</pre>
      *
@@ -134,11 +134,11 @@ public interface Poolable {
      * @param value the object to wrap, can be {@code null}
      * @param liveTime maximum lifetime in milliseconds before the object expires
      * @param maxIdleTime maximum idle time in milliseconds before the object expires
-     * @return a PoolableWrapper containing the source object with the specified expiration settings
+     * @return a PoolableAdapter containing the source object with the specified expiration settings
      * @throws IllegalArgumentException if liveTime or maxIdleTime is not positive
      */
-    static <T> PoolableWrapper<T> wrap(final T value, final long liveTime, final long maxIdleTime) {
-        return PoolableWrapper.of(value, liveTime, maxIdleTime);
+    static <T> PoolableAdapter<T> wrap(final T value, final long liveTime, final long maxIdleTime) {
+        return PoolableAdapter.of(value, liveTime, maxIdleTime);
     }
 
     /**

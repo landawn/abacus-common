@@ -30,7 +30,7 @@ import java.util.Objects;
 
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BiMap;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
@@ -72,6 +72,7 @@ import com.landawn.abacus.util.Strings;
  */
 @SuppressWarnings("java:S2160")
 public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
+    /** The type name constant for Enum type identification. */
     public static final String ENUM = Enum.class.getSimpleName();
 
     private static final String NULL = "null";
@@ -142,6 +143,13 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     /**
      * Returns the enumeration strategy used by this type handler.
      * Indicates whether enums are stored by ordinal (numeric), name (string), or code (numeric).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * EnumType<Status> statusType = (EnumType<Status>) TypeFactory.getType(Status.class);
+     * com.landawn.abacus.util.EnumType enumRep = statusType.enumerated();
+     * // Returns: com.landawn.abacus.util.EnumType.NAME (default), .ORDINAL, or .CODE
+     * }</pre>
      *
      * @return the configured enum representation
      */
@@ -220,6 +228,16 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * For CODE representation, the value is matched against the {@code code()} values; otherwise,
      * it is matched against ordinal values. A value of 0 returns {@code null} when no constant
      * is mapped to 0.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Given: enum Status { PENDING, ACTIVE, COMPLETED }
+     * EnumType<Status> statusType = (EnumType<Status>) TypeFactory.getType(Status.class);
+     *
+     * Status s0 = statusType.valueOf(0);  // Returns: Status.PENDING
+     * Status s1 = statusType.valueOf(1);  // Returns: Status.ACTIVE
+     * Status s2 = statusType.valueOf(2);  // Returns: Status.COMPLETED
+     * }</pre>
      *
      * @param value the ordinal or code value
      * @return the enum constant for the specified value, or {@code null} if value is 0 and no constant maps to 0
@@ -353,7 +371,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final T x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

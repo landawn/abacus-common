@@ -21,7 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -52,7 +52,7 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      * @return the Class object for {@code AtomicLong}
      */
     @Override
-    public Class<AtomicLong> clazz() {
+    public Class<AtomicLong> javaType() {
         return AtomicLong.class;
     }
 
@@ -62,7 +62,7 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      *
      * @param rs the ResultSet to retrieve the value from
      * @param columnIndex the column index (1-based) of the long value
-     * @return a new AtomicLong containing the retrieved value (0L if SQL NULL)
+     * @return a new AtomicLong containing the retrieved value, or {@code null} if SQL NULL
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
@@ -79,7 +79,7 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      * @param rs the ResultSet to retrieve the value from
      * @param columnName the label for the column specified with the SQL AS clause,
      *                    or the column name if no AS clause was specified
-     * @return a new AtomicLong containing the retrieved value (0L if SQL NULL)
+     * @return a new AtomicLong containing the retrieved value, or {@code null} if SQL NULL
      * @throws SQLException if a database access error occurs or the columnName is invalid
      */
     @Override
@@ -92,11 +92,11 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
     /**
      * Sets an AtomicLong parameter in a PreparedStatement at the specified position.
      * The long value is extracted from the AtomicLong before setting.
-     * If the AtomicLong is {@code null}, sets 0L as the parameter value.
+     * If the AtomicLong is {@code null}, sets the parameter to SQL NULL.
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
-     * @param x the AtomicLong value to set, may be {@code null} (treated as 0L)
+     * @param x the AtomicLong value to set, may be {@code null} (set as SQL NULL)
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
@@ -111,11 +111,11 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
     /**
      * Sets a named AtomicLong parameter in a CallableStatement.
      * The long value is extracted from the AtomicLong before setting.
-     * If the AtomicLong is {@code null}, sets 0L as the parameter value.
+     * If the AtomicLong is {@code null}, sets the parameter to SQL NULL.
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
-     * @param x the AtomicLong value to set, may be {@code null} (treated as 0L)
+     * @param x the AtomicLong value to set, may be {@code null} (set as SQL NULL)
      * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override
@@ -212,7 +212,7 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final AtomicLong x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final AtomicLong x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

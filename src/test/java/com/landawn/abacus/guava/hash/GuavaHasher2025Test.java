@@ -595,11 +595,11 @@ public class GuavaHasher2025Test extends TestBase {
     public void testPutCharSequenceMultipleCharsets() {
         String text = "Test";
 
-        HashCode hashUTF8 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(text, StandardCharsets.UTF_8).hash();
+        HashCode hashUtf8 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(text, StandardCharsets.UTF_8).hash();
 
         HashCode hashUTF16 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(text, StandardCharsets.UTF_16).hash();
 
-        assertNotEquals(hashUTF8, hashUTF16);
+        assertNotEquals(hashUtf8, hashUTF16);
     }
 
     @Test

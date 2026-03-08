@@ -1420,13 +1420,13 @@ public class Sheet200Test extends TestBase {
 
         @Test
         public void testCountOfNonNullValue() {
-            assertEquals(4, sheet.countOfNonNullValues());
+            assertEquals(4, sheet.nonNullValueCount());
             sheet.set("R3", "C3", "V33");
-            assertEquals(5, sheet.countOfNonNullValues());
+            assertEquals(5, sheet.nonNullValueCount());
             sheet.clear();
-            assertEquals(0, sheet.countOfNonNullValues());
+            assertEquals(0, sheet.nonNullValueCount());
             Sheet<String, String, String> uninit = new Sheet<>(rowKeys, colKeys);
-            assertEquals(0, uninit.countOfNonNullValues());
+            assertEquals(0, uninit.nonNullValueCount());
         }
 
         @Test
@@ -1730,13 +1730,13 @@ public class Sheet200Test extends TestBase {
     public class FunctionalInterfaceMethods {
         @Test
         public void testApply() {
-            Integer totalNonNull = sheet.apply(s -> (int) s.countOfNonNullValues());
+            Integer totalNonNull = sheet.apply(s -> (int) s.nonNullValueCount());
             assertEquals(4, totalNonNull);
         }
 
         @Test
         public void testApplyIfNotEmpty_nonEmptySheet() {
-            u.Optional<Integer> result = sheet.applyIfNotEmpty(s -> (int) s.countOfNonNullValues());
+            u.Optional<Integer> result = sheet.applyIfNotEmpty(s -> (int) s.nonNullValueCount());
             assertTrue(result.isPresent());
             assertEquals(4, result.get());
         }
@@ -1744,7 +1744,7 @@ public class Sheet200Test extends TestBase {
         @Test
         public void testApplyIfNotEmpty_emptySheet() {
             Sheet<String, String, String> emptyS = Sheet.empty();
-            u.Optional<Integer> result = emptyS.applyIfNotEmpty(s -> (int) s.countOfNonNullValues());
+            u.Optional<Integer> result = emptyS.applyIfNotEmpty(s -> (int) s.nonNullValueCount());
             assertFalse(result.isPresent());
         }
 

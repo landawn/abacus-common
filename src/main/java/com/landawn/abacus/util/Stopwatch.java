@@ -141,7 +141,7 @@ public final class Stopwatch {
      * Creates (and starts) a new stopwatch, using the specified time source.
      * This is a convenience method equivalent to calling {@code createUnstarted(ticker).start()}.
      * 
-     * <p><b>Example usage for Android:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Stopwatch stopwatch = Stopwatch.createStarted(
      *     new Ticker() {

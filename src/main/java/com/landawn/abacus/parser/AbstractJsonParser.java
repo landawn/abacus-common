@@ -46,10 +46,10 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * @see JsonParser
  * @see AbstractParser
- * @see JsonSerializationConfig
- * @see JsonDeserializationConfig
+ * @see JsonSerConfig
+ * @see JsonDeserConfig
  */
-abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig, JsonDeserializationConfig> implements JsonParser {
+abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDeserConfig> implements JsonParser {
 
     protected static final char _BRACE_L = SK._BRACE_L;
 
@@ -84,17 +84,17 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
         }
     }
 
-    protected final JsonSerializationConfig defaultJsonSerializationConfig;
+    protected final JsonSerConfig defaultJsonSerConfig;
 
-    protected final JsonDeserializationConfig defaultJsonDeserializationConfig;
+    protected final JsonDeserConfig defaultJsonDeserConfig;
 
     protected AbstractJsonParser() {
         this(null, null);
     }
 
-    protected AbstractJsonParser(final JsonSerializationConfig jsc, final JsonDeserializationConfig jdc) {
-        defaultJsonSerializationConfig = jsc != null ? jsc : new JsonSerializationConfig();
-        defaultJsonDeserializationConfig = jdc != null ? jdc : new JsonDeserializationConfig();
+    protected AbstractJsonParser(final JsonSerConfig jsc, final JsonDeserConfig jdc) {
+        defaultJsonSerConfig = jsc != null ? jsc : new JsonSerConfig();
+        defaultJsonDeserConfig = jdc != null ? jdc : new JsonDeserConfig();
     }
 
     /**
@@ -147,7 +147,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig();
+     * JsonDeserConfig config = new JsonDeserConfig();
      * User user = parser.parse("{\"name\":\"John\"}", config, User.class);
      * }</pre>
      *
@@ -159,7 +159,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * @throws UnsupportedOperationException if this operation is not supported by the implementation
      */
     @Override
-    public <T> T parse(final String source, final JsonDeserializationConfig config, final Class<? extends T> targetType) throws UnsupportedOperationException {
+    public <T> T parse(final String source, final JsonDeserConfig config, final Class<? extends T> targetType) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -191,7 +191,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Object[] output = new Object[3];
-     * JsonDeserializationConfig config = new JsonDeserializationConfig();
+     * JsonDeserConfig config = new JsonDeserConfig();
      * parser.parse("[\"Alice\",\"Bob\",\"Charlie\"]", config, output);
      * }</pre>
      *
@@ -201,7 +201,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * @throws UnsupportedOperationException if this operation is not supported by the implementation
      */
     @Override
-    public void parse(final String source, final JsonDeserializationConfig config, final Object[] output) throws UnsupportedOperationException {
+    public void parse(final String source, final JsonDeserConfig config, final Object[] output) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -233,7 +233,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> output = new ArrayList<>();
-     * JsonDeserializationConfig config = new JsonDeserializationConfig();
+     * JsonDeserConfig config = new JsonDeserConfig();
      * parser.parse("[\"Alice\",\"Bob\"]", config, output);
      * }</pre>
      *
@@ -243,7 +243,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * @throws UnsupportedOperationException if this operation is not supported by the implementation
      */
     @Override
-    public void parse(final String source, final JsonDeserializationConfig config, final Collection<?> output) throws UnsupportedOperationException {
+    public void parse(final String source, final JsonDeserConfig config, final Collection<?> output) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -275,7 +275,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> output = new HashMap<>();
-     * JsonDeserializationConfig config = new JsonDeserializationConfig();
+     * JsonDeserConfig config = new JsonDeserConfig();
      * parser.parse("{\"name\":\"John\",\"age\":30}", config, output);
      * }</pre>
      *
@@ -285,7 +285,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * @throws UnsupportedOperationException if this operation is not supported by the implementation
      */
     @Override
-    public void parse(final String source, final JsonDeserializationConfig config, final Map<?, ?> output) throws UnsupportedOperationException {
+    public void parse(final String source, final JsonDeserConfig config, final Map<?, ?> output) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -340,7 +340,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "{\"users\":[{\"name\":\"John\"}]}";
-     * JsonDeserializationConfig config = new JsonDeserializationConfig();
+     * JsonDeserConfig config = new JsonDeserConfig();
      * User user = parser.deserialize(json, 10, 25, config, Type.of(User.class));
      * }</pre>
      *
@@ -353,8 +353,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * @return an instance of the target object populated with data from the JSON substring; never {@code null}
      */
     @Override
-    public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final JsonDeserializationConfig config,
-            final Type<? extends T> targetType) {
+    public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final JsonDeserConfig config, final Type<? extends T> targetType) {
         return deserialize(source.substring(fromIndex, toIndex), config, targetType);
     }
 
@@ -365,7 +364,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "{\"users\":[{\"name\":\"John\"}]}";
-     * JsonDeserializationConfig config = new JsonDeserializationConfig();
+     * JsonDeserConfig config = new JsonDeserConfig();
      * User user = parser.deserialize(json, 10, 25, config, User.class);
      * }</pre>
      *
@@ -378,8 +377,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
      * @return an instance of the target class populated with data from the JSON substring; never {@code null}
      */
     @Override
-    public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final JsonDeserializationConfig config,
-            final Class<? extends T> targetType) {
+    public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final JsonDeserConfig config, final Class<? extends T> targetType) {
         return deserialize(source.substring(fromIndex, toIndex), config, targetType);
     }
 
@@ -465,11 +463,11 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerializationConfig
         return stream(reader, closeReaderWhenStreamIsClosed, null, elementType);
     }
 
-    protected JsonSerializationConfig check(JsonSerializationConfig config) {
-        return config == null ? defaultJsonSerializationConfig : config;
+    protected JsonSerConfig check(JsonSerConfig config) {
+        return config == null ? defaultJsonSerConfig : config;
     }
 
-    protected JsonDeserializationConfig check(JsonDeserializationConfig config) {
-        return config == null ? defaultJsonDeserializationConfig : config;
+    protected JsonDeserConfig check(JsonDeserConfig config) {
+        return config == null ? defaultJsonDeserConfig : config;
     }
 }

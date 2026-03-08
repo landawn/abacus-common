@@ -46,7 +46,7 @@ public final class ByteType extends AbstractByteType {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public Class clazz() {
+    public Class javaType() {
         return Byte.class;
     }
 

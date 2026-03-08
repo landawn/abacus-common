@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
@@ -204,13 +204,13 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Returns the Java class that this type represents.
+     * Returns the Java reflection type for this type.
      *
-     * @return the Java class
+     * @return the Java reflection type
      */
     @Override
-    public java.lang.reflect.Type javaType() {
-        return clazz();
+    public java.lang.reflect.Type reflectType() {
+        return javaType();
     }
 
     /**
@@ -244,7 +244,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return {@code true} if this is a primitive type, {@code false} otherwise
      */
     @Override
-    public boolean isPrimitiveType() {
+    public boolean isPrimitive() {
         return false;
     }
 
@@ -521,7 +521,7 @@ public abstract class AbstractType<T> implements Type<T> {
      */
     @Override
     public boolean isParameterizedType() {
-        return N.notEmpty(getParameterTypes());
+        return N.notEmpty(parameterTypes());
     }
 
     /**
@@ -564,7 +564,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return the serialization type
      */
     @Override
-    public SerializationType getSerializationType() {
+    public SerializationType serializationType() {
         return isSerializable() ? SerializationType.SERIALIZABLE : SerializationType.UNKNOWN;
     }
 
@@ -586,7 +586,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return {@code true} if this is the Object type, {@code false} otherwise
      */
     @Override
-    public boolean isObjectType() {
+    public boolean isObject() {
         return false;
     }
 
@@ -597,7 +597,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return the element type, or {@code null} if not applicable
      */
     @Override
-    public Type<?> getElementType() {
+    public Type<?> elementType() {
         return null; // NOSONAR
     }
 
@@ -608,7 +608,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return array of parameter types
      */
     @Override
-    public Type<?>[] getParameterTypes() {
+    public Type<?>[] parameterTypes() {
         return AbstractType.EMPTY_TYPE_ARRAY;
     }
 
@@ -795,7 +795,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final T x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -952,7 +952,7 @@ public abstract class AbstractType<T> implements Type<T> {
 
         if (obj instanceof AbstractType) {
             final AbstractType<T> another = ((AbstractType<T>) obj);
-            return N.equals(another.name(), this.name()) && N.equals(another.declaringName(), this.declaringName()) && another.clazz().equals(clazz());
+            return N.equals(another.name(), this.name()) && N.equals(another.declaringName(), this.declaringName()) && another.javaType().equals(javaType());
         }
 
         return false;

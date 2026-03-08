@@ -785,12 +785,12 @@ public class ByteList2025Test extends TestBase {
     }
 
     @Test
-    public void test_hasDuplicates() {
+    public void test_containsDuplicates() {
         ByteList list1 = ByteList.of((byte) 1, (byte) 2, (byte) 1);
-        assertTrue(list1.hasDuplicates());
+        assertTrue(list1.containsDuplicates());
 
         ByteList list2 = ByteList.of((byte) 1, (byte) 2, (byte) 3);
-        assertFalse(list2.hasDuplicates());
+        assertFalse(list2.containsDuplicates());
     }
 
     @Test

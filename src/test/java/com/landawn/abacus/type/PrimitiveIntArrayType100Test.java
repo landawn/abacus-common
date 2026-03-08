@@ -37,12 +37,12 @@ public class PrimitiveIntArrayType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(int[].class, type.clazz());
+        assertEquals(int[].class, type.javaType());
     }
 
     @Test
     public void testGetElementType() {
-        Type<Integer> elementType = type.getElementType();
+        Type<Integer> elementType = type.elementType();
         assertNotNull(elementType);
     }
 

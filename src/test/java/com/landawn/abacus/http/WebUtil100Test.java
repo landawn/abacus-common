@@ -24,7 +24,7 @@ public class WebUtil100Test extends TestBase {
     public void testCurl2HttpRequest() {
         String curl = "curl -X POST https://api.example.com/users -H \"Content-Type: application/json\" -H \"Authorization: Bearer token123\" -d '{\"name\":\"John\",\"age\":30}'";
 
-        String result = WebUtil.convertCurlToHttpRequest(curl);
+        String result = WebUtil.curlToHttpRequestCode(curl);
         assertNotNull(result);
         assertTrue(result.contains("HttpRequest.url(\"https://api.example.com/users\")"));
         assertTrue(result.contains(".header(\"Content-Type\", \"application/json\")"));
@@ -38,7 +38,7 @@ public class WebUtil100Test extends TestBase {
     public void testCurl2HttpRequestSimpleGet() {
         String curl = "curl https://api.example.com/data";
 
-        String result = WebUtil.convertCurlToHttpRequest(curl);
+        String result = WebUtil.curlToHttpRequestCode(curl);
         assertNotNull(result);
         assertTrue(result.contains("HttpRequest.url(\"https://api.example.com/data\")"));
         assertTrue(result.contains(".get();"));
@@ -48,7 +48,7 @@ public class WebUtil100Test extends TestBase {
     public void testCurl2HttpRequestGetWithHeaders() {
         String curl = "curl -X GET https://api.example.com/data -H \"Accept: application/json\"";
 
-        String result = WebUtil.convertCurlToHttpRequest(curl);
+        String result = WebUtil.curlToHttpRequestCode(curl);
         assertNotNull(result);
         assertTrue(result.contains(".header(\"Accept\", \"application/json\")"));
         assertTrue(result.contains(".get();"));
@@ -58,7 +58,7 @@ public class WebUtil100Test extends TestBase {
     public void testCurl2HttpRequestDelete() {
         String curl = "curl -X DELETE https://api.example.com/users/123";
 
-        String result = WebUtil.convertCurlToHttpRequest(curl);
+        String result = WebUtil.curlToHttpRequestCode(curl);
         assertNotNull(result);
         assertTrue(result.contains(".delete();"));
     }
@@ -67,7 +67,7 @@ public class WebUtil100Test extends TestBase {
     public void testCurl2HttpRequestDeleteWithBody() {
         String curl = "curl -X DELETE https://api.example.com/users/123 -d '{\"hard\":true}'";
 
-        String result = WebUtil.convertCurlToHttpRequest(curl);
+        String result = WebUtil.curlToHttpRequestCode(curl);
         assertNotNull(result);
         assertTrue(result.contains("String requestBody"));
         assertTrue(result.contains(".body(requestBody)"));
@@ -78,7 +78,7 @@ public class WebUtil100Test extends TestBase {
     public void testCurl2HttpRequestPut() {
         String curl = "curl -X PUT https://api.example.com/users/123 -d '{\"name\":\"Jane\"}'";
 
-        String result = WebUtil.convertCurlToHttpRequest(curl);
+        String result = WebUtil.curlToHttpRequestCode(curl);
         assertNotNull(result);
         assertTrue(result.contains(".body(requestBody)"));
         assertTrue(result.contains(".put();"));
@@ -88,7 +88,7 @@ public class WebUtil100Test extends TestBase {
     public void testCurl2HttpRequestOtherMethod() {
         String curl = "curl -X PATCH https://api.example.com/users/123 -d '{\"name\":\"Jane\"}'";
 
-        String result = WebUtil.convertCurlToHttpRequest(curl);
+        String result = WebUtil.curlToHttpRequestCode(curl);
         N.println(result);
         assertNotNull(result);
         assertTrue(result.contains(".body(requestBody)"));
@@ -99,7 +99,7 @@ public class WebUtil100Test extends TestBase {
     public void testCurl2HttpRequestWithSingleQuotes() {
         String curl = "curl -X POST 'https://api.example.com/users' -H 'Content-Type: application/json' -d '{\"name\":\"John\"}'";
 
-        String result = WebUtil.convertCurlToHttpRequest(curl);
+        String result = WebUtil.curlToHttpRequestCode(curl);
         assertNotNull(result);
         assertTrue(result.contains("HttpRequest.url(\"https://api.example.com/users\")"));
     }
@@ -108,7 +108,7 @@ public class WebUtil100Test extends TestBase {
     public void testCurl2HttpRequestWithDoubleQuotes() {
         String curl = "curl -X POST \"https://api.example.com/users\" -H \"Content-Type: application/json\"";
 
-        String result = WebUtil.convertCurlToHttpRequest(curl);
+        String result = WebUtil.curlToHttpRequestCode(curl);
         assertNotNull(result);
         assertTrue(result.contains("HttpRequest.url(\"https://api.example.com/users\")"));
     }
@@ -117,7 +117,7 @@ public class WebUtil100Test extends TestBase {
     public void testCurl2HttpRequestWithDataRaw() {
         String curl = "curl -X POST https://api.example.com/users --data-raw '{\"test\":true}'";
 
-        String result = WebUtil.convertCurlToHttpRequest(curl);
+        String result = WebUtil.curlToHttpRequestCode(curl);
         assertNotNull(result);
         assertTrue(result.contains("String requestBody"));
     }
@@ -126,23 +126,23 @@ public class WebUtil100Test extends TestBase {
     public void testCurl2HttpRequestWithLongHeader() {
         String curl = "curl -X GET https://api.example.com/data --header \"Authorization: Bearer token123\"";
 
-        String result = WebUtil.convertCurlToHttpRequest(curl);
+        String result = WebUtil.curlToHttpRequestCode(curl);
         assertNotNull(result);
         assertTrue(result.contains(".header(\"Authorization\", \"Bearer token123\")"));
     }
 
     @Test
     public void testCurl2HttpRequestInvalidInput() {
-        assertThrows(IllegalArgumentException.class, () -> WebUtil.convertCurlToHttpRequest(""));
-        assertThrows(IllegalArgumentException.class, () -> WebUtil.convertCurlToHttpRequest(null));
-        assertThrows(IllegalArgumentException.class, () -> WebUtil.convertCurlToHttpRequest("not a curl command"));
+        assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToHttpRequestCode(""));
+        assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToHttpRequestCode(null));
+        assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToHttpRequestCode("not a curl command"));
     }
 
     @Test
     public void testCurl2HttpRequestWithEscapedQuotes() {
         String curl = "curl -X POST https://api.example.com/users -d '{\"message\":\"Hello \\\"World\\\"\"}'";
 
-        String result = WebUtil.convertCurlToHttpRequest(curl);
+        String result = WebUtil.curlToHttpRequestCode(curl);
         assertNotNull(result);
         assertTrue(result.contains("requestBody"));
     }
@@ -151,7 +151,7 @@ public class WebUtil100Test extends TestBase {
     public void testCurl2OkHttpRequest() {
         String curl = "curl -X POST https://api.example.com/users -H \"Content-Type: application/json\" -H \"Authorization: Bearer token123\" -d '{\"name\":\"John\",\"age\":30}'";
 
-        String result = WebUtil.convertCurlToOkHttpRequest(curl);
+        String result = WebUtil.curlToOkHttpRequestCode(curl);
         assertNotNull(result);
         assertTrue(result.contains("OkHttpRequest.url(\"https://api.example.com/users\")"));
         assertTrue(result.contains(".header(\"Content-Type\", \"application/json\")"));
@@ -166,7 +166,7 @@ public class WebUtil100Test extends TestBase {
     public void testCurl2OkHttpRequestSimpleGet() {
         String curl = "curl https://api.example.com/data";
 
-        String result = WebUtil.convertCurlToOkHttpRequest(curl);
+        String result = WebUtil.curlToOkHttpRequestCode(curl);
         assertNotNull(result);
         assertTrue(result.contains("OkHttpRequest.url(\"https://api.example.com/data\")"));
         assertTrue(result.contains(".get();"));
@@ -176,7 +176,7 @@ public class WebUtil100Test extends TestBase {
     public void testCurl2OkHttpRequestDelete() {
         String curl = "curl -X DELETE https://api.example.com/users/123";
 
-        String result = WebUtil.convertCurlToOkHttpRequest(curl);
+        String result = WebUtil.curlToOkHttpRequestCode(curl);
         assertNotNull(result);
         assertTrue(result.contains(".delete();"));
     }
@@ -185,7 +185,7 @@ public class WebUtil100Test extends TestBase {
     public void testCurl2OkHttpRequestPut() {
         String curl = "curl -X PUT https://api.example.com/users/123 -d '{\"name\":\"Jane\"}'";
 
-        String result = WebUtil.convertCurlToOkHttpRequest(curl);
+        String result = WebUtil.curlToOkHttpRequestCode(curl);
         assertNotNull(result);
         assertTrue(result.contains(".put();"));
     }
@@ -194,7 +194,7 @@ public class WebUtil100Test extends TestBase {
     public void testCurl2OkHttpRequestOtherMethod() {
         String curl = "curl -X PATCH https://api.example.com/users/123 -d '{\"name\":\"Jane\"}'";
 
-        String result = WebUtil.convertCurlToOkHttpRequest(curl);
+        String result = WebUtil.curlToOkHttpRequestCode(curl);
         assertNotNull(result);
         assertTrue(result.contains(".execute(HttpMethod.PATCH);"));
     }
@@ -203,23 +203,23 @@ public class WebUtil100Test extends TestBase {
     public void testCurl2OkHttpRequestWithoutContentType() {
         String curl = "curl -X POST https://api.example.com/users -d '{\"name\":\"John\"}'";
 
-        String result = WebUtil.convertCurlToOkHttpRequest(curl);
+        String result = WebUtil.curlToOkHttpRequestCode(curl);
         assertNotNull(result);
         assertTrue(result.contains("RequestBody.create(null,"));
     }
 
     @Test
     public void testCurl2OkHttpRequestInvalidInput() {
-        assertThrows(IllegalArgumentException.class, () -> WebUtil.convertCurlToOkHttpRequest(""));
-        assertThrows(IllegalArgumentException.class, () -> WebUtil.convertCurlToOkHttpRequest(null));
-        assertThrows(IllegalArgumentException.class, () -> WebUtil.convertCurlToOkHttpRequest("not a curl command"));
+        assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToOkHttpRequestCode(""));
+        assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToOkHttpRequestCode(null));
+        assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToOkHttpRequestCode("not a curl command"));
     }
 
     @Test
     public void testCreateOkHttpRequestForCurl() {
         Consumer<String> logHandler = curl -> assertNotNull(curl);
 
-        OkHttpRequest request = WebUtil.createOkHttpRequestForCurl("https://api.example.com", logHandler);
+        OkHttpRequest request = WebUtil.createCurlLoggingOkHttpRequest("https://api.example.com", logHandler);
         assertNotNull(request);
     }
 
@@ -230,7 +230,7 @@ public class WebUtil100Test extends TestBase {
             assertTrue(curl.contains("\""));
         };
 
-        OkHttpRequest request = WebUtil.createOkHttpRequestForCurl("https://api.example.com", '"', logHandler);
+        OkHttpRequest request = WebUtil.createCurlLoggingOkHttpRequest("https://api.example.com", '"', logHandler);
         assertNotNull(request);
     }
 
@@ -329,7 +329,7 @@ public class WebUtil100Test extends TestBase {
     @Test
     public void testParseCurlWithComments() {
         String curl = "curl https://api.example.com/data // this is a comment";
-        String result = WebUtil.convertCurlToHttpRequest(curl);
+        String result = WebUtil.curlToHttpRequestCode(curl);
         assertNotNull(result);
         assertTrue(result.contains("https://api.example.com/data"));
     }
@@ -337,7 +337,7 @@ public class WebUtil100Test extends TestBase {
     @Test
     public void testParseCurlWithDoubleSlashInPath() {
         String curl = "curl https://api.example.com/a//b";
-        String result = WebUtil.convertCurlToHttpRequest(curl);
+        String result = WebUtil.curlToHttpRequestCode(curl);
         assertNotNull(result);
         assertTrue(result.contains("https://api.example.com/a//b"));
     }
@@ -345,7 +345,7 @@ public class WebUtil100Test extends TestBase {
     @Test
     public void testParseCurlWithBackslash() {
         String curl = "curl https://api.example.com/data \\\n-H \"Accept: application/json\"";
-        String result = WebUtil.convertCurlToHttpRequest(curl);
+        String result = WebUtil.curlToHttpRequestCode(curl);
         assertNotNull(result);
         assertTrue(result.contains(".header(\"Accept\", \"application/json\")"));
     }
@@ -353,6 +353,6 @@ public class WebUtil100Test extends TestBase {
     @Test
     public void testParseCurlWithUnmatchedQuote() {
         String curl = "curl -X POST https://api.example.com/users -d '{\"name\":\"John";
-        assertThrows(IllegalArgumentException.class, () -> WebUtil.convertCurlToHttpRequest(curl));
+        assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToHttpRequestCode(curl));
     }
 }

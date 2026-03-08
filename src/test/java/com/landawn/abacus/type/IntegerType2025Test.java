@@ -40,7 +40,7 @@ public class IntegerType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(Integer.class, type.clazz());
+        assertEquals(Integer.class, type.javaType());
     }
 
     @Test

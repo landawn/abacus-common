@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -34,7 +34,7 @@ public class ObjectArrayType100Test extends TestBase {
     private ObjectArrayType<Integer> intArrayType;
     private ObjectArrayType<Object> objectArrayType;
     private CharacterWriter writer;
-    private JsonXmlSerializationConfig<?> config;
+    private JsonXmlSerConfig<?> config;
 
     @BeforeEach
     public void setUp() {
@@ -42,21 +42,21 @@ public class ObjectArrayType100Test extends TestBase {
         intArrayType = (ObjectArrayType<Integer>) createType(Integer[].class);
         objectArrayType = (ObjectArrayType<Object>) createType(Object[].class);
         writer = createCharacterWriter();
-        config = mock(JsonXmlSerializationConfig.class);
+        config = mock(JsonXmlSerConfig.class);
     }
 
     @Test
     public void testClazz() {
-        assertEquals(String[].class, stringArrayType.clazz());
-        assertEquals(Integer[].class, intArrayType.clazz());
-        assertEquals(Object[].class, objectArrayType.clazz());
+        assertEquals(String[].class, stringArrayType.javaType());
+        assertEquals(Integer[].class, intArrayType.javaType());
+        assertEquals(Object[].class, objectArrayType.javaType());
     }
 
     @Test
     public void testGetElementType() {
-        assertEquals("String", stringArrayType.getElementType().name());
-        assertEquals("Integer", intArrayType.getElementType().name());
-        assertEquals("Object", objectArrayType.getElementType().name());
+        assertEquals("String", stringArrayType.elementType().name());
+        assertEquals("Integer", intArrayType.elementType().name());
+        assertEquals("Object", objectArrayType.elementType().name());
     }
 
     @Test

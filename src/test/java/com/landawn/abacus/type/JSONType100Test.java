@@ -30,12 +30,12 @@ public class JSONType100Test extends TestBase {
 
     @Test
     public void testClazz_Map() {
-        assertEquals(Map.class, jsonMapType.clazz());
+        assertEquals(Map.class, jsonMapType.javaType());
     }
 
     @Test
     public void testClazz_List() {
-        assertEquals(List.class, jsonListType.clazz());
+        assertEquals(List.class, jsonListType.javaType());
     }
 
     @Test

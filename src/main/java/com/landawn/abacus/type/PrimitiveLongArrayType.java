@@ -17,7 +17,7 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.util.Collection;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -47,7 +47,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<long[]> type = TypeFactory.getType(long[].class);
-     * Class<?> clazz = type.clazz();
+     * Class<?> clazz = type.javaType();
      * // clazz equals long[].class
      * }</pre>
      *
@@ -55,7 +55,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public Class clazz() {
+    public Class javaType() {
         return long[].class;
     }
 
@@ -66,14 +66,14 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<long[]> type = TypeFactory.getType(long[].class);
-     * Type<Long> elemType = type.getElementType();
+     * Type<Long> elemType = type.elementType();
      * // elemType can be used for element-level operations
      * }</pre>
      *
      * @return the Type instance representing Long type for array elements
      */
     @Override
-    public Type<Long> getElementType() {
+    public Type<Long> elementType() {
         return elementType;
     }
 
@@ -83,15 +83,15 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<long[]> type = TypeFactory.getType(long[].class);
-     * Type<Long>[] paramTypes = type.getParameterTypes();
+     * Type<Long>[] paramTypes = type.parameterTypes();
      * // paramTypes[0] represents the element type
      * }</pre>
      *
      * @return an array containing the Long Type that describes the elements of this array type
-     * @see #getElementType()
+     * @see #elementType()
      */
     @Override
-    public Type<Long>[] getParameterTypes() {
+    public Type<Long>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -240,7 +240,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final long[] x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final long[] x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

@@ -23,12 +23,12 @@ public class PrimitiveBooleanType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(boolean.class, primitiveBooleanType.clazz());
+        assertEquals(boolean.class, primitiveBooleanType.javaType());
     }
 
     @Test
-    public void testIsPrimitiveType() {
-        assertTrue(primitiveBooleanType.isPrimitiveType());
+    public void testIsPrimitive() {
+        assertTrue(primitiveBooleanType.isPrimitive());
     }
 
     @Test
@@ -63,8 +63,8 @@ public class PrimitiveBooleanType100Test extends TestBase {
     }
 
     @Test
-    public void testIsObjectType() {
-        assertFalse(primitiveBooleanType.isObjectType());
+    public void testIsObject() {
+        assertFalse(primitiveBooleanType.isObject());
     }
 
     @Test

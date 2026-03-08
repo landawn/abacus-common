@@ -111,10 +111,9 @@ import com.landawn.abacus.util.stream.Stream;
  *     .val();
  *
  * // Primitive list building
- * IntList numbers = Builder.of(IntList.of())
- *     .add(1, 2, 3)
- *     .addAll(Arrays.asList(4, 5, 6))
- *     .sort()
+ * IntList numbers = Builder.of(IntList.of(1, 2, 3))
+ *     .addAll(IntList.of(4, 5, 6))
+ *     .add(7)
  *     .val();
  *
  * // Functional operations
@@ -532,8 +531,8 @@ public class Builder<T> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Multimap<String, String> multimap = new ListMultimap<>();
-     * Multimap<String, String> result = Builder.of(multimap)
+     * ListMultimap<String, String> multimap = N.newListMultimap();
+     * Multimap<String, String, List<String>> result = Builder.of(multimap)
      *     .put("fruits", "apple")
      *     .put("fruits", "banana")
      *     .putMany("colors", Arrays.asList("red", "blue"))
@@ -3740,7 +3739,7 @@ public class Builder<T> {
         private int result = 0;
 
         private ComparisonBuilder() {
-            // singleton.
+            // Utility class - prevent instantiation
         }
 
         /**
@@ -4276,7 +4275,7 @@ public class Builder<T> {
         private boolean result = true;
 
         private EquivalenceBuilder() {
-            // singleton.
+            // Utility class - prevent instantiation
         }
 
         /**
@@ -4719,7 +4718,7 @@ public class Builder<T> {
         private int result = 0;
 
         private HashCodeBuilder() {
-            // singleton.
+            // Utility class - prevent instantiation
         }
 
         /**

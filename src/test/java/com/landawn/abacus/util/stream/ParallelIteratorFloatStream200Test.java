@@ -232,7 +232,7 @@ public class ParallelIteratorFloatStream200Test extends TestBase {
                 consumed.add(it);
             }
         };
-        stream.onEach(action).forEach(f -> {
+        stream.peek(action).forEach(f -> {
         });
         assertEquals(TEST_ARRAY.length, consumed.size());
 

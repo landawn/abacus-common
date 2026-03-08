@@ -39,7 +39,7 @@ public class EnumType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertNotNull(type.clazz());
+        assertNotNull(type.javaType());
     }
 
     @Test

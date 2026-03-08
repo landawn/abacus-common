@@ -453,93 +453,93 @@ public class N202Test extends TestBase {
 
     @Test
     public void testHasDuplicatesBooleanArray() {
-        assertFalse(N.hasDuplicates((boolean[]) null));
-        assertFalse(N.hasDuplicates(new boolean[] {}));
-        assertFalse(N.hasDuplicates(new boolean[] { true }));
-        assertTrue(N.hasDuplicates(new boolean[] { true, true }));
-        assertFalse(N.hasDuplicates(new boolean[] { true, false }));
-        assertTrue(N.hasDuplicates(new boolean[] { true, false, true }));
-        assertTrue(N.hasDuplicates(new boolean[] { false, false, false }));
+        assertFalse(N.containsDuplicates((boolean[]) null));
+        assertFalse(N.containsDuplicates(new boolean[] {}));
+        assertFalse(N.containsDuplicates(new boolean[] { true }));
+        assertTrue(N.containsDuplicates(new boolean[] { true, true }));
+        assertFalse(N.containsDuplicates(new boolean[] { true, false }));
+        assertTrue(N.containsDuplicates(new boolean[] { true, false, true }));
+        assertTrue(N.containsDuplicates(new boolean[] { false, false, false }));
     }
 
     @Test
     public void testHasDuplicatesCharArray() {
-        assertFalse(N.hasDuplicates((char[]) null));
-        assertFalse(N.hasDuplicates(new char[] {}));
-        assertFalse(N.hasDuplicates(new char[] { 'a' }));
-        assertTrue(N.hasDuplicates(new char[] { 'a', 'a' }));
-        assertFalse(N.hasDuplicates(new char[] { 'a', 'b' }));
-        assertTrue(N.hasDuplicates(new char[] { 'a', 'b', 'a' }));
-        assertFalse(N.hasDuplicates(new char[] { 'a', 'b', 'c' }));
+        assertFalse(N.containsDuplicates((char[]) null));
+        assertFalse(N.containsDuplicates(new char[] {}));
+        assertFalse(N.containsDuplicates(new char[] { 'a' }));
+        assertTrue(N.containsDuplicates(new char[] { 'a', 'a' }));
+        assertFalse(N.containsDuplicates(new char[] { 'a', 'b' }));
+        assertTrue(N.containsDuplicates(new char[] { 'a', 'b', 'a' }));
+        assertFalse(N.containsDuplicates(new char[] { 'a', 'b', 'c' }));
 
-        assertTrue(N.hasDuplicates(new char[] { 'a', 'a', 'b' }, true));
-        assertFalse(N.hasDuplicates(new char[] { 'a', 'b', 'c' }, true));
-        assertTrue(N.hasDuplicates(new char[] { 'c', 'a', 'b', 'a' }, false));
-        assertFalse(N.hasDuplicates(new char[] { 'd', 'c', 'b', 'a' }, false));
+        assertTrue(N.containsDuplicates(new char[] { 'a', 'a', 'b' }, true));
+        assertFalse(N.containsDuplicates(new char[] { 'a', 'b', 'c' }, true));
+        assertTrue(N.containsDuplicates(new char[] { 'c', 'a', 'b', 'a' }, false));
+        assertFalse(N.containsDuplicates(new char[] { 'd', 'c', 'b', 'a' }, false));
     }
 
     @Test
     public void testHasDuplicatesFloatArray() {
-        assertFalse(N.hasDuplicates((float[]) null));
-        assertFalse(N.hasDuplicates(new float[] {}));
-        assertFalse(N.hasDuplicates(new float[] { 1.0f }));
-        assertTrue(N.hasDuplicates(new float[] { 1.0f, 1.0f }));
-        assertFalse(N.hasDuplicates(new float[] { 1.0f, 2.0f }));
-        assertTrue(N.hasDuplicates(new float[] { 1.0f, 2.0f, 1.0f }));
-        assertTrue(N.hasDuplicates(new float[] { Float.NaN, Float.NaN }));
+        assertFalse(N.containsDuplicates((float[]) null));
+        assertFalse(N.containsDuplicates(new float[] {}));
+        assertFalse(N.containsDuplicates(new float[] { 1.0f }));
+        assertTrue(N.containsDuplicates(new float[] { 1.0f, 1.0f }));
+        assertFalse(N.containsDuplicates(new float[] { 1.0f, 2.0f }));
+        assertTrue(N.containsDuplicates(new float[] { 1.0f, 2.0f, 1.0f }));
+        assertTrue(N.containsDuplicates(new float[] { Float.NaN, Float.NaN }));
 
-        assertTrue(N.hasDuplicates(new float[] { 1.0f, 1.0f, 2.0f }, true));
-        assertFalse(N.hasDuplicates(new float[] { 1.0f, 2.0f, 3.0f }, true));
+        assertTrue(N.containsDuplicates(new float[] { 1.0f, 1.0f, 2.0f }, true));
+        assertFalse(N.containsDuplicates(new float[] { 1.0f, 2.0f, 3.0f }, true));
     }
 
     @Test
     public void testHasDuplicatesDoubleArray() {
-        assertFalse(N.hasDuplicates((double[]) null));
-        assertFalse(N.hasDuplicates(new double[] {}));
-        assertFalse(N.hasDuplicates(new double[] { 1.0 }));
-        assertTrue(N.hasDuplicates(new double[] { 1.0, 1.0 }));
-        assertFalse(N.hasDuplicates(new double[] { 1.0, 2.0 }));
-        assertTrue(N.hasDuplicates(new double[] { 1.0, 2.0, 1.0 }));
-        assertTrue(N.hasDuplicates(new double[] { Double.NaN, Double.NaN }));
+        assertFalse(N.containsDuplicates((double[]) null));
+        assertFalse(N.containsDuplicates(new double[] {}));
+        assertFalse(N.containsDuplicates(new double[] { 1.0 }));
+        assertTrue(N.containsDuplicates(new double[] { 1.0, 1.0 }));
+        assertFalse(N.containsDuplicates(new double[] { 1.0, 2.0 }));
+        assertTrue(N.containsDuplicates(new double[] { 1.0, 2.0, 1.0 }));
+        assertTrue(N.containsDuplicates(new double[] { Double.NaN, Double.NaN }));
 
-        assertTrue(N.hasDuplicates(new double[] { 1.0, 1.0, 2.0 }, true));
-        assertFalse(N.hasDuplicates(new double[] { 1.0, 2.0, 3.0 }, true));
+        assertTrue(N.containsDuplicates(new double[] { 1.0, 1.0, 2.0 }, true));
+        assertFalse(N.containsDuplicates(new double[] { 1.0, 2.0, 3.0 }, true));
     }
 
     @Test
     public void testHasDuplicatesGenericArray() {
-        assertFalse(N.hasDuplicates((Integer[]) null));
-        assertFalse(N.hasDuplicates(new Integer[] {}));
-        assertFalse(N.hasDuplicates(new Integer[] { 1 }));
-        assertTrue(N.hasDuplicates(new Integer[] { 1, 1 }));
-        assertFalse(N.hasDuplicates(new Integer[] { 1, 2 }));
-        assertTrue(N.hasDuplicates(new Integer[] { 1, 2, 1 }));
-        assertFalse(N.hasDuplicates(new Integer[] { 1, 2, 3 }));
-        assertTrue(N.hasDuplicates(new Integer[] { null, null }));
-        assertFalse(N.hasDuplicates(new Integer[] { 1, null }));
+        assertFalse(N.containsDuplicates((Integer[]) null));
+        assertFalse(N.containsDuplicates(new Integer[] {}));
+        assertFalse(N.containsDuplicates(new Integer[] { 1 }));
+        assertTrue(N.containsDuplicates(new Integer[] { 1, 1 }));
+        assertFalse(N.containsDuplicates(new Integer[] { 1, 2 }));
+        assertTrue(N.containsDuplicates(new Integer[] { 1, 2, 1 }));
+        assertFalse(N.containsDuplicates(new Integer[] { 1, 2, 3 }));
+        assertTrue(N.containsDuplicates(new Integer[] { null, null }));
+        assertFalse(N.containsDuplicates(new Integer[] { 1, null }));
 
-        assertTrue(N.hasDuplicates(new String[] { "a", "a", "b" }, true));
-        assertFalse(N.hasDuplicates(new String[] { "a", "b", "c" }, true));
+        assertTrue(N.containsDuplicates(new String[] { "a", "a", "b" }, true));
+        assertFalse(N.containsDuplicates(new String[] { "a", "b", "c" }, true));
     }
 
     @Test
     public void testHasDuplicatesCollection() {
-        assertFalse(N.hasDuplicates((Collection<?>) null));
-        assertFalse(N.hasDuplicates(Collections.emptyList()));
-        assertFalse(N.hasDuplicates(Collections.singletonList(1)));
-        assertTrue(N.hasDuplicates(Arrays.asList(1, 1)));
-        assertFalse(N.hasDuplicates(Arrays.asList(1, 2)));
-        assertTrue(N.hasDuplicates(Arrays.asList(1, 2, 1)));
-        assertTrue(N.hasDuplicates(Arrays.asList(null, null)));
+        assertFalse(N.containsDuplicates((Collection<?>) null));
+        assertFalse(N.containsDuplicates(Collections.emptyList()));
+        assertFalse(N.containsDuplicates(Collections.singletonList(1)));
+        assertTrue(N.containsDuplicates(Arrays.asList(1, 1)));
+        assertFalse(N.containsDuplicates(Arrays.asList(1, 2)));
+        assertTrue(N.containsDuplicates(Arrays.asList(1, 2, 1)));
+        assertTrue(N.containsDuplicates(Arrays.asList(null, null)));
 
         List<Integer> sortedListWithDup = Arrays.asList(1, 2, 2, 3);
-        assertTrue(N.hasDuplicates(sortedListWithDup, true));
+        assertTrue(N.containsDuplicates(sortedListWithDup, true));
         List<Integer> sortedListNoDup = Arrays.asList(1, 2, 3, 4);
-        assertFalse(N.hasDuplicates(sortedListNoDup, true));
+        assertFalse(N.containsDuplicates(sortedListNoDup, true));
 
         Set<Integer> setWithNoDup = new HashSet<>(Arrays.asList(1, 2, 3));
-        assertFalse(N.hasDuplicates(setWithNoDup, false));
-        assertFalse(N.hasDuplicates(setWithNoDup, true));
+        assertFalse(N.containsDuplicates(setWithNoDup, false));
+        assertFalse(N.containsDuplicates(setWithNoDup, true));
     }
 
     @Test

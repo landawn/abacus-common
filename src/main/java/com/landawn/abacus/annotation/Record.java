@@ -61,8 +61,8 @@ import java.lang.annotation.Target;
  *   <li>String representation should include all field values</li>
  * </ul>
  * 
- * <p><strong>Note:</strong> This annotation is marked as {@link Test}, indicating it's intended
- * for testing purposes and may not be suitable for production code.</p>
+ * <p><strong>Note:</strong> This annotation is meta-annotated with {@link Test}, indicating it is
+ * primarily intended for testing purposes and may not be suitable for production code.</p>
  * 
  * @see Test
  * @see java.lang.Record

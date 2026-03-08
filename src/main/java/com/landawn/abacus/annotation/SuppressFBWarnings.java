@@ -17,10 +17,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Annotation used to suppress FindBugs warnings on annotated program elements.
- * FindBugs is a static analysis tool that detects potential bugs and security vulnerabilities
- * in Java code. This annotation allows developers to suppress specific warnings when they
- * are {@code false} positives or when the code is intentionally designed a certain way.
+ * Annotation used to suppress FindBugs/SpotBugs warnings on annotated program elements.
+ * FindBugs (now succeeded by SpotBugs) is a static analysis tool that detects potential bugs
+ * and security vulnerabilities in Java code. This annotation allows developers to suppress
+ * specific warnings when they are {@code false} positives or when the code is intentionally
+ * designed a certain way.
  * 
  * <p>This annotation should be used judiciously and only when:</p>
  * <ul>

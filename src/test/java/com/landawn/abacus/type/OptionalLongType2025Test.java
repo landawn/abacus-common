@@ -39,7 +39,7 @@ public class OptionalLongType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(OptionalLong.class, type.clazz());
+        assertEquals(OptionalLong.class, type.javaType());
     }
 
     @Test

@@ -756,16 +756,16 @@ public class ShortList100Test extends TestBase {
 
     @Test
     public void testHasDuplicates() {
-        assertFalse(list.hasDuplicates());
+        assertFalse(list.containsDuplicates());
 
         list.add((short) 1);
-        assertFalse(list.hasDuplicates());
+        assertFalse(list.containsDuplicates());
 
         list.add((short) 2);
-        assertFalse(list.hasDuplicates());
+        assertFalse(list.containsDuplicates());
 
         list.add((short) 1);
-        assertTrue(list.hasDuplicates());
+        assertTrue(list.containsDuplicates());
     }
 
     @Test

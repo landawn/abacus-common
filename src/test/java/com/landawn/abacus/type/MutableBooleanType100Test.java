@@ -8,6 +8,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +40,7 @@ public class MutableBooleanType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<MutableBoolean> clazz = mutableBooleanType.clazz();
+        Class<MutableBoolean> clazz = mutableBooleanType.javaType();
         assertEquals(MutableBoolean.class, clazz);
     }
 
@@ -130,7 +131,7 @@ public class MutableBooleanType100Test extends TestBase {
     @Test
     public void testSetPreparedStatementWithNull() throws SQLException {
         mutableBooleanType.set(mockPreparedStatement, 1, null);
-        Mockito.verify(mockPreparedStatement).setBoolean(1, false);
+        Mockito.verify(mockPreparedStatement).setNull(1, Types.BOOLEAN);
     }
 
     @Test
@@ -148,7 +149,7 @@ public class MutableBooleanType100Test extends TestBase {
     @Test
     public void testSetCallableStatementWithNull() throws SQLException {
         mutableBooleanType.set(mockCallableStatement, "param", null);
-        Mockito.verify(mockCallableStatement).setBoolean("param", false);
+        Mockito.verify(mockCallableStatement).setNull("param", Types.BOOLEAN);
     }
 
     @Test

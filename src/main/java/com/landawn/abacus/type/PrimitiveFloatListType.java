@@ -16,7 +16,7 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.FloatList;
 import com.landawn.abacus.util.Strings;
@@ -46,14 +46,14 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<FloatList> type = TypeFactory.getType(FloatList.class);
-     * Class<FloatList> clazz = type.clazz();
+     * Class<FloatList> clazz = type.javaType();
      * // Returns: FloatList.class
      * }</pre>
      *
      * @return the Class object for FloatList
      */
     @Override
-    public Class<FloatList> clazz() {
+    public Class<FloatList> javaType() {
         return FloatList.class;
     }
 
@@ -63,14 +63,14 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<FloatList> type = TypeFactory.getType(FloatList.class);
-     * Type<Float> elementType = type.getElementType();
+     * Type<Float> elementType = type.elementType();
      * // Returns: Type instance for float
      * }</pre>
      *
      * @return the Type object representing float elements
      */
     @Override
-    public Type<Float> getElementType() {
+    public Type<Float> elementType() {
         return elementType;
     }
 
@@ -78,10 +78,10 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      * Returns the parameter types associated with this list type.
      *
      * @return an array containing the Float Type that describes the elements of this list type
-     * @see #getElementType()
+     * @see #elementType()
      */
     @Override
-    public Type<Float>[] getParameterTypes() {
+    public Type<Float>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -181,7 +181,7 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      * @throws IOException if an I/O error occurs
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final FloatList x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final FloatList x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

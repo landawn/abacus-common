@@ -20,7 +20,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -38,7 +38,7 @@ public class AbstractBooleanType100Test extends TestBase {
     private CallableStatement callableStatement;
 
     @Mock
-    private JsonXmlSerializationConfig<?> config;
+    private JsonXmlSerConfig<?> config;
 
     @BeforeEach
     public void setUp() {
@@ -291,13 +291,13 @@ public class AbstractBooleanType100Test extends TestBase {
 
     @Test
     public void testWriteCharacter_Null_WithWriteNullBooleanAsFalse() throws IOException {
-        when(config.writeNullBooleanAsFalse()).thenReturn(true);
+        when(config.isWriteNullBooleanAsFalse()).thenReturn(true);
         type.writeCharacter(characterWriter, null, config);
     }
 
     @Test
     public void testWriteCharacter_Null_WithoutWriteNullBooleanAsFalse() throws IOException {
-        when(config.writeNullBooleanAsFalse()).thenReturn(false);
+        when(config.isWriteNullBooleanAsFalse()).thenReturn(false);
         type.writeCharacter(characterWriter, null, config);
     }
 }

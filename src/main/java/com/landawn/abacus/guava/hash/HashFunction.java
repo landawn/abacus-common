@@ -44,14 +44,12 @@ import com.google.common.hash.HashCode;
  * <p><b>Usage Patterns</b></p>
  *
  * <p><b>Simple hashing:</b></p>
- * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * HashFunction hf = Hashing.sha256();
  * HashCode hash = hf.hash("hello world".getBytes());
  * }</pre>
- * 
+ *
  * <p><b>Incremental hashing with Hasher:</b></p>
- * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * HashFunction hf = Hashing.murmur3_128();
  * long userId = 12345L;
@@ -63,9 +61,8 @@ import com.google.common.hash.HashCode;
  *     .put(timestamp)
  *     .hash();
  * }</pre>
- * 
+ *
  * <p><b>Hashing complex objects with Funnel:</b></p>
- * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * class Person {
  *     String firstName;
@@ -106,7 +103,7 @@ public interface HashFunction {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HashFunction hf = Hashing.md5();
+     * HashFunction hf = Hashing.sha256();
      * long id = 12345L;
      * boolean isActive = true;
      * String name = "example";

@@ -14,12 +14,67 @@
 
 package com.landawn.abacus.type;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.MutableByte;
 
 @Tag("2025")
 public class MutableByteType2025Test extends TestBase {
 
     private final MutableByteType type = new MutableByteType();
+
+    @Test
+    public void test_get_PreservesZeroValue() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+
+        when(rs.getByte(1)).thenReturn((byte) 0);
+        when(rs.wasNull()).thenReturn(false);
+
+        MutableByte result = type.get(rs, 1);
+        assertNotNull(result);
+        assertEquals((byte) 0, result.value());
+    }
+
+    @Test
+    public void test_get_ReturnsNullWhenJdbcValueIsNull() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+
+        when(rs.getByte("col")).thenReturn((byte) 0);
+        when(rs.wasNull()).thenReturn(true);
+
+        assertNull(type.get(rs, "col"));
+    }
+
+    @Test
+    public void test_set_PreparedStatement_NullUsesSqlNull() throws SQLException {
+        PreparedStatement stmt = mock(PreparedStatement.class);
+
+        type.set(stmt, 1, null);
+
+        verify(stmt).setNull(1, Types.TINYINT);
+    }
+
+    @Test
+    public void test_set_CallableStatement_NullUsesSqlNull() throws SQLException {
+        CallableStatement stmt = mock(CallableStatement.class);
+
+        type.set(stmt, "param", null);
+
+        verify(stmt).setNull("param", Types.TINYINT);
+    }
 }

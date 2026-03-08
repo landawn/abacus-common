@@ -9,8 +9,9 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.N;
@@ -39,14 +40,14 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<MutableBoolean> type = TypeFactory.getType(MutableBoolean.class);
-     * Class<MutableBoolean> clazz = type.clazz();
+     * Class<MutableBoolean> clazz = type.javaType();
      * // Returns: MutableBoolean.class
      * }</pre>
      *
      * @return The Class object for MutableBoolean
      */
     @Override
-    public Class<MutableBoolean> clazz() {
+    public Class<MutableBoolean> javaType() {
         return MutableBoolean.class;
     }
 
@@ -150,7 +151,9 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      */
     @Override
     public MutableBoolean get(final ResultSet rs, final int columnIndex) throws SQLException {
-        return MutableBoolean.of(rs.getBoolean(columnIndex));
+        final boolean value = rs.getBoolean(columnIndex);
+
+        return rs.wasNull() ? null : MutableBoolean.of(value);
     }
 
     /**
@@ -178,7 +181,9 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      */
     @Override
     public MutableBoolean get(final ResultSet rs, final String columnName) throws SQLException {
-        return MutableBoolean.of(rs.getBoolean(columnName));
+        final boolean value = rs.getBoolean(columnName);
+
+        return rs.wasNull() ? null : MutableBoolean.of(value);
     }
 
     /**
@@ -205,7 +210,11 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final MutableBoolean x) throws SQLException {
-        stmt.setBoolean(columnIndex, x != null && x.value());
+        if (x == null) {
+            stmt.setNull(columnIndex, Types.BOOLEAN);
+        } else {
+            stmt.setBoolean(columnIndex, x.value());
+        }
     }
 
     /**
@@ -232,7 +241,11 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final MutableBoolean x) throws SQLException {
-        stmt.setBoolean(parameterName, x != null && x.value());
+        if (x == null) {
+            stmt.setNull(parameterName, Types.BOOLEAN);
+        } else {
+            stmt.setBoolean(parameterName, x.value());
+        }
     }
 
     /**
@@ -294,7 +307,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * @throws IOException if an I/O error occurs while writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final MutableBoolean x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final MutableBoolean x, final JsonXmlSerConfig<?> config) throws IOException {
         writer.write((x == null) ? NULL_CHAR_ARRAY : (x.value() ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY));
     }
 }

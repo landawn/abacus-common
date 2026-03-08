@@ -57,7 +57,7 @@ public final class PrimitiveCharType extends AbstractCharacterType {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public Class clazz() {
+    public Class javaType() {
         return char.class;
     }
 
@@ -68,7 +68,7 @@ public final class PrimitiveCharType extends AbstractCharacterType {
      * @return {@code true}, as this type handler is for primitive char
      */
     @Override
-    public boolean isPrimitiveType() {
+    public boolean isPrimitive() {
         return true;
     }
 

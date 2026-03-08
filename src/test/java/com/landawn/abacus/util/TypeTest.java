@@ -46,7 +46,7 @@ public class TypeTest extends AbstractTest {
         }
 
         @Override
-        public Class<BigInteger> clazz() {
+        public Class<BigInteger> javaType() {
             return BigInteger.class;
         }
 

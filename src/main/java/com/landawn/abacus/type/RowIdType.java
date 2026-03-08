@@ -21,7 +21,7 @@ import java.sql.ResultSet;
 import java.sql.RowId;
 import java.sql.SQLException;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 /**
@@ -88,13 +88,13 @@ public class RowIdType extends AbstractType<RowId> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<RowId> type = TypeFactory.getType(RowId.class);
-     * Class<RowId> clazz = type.clazz();   // Returns RowId.class
+     * Class<RowId> clazz = type.javaType();   // Returns RowId.class
      * }</pre>
      *
      * @return the Class object for java.sql.RowId.class
      */
     @Override
-    public Class<RowId> clazz() {
+    public Class<RowId> javaType() {
         return RowId.class;
     }
 
@@ -257,7 +257,7 @@ public class RowIdType extends AbstractType<RowId> {
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final RowId x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final RowId x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

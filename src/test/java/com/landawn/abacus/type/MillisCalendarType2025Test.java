@@ -15,12 +15,18 @@
 package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Calendar;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -58,5 +64,41 @@ public class MillisCalendarType2025Test extends TestBase {
         CallableStatement stmt = mock(CallableStatement.class);
         // Basic set test - actual implementation will vary by type
         assertDoesNotThrow(() -> type.set(stmt, "param", null));
+    }
+
+    @Test
+    public void test_get_PreservesEpochZeroValue() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+        when(rs.getLong(1)).thenReturn(0L);
+        when(rs.wasNull()).thenReturn(false);
+
+        assertEquals(0L, type.get(rs, 1).getTimeInMillis());
+    }
+
+    @Test
+    public void test_get_ReturnsNullWhenJdbcValueIsNull() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+        when(rs.getLong("col")).thenReturn(0L);
+        when(rs.wasNull()).thenReturn(true);
+
+        assertNull(type.get(rs, "col"));
+    }
+
+    @Test
+    public void test_set_PreparedStatement_NullUsesSqlNull() throws SQLException {
+        PreparedStatement stmt = mock(PreparedStatement.class);
+
+        type.set(stmt, 1, null);
+
+        verify(stmt).setNull(1, Types.BIGINT);
+    }
+
+    @Test
+    public void test_set_CallableStatement_NullUsesSqlNull() throws SQLException {
+        CallableStatement stmt = mock(CallableStatement.class);
+
+        type.set(stmt, "param", null);
+
+        verify(stmt).setNull("param", Types.BIGINT);
     }
 }

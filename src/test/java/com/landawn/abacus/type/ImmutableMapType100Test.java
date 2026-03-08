@@ -47,9 +47,9 @@ public class ImmutableMapType100Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test clazz() returns ImmutableMap class")
+    @DisplayName("Test javaType() returns ImmutableMap class")
     public void testClazz() {
-        Class<?> clazz = immutableMapType.clazz();
+        Class<?> clazz = immutableMapType.javaType();
         assertNotNull(clazz);
         assertEquals(ImmutableMap.class, clazz);
     }
@@ -57,7 +57,7 @@ public class ImmutableMapType100Test extends TestBase {
     @Test
     @DisplayName("Test getParameterTypes() returns array with key and value types")
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = immutableMapType.getParameterTypes();
+        Type<?>[] paramTypes = immutableMapType.parameterTypes();
         assertNotNull(paramTypes);
         assertEquals(2, paramTypes.length);
         assertNotNull(paramTypes[0]);
@@ -85,7 +85,7 @@ public class ImmutableMapType100Test extends TestBase {
     @Test
     @DisplayName("Test getSerializationType() returns MAP")
     public void testGetSerializationType() {
-        SerializationType serType = immutableMapType.getSerializationType();
+        SerializationType serType = immutableMapType.serializationType();
         assertEquals(SerializationType.MAP, serType);
     }
 
@@ -239,7 +239,7 @@ public class ImmutableMapType100Test extends TestBase {
         assertTrue(objectMapType.isMap());
         assertTrue(objectMapType.isParameterizedType());
         assertFalse(objectMapType.isSerializable());
-        assertEquals(SerializationType.MAP, objectMapType.getSerializationType());
+        assertEquals(SerializationType.MAP, objectMapType.serializationType());
     }
 
     @Test
@@ -291,8 +291,8 @@ public class ImmutableMapType100Test extends TestBase {
     @Test
     @DisplayName("Test getParameterTypes() consistency")
     public void testGetParameterTypesConsistency() {
-        Type<?>[] params1 = immutableMapType.getParameterTypes();
-        Type<?>[] params2 = immutableMapType.getParameterTypes();
+        Type<?>[] params1 = immutableMapType.parameterTypes();
+        Type<?>[] params2 = immutableMapType.parameterTypes();
 
         assertSame(params1, params2);
         assertEquals(params1.length, params2.length);

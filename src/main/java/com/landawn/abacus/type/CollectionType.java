@@ -23,9 +23,8 @@ import java.util.Queue;
 import java.util.Set;
 
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.parser.JsonDeserializationConfig;
-import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonDeserConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
@@ -84,7 +83,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
 
     private final boolean isSet;
 
-    private final JsonDeserializationConfig jdc;
+    private final JsonDeserConfig jdc;
 
     CollectionType(final Class<T> typeClass, final String parameterTypeName) {
         super(getTypeName(typeClass, parameterTypeName, false));
@@ -121,7 +120,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
         parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
         elementType = parameterTypes[0];
 
-        jdc = JDC.create().setElementType(elementType);
+        jdc = JsonDeserConfig.create().setElementType(elementType);
 
         isList = List.class.isAssignableFrom(this.typeClass);
         isSet = Set.class.isAssignableFrom(this.typeClass);
@@ -145,7 +144,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      * @return the Class object for the collection type
      */
     @Override
-    public Class<T> clazz() {
+    public Class<T> javaType() {
         return typeClass;
     }
 
@@ -155,7 +154,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      * @return the Type instance representing the element type of this collection
      */
     @Override
-    public Type<E> getElementType() {
+    public Type<E> elementType() {
         return elementType;
     }
 
@@ -166,7 +165,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      * @return an array containing the element type as the only parameter type
      */
     @Override
-    public Type<E>[] getParameterTypes() {
+    public Type<E>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -228,7 +227,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      * @return SerializationType.SERIALIZABLE if elements are serializable, SerializationType.COLLECTION otherwise
      */
     @Override
-    public SerializationType getSerializationType() {
+    public SerializationType serializationType() {
         return isSerializable() ? SerializationType.SERIALIZABLE : SerializationType.COLLECTION;
     }
 
@@ -376,7 +375,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final T x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

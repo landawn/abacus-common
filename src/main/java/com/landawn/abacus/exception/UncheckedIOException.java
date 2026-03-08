@@ -122,6 +122,11 @@ public class UncheckedIOException extends UncheckedException {
         this.cause = cause;
     }
 
+    /**
+     * Returns the {@link IOException} that caused this exception.
+     *
+     * @return the wrapped {@link IOException}, never {@code null}
+     */
     @Override
     public synchronized IOException getCause() {
         return cause;

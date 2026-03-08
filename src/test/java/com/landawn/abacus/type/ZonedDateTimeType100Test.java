@@ -32,7 +32,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 
@@ -51,7 +51,7 @@ public class ZonedDateTimeType100Test extends TestBase {
     private CallableStatement callableStatement;
 
     @Mock
-    private JsonXmlSerializationConfig<?> config;
+    private JsonXmlSerConfig<?> config;
 
     @BeforeEach
     public void setUp() {
@@ -61,7 +61,7 @@ public class ZonedDateTimeType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<ZonedDateTime> clazz = zonedDateTimeType.clazz();
+        Class<ZonedDateTime> clazz = zonedDateTimeType.javaType();
         assertEquals(ZonedDateTime.class, clazz);
     }
 

@@ -425,7 +425,7 @@ public class ArrayStream100Test extends TestBase {
     public void testOnEach() {
         Stream<Integer> stream = Stream.of(integerArray);
         AtomicInteger sum = new AtomicInteger(0);
-        List<Integer> result = stream.onEach(sum::addAndGet).toList();
+        List<Integer> result = stream.peek(sum::addAndGet).toList();
         assertEquals(10, result.size());
         assertEquals(55, sum.get());
     }
@@ -740,10 +740,10 @@ public class ArrayStream100Test extends TestBase {
     @Test
     public void testNMatch() {
         Stream<Integer> stream = Stream.of(integerArray);
-        assertTrue(stream.isMatchCountBetween(5, 5, x -> x <= 5));
+        assertTrue(stream.hasMatchCountBetween(5, 5, x -> x <= 5));
 
         Stream<Integer> stream2 = Stream.of(integerArray);
-        assertTrue(stream2.isMatchCountBetween(1, 3, x -> x > 8));
+        assertTrue(stream2.hasMatchCountBetween(1, 3, x -> x > 8));
     }
 
     @Test

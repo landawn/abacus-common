@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.u.OptionalBoolean;
 
@@ -30,18 +30,18 @@ public class OptionalBooleanType100Test extends TestBase {
 
     private OptionalBooleanType optionalBooleanType;
     private CharacterWriter writer;
-    private JsonXmlSerializationConfig<?> config;
+    private JsonXmlSerConfig<?> config;
 
     @BeforeEach
     public void setUp() {
         optionalBooleanType = (OptionalBooleanType) createType("OptionalBoolean");
         writer = createCharacterWriter();
-        config = mock(JsonXmlSerializationConfig.class);
+        config = mock(JsonXmlSerConfig.class);
     }
 
     @Test
     public void testClazz() {
-        assertEquals(OptionalBoolean.class, optionalBooleanType.clazz());
+        assertEquals(OptionalBoolean.class, optionalBooleanType.javaType());
     }
 
     @Test

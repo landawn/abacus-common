@@ -374,7 +374,7 @@ public final class Clazz {
      * Private constructor to prevent instantiation of this utility class.
      */
     private Clazz() {
-        // singleton.
+        // Utility class - prevent instantiation
     }
 
     /**

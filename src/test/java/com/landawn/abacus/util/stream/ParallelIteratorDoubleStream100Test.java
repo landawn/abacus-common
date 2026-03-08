@@ -257,7 +257,7 @@ public class ParallelIteratorDoubleStream100Test extends TestBase {
                 capturedValues.add(it);
             }
         };
-        DoubleStream result = parallelStream.onEach(action);
+        DoubleStream result = parallelStream.peek(action);
 
         double[] array = result.toArray();
 

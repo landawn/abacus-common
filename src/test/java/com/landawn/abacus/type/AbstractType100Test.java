@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
@@ -82,9 +82,9 @@ public class AbstractType100Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test isPrimitiveType()")
-    public void testIsPrimitiveType() {
-        assertFalse(stringType.isPrimitiveType());
+    @DisplayName("Test isPrimitive()")
+    public void testIsPrimitive() {
+        assertFalse(stringType.isPrimitive());
     }
 
     @Test
@@ -258,7 +258,7 @@ public class AbstractType100Test extends TestBase {
     @Test
     @DisplayName("Test getSerializationType()")
     public void testGetSerializationType() {
-        assertEquals(Type.SerializationType.SERIALIZABLE, stringType.getSerializationType());
+        assertEquals(Type.SerializationType.SERIALIZABLE, stringType.serializationType());
     }
 
     @Test
@@ -268,21 +268,21 @@ public class AbstractType100Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test isObjectType()")
-    public void testIsObjectType() {
-        assertFalse(stringType.isObjectType());
+    @DisplayName("Test isObject()")
+    public void testIsObject() {
+        assertFalse(stringType.isObject());
     }
 
     @Test
     @DisplayName("Test getElementType()")
     public void testGetElementType() {
-        assertNull(stringType.getElementType());
+        assertNull(stringType.elementType());
     }
 
     @Test
     @DisplayName("Test getParameterTypes()")
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = stringType.getParameterTypes();
+        Type<?>[] paramTypes = stringType.parameterTypes();
         assertNotNull(paramTypes);
         assertEquals(0, paramTypes.length);
     }
@@ -318,7 +318,7 @@ public class AbstractType100Test extends TestBase {
         }
 
         @Override
-        public Class<String> clazz() {
+        public Class<String> javaType() {
             return String.class;
         }
 
@@ -441,7 +441,7 @@ public class AbstractType100Test extends TestBase {
     public void testWriteCharacterWithConfig() throws IOException {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
 
-        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getStringQuotation()).thenReturn('"');
 
         stringType.writeCharacter(writer, "test", config);

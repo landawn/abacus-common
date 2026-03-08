@@ -54,6 +54,12 @@ public interface IntToFloatFunction {
      *       will be approximated as float values</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntToFloatFunction percent = value -> value / 100.0f;
+     * float result = percent.applyAsFloat(25);   // 0.25f
+     * }</pre>
+     *
      * @param value the function argument, an int value to be converted to float
      * @return the function result as a float value. For int values with magnitude
      *         greater than 2^24, the result may be an approximation of the input value

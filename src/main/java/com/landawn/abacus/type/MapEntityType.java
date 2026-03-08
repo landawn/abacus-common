@@ -39,14 +39,14 @@ public class MapEntityType extends AbstractType<MapEntity> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<MapEntity> type = TypeFactory.getType(MapEntity.class);
-     * Class<MapEntity> clazz = type.clazz();
+     * Class<MapEntity> clazz = type.javaType();
      * // Returns: MapEntity.class
      * }</pre>
      *
      * @return The Class object for MapEntity
      */
     @Override
-    public Class<MapEntity> clazz() {
+    public Class<MapEntity> javaType() {
         return typeClass;
     }
 
@@ -93,14 +93,14 @@ public class MapEntityType extends AbstractType<MapEntity> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<MapEntity> type = TypeFactory.getType(MapEntity.class);
-     * SerializationType serType = type.getSerializationType();
+     * SerializationType serType = type.serializationType();
      * // Returns: SerializationType.MAP_ENTITY
      * }</pre>
      *
      * @return SerializationType.MAP_ENTITY
      */
     @Override
-    public SerializationType getSerializationType() {
+    public SerializationType serializationType() {
         return SerializationType.MAP_ENTITY;
     }
 

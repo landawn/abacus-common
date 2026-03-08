@@ -80,14 +80,14 @@ import com.landawn.abacus.util.Strings;
  * 
  * // With generic records and schema
  * Schema schema = new Schema.Parser().parse(schemaJson);
- * AvroSerializationConfig config = new AvroSerializationConfig().setSchema(schema);
+ * AvroSerConfig config = new AvroSerConfig().setSchema(schema);
  * 
  * Map<String, Object> data = Map.of("name", "John", "age", 30);
  * parser.serialize(data, config, outputStream);
  * }</pre>
  * 
  */
-public final class AvroParser extends AbstractParser<AvroSerializationConfig, AvroDeserializationConfig> {
+public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserConfig> {
 
     /**
      * Constructs a new AvroParser instance.
@@ -107,7 +107,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 30);
-     * AvroSerializationConfig config = new AvroSerializationConfig()
+     * AvroSerConfig config = new AvroSerConfig()
      *     .setSchema(User.getSchema());
      * String base64Encoded = parser.serialize(user, config);
      * }</pre>
@@ -118,7 +118,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * @throws IllegalArgumentException if schema is not specified for non-SpecificRecord objects
      */
     @Override
-    public String serialize(final Object obj, final AvroSerializationConfig config) {
+    public String serialize(final Object obj, final AvroSerConfig config) {
         final ByteArrayOutputStream os = Objectory.createByteArrayOutputStream();
 
         try {
@@ -152,7 +152,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * @throws UncheckedIOException if an I/O error occurs during file writing
      */
     @Override
-    public void serialize(final Object obj, final AvroSerializationConfig config, final File output) {
+    public void serialize(final Object obj, final AvroSerConfig config, final File output) {
         OutputStream os = null;
 
         try {
@@ -195,7 +195,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      *
      * // With regular bean and schema
      * Person person = new Person("John", 30);
-     * AvroSerializationConfig config = new AvroSerializationConfig()
+     * AvroSerConfig config = new AvroSerConfig()
      *     .setSchema(personSchema);
      * parser.serialize(person, config, outputStream);
      * }</pre>
@@ -208,7 +208,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      */
     @SuppressFBWarnings
     @Override
-    public void serialize(final Object obj, final AvroSerializationConfig config, final OutputStream output) {
+    public void serialize(final Object obj, final AvroSerConfig config, final OutputStream output) {
         if (obj == null) {
             return;
         }
@@ -278,8 +278,8 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
 
     /**
      * Serialization to Writer is not supported for Avro format.
-     * Use {@link #serialize(Object, AvroSerializationConfig)} to get Base64 encoded string
-     * or {@link #serialize(Object, AvroSerializationConfig, OutputStream)} for binary output.
+     * Use {@link #serialize(Object, AvroSerConfig)} to get Base64 encoded string
+     * or {@link #serialize(Object, AvroSerConfig, OutputStream)} for binary output.
      *
      * @param obj the object to serialize
      * @param config the serialization configuration
@@ -289,7 +289,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      */
     @Deprecated
     @Override
-    public void serialize(final Object obj, final AvroSerializationConfig config, final Writer output) throws UnsupportedOperationException {
+    public void serialize(final Object obj, final AvroSerConfig config, final Writer output) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -345,7 +345,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String base64Data = "...";  // Base64 encoded Avro data
-     * AvroDeserializationConfig config = new AvroDeserializationConfig()
+     * AvroDeserConfig config = new AvroDeserConfig()
      *     .setSchema(User.getSchema());
      * User user = parser.deserialize(base64Data, config, User.class);
      * }</pre>
@@ -357,7 +357,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * @return the deserialized object instance
      */
     @Override
-    public <T> T deserialize(String source, AvroDeserializationConfig config, Type<? extends T> targetType) {
+    public <T> T deserialize(String source, AvroDeserConfig config, Type<? extends T> targetType) {
         return deserialize(new ByteArrayInputStream(Strings.base64Decode(source)), config, targetType);
     }
 
@@ -370,7 +370,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String base64Data = "...";  // Base64 encoded Avro data
-     * AvroDeserializationConfig config = new AvroDeserializationConfig()
+     * AvroDeserConfig config = new AvroDeserConfig()
      *     .setSchema(User.getSchema());
      * User user = parser.deserialize(base64Data, config, User.class);
      * }</pre>
@@ -382,7 +382,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * @return the deserialized object instance
      */
     @Override
-    public <T> T deserialize(final String source, final AvroDeserializationConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final String source, final AvroDeserConfig config, final Class<? extends T> targetClass) {
         return deserialize(new ByteArrayInputStream(Strings.base64Decode(source)), config, targetClass);
     }
 
@@ -406,7 +406,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * @throws UncheckedIOException if an I/O error occurs or the file doesn't exist
      */
     @Override
-    public <T> T deserialize(File source, AvroDeserializationConfig config, Type<? extends T> targetType) throws UncheckedIOException {
+    public <T> T deserialize(File source, AvroDeserConfig config, Type<? extends T> targetType) throws UncheckedIOException {
         InputStream is = null;
 
         try {
@@ -438,7 +438,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * @throws UncheckedIOException if an I/O error occurs or the file doesn't exist
      */
     @Override
-    public <T> T deserialize(final File source, final AvroDeserializationConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final File source, final AvroDeserConfig config, final Class<? extends T> targetClass) {
         InputStream is = null;
 
         try {
@@ -472,7 +472,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * }
      *
      * // Deserialize to regular bean with schema
-     * AvroDeserializationConfig config = new AvroDeserializationConfig()
+     * AvroDeserConfig config = new AvroDeserConfig()
      *     .setSchema(schema)
      *     .setElementType(Person.class);
      * List<Person> people = parser.deserialize(inputStream, config, List.class);
@@ -487,11 +487,11 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * @throws UncheckedIOException if an I/O error occurs during stream reading
      */
     @Override
-    public <T> T deserialize(InputStream source, AvroDeserializationConfig config, Type<? extends T> targetType) throws UncheckedIOException {
+    public <T> T deserialize(InputStream source, AvroDeserConfig config, Type<? extends T> targetType) throws UncheckedIOException {
         final InputStream targetInput = nonClosingInputStream(source);
-        final Class<? extends T> targetClass = targetType.clazz();
+        final Class<? extends T> targetClass = targetType.javaType();
         final Type<Object> eleType = config == null || config.getElementType() == null
-                ? (targetType.isCollection() && !targetType.getElementType().isObjectType() ? (Type<Object>) targetType.getElementType() : null)
+                ? (targetType.isCollection() && !targetType.elementType().isObject() ? (Type<Object>) targetType.elementType() : null)
                 : config.getElementType();
 
         if (SpecificRecord.class.isAssignableFrom(targetClass)) {
@@ -507,8 +507,8 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
             }
 
             return bean;
-        } else if (targetType.isCollection() && (eleType != null && SpecificRecord.class.isAssignableFrom(eleType.clazz()))) {
-            final Class<Object> eleClass = eleType.clazz();
+        } else if (targetType.isCollection() && (eleType != null && SpecificRecord.class.isAssignableFrom(eleType.javaType()))) {
+            final Class<Object> eleClass = eleType.javaType();
             @SuppressWarnings("rawtypes")
             final Collection<Object> c = targetType.isCollection() ? N.newCollection((Class<Collection>) targetClass) : new ArrayList<>();
             final DatumReader<Object> datumReader = new SpecificDatumReader<>(eleClass);
@@ -536,12 +536,12 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
                 } else if (targetType.isBean() || targetType.isMap()) {
                     return dataFileReader.hasNext() ? fromGenericRecord((GenericRecord) dataFileReader.next(), targetClass) : null;
                 } else if (targetType.isCollection()) {
-                    if (eleType != null && (eleType.isBean() || eleType.isMap() || GenericRecord.class.isAssignableFrom(eleType.clazz()))) {
+                    if (eleType != null && (eleType.isBean() || eleType.isMap() || GenericRecord.class.isAssignableFrom(eleType.javaType()))) {
                         @SuppressWarnings("rawtypes")
                         final Collection<Object> c = targetType.isCollection() ? N.newCollection((Class<Collection>) targetClass) : new ArrayList<>();
 
                         while (dataFileReader.hasNext()) {
-                            c.add(fromGenericRecord((GenericRecord) dataFileReader.next(), eleType.clazz()));
+                            c.add(fromGenericRecord((GenericRecord) dataFileReader.next(), eleType.javaType()));
                         }
 
                         return (T) c;
@@ -597,7 +597,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * }
      *
      * // Deserialize to regular bean with schema
-     * AvroDeserializationConfig config = new AvroDeserializationConfig()
+     * AvroDeserConfig config = new AvroDeserConfig()
      *     .setSchema(schema)
      *     .setElementType(Person.class);
      * List<Person> people = parser.deserialize(inputStream, config, List.class);
@@ -612,14 +612,14 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * @throws UncheckedIOException if an I/O error occurs during stream reading
      */
     @Override
-    public <T> T deserialize(final InputStream source, final AvroDeserializationConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final InputStream source, final AvroDeserConfig config, final Class<? extends T> targetClass) {
         return deserialize(source, config, Type.of(targetClass));
     }
 
     /**
      * Deserialization from Reader is not supported for Avro format.
-     * Use {@link #deserialize(String, AvroDeserializationConfig, Type)} for Base64 encoded input
-     * or {@link #deserialize(InputStream, AvroDeserializationConfig, Type)} for binary input.
+     * Use {@link #deserialize(String, AvroDeserConfig, Type)} for Base64 encoded input
+     * or {@link #deserialize(InputStream, AvroDeserConfig, Type)} for binary input.
      *
      * @param <T> the target type
      * @param source the reader (not supported)
@@ -631,14 +631,14 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      */
     @Deprecated
     @Override
-    public <T> T deserialize(Reader source, AvroDeserializationConfig config, Type<? extends T> targetType) throws UnsupportedOperationException {
+    public <T> T deserialize(Reader source, AvroDeserConfig config, Type<? extends T> targetType) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
     /**
      * Deserialization from Reader is not supported for Avro format.
-     * Use {@link #deserialize(String, AvroDeserializationConfig, Class)} for Base64 encoded input
-     * or {@link #deserialize(InputStream, AvroDeserializationConfig, Class)} for binary input.
+     * Use {@link #deserialize(String, AvroDeserConfig, Class)} for Base64 encoded input
+     * or {@link #deserialize(InputStream, AvroDeserConfig, Class)} for binary input.
      *
      * @param <T> the target type
      * @param source the reader (not supported)
@@ -650,8 +650,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      */
     @Deprecated
     @Override
-    public <T> T deserialize(final Reader source, final AvroDeserializationConfig config, final Class<? extends T> targetClass)
-            throws UnsupportedOperationException {
+    public <T> T deserialize(final Reader source, final AvroDeserConfig config, final Class<? extends T> targetClass) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 

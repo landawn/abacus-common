@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
@@ -85,7 +85,7 @@ public class Tuple2Type<T1, T2> extends AbstractType<Tuple2<T1, T2>> {
      * @return {@code Tuple2.class}
      */
     @Override
-    public Class<Tuple2<T1, T2>> clazz() {
+    public Class<Tuple2<T1, T2>> javaType() {
         return typeClass;
     }
 
@@ -96,7 +96,7 @@ public class Tuple2Type<T1, T2> extends AbstractType<Tuple2<T1, T2>> {
      * @return an array containing the types of the tuple elements
      */
     @Override
-    public Type<?>[] getParameterTypes() {
+    public Type<?>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -158,8 +158,8 @@ public class Tuple2Type<T1, T2> extends AbstractType<Tuple2<T1, T2>> {
             throw new IllegalArgumentException("Invalid Tuple2 format. Expected array with at least 2 elements but got: " + str);
         }
 
-        final T1 t1 = a[0] == null ? null : ((T1) (type1.clazz().isAssignableFrom(a[0].getClass()) ? a[0] : N.convert(a[0], type1)));
-        final T2 t2 = a[1] == null ? null : ((T2) (type2.clazz().isAssignableFrom(a[1].getClass()) ? a[1] : N.convert(a[1], type2)));
+        final T1 t1 = a[0] == null ? null : ((T1) (type1.javaType().isAssignableFrom(a[0].getClass()) ? a[0] : N.convert(a[0], type1)));
+        final T2 t2 = a[1] == null ? null : ((T2) (type2.javaType().isAssignableFrom(a[1].getClass()) ? a[1] : N.convert(a[1], type2)));
 
         return Tuple.of(t1, t2);
     }
@@ -224,7 +224,7 @@ public class Tuple2Type<T1, T2> extends AbstractType<Tuple2<T1, T2>> {
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Tuple2<T1, T2> x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Tuple2<T1, T2> x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

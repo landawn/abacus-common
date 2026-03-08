@@ -28,7 +28,7 @@ public class LongType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(Long.class, longType.clazz());
+        assertEquals(Long.class, longType.javaType());
     }
 
     @Test

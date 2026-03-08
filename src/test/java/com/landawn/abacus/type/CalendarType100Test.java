@@ -33,7 +33,7 @@ public class CalendarType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<Calendar> result = type.clazz();
+        Class<Calendar> result = type.javaType();
         assertEquals(Calendar.class, result);
     }
 

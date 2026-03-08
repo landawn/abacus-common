@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
@@ -41,7 +41,7 @@ public class FloatArrayType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(Float[].class, type.clazz());
+        assertEquals(Float[].class, type.javaType());
     }
 
     @Test
@@ -82,7 +82,7 @@ public class FloatArrayType2025Test extends TestBase {
     @Test
     public void test_writeCharacter() throws IOException {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
-        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
         Float[] arr = new Float[] { 1.1f, 2.2f };
         type.writeCharacter(writer, arr, config);

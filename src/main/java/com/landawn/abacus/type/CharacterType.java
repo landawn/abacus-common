@@ -45,7 +45,7 @@ public final class CharacterType extends AbstractCharacterType {
      * @return the Class object for Character.class
      */
     @Override
-    public Class<Character> clazz() {
+    public Class<Character> javaType() {
         return Character.class;
     }
 

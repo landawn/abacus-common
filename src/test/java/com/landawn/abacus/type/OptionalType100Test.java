@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.u.Optional;
 
@@ -30,14 +30,14 @@ public class OptionalType100Test extends TestBase {
     private OptionalType<String> optionalStringType;
     private OptionalType<Integer> optionalIntType;
     private CharacterWriter writer;
-    private JsonXmlSerializationConfig<?> config;
+    private JsonXmlSerConfig<?> config;
 
     @BeforeEach
     public void setUp() {
         optionalStringType = (OptionalType<String>) createType("Optional<String>");
         optionalIntType = (OptionalType<Integer>) createType("Optional<Integer>");
         writer = createCharacterWriter();
-        config = mock(JsonXmlSerializationConfig.class);
+        config = mock(JsonXmlSerConfig.class);
     }
 
     @Test
@@ -49,19 +49,19 @@ public class OptionalType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(Optional.class, optionalStringType.clazz());
-        assertEquals(Optional.class, optionalIntType.clazz());
+        assertEquals(Optional.class, optionalStringType.javaType());
+        assertEquals(Optional.class, optionalIntType.javaType());
     }
 
     @Test
     public void testGetElementType() {
-        assertNotNull(optionalStringType.getElementType());
-        assertEquals("String", optionalStringType.getElementType().name());
+        assertNotNull(optionalStringType.elementType());
+        assertEquals("String", optionalStringType.elementType().name());
     }
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = optionalStringType.getParameterTypes();
+        Type<?>[] paramTypes = optionalStringType.parameterTypes();
         assertNotNull(paramTypes);
         assertEquals(1, paramTypes.length);
         assertEquals("String", paramTypes[0].name());

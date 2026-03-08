@@ -26,8 +26,8 @@ import org.xml.sax.SAXException;
 
 import com.landawn.abacus.entity.extendDirty.basic.Account;
 import com.landawn.abacus.exception.ParsingException;
-import com.landawn.abacus.parser.XmlDeserializationConfig.XDC;
-import com.landawn.abacus.parser.XmlSerializationConfig.XSC;
+import com.landawn.abacus.parser.XmlDeserConfig;
+import com.landawn.abacus.parser.XmlSerConfig;
 import com.landawn.abacus.parser.entity.GenericEntity;
 import com.landawn.abacus.parser.entity.XBean;
 import com.landawn.abacus.type.Type;
@@ -63,7 +63,7 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
         Map<String, Account> map = N.asMap(account.getFirstName(), account);
         genericBean.setAccountMap(map);
 
-        XmlSerializationConfig xsc = XSC.create().prettyFormat(true);
+        XmlSerConfig xsc = XmlSerConfig.create().setPrettyFormat(true);
         String str = abacusXmlParser.serialize(genericBean, xsc);
 
         N.println(str);
@@ -87,13 +87,13 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
         Map<String, Account> map = N.asMap(account.getFirstName(), account);
         genericBean.setAccountMap(map);
 
-        XmlSerializationConfig xsc = XSC.create().prettyFormat(true);
+        XmlSerConfig xsc = XmlSerConfig.create().setPrettyFormat(true);
         Map<String, Object> props = Beans.beanToMap(genericBean);
         String str = abacusXmlParser.serialize(props, xsc);
 
         N.println(str);
 
-        XmlDeserializationConfig xdc = XDC.create().setValueType("account", Account.class);
+        XmlDeserConfig xdc = XmlDeserConfig.create().setValueType("account", Account.class);
         Map<String, Object> props2 = abacusXmlParser.deserialize(str, xdc, Map.class);
         N.println(props);
         N.println(props2);
@@ -197,7 +197,7 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
         N.println(list2);
 
         Map<String, Object> map = N.asMap(nullElement, nullElement);
-        XmlSerializationConfig jsc = XSC.create().setExclusion(Exclusion.NONE);
+        XmlSerConfig jsc = XmlSerConfig.create().setExclusion(Exclusion.NONE);
         str = abacusXmlParser.serialize(map, jsc);
         N.println(str);
 
@@ -236,23 +236,23 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
         String str = abacusXmlParser.serialize(array);
         N.println(str);
 
-        Object[] array2 = abacusXmlParser.deserialize(str, XDC.of(Account.class), Object[].class);
+        Object[] array2 = abacusXmlParser.deserialize(str, XmlDeserConfig.create().setElementType(Account.class), Object[].class);
         assertTrue(N.equals(array, array2));
 
         List<?> list = N.toList(account, nullElement);
         str = abacusXmlParser.serialize(list);
         N.println(str);
 
-        List<String> list2 = abacusXmlParser.deserialize(str, XDC.of(Account.class), List.class);
+        List<String> list2 = abacusXmlParser.deserialize(str, XmlDeserConfig.create().setElementType(Account.class), List.class);
         assertTrue(N.equals(list, list2));
         N.println(list2);
 
         Map<String, Object> map = N.asMap(nullElement, account);
-        XmlSerializationConfig xsc = XSC.create().setExclusion(Exclusion.NONE);
+        XmlSerConfig xsc = XmlSerConfig.create().setExclusion(Exclusion.NONE);
         str = abacusXmlParser.serialize(map, xsc);
         N.println(str);
 
-        XmlDeserializationConfig xdc = XDC.of(Account.class);
+        XmlDeserConfig xdc = XmlDeserConfig.create().setElementType(Account.class);
         xdc.setValueType("account", Account.class);
         Map<String, Object> map2 = abacusXmlParser.deserialize(str, xdc, Map.class);
         N.println(map2);
@@ -268,10 +268,10 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
         account.setFirstName("firstName");
         account.setLastName(null);
 
-        str = abacusXmlParser.serialize(account, XSC.of(Exclusion.DEFAULT, null));
+        str = abacusXmlParser.serialize(account, XmlSerConfig.create().setExclusion(Exclusion.DEFAULT));
         N.println(str);
 
-        str = abacusXmlParser.serialize(Beans.beanToMap(account), XSC.of(Exclusion.DEFAULT, null));
+        str = abacusXmlParser.serialize(Beans.beanToMap(account), XmlSerConfig.create().setExclusion(Exclusion.DEFAULT));
         N.println(str);
 
         Map<String, Object> map = Beans.beanToMap(account);
@@ -280,11 +280,11 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
 
         Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Map.class, N.toSet("id"));
 
-        XmlSerializationConfig xsc = XSC.of(Exclusion.DEFAULT, ignoredPropNames).prettyFormat(true);
+        XmlSerConfig xsc = XmlSerConfig.create().setExclusion(Exclusion.DEFAULT).setIgnoredPropNames(ignoredPropNames).setPrettyFormat(true);
         str = abacusXmlParser.serialize(map, xsc);
         N.println(str);
 
-        XmlDeserializationConfig xdc = XDC.of(Account.class);
+        XmlDeserConfig xdc = XmlDeserConfig.create().setElementType(Account.class);
         xdc.setValueType("account", Account.class);
         Map<String, Object> map2 = abacusXmlParser.deserialize(str, xdc, Map.class);
         N.println(map2);
@@ -292,7 +292,7 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
         str = abacusXmlParser.serialize(N.toList(map), xsc);
         N.println(str);
 
-        xdc = XDC.of(Map.class);
+        xdc = XmlDeserConfig.create().setElementType(Map.class);
         xdc.setValueType("account", Account.class);
         List<?> list = abacusXmlParser.deserialize(str, xdc, List.class);
         N.println(list);
@@ -301,15 +301,15 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
         map3.put("accountList", N.toList(account, null, account));
         map3.put("accountArray", N.asArray(account, null, account));
 
-        xsc = XSC.of(Exclusion.DEFAULT, ignoredPropNames).prettyFormat(true);
+        xsc = XmlSerConfig.create().setExclusion(Exclusion.DEFAULT).setIgnoredPropNames(ignoredPropNames).setPrettyFormat(true);
         str = abacusXmlParser.serialize(map3, xsc);
         N.println(str);
 
-        xdc = XDC.create();
+        xdc = XmlDeserConfig.create();
         xdc.setValueType("account", Account.class);
         N.println(abacusXmlParser.deserialize(str, xdc, Map.class));
 
-        xsc = XSC.of(Exclusion.DEFAULT, ignoredPropNames).prettyFormat(true);
+        xsc = XmlSerConfig.create().setExclusion(Exclusion.DEFAULT).setIgnoredPropNames(ignoredPropNames).setPrettyFormat(true);
         str = abacusXmlParser.serialize(map3, xsc);
         N.println(str);
 
@@ -322,15 +322,15 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
 
     @Test
     public void test_config() {
-        XmlSerializationConfig xsc1 = XSC.create();
-        XmlSerializationConfig xsc2 = XSC.create();
+        XmlSerConfig xsc1 = XmlSerConfig.create();
+        XmlSerConfig xsc2 = XmlSerConfig.create();
 
         N.println(xsc1);
 
         assertTrue(N.toSet(xsc1).contains(xsc2));
 
-        XmlDeserializationConfig xdc1 = XDC.of(String.class, String.class, true, null);
-        XmlDeserializationConfig xdc2 = XDC.of(String.class, String.class, true, null);
+        XmlDeserConfig xdc1 = XmlDeserConfig.create().setMapKeyType(String.class).setMapValueType(String.class).setIgnoreUnmatchedProperty(true);
+        XmlDeserConfig xdc2 = XmlDeserConfig.create().setMapKeyType(String.class).setMapValueType(String.class).setIgnoreUnmatchedProperty(true);
 
         N.println(xdc1);
 
@@ -349,7 +349,7 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
 
         assertTrue(str.indexOf("abc") == -1);
 
-        XmlSerializationConfig config = XSC.create().skipTransientField(false);
+        XmlSerConfig config = XmlSerConfig.create().setSkipTransientField(false);
         str = abacusXmlParser.serialize(bean, config);
 
         N.println(str);
@@ -364,7 +364,7 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
         Account account = createAccountWithContact(Account.class);
         account.setId(100);
 
-        XmlSerializationConfig config = XSC.create().prettyFormat(true).setIndentation("    ");
+        XmlSerConfig config = XmlSerConfig.create().setPrettyFormat(true).setIndentation("    ");
 
         String str = abacusXmlParser.serialize(account, config);
         N.println("============account=====================================================================================================");
@@ -554,7 +554,7 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
     public void testSerialize_1() throws Exception {
         XBean xBean = createXBean();
 
-        XmlSerializationConfig sc = XSC.create().setExclusion(Exclusion.NONE);
+        XmlSerConfig sc = XmlSerConfig.create().setExclusion(Exclusion.NONE);
         String str = abacusXmlParser.serialize(xBean, sc);
 
         N.println(str);
@@ -570,7 +570,7 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
     public void testSerialize_1_1() throws Exception {
         XBean xBean = createXBean();
 
-        XmlSerializationConfig sc = XSC.create().setExclusion(Exclusion.NONE);
+        XmlSerConfig sc = XmlSerConfig.create().setExclusion(Exclusion.NONE);
         sc.setPropNamingPolicy(NamingPolicy.SNAKE_CASE);
         String str = abacusXmlParser.serialize(xBean, sc);
 
@@ -588,9 +588,9 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
         XBean xBean = createXBean();
 
         Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(XBean.class, N.toSet("typeBoolean", "typeShort", "typeLong"));
-        XmlSerializationConfig sc = XSC.create();
+        XmlSerConfig sc = XmlSerConfig.create();
         sc.setIgnoredPropNames(ignoredPropNames);
-        sc.writeTypeInfo(true);
+        sc.setWriteTypeInfo(true);
 
         String str = abacusXmlParser.serialize(xBean, sc);
 
@@ -612,7 +612,7 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
         XBean xBean = createXBean();
 
         Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(XBean.class, N.toSet("typeBoolean", "typeShort", "typeLong"));
-        XmlSerializationConfig sc = XSC.create();
+        XmlSerConfig sc = XmlSerConfig.create();
         sc.setIgnoredPropNames(ignoredPropNames);
         sc.setExclusion(Exclusion.NONE);
 
@@ -636,7 +636,7 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
         XBean xBean = createXBean();
 
         Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(XBean.class, N.toSet("typeBoolean", "typeShort", "typeLong"));
-        XmlSerializationConfig sc = XSC.create();
+        XmlSerConfig sc = XmlSerConfig.create();
         sc.setIgnoredPropNames(ignoredPropNames);
         sc.setExclusion(Exclusion.NONE);
 
@@ -670,7 +670,7 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
 
         N.println(map2);
 
-        map2 = abacusXmlParser.deserialize(str, XDC.of(String.class, String[].class), Map.class);
+        map2 = abacusXmlParser.deserialize(str, XmlDeserConfig.create().setMapKeyType(String.class).setMapValueType(String[].class), Map.class);
 
         N.println(map2);
     }
@@ -679,7 +679,7 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
     public void testSerialize_8() throws Exception {
         XBean xBean = createXBean();
 
-        XmlSerializationConfig sc = XSC.create().tagByPropertyName(false);
+        XmlSerConfig sc = XmlSerConfig.create().setTagByPropertyName(false);
         String str = abacusXmlParser.serialize(xBean, sc);
 
         N.println(str);
@@ -695,12 +695,12 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
         Account account = createAccountWithContact(Account.class);
         account.setFirstName(null);
 
-        XmlSerializationConfig xsc = XSC.of(false, false);
+        XmlSerConfig xsc = XmlSerConfig.create().setTagByPropertyName(false).setWriteTypeInfo(false);
         xsc.setExclusion(Exclusion.NONE);
         String xml = abacusXmlParser.serialize(account, xsc);
         N.println(xml);
 
-        XmlDeserializationConfig xdc = XDC.create();
+        XmlDeserConfig xdc = XmlDeserConfig.create();
         Account account2 = abacusXmlParser.deserialize(xml, xdc, Account.class);
 
         N.println(account);
@@ -709,12 +709,12 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
         assertNull(account2.getFirstName());
         assertNotNull(account2.getContact());
 
-        xsc = XSC.of(false, true);
+        xsc = XmlSerConfig.create().setTagByPropertyName(false).setWriteTypeInfo(true);
         xsc.setExclusion(Exclusion.NONE);
         xml = abacusXmlParser.serialize(account, xsc);
         N.println(xml);
 
-        xdc = XDC.create();
+        xdc = XmlDeserConfig.create();
         account2 = abacusXmlParser.deserialize(xml, xdc, Account.class);
 
         N.println(account);
@@ -730,13 +730,13 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
         account.setFirstName(null);
         N.println(account);
 
-        XmlSerializationConfig xsc = XSC.of(true, false);
+        XmlSerConfig xsc = XmlSerConfig.create().setTagByPropertyName(true).setWriteTypeInfo(false);
 
         xsc.setExclusion(Exclusion.NONE);
         String xml = abacusXmlParser.serialize(Beans.deepBeanToMap(account), xsc);
         N.println(xml);
 
-        XmlDeserializationConfig xdc = XDC.create();
+        XmlDeserConfig xdc = XmlDeserConfig.create();
         xdc.setValueType("accountContact", account.getContact().getClass());
         Map<String, Object> account2 = abacusXmlParser.deserialize(xml, xdc, Map.class);
 
@@ -745,23 +745,23 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
         xml = abacusXmlParser.serialize(N.toList(account), xsc);
         N.println(xml);
 
-        xdc = XDC.of(Account.class);
+        xdc = XmlDeserConfig.create().setElementType(Account.class);
         List<Account> accountList = abacusXmlParser.deserialize(xml, xdc, List.class);
         N.println(accountList);
 
         xml = abacusXmlParser.serialize(N.asArray(account), xsc);
         N.println(xml);
 
-        xdc = XDC.of(Account.class);
+        xdc = XmlDeserConfig.create().setElementType(Account.class);
         Object[] accountArray = abacusXmlParser.deserialize(xml, xdc, Object[].class);
         N.println(accountArray);
 
-        xsc = XSC.of(false, true);
+        xsc = XmlSerConfig.create().setTagByPropertyName(false).setWriteTypeInfo(true);
         xsc.setExclusion(Exclusion.NONE);
         xml = abacusXmlParser.serialize(Beans.deepBeanToMap(account), xsc);
         N.println(xml);
 
-        xdc = XDC.create();
+        xdc = XmlDeserConfig.create();
         xdc.setValueType("accountContact", account.getContact().getClass());
         account2 = abacusXmlParser.deserialize(xml, xdc, Map.class);
 
@@ -781,7 +781,7 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
         Map<Object, Object> map2 = abacusXmlParser.deserialize(str, Map.class);
         N.println(map2);
 
-        str = abacusXmlParser.serialize(map, XSC.of(true, false));
+        str = abacusXmlParser.serialize(map, XmlSerConfig.create().setTagByPropertyName(true).setWriteTypeInfo(false));
         N.println(str);
 
         map2 = abacusXmlParser.deserialize(str, Map.class);
@@ -790,7 +790,7 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
         map = new HashMap<>();
         map.put(N.asArray("abc"), Array.of(123));
 
-        str = abacusXmlParser.serialize(map, XSC.of(true, false));
+        str = abacusXmlParser.serialize(map, XmlSerConfig.create().setTagByPropertyName(true).setWriteTypeInfo(false));
         N.println(str);
 
         map2 = abacusXmlParser.deserialize(str, Map.class);
@@ -803,13 +803,13 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
         Account account = createAccountWithContact(Account.class);
 
         Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Account.class, N.toSet("firstName", "contact"));
-        XmlSerializationConfig sc = XSC.create();
+        XmlSerConfig sc = XmlSerConfig.create();
         sc.setIgnoredPropNames(ignoredPropNames);
 
         String xml = abacusXmlParser.serialize(account);
         N.println(xml);
 
-        XmlDeserializationConfig xdc = XDC.create();
+        XmlDeserConfig xdc = XmlDeserConfig.create();
         xdc.setIgnoredPropNames(ignoredPropNames);
         Account account2 = abacusXmlParser.deserialize(xml, xdc, Account.class);
 
@@ -825,13 +825,13 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
         Account account = createAccountWithContact(Account.class);
 
         Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Map.class, N.toSet("firstName", "contact"));
-        XmlSerializationConfig sc = XSC.create();
+        XmlSerConfig sc = XmlSerConfig.create();
         sc.setIgnoredPropNames(ignoredPropNames);
 
         String xml = abacusXmlParser.serialize(Beans.deepBeanToMap(account));
         N.println(xml);
 
-        XmlDeserializationConfig xdc = XDC.create();
+        XmlDeserConfig xdc = XmlDeserConfig.create();
         xdc.setIgnoredPropNames(ignoredPropNames);
         Map<String, Object> account2 = abacusXmlParser.deserialize(xml, xdc, Map.class);
 
@@ -848,7 +848,7 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
         N.println(xml);
 
         Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Account.class, N.toSet("firstName", "contact"));
-        XmlDeserializationConfig dc = XDC.create();
+        XmlDeserConfig dc = XmlDeserConfig.create();
         dc.setIgnoredPropNames(ignoredPropNames);
         Account account2 = abacusXmlParser.deserialize(xml, dc, Account.class);
         N.println(account2);
@@ -857,14 +857,15 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
         assertNull(account2.getContact());
 
         try {
-            abacusXmlParser.deserialize(xml, XDC.of(false, null), Account.class);
+            abacusXmlParser.deserialize(xml, XmlDeserConfig.create().setIgnoreUnmatchedProperty(false), Account.class);
             fail("Should throw RuntimeException");
         } catch (ParsingException e) {
 
         }
 
         ignoredPropNames = N.asMap(Account.class, N.toSet("gui_1", "contact_1"));
-        account2 = abacusXmlParser.deserialize(xml, XDC.of(false, ignoredPropNames), Account.class);
+        account2 = abacusXmlParser.deserialize(xml, XmlDeserConfig.create().setIgnoreUnmatchedProperty(false).setIgnoredPropNames(ignoredPropNames),
+                Account.class);
 
         assertNotNull(account2.getFirstName());
         assertNull(account2.getContact());

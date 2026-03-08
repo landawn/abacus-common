@@ -965,7 +965,7 @@ public class ByteStream102Test extends TestBase {
     public void testOnEach() {
         ByteStream stream = createByteStream((byte) 1, (byte) 2, (byte) 3);
         List<Byte> onEach = new ArrayList<>();
-        byte[] result = stream.onEach(onEach::add).toArray();
+        byte[] result = stream.peek(onEach::add).toArray();
 
         assertArrayEquals(new byte[] { 1, 2, 3 }, result);
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3), onEach);

@@ -9,8 +9,9 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
@@ -39,14 +40,14 @@ public class MutableLongType extends NumberType<MutableLong> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<MutableLong> type = TypeFactory.getType(MutableLong.class);
-     * Class<MutableLong> clazz = type.clazz();
+     * Class<MutableLong> clazz = type.javaType();
      * // clazz equals MutableLong.class
      * }</pre>
      *
      * @return the {@link MutableLong} class object
      */
     @Override
-    public Class<MutableLong> clazz() {
+    public Class<MutableLong> javaType() {
         return MutableLong.class;
     }
 
@@ -117,7 +118,9 @@ public class MutableLongType extends NumberType<MutableLong> {
      */
     @Override
     public MutableLong get(final ResultSet rs, final int columnIndex) throws SQLException {
-        return MutableLong.of(rs.getLong(columnIndex));
+        final long value = rs.getLong(columnIndex);
+
+        return rs.wasNull() ? null : MutableLong.of(value);
     }
 
     /**
@@ -140,7 +143,9 @@ public class MutableLongType extends NumberType<MutableLong> {
      */
     @Override
     public MutableLong get(final ResultSet rs, final String columnName) throws SQLException {
-        return MutableLong.of(rs.getLong(columnName));
+        final long value = rs.getLong(columnName);
+
+        return rs.wasNull() ? null : MutableLong.of(value);
     }
 
     /**
@@ -166,7 +171,11 @@ public class MutableLongType extends NumberType<MutableLong> {
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final MutableLong x) throws SQLException {
-        stmt.setLong(columnIndex, (x == null) ? 0 : x.value());
+        if (x == null) {
+            stmt.setNull(columnIndex, Types.BIGINT);
+        } else {
+            stmt.setLong(columnIndex, x.value());
+        }
     }
 
     /**
@@ -192,7 +201,11 @@ public class MutableLongType extends NumberType<MutableLong> {
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final MutableLong x) throws SQLException {
-        stmt.setLong(parameterName, (x == null) ? 0 : x.value());
+        if (x == null) {
+            stmt.setNull(parameterName, Types.BIGINT);
+        } else {
+            stmt.setLong(parameterName, x.value());
+        }
     }
 
     /**
@@ -246,7 +259,7 @@ public class MutableLongType extends NumberType<MutableLong> {
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final MutableLong x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final MutableLong x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

@@ -254,16 +254,16 @@ public class Seq104Test extends TestBase {
     @Test
     public void testHasDuplicates() {
         Seq<Integer, RuntimeException> seq1 = Seq.of(1, 2, 3, 2, 4);
-        assertTrue(seq1.hasDuplicates());
+        assertTrue(seq1.containsDuplicates());
 
         Seq<Integer, RuntimeException> seq2 = Seq.of(1, 2, 3, 4, 5);
-        assertFalse(seq2.hasDuplicates());
+        assertFalse(seq2.containsDuplicates());
 
         Seq<Integer, RuntimeException> seq3 = Seq.<Integer, RuntimeException> empty();
-        assertFalse(seq3.hasDuplicates());
+        assertFalse(seq3.containsDuplicates());
 
         Seq<Integer, RuntimeException> seq4 = Seq.of(1);
-        assertFalse(seq4.hasDuplicates());
+        assertFalse(seq4.containsDuplicates());
     }
 
     @Test

@@ -42,7 +42,7 @@ public class Base64EncodedType extends AbstractType<byte[]> {
      * @return the Class object for byte[].class
      */
     @Override
-    public Class<byte[]> clazz() {
+    public Class<byte[]> javaType() {
         return byte[].class;
     }
 

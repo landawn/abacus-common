@@ -116,7 +116,7 @@ public class ParallelArrayShortStream200Test extends TestBase {
         @Test
         public void testOnEach() {
             AtomicInteger counter = new AtomicInteger(0);
-            parallelStream.onEach(e -> counter.incrementAndGet()).count();
+            parallelStream.peek(e -> counter.incrementAndGet()).count();
             assertEquals(largeArray.length, counter.get());
         }
 

@@ -1013,7 +1013,7 @@ public class FloatStream2025Test extends TestBase {
         public void testOnEach() {
             List<Float> collected = new ArrayList<>();
             FloatStream stream = createFloatStream(1.0f, 2.0f, 3.0f);
-            assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f }, stream.onEach(collected::add).toArray());
+            assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f }, stream.peek(collected::add).toArray());
             assertEquals(Arrays.asList(1.0f, 2.0f, 3.0f), collected);
         }
     }

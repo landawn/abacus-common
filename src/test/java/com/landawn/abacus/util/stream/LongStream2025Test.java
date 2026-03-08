@@ -183,12 +183,12 @@ public class LongStream2025Test extends TestBase {
         assertArrayEquals(new long[] { 1L, 2L, 3L }, stream.toArray());
     }
 
-    @Test
-    public void testOfJavaStream() {
-        java.util.stream.LongStream javaStream = java.util.stream.LongStream.of(10L, 20L, 30L);
-        LongStream stream = LongStream.of(javaStream);
-        assertArrayEquals(new long[] { 10L, 20L, 30L }, stream.toArray());
-    }
+    //    @Test
+    //    public void testOfJavaStream() {
+    //        java.util.stream.LongStream javaStream = java.util.stream.LongStream.of(10L, 20L, 30L);
+    //        LongStream stream = LongStream.of(javaStream);
+    //        assertArrayEquals(new long[] { 10L, 20L, 30L }, stream.toArray());
+    //    }
 
     @Test
     public void testOfLongBuffer() {
@@ -730,7 +730,7 @@ public class LongStream2025Test extends TestBase {
     public void testOnEach() {
         AtomicLong sum = new AtomicLong(0);
         LongStream stream = LongStream.of(1L, 2L, 3L);
-        long[] result = stream.onEach(sum::addAndGet).toArray();
+        long[] result = stream.peek(sum::addAndGet).toArray();
 
         assertArrayEquals(new long[] { 1L, 2L, 3L }, result);
         assertEquals(6L, sum.get());

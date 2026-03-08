@@ -294,7 +294,7 @@ public final class Index {
     private static final OptionalInt NOT_FOUND = OptionalInt.empty();
 
     private Index() {
-        // singleton.
+        // Utility class - prevent instantiation
     }
 
     /**

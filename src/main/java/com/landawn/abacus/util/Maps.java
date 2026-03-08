@@ -82,10 +82,30 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li><b>Null Safety First:</b> Comprehensive null input handling throughout the API</li>
  * </ul>
  *
+ * <p><b>Value Retrieval Method Groups:</b>
+ * <br>The {@code get*} methods are organized into five families, each with distinct null-handling and return-type contracts:
+ * <ul>
+ *   <li><b>Existence-aware ({@code getIfExists}):</b> Returns {@link Nullable} — distinguishes between
+ *       "key maps to {@code null}" ({@code Nullable.of(null)}) and "key is missing" ({@code Nullable.empty()}).
+ *       Use when you need to tell whether a key is present with a {@code null} value.</li>
+ *   <li><b>Null-as-absent ({@code getOrDefaultIfAbsent}, {@code getOrEmpty*IfAbsent}):</b> Returns a raw value
+ *       — treats a {@code null} value the same as a missing key and falls back to the supplied default.
+ *       Use when {@code null} has no special meaning in your domain.</li>
+ *   <li><b>Get-or-create ({@code getOrPut*IfAbsent}):</b> Returns a raw value — like {@code Map.computeIfAbsent}
+ *       but treats {@code null} as absent. Inserts the default into the map when the key is absent.
+ *       Use for multimap-style "get or create a new collection" patterns.</li>
+ *   <li><b>Type-converting ({@code getAs*}, {@code getAs*OrDefault}):</b> Returns {@link Optional} or a
+ *       primitive value — retrieves and converts the value to a target type (e.g.&nbsp;{@code int},
+ *       {@code String}, {@code LocalDate}). Use when map values are heterogeneous (e.g.&nbsp;{@code Map<String, Object>}).</li>
+ *   <li><b>Path-based ({@code getByPath*}):</b> Returns raw, {@link Nullable}, or converted values —
+ *       traverses nested map/collection structures via a dot-separated path with optional {@code [index]} segments.
+ *       Use for deep navigation into configuration-style nested maps.</li>
+ * </ul>
+ *
  * <p><b>Core Functional Categories:</b>
  * <ul>
  *   <li><b>Map Creation:</b> Factory methods for HashMap, LinkedHashMap, TreeMap, and specialized maps</li>
- *   <li><b>Access Operations:</b> get, getOrDefault, getFirst, getLast with Optional and Nullable returns</li>
+ *   <li><b>Access Operations:</b> {@code getIfExists}, {@code getOrDefaultIfAbsent}, {@code getAs*} with Optional and Nullable returns</li>
  *   <li><b>Search Operations:</b> find, contains, indexOf with predicate support and Optional returns</li>
  *   <li><b>Transformation Operations:</b> map keys/values, filter, invert, merge, combine</li>
  *   <li><b>Aggregation Operations:</b> reduce, fold, sum, count, min, max for map values</li>
@@ -106,14 +126,18 @@ import com.landawn.abacus.util.u.OptionalShort;
  * List<Integer> values = Arrays.asList(1, 2, 3);
  * Map<String, Integer> zipped = Maps.zip(keys, values);        // {a=1, b=2, c=3}
  *
- * // Safe access operations with Optional returns
- * Optional<Integer> value = Maps.get(map, "key");              // Optional-wrapped value
- * Nullable<Integer> nullable = Maps.getNullable(map, "key");   // Nullable-wrapped value
- * int defaultValue = Maps.getOrDefault(map, "key", 0);         // With default value
+ * // Existence-aware access (distinguishes null-value from missing-key)
+ * Nullable<Integer> nullable = Maps.getIfExists(map, "key");   // Nullable-wrapped value
+ *
+ * // Null-as-absent access (treats null same as missing)
+ * int defaultValue = Maps.getOrDefaultIfAbsent(map, "key", 0); // With default value
+ *
+ * // Type-converting access
+ * OptionalInt intVal = Maps.getAsInt(map, "key");               // Type-converted Optional
  *
  * // Null-safe operations
- * Optional<Integer> fromNull = Maps.get(null, "key");   // Optional.empty()
- * boolean isEmpty = Maps.isEmpty(null);                 // Returns true
+ * Nullable<Integer> fromNull = Maps.getIfExists(null, "key");   // Nullable.empty()
+ * boolean isEmpty = Maps.isEmpty(null);                          // Returns true
  *
  * // Transformation operations
  * Map<String, String> transformed = Maps.map(map, (k, v) -> k.toUpperCase(), v -> v.toString());
@@ -145,12 +169,13 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li><b>Specialized Maps:</b> {@code newIdentityHashMap()}, {@code newConcurrentHashMap()}</li>
  * </ul>
  *
- * <p><b>Optional-Based Access:</b>
+ * <p><b>Value Retrieval Access:</b>
  * <ul>
- *   <li><b>Safe Access:</b> {@code get()}, {@code getFirst()}, {@code getLast()} returning Optional</li>
- *   <li><b>Nullable Access:</b> {@code getNullable()} returning Nullable wrapper</li>
- *   <li><b>Default Values:</b> {@code getOrDefault()}, {@code getOrElse()} with fallback values</li>
- *   <li><b>Conditional Access:</b> {@code getIf()}, {@code getUnless()} with predicate conditions</li>
+ *   <li><b>Existence-aware:</b> {@code getIfExists()} returning {@link Nullable} — preserves null values</li>
+ *   <li><b>Null-as-absent:</b> {@code getOrDefaultIfAbsent()}, {@code getOrEmpty*IfAbsent()} with fallback values</li>
+ *   <li><b>Get-or-create:</b> {@code getOrPut*IfAbsent()} — inserts default into map when absent</li>
+ *   <li><b>Type-converting:</b> {@code getAs*()}, {@code getAs*OrDefault()} with automatic type conversion</li>
+ *   <li><b>Path-based:</b> {@code getByPath*()}, {@code getByPathIfExists()} for nested map navigation</li>
  * </ul>
  *
  * <p><b>Functional Transformations:</b>
@@ -223,7 +248,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * <p><b>Common Patterns:</b>
  * <ul>
- *   <li><b>Safe Access:</b> {@code Optional<V> value = Maps.get(map, key);}</li>
+ *   <li><b>Safe Access:</b> {@code Nullable<V> value = Maps.getIfExists(map, key);}</li>
  *   <li><b>Transformation:</b> {@code Map<K, R> result = Maps.mapValues(map, transformer);}</li>
  *   <li><b>Filtering:</b> {@code Map<K, V> filtered = Maps.filter(map, predicate);}</li>
  *   <li><b>Merging:</b> {@code Map<K, V> merged = Maps.merge(map1, map2, combiner);}</li>
@@ -281,9 +306,9 @@ import com.landawn.abacus.util.u.OptionalShort;
  * Map<String, String> config = loadConfiguration();
  *
  * // Safe access with defaults
- * int timeout = Maps.getInt(config, "timeout").orElse(30);
- * String environment = Maps.get(config, "environment").orElse("development");
- * boolean debugMode = Maps.getBoolean(config, "debug").orElse(false);
+ * int timeout = Maps.getAsInt(config, "timeout").orElse(30);
+ * String environment = Maps.getAsString(config, "environment").orElse("development");
+ * boolean debugMode = Maps.getAsBoolean(config, "debug").orElse(false);
  *
  * // Validation and filtering
  * Map<String, String> validConfig = Maps.filter(config, 
@@ -771,6 +796,11 @@ public final class Maps {
      * <li>If the key does not exist or the map is {@code null}, returns {@code Nullable.empty()}.</li>
      * </ul>
      *
+     * <p><b>Contrast with {@link #getOrDefaultIfAbsent(Map, Object, Object)}:</b><br>
+     * This method <em>preserves</em> {@code null} values — a key mapped to {@code null} is considered present.
+     * {@code getOrDefaultIfAbsent} treats {@code null} the same as a missing key and returns the default instead.
+     * Choose this method when you need to distinguish "key present with {@code null}" from "key absent".</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, String> map = new HashMap<>();
@@ -787,7 +817,7 @@ public final class Maps {
      * @param key the key whose associated value is to be returned
      * @return a {@code Nullable} wrapping the value if the key exists, otherwise an empty {@code Nullable}
      * @see #getOrDefaultIfAbsent(Map, Object, Object)
-     * @see #getIfExists(Map, Object, Object, Object)
+     * @see #getIfExists(Map, Object, Object)
      */
     // @ai-ignore getIfExists variants - intentional overloads for type-safe nested map access (1/2/3 level deep). Do not suggest consolidation.
     public static <K, V> Nullable<V> getIfExists(final Map<K, ? extends V> map, final K key) {
@@ -1269,6 +1299,12 @@ public final class Maps {
      * <p>This method therefore differs from {@link Map#getOrDefault(Object, Object)} in that
      * a {@code null} value is treated the same as a missing key.</p>
      *
+     * <p><b>Contrast with {@link #getIfExists(Map, Object)}:</b><br>
+     * This method treats a {@code null} value the same as a missing key (null-as-absent semantics).
+     * {@code getIfExists} <em>preserves</em> {@code null} — a key mapped to {@code null} is considered present
+     * and returns {@code Nullable.of(null)}.
+     * Choose this method when {@code null} has no special meaning and you just need a fallback value.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, String> map = new HashMap<>();
@@ -1276,7 +1312,7 @@ public final class Maps {
      * map.put("key2", null);
      *
      * Maps.getOrDefaultIfAbsent(map, "key1", "default"); // "value1"
-     * Maps.getOrDefaultIfAbsent(map, "key2", "default"); // "default"
+     * Maps.getOrDefaultIfAbsent(map, "key2", "default"); // "default" (null treated as absent)
      * Maps.getOrDefaultIfAbsent(map, "key3", "default"); // "default"
      * }</pre>
      *
@@ -1407,18 +1443,22 @@ public final class Maps {
     }
 
     /**
-     * Returns the List value to which the specified key is found, or an empty immutable List if the key is absent.
+     * Returns the List value to which the specified key is found, or an empty <b>immutable</b> List if the key is absent.
      * A key is considered absent if the map is empty, contains no mapping for the key, or the mapped value is {@code null}.
+     *
+     * <p><b>Important:</b> The empty List returned when the key is absent is <em>immutable</em> (via {@link N#emptyList()}).
+     * Any attempt to modify it (e.g.&nbsp;{@code add}, {@code remove}) will throw {@link UnsupportedOperationException}.
+     * If you need a mutable list, use {@link #getOrPutListIfAbsent(Map, Object)} instead.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, List<String>> map = new HashMap<>();
      * map.put("fruits", Arrays.asList("apple", "banana"));
      * map.put("empty", null);
-     * 
+     *
      * List<String> result1 = Maps.getOrEmptyListIfAbsent(map, "fruits");    // ["apple", "banana"]
-     * List<String> result2 = Maps.getOrEmptyListIfAbsent(map, "empty");     // []
-     * List<String> result3 = Maps.getOrEmptyListIfAbsent(map, "missing");   // []
+     * List<String> result2 = Maps.getOrEmptyListIfAbsent(map, "empty");     // [] (immutable)
+     * List<String> result3 = Maps.getOrEmptyListIfAbsent(map, "missing");   // [] (immutable)
      * }</pre>
      *
      * @param <K> the type of keys maintained by the map.
@@ -1426,8 +1466,9 @@ public final class Maps {
      * @param <V> the type of list values maintained by the map.
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
-     * @return the List value mapped by the key, or an empty immutable List if the key is absent.
+     * @return the List value mapped by the key, or an empty <b>immutable</b> List if the key is absent.
      * @see N#emptyList()
+     * @see #getOrPutListIfAbsent(Map, Object)
      */
     // @ai-ignore getOrEmpty*IfAbsent variants - return empty immutable collection (List/Set/Map) when key is absent. Do not suggest consolidation.
     public static <K, E, V extends List<E>> List<E> getOrEmptyListIfAbsent(final Map<K, V> map, final K key) {
@@ -1445,18 +1486,22 @@ public final class Maps {
     }
 
     /**
-     * Returns the Set value to which the specified key is found, or an empty immutable Set if the key is absent.
+     * Returns the Set value to which the specified key is found, or an empty <b>immutable</b> Set if the key is absent.
      * A key is considered absent if the map is empty, contains no mapping for the key, or the mapped value is {@code null}.
+     *
+     * <p><b>Important:</b> The empty Set returned when the key is absent is <em>immutable</em> (via {@link N#emptySet()}).
+     * Any attempt to modify it (e.g.&nbsp;{@code add}, {@code remove}) will throw {@link UnsupportedOperationException}.
+     * If you need a mutable set, use {@link #getOrPutSetIfAbsent(Map, Object)} instead.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Set<Integer>> map = new HashMap<>();
      * map.put("primes", new HashSet<>(Arrays.asList(2, 3, 5, 7)));
      * map.put("empty", null);
-     * 
+     *
      * Set<Integer> result1 = Maps.getOrEmptySetIfAbsent(map, "primes");    // {2, 3, 5, 7}
-     * Set<Integer> result2 = Maps.getOrEmptySetIfAbsent(map, "empty");     // {}
-     * Set<Integer> result3 = Maps.getOrEmptySetIfAbsent(map, "missing");   // {}
+     * Set<Integer> result2 = Maps.getOrEmptySetIfAbsent(map, "empty");     // {} (immutable)
+     * Set<Integer> result3 = Maps.getOrEmptySetIfAbsent(map, "missing");   // {} (immutable)
      * }</pre>
      *
      * @param <K> the type of keys maintained by the map.
@@ -1464,8 +1509,9 @@ public final class Maps {
      * @param <V> the type of set values maintained by the map.
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
-     * @return the Set value mapped by the key, or an empty immutable Set if the key is absent.
+     * @return the Set value mapped by the key, or an empty <b>immutable</b> Set if the key is absent.
      * @see N#emptySet()
+     * @see #getOrPutSetIfAbsent(Map, Object)
      */
     public static <K, E, V extends Set<E>> Set<E> getOrEmptySetIfAbsent(final Map<K, V> map, final K key) {
         if (N.isEmpty(map)) {
@@ -1482,8 +1528,12 @@ public final class Maps {
     }
 
     /**
-     * Returns the Map value to which the specified key is found, or an empty immutable Map if the key is absent.
+     * Returns the Map value to which the specified key is found, or an empty <b>immutable</b> Map if the key is absent.
      * A key is considered absent if the map is empty, contains no mapping for the key, or the mapped value is {@code null}.
+     *
+     * <p><b>Important:</b> The empty Map returned when the key is absent is <em>immutable</em> (via {@link N#emptyMap()}).
+     * Any attempt to modify it (e.g.&nbsp;{@code put}, {@code remove}) will throw {@link UnsupportedOperationException}.
+     * If you need a mutable map, use {@link #getOrPutMapIfAbsent(Map, Object)} instead.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1493,10 +1543,10 @@ public final class Maps {
      * innerMap.put("b", 2);
      * map.put("data", innerMap);
      * map.put("empty", null);
-     * 
+     *
      * Map<String, Integer> result1 = Maps.getOrEmptyMapIfAbsent(map, "data");      // {a=1, b=2}
-     * Map<String, Integer> result2 = Maps.getOrEmptyMapIfAbsent(map, "empty");     // {}
-     * Map<String, Integer> result3 = Maps.getOrEmptyMapIfAbsent(map, "missing");   // {}
+     * Map<String, Integer> result2 = Maps.getOrEmptyMapIfAbsent(map, "empty");     // {} (immutable)
+     * Map<String, Integer> result3 = Maps.getOrEmptyMapIfAbsent(map, "missing");   // {} (immutable)
      * }</pre>
      *
      * @param <K> the type of keys maintained by the outer map.
@@ -1505,8 +1555,9 @@ public final class Maps {
      * @param <V> the type of map values maintained by the outer map.
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
-     * @return the Map value mapped by the key, or an empty immutable Map if the key is absent.
+     * @return the Map value mapped by the key, or an empty <b>immutable</b> Map if the key is absent.
      * @see N#emptyMap()
+     * @see #getOrPutMapIfAbsent(Map, Object)
      */
     public static <K, KK, VV, V extends Map<KK, VV>> Map<KK, VV> getOrEmptyMapIfAbsent(final Map<K, V> map, final K key) {
         if (N.isEmpty(map)) {
@@ -2547,7 +2598,7 @@ public final class Maps {
 
         if (val == null) {
             return Optional.empty();
-        } else if (targetType.clazz().isAssignableFrom(val.getClass())) {
+        } else if (targetType.javaType().isAssignableFrom(val.getClass())) {
             return Optional.of((T) val);
         } else {
             return Optional.of(N.convert(val, targetType));
@@ -3360,7 +3411,7 @@ public final class Maps {
      * 
      * boolean changed = Maps.removeIf(map, (key, value) -> key.length() > 5 && value > 1);
      * // changed: true
-     * // map: {apple=1, banana=2}  // "cherry" was removed
+     * // map: {apple=1}  // "banana" and "cherry" were removed (both have length > 5 and value > 1)
      * }</pre>
      *
      * @param <K> the type of keys maintained by the map.

@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Timed;
 
@@ -37,12 +37,12 @@ public class TimedType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(Timed.class, timedType.clazz());
+        assertEquals(Timed.class, timedType.javaType());
     }
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = timedType.getParameterTypes();
+        Type<?>[] paramTypes = timedType.parameterTypes();
         assertNotNull(paramTypes);
         assertEquals(1, paramTypes.length);
     }
@@ -94,7 +94,7 @@ public class TimedType100Test extends TestBase {
     @Test
     public void testWriteCharacter() throws IOException {
         CharacterWriter writer = createCharacterWriter();
-        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
         Timed<String> timed = Timed.of("test", 123456789L);
         timedType.writeCharacter(writer, timed, config);

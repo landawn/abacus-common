@@ -58,8 +58,8 @@ class Log4Jv2Logger extends AbstractLogger {
      * <p>This constructor obtains a Log4j 2 logger instance from the LogManager
      * and casts it to ExtendedLogger for access to advanced features.</p>
      *
-     * <p><b>Note:</b> This constructor is package-private and should not be called directly.
-     * Use {@link LoggerFactory#getLogger(Class)} or {@link LoggerFactory#getLogger(String)} instead.</p>
+     * <p><b>Note:</b> This class is package-private and this constructor should not be called directly
+     * from outside the logging package. Use {@link LoggerFactory#getLogger(Class)} or {@link LoggerFactory#getLogger(String)} instead.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

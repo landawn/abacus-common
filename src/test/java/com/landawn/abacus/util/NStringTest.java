@@ -22,7 +22,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractParserTest;
-import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
+import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.util.Splitter.MapSplitter;
 import com.landawn.abacus.util.Strings.StrUtil;
 
@@ -207,13 +207,14 @@ public class NStringTest extends AbstractParserTest {
         String json = N.toJson(map);
         N.println(json);
         assertEquals(map, N.fromJson(json,
-                JDC.create().setMapKeyType(CommonUtil.typeOf("Map<String, Double>")).setMapValueType(CommonUtil.typeOf("Map<Double, String>")), Map.class));
+                JsonDeserConfig.create().setMapKeyType(CommonUtil.typeOf("Map<String, Double>")).setMapValueType(CommonUtil.typeOf("Map<Double, String>")),
+                Map.class));
 
         final List<Map<String, Double>> list = CommonUtil.toList(CommonUtil.asMap("abc", 123D));
         json = N.toJson(list);
         N.println(json);
-        assertTrue(CommonUtil.equals(list, N.fromJson(json, JDC.create().setElementType(CommonUtil.typeOf("Map<String, Double>")), List.class)));
-        assertFalse(CommonUtil.equals(list, N.fromJson(json, JDC.create().setElementType(CommonUtil.typeOf("Map<String, Float>")), List.class)));
+        assertTrue(CommonUtil.equals(list, N.fromJson(json, JsonDeserConfig.create().setElementType(CommonUtil.typeOf("Map<String, Double>")), List.class)));
+        assertFalse(CommonUtil.equals(list, N.fromJson(json, JsonDeserConfig.create().setElementType(CommonUtil.typeOf("Map<String, Float>")), List.class)));
     }
 
     @Test
@@ -3190,155 +3191,155 @@ public class NStringTest extends AbstractParserTest {
     }
 
     @Test
-    public void test_hasDuplicates() {
+    public void test_containsDuplicates() {
         {
             final char[] a = { '1', '2', '1', '3' };
-            assertTrue(N.hasDuplicates(a));
+            assertTrue(N.containsDuplicates(a));
         }
 
         {
             final byte[] a = { '1', '2', '1', '3' };
-            assertTrue(N.hasDuplicates(a));
+            assertTrue(N.containsDuplicates(a));
         }
 
         {
             final short[] a = { '1', '2', '1', '3' };
-            assertTrue(N.hasDuplicates(a));
+            assertTrue(N.containsDuplicates(a));
         }
 
         {
             final int[] a = { '1', '2', '1', '3' };
-            assertTrue(N.hasDuplicates(a));
+            assertTrue(N.containsDuplicates(a));
         }
 
         {
             final long[] a = { '1', '2', '1', '3' };
-            assertTrue(N.hasDuplicates(a));
+            assertTrue(N.containsDuplicates(a));
         }
 
         {
             final float[] a = { '1', '2', '1', '3' };
-            assertTrue(N.hasDuplicates(a));
+            assertTrue(N.containsDuplicates(a));
         }
 
         {
             final double[] a = { '1', '2', '1', '3' };
-            assertTrue(N.hasDuplicates(a));
+            assertTrue(N.containsDuplicates(a));
         }
 
         {
             final Object[] a = { '1', '2', '1', '3' };
-            assertTrue(N.hasDuplicates(a));
+            assertTrue(N.containsDuplicates(a));
         }
 
         {
             final List<?> a = CommonUtil.toList('1', '2', '1', '3');
-            assertTrue(N.hasDuplicates(a));
+            assertTrue(N.containsDuplicates(a));
         }
     }
 
     @Test
-    public void test_hasDuplicates_sorted() {
+    public void test_containsDuplicates_sorted() {
         {
             final char[] a = { '1', '2', '1', '3' };
             CommonUtil.sort(a);
-            assertTrue(N.hasDuplicates(a, true));
+            assertTrue(N.containsDuplicates(a, true));
         }
 
         {
             final byte[] a = { '1', '2', '1', '3' };
             CommonUtil.sort(a);
-            assertTrue(N.hasDuplicates(a, true));
+            assertTrue(N.containsDuplicates(a, true));
         }
 
         {
             final short[] a = { '1', '2', '1', '3' };
             CommonUtil.sort(a);
-            assertTrue(N.hasDuplicates(a, true));
+            assertTrue(N.containsDuplicates(a, true));
         }
 
         {
             final int[] a = { '1', '2', '1', '3' };
             CommonUtil.sort(a);
-            assertTrue(N.hasDuplicates(a, true));
+            assertTrue(N.containsDuplicates(a, true));
         }
 
         {
             final long[] a = { '1', '2', '1', '3' };
             CommonUtil.sort(a);
-            assertTrue(N.hasDuplicates(a, true));
+            assertTrue(N.containsDuplicates(a, true));
         }
 
         {
             final float[] a = { '1', '2', '1', '3' };
             CommonUtil.sort(a);
-            assertTrue(N.hasDuplicates(a, true));
+            assertTrue(N.containsDuplicates(a, true));
         }
 
         {
             final double[] a = { '1', '2', '1', '3' };
             CommonUtil.sort(a);
-            assertTrue(N.hasDuplicates(a, true));
+            assertTrue(N.containsDuplicates(a, true));
         }
 
         {
             final Character[] a = { '1', '2', '1', '3' };
             CommonUtil.sort(a);
-            assertTrue(N.hasDuplicates(a, true));
+            assertTrue(N.containsDuplicates(a, true));
         }
 
         {
             final List<Character> a = CommonUtil.toList('1', '2', '1', '3');
             CommonUtil.sort(a);
-            assertTrue(N.hasDuplicates(a, true));
+            assertTrue(N.containsDuplicates(a, true));
         }
     }
 
     @Test
-    public void test_hasDuplicates_2() {
+    public void test_containsDuplicates_2() {
         {
             final char[] a = { '1', '2', '3' };
-            assertFalse(N.hasDuplicates(a));
+            assertFalse(N.containsDuplicates(a));
         }
 
         {
             final byte[] a = { '1', '2', '3' };
-            assertFalse(N.hasDuplicates(a));
+            assertFalse(N.containsDuplicates(a));
         }
 
         {
             final short[] a = { '1', '2', '3' };
-            assertFalse(N.hasDuplicates(a));
+            assertFalse(N.containsDuplicates(a));
         }
 
         {
             final int[] a = { '1', '2', '3' };
-            assertFalse(N.hasDuplicates(a));
+            assertFalse(N.containsDuplicates(a));
         }
 
         {
             final long[] a = { '1', '2', '3' };
-            assertFalse(N.hasDuplicates(a));
+            assertFalse(N.containsDuplicates(a));
         }
 
         {
             final float[] a = { '1', '2', '3' };
-            assertFalse(N.hasDuplicates(a));
+            assertFalse(N.containsDuplicates(a));
         }
 
         {
             final double[] a = { '1', '2', '3' };
-            assertFalse(N.hasDuplicates(a));
+            assertFalse(N.containsDuplicates(a));
         }
 
         {
             final Object[] a = { '1', '2', '3' };
-            assertFalse(N.hasDuplicates(a));
+            assertFalse(N.containsDuplicates(a));
         }
 
         {
             final List<?> a = CommonUtil.toList('1', '2', '3');
-            assertFalse(N.hasDuplicates(a));
+            assertFalse(N.containsDuplicates(a));
         }
     }
 

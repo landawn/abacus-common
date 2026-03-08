@@ -7,6 +7,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,8 +36,10 @@ public class MillisDateType100Test extends TestBase {
     @Test
     public void testGetByIndexWithZeroValue() throws SQLException {
         Mockito.when(mockResultSet.getLong(1)).thenReturn(0L);
+        Mockito.when(mockResultSet.wasNull()).thenReturn(false);
         Date result = millisDateType.get(mockResultSet, 1);
-        Assertions.assertNull(result);
+        Assertions.assertNotNull(result);
+        assertEquals(0L, result.getTime());
     }
 
     @Test
@@ -51,6 +54,24 @@ public class MillisDateType100Test extends TestBase {
     @Test
     public void testGetByLabelWithZeroValue() throws SQLException {
         Mockito.when(mockResultSet.getLong("dateColumn")).thenReturn(0L);
+        Mockito.when(mockResultSet.wasNull()).thenReturn(false);
+        Date result = millisDateType.get(mockResultSet, "dateColumn");
+        Assertions.assertNotNull(result);
+        assertEquals(0L, result.getTime());
+    }
+
+    @Test
+    public void testGetByIndexWithSqlNull() throws SQLException {
+        Mockito.when(mockResultSet.getLong(1)).thenReturn(0L);
+        Mockito.when(mockResultSet.wasNull()).thenReturn(true);
+        Date result = millisDateType.get(mockResultSet, 1);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testGetByLabelWithSqlNull() throws SQLException {
+        Mockito.when(mockResultSet.getLong("dateColumn")).thenReturn(0L);
+        Mockito.when(mockResultSet.wasNull()).thenReturn(true);
         Date result = millisDateType.get(mockResultSet, "dateColumn");
         Assertions.assertNull(result);
     }
@@ -67,7 +88,7 @@ public class MillisDateType100Test extends TestBase {
     @Test
     public void testSetPreparedStatementWithNull() throws SQLException {
         millisDateType.set(mockPreparedStatement, 1, null);
-        Mockito.verify(mockPreparedStatement).setLong(1, 0L);
+        Mockito.verify(mockPreparedStatement).setNull(1, Types.BIGINT);
     }
 
     @Test
@@ -81,7 +102,7 @@ public class MillisDateType100Test extends TestBase {
     @Test
     public void testSetCallableStatementWithNull() throws SQLException {
         millisDateType.set(mockCallableStatement, "dateParam", null);
-        Mockito.verify(mockCallableStatement).setLong("dateParam", 0L);
+        Mockito.verify(mockCallableStatement).setNull("dateParam", Types.BIGINT);
     }
 
     @Test

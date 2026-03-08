@@ -75,7 +75,7 @@ import javax.mail.internet.MimeMultipart;
 public final class EmailUtil {
 
     private EmailUtil() {
-        // singleton.
+        // Utility class - prevent instantiation
     }
 
     /**

@@ -21,8 +21,8 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.AvroDeserializationConfig.ADC;
-import com.landawn.abacus.parser.AvroSerializationConfig.ASC;
+import com.landawn.abacus.parser.AvroDeserConfig;
+import com.landawn.abacus.parser.AvroSerConfig;
 
 @Tag("new-test")
 public class AvroParser100Test extends TestBase {
@@ -43,7 +43,7 @@ public class AvroParser100Test extends TestBase {
         data.put("name", "John");
         data.put("age", 30);
 
-        AvroSerializationConfig config = ASC.create().setSchema(schema);
+        AvroSerConfig config = AvroSerConfig.create().setSchema(schema);
         String result = parser.serialize(data, config);
 
         Assertions.assertNotNull(result);
@@ -52,8 +52,8 @@ public class AvroParser100Test extends TestBase {
 
     @Test
     public void testSerializeToStringWithNull() {
-        // assertThrows(NullPointerException.class, () -> parser.serialize(null, (AvroSerializationConfig) null));
-        Assertions.assertEquals("", parser.serialize(null, (AvroSerializationConfig) null));
+        // assertThrows(NullPointerException.class, () -> parser.serialize(null, (AvroSerConfig) null));
+        Assertions.assertEquals("", parser.serialize(null, (AvroSerConfig) null));
     }
 
     @Test
@@ -62,7 +62,7 @@ public class AvroParser100Test extends TestBase {
         data.put("name", "Jane");
         data.put("age", 25);
 
-        AvroSerializationConfig config = ASC.create().setSchema(schema);
+        AvroSerConfig config = AvroSerConfig.create().setSchema(schema);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
 
         parser.serialize(data, config, os);
@@ -77,7 +77,7 @@ public class AvroParser100Test extends TestBase {
         data.put("name", "NoClose");
         data.put("age", 26);
 
-        AvroSerializationConfig config = ASC.create().setSchema(schema);
+        AvroSerConfig config = AvroSerConfig.create().setSchema(schema);
         CloseTrackingOutputStream os = new CloseTrackingOutputStream();
 
         parser.serialize(data, config, os);
@@ -113,10 +113,10 @@ public class AvroParser100Test extends TestBase {
         data.put("name", "Test");
         data.put("age", 35);
 
-        AvroSerializationConfig serConfig = ASC.create().setSchema(schema);
+        AvroSerConfig serConfig = AvroSerConfig.create().setSchema(schema);
         String base64 = parser.serialize(data, serConfig);
 
-        AvroDeserializationConfig desConfig = ADC.create().setSchema(schema);
+        AvroDeserConfig desConfig = AvroDeserConfig.create().setSchema(schema);
         GenericRecord result = parser.deserialize(base64, desConfig, GenericRecord.class);
 
         Assertions.assertNotNull(result);
@@ -130,12 +130,12 @@ public class AvroParser100Test extends TestBase {
         data.put("name", "Stream Test");
         data.put("age", 40);
 
-        AvroSerializationConfig serConfig = ASC.create().setSchema(schema);
+        AvroSerConfig serConfig = AvroSerConfig.create().setSchema(schema);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         parser.serialize(data, serConfig, os);
 
         ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
-        AvroDeserializationConfig desConfig = ADC.create().setSchema(schema);
+        AvroDeserConfig desConfig = AvroDeserConfig.create().setSchema(schema);
         GenericRecord result = parser.deserialize(is, desConfig, GenericRecord.class);
 
         Assertions.assertNotNull(result);
@@ -149,12 +149,12 @@ public class AvroParser100Test extends TestBase {
         data.put("name", "InputNoClose");
         data.put("age", 41);
 
-        AvroSerializationConfig serConfig = ASC.create().setSchema(schema);
+        AvroSerConfig serConfig = AvroSerConfig.create().setSchema(schema);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         parser.serialize(data, serConfig, os);
 
         CloseTrackingInputStream is = new CloseTrackingInputStream(os.toByteArray());
-        AvroDeserializationConfig desConfig = ADC.create().setSchema(schema);
+        AvroDeserConfig desConfig = AvroDeserConfig.create().setSchema(schema);
         GenericRecord result = parser.deserialize(is, desConfig, GenericRecord.class);
 
         Assertions.assertNotNull(result);
@@ -192,7 +192,7 @@ public class AvroParser100Test extends TestBase {
         list.add(item1);
         list.add(item2);
 
-        AvroSerializationConfig config = ASC.create().setSchema(schema);
+        AvroSerConfig config = AvroSerConfig.create().setSchema(schema);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
 
         parser.serialize(list, config, os);
@@ -207,12 +207,12 @@ public class AvroParser100Test extends TestBase {
         record.put("name", "MapTest");
         record.put("age", 50);
 
-        AvroSerializationConfig serConfig = ASC.create().setSchema(schema);
+        AvroSerConfig serConfig = AvroSerConfig.create().setSchema(schema);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         parser.serialize(record, serConfig, os);
 
         ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
-        AvroDeserializationConfig desConfig = ADC.create().setSchema(schema);
+        AvroDeserConfig desConfig = AvroDeserConfig.create().setSchema(schema);
         Map<String, Object> result = parser.deserialize(is, desConfig, Map.class);
 
         Assertions.assertNotNull(result);

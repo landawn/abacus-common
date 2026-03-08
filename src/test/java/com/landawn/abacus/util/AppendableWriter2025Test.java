@@ -246,6 +246,15 @@ public class AppendableWriter2025Test extends TestBase {
     }
 
     @Test
+    public void testClosePropagatesIOExceptionFromUnderlyingAppendable() {
+        IOException failure = new IOException("close failed");
+        AppendableWriter writer = new AppendableWriter(new FailingCloseAppendable(failure));
+
+        IOException thrown = assertThrows(IOException.class, writer::close);
+        assertTrue(thrown == failure);
+    }
+
+    @Test
     public void testToString() throws IOException {
         StringBuilder sb = new StringBuilder("Initial");
         try (AppendableWriter writer = new AppendableWriter(sb)) {
@@ -322,6 +331,34 @@ public class AppendableWriter2025Test extends TestBase {
             writer.write("Hello");
             writer.append(" World");
             assertEquals("Hello World", sb.toString());
+        }
+    }
+
+    private static final class FailingCloseAppendable implements Appendable, AutoCloseable {
+        private final IOException failure;
+
+        private FailingCloseAppendable(IOException failure) {
+            this.failure = failure;
+        }
+
+        @Override
+        public Appendable append(CharSequence csq) {
+            return this;
+        }
+
+        @Override
+        public Appendable append(CharSequence csq, int start, int end) {
+            return this;
+        }
+
+        @Override
+        public Appendable append(char c) {
+            return this;
+        }
+
+        @Override
+        public void close() throws IOException {
+            throw failure;
         }
     }
 }

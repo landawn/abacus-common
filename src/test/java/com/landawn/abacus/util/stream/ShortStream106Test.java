@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Comparator;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Duration;
@@ -846,32 +846,32 @@ public class ShortStream106Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterOnEach() {
-        assertEquals(5, ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).onEach(i -> {
+        assertEquals(5, ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).peek(i -> {
         }).count());
-        assertEquals(4, ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).onEach(i -> {
+        assertEquals(4, ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).peek(i -> {
         }).skip(1).count());
-        assertArrayEquals(new short[] { 1, 2, 3, 4, 5 }, ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).onEach(i -> {
+        assertArrayEquals(new short[] { 1, 2, 3, 4, 5 }, ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).peek(i -> {
         }).toArray());
-        assertArrayEquals(new short[] { 2, 3, 4, 5 }, ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).onEach(i -> {
+        assertArrayEquals(new short[] { 2, 3, 4, 5 }, ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).peek(i -> {
         }).skip(1).toArray());
         assertEquals(N.asList((short) 1, (short) 2, (short) 3, (short) 4, (short) 5),
-                ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).onEach(i -> {
+                ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).peek(i -> {
                 }).toList());
-        assertEquals(N.asList((short) 2, (short) 3, (short) 4, (short) 5), ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).onEach(i -> {
+        assertEquals(N.asList((short) 2, (short) 3, (short) 4, (short) 5), ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).peek(i -> {
         }).skip(1).toList());
-        assertEquals(5, ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).map(e -> e).onEach(i -> {
+        assertEquals(5, ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).map(e -> e).peek(i -> {
         }).count());
-        assertEquals(4, ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).map(e -> e).onEach(i -> {
+        assertEquals(4, ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).map(e -> e).peek(i -> {
         }).skip(1).count());
-        assertArrayEquals(new short[] { 1, 2, 3, 4, 5 }, ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).map(e -> e).onEach(i -> {
+        assertArrayEquals(new short[] { 1, 2, 3, 4, 5 }, ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).map(e -> e).peek(i -> {
         }).toArray());
-        assertArrayEquals(new short[] { 2, 3, 4, 5 }, ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).map(e -> e).onEach(i -> {
+        assertArrayEquals(new short[] { 2, 3, 4, 5 }, ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).map(e -> e).peek(i -> {
         }).skip(1).toArray());
         assertEquals(N.asList((short) 1, (short) 2, (short) 3, (short) 4, (short) 5),
-                ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).map(e -> e).onEach(i -> {
+                ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).map(e -> e).peek(i -> {
                 }).toList());
         assertEquals(N.asList((short) 2, (short) 3, (short) 4, (short) 5),
-                ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).map(e -> e).onEach(i -> {
+                ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).map(e -> e).peek(i -> {
                 }).skip(1).toList());
     }
 }

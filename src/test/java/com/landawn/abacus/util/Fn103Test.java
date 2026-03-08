@@ -156,7 +156,7 @@ public class Fn103Test extends TestBase {
 
         @Test
         public void testOfUUID() {
-            Supplier<String> uuidSupplier = Suppliers.ofUUID();
+            Supplier<String> uuidSupplier = Suppliers.ofUuid();
             assertNotNull(uuidSupplier);
 
             String uuid1 = uuidSupplier.get();
@@ -169,7 +169,7 @@ public class Fn103Test extends TestBase {
 
         @Test
         public void testOfGUID() {
-            Supplier<String> guidSupplier = Suppliers.ofGUID();
+            Supplier<String> guidSupplier = Suppliers.ofUuidWithoutHyphens();
             assertNotNull(guidSupplier);
 
             String guid1 = guidSupplier.get();

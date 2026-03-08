@@ -36,7 +36,7 @@ public class JodaMutableDateTimeType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(MutableDateTime.class, mutableDateTimeType.clazz());
+        assertEquals(MutableDateTime.class, mutableDateTimeType.javaType());
     }
 
     @Test

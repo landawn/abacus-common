@@ -57,14 +57,14 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<MutableDateTime> type = TypeFactory.getType(MutableDateTime.class);
-     * Class<MutableDateTime> clazz = type.clazz();
+     * Class<MutableDateTime> clazz = type.javaType();
      * System.out.println(clazz.getName());   // Outputs: org.joda.time.MutableDateTime
      * }</pre>
      *
      * @return the Class object representing org.joda.time.MutableDateTime
      */
     @Override
-    public Class<MutableDateTime> clazz() {
+    public Class<MutableDateTime> javaType() {
         return MutableDateTime.class;
     }
 

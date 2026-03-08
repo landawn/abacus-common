@@ -71,11 +71,17 @@ public final class HttpRequest {
 
     private static final String HTTP_METHOD_STR = "httpMethod";
 
+    private enum RequestTarget {
+        NONE, QUERY, BODY
+    }
+
     private final HttpClient httpClient;
 
     private HttpSettings settings;
 
     private Object request;
+
+    private RequestTarget requestTarget = RequestTarget.NONE;
 
     private boolean closeHttpClientAfterExecution = false;
 
@@ -534,7 +540,13 @@ public final class HttpRequest {
      * @return This HttpRequest instance for method chaining
      */
     public HttpRequest query(final String query) {
-        request = query;
+        if (Strings.isEmpty(query)) {
+            request = null;
+            requestTarget = RequestTarget.NONE;
+        } else {
+            request = query;
+            requestTarget = RequestTarget.QUERY;
+        }
 
         return this;
     }
@@ -554,7 +566,13 @@ public final class HttpRequest {
      * @return This HttpRequest instance for method chaining
      */
     public HttpRequest query(final Map<String, ?> queryParams) {
-        request = queryParams;
+        if (queryParams == null || queryParams.isEmpty()) {
+            request = null;
+            requestTarget = RequestTarget.NONE;
+        } else {
+            request = queryParams;
+            requestTarget = RequestTarget.QUERY;
+        }
 
         return this;
     }
@@ -576,6 +594,7 @@ public final class HttpRequest {
         setContentType(HttpHeaders.Values.APPLICATION_JSON);
 
         request = json;
+        requestTarget = RequestTarget.BODY;
 
         return this;
     }
@@ -598,6 +617,7 @@ public final class HttpRequest {
         setContentType(HttpHeaders.Values.APPLICATION_JSON);
 
         request = N.toJson(obj);
+        requestTarget = RequestTarget.BODY;
 
         return this;
     }
@@ -620,6 +640,7 @@ public final class HttpRequest {
         setContentType(HttpHeaders.Values.APPLICATION_XML);
 
         request = xml;
+        requestTarget = RequestTarget.BODY;
 
         return this;
     }
@@ -643,6 +664,7 @@ public final class HttpRequest {
         setContentType(HttpHeaders.Values.APPLICATION_XML);
 
         request = N.toXml(obj);
+        requestTarget = RequestTarget.BODY;
 
         return this;
     }
@@ -665,6 +687,7 @@ public final class HttpRequest {
         setContentType(HttpHeaders.Values.APPLICATION_URL_ENCODED);
 
         request = formBodyByMap;
+        requestTarget = RequestTarget.BODY;
 
         return this;
     }
@@ -688,6 +711,7 @@ public final class HttpRequest {
         setContentType(HttpHeaders.Values.APPLICATION_URL_ENCODED);
 
         request = formBodyByBean;
+        requestTarget = RequestTarget.BODY;
 
         return this;
     }
@@ -719,6 +743,7 @@ public final class HttpRequest {
      */
     public HttpRequest body(final Object requestBody) {
         request = requestBody;
+        requestTarget = RequestTarget.BODY;
 
         return this;
     }
@@ -935,7 +960,7 @@ public final class HttpRequest {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         try {
-            return httpClient.execute(httpMethod, request, checkSettings(), resultClass);
+            return httpClient.execute(httpMethod, requestFor(httpMethod), checkSettings(), resultClass);
         } finally {
             doAfterExecution();
         }
@@ -962,7 +987,7 @@ public final class HttpRequest {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         try {
-            httpClient.execute(httpMethod, request, checkSettings(), output);
+            httpClient.execute(httpMethod, requestFor(httpMethod), checkSettings(), output);
         } finally {
             doAfterExecution();
         }
@@ -990,7 +1015,7 @@ public final class HttpRequest {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         try {
-            httpClient.execute(httpMethod, request, checkSettings(), output);
+            httpClient.execute(httpMethod, requestFor(httpMethod), checkSettings(), output);
         } finally {
             doAfterExecution();
         }
@@ -1018,10 +1043,30 @@ public final class HttpRequest {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         try {
-            httpClient.execute(httpMethod, request, checkSettings(), output);
+            httpClient.execute(httpMethod, requestFor(httpMethod), checkSettings(), output);
         } finally {
             doAfterExecution();
         }
+    }
+
+    private Object requestFor(final HttpMethod httpMethod) {
+        if (request == null || requestTarget == RequestTarget.NONE) {
+            return null;
+        }
+
+        if (requestTarget == RequestTarget.QUERY) {
+            if (httpMethod == HttpMethod.GET || httpMethod == HttpMethod.DELETE) {
+                return request;
+            }
+
+            throw new IllegalStateException("query(...) is only supported for GET and DELETE requests");
+        }
+
+        if (httpMethod == HttpMethod.POST || httpMethod == HttpMethod.PUT || httpMethod == HttpMethod.PATCH) {
+            return request;
+        }
+
+        throw new IllegalStateException("body(...) is only supported for POST, PUT, and PATCH requests");
     }
 
     void doAfterExecution() {
@@ -1390,8 +1435,6 @@ public final class HttpRequest {
     /**
      * Executes an asynchronous HEAD request with a custom executor and the specified result class.
      *
-     * <p><b>Note:</b> This method has unusual parameter ordering (executor, resultClass) compared to
-     * other async methods which use (resultClass, executor). This is maintained for backward compatibility.</p>
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      *

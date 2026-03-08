@@ -243,32 +243,6 @@ public class CommonUtil203Test extends TestBase {
         }
 
         @Test
-        public void testNullToEmptyForEach_StringArray() {
-            assertArrayEquals(CommonUtil.EMPTY_STRING_ARRAY, CommonUtil.nullElementsToEmpty(null));
-            String[] arr = { "a", "b" };
-            String[] result = CommonUtil.nullElementsToEmpty(arr);
-            assertSame(arr, result);
-            assertArrayEquals(new String[] { "a", "b" }, result);
-
-            String[] arrWithNulls = { "a", null, "c", null };
-            String[] expected = { "a", EMPTY_STR, "c", EMPTY_STR };
-            result = CommonUtil.nullElementsToEmpty(arrWithNulls);
-            assertSame(arrWithNulls, result);
-            assertArrayEquals(expected, result);
-
-            String[] allNulls = { null, null };
-            String[] expectedAllEmpty = { EMPTY_STR, EMPTY_STR };
-            result = CommonUtil.nullElementsToEmpty(allNulls);
-            assertSame(allNulls, result);
-            assertArrayEquals(expectedAllEmpty, result);
-
-            String[] emptyArr = CommonUtil.EMPTY_STRING_ARRAY;
-            result = CommonUtil.nullElementsToEmpty(emptyArr);
-            assertSame(emptyArr, result);
-            assertArrayEquals(CommonUtil.EMPTY_STRING_ARRAY, result);
-        }
-
-        @Test
         public void testNullToEmpty_JavaUtilDateArray() {
             assertArrayEquals(CommonUtil.EMPTY_JU_DATE_ARRAY, CommonUtil.nullToEmpty((java.util.Date[]) null));
             java.util.Date[] arr = { new java.util.Date() };

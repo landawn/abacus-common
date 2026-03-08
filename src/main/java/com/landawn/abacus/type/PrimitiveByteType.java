@@ -57,7 +57,7 @@ public final class PrimitiveByteType extends AbstractByteType {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public Class clazz() {
+    public Class javaType() {
         return byte.class;
     }
 
@@ -68,7 +68,7 @@ public final class PrimitiveByteType extends AbstractByteType {
      * @return {@code true}, as this type handler is for primitive byte
      */
     @Override
-    public boolean isPrimitiveType() {
+    public boolean isPrimitive() {
         return true;
     }
 

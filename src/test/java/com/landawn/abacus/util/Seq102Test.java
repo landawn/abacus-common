@@ -1165,16 +1165,16 @@ public class Seq102Test extends TestBase {
     }
 
     @Test
-    public void testOnEach() throws Exception {
+    public void testPeekWithFilterAndEmpty() throws Exception {
         List<Integer> sideEffect = new ArrayList<>();
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5);
-        List<Integer> result = seq.onEach(sideEffect::add).filter(n -> n % 2 == 0).toList();
+        List<Integer> result = seq.peek(sideEffect::add).filter(n -> n % 2 == 0).toList();
         assertEquals(Arrays.asList(2, 4), result);
         assertEquals(Arrays.asList(1, 2, 3, 4, 5), sideEffect);
 
         sideEffect.clear();
         seq = Seq.<Integer, Exception> empty();
-        result = seq.onEach(sideEffect::add).toList();
+        result = seq.peek(sideEffect::add).toList();
         assertTrue(result.isEmpty());
         assertTrue(sideEffect.isEmpty());
     }

@@ -11,8 +11,8 @@ import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.junit.jupiter.api.Test;
 
-import com.landawn.abacus.parser.AvroDeserializationConfig.ADC;
-import com.landawn.abacus.parser.AvroSerializationConfig.ASC;
+import com.landawn.abacus.parser.AvroDeserConfig;
+import com.landawn.abacus.parser.AvroSerConfig;
 import com.landawn.abacus.parser.entity.User;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
@@ -44,7 +44,7 @@ public class AvroParserTest {
         GenericRecord xBean2 = avroParser.deserialize(str, User.class);
         N.println(xBean2);
 
-        Map<String, Object> m = avroParser.deserialize(str, ADC.create().setSchema(schema), Map.class);
+        Map<String, Object> m = avroParser.deserialize(str, AvroDeserConfig.create().setSchema(schema), Map.class);
         N.println(m);
 
         User user2 = new User("Ben", 7, "red");
@@ -53,11 +53,11 @@ public class AvroParserTest {
 
         N.println(str);
 
-        AvroDeserializationConfig ds = ADC.create().setSchema(schema).setElementType(User.class);
+        AvroDeserConfig ds = AvroDeserConfig.create().setSchema(schema).setElementType(User.class);
         List<User> users = avroParser.deserialize(str, ds, List.class);
         N.println(users);
 
-        ds = ADC.create().setElementType(User.class);
+        ds = AvroDeserConfig.create().setElementType(User.class);
         users = avroParser.deserialize(str, ds, List.class);
         N.println(users);
 
@@ -82,11 +82,11 @@ public class AvroParserTest {
 
         N.println(IOUtil.readAllToString(file));
 
-        AvroDeserializationConfig ds = ADC.create().setSchema(schema).setElementType(User.class);
+        AvroDeserConfig ds = AvroDeserConfig.create().setSchema(schema).setElementType(User.class);
         List<User> users = avroParser.deserialize(file, ds, List.class);
         N.println(users);
 
-        ds = ADC.create().setElementType(User.class);
+        ds = AvroDeserConfig.create().setElementType(User.class);
         users = avroParser.deserialize(file, ds, List.class);
         N.println(users);
 
@@ -98,7 +98,7 @@ public class AvroParserTest {
         user1.put("name", "Alyssa");
         user1.put("favorite_number", 256);
 
-        AvroSerializationConfig sc = ASC.of(schema);
+        AvroSerConfig sc = AvroSerConfig.create().setSchema(schema);
         String str = avroParser.serialize(user1, sc);
         N.println(str);
 
@@ -107,11 +107,11 @@ public class AvroParserTest {
         user2.put("favorite_number", 7);
         user2.put("favorite_color", "red");
 
-        sc = ASC.of(schema);
+        sc = AvroSerConfig.create().setSchema(schema);
         str = avroParser.serialize(user2, sc);
         N.println(str);
 
-        AvroDeserializationConfig ds = ADC.create().setSchema(schema);
+        AvroDeserConfig ds = AvroDeserConfig.create().setSchema(schema);
         GenericRecord record = avroParser.deserialize(str, ds, GenericRecord.class);
         N.println(record);
 

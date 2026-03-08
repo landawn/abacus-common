@@ -19,11 +19,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.Tag;
@@ -56,6 +58,16 @@ public class PrimitiveShortType2025Test extends TestBase {
 
         type.set(stmt, "param2", null);
         verify(stmt).setNull("param2", java.sql.Types.SMALLINT);
+    }
+
+    @Test
+    public void test_get_ResultSet_usesPrimitiveDefaultForSqlNull() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+        when(rs.getShort(1)).thenReturn((short) 0);
+        when(rs.getShort("col")).thenReturn((short) 0);
+
+        assertEquals((short) 0, type.get(rs, 1));
+        assertEquals((short) 0, type.get(rs, "col"));
     }
 
     @Test

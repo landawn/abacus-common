@@ -241,9 +241,9 @@ public enum LockMode {
     }
 
     /**
-     * Checks if this LockMode is locked by (is a subset of) the specified LockMode.
-     * This method uses bitwise AND operation to determine if all lock types in this mode
-     * are also present in the specified mode.
+     * Checks whether this lock mode shares at least one lock flag with the specified lock mode.
+     * This method performs a bitwise {@code AND} and returns {@code true} when the two modes
+     * overlap on any of the {@code R}, {@code A}, {@code U}, or {@code D} flags.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -252,12 +252,13 @@ public enum LockMode {
      * boolean isLocked = currentLock.isXLockOf(checkLock);   // Returns true
      * 
      * LockMode currentLock2 = LockMode.UD;
-     * LockMode checkLock2 = LockMode.U;
-     * boolean isLocked2 = currentLock2.isXLockOf(checkLock2);   // Returns true
+     * LockMode checkLock2 = LockMode.R;
+     * boolean isLocked2 = currentLock2.isXLockOf(checkLock2);   // Returns false
      * }</pre>
      *
      * @param lockMode the LockMode to check against
-     * @return {@code true} if this LockMode's operations are locked by the specified lockMode, {@code false} otherwise
+     * @return {@code true} if this mode and {@code lockMode} have at least one lock flag in common,
+     *         {@code false} otherwise
      */
     public boolean isXLockOf(final LockMode lockMode) {
         return (intValue & lockMode.intValue) > 0;

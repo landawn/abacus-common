@@ -20,7 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.ByteList;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Strings;
@@ -50,7 +50,7 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * @return the Class object for ByteList
      */
     @Override
-    public Class<ByteList> clazz() {
+    public Class<ByteList> javaType() {
         return ByteList.class;
     }
 
@@ -60,7 +60,7 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * @return the Type object representing byte elements
      */
     @Override
-    public Type<Byte> getElementType() {
+    public Type<Byte> elementType() {
         return elementType;
     }
 
@@ -68,10 +68,10 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * Returns the parameter types associated with this list type.
      *
      * @return an array containing the Byte Type that describes the elements of this list type
-     * @see #getElementType()
+     * @see #elementType()
      */
     @Override
-    public Type<Byte>[] getParameterTypes() {
+    public Type<Byte>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -241,7 +241,7 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * @throws IOException if an I/O error occurs
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final ByteList x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final ByteList x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

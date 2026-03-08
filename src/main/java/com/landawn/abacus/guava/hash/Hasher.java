@@ -59,8 +59,8 @@ import com.google.common.hash.HashCode;
  *
  * <p><b>Avoiding Collisions</b></p>
  * <p>Since data chunks are not delimited, be careful to avoid unintended collisions:</p>
- * 
- * <p><b>Usage Examples:</b></p>
+ *
+ * <p><b>Collision Example:</b></p>
  * <pre>{@code
  * // These produce the same hash:
  * hasher1.put("foo", StandardCharsets.UTF_8).put("bar", StandardCharsets.UTF_8).hash();

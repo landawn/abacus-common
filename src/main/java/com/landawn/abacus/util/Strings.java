@@ -84,7 +84,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Validation:</b> isEmpty, isBlank, isValidEmailAddress, isJavaIdentifier, isBase64</li>
  *   <li><b>Transformation:</b> reverse, abbreviate, capitalize, uncapitalize, swapCase</li>
  *   <li><b>Case Operations:</b> upperCase, lowerCase, toCamelCase, toSnakeCase, toUpperCamelCase</li>
- *   <li><b>Padding:</b> leftPad, rightPad, center with character or string padding</li>
+ *   <li><b>Padding:</b> padStart, padEnd, center with character or string padding</li>
  *   <li><b>Trimming:</b> trim, strip, trimToNull, stripToNull with whitespace handling</li>
  *   <li><b>Searching:</b> indexOf, lastIndexOf, contains, startsWith, endsWith</li>
  *   <li><b>Replacement:</b> replace, replaceAll, replaceFirst with pattern support</li>
@@ -120,7 +120,7 @@ import com.landawn.abacus.util.stream.Stream;
  * String camelCase   = Strings.toCamelCase("hello_world");     // Returns "helloWorld"
  *
  * // Padding and alignment operations
- * String padded   = Strings.leftPad("123", 5, '0');    // Returns "00123"
+ * String padded   = Strings.padStart("123", 5, '0');   // Returns "00123"
  * String centered = Strings.center("Hi", 6);           // Returns "  Hi  "
  * String trimmed  = Strings.trim("  text  ");          // Returns "text"
  *
@@ -1918,20 +1918,19 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {null, "hello", null, "world"};
-     * Strings.nullToEmpty(arr);   // arr becomes {"", "hello", "", "world"}
+     * Strings.nullElementsToEmpty(arr);   // arr becomes {"", "hello", "", "world"}
      * 
      * String[] arr2 = {"a", "b", "c"};
-     * Strings.nullToEmpty(arr2);            // arr2 remains {"a", "b", "c"}
+     * Strings.nullElementsToEmpty(arr2);   // arr2 remains {"a", "b", "c"}
      * 
-     * Strings.nullToEmpty(null);            // does nothing
-     * Strings.nullToEmpty(new String[0]);   // does nothing
+     * Strings.nullElementsToEmpty(null);          // does nothing
+     * Strings.nullElementsToEmpty(new String[0]); // does nothing
      * }</pre>
      *
      * @param strs the input string array to be checked. Each {@code null} element in the array will be converted to an empty string, may be {@code null} or empty
      * @see N#nullToEmpty(String[])
-     * @see N#nullElementsToEmpty(String[])
      */
-    public static void nullToEmpty(final String[] strs) {
+    public static void nullElementsToEmpty(final String[] strs) {
         if (N.isEmpty(strs)) {
             return;
         }
@@ -1973,19 +1972,19 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"", "hello", "", "world"};
-     * Strings.emptyToNull(arr);   // arr becomes {null, "hello", null, "world"}
+     * Strings.emptyElementsToNull(arr);   // arr becomes {null, "hello", null, "world"}
      * 
      * String[] arr2 = {"a", "   ", "c"};
-     * Strings.emptyToNull(arr2);            // arr2 remains {"a", "   ", "c"} (spaces are not empty)
+     * Strings.emptyElementsToNull(arr2);   // arr2 remains {"a", "   ", "c"} (spaces are not empty)
      * 
-     * Strings.emptyToNull(null);            // does nothing
-     * Strings.emptyToNull(new String[0]);   // does nothing
+     * Strings.emptyElementsToNull(null);          // does nothing
+     * Strings.emptyElementsToNull(new String[0]); // does nothing
      * }</pre>
      *
      * @param <T> the type of the CharSequence
      * @param strs the input string array to be checked. Each empty element in the array will be converted to {@code null}, may be {@code null} or empty
      */
-    public static <T extends CharSequence> void emptyToNull(final T[] strs) {
+    public static <T extends CharSequence> void emptyElementsToNull(final T[] strs) {
         if (N.isEmpty(strs)) {
             return;
         }
@@ -2028,18 +2027,18 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {null, "   ", "hello", "\t"};
-     * Strings.blankToEmpty(arr);   // arr becomes {"", "", "hello", ""}
+     * Strings.blankElementsToEmpty(arr);   // arr becomes {"", "", "hello", ""}
      * 
      * String[] arr2 = {"a", "  b  ", "c"};
-     * Strings.blankToEmpty(arr2);            // arr2 remains {"a", "  b  ", "c"}
+     * Strings.blankElementsToEmpty(arr2);   // arr2 remains {"a", "  b  ", "c"}
      * 
-     * Strings.blankToEmpty(null);            // does nothing
-     * Strings.blankToEmpty(new String[0]);   // does nothing
+     * Strings.blankElementsToEmpty(null);          // does nothing
+     * Strings.blankElementsToEmpty(new String[0]); // does nothing
      * }</pre>
      *
      * @param strs the input string array to be checked. Each blank element in the array will be converted to an empty string, may be {@code null} or empty
      */
-    public static void blankToEmpty(final String[] strs) {
+    public static void blankElementsToEmpty(final String[] strs) {
         if (N.isEmpty(strs)) {
             return;
         }
@@ -2083,19 +2082,19 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"   ", "hello", "\t", "world"};
-     * Strings.blankToNull(arr);   // arr becomes {null, "hello", null, "world"}
+     * Strings.blankElementsToNull(arr);   // arr becomes {null, "hello", null, "world"}
      * 
      * String[] arr2 = {"a", "  b  ", "c"};
-     * Strings.blankToNull(arr2);            // arr2 remains {"a", "  b  ", "c"}
+     * Strings.blankElementsToNull(arr2);   // arr2 remains {"a", "  b  ", "c"}
      * 
-     * Strings.blankToNull(null);            // does nothing
-     * Strings.blankToNull(new String[0]);   // does nothing
+     * Strings.blankElementsToNull(null);          // does nothing
+     * Strings.blankElementsToNull(new String[0]); // does nothing
      * }</pre>
      *
      * @param <T> the type of the CharSequence
      * @param strs the input string array to be checked. Each blank element in the array will be converted to {@code null}, may be {@code null} or empty
      */
-    public static <T extends CharSequence> void blankToNull(final T[] strs) {
+    public static <T extends CharSequence> void blankElementsToNull(final T[] strs) {
         if (N.isEmpty(strs)) {
             return;
         }
@@ -13869,7 +13868,7 @@ public final class Strings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Strings.substringBetween("user@example.com", 3, '@');   // returns "r"
+     * Strings.substringBetween("user@example.com", -1, '@');   // returns "user"
      * Strings.substringBetween("a,b,c,d", 1, ',');            // returns "b"
      * Strings.substringBetween("test", -1, 's');              // returns "te"
      * Strings.substringBetween("test", 2, 'x');               // returns null (delimiter not found)
@@ -13913,7 +13912,7 @@ public final class Strings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Strings.substringBetween("Hello World Java", 5, " ");    // returns "World"
-     * Strings.substringBetween("user@@domain.com", 3, "@@");   // returns "r"
+     * Strings.substringBetween("user@@domain.com", -1, "@@");   // returns "user"
      * Strings.substringBetween("test", -1, "st");              // returns "te"
      * Strings.substringBetween("test", 2, "xyz");              // returns null (delimiter not found)
      * Strings.substringBetween(null, 0, "@");                  // returns null

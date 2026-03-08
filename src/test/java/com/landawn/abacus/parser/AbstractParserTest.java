@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.landawn.abacus.AbstractTest;
-import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
+import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.entity.PersonType;
 import com.landawn.abacus.parser.entity.XBean;
 import com.landawn.abacus.types.WeekDay;
@@ -51,7 +51,7 @@ public abstract class AbstractParserTest extends AbstractTest {
     public static final XmlParser xmlDOMParser = ParserFactory.createXmlDOMParser();
     protected static final XmlParser jaxbXmlParser = ParserFactory.createJaxbParser();
     protected static final KryoParser kryoParser = ParserFactory.createKryoParser();
-    protected static final JsonSerializationConfig jsc = JSC.of(true, true);
+    protected static final JsonSerConfig jsc = JsonSerConfig.create().setQuotePropName(true).setQuoteMapKey(true);
     protected static final XBean xBean = createXBean();
     protected static final XBean bigXBean = createXBean(100);
     static final ObjectMapper objMapper = new ObjectMapper();
@@ -92,9 +92,9 @@ public abstract class AbstractParserTest extends AbstractTest {
         }
     }
 
-    protected final Parser<? extends SerializationConfig, ? extends DeserializationConfig> parser = getParser();
+    protected final Parser<? extends SerializationConfig, ? extends Deserialization> parser = getParser();
 
-    protected abstract Parser<? extends SerializationConfig, ? extends DeserializationConfig> getParser();
+    protected abstract Parser<? extends SerializationConfig, ? extends Deserialization> getParser();
 
     protected static XBean createXBean() {
         XBean xBean = new XBean();

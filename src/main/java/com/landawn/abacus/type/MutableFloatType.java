@@ -9,8 +9,9 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.MutableFloat;
 import com.landawn.abacus.util.N;
@@ -43,14 +44,14 @@ public class MutableFloatType extends NumberType<MutableFloat> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<MutableFloat> type = TypeFactory.getType(MutableFloat.class);
-     * Class<MutableFloat> clazz = type.clazz();
+     * Class<MutableFloat> clazz = type.javaType();
      * // clazz equals MutableFloat.class
      * }</pre>
      *
      * @return the Class object for MutableFloat
      */
     @Override
-    public Class<MutableFloat> clazz() {
+    public Class<MutableFloat> javaType() {
         return MutableFloat.class;
     }
 
@@ -124,7 +125,9 @@ public class MutableFloatType extends NumberType<MutableFloat> {
      */
     @Override
     public MutableFloat get(final ResultSet rs, final int columnIndex) throws SQLException {
-        return MutableFloat.of(rs.getFloat(columnIndex));
+        final float value = rs.getFloat(columnIndex);
+
+        return rs.wasNull() ? null : MutableFloat.of(value);
     }
 
     /**
@@ -148,7 +151,9 @@ public class MutableFloatType extends NumberType<MutableFloat> {
      */
     @Override
     public MutableFloat get(final ResultSet rs, final String columnName) throws SQLException {
-        return MutableFloat.of(rs.getFloat(columnName));
+        final float value = rs.getFloat(columnName);
+
+        return rs.wasNull() ? null : MutableFloat.of(value);
     }
 
     /**
@@ -176,7 +181,11 @@ public class MutableFloatType extends NumberType<MutableFloat> {
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final MutableFloat x) throws SQLException {
-        stmt.setFloat(columnIndex, (x == null) ? 0 : x.value());
+        if (x == null) {
+            stmt.setNull(columnIndex, Types.FLOAT);
+        } else {
+            stmt.setFloat(columnIndex, x.value());
+        }
     }
 
     /**
@@ -204,7 +213,11 @@ public class MutableFloatType extends NumberType<MutableFloat> {
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final MutableFloat x) throws SQLException {
-        stmt.setFloat(parameterName, (x == null) ? 0 : x.value());
+        if (x == null) {
+            stmt.setNull(parameterName, Types.FLOAT);
+        } else {
+            stmt.setFloat(parameterName, x.value());
+        }
     }
 
     /**
@@ -261,7 +274,7 @@ public class MutableFloatType extends NumberType<MutableFloat> {
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final MutableFloat x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final MutableFloat x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

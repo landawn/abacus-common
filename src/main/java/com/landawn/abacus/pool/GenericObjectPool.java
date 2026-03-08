@@ -231,7 +231,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *
      * @param element the object to add, must not be {@code null}
      * @return {@code true} if the object was successfully added, {@code false} otherwise
-     * @throws IllegalArgumentException if the object is null
+     * @throws IllegalArgumentException if the element is null
      * @throws IllegalStateException if the pool has been closed
      */
     @Override
@@ -310,9 +310,9 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * This method ensures proper cleanup of resources if the object cannot be added.
      *
      * @param element the object to add, must not be {@code null}
-     * @param autoDestroyOnFailedToAdd if {@code true}, calls e.destroy(PUT_ADD_FAILURE) if add fails
+     * @param autoDestroyOnFailedToAdd if {@code true}, calls element.destroy(PUT_ADD_FAILURE) if add fails
      * @return {@code true} if the object was successfully added, {@code false} otherwise
-     * @throws IllegalArgumentException if the object is null
+     * @throws IllegalArgumentException if the element is null
      * @throws IllegalStateException if the pool has been closed
      */
     @Override
@@ -357,7 +357,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @param unit the time unit of the timeout argument
      * @return {@code true} if successful, {@code false} if the timeout elapsed before space was available
      *         or if the maxSpins safety limit (10,000 iterations) is reached
-     * @throws IllegalArgumentException if the object is null
+     * @throws IllegalArgumentException if the element is null
      * @throws IllegalStateException if the pool has been closed
      * @throws InterruptedException if interrupted while waiting
      */
@@ -441,7 +441,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @param element the object to add, must not be {@code null}
      * @param timeout the maximum time to wait
      * @param unit the time unit of the timeout argument
-     * @param autoDestroyOnFailedToAdd if {@code true}, calls e.destroy(PUT_ADD_FAILURE) if add fails
+     * @param autoDestroyOnFailedToAdd if {@code true}, calls element.destroy(PUT_ADD_FAILURE) if add fails
      * @return {@code true} if successful, {@code false} if the timeout elapsed or add failed
      * @throws InterruptedException if interrupted while waiting
      */
@@ -648,7 +648,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Removes a portion of objects from the pool based on the configured balance factor.
      * Objects are selected for removal according to the eviction policy.
-     * After vacating, signals waiting threads that space is now available in the pool.
+     * After evicting, signals waiting threads that space is now available in the pool.
      *
      * @throws IllegalStateException if the pool has been closed
      */
@@ -659,7 +659,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         lock.lock();
 
         try {
-            evict((int) (pool.size() * balanceFactor)); // NOSONAR
+            evict(numberToAutoBalance()); // NOSONAR
 
             notFull.signalAll();
         } finally {
@@ -698,6 +698,8 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         } finally {
             lock.unlock();
         }
+
+        removeShutdownHook();
 
         try {
             if (scheduleFuture != null) {
@@ -783,7 +785,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
     /**
      * Removes the specified number of objects from the pool based on the eviction policy.
-     * This method is called internally during vacate operations.
+     * This method is called internally during eviction operations.
      *
      * @param numberToEvict the number of objects to remove
      */
@@ -812,6 +814,14 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
             destroyAll(heap, Caller.VACATE);
         }
+    }
+
+    private int numberToAutoBalance() {
+        if (pool.isEmpty()) {
+            return 0;
+        }
+
+        return Math.max(1, (int) (pool.size() * balanceFactor));
     }
 
     /**
@@ -940,8 +950,8 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Deserializes this pool from an ObjectInputStream.
-     * The pool is locked during deserialization to ensure consistency.
+     * Deserializes this pool from an ObjectInputStream and reinitializes transient fields
+     * (lock, conditions, comparator, and eviction task).
      * 
      * @param is the input stream
      * @throws IOException if an I/O error occurs

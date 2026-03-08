@@ -131,8 +131,8 @@ public class JsonParserImpl2025Test extends TestBase {
 
     @Test
     public void test_constructor_withConfig() {
-        JsonSerializationConfig jsc = new JsonSerializationConfig();
-        JsonDeserializationConfig jdc = new JsonDeserializationConfig();
+        JsonSerConfig jsc = new JsonSerConfig();
+        JsonDeserConfig jdc = new JsonDeserConfig();
         JsonParser parser = new JsonParserImpl(jsc, jdc);
         assertNotNull(parser);
     }

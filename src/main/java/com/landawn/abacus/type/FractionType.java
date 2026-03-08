@@ -24,6 +24,7 @@ import com.landawn.abacus.util.Strings;
  */
 public class FractionType extends AbstractType<Fraction> {
 
+    /** The type name constant for Fraction type identification. */
     public static final String FRACTION = Fraction.class.getSimpleName();
 
     FractionType() {
@@ -36,14 +37,14 @@ public class FractionType extends AbstractType<Fraction> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Fraction> type = TypeFactory.getType(Fraction.class);
-     * Class<Fraction> clazz = type.clazz();
+     * Class<Fraction> clazz = type.javaType();
      * // Returns: Fraction.class
      * }</pre>
      *
      * @return Fraction.class
      */
     @Override
-    public Class<Fraction> clazz() {
+    public Class<Fraction> javaType() {
         return Fraction.class;
     }
 
@@ -127,7 +128,7 @@ public class FractionType extends AbstractType<Fraction> {
      *
      * fraction = Fraction.of(5, 1);
      * result = type.stringOf(fraction);
-     * // Returns: "5"
+     * // Returns: "5/1"
      *
      * result = type.stringOf(null);
      * // Returns: null

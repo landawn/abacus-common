@@ -31,7 +31,7 @@ public class RefType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(Ref.class, refType.clazz());
+        assertEquals(Ref.class, refType.javaType());
     }
 
     @Test

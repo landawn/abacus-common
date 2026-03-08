@@ -1882,7 +1882,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *         A list with exactly two different boolean values (one {@code true} and one false) returns {@code false}.
      */
     @Override
-    public boolean hasDuplicates() {
+    public boolean containsDuplicates() {
         if (size < 2) {
             return false;
         } else if (size == 2) {

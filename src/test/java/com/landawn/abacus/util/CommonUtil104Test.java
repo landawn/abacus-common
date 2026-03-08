@@ -15,6 +15,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -806,6 +807,31 @@ public class CommonUtil104Test extends TestBase {
     //         assertEquals("b", iter.next());
     //         assertEquals("c", iter.next());
     //     }
+
+    @Test
+    public void testToLinkedHashMap() {
+        Map<String, Integer> map = CommonUtil.toLinkedHashMap("a", 1);
+        assertTrue(map instanceof LinkedHashMap);
+        assertEquals(1, map.size());
+
+        map = CommonUtil.toLinkedHashMap("a", 1, "b", 2);
+        assertEquals(2, map.size());
+
+        map = CommonUtil.toLinkedHashMap("a", 1, "b", 2, "c", 3);
+        assertEquals(3, map.size());
+
+        map = CommonUtil.toLinkedHashMap("a", 1, "b", 2, "c", 3, "d", 4, "e", 5);
+        assertEquals(5, map.size());
+
+        Iterator<String> iter = map.keySet().iterator();
+        assertEquals("a", iter.next());
+        assertEquals("b", iter.next());
+        assertEquals("c", iter.next());
+        assertEquals("d", iter.next());
+        assertEquals("e", iter.next());
+
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.toLinkedHashMap("a", 1, "b"));
+    }
 
     //     @Test
     //     public void testAsProps() {

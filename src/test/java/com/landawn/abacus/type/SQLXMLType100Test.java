@@ -31,7 +31,7 @@ public class SQLXMLType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(SQLXML.class, sqlXMLType.clazz());
+        assertEquals(SQLXML.class, sqlXMLType.javaType());
     }
 
     @Test

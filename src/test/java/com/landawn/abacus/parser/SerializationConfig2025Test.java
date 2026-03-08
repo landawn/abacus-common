@@ -70,35 +70,35 @@ public class SerializationConfig2025Test extends TestBase {
 
     @Test
     public void test_skipTransientField_defaultValue() {
-        assertTrue(config.skipTransientField());
+        assertTrue(config.isSkipTransientField());
     }
 
     @Test
     public void test_skipTransientField_setTrue() {
-        config.skipTransientField(true);
-        assertTrue(config.skipTransientField());
+        config.setSkipTransientField(true);
+        assertTrue(config.isSkipTransientField());
     }
 
     @Test
     public void test_skipTransientField_setFalse() {
-        config.skipTransientField(false);
-        assertFalse(config.skipTransientField());
+        config.setSkipTransientField(false);
+        assertFalse(config.isSkipTransientField());
     }
 
     @Test
     public void test_skipTransientField_methodChaining() {
-        TestSerializationConfig result = config.skipTransientField(false);
+        TestSerializationConfig result = config.setSkipTransientField(false);
         assertEquals(config, result);
-        assertFalse(config.skipTransientField());
+        assertFalse(config.isSkipTransientField());
     }
 
     @Test
     public void test_skipTransientField_toggleValue() {
-        config.skipTransientField(false);
-        assertFalse(config.skipTransientField());
+        config.setSkipTransientField(false);
+        assertFalse(config.isSkipTransientField());
 
-        config.skipTransientField(true);
-        assertTrue(config.skipTransientField());
+        config.setSkipTransientField(true);
+        assertTrue(config.isSkipTransientField());
     }
 
     @Test
@@ -134,10 +134,10 @@ public class SerializationConfig2025Test extends TestBase {
     @Test
     public void test_hashCode_withSkipTransientField() {
         TestSerializationConfig config1 = new TestSerializationConfig();
-        config1.skipTransientField(false);
+        config1.setSkipTransientField(false);
 
         TestSerializationConfig config2 = new TestSerializationConfig();
-        config2.skipTransientField(false);
+        config2.setSkipTransientField(false);
 
         assertEquals(config1.hashCode(), config2.hashCode());
     }
@@ -145,10 +145,10 @@ public class SerializationConfig2025Test extends TestBase {
     @Test
     public void test_hashCode_withDifferentSkipTransientField() {
         TestSerializationConfig config1 = new TestSerializationConfig();
-        config1.skipTransientField(true);
+        config1.setSkipTransientField(true);
 
         TestSerializationConfig config2 = new TestSerializationConfig();
-        config2.skipTransientField(false);
+        config2.setSkipTransientField(false);
 
         assertNotEquals(config1.hashCode(), config2.hashCode());
     }
@@ -192,10 +192,10 @@ public class SerializationConfig2025Test extends TestBase {
     @Test
     public void test_equals_withSameSkipTransientField() {
         TestSerializationConfig config1 = new TestSerializationConfig();
-        config1.skipTransientField(false);
+        config1.setSkipTransientField(false);
 
         TestSerializationConfig config2 = new TestSerializationConfig();
-        config2.skipTransientField(false);
+        config2.setSkipTransientField(false);
 
         assertTrue(config1.equals(config2));
     }
@@ -203,10 +203,10 @@ public class SerializationConfig2025Test extends TestBase {
     @Test
     public void test_equals_withDifferentSkipTransientField() {
         TestSerializationConfig config1 = new TestSerializationConfig();
-        config1.skipTransientField(true);
+        config1.setSkipTransientField(true);
 
         TestSerializationConfig config2 = new TestSerializationConfig();
-        config2.skipTransientField(false);
+        config2.setSkipTransientField(false);
 
         assertFalse(config1.equals(config2));
     }
@@ -261,12 +261,12 @@ public class SerializationConfig2025Test extends TestBase {
 
         TestSerializationConfig config1 = new TestSerializationConfig();
         config1.setExclusion(Exclusion.NULL);
-        config1.skipTransientField(false);
+        config1.setSkipTransientField(false);
         config1.setIgnoredPropNames(props);
 
         TestSerializationConfig config2 = new TestSerializationConfig();
         config2.setExclusion(Exclusion.NULL);
-        config2.skipTransientField(false);
+        config2.setSkipTransientField(false);
         config2.setIgnoredPropNames(props);
 
         assertTrue(config1.equals(config2));
@@ -292,7 +292,7 @@ public class SerializationConfig2025Test extends TestBase {
 
     @Test
     public void test_toString_withSkipTransientFieldFalse() {
-        config.skipTransientField(false);
+        config.setSkipTransientField(false);
         String result = config.toString();
         assertNotNull(result);
         assertTrue(result.contains("false"));
@@ -326,9 +326,9 @@ public class SerializationConfig2025Test extends TestBase {
 
     @Test
     public void test_copy_copiesSkipTransientField() {
-        config.skipTransientField(false);
+        config.setSkipTransientField(false);
         TestSerializationConfig copy = config.copy();
-        assertFalse(copy.skipTransientField());
+        assertFalse(copy.isSkipTransientField());
     }
 
     @Test
@@ -356,11 +356,11 @@ public class SerializationConfig2025Test extends TestBase {
         Set<String> props = new HashSet<>();
         props.add("field1");
 
-        TestSerializationConfig result = config.setExclusion(Exclusion.NULL).skipTransientField(false).setIgnoredPropNames(props);
+        TestSerializationConfig result = config.setExclusion(Exclusion.NULL).setSkipTransientField(false).setIgnoredPropNames(props);
 
         assertEquals(config, result);
         assertEquals(Exclusion.NULL, config.getExclusion());
-        assertFalse(config.skipTransientField());
+        assertFalse(config.isSkipTransientField());
         assertNotNull(config.getIgnoredPropNames());
     }
 }

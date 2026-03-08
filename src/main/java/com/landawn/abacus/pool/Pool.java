@@ -55,7 +55,6 @@ public interface Pool extends Serializable, AutoCloseable {
      * }
      * }</pre>
      *
-     * @throws IllegalStateException if the pool has been closed
      */
     void lock();
 

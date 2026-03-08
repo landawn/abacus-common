@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -28,13 +28,13 @@ public class AbstractIntegerType100Test extends TestBase {
 
     private Type<Number> integerType;
     private CharacterWriter writer;
-    private JsonXmlSerializationConfig<?> config;
+    private JsonXmlSerConfig<?> config;
 
     @BeforeEach
     public void setUp() {
         integerType = createType("Integer");
         writer = createCharacterWriter();
-        config = mock(JsonXmlSerializationConfig.class);
+        config = mock(JsonXmlSerConfig.class);
     }
 
     @Test
@@ -156,7 +156,7 @@ public class AbstractIntegerType100Test extends TestBase {
         integerType.writeCharacter(writer, 123, null);
         verify(writer).writeInt(123);
 
-        when(config.writeNullNumberAsZero()).thenReturn(true);
+        when(config.isWriteNullNumberAsZero()).thenReturn(true);
         integerType.writeCharacter(writer, null, config);
         verify(writer).writeInt(0);
     }

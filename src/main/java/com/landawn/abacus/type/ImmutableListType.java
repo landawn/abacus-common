@@ -17,7 +17,7 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.util.List;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ImmutableList;
@@ -72,7 +72,7 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * @return the Class object for ImmutableList
      */
     @Override
-    public Class<ImmutableList<E>> clazz() {
+    public Class<ImmutableList<E>> javaType() {
         return typeClass;
     }
 
@@ -82,7 +82,7 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * @return the Type instance representing the element type of this immutable list
      */
     @Override
-    public Type<E> getElementType() {
+    public Type<E> elementType() {
         return elementType;
     }
 
@@ -93,7 +93,7 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * @return an array containing the element type as the only parameter type
      */
     @Override
-    public Type<E>[] getParameterTypes() {
+    public Type<E>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -142,7 +142,7 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * @return SerializationType.SERIALIZABLE if elements are serializable, SerializationType.COLLECTION otherwise
      */
     @Override
-    public SerializationType getSerializationType() {
+    public SerializationType serializationType() {
         return isSerializable() ? SerializationType.SERIALIZABLE : SerializationType.COLLECTION;
     }
 
@@ -233,7 +233,7 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * <pre>{@code
      * Type<ImmutableList<String>> type = TypeFactory.getType("ImmutableList<String>");
      * CharacterWriter writer = new CharacterWriter();
-     * JsonXmlSerializationConfig config = JsonXmlSerializationConfig.of();
+     * JsonXmlSerConfig config = JsonXmlSerConfig.of();
      * ImmutableList<String> list = ImmutableList.of("apple", "banana");
      * type.writeCharacter(writer, list, config);
      * String result = writer.toString();
@@ -246,7 +246,7 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final ImmutableList<E> x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final ImmutableList<E> x, final JsonXmlSerConfig<?> config) throws IOException {
         listType.writeCharacter(writer, x, config);
     }
 

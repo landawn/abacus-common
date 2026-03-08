@@ -49,7 +49,7 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      * @return the Class object for BigInteger.class
      */
     @Override
-    public Class<BigInteger> clazz() {
+    public Class<BigInteger> javaType() {
         return BigInteger.class;
     }
 

@@ -45,7 +45,7 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      * @return The Class object representing Calendar.class
      */
     @Override
-    public Class<Calendar> clazz() {
+    public Class<Calendar> javaType() {
         return Calendar.class;
     }
 

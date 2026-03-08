@@ -880,10 +880,10 @@ public class ShortList2025Test extends TestBase {
     @Test
     public void testHasDuplicates() {
         ShortList list1 = ShortList.of((short) 1, (short) 2, (short) 2, (short) 3);
-        assertTrue(list1.hasDuplicates());
+        assertTrue(list1.containsDuplicates());
 
         ShortList list2 = ShortList.of((short) 1, (short) 2, (short) 3);
-        assertFalse(list2.hasDuplicates());
+        assertFalse(list2.containsDuplicates());
     }
 
     @Test

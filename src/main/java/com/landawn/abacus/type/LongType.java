@@ -46,7 +46,7 @@ public final class LongType extends AbstractLongType {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public Class clazz() {
+    public Class javaType() {
         return Long.class;
     }
 

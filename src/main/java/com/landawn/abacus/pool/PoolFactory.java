@@ -69,7 +69,7 @@ package com.landawn.abacus.pool;
 public final class PoolFactory { //NOSONAR
 
     private PoolFactory() {
-        // singleton
+        // Utility class - prevent instantiation
     }
 
     /**

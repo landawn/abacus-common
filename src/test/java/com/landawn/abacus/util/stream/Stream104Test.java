@@ -420,9 +420,9 @@ public class Stream104Test extends TestBase {
     @Test
     public void testStreamCreatedAfterOnEach() {
         List<Integer> list = new ArrayList<>();
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).onEach(list::add).count());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).peek(list::add).count());
         list.clear();
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).onEach(list::add).skip(1).count());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).peek(list::add).skip(1).count());
         list.clear();
         assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).peek(list::add).toArray());
         list.clear();

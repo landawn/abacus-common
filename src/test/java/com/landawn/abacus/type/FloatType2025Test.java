@@ -39,7 +39,7 @@ public class FloatType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(Float.class, type.clazz());
+        assertEquals(Float.class, type.javaType());
     }
 
     @Test

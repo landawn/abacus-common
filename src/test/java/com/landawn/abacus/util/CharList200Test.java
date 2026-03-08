@@ -546,13 +546,13 @@ public class CharList200Test extends TestBase {
 
     @Test
     public void testHasDuplicates() {
-        assertFalse(list.hasDuplicates());
+        assertFalse(list.containsDuplicates());
         list.add('a');
-        assertFalse(list.hasDuplicates());
+        assertFalse(list.containsDuplicates());
         list.add('b');
-        assertFalse(list.hasDuplicates());
+        assertFalse(list.containsDuplicates());
         list.add('a');
-        assertTrue(list.hasDuplicates());
+        assertTrue(list.containsDuplicates());
     }
 
     @Test

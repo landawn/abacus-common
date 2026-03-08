@@ -37,7 +37,7 @@ public class GregorianCalendarType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(GregorianCalendar.class, gregorianCalendarType.clazz());
+        assertEquals(GregorianCalendar.class, gregorianCalendarType.javaType());
     }
 
     @Test

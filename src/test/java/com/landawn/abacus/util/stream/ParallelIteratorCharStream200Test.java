@@ -161,7 +161,7 @@ public class ParallelIteratorCharStream200Test extends TestBase {
     @Test
     public void testOnEach() {
         StringBuilder sb = new StringBuilder();
-        List<Character> result = stream.onEach(e -> {
+        List<Character> result = stream.peek(e -> {
             synchronized (sb) {
                 sb.append(e);
             }

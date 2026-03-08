@@ -8,6 +8,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +40,7 @@ public class MutableDoubleType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<MutableDouble> clazz = mutableDoubleType.clazz();
+        Class<MutableDouble> clazz = mutableDoubleType.javaType();
         assertEquals(MutableDouble.class, clazz);
     }
 
@@ -101,7 +102,7 @@ public class MutableDoubleType100Test extends TestBase {
     @Test
     public void testSetPreparedStatementWithNull() throws SQLException {
         mutableDoubleType.set(mockPreparedStatement, 1, null);
-        Mockito.verify(mockPreparedStatement).setDouble(1, 0.0);
+        Mockito.verify(mockPreparedStatement).setNull(1, Types.DOUBLE);
     }
 
     @Test
@@ -113,7 +114,7 @@ public class MutableDoubleType100Test extends TestBase {
     @Test
     public void testSetCallableStatementWithNull() throws SQLException {
         mutableDoubleType.set(mockCallableStatement, "param", null);
-        Mockito.verify(mockCallableStatement).setDouble("param", 0.0);
+        Mockito.verify(mockCallableStatement).setNull("param", Types.DOUBLE);
     }
 
     @Test

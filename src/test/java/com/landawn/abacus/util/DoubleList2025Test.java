@@ -1344,15 +1344,15 @@ public class DoubleList2025Test extends TestBase {
     @Test
     public void testHasDuplicates() {
         list.addAll(new double[] { 1.1, 2.2, 2.2, 3.3 });
-        assertTrue(list.hasDuplicates());
+        assertTrue(list.containsDuplicates());
 
         DoubleList noDupes = DoubleList.of(1.1, 2.2, 3.3);
-        assertFalse(noDupes.hasDuplicates());
+        assertFalse(noDupes.containsDuplicates());
     }
 
     @Test
     public void testHasDuplicatesEmpty() {
-        assertFalse(list.hasDuplicates());
+        assertFalse(list.containsDuplicates());
     }
 
     @Test

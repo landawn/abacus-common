@@ -401,7 +401,7 @@ public class ParallelArrayStream103Test extends TestBase {
             AtomicInteger sum = new AtomicInteger(0);
             Consumer<Integer> addToSum = sum::addAndGet;
 
-            List<Integer> result = stream.limit(5).onEach(addToSum).sorted().toList();
+            List<Integer> result = stream.limit(5).peek(addToSum).sorted().toList();
 
             assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
             assertEquals(15, sum.get());
@@ -709,7 +709,7 @@ public class ParallelArrayStream103Test extends TestBase {
         public void testNMatch() {
             Predicate<Integer> even = x -> x % 2 == 0;
 
-            boolean result = stream.isMatchCountBetween(3, 7, even);
+            boolean result = stream.hasMatchCountBetween(3, 7, even);
 
             assertTrue(result);
         }
@@ -719,7 +719,7 @@ public class ParallelArrayStream103Test extends TestBase {
         public void testNMatchOutsideRange() {
             Predicate<Integer> even = x -> x % 2 == 0;
 
-            boolean result = stream.isMatchCountBetween(1, 3, even);
+            boolean result = stream.hasMatchCountBetween(1, 3, even);
 
             assertFalse(result);
         }

@@ -35,8 +35,8 @@ public class ParserFactory2025Test extends TestBase {
 
     @Test
     public void test_createJsonParser_withConfig() {
-        JsonSerializationConfig jsc = new JsonSerializationConfig();
-        JsonDeserializationConfig jdc = new JsonDeserializationConfig();
+        JsonSerConfig jsc = new JsonSerConfig();
+        JsonDeserConfig jdc = new JsonDeserConfig();
         JsonParser parser = ParserFactory.createJsonParser(jsc, jdc);
         assertNotNull(parser);
     }
@@ -68,8 +68,8 @@ public class ParserFactory2025Test extends TestBase {
     @Test
     public void test_createAbacusXmlParser_withConfig() {
         if (ParserFactory.isAbacusXmlParserAvailable()) {
-            XmlSerializationConfig xsc = new XmlSerializationConfig();
-            XmlDeserializationConfig xdc = new XmlDeserializationConfig();
+            XmlSerConfig xsc = new XmlSerConfig();
+            XmlDeserConfig xdc = new XmlDeserConfig();
             XmlParser parser = ParserFactory.createAbacusXmlParser(xsc, xdc);
             assertNotNull(parser);
         }
@@ -86,8 +86,8 @@ public class ParserFactory2025Test extends TestBase {
     @Test
     public void test_createXmlParser_withConfig() {
         if (ParserFactory.isXmlParserAvailable()) {
-            XmlSerializationConfig xsc = new XmlSerializationConfig();
-            XmlDeserializationConfig xdc = new XmlDeserializationConfig();
+            XmlSerConfig xsc = new XmlSerConfig();
+            XmlDeserConfig xdc = new XmlDeserConfig();
             XmlParser parser = ParserFactory.createXmlParser(xsc, xdc);
             assertNotNull(parser);
         }
@@ -101,8 +101,8 @@ public class ParserFactory2025Test extends TestBase {
 
     @Test
     public void test_createJaxbParser_withConfig() {
-        XmlSerializationConfig xsc = new XmlSerializationConfig();
-        XmlDeserializationConfig xdc = new XmlDeserializationConfig();
+        XmlSerConfig xsc = new XmlSerConfig();
+        XmlDeserConfig xdc = new XmlDeserConfig();
         XmlParser parser = ParserFactory.createJaxbParser(xsc, xdc);
         assertNotNull(parser);
     }

@@ -338,7 +338,7 @@ import com.landawn.abacus.util.Tuple.Tuple7;
 public final class Futures {
 
     private Futures() {
-        // singleton.
+        // Utility class - prevent instantiation
     }
 
     /**

@@ -52,8 +52,7 @@ import java.util.stream.Collector;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonParser;
-import com.landawn.abacus.parser.JsonSerializationConfig;
-import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
+import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.KryoParser;
 import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.parser.ParserUtil;
@@ -61,8 +60,7 @@ import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.parser.XmlConstants;
 import com.landawn.abacus.parser.XmlParser;
-import com.landawn.abacus.parser.XmlSerializationConfig;
-import com.landawn.abacus.parser.XmlSerializationConfig.XSC;
+import com.landawn.abacus.parser.XmlSerConfig;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
@@ -133,9 +131,9 @@ public final class RowDataset implements Dataset, Cloneable {
 
     private static final KryoParser kryoParser = ParserFactory.isKryoParserAvailable() ? ParserFactory.createKryoParser() : null;
 
-    private static final JsonSerializationConfig jsc = JSC.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP);
+    private static final JsonSerConfig jsc = JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP);
 
-    private static final XmlSerializationConfig xsc = XSC.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP);
+    private static final XmlSerConfig xsc = XmlSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP);
 
     private static final Type<Object> strType = Type.of(String.class);
 
@@ -267,7 +265,7 @@ public final class RowDataset implements Dataset, Cloneable {
         N.checkArgNotNull(columnList);
 
         N.checkArgument(!N.anyEmpty(columnNameList), "Empty column name found in: {}", columnNameList);
-        N.checkArgument(!N.hasDuplicates(columnNameList), "Duplicated column names found in: {}", columnNameList);
+        N.checkArgument(!N.containsDuplicates(columnNameList), "Duplicated column names found in: {}", columnNameList);
         N.checkArgument(columnNameList.size() == columnList.size(), "The size of column name list: {} is different from the size of column list: {}",
                 columnNameList.size(), columnList.size());
 
@@ -465,7 +463,7 @@ public final class RowDataset implements Dataset, Cloneable {
     public void renameColumns(final Map<String, String> oldNewNames) throws IllegalArgumentException {
         checkFrozen();
 
-        if (N.hasDuplicates(oldNewNames.values())) {
+        if (N.containsDuplicates(oldNewNames.values())) {
             throw new IllegalArgumentException("Duplicated new column names: " + oldNewNames.values());
         }
 
@@ -2296,13 +2294,13 @@ public final class RowDataset implements Dataset, Cloneable {
                         }
                     }
 
-                    final Type<Object> propBeanType = propInfo.type.isCollection() ? (Type<Object>) propInfo.type.getElementType() : propInfo.type;
+                    final Type<Object> propBeanType = propInfo.type.isCollection() ? (Type<Object>) propInfo.type.elementType() : propInfo.type;
 
                     if (!propBeanType.isBean()) {
                         throw new UnsupportedOperationException("Property: " + propInfo.name + " in class: " + rowClass + " is not a bean type");
                     }
 
-                    final Class<Object> propBeanClass = propBeanType.clazz();
+                    final Class<Object> propBeanClass = propBeanType.javaType();
                     final BeanInfo propBeanInfo = ParserUtil.getBeanInfo(propBeanClass);
                     final List<String> newTmpColumnNameList = new ArrayList<>();
                     final List<List<Object>> newTmpColumnList = new ArrayList<>();
@@ -2353,7 +2351,7 @@ public final class RowDataset implements Dataset, Cloneable {
             return (T) result;
         } else {
             throw new IllegalArgumentException(
-                    "Unsupported row type: " + rowType.clazz().getCanonicalName() + ". Only Array, Collection, Map and bean class are supported");
+                    "Unsupported row type: " + rowType.javaType().getCanonicalName() + ". Only Array, Collection, Map and bean class are supported");
         }
     }
 
@@ -3096,13 +3094,13 @@ public final class RowDataset implements Dataset, Cloneable {
                         }
                     }
 
-                    final Type<?> propBeanType = propInfo.type.isCollection() ? propInfo.type.getElementType() : propInfo.type;
+                    final Type<?> propBeanType = propInfo.type.isCollection() ? propInfo.type.elementType() : propInfo.type;
 
                     if (!propBeanType.isBean()) {
                         throw new UnsupportedOperationException("Property: " + propInfo.name + " in class: " + rowType + " is not a bean type");
                     }
 
-                    final Class<?> propBeanClass = propBeanType.clazz();
+                    final Class<?> propBeanClass = propBeanType.javaType();
                     final BeanInfo propBeanInfo = ParserUtil.getBeanInfo(propBeanClass);
                     final List<String> propEntityIdPropNames = mergeResult ? propBeanInfo.idPropNameList : null;
                     final List<String> newPropEntityIdNames = mergeResult && N.isEmpty(propEntityIdPropNames) ? new ArrayList<>() : propEntityIdPropNames;
@@ -3143,7 +3141,7 @@ public final class RowDataset implements Dataset, Cloneable {
                             final Object defaultIdPropValue = idPropInfo.type.defaultValue();
                             final List<Object> idColumn = tmp._columnList.get(tmp.getColumnIndex(newPropEntityIdNames.get(i)));
 
-                            if (!Stream.of(idColumn).isMatchCountBetween(0, 1, it -> N.equals(it, defaultIdPropValue))) { // two or more rows have the same id value.
+                            if (!Stream.of(idColumn).hasMatchCountBetween(0, 1, it -> N.equals(it, defaultIdPropValue))) { // two or more rows have the same id value.
                                 isToMerge = false;
                                 break;
                             }
@@ -3233,14 +3231,14 @@ public final class RowDataset implements Dataset, Cloneable {
             propInfo = beanInfo.getPropInfo(prefix + "s"); // Trying to do something smart?
             final int len = prefix.length() + 1;
 
-            if (propInfo != null && (propInfo.type.isBean() || (propInfo.type.isCollection() && propInfo.type.getElementType().isBean()))
+            if (propInfo != null && (propInfo.type.isBean() || (propInfo.type.isCollection() && propInfo.type.elementType().isBean()))
                     && N.noneMatch(_columnNameList, it -> it.length() > len && it.charAt(len) == '.' && Strings.startsWithIgnoreCase(it, prefix + "s."))) {
                 // good
             } else {
                 propInfo = beanInfo.getPropInfo(prefix + "es"); // Trying to do something smart?
                 final int len2 = prefix.length() + 2;
 
-                if (propInfo != null && (propInfo.type.isBean() || (propInfo.type.isCollection() && propInfo.type.getElementType().isBean())) && N
+                if (propInfo != null && (propInfo.type.isBean() || (propInfo.type.isCollection() && propInfo.type.elementType().isBean())) && N
                         .noneMatch(_columnNameList, it -> it.length() > len2 && it.charAt(len2) == '.' && Strings.startsWithIgnoreCase(it, prefix + "es."))) {
                     // good
                 } else {
@@ -5222,7 +5220,7 @@ public final class RowDataset implements Dataset, Cloneable {
         return Stream.of(Iterables.powerSet(N.newLinkedHashSet(columnNames)))
                 .groupByToEntry(Fn.size())
                 .values()
-                .onEach(REVERSE_ACTION)
+                .peek(REVERSE_ACTION)
                 .flatmap(Fn.identity())
                 .reversed();
     }
@@ -6444,12 +6442,12 @@ public final class RowDataset implements Dataset, Cloneable {
         }
 
         //    if (kryoParser != null) {
-        //        dataset = kryoParser.clone(this);
+        //        dataset = kryoParser.deepCopy(this);
         //    } else {
         //        dataset = jsonParser.deserialize(jsonParser.serialize(this), RowDataset.class);   // column type could be different by json Serialization/Deserialization
         //    }
 
-        final RowDataset dataset = kryoParser.clone(this);
+        final RowDataset dataset = kryoParser.deepCopy(this);
 
         dataset._isFrozen = freeze;
 

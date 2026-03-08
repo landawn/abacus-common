@@ -39,7 +39,7 @@ public class ByteType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(Byte.class, type.clazz());
+        assertEquals(Byte.class, type.javaType());
     }
 
     @Test

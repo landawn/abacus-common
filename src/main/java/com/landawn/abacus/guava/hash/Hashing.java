@@ -74,7 +74,7 @@ import com.landawn.abacus.util.N;
 public final class Hashing {
 
     private Hashing() {
-        // singleton for utility class.
+        // Utility class - prevent instantiation
     }
 
     /**
@@ -951,7 +951,7 @@ public final class Hashing {
         static final HashFunction FARM_HASH_FINGERPRINT_64 = GuavaHashFunction.wrap(com.google.common.hash.Hashing.farmHashFingerprint64());
 
         private Hash_Holder() {
-            // singleton for utility class.
+            // Utility class - prevent instantiation
         }
     }
 }

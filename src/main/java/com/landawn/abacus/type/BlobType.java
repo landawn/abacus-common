@@ -50,7 +50,7 @@ public class BlobType extends AbstractType<Blob> {
      * @return the Class object for java.sql.Blob
      */
     @Override
-    public Class<Blob> clazz() {
+    public Class<Blob> javaType() {
         return clazz;
     }
 

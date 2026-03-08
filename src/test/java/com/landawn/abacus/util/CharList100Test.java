@@ -707,13 +707,13 @@ public class CharList100Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test hasDuplicates()")
+    @DisplayName("Test containsDuplicates()")
     public void testHasDuplicates() {
         list.addAll(CharList.of('a', 'b', 'c'));
-        assertFalse(list.hasDuplicates());
+        assertFalse(list.containsDuplicates());
 
         list.add('b');
-        assertTrue(list.hasDuplicates());
+        assertTrue(list.containsDuplicates());
     }
 
     @Test

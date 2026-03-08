@@ -22,7 +22,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.Dates;
@@ -36,6 +36,7 @@ import com.landawn.abacus.util.Numbers;
  */
 public class InstantType extends AbstractTemporalType<Instant> {
 
+    /** The type name constant for Instant type identification. */
     public static final String INSTANT = Instant.class.getSimpleName();
 
     InstantType() {
@@ -48,14 +49,14 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Instant> type = TypeFactory.getType(Instant.class);
-     * Class<Instant> clazz = type.clazz();
+     * Class<Instant> clazz = type.javaType();
      * // Returns: Instant.class
      * }</pre>
      *
      * @return Instant.class
      */
     @Override
-    public Class<Instant> clazz() {
+    public Class<Instant> javaType() {
         return Instant.class;
     }
 
@@ -330,13 +331,13 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * CharacterWriter writer = new CharacterWriter();
      * Instant instant = Instant.ofEpochMilli(1703502645123L);
      *
-     * JsonXmlSerializationConfig config =
-     *     JsonXmlSerializationConfig.of().setDateTimeFormat(DateTimeFormat.LONG);
+     * JsonXmlSerConfig config =
+     *     JsonXmlSerConfig.of().setDateTimeFormat(DateTimeFormat.LONG);
      * type.writeCharacter(writer, instant, config);
      * // Writes: 1703502645123
      *
      * writer = new CharacterWriter();
-     * config = JsonXmlSerializationConfig.of()
+     * config = JsonXmlSerConfig.of()
      *     .setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP);
      * type.writeCharacter(writer, instant, config);
      * // Writes: "2023-12-25T10:30:45.123Z"
@@ -349,7 +350,7 @@ public class InstantType extends AbstractTemporalType<Instant> {
      */
     @SuppressWarnings("null")
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Instant x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Instant x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
@@ -44,7 +44,7 @@ public class StringType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(String.class, type.clazz());
+        assertEquals(String.class, type.javaType());
     }
 
     @Test
@@ -193,7 +193,7 @@ public class StringType2025Test extends TestBase {
     @Test
     public void test_writeCharacter_withConfig_noQuotation() throws Exception {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
-        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
         type.writeCharacter(writer, "Test", config);
@@ -203,8 +203,8 @@ public class StringType2025Test extends TestBase {
     @Test
     public void test_writeCharacter_null_withConfig_writeNullAsEmpty() throws Exception {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
-        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
-        when(config.writeNullStringAsEmpty()).thenReturn(true);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
+        when(config.isWriteNullStringAsEmpty()).thenReturn(true);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
         type.writeCharacter(writer, null, config);

@@ -46,7 +46,7 @@ public final class IntegerType extends AbstractIntegerType {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public Class clazz() {
+    public Class javaType() {
         return Integer.class;
     }
 

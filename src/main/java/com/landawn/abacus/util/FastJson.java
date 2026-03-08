@@ -55,7 +55,7 @@ public final class FastJson {
      * Private constructor to prevent instantiation of this utility class.
      */
     private FastJson() {
-        // singleton for utility class.
+        // Utility class - prevent instantiation
     }
 
     /**

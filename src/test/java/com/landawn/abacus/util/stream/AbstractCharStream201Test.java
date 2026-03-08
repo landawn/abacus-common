@@ -725,7 +725,7 @@ public class AbstractCharStream201Test extends TestBase {
         assertEquals(5, stats.getCount());
         assertEquals('1', stats.getMin());
         assertEquals('5', stats.getMax());
-        assertEquals((long) ((int) '1' + (int) '2' + (int) '3' + (int) '4' + (int) '5'), stats.getSum().longValue());
+        assertEquals((long) ((int) '1' + (int) '2' + (int) '3' + (int) '4' + (int) '5'), stats.getSum());
         assertTrue(percentiles.isPresent());
 
         summary = createCharStream(new char[] {}).summaryStatisticsAndPercentiles();

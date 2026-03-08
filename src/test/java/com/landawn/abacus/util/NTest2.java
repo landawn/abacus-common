@@ -14,10 +14,10 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractParserTest;
-import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
+import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.parser.XmlParser;
-import com.landawn.abacus.parser.XmlSerializationConfig.XSC;
+import com.landawn.abacus.parser.XmlSerConfig;
 import com.landawn.abacus.util.stream.Stream;
 
 public class NTest2 extends AbstractParserTest {
@@ -233,13 +233,13 @@ public class NTest2 extends AbstractParserTest {
 
         }
 
-        N.println(N.toJson(a, JSC.create().supportCircularReference(true)));
-        N.println(N.toXml(a, XSC.create().supportCircularReference(true)));
-        N.println(abacusXmlParser.serialize(a, XSC.create().supportCircularReference(true)));
+        N.println(N.toJson(a, JsonSerConfig.create().setSupportCircularReference(true)));
+        N.println(N.toXml(a, XmlSerConfig.create().setSupportCircularReference(true)));
+        N.println(abacusXmlParser.serialize(a, XmlSerConfig.create().setSupportCircularReference(true)));
 
-        N.println(N.fromJson(N.toJson(a, JSC.create().supportCircularReference(true)), Object[].class));
-        N.println(N.fromXml(N.toXml(a, XSC.create().supportCircularReference(true)), Object[].class));
-        N.println(abacusXmlParser.deserialize(abacusXmlParser.serialize(a, XSC.create().supportCircularReference(true)), Object[].class));
+        N.println(N.fromJson(N.toJson(a, JsonSerConfig.create().setSupportCircularReference(true)), Object[].class));
+        N.println(N.fromXml(N.toXml(a, XmlSerConfig.create().setSupportCircularReference(true)), Object[].class));
+        N.println(abacusXmlParser.deserialize(abacusXmlParser.serialize(a, XmlSerConfig.create().setSupportCircularReference(true)), Object[].class));
     }
 
     @Test
@@ -281,13 +281,13 @@ public class NTest2 extends AbstractParserTest {
 
         }
 
-        N.println(N.toJson(ab, JSC.create().supportCircularReference(true)));
-        N.println(N.toXml(ab, XSC.create().supportCircularReference(true)));
-        N.println(abacusXmlParser.serialize(ab, XSC.create().supportCircularReference(true)));
+        N.println(N.toJson(ab, JsonSerConfig.create().setSupportCircularReference(true)));
+        N.println(N.toXml(ab, XmlSerConfig.create().setSupportCircularReference(true)));
+        N.println(abacusXmlParser.serialize(ab, XmlSerConfig.create().setSupportCircularReference(true)));
 
-        N.println(N.fromJson(N.toJson(ab, JSC.create().supportCircularReference(true)), AB.class));
-        N.println(N.fromXml(N.toXml(ab, XSC.create().supportCircularReference(true)), AB.class));
-        String xml = abacusXmlParser.serialize(ab, XSC.create().supportCircularReference(true));
+        N.println(N.fromJson(N.toJson(ab, JsonSerConfig.create().setSupportCircularReference(true)), AB.class));
+        N.println(N.fromXml(N.toXml(ab, XmlSerConfig.create().setSupportCircularReference(true)), AB.class));
+        String xml = abacusXmlParser.serialize(ab, XmlSerConfig.create().setSupportCircularReference(true));
         N.println(abacusXmlParser.deserialize(xml, AB.class));
     }
 

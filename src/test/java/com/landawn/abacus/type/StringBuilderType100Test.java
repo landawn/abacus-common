@@ -23,7 +23,7 @@ public class StringBuilderType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(StringBuilder.class, stringBuilderType.clazz());
+        assertEquals(StringBuilder.class, stringBuilderType.javaType());
     }
 
     @Test

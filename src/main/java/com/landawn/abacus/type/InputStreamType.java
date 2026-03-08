@@ -28,7 +28,7 @@ import java.sql.SQLException;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedSQLException;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
@@ -43,6 +43,7 @@ import com.landawn.abacus.util.IOUtil;
 @SuppressWarnings("java:S2160")
 public class InputStreamType extends AbstractType<InputStream> {
 
+    /** The type name constant for InputStream type identification. */
     public static final String INPUT_STREAM = InputStream.class.getSimpleName();
 
     private final Class<InputStream> typeClass;
@@ -84,14 +85,14 @@ public class InputStreamType extends AbstractType<InputStream> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<InputStream> type = TypeFactory.getType(InputStream.class);
-     * Class<InputStream> clazz = type.clazz();
+     * Class<InputStream> clazz = type.javaType();
      * // Returns: InputStream.class
      * }</pre>
      *
      * @return the Class object for InputStream or its subclass
      */
     @Override
-    public Class<InputStream> clazz() {
+    public Class<InputStream> javaType() {
         return typeClass;
     }
 
@@ -383,8 +384,8 @@ public class InputStreamType extends AbstractType<InputStream> {
      * Type<InputStream> type = TypeFactory.getType(InputStream.class);
      * CharacterWriter writer = new CharacterWriter();
      * InputStream stream = new ByteArrayInputStream("Hello".getBytes());
-     * JsonXmlSerializationConfig config =
-     *     JsonXmlSerializationConfig.of().setStringQuotation('"');
+     * JsonXmlSerConfig config =
+     *     JsonXmlSerConfig.of().setStringQuotation('"');
      * type.writeCharacter(writer, stream, config);
      * String result = writer.toString();
      * // result: "Hello" (with quotes)
@@ -397,7 +398,7 @@ public class InputStreamType extends AbstractType<InputStream> {
      * @throws IOException if an I/O error occurs during reading or writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final InputStream x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final InputStream x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

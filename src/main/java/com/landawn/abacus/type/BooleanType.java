@@ -46,7 +46,7 @@ public final class BooleanType extends AbstractBooleanType {
      * @return the Class object for Boolean.class
      */
     @Override
-    public Class<Boolean> clazz() {
+    public Class<Boolean> javaType() {
         return Boolean.class;
     }
 

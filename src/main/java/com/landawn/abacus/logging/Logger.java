@@ -66,7 +66,8 @@ import java.util.function.Supplier;
  * }</pre>
  *
  * @see AbstractLogger
- * @author Ceki G&uuml;lc&uuml; (original SLF4J author) (adaptations for Abacus)
+ * @author Ceki G&uuml;lc&uuml; (original SLF4J design)
+ * @author HaiYang Li (adaptations for Abacus)
  */
 public interface Logger {
 

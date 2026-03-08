@@ -68,17 +68,17 @@ public final class BeanType<T> extends AbstractType<T> {
      * @return the Class object for the specific bean type T
      */
     @Override
-    public Class<T> clazz() {
+    public Class<T> javaType() {
         return typeClass;
     }
 
     /**
-     * Returns the Java Type representation of the bean type.
+     * Returns the Java reflection Type representation of the bean type.
      *
-     * @return the Java Type for the specific bean type T
+     * @return the Java reflection Type for the specific bean type T
      */
     @Override
-    public java.lang.reflect.Type javaType() {
+    public java.lang.reflect.Type reflectType() {
         return javaType;
     }
 
@@ -111,7 +111,7 @@ public final class BeanType<T> extends AbstractType<T> {
      * @return SerializationType.ENTITY indicating this is an entity type
      */
     @Override
-    public SerializationType getSerializationType() {
+    public SerializationType serializationType() {
         return SerializationType.ENTITY;
     }
 

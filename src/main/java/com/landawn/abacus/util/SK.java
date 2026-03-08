@@ -28,8 +28,8 @@ import com.landawn.abacus.annotation.Internal;
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * String query = WD.SELECT + WD.SPACE + "*" + WD.SPACE + WD.FROM + WD.SPACE + "users";
- * String csv = "John" + WD.COMMA_SPACE + "Doe" + WD.COMMA_SPACE + "30";
+ * String query = SK.SELECT + SK.SPACE + "*" + SK.SPACE + SK.FROM + SK.SPACE + "users";
+ * String csv = "John" + SK.COMMA_SPACE + "Doe" + SK.COMMA_SPACE + "30";
  * }</pre>
  *
  */
@@ -38,7 +38,7 @@ import com.landawn.abacus.annotation.Internal;
 public final class SK {
 
     private SK() {
-        // singleton
+        // Utility class - prevent instantiation
     }
 
     /**

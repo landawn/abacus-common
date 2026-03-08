@@ -15,6 +15,7 @@
 package com.landawn.abacus.logging;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
@@ -25,7 +26,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * <p>This factory automatically detects and initializes the appropriate logging implementation
  * in the following order of preference:</p>
  * <ol>
- *   <li>Android Logger (on Android platform)</li>
+ *   <li>Android Logger (on Android platform, loaded reflectively from a separate module)</li>
  *   <li>SLF4J Logger</li>
  *   <li>Log4j v2 Logger</li>
  *   <li>JDK Logger (fallback)</li>
@@ -67,7 +68,7 @@ public final class LoggerFactory {
     private static volatile boolean initialized = false;
 
     private LoggerFactory() {
-        // singleton.
+        // Utility class - prevent instantiation
     }
 
     /**
@@ -121,6 +122,8 @@ public final class LoggerFactory {
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     @SuppressWarnings("fallthrough")
     public static synchronized Logger getLogger(final String name) {
+        Objects.requireNonNull(name, "name");
+
         Logger logger = namedLoggers.get(name);
 
         if (logger == null) {

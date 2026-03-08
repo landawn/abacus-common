@@ -67,8 +67,14 @@ public interface ObjBooleanConsumer<T> extends Throwables.ObjBooleanConsumer<T, 
      * Performs this operation on the given arguments.
      * This method is expected to operate via side-effects.
      *
-     * @param t the first input argument
-     * @param value the second input argument
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ObjBooleanConsumer<StringBuilder> mark = (sb, enabled) -> sb.append(enabled ? "Y" : "N");
+     * mark.accept(new StringBuilder(), true);
+     * }</pre>
+     *
+     * @param t the object to receive or contextualize the side effect
+     * @param value the boolean flag that influences the side effect
      */
     // @ai-ignore Obj* argument order convention - intentional: class name prefix determines parameter order. ObjBoolean* has object first, boolean second. Do not suggest reordering.
     @Override

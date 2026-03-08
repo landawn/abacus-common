@@ -14,7 +14,10 @@
 
 package com.landawn.abacus.logging;
 
+import static org.slf4j.spi.LocationAwareLogger.DEBUG_INT;
 import static org.slf4j.spi.LocationAwareLogger.ERROR_INT;
+import static org.slf4j.spi.LocationAwareLogger.INFO_INT;
+import static org.slf4j.spi.LocationAwareLogger.TRACE_INT;
 import static org.slf4j.spi.LocationAwareLogger.WARN_INT;
 
 import org.slf4j.helpers.NOPLoggerFactory;
@@ -30,7 +33,7 @@ import org.slf4j.spi.LocationAwareLogger;
  * <p>Key features:</p>
  * <ul>
  *   <li>Direct delegation to SLF4J logger methods</li>
- *   <li>Support for LocationAwareLogger for accurate caller information</li>
+ *   <li>Support for LocationAwareLogger for accurate caller information (used for WARN and ERROR levels)</li>
  *   <li>Throws RuntimeException if SLF4J is not properly initialized</li>
  * </ul>
  * 
@@ -63,8 +66,8 @@ class SLF4JLogger extends AbstractLogger {
      * <p>If the obtained logger implements LocationAwareLogger, it will be used for
      * WARN and ERROR level logging to provide accurate caller location information.</p>
      *
-     * <p><b>Note:</b> This constructor is package-private and should not be called directly.
-     * Use {@link LoggerFactory#getLogger(Class)} or {@link LoggerFactory#getLogger(String)} instead.</p>
+     * <p><b>Note:</b> This class is package-private and this constructor should not be called directly
+     * from outside the logging package. Use {@link LoggerFactory#getLogger(Class)} or {@link LoggerFactory#getLogger(String)} instead.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -83,6 +86,12 @@ class SLF4JLogger extends AbstractLogger {
         }
 
         loggerImpl = org.slf4j.LoggerFactory.getLogger(name);
+        locationAwareLogger = loggerImpl instanceof LocationAwareLogger ? ((LocationAwareLogger) loggerImpl) : null;
+    }
+
+    SLF4JLogger(final String name, final org.slf4j.Logger loggerImpl) {
+        super(name);
+        this.loggerImpl = loggerImpl;
         locationAwareLogger = loggerImpl instanceof LocationAwareLogger ? ((LocationAwareLogger) loggerImpl) : null;
     }
 
@@ -112,7 +121,11 @@ class SLF4JLogger extends AbstractLogger {
      */
     @Override
     public void trace(final String msg) {
-        loggerImpl.trace(msg);
+        if (locationAwareLogger == null) {
+            loggerImpl.trace(msg);
+        } else {
+            locationAwareLogger.log(null, FQCN, TRACE_INT, msg, null, null);
+        }
     }
 
     /**
@@ -131,7 +144,11 @@ class SLF4JLogger extends AbstractLogger {
      */
     @Override
     public void trace(final String msg, final Throwable t) {
-        loggerImpl.trace(msg, t);
+        if (locationAwareLogger == null) {
+            loggerImpl.trace(msg, t);
+        } else {
+            locationAwareLogger.log(null, FQCN, TRACE_INT, msg, null, t);
+        }
     }
 
     /**
@@ -160,7 +177,11 @@ class SLF4JLogger extends AbstractLogger {
      */
     @Override
     public void debug(final String msg) {
-        loggerImpl.debug(msg);
+        if (locationAwareLogger == null) {
+            loggerImpl.debug(msg);
+        } else {
+            locationAwareLogger.log(null, FQCN, DEBUG_INT, msg, null, null);
+        }
     }
 
     /**
@@ -179,7 +200,11 @@ class SLF4JLogger extends AbstractLogger {
      */
     @Override
     public void debug(final String msg, final Throwable t) {
-        loggerImpl.debug(msg, t);
+        if (locationAwareLogger == null) {
+            loggerImpl.debug(msg, t);
+        } else {
+            locationAwareLogger.log(null, FQCN, DEBUG_INT, msg, null, t);
+        }
     }
 
     /**
@@ -208,7 +233,11 @@ class SLF4JLogger extends AbstractLogger {
      */
     @Override
     public void info(final String msg) {
-        loggerImpl.info(msg);
+        if (locationAwareLogger == null) {
+            loggerImpl.info(msg);
+        } else {
+            locationAwareLogger.log(null, FQCN, INFO_INT, msg, null, null);
+        }
     }
 
     /**
@@ -227,7 +256,11 @@ class SLF4JLogger extends AbstractLogger {
      */
     @Override
     public void info(final String msg, final Throwable t) {
-        loggerImpl.info(msg, t);
+        if (locationAwareLogger == null) {
+            loggerImpl.info(msg, t);
+        } else {
+            locationAwareLogger.log(null, FQCN, INFO_INT, msg, null, t);
+        }
     }
 
     /**

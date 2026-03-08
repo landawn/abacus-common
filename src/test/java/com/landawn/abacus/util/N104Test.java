@@ -61,8 +61,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonSerializationConfig;
-import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
+import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
@@ -145,7 +144,7 @@ public class N104Test extends TestBase {
     @Test
     public void testToJsonWithConfig() {
         TestPerson person = new TestPerson("John", 30);
-        JsonSerializationConfig config = JSC.create();
+        JsonSerConfig config = JsonSerConfig.create();
         String json = N.toJson(person, config);
         assertNotNull(json);
         assertTrue(json.contains("John"));
@@ -1244,7 +1243,7 @@ public class N104Test extends TestBase {
     public void testToJsonWithFileAndConfig() throws IOException {
         TestPerson person = new TestPerson("John", 30);
         File outputFile = new File(tempDir, "test_config.json");
-        JsonSerializationConfig config = JSC.create().prettyFormat(true);
+        JsonSerConfig config = JsonSerConfig.create().setPrettyFormat(true);
         N.toJson(person, config, outputFile);
 
         assertTrue(outputFile.exists());
@@ -1259,7 +1258,7 @@ public class N104Test extends TestBase {
     public void testToJsonWithOutputStreamAndConfig() throws IOException {
         TestPerson person = new TestPerson("John", 30);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        JsonSerializationConfig config = JSC.create().prettyFormat(true);
+        JsonSerConfig config = JsonSerConfig.create().setPrettyFormat(true);
         N.toJson(person, config, baos);
 
         String json = baos.toString();
@@ -1271,7 +1270,7 @@ public class N104Test extends TestBase {
     public void testToJsonWithWriterAndConfig() throws IOException {
         TestPerson person = new TestPerson("John", 30);
         StringWriter writer = new StringWriter();
-        JsonSerializationConfig config = JSC.create().prettyFormat(true);
+        JsonSerConfig config = JsonSerConfig.create().setPrettyFormat(true);
         N.toJson(person, config, writer);
 
         String json = writer.toString();

@@ -22,7 +22,7 @@ import java.util.Collection;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedSQLException;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
@@ -57,7 +57,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * @return the Class object for char[]
      */
     @Override
-    public Class<char[]> clazz() {
+    public Class<char[]> javaType() {
         return char[].class;
     }
 
@@ -67,7 +67,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * @return the Type object representing Character/char elements
      */
     @Override
-    public Type<Character> getElementType() {
+    public Type<Character> elementType() {
         return elementType;
     }
 
@@ -75,10 +75,10 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * Returns the parameter types associated with this array type.
      *
      * @return an array containing the Character Type that describes the elements of this array type
-     * @see #getElementType()
+     * @see #elementType()
      */
     @Override
-    public Type<Character>[] getParameterTypes() {
+    public Type<Character>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -242,7 +242,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * @throws IOException if an I/O error occurs
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final char[] x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final char[] x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

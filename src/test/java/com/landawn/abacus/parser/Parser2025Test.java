@@ -47,7 +47,7 @@ public class Parser2025Test extends TestBase {
         }
     }
 
-    private static class TestDeserializationConfig extends DeserializationConfig<TestDeserializationConfig> {
+    private static class TestDeserializationConfig extends Deserialization<TestDeserializationConfig> {
         private boolean ignoreUnknownProperty = false;
 
         public TestDeserializationConfig setIgnoreUnknownProperty(boolean ignoreUnknownProperty) {
@@ -205,7 +205,7 @@ public class Parser2025Test extends TestBase {
 
         @Override
         public <T> T deserialize(String source, TestDeserializationConfig config, Type<? extends T> targetType) {
-            return deserialize(source, config, (Class<? extends T>) targetType.clazz());
+            return deserialize(source, config, (Class<? extends T>) targetType.javaType());
         }
 
         @Override
@@ -215,7 +215,7 @@ public class Parser2025Test extends TestBase {
 
         @Override
         public <T> T deserialize(File source, TestDeserializationConfig config, Type<? extends T> targetType) throws UncheckedIOException {
-            return deserialize(source, config, (Class<? extends T>) targetType.clazz());
+            return deserialize(source, config, (Class<? extends T>) targetType.javaType());
         }
 
         @Override
@@ -225,7 +225,7 @@ public class Parser2025Test extends TestBase {
 
         @Override
         public <T> T deserialize(InputStream source, TestDeserializationConfig config, Type<? extends T> targetType) throws UncheckedIOException {
-            return deserialize(source, config, (Class<? extends T>) targetType.clazz());
+            return deserialize(source, config, (Class<? extends T>) targetType.javaType());
         }
 
         @Override
@@ -235,7 +235,7 @@ public class Parser2025Test extends TestBase {
 
         @Override
         public <T> T deserialize(Reader source, TestDeserializationConfig config, Type<? extends T> targetType) throws UncheckedIOException {
-            return deserialize(source, config, (Class<? extends T>) targetType.clazz());
+            return deserialize(source, config, (Class<? extends T>) targetType.javaType());
         }
     }
 

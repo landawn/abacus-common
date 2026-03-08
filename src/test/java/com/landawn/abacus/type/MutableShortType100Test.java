@@ -8,6 +8,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +40,7 @@ public class MutableShortType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<MutableShort> clazz = mutableShortType.clazz();
+        Class<MutableShort> clazz = mutableShortType.javaType();
         assertEquals(MutableShort.class, clazz);
     }
 
@@ -101,7 +102,7 @@ public class MutableShortType100Test extends TestBase {
     @Test
     public void testSetPreparedStatementWithNull() throws SQLException {
         mutableShortType.set(mockPreparedStatement, 1, null);
-        Mockito.verify(mockPreparedStatement).setShort(1, (short) 0);
+        Mockito.verify(mockPreparedStatement).setNull(1, Types.SMALLINT);
     }
 
     @Test
@@ -113,7 +114,7 @@ public class MutableShortType100Test extends TestBase {
     @Test
     public void testSetCallableStatementWithNull() throws SQLException {
         mutableShortType.set(mockCallableStatement, "param", null);
-        Mockito.verify(mockCallableStatement).setShort("param", (short) 0);
+        Mockito.verify(mockCallableStatement).setNull("param", Types.SMALLINT);
     }
 
     @Test

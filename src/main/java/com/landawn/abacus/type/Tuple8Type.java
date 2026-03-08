@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
@@ -118,7 +118,7 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
      * @return {@code Tuple8.class}
      */
     @Override
-    public Class<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> clazz() {
+    public Class<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> javaType() {
         return typeClass;
     }
 
@@ -129,7 +129,7 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
      * @return an array containing the types of the tuple elements
      */
     @Override
-    public Type<?>[] getParameterTypes() {
+    public Type<?>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -177,14 +177,14 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
             throw new IllegalArgumentException("Invalid Tuple8 format. Expected array with at least 8 elements but got: " + str);
         }
 
-        final T1 t1 = a[0] == null ? null : ((T1) (type1.clazz().isAssignableFrom(a[0].getClass()) ? a[0] : N.convert(a[0], type1)));
-        final T2 t2 = a[1] == null ? null : ((T2) (type2.clazz().isAssignableFrom(a[1].getClass()) ? a[1] : N.convert(a[1], type2)));
-        final T3 t3 = a[2] == null ? null : ((T3) (type3.clazz().isAssignableFrom(a[2].getClass()) ? a[2] : N.convert(a[2], type3)));
-        final T4 t4 = a[3] == null ? null : ((T4) (type4.clazz().isAssignableFrom(a[3].getClass()) ? a[3] : N.convert(a[3], type4)));
-        final T5 t5 = a[4] == null ? null : ((T5) (type5.clazz().isAssignableFrom(a[4].getClass()) ? a[4] : N.convert(a[4], type5)));
-        final T6 t6 = a[5] == null ? null : ((T6) (type6.clazz().isAssignableFrom(a[5].getClass()) ? a[5] : N.convert(a[5], type6)));
-        final T7 t7 = a[6] == null ? null : ((T7) (type7.clazz().isAssignableFrom(a[6].getClass()) ? a[6] : N.convert(a[6], type7)));
-        final T8 t8 = a[7] == null ? null : ((T8) (type8.clazz().isAssignableFrom(a[7].getClass()) ? a[7] : N.convert(a[7], type8)));
+        final T1 t1 = a[0] == null ? null : ((T1) (type1.javaType().isAssignableFrom(a[0].getClass()) ? a[0] : N.convert(a[0], type1)));
+        final T2 t2 = a[1] == null ? null : ((T2) (type2.javaType().isAssignableFrom(a[1].getClass()) ? a[1] : N.convert(a[1], type2)));
+        final T3 t3 = a[2] == null ? null : ((T3) (type3.javaType().isAssignableFrom(a[2].getClass()) ? a[2] : N.convert(a[2], type3)));
+        final T4 t4 = a[3] == null ? null : ((T4) (type4.javaType().isAssignableFrom(a[3].getClass()) ? a[3] : N.convert(a[3], type4)));
+        final T5 t5 = a[4] == null ? null : ((T5) (type5.javaType().isAssignableFrom(a[4].getClass()) ? a[4] : N.convert(a[4], type5)));
+        final T6 t6 = a[5] == null ? null : ((T6) (type6.javaType().isAssignableFrom(a[5].getClass()) ? a[5] : N.convert(a[5], type6)));
+        final T7 t7 = a[6] == null ? null : ((T7) (type7.javaType().isAssignableFrom(a[6].getClass()) ? a[6] : N.convert(a[6], type7)));
+        final T8 t8 = a[7] == null ? null : ((T8) (type8.javaType().isAssignableFrom(a[7].getClass()) ? a[7] : N.convert(a[7], type8)));
 
         return Tuple.of(t1, t2, t3, t4, t5, t6, t7, t8);
     }
@@ -273,7 +273,7 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> x, final JsonXmlSerializationConfig<?> config)
+    public void writeCharacter(final CharacterWriter writer, final Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> x, final JsonXmlSerConfig<?> config)
             throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);

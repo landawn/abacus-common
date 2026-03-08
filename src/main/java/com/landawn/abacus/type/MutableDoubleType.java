@@ -9,8 +9,9 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.MutableDouble;
 import com.landawn.abacus.util.N;
@@ -40,14 +41,14 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<MutableDouble> type = TypeFactory.getType(MutableDouble.class);
-     * Class&lt;MutableDouble&gt; clazz = type.clazz();
+     * Class&lt;MutableDouble&gt; clazz = type.javaType();
      * // clazz equals MutableDouble.class
      * }</pre>
      *
      * @return The Class object for MutableDouble
      */
     @Override
-    public Class<MutableDouble> clazz() {
+    public Class<MutableDouble> javaType() {
         return MutableDouble.class;
     }
 
@@ -121,7 +122,9 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      */
     @Override
     public MutableDouble get(final ResultSet rs, final int columnIndex) throws SQLException {
-        return MutableDouble.of(rs.getDouble(columnIndex));
+        final double value = rs.getDouble(columnIndex);
+
+        return rs.wasNull() ? null : MutableDouble.of(value);
     }
 
     /**
@@ -145,7 +148,9 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      */
     @Override
     public MutableDouble get(final ResultSet rs, final String columnName) throws SQLException {
-        return MutableDouble.of(rs.getDouble(columnName));
+        final double value = rs.getDouble(columnName);
+
+        return rs.wasNull() ? null : MutableDouble.of(value);
     }
 
     /**
@@ -172,7 +177,11 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final MutableDouble x) throws SQLException {
-        stmt.setDouble(columnIndex, (x == null) ? 0 : x.value());
+        if (x == null) {
+            stmt.setNull(columnIndex, Types.DOUBLE);
+        } else {
+            stmt.setDouble(columnIndex, x.value());
+        }
     }
 
     /**
@@ -199,7 +208,11 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final MutableDouble x) throws SQLException {
-        stmt.setDouble(parameterName, (x == null) ? 0 : x.value());
+        if (x == null) {
+            stmt.setNull(parameterName, Types.DOUBLE);
+        } else {
+            stmt.setDouble(parameterName, x.value());
+        }
     }
 
     /**
@@ -255,7 +268,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * @throws IOException if an I/O error occurs while writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final MutableDouble x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final MutableDouble x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

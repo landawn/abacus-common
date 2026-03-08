@@ -41,12 +41,12 @@ public class PrimitiveDoubleType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(double.class, type.clazz());
+        assertEquals(double.class, type.javaType());
     }
 
     @Test
-    public void test_isPrimitiveType() {
-        assertTrue(type.isPrimitiveType());
+    public void test_isPrimitive() {
+        assertTrue(type.isPrimitive());
     }
 
     @Test

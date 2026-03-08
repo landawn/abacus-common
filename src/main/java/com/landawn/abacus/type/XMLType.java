@@ -80,7 +80,7 @@ public class XMLType<T> extends AbstractType<T> {
      * @return the Class object for the target type
      */
     @Override
-    public Class<T> clazz() {
+    public Class<T> javaType() {
         return typeClass;
     }
 

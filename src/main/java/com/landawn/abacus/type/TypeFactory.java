@@ -453,7 +453,7 @@ public final class TypeFactory {
                     final Type<?> type = (Type<?>) cls.getDeclaredConstructor().newInstance();
                     typePool.put(type.name(), type);
 
-                    if (!(type.clazz().equals(String.class) || type.clazz().equals(InputStream.class) || type.clazz().equals(Reader.class)
+                    if (!(type.javaType().equals(String.class) || type.javaType().equals(InputStream.class) || type.javaType().equals(Reader.class)
                             || type instanceof MillisCalendarType || type instanceof MillisDateType || type instanceof MillisTimeType
                             || type instanceof MillisTimestampType || type instanceof BytesType || type instanceof BooleanCharType
                             || type instanceof BooleanIntType)
@@ -462,10 +462,10 @@ public final class TypeFactory {
                         if (!(type instanceof JUDateType || type instanceof JdkOptionalIntType || type instanceof JdkOptionalLongType
                                 || type instanceof JdkOptionalDoubleType || type instanceof JdkOptionalType || type instanceof JdkDurationType
                                 || type.getClass().getSimpleName().startsWith("Joda"))) { // conflict with DateType.
-                            typePool.put(type.clazz().getSimpleName(), type);
+                            typePool.put(type.javaType().getSimpleName(), type);
                         }
 
-                        typePool.put(type.clazz().getCanonicalName(), type);
+                        typePool.put(type.javaType().getCanonicalName(), type);
                     }
                 } catch (final Throwable e) {
                     if (logger.isInfoEnabled()) {
@@ -481,9 +481,9 @@ public final class TypeFactory {
 
                 typePool.put(type.name(), type);
 
-                typePool.put(type.clazz().getSimpleName(), type);
+                typePool.put(type.javaType().getSimpleName(), type);
 
-                typePool.put(type.clazz().getCanonicalName(), type);
+                typePool.put(type.javaType().getCanonicalName(), type);
             } catch (final Throwable e) {
                 if (logger.isInfoEnabled()) {
                     logger.info(getClassName(cls) + " is not initialized as built-in type.");
@@ -506,13 +506,13 @@ public final class TypeFactory {
         final Multiset<Class<?>> typeClassMultiset = N.newMultiset(typePool.size());
 
         for (final Type<?> type : typePool.values()) {
-            typeClassMultiset.add(type.clazz());
+            typeClassMultiset.add(type.javaType());
         }
 
         for (final Type<?> type : typePool.values()) {
-            if (typeClassMultiset.getCount(type.clazz()) > 1 && !builtinType.contains(type.getClass())) {
+            if (typeClassMultiset.getCount(type.javaType()) > 1 && !builtinType.contains(type.getClass())) {
                 if (type.getClass().getPackage() == null || !type.getClass().getPackageName().startsWith("com.landawn.abacus.type")) {
-                    logger.info("More than one types are defined for class: " + getClassName(type.clazz()) + ". Ignore type: " + type.name());
+                    logger.info("More than one types are defined for class: " + getClassName(type.javaType()) + ". Ignore type: " + type.name());
                 }
 
                 continue;
@@ -522,7 +522,7 @@ public final class TypeFactory {
                 continue;
             }
 
-            javaType2TypeCache.put(type.javaType(), type);
+            javaType2TypeCache.put(type.reflectType(), type);
         }
     }
 
@@ -1118,7 +1118,7 @@ public final class TypeFactory {
                     for (final Map.Entry<String, Type<?>> entry : typePool.entrySet()) {
                         val = entry.getValue();
 
-                        if (!(val.isObjectType() || val.clazz().equals(Object[].class)) && val.clazz().isAssignableFrom(cls)) {
+                        if (!(val.isObject() || val.javaType().equals(Object[].class)) && val.javaType().isAssignableFrom(cls)) {
                             try {
                                 if ((val.isParameterizedType() || N.notEmpty(typeParameters) || N.notEmpty(parameters)) && Strings.isNotEmpty(typeName)) {
                                     final Constructor<? extends Type> constructor = ClassUtil.getDeclaredConstructor(val.getClass(), String.class);
@@ -1374,7 +1374,7 @@ public final class TypeFactory {
 
         registerType(targetClass, new AbstractType<>(getClassName(targetClass)) {
             @Override
-            public Class<T> clazz() {
+            public Class<T> javaType() {
                 return targetClass;
             }
 
@@ -1422,7 +1422,7 @@ public final class TypeFactory {
 
         registerType(cls, new AbstractType<>(getClassName(cls)) {
             @Override
-            public Class<T> clazz() {
+            public Class<T> javaType() {
                 return cls;
             }
 
@@ -1514,7 +1514,7 @@ public final class TypeFactory {
 
         final Type<T> type = new AbstractType<>(typeName) {
             @Override
-            public Class<T> clazz() {
+            public Class<T> javaType() {
                 return targetClass;
             }
 
@@ -1573,7 +1573,7 @@ public final class TypeFactory {
 
         final Type<T> type = new AbstractType<>(typeName) {
             @Override
-            public Class<T> clazz() {
+            public Class<T> javaType() {
                 return targetClass;
             }
 
@@ -1667,12 +1667,12 @@ public final class TypeFactory {
 
         typePool.put(type.name(), type);
 
-        //    if (!typePool.containsKey(getClassName(type.clazz()))) {
-        //        typePool.put(getClassName(type.clazz()), type);
+        //    if (!typePool.containsKey(getClassName(type.javaType()))) {
+        //        typePool.put(getClassName(type.javaType()), type);
         //    }
 
-        //    if (!classTypePool.containsKey(type.clazz())) {
-        //        classTypePool.put(type.clazz(), type);
+        //    if (!classTypePool.containsKey(type.javaType())) {
+        //        classTypePool.put(type.javaType(), type);
         //    }
     }
 

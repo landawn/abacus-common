@@ -109,7 +109,7 @@ public class Fn106Test extends TestBase {
 
         @Test
         public void testOfUUID() {
-            Supplier<String> supplier = Suppliers.ofUUID();
+            Supplier<String> supplier = Suppliers.ofUuid();
             Assertions.assertNotNull(supplier);
 
             String uuid1 = supplier.get();
@@ -119,12 +119,12 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(uuid2);
             Assertions.assertNotEquals(uuid1, uuid2);
 
-            Assertions.assertSame(supplier, Suppliers.ofUUID());
+            Assertions.assertSame(supplier, Suppliers.ofUuid());
         }
 
         @Test
         public void testOfGUID() {
-            Supplier<String> supplier = Suppliers.ofGUID();
+            Supplier<String> supplier = Suppliers.ofUuidWithoutHyphens();
             Assertions.assertNotNull(supplier);
 
             String guid1 = supplier.get();
@@ -134,7 +134,7 @@ public class Fn106Test extends TestBase {
             Assertions.assertNotNull(guid2);
             Assertions.assertNotEquals(guid1, guid2);
 
-            Assertions.assertSame(supplier, Suppliers.ofGUID());
+            Assertions.assertSame(supplier, Suppliers.ofUuidWithoutHyphens());
         }
 
         @Test

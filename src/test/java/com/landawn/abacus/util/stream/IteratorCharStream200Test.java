@@ -20,8 +20,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
@@ -521,7 +521,7 @@ public class IteratorCharStream200Test extends TestBase {
         assertEquals(4, stats.getCount());
         assertEquals('w', stats.getMin());
         assertEquals('z', stats.getMax());
-        assertEquals((int) 'z' + (int) 'y' + (int) 'x' + (int) 'w', stats.getSum().intValue());
+        assertEquals((int) 'z' + (int) 'y' + (int) 'x' + (int) 'w', stats.getSum());
 
         stats = createCharStream(new char[] {}).summaryStatistics();
         assertEquals(0, stats.getCount());

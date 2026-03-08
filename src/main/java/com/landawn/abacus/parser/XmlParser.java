@@ -65,10 +65,10 @@ import com.landawn.abacus.type.Type;
  * }</pre>
  * 
  * @see Parser
- * @see XmlSerializationConfig
- * @see XmlDeserializationConfig
+ * @see XmlSerConfig
+ * @see XmlDeserConfig
  */
-public interface XmlParser extends Parser<XmlSerializationConfig, XmlDeserializationConfig> {
+public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
 
     /**
      * Deserializes an XML DOM node to an object of the specified type using a Type descriptor.
@@ -132,8 +132,8 @@ public interface XmlParser extends Parser<XmlSerializationConfig, XmlDeserializa
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlDeserializationConfig config = new XmlDeserializationConfig()
-     *     .ignoreUnmatchedProperty(true);
+     * XmlDeserConfig config = new XmlDeserConfig()
+     *     .setIgnoreUnmatchedProperty(true);
      *
      * try {
      *     Document doc = DocumentBuilderFactory.newInstance()
@@ -152,7 +152,7 @@ public interface XmlParser extends Parser<XmlSerializationConfig, XmlDeserializa
      * @return the deserialized object of type {@code T}, never {@code null}
      * @throws IllegalArgumentException if source or targetType is {@code null}
      */
-    <T> T deserialize(Node source, XmlDeserializationConfig config, Type<? extends T> targetType);
+    <T> T deserialize(Node source, XmlDeserConfig config, Type<? extends T> targetType);
 
     /**
      * Deserializes an XML DOM node to an object of the specified type with custom deserialization configuration.
@@ -163,8 +163,8 @@ public interface XmlParser extends Parser<XmlSerializationConfig, XmlDeserializa
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlDeserializationConfig config = new XmlDeserializationConfig()
-     *     .ignoreUnmatchedProperty(true);
+     * XmlDeserConfig config = new XmlDeserConfig()
+     *     .setIgnoreUnmatchedProperty(true);
      *
      * try {
      *     Document doc = DocumentBuilderFactory.newInstance()
@@ -182,7 +182,7 @@ public interface XmlParser extends Parser<XmlSerializationConfig, XmlDeserializa
      * @return the deserialized object of type {@code T}, never {@code null}
      * @throws IllegalArgumentException if source or targetType is {@code null}
      */
-    <T> T deserialize(Node source, XmlDeserializationConfig config, Class<? extends T> targetType);
+    <T> T deserialize(Node source, XmlDeserConfig config, Class<? extends T> targetType);
 
     /**
      * Deserializes XML from a file using node class mappings for dynamic type resolution.
@@ -209,7 +209,7 @@ public interface XmlParser extends Parser<XmlSerializationConfig, XmlDeserializa
      * @return the deserialized object of type {@code T}, or {@code null} if the file is empty
      * @throws IllegalArgumentException if source or nodeTypes is {@code null}
      */
-    <T> T deserialize(File source, XmlDeserializationConfig config, Map<String, Type<?>> nodeTypes);
+    <T> T deserialize(File source, XmlDeserConfig config, Map<String, Type<?>> nodeTypes);
 
     /**
      * Deserializes XML from an input stream using node class mappings for dynamic type resolution.
@@ -236,7 +236,7 @@ public interface XmlParser extends Parser<XmlSerializationConfig, XmlDeserializa
      * @return the deserialized object of type {@code T}, or {@code null} if the input stream is empty
      * @throws IllegalArgumentException if source or nodeTypes is {@code null}
      */
-    <T> T deserialize(InputStream source, XmlDeserializationConfig config, Map<String, Type<?>> nodeTypes);
+    <T> T deserialize(InputStream source, XmlDeserConfig config, Map<String, Type<?>> nodeTypes);
 
     /**
      * Deserializes XML from a reader using node class mappings for dynamic type resolution.
@@ -266,7 +266,7 @@ public interface XmlParser extends Parser<XmlSerializationConfig, XmlDeserializa
      * @return the deserialized object of type {@code T}, or {@code null} if the reader is empty
      * @throws IllegalArgumentException if source or nodeTypes is {@code null}
      */
-    <T> T deserialize(Reader source, XmlDeserializationConfig config, Map<String, Type<?>> nodeTypes);
+    <T> T deserialize(Reader source, XmlDeserConfig config, Map<String, Type<?>> nodeTypes);
 
     /**
      * Deserializes an XML DOM node using node class mappings for dynamic type resolution.
@@ -302,5 +302,5 @@ public interface XmlParser extends Parser<XmlSerializationConfig, XmlDeserializa
      * @return the deserialized object of type {@code T}, or {@code null} if the node is empty
      * @throws IllegalArgumentException if source or nodeTypes is {@code null}
      */
-    <T> T deserialize(Node source, XmlDeserializationConfig config, Map<String, Type<?>> nodeTypes);
+    <T> T deserialize(Node source, XmlDeserConfig config, Map<String, Type<?>> nodeTypes);
 }

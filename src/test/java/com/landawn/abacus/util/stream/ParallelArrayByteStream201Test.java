@@ -201,14 +201,14 @@ public class ParallelArrayByteStream201Test extends TestBase {
         List<Byte> consumedElements = new CopyOnWriteArrayList<>();
 
         ByteStream stream1 = createStream(TEST_ARRAY);
-        stream1.onEach(consumedElements::add).count();
+        stream1.peek(consumedElements::add).count();
         assertEquals(TEST_ARRAY.length, consumedElements.size());
         assertTrue(consumedElements.containsAll(N.toList(TEST_ARRAY)));
 
         consumedElements.clear();
 
         ByteStream stream2 = createStream(TEST_ARRAY);
-        stream2.onEach(consumedElements::add).count();
+        stream2.peek(consumedElements::add).count();
         assertEquals(TEST_ARRAY.length, consumedElements.size());
         assertTrue(consumedElements.containsAll(N.toList(TEST_ARRAY)));
     }

@@ -9,8 +9,9 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.MutableShort;
 import com.landawn.abacus.util.N;
@@ -39,14 +40,14 @@ public class MutableShortType extends NumberType<MutableShort> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<MutableShort> type = TypeFactory.getType(MutableShort.class);
-     * Class<MutableShort> clazz = type.clazz();
+     * Class<MutableShort> clazz = type.javaType();
      * // clazz equals MutableShort.class
      * }</pre>
      *
      * @return the {@link MutableShort} class object
      */
     @Override
-    public Class<MutableShort> clazz() {
+    public Class<MutableShort> javaType() {
         return MutableShort.class;
     }
 
@@ -117,7 +118,9 @@ public class MutableShortType extends NumberType<MutableShort> {
      */
     @Override
     public MutableShort get(final ResultSet rs, final int columnIndex) throws SQLException {
-        return MutableShort.of(rs.getShort(columnIndex));
+        final short value = rs.getShort(columnIndex);
+
+        return rs.wasNull() ? null : MutableShort.of(value);
     }
 
     /**
@@ -140,7 +143,9 @@ public class MutableShortType extends NumberType<MutableShort> {
      */
     @Override
     public MutableShort get(final ResultSet rs, final String columnName) throws SQLException {
-        return MutableShort.of(rs.getShort(columnName));
+        final short value = rs.getShort(columnName);
+
+        return rs.wasNull() ? null : MutableShort.of(value);
     }
 
     /**
@@ -166,7 +171,11 @@ public class MutableShortType extends NumberType<MutableShort> {
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final MutableShort x) throws SQLException {
-        stmt.setShort(columnIndex, (x == null) ? 0 : x.value());
+        if (x == null) {
+            stmt.setNull(columnIndex, Types.SMALLINT);
+        } else {
+            stmt.setShort(columnIndex, x.value());
+        }
     }
 
     /**
@@ -192,7 +201,11 @@ public class MutableShortType extends NumberType<MutableShort> {
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final MutableShort x) throws SQLException {
-        stmt.setShort(parameterName, (x == null) ? 0 : x.value());
+        if (x == null) {
+            stmt.setNull(parameterName, Types.SMALLINT);
+        } else {
+            stmt.setShort(parameterName, x.value());
+        }
     }
 
     /**
@@ -246,7 +259,7 @@ public class MutableShortType extends NumberType<MutableShort> {
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final MutableShort x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final MutableShort x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

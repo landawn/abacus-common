@@ -223,7 +223,7 @@ public class FloatSummaryStatistics implements FloatConsumer {
      *
      * @return the sum of values, or zero if none
      */
-    public final Double getSum() {
+    public final double getSum() {
         return summation.sum();
     }
 
@@ -245,7 +245,7 @@ public class FloatSummaryStatistics implements FloatConsumer {
      *
      * @return the arithmetic mean of values, or zero if none
      */
-    public final Double getAverage() {
+    public final double getAverage() {
         return summation.average().orElse(0d);
     }
 

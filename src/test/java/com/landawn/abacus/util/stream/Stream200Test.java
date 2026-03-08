@@ -136,7 +136,7 @@ public class Stream200Test extends TestBase {
         assertEquals(Arrays.asList(1, 2), peeked);
         assertEquals(Arrays.asList(2, 4), resultPeek);
 
-        List<Integer> resultOnEach = Stream.of(1, 2).onEach(onEached::add).map(x -> x * 2).toList();
+        List<Integer> resultOnEach = Stream.of(1, 2).peek(onEached::add).map(x -> x * 2).toList();
         assertEquals(Arrays.asList(1, 2), onEached);
         assertEquals(Arrays.asList(2, 4), resultOnEach);
     }
@@ -994,12 +994,12 @@ public class Stream200Test extends TestBase {
 
     @Test
     public void testNMatch() {
-        assertTrue(Stream.of(1, 2, 3, 4, 5, 6).isMatchCountBetween(2, 3, x -> x % 2 == 0));
-        assertFalse(Stream.of(1, 2, 3, 4, 5).isMatchCountBetween(3, 3, x -> x % 2 == 0));
-        assertTrue(Stream.of(1, 2, 3, 4, 5).isMatchCountBetween(2, 2, x -> x % 2 == 0));
+        assertTrue(Stream.of(1, 2, 3, 4, 5, 6).hasMatchCountBetween(2, 3, x -> x % 2 == 0));
+        assertFalse(Stream.of(1, 2, 3, 4, 5).hasMatchCountBetween(3, 3, x -> x % 2 == 0));
+        assertTrue(Stream.of(1, 2, 3, 4, 5).hasMatchCountBetween(2, 2, x -> x % 2 == 0));
 
-        assertFalse(Stream.of(1, 2, 3).isMatchCountBetween(2, 3, x -> x % 2 == 0));
-        assertFalse(Stream.of(2, 4, 6, 8).isMatchCountBetween(2, 3, x -> x % 2 == 0));
+        assertFalse(Stream.of(1, 2, 3).hasMatchCountBetween(2, 3, x -> x % 2 == 0));
+        assertFalse(Stream.of(2, 4, 6, 8).hasMatchCountBetween(2, 3, x -> x % 2 == 0));
     }
 
     @Test
@@ -1338,9 +1338,9 @@ public class Stream200Test extends TestBase {
 
     @Test
     public void testHasDuplicates() {
-        assertTrue(Stream.of(1, 2, 2, 3).hasDuplicates());
-        assertFalse(Stream.of(1, 2, 3, 4).hasDuplicates());
-        assertFalse(Stream.empty().hasDuplicates());
+        assertTrue(Stream.of(1, 2, 2, 3).containsDuplicates());
+        assertFalse(Stream.of(1, 2, 3, 4).containsDuplicates());
+        assertFalse(Stream.empty().containsDuplicates());
     }
 
     @Test
@@ -1886,13 +1886,16 @@ public class Stream200Test extends TestBase {
     public void testObserveBlockingQueueWithDuration() throws InterruptedException {
         BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(10);
         List<Integer> producedItems = Collections.synchronizedList(new ArrayList<>());
-        Duration observationDuration = Duration.ofMillis(200);
+        Duration observationDuration = Duration.ofMillis(1000);
+        CountDownLatch producerStarted = new CountDownLatch(1);
 
         Thread producer = new Thread(() -> {
+            producerStarted.countDown();
+
             try {
                 for (int i = 0; i < 5; i++) {
                     queue.put(i);
-                    Thread.sleep(30);
+                    Thread.sleep(10);
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -1900,6 +1903,7 @@ public class Stream200Test extends TestBase {
         });
 
         producer.start();
+        assertTrue(producerStarted.await(1, TimeUnit.SECONDS));
 
         Stream.observe(queue, observationDuration).forEach(producedItems::add);
 

@@ -36,7 +36,7 @@ public class NClobType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<NClob> clazz = nClobType.clazz();
+        Class<NClob> clazz = nClobType.javaType();
         assertEquals(NClob.class, clazz);
     }
 

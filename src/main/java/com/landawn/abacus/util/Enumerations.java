@@ -78,7 +78,7 @@ public final class Enumerations {
      * @throws AssertionError if called
      */
     private Enumerations() {
-        // singleton
+        // Utility class - prevent instantiation
     }
 
     /**

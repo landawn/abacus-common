@@ -742,7 +742,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     Dates() {
-        // singleton
+        // Utility class - prevent instantiation
     }
 
     /**
@@ -6894,7 +6894,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     public static final class DateUtil extends Dates {
 
         private DateUtil() {
-            // singleton.
+            // Utility class - prevent instantiation
         }
     }
 

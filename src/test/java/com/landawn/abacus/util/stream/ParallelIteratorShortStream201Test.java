@@ -177,7 +177,7 @@ public class ParallelIteratorShortStream201Test extends TestBase {
                 consumed.add(it);
             }
         };
-        stream.onEach(action).forEach(s -> {
+        stream.peek(action).forEach(s -> {
         });
 
         assertHaveSameElements(N.toList(TEST_ARRAY), consumed);

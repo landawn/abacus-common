@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -38,7 +38,7 @@ public class ReaderType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(Reader.class, readerType.clazz());
+        assertEquals(Reader.class, readerType.javaType());
     }
 
     @Test
@@ -152,7 +152,7 @@ public class ReaderType100Test extends TestBase {
     @Test
     public void testWriteCharacter() throws IOException {
         CharacterWriter writer = createCharacterWriter();
-        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
         Reader reader = new StringReader("test");
         readerType.writeCharacter(writer, reader, config);

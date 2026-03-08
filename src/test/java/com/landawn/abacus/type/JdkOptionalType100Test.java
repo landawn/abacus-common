@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -42,8 +42,8 @@ public class JdkOptionalType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(Optional.class, optionalStringType.clazz());
-        assertEquals(Optional.class, optionalIntegerType.clazz());
+        assertEquals(Optional.class, optionalStringType.javaType());
+        assertEquals(Optional.class, optionalIntegerType.javaType());
     }
 
     @Test
@@ -54,12 +54,12 @@ public class JdkOptionalType100Test extends TestBase {
 
     @Test
     public void testGetElementType() {
-        assertNotNull(optionalStringType.getElementType());
+        assertNotNull(optionalStringType.elementType());
     }
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = optionalStringType.getParameterTypes();
+        Type<?>[] paramTypes = optionalStringType.parameterTypes();
         assertNotNull(paramTypes);
         assertEquals(1, paramTypes.length);
     }
@@ -235,7 +235,7 @@ public class JdkOptionalType100Test extends TestBase {
     @Test
     public void testWriteCharacter_Present() throws IOException {
         Optional<String> opt = Optional.of("test");
-        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
         optionalStringType.writeCharacter(characterWriter, opt, config);
         verify(characterWriter, times(1)).writeCharacter(anyString());

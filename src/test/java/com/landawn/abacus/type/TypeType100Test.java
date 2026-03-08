@@ -23,7 +23,7 @@ public class TypeType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<?> clazz = typeType.clazz();
+        Class<?> clazz = typeType.javaType();
         assertNotNull(clazz);
         assertEquals(Type.class, clazz);
     }

@@ -1211,7 +1211,7 @@ public class ByteStream2025Test extends TestBase {
     public void testOnEach() {
         AtomicInteger sum = new AtomicInteger(0);
         ByteStream stream = ByteStream.of((byte) 1, (byte) 2, (byte) 3);
-        stream.onEach(b -> sum.addAndGet(b)).forEach(b -> {
+        stream.peek(b -> sum.addAndGet(b)).forEach(b -> {
         });
         assertEquals(6, sum.get());
     }

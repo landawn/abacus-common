@@ -46,7 +46,7 @@ public final class DoubleType extends AbstractDoubleType {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public Class clazz() {
+    public Class javaType() {
         return Double.class;
     }
 

@@ -647,7 +647,7 @@ public class ShortStream105Test extends TestBase {
     @DisplayName("Test onEach() / peek() method")
     public void testOnEach() {
         List<Short> peeked = new ArrayList<>();
-        short[] result = stream.onEach(peeked::add).toArray();
+        short[] result = stream.peek(peeked::add).toArray();
         assertArrayEquals(new short[] { 1, 2, 3, 4, 5 }, result);
         assertEquals(Arrays.asList((short) 1, (short) 2, (short) 3, (short) 4, (short) 5), peeked);
 

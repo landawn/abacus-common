@@ -22,12 +22,12 @@ public class PrimitiveLongType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(long.class, type.clazz());
+        assertEquals(long.class, type.javaType());
     }
 
     @Test
-    public void testIsPrimitiveType() {
-        assertTrue(type.isPrimitiveType());
+    public void testIsPrimitive() {
+        assertTrue(type.isPrimitive());
     }
 
     @Test

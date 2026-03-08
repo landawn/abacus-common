@@ -529,7 +529,7 @@ public class ArrayCharStream200Test extends TestBase {
         assertEquals(4, stats.getCount());
         assertEquals('w', stats.getMin());
         assertEquals('z', stats.getMax());
-        assertEquals((int) 'z' + (int) 'y' + (int) 'x' + (int) 'w', stats.getSum().intValue());
+        assertEquals((int) 'z' + (int) 'y' + (int) 'x' + (int) 'w', stats.getSum());
 
         stats = createCharStream(new char[] {}).summaryStatistics();
         assertEquals(0, stats.getCount());

@@ -41,7 +41,7 @@ public class AtomicIntegerType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(AtomicInteger.class, type.clazz());
+        assertEquals(AtomicInteger.class, type.javaType());
     }
 
     @Test

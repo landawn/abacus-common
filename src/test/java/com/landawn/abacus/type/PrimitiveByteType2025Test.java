@@ -42,12 +42,12 @@ public class PrimitiveByteType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(byte.class, type.clazz());
+        assertEquals(byte.class, type.javaType());
     }
 
     @Test
-    public void test_isPrimitiveType() {
-        assertTrue(type.isPrimitiveType());
+    public void test_isPrimitive() {
+        assertTrue(type.isPrimitive());
     }
 
     @Test

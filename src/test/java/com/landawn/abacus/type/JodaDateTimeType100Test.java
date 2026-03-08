@@ -36,7 +36,7 @@ public class JodaDateTimeType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(DateTime.class, dateTimeType.clazz());
+        assertEquals(DateTime.class, dateTimeType.javaType());
     }
 
     @Test

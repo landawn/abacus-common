@@ -751,16 +751,16 @@ public class ByteList100Test extends TestBase {
 
     @Test
     public void testHasDuplicates() {
-        assertFalse(list.hasDuplicates());
+        assertFalse(list.containsDuplicates());
 
         list.add((byte) 1);
-        assertFalse(list.hasDuplicates());
+        assertFalse(list.containsDuplicates());
 
         list.add((byte) 2);
-        assertFalse(list.hasDuplicates());
+        assertFalse(list.containsDuplicates());
 
         list.add((byte) 1);
-        assertTrue(list.hasDuplicates());
+        assertTrue(list.containsDuplicates());
     }
 
     @Test

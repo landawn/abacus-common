@@ -39,7 +39,7 @@ public class BigIntegerType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(BigInteger.class, type.clazz());
+        assertEquals(BigInteger.class, type.javaType());
     }
 
     @Test

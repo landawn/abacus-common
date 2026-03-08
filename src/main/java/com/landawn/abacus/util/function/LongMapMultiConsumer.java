@@ -44,7 +44,7 @@ public interface LongMapMultiConsumer extends java.util.stream.LongStream.LongMa
      *   <li>Implementing custom filtering and transformation logic in one step</li>
      * </ul>
      *
-     * <p>Example usage in a stream:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongStream.of(1L, 2L, 3L)
      *     .mapMulti((value, consumer) -> {
@@ -57,10 +57,9 @@ public interface LongMapMultiConsumer extends java.util.stream.LongStream.LongMa
      * // Output: 0, 0, 1, 0, 1, 2
      * }</pre>
      *
-     * @param value the input long value to be transformed
-     * @param consumer the consumer that accepts the transformed values. The implementation
-     *                 should call {@code consumer.accept(long)} for each output value. May be
-     *                 called zero or more times
+     * @param value the source value to expand, transform, or suppress
+     * @param consumer the downstream consumer that receives each produced value; implementations
+     *        may invoke it zero or more times for the same input value
      */
     @Override
     void accept(long value, java.util.function.LongConsumer consumer);

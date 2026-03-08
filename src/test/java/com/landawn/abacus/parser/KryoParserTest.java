@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.entity.extendDirty.basic.Account;
-import com.landawn.abacus.parser.KryoSerializationConfig.KSC;
+import com.landawn.abacus.parser.KryoSerConfig;
 import com.landawn.abacus.util.N;
 
 public class KryoParserTest extends AbstractParserTest {
@@ -22,8 +22,8 @@ public class KryoParserTest extends AbstractParserTest {
 
     @Test
     public void test_config() {
-        KryoSerializationConfig ksc1 = KSC.create();
-        KryoSerializationConfig ksc2 = KSC.create();
+        KryoSerConfig ksc1 = KryoSerConfig.create();
+        KryoSerConfig ksc2 = KryoSerConfig.create();
 
         N.println(ksc1);
 
@@ -40,13 +40,13 @@ public class KryoParserTest extends AbstractParserTest {
     }
 
     @Test
-    public void test_copy() {
+    public void test_shallowCopy_and_deepCopy() {
         Account account = createAccountWithContact(Account.class);
-        Account account2 = kryoParser.copy(account);
+        Account account2 = kryoParser.shallowCopy(account);
         assertTrue(account.getContact().equals(account2.getContact()));
         assertTrue(account.getContact() == account2.getContact());
 
-        account2 = kryoParser.clone(account);
+        account2 = kryoParser.deepCopy(account);
         assertTrue(account.getContact().equals(account2.getContact()));
         assertFalse(account.getContact() == account2.getContact());
     }

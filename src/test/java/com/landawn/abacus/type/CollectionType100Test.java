@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -52,20 +52,20 @@ public class CollectionType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<List<String>> result = listType.clazz();
+        Class<List<String>> result = listType.javaType();
         Assertions.assertNotNull(result);
     }
 
     @Test
     public void testGetParameterTypes() {
-        Type<String>[] paramTypes = listType.getParameterTypes();
+        Type<String>[] paramTypes = listType.parameterTypes();
         Assertions.assertNotNull(paramTypes);
         assertEquals(1, paramTypes.length);
     }
 
     @Test
     public void testGetElementType() {
-        Type<String> elementType = listType.getElementType();
+        Type<String> elementType = listType.elementType();
         Assertions.assertNotNull(elementType);
     }
 
@@ -105,7 +105,7 @@ public class CollectionType100Test extends TestBase {
 
     @Test
     public void testGetSerializationType() {
-        CollectionType.SerializationType result = listType.getSerializationType();
+        CollectionType.SerializationType result = listType.serializationType();
         Assertions.assertNotNull(result);
     }
 
@@ -244,7 +244,7 @@ public class CollectionType100Test extends TestBase {
     public void testWriteCharacter_Elements() throws IOException {
         CharacterWriter mockWriter = createCharacterWriter();
         List<String> list = Arrays.asList("a", "b");
-        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
         listType.writeCharacter(mockWriter, list, config);
 

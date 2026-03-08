@@ -349,11 +349,11 @@ public class Strings200Test extends TestBase {
     }
 
     @Test
-    public void testNullToEmptyArray() {
+    public void testNullElementsToEmptyArray() {
         String[] arr = { null, "a", null, "" };
-        Strings.nullToEmpty(arr);
+        Strings.nullElementsToEmpty(arr);
         assertArrayEquals(new String[] { "", "a", "", "" }, arr);
-        Strings.nullToEmpty((String[]) null);
+        Strings.nullElementsToEmpty((String[]) null);
     }
 
     @Test
@@ -365,11 +365,11 @@ public class Strings200Test extends TestBase {
     }
 
     @Test
-    public void testEmptyToNullArray() {
+    public void testEmptyElementsToNullArray() {
         String[] arr = { null, "a", "", " " };
-        Strings.emptyToNull(arr);
+        Strings.emptyElementsToNull(arr);
         assertArrayEquals(new String[] { null, "a", null, " " }, arr);
-        Strings.emptyToNull((String[]) null);
+        Strings.emptyElementsToNull((String[]) null);
     }
 
     @Test
@@ -381,9 +381,9 @@ public class Strings200Test extends TestBase {
     }
 
     @Test
-    public void testBlankToEmptyArray() {
+    public void testBlankElementsToEmptyArray() {
         String[] arr = { null, "a", " ", "\t" };
-        Strings.blankToEmpty(arr);
+        Strings.blankElementsToEmpty(arr);
         assertArrayEquals(new String[] { "", "a", "", "" }, arr);
     }
 
@@ -396,9 +396,9 @@ public class Strings200Test extends TestBase {
     }
 
     @Test
-    public void testBlankToNullArray() {
+    public void testBlankElementsToNullArray() {
         String[] arr = { null, "a", " ", "\t" };
-        Strings.blankToNull(arr);
+        Strings.blankElementsToNull(arr);
         assertArrayEquals(new String[] { null, "a", null, null }, arr);
     }
 

@@ -123,7 +123,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Method Categories:</b>
  * <ul>
  *   <li><b>Memoization:</b> {@code memoize()}, {@code memoizeWithExpiration()}, {@code memoizeByKey()}</li>
- *   <li><b>Standard Functional:</b> {@code identity()}, {@code alwaysTrue()}, {@code alwaysFalse()}</li>
+ *   <li><b>Standard Functional:</b> {@code identity()}, {@code tap()}, {@code alwaysTrue()}, {@code alwaysFalse()}</li>
  *   <li><b>Interface Conversion:</b> {@code pp()}, {@code cc()}, {@code ff()} for Predicate/Consumer/Function</li>
  *   <li><b>Synchronization:</b> {@code sp()}, {@code sc()}, {@code sf()} for synchronized variants</li>
  *   <li><b>Type Conversion:</b> {@code c2f()}, {@code f2c()}, {@code r2c()}, {@code c2r()}</li>
@@ -474,9 +474,49 @@ public final class Fnn {
      * @param <E> the type of exception that may be thrown
      * @return a function that always returns its input argument unchanged
      * @see java.util.function.Function#identity()
+     * @see #tap(Throwables.Consumer)
      */
+    @SuppressWarnings("unchecked")
     public static <T, E extends Exception> Throwables.Function<T, T, E> identity() {
-        return Fn.IDENTITY;
+        return (Throwables.Function<T, T, E>) Fn.IDENTITY;
+    }
+
+    /**
+     * Returns an identity function that invokes the specified {@code consumer} with each input
+     * before returning that same input unchanged.
+     *
+     * <p>This is useful for inserting side effects such as logging, tracing, validation, or
+     * metrics collection into a function pipeline while preserving the original value.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Function<String, String, IOException> tracedIdentity =
+     *     Fnn.tap(value -> writer.write(value));
+     *
+     * String result = tracedIdentity.apply("abc"); // writer receives "abc", result is "abc"
+     * }</pre>
+     *
+     * @param <T> the type of the input and output of the function
+     * @param <E> the type of exception that may be thrown by the consumer
+     * @param consumer the consumer to invoke before returning the input value
+     * @return a function that first consumes and then returns its input argument unchanged
+     * @throws IllegalArgumentException if consumer is null
+     * @see #identity()
+     */
+    @Beta
+    @SuppressWarnings("unchecked")
+    public static <T, E extends Exception> Throwables.Function<T, T, E> tap(final Throwables.Consumer<? super T, E> consumer) throws IllegalArgumentException {
+        N.checkArgNotNull(consumer, cs.Consumer);
+
+        if (consumer == Fn.EMPTY_CONSUMER) {
+            return identity();
+        }
+
+        return t -> {
+            consumer.accept(t);
+
+            return t;
+        };
     }
 
     /**
@@ -867,10 +907,24 @@ public final class Fnn {
 
     /**
      * Returns a Throwables.Consumer that throws a RuntimeException with the specified error message.
+     * The consumer ignores its input and always throws. This is useful as a terminal handler in
+     * functional pipelines to signal unexpected or invalid states.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Fail on unexpected elements in a stream
+     * stream.forEach(Fnn.<String>throwRuntimeException("Unexpected element encountered"));
+     *
+     * // Use as a fallback consumer
+     * Consumer<String> handler = condition ? normalHandler : Fnn.throwRuntimeException("Not supported");
+     * }</pre>
      *
      * @param <T> the type of the input to the consumer
-     * @param errorMessage the error message for the exception
-     * @return a Consumer that throws a RuntimeException
+     * @param errorMessage the error message for the RuntimeException
+     * @return a Consumer that always throws a RuntimeException with the specified message
+     * @see #throwIOException(String)
+     * @see #throwException(String)
+     * @see #throwException(Supplier)
      */
     public static <T> Throwables.Consumer<T, RuntimeException> throwRuntimeException(final String errorMessage) {
         return t -> {
@@ -880,10 +934,20 @@ public final class Fnn {
 
     /**
      * Returns a Throwables.Consumer that throws an IOException with the specified error message.
+     * The consumer ignores its input and always throws. This is useful in I/O functional pipelines
+     * to signal unexpected or invalid states.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Fail on invalid file paths
+     * Throwables.Consumer<Path, IOException> handler = Fnn.throwIOException("Invalid path");
+     * }</pre>
      *
      * @param <T> the type of the input to the consumer
-     * @param errorMessage the error message for the exception
-     * @return a Consumer that throws an IOException
+     * @param errorMessage the error message for the IOException
+     * @return a Consumer that always throws an IOException with the specified message
+     * @see #throwRuntimeException(String)
+     * @see #throwException(String)
      */
     public static <T> Throwables.Consumer<T, IOException> throwIOException(final String errorMessage) {
         return t -> {
@@ -892,11 +956,21 @@ public final class Fnn {
     }
 
     /**
-     * Returns a Throwables.Consumer that throws an Exception with the specified error message.
+     * Returns a Throwables.Consumer that throws a checked Exception with the specified error message.
+     * The consumer ignores its input and always throws.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Fail on unexpected elements
+     * Throwables.Consumer<String, Exception> handler = Fnn.throwException("Unsupported operation");
+     * }</pre>
      *
      * @param <T> the type of the input to the consumer
-     * @param errorMessage the error message for the exception
-     * @return a Consumer that throws an Exception
+     * @param errorMessage the error message for the Exception
+     * @return a Consumer that always throws an Exception with the specified message
+     * @see #throwRuntimeException(String)
+     * @see #throwIOException(String)
+     * @see #throwException(Supplier)
      */
     public static <T> Throwables.Consumer<T, Exception> throwException(final String errorMessage) {
         return t -> {
@@ -1007,26 +1081,42 @@ public final class Fnn {
     }
 
     /**
-     * Returns a Throwables.Consumer that prints its input to standard output.
-     * The consumer calls System.out.println() with the input value.
+     * Returns a Throwables.Consumer that prints its input to standard output using {@code N.println()}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Debug: print each element in a stream
+     * stream.forEach(Fnn.println());
+     * }</pre>
      *
      * @param <T> the type of the input to the consumer
      * @param <E> the type of exception that may be thrown
-     * @return a Consumer that prints to standard output
+     * @return a Consumer that prints each input value to standard output followed by a newline
+     * @see #println(String)
      */
     public static <T, E extends Exception> Throwables.Consumer<T, E> println() {
         return Fn.PRINTLN;
     }
 
     /**
-     * Returns a Throwables.BiConsumer that prints its two inputs to standard output with a separator.
-     * The consumer formats the output as "first separator second".
+     * Returns a Throwables.BiConsumer that prints its two inputs to standard output separated by the given string.
+     * The output format is {@code "first<separator>second"} followed by a newline.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Print map entries as "key=value"
+     * map.forEach(Fnn.println("="));
+     *
+     * // Print pairs as "key: value"
+     * map.forEach(Fnn.println(": "));
+     * }</pre>
      *
      * @param <T> the type of the first input to the consumer
      * @param <U> the type of the second input to the consumer
      * @param <E> the type of exception that may be thrown
-     * @param separator the separator string to use between the two values
-     * @return a BiConsumer that prints two values with a separator
+     * @param separator the separator string to place between the two values in the output
+     * @return a BiConsumer that prints two values with the specified separator to standard output
+     * @see #println()
      */
     public static <T, U, E extends Exception> Throwables.BiConsumer<T, U, E> println(final String separator) {
         return cc(Fn.println(separator));
@@ -1034,11 +1124,22 @@ public final class Fnn {
 
     /**
      * Returns a Throwables.Predicate that tests if its input is {@code null}.
-     * This method is marked as Beta.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Filter null elements in a stream
+     * stream.filter(Fnn.isNull());
+     *
+     * // Compose with other predicates
+     * Throwables.Predicate<String, Exception> isNullOrEmpty = Fnn.<String, Exception>isNull().or(Fnn.isEmpty());
+     * }</pre>
      *
      * @param <T> the type of the input to the predicate
      * @param <E> the type of exception that may be thrown
-     * @return a Predicate that returns {@code true} if the input is null
+     * @return a Predicate that returns {@code true} if the input is {@code null}
+     * @see #notNull()
+     * @see #isEmpty()
+     * @see #isBlank()
      */
     @Beta
     public static <T, E extends Exception> Throwables.Predicate<T, E> isNull() {
@@ -1046,12 +1147,20 @@ public final class Fnn {
     }
 
     /**
-     * Returns a Throwables.Predicate that tests if a CharSequence is empty.
-     * The predicate returns {@code true} if the CharSequence has length 0.
+     * Returns a Throwables.Predicate that tests if a CharSequence is empty (length 0) or {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Filter out empty strings in a throwable stream pipeline
+     * stream.filter(Fnn.<String, IOException>isEmpty().negate());
+     * }</pre>
      *
      * @param <T> the type of CharSequence
      * @param <E> the type of exception that may be thrown
-     * @return a Predicate that returns {@code true} if the CharSequence is empty
+     * @return a Predicate that returns {@code true} if the CharSequence is {@code null} or has length 0
+     * @see #isBlank()
+     * @see #isNull()
+     * @see #isNotEmpty()
      */
     public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> isEmpty() {
         return (Throwables.Predicate<T, E>) Fn.IS_EMPTY;
@@ -1450,13 +1559,20 @@ public final class Fnn {
     /**
      * Returns a BinaryOperator that returns the minimum of two Map.Entry objects by comparing their keys.
      * The keys must be Comparable and are compared using their natural ordering.
-     * 
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Find the entry with the smallest key in a map
+     * Optional<Map.Entry<String, Integer>> minEntry = entryStream
+     *     .reduce(Fnn.minByKey());
+     * }</pre>
+     *
      * @param <K> the type of the Comparable key
      * @param <V> the type of the value
      * @param <E> the type of the exception that may be thrown
      * @return a BinaryOperator that returns the Map.Entry with the smaller key
-     * @see Map.Entry#getKey()
-     * @see Comparable#compareTo(Object)
+     * @see #minByValue()
+     * @see #maxByKey()
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <K extends Comparable<? super K>, V, E extends Throwable> Throwables.BinaryOperator<Map.Entry<K, V>, E> minByKey() {
@@ -1471,13 +1587,20 @@ public final class Fnn {
     /**
      * Returns a BinaryOperator that returns the minimum of two Map.Entry objects by comparing their values.
      * The values must be Comparable and are compared using their natural ordering.
-     * 
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Find the entry with the smallest value in a map
+     * Optional<Map.Entry<String, Integer>> minEntry = entryStream
+     *     .reduce(Fnn.minByValue());
+     * }</pre>
+     *
      * @param <K> the type of the key
      * @param <V> the type of the Comparable value
      * @param <E> the type of the exception that may be thrown
      * @return a BinaryOperator that returns the Map.Entry with the smaller value
-     * @see Map.Entry#getValue()
-     * @see Comparable#compareTo(Object)
+     * @see #minByKey()
+     * @see #maxByValue()
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <K, V extends Comparable<? super V>, E extends Throwable> Throwables.BinaryOperator<Map.Entry<K, V>, E> minByValue() {

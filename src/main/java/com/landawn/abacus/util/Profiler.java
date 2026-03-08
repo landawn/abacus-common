@@ -222,7 +222,7 @@ public final class Profiler {
     private static final ThreadLocal<DecimalFormat> elapsedTimeFormat = ThreadLocal.withInitial(() -> new DecimalFormat("#0.000"));
 
     private Profiler() {
-        // singleton
+        // Utility class - prevent instantiation
     }
 
     /**

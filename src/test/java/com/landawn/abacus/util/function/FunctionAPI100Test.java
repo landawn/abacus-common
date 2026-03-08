@@ -3599,20 +3599,20 @@ public class FunctionAPI100Test extends TestBase {
 
         @Test
         public void testNegateAndOr() {
-            NPredicate<String> hasDuplicates = args -> Arrays.stream(args).distinct().count() < args.length;
-            NPredicate<String> noDuplicates = hasDuplicates.negate();
+            NPredicate<String> containsDuplicates = args -> Arrays.stream(args).distinct().count() < args.length;
+            NPredicate<String> noDuplicates = containsDuplicates.negate();
             NPredicate<String> hasEmptyString = args -> Arrays.stream(args).anyMatch(String::isEmpty);
 
-            assertTrue(hasDuplicates.test("a", "b", "a"));
+            assertTrue(containsDuplicates.test("a", "b", "a"));
             assertFalse(noDuplicates.test("a", "b", "a"));
             assertTrue(noDuplicates.test("a", "b", "c"));
 
-            NPredicate<String> combinedOr = hasDuplicates.or(hasEmptyString);
+            NPredicate<String> combinedOr = containsDuplicates.or(hasEmptyString);
             assertTrue(combinedOr.test("a", "b", "a"));
             assertTrue(combinedOr.test("a", "b", ""));
             assertFalse(combinedOr.test("a", "b", "c"));
 
-            NPredicate<String> combinedAnd = hasDuplicates.and(hasEmptyString);
+            NPredicate<String> combinedAnd = containsDuplicates.and(hasEmptyString);
             assertTrue(combinedAnd.test("a", "", "a"));
             assertFalse(combinedAnd.test("a", "b", "a"));
         }

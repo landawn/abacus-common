@@ -44,7 +44,7 @@ public interface DoubleMapMultiConsumer extends java.util.stream.DoubleStream.Do
      *   <li>Implementing custom filtering and transformation logic in one step</li>
      * </ul>
      *
-     * <p>Example usage in a stream:
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleStream.of(1.5, 2.5, 3.5)
      *     .mapMulti((value, consumer) -> {
@@ -57,10 +57,9 @@ public interface DoubleMapMultiConsumer extends java.util.stream.DoubleStream.Do
      * // Output: 0.0, 0.0, 1.0, 0.0, 1.0, 2.0
      * }</pre>
      *
-     * @param value the input double value to be transformed
-     * @param consumer the consumer that accepts the transformed values. The implementation
-     *                 should call {@code consumer.accept(double)} for each output value. May be
-     *                 called zero or more times
+     * @param value the source value to expand, transform, or suppress
+     * @param consumer the downstream consumer that receives each produced value; implementations
+     *        may invoke it zero or more times for the same input value
      */
     @Override
     void accept(double value, java.util.function.DoubleConsumer consumer);

@@ -53,6 +53,12 @@ public interface IntToShortFunction {
      *   <li>For example, 32,768 converts to -32,768, and 65,536 converts to 0</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntToShortFunction low16Bits = value -> (short) value;
+     * short result = low16Bits.applyAsShort(32768);   // -32768
+     * }</pre>
+     *
      * @param value the function argument, an int value to be converted to short
      * @return the function result as a short value. If the input value is outside
      *         the range of short (-32,768 to 32,767), the result will be the lower

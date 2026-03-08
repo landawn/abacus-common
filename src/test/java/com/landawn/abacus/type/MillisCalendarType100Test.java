@@ -6,6 +6,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Calendar;
 
 import org.junit.jupiter.api.Assertions;
@@ -35,8 +36,10 @@ public class MillisCalendarType100Test extends TestBase {
     @Test
     public void testGetByIndexWithZeroValue() throws SQLException {
         Mockito.when(mockResultSet.getLong(1)).thenReturn(0L);
+        Mockito.when(mockResultSet.wasNull()).thenReturn(false);
         Calendar result = millisCalendarType.get(mockResultSet, 1);
-        Assertions.assertNull(result);
+        Assertions.assertNotNull(result);
+        assertEquals(0L, result.getTimeInMillis());
     }
 
     @Test
@@ -51,6 +54,24 @@ public class MillisCalendarType100Test extends TestBase {
     @Test
     public void testGetByLabelWithZeroValue() throws SQLException {
         Mockito.when(mockResultSet.getLong("testColumn")).thenReturn(0L);
+        Mockito.when(mockResultSet.wasNull()).thenReturn(false);
+        Calendar result = millisCalendarType.get(mockResultSet, "testColumn");
+        Assertions.assertNotNull(result);
+        assertEquals(0L, result.getTimeInMillis());
+    }
+
+    @Test
+    public void testGetByIndexWithSqlNull() throws SQLException {
+        Mockito.when(mockResultSet.getLong(1)).thenReturn(0L);
+        Mockito.when(mockResultSet.wasNull()).thenReturn(true);
+        Calendar result = millisCalendarType.get(mockResultSet, 1);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testGetByLabelWithSqlNull() throws SQLException {
+        Mockito.when(mockResultSet.getLong("testColumn")).thenReturn(0L);
+        Mockito.when(mockResultSet.wasNull()).thenReturn(true);
         Calendar result = millisCalendarType.get(mockResultSet, "testColumn");
         Assertions.assertNull(result);
     }
@@ -67,7 +88,7 @@ public class MillisCalendarType100Test extends TestBase {
     @Test
     public void testSetPreparedStatementWithNull() throws SQLException {
         millisCalendarType.set(mockPreparedStatement, 1, null);
-        Mockito.verify(mockPreparedStatement).setLong(1, 0L);
+        Mockito.verify(mockPreparedStatement).setNull(1, Types.BIGINT);
     }
 
     @Test
@@ -81,7 +102,7 @@ public class MillisCalendarType100Test extends TestBase {
     @Test
     public void testSetCallableStatementWithNull() throws SQLException {
         millisCalendarType.set(mockCallableStatement, "param", null);
-        Mockito.verify(mockCallableStatement).setLong("param", 0L);
+        Mockito.verify(mockCallableStatement).setNull("param", Types.BIGINT);
     }
 
     @Test

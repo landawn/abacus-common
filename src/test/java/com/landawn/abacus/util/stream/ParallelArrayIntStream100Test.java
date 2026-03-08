@@ -329,7 +329,7 @@ public class ParallelArrayIntStream100Test extends TestBase {
                 capturedValues.add(it);
             }
         };
-        IntStream result = parallelStream.onEach(action);
+        IntStream result = parallelStream.peek(action);
 
         int[] array = result.toArray();
 

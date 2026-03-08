@@ -85,7 +85,7 @@ public final class WebUtil {
      *     + "-H \"Content-Type: application/json\" "
      *     + "-H \"Authorization: Bearer token123\" "
      *     + "-d '{\"name\":\"John\",\"age\":30}'";
-     * String javaCode = WebUtil.convertCurlToHttpRequest(curl);
+     * String javaCode = WebUtil.curlToHttpRequestCode(curl);
      * System.out.println(javaCode);
      * }</pre>
      *
@@ -95,9 +95,9 @@ public final class WebUtil {
      *         with proper indentation and line separators
      * @throws IllegalArgumentException if the curl parameter is {@code null}, empty, or
      *                                  doesn't start with "curl"
-     * @see #convertCurlToOkHttpRequest(String)
+     * @see #curlToOkHttpRequestCode(String)
      */
-    public static String convertCurlToHttpRequest(final String curl) {
+    public static String curlToHttpRequestCode(final String curl) {
         final String indent = "\n    ";
         final List<String> tokens = parseCurl(curl);
 
@@ -200,10 +200,10 @@ public final class WebUtil {
      *
      * <p>This method parses a cURL command and generates the equivalent Java code
      * using the OkHttpRequest API. It handles the same cURL options as
-     * {@link #convertCurlToHttpRequest(String)} but generates code specifically for the
+     * {@link #curlToHttpRequestCode(String)} but generates code specifically for the
      * OkHttp client library.</p>
      *
-     * <p>Key differences from {@link #convertCurlToHttpRequest(String)}:</p>
+     * <p>Key differences from {@link #curlToHttpRequestCode(String)}:</p>
      * <ul>
      *   <li>Creates {@code RequestBody} with {@code MediaType} when body is present</li>
      *   <li>Automatically extracts {@code MediaType} from Content-Type header</li>
@@ -218,7 +218,7 @@ public final class WebUtil {
      *   <li>Appropriate HTTP method call ({@code get()}, {@code post()}, {@code put()}, {@code delete()}, or {@code execute()})</li>
      * </ul>
      *
-     * <p>HTTP Method Detection follows the same rules as {@link #convertCurlToHttpRequest(String)}:</p>
+     * <p>HTTP Method Detection follows the same rules as {@link #curlToHttpRequestCode(String)}:</p>
      * <ul>
      *   <li>If {@code -X} is specified, uses that method</li>
      *   <li>If {@code -d} is present without {@code -X}, defaults to POST</li>
@@ -231,7 +231,7 @@ public final class WebUtil {
      * String curl = "curl -X POST http://localhost:18080/users "
      *     + "-H \"Content-Type: application/json\" "
      *     + "-d '{\"name\":\"John\"}'";
-     * String javaCode = WebUtil.convertCurlToOkHttpRequest(curl);
+     * String javaCode = WebUtil.curlToOkHttpRequestCode(curl);
      * System.out.println(javaCode);
      * }</pre>
      *
@@ -241,9 +241,9 @@ public final class WebUtil {
      *         with proper indentation and line separators
      * @throws IllegalArgumentException if the curl parameter is {@code null}, empty, or
      *                                  doesn't start with "curl"
-     * @see #convertCurlToHttpRequest(String)
+     * @see #curlToHttpRequestCode(String)
      */
-    public static String convertCurlToOkHttpRequest(final String curl) {
+    public static String curlToOkHttpRequestCode(final String curl) {
         final String indent = "\n    ";
         final List<String> tokens = parseCurl(curl);
 
@@ -467,7 +467,7 @@ public final class WebUtil {
      *
      * <p>The generated cURL commands use single quotes (') by default as the quote
      * character. To use a different quote character, see
-     * {@link #createOkHttpRequestForCurl(String, char, Consumer)}.</p>
+     * {@link #createCurlLoggingOkHttpRequest(String, char, Consumer)}.</p>
      *
      * <p>The interceptor is added to a new {@code OkHttpClient} instance specifically
      * created for this request, ensuring the logging doesn't affect other clients.</p>
@@ -475,7 +475,7 @@ public final class WebUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create request with cURL logging
-     * OkHttpRequest request = WebUtil.createOkHttpRequestForCurl(
+     * OkHttpRequest request = WebUtil.createCurlLoggingOkHttpRequest(
      *     "http://localhost:18080",
      *     curl -> logger.debug("cURL command: {}", curl)
      * );
@@ -497,18 +497,18 @@ public final class WebUtil {
      * @param logHandler consumer that receives the generated cURL command string
      *                   for each request, must not be null
      * @return an OkHttpRequest configured with cURL logging interceptor
-     * @see #createOkHttpRequestForCurl(String, char, Consumer)
+     * @see #createCurlLoggingOkHttpRequest(String, char, Consumer)
      * @see CurlInterceptor
      * @see <a href="https://github.com/mrmike/Ok2Curl">Ok2Curl - OkHttp to cURL converter</a>
      */
-    public static OkHttpRequest createOkHttpRequestForCurl(final String url, final Consumer<? super String> logHandler) {
-        return createOkHttpRequestForCurl(url, CurlInterceptor.DEFAULT_QUOTE_CHAR, logHandler);
+    public static OkHttpRequest createCurlLoggingOkHttpRequest(final String url, final Consumer<? super String> logHandler) {
+        return createCurlLoggingOkHttpRequest(url, CurlInterceptor.DEFAULT_QUOTE_CHAR, logHandler);
     }
 
     /**
      * Creates an OkHttpRequest configured to log cURL commands with a custom quote character.
      *
-     * <p>This method is similar to {@link #createOkHttpRequestForCurl(String, Consumer)}
+     * <p>This method is similar to {@link #createCurlLoggingOkHttpRequest(String, Consumer)}
      * but allows you to specify the quote character used in the generated cURL commands.
      * This is useful when you need to generate cURL commands compatible with specific
      * shell environments or documentation standards.</p>
@@ -529,7 +529,7 @@ public final class WebUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Use double quotes in generated cURL commands (e.g., for Windows compatibility)
-     * OkHttpRequest request = WebUtil.createOkHttpRequestForCurl(
+     * OkHttpRequest request = WebUtil.createCurlLoggingOkHttpRequest(
      *     "http://localhost:18080",
      *     '"',
      *     curl -> System.out.println("cURL: " + curl)
@@ -550,10 +550,10 @@ public final class WebUtil {
      *                   for each request, must not be null
      * @return an OkHttpRequest configured with cURL logging interceptor using the
      *         specified quote character
-     * @see #createOkHttpRequestForCurl(String, Consumer)
+     * @see #createCurlLoggingOkHttpRequest(String, Consumer)
      * @see CurlInterceptor
      */
-    public static OkHttpRequest createOkHttpRequestForCurl(final String url, final char quoteChar, final Consumer<? super String> logHandler) {
+    public static OkHttpRequest createCurlLoggingOkHttpRequest(final String url, final char quoteChar, final Consumer<? super String> logHandler) {
         final okhttp3.OkHttpClient client = new okhttp3.OkHttpClient().newBuilder().addInterceptor(new CurlInterceptor(quoteChar, logHandler)).build();
 
         return OkHttpRequest.create(url, client);

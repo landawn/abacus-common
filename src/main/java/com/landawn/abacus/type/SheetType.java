@@ -84,14 +84,14 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SheetType<String, String, Object> type = new SheetType<>("String", "String", "Object");
-     * Class<Sheet<String, String, Object>> clazz = type.clazz();
+     * Class<Sheet<String, String, Object>> clazz = type.javaType();
      * // clazz represents Sheet.class
      * }</pre>
      *
      * @return the Class object for Sheet.class
      */
     @Override
-    public Class<Sheet<R, C, E>> clazz() {
+    public Class<Sheet<R, C, E>> javaType() {
         return typeClass;
     }
 
@@ -102,7 +102,7 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SheetType<String, Integer, Double> type = new SheetType<>("String", "Integer", "Double");
-     * Type<?>[] paramTypes = type.getParameterTypes();
+     * Type<?>[] paramTypes = type.parameterTypes();
      * // paramTypes[0] is Type for String (row keys)
      * // paramTypes[1] is Type for Integer (column keys)
      * // paramTypes[2] is Type for Double (elements)
@@ -111,7 +111,7 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * @return an array with Type instances for row key, column key, and element types
      */
     @Override
-    public Type<?>[] getParameterTypes() {
+    public Type<?>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -158,13 +158,13 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Sheet<String, String, Object>> type = TypeFactory.getType("Sheet<String, String, Object>");
-     * SerializationType serType = type.getSerializationType();   // Returns SerializationType.SHEET
+     * SerializationType serType = type.serializationType();   // Returns SerializationType.SHEET
      * }</pre>
      *
      * @return {@link SerializationType#SHEET}, indicating this type uses sheet-based serialization
      */
     @Override
-    public SerializationType getSerializationType() {
+    public SerializationType serializationType() {
         return SerializationType.SHEET;
     }
 

@@ -837,10 +837,10 @@ public class FloatList2025Test extends TestBase {
     @Test
     public void testHasDuplicates() {
         FloatList list1 = FloatList.of(1.0f, 2.0f, 1.0f);
-        assertTrue(list1.hasDuplicates());
+        assertTrue(list1.containsDuplicates());
 
         FloatList list2 = FloatList.of(1.0f, 2.0f, 3.0f);
-        assertFalse(list2.hasDuplicates());
+        assertFalse(list2.containsDuplicates());
     }
 
     @Test

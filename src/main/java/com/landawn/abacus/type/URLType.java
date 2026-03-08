@@ -77,13 +77,13 @@ public class URLType extends AbstractType<URL> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<URL> type = TypeFactory.getType(URL.class);
-     * Class<URL> clazz = type.clazz();   // Returns URL.class
+     * Class<URL> clazz = type.javaType();   // Returns URL.class
      * }</pre>
      *
      * @return the Class object for URL.class
      */
     @Override
-    public Class<URL> clazz() {
+    public Class<URL> javaType() {
         return URL.class;
     }
 

@@ -16,7 +16,7 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IntList;
 import com.landawn.abacus.util.Strings;
@@ -44,14 +44,14 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<IntList> type = TypeFactory.getType(IntList.class);
-     * Class&lt;IntList&gt; clazz = type.clazz();
+     * Class&lt;IntList&gt; clazz = type.javaType();
      * // clazz equals IntList.class
      * }</pre>
      *
      * @return the Class object for IntList.class
      */
     @Override
-    public Class<IntList> clazz() {
+    public Class<IntList> javaType() {
         return IntList.class;
     }
 
@@ -62,14 +62,14 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<IntList> type = TypeFactory.getType(IntList.class);
-     * Type&lt;Integer&gt; elemType = type.getElementType();
+     * Type&lt;Integer&gt; elemType = type.elementType();
      * // elemType can be used for element-level operations
      * }</pre>
      *
      * @return the Type instance representing int type for list elements
      */
     @Override
-    public Type<Integer> getElementType() {
+    public Type<Integer> elementType() {
         return elementType;
     }
 
@@ -79,15 +79,15 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<IntList> type = TypeFactory.getType(IntList.class);
-     * Type&lt;Integer&gt;[] paramTypes = type.getParameterTypes();
+     * Type&lt;Integer&gt;[] paramTypes = type.parameterTypes();
      * // paramTypes[0] represents the element type
      * }</pre>
      *
      * @return an array containing the Integer Type that describes the elements of this list type
-     * @see #getElementType()
+     * @see #elementType()
      */
     @Override
-    public Type<Integer>[] getParameterTypes() {
+    public Type<Integer>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -203,7 +203,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final IntList x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final IntList x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

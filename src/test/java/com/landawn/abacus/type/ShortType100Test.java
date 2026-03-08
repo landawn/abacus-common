@@ -21,7 +21,7 @@ public class ShortType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(Short.class, shortType.clazz());
+        assertEquals(Short.class, shortType.javaType());
     }
 
     @Test

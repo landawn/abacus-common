@@ -32,10 +32,8 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.Tuple.Tuple4;
 
 // This class is heavily inspired by CompletableFuture but redesigned for better usability and flexibility.
-// Another important reason for creating this class is to support the java versions prior to Java 8 and Android platforms.
-// Now, it seems this class is not necessary any more after Java 8 is widely adopted.
-// Try to remove it several times but failed because it provides some important features not available in CompletableFuture,
-// Keep it here for the time being.
+// It provides some important features not available in CompletableFuture,
+// such as recursive cancellation support and fluent chaining with enhanced control.
 
 /**
  * A powerful and flexible asynchronous computation framework that extends the standard {@link Future} interface

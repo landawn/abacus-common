@@ -29,12 +29,11 @@ import java.util.Set;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 
-/** 
+/**
+ * Utility class for escaping and unescaping {@code String}s for
+ * Java, JavaScript, HTML, and XML contexts.
  *
- * <p>Escapes and unescapes {@code String}s for
- * Java, Java Script, HTML and XML.</p>
- *
- * <p>#ThreadSafe#</p>
+ * <p>This class is thread-safe as all methods are stateless.</p>
  *
  * <p><b>Attribution:</b>
  * This class includes code adapted from Apache Commons Lang, Google Guava, and other
@@ -242,7 +241,7 @@ public final class EscapeUtil {
      * instance to operate.</p>
      */
     private EscapeUtil() {
-        // singleton.
+        // Utility class - prevent instantiation
     }
 
     // Java and JavaScript

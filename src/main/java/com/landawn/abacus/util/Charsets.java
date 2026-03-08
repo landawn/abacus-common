@@ -152,7 +152,7 @@ public final class Charsets {
     }
 
     private Charsets() {
-        // singleton.
+        // Utility class - prevent instantiation
     }
 
     /**

@@ -17,7 +17,7 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.util.Collection;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -47,14 +47,14 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<int[]> type = TypeFactory.getType(int[].class);
-     * Class<int[]> clazz = type.clazz();
+     * Class<int[]> clazz = type.javaType();
      * // clazz equals int[].class
      * }</pre>
      *
      * @return the Class object for int[] type
      */
     @Override
-    public Class<int[]> clazz() {
+    public Class<int[]> javaType() {
         return int[].class;
     }
 
@@ -65,14 +65,14 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<int[]> type = TypeFactory.getType(int[].class);
-     * Type<Integer> elemType = type.getElementType();
+     * Type<Integer> elemType = type.elementType();
      * // elemType can be used for element-level operations
      * }</pre>
      *
      * @return the Type instance representing Integer type for array elements
      */
     @Override
-    public Type<Integer> getElementType() {
+    public Type<Integer> elementType() {
         return elementType;
     }
 
@@ -82,15 +82,15 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<int[]> type = TypeFactory.getType(int[].class);
-     * Type<Integer>[] paramTypes = type.getParameterTypes();
+     * Type<Integer>[] paramTypes = type.parameterTypes();
      * // paramTypes[0] represents the element type
      * }</pre>
      *
      * @return an array containing the Integer Type that describes the elements of this array type
-     * @see #getElementType()
+     * @see #elementType()
      */
     @Override
-    public Type<Integer>[] getParameterTypes() {
+    public Type<Integer>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -236,7 +236,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final int[] x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final int[] x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

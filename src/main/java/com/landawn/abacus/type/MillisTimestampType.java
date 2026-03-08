@@ -19,6 +19,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 
 import com.landawn.abacus.util.Dates;
 
@@ -66,7 +67,7 @@ public class MillisTimestampType extends TimestampType {
     public Timestamp get(final ResultSet rs, final int columnIndex) throws SQLException {
         final long lng = rs.getLong(columnIndex);
 
-        return (lng == 0) ? null : Dates.createTimestamp(lng);
+        return (lng == 0 && rs.wasNull()) ? null : Dates.createTimestamp(lng);
     }
 
     /**
@@ -97,7 +98,7 @@ public class MillisTimestampType extends TimestampType {
     public Timestamp get(final ResultSet rs, final String columnName) throws SQLException {
         final long lng = rs.getLong(columnName);
 
-        return (lng == 0) ? null : Dates.createTimestamp(lng);
+        return (lng == 0 && rs.wasNull()) ? null : Dates.createTimestamp(lng);
     }
 
     /**
@@ -125,7 +126,11 @@ public class MillisTimestampType extends TimestampType {
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final Timestamp x) throws SQLException {
-        stmt.setLong(columnIndex, (x == null) ? 0 : x.getTime());
+        if (x == null) {
+            stmt.setNull(columnIndex, Types.BIGINT);
+        } else {
+            stmt.setLong(columnIndex, x.getTime());
+        }
     }
 
     /**
@@ -153,6 +158,10 @@ public class MillisTimestampType extends TimestampType {
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final Timestamp x) throws SQLException {
-        stmt.setLong(parameterName, (x == null) ? 0 : x.getTime());
+        if (x == null) {
+            stmt.setNull(parameterName, Types.BIGINT);
+        } else {
+            stmt.setLong(parameterName, x.getTime());
+        }
     }
 }

@@ -34,7 +34,7 @@ public class URLType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<?> clazz = urlType.clazz();
+        Class<?> clazz = urlType.javaType();
         assertNotNull(clazz);
         assertEquals(URL.class, clazz);
     }

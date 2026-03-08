@@ -2035,16 +2035,16 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteList list1 = ByteList.of(1, 2, 3, 4);   // hasDuplicates() returns false
-     * ByteList list2 = ByteList.of(1, 2, 2, 3);   // hasDuplicates() returns true
-     * ByteList list3 = ByteList.of();             // hasDuplicates() returns false
+     * ByteList list1 = ByteList.of(1, 2, 3, 4);   // containsDuplicates() returns false
+     * ByteList list2 = ByteList.of(1, 2, 2, 3);   // containsDuplicates() returns true
+     * ByteList list3 = ByteList.of();             // containsDuplicates() returns false
      * }</pre>
      *
      * @return {@code true} if this list contains at least one duplicate element, {@code false} otherwise
      */
     @Override
-    public boolean hasDuplicates() {
-        return N.hasDuplicates(elementData, 0, size, false);
+    public boolean containsDuplicates() {
+        return N.containsDuplicates(elementData, 0, size, false);
     }
 
     /**

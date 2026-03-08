@@ -212,51 +212,40 @@ import com.landawn.abacus.util.u.OptionalShort;
  * <pre>{@code
  * // Dynamic class loading and instantiation
  * Class<?> clazz = ClassUtil.forName("com.example.MyClass");
- * Object instance = ClassUtil.newInstance(clazz);
- *
- * // Bean property introspection
- * List<String> properties = ClassUtil.getPropNameList(MyBean.class);
- * Map<String, PropertyInfo> propInfo = ClassUtil.getPropInfoMap(MyBean.class);
- *
- * // Property value access
- * MyBean bean = new MyBean();
- * String name = (String) ClassUtil.getPropValue(bean, "name");
- * ClassUtil.setPropValue(bean, "name", "John Doe");
- *
- * // Nested property access
- * Address address = (Address) ClassUtil.getPropValue(bean, "address");
- * String city = (String) ClassUtil.getPropValue(bean, "address.city");
- * ClassUtil.setPropValue(bean, "address.city", "New York");
+ * Object instance = N.newInstance(clazz);
  *
  * // Type conversion operations
  * Class<?> wrapperType = ClassUtil.wrap(int.class);   // Returns Integer.class
  * Class<?> primitiveType = ClassUtil.unwrap(Integer.class);   // Returns int.class
  *
  * // Method handle creation for performance
- * Method getter = ClassUtil.getPropGetter(MyBean.class, "name");
+ * Method getter = Beans.getPropGetter(MyBean.class, "name");
  * MethodHandle handle = ClassUtil.createMethodHandle(getter);
+ *
+ * // Bean property introspection (via Beans utility)
+ * List<String> properties = Beans.getPropNameList(MyBean.class);
+ *
+ * // Property value access (via Beans utility)
+ * MyBean bean = new MyBean();
+ * String name = (String) Beans.getPropValue(bean, "name");
+ * Beans.setPropValue(bean, "name", "John Doe");
  * }</pre>
  *
  * <p><b>Advanced Reflection Patterns:</b>
  * <pre>{@code
  * public class DynamicBeanProcessor {
  *
- *     // Generic bean copying with type conversion
+ *     // Generic bean copying using Beans utility
  *     public void copyProperties(Object source, Object target) {
- *         Class<?> sourceClass = source.getClass();
- *         Class<?> targetClass = target.getClass();
+ *         List<String> sourceProps = Beans.getPropNameList(source.getClass());
+ *         Map<String, Method> targetGetters = Beans.getPropGetters(target.getClass());
  *
- *         Map<String, PropertyInfo> sourceProps = ClassUtil.getPropInfoMap(sourceClass);
- *         Map<String, PropertyInfo> targetProps = ClassUtil.getPropInfoMap(targetClass);
- *
- *         for (String propName : sourceProps.keySet()) {
- *             if (targetProps.containsKey(propName)) {
+ *         for (String propName : sourceProps) {
+ *             if (targetGetters.containsKey(propName)) {
  *                 try {
- *                     Object value = ClassUtil.getPropValue(source, propName);
+ *                     Object value = Beans.getPropValue(source, propName);
  *                     if (value != null) {
- *                         PropertyInfo targetProp = targetProps.get(propName);
- *                         Object convertedValue = convertValue(value, targetProp.getType());
- *                         ClassUtil.setPropValue(target, propName, convertedValue);
+ *                         Beans.setPropValue(target, propName, value);
  *                     }
  *                 } catch (Exception e) {
  *                     logger.warn("Failed to copy property: " + propName, e);
@@ -268,17 +257,15 @@ import com.landawn.abacus.util.u.OptionalShort;
  *     // Dynamic configuration binding
  *     public <T> T bindConfiguration(Map<String, Object> config, Class<T> targetClass) {
  *         try {
- *             T instance = ClassUtil.newInstance(targetClass);
- *             Map<String, PropertyInfo> properties = ClassUtil.getPropInfoMap(targetClass);
+ *             T instance = N.newInstance(targetClass);
+ *             List<String> properties = Beans.getPropNameList(targetClass);
  *
  *             for (Map.Entry<String, Object> entry : config.entrySet()) {
  *                 String key = entry.getKey();
  *                 Object value = entry.getValue();
  *
- *                 if (properties.containsKey(key)) {
- *                     PropertyInfo propInfo = properties.get(key);
- *                     Object convertedValue = convertToType(value, propInfo.getType());
- *                     ClassUtil.setPropValue(instance, key, convertedValue);
+ *                 if (properties.contains(key)) {
+ *                     Beans.setPropValue(instance, key, value);
  *                 }
  *             }
  *
@@ -291,17 +278,17 @@ import com.landawn.abacus.util.u.OptionalShort;
  *     // Dynamic proxy with method interception
  *     public Object createProxy(Object target, MethodInterceptor interceptor) {
  *         Class<?> targetClass = target.getClass();
- *         
+ *
  *         return Proxy.newProxyInstance(
  *             targetClass.getClassLoader(),
  *             targetClass.getInterfaces(),
  *             (proxy, method, args) -> {
  *                 // Pre-processing
  *                 Object[] processedArgs = interceptor.beforeMethod(method, args);
- *                 
+ *
  *                 // Method invocation
  *                 Object result = ClassUtil.invokeMethod(target, method, processedArgs);
- *                 
+ *
  *                 // Post-processing
  *                 return interceptor.afterMethod(method, result);
  *             }
@@ -380,7 +367,7 @@ import com.landawn.abacus.util.u.OptionalShort;
 public final class ClassUtil {
 
     private ClassUtil() {
-        // singleton
+        // Utility class - prevent instantiation
     }
 
     /**
@@ -852,11 +839,11 @@ public final class ClassUtil {
                                     try {
                                         final Type<?> componentType = Type.of(componentTypeName);
 
-                                        if (componentType.isObjectType() && !componentType.name().equals(ObjectType.OBJECT)) {
+                                        if (componentType.isObject() && !componentType.name().equals(ObjectType.OBJECT)) {
                                             throw new IllegalArgumentException("No Class found by name: " + clsName);
                                         }
 
-                                        cls = Class.forName(prefixOfArray + "L" + componentType.clazz().getCanonicalName() + ";"); // NOSONAR
+                                        cls = Class.forName(prefixOfArray + "L" + componentType.javaType().getCanonicalName() + ";"); // NOSONAR
                                     } catch (final ClassNotFoundException e3) {
                                         // ignore.
                                     }
@@ -1719,7 +1706,7 @@ public final class ClassUtil {
             try {
                 final Type<Object> type = Type.of(typeName);
 
-                if (field.getType().isAssignableFrom(type.clazz())) {
+                if (field.getType().isAssignableFrom(type.javaType())) {
                     return type.name();
                 }
             } catch (final Throwable e) {
@@ -1766,7 +1753,7 @@ public final class ClassUtil {
                 final Type<Object> type = Type.of(typeName);
                 methodType = N.notEmpty(genericParameterTypes) ? method.getParameterTypes()[0] : method.getReturnType();
 
-                if (methodType.isAssignableFrom(type.clazz())) {
+                if (methodType.isAssignableFrom(type.javaType())) {
                     return type.name();
                 }
             } catch (final Throwable e) {
@@ -1971,8 +1958,12 @@ public final class ClassUtil {
 
                     final String tmp = res.substring(i + 1, j);
 
-                    if (tmp.length() > 1 && tmp.substring(0, tmp.length() / 2).equals(tmp.substring(tmp.length() / 2 + 1))) {
-                        sb.append(Strings.reverse(tmp.substring(0, tmp.length() / 2)));
+                    final int half = tmp.length() / 2;
+
+                    if (tmp.length() > 1 && tmp.substring(0, half).equals(tmp.substring(half))) {
+                        sb.append(Strings.reverse(tmp.substring(0, half)));
+                    } else if (tmp.length() > 2 && tmp.length() % 2 == 1 && tmp.substring(0, half).equals(tmp.substring(half + 1))) {
+                        sb.append(Strings.reverse(tmp.substring(0, half)));
                     } else {
                         sb.append(Strings.reverse(tmp));
                     }
@@ -2444,7 +2435,7 @@ public final class ClassUtil {
     public static boolean isPrimitiveType(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);
 
-        return Type.of(cls).isPrimitiveType();
+        return Type.of(cls).isPrimitive();
     }
 
     /**

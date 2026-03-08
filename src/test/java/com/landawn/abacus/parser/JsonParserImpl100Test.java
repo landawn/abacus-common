@@ -27,8 +27,8 @@ import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.annotation.JsonXmlField;
-import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
-import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
+import com.landawn.abacus.parser.JsonDeserConfig;
+import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.IOUtil;
@@ -324,7 +324,7 @@ public class JsonParserImpl100Test extends TestBase {
     public void testSerializationConfig() {
         Person person = new Person("Test", 100);
 
-        JsonSerializationConfig config = JSC.create().prettyFormat(true).setIndentation("  ");
+        JsonSerConfig config = JsonSerConfig.create().setPrettyFormat(true).setIndentation("  ");
 
         String json = parser.serialize(person, config);
         assertTrue(json.contains("\n"));
@@ -338,7 +338,7 @@ public class JsonParserImpl100Test extends TestBase {
         map.put("number", null);
         map.put("boolean", null);
 
-        JsonSerializationConfig config = JSC.create().writeNullStringAsEmpty(true).writeNullNumberAsZero(true).writeNullBooleanAsFalse(true);
+        JsonSerConfig config = JsonSerConfig.create().setWriteNullStringAsEmpty(true).setWriteNullNumberAsZero(true).setWriteNullBooleanAsFalse(true);
 
         String json = parser.serialize(map, config);
         assertTrue(json.contains("\"string\": null"));
@@ -350,7 +350,7 @@ public class JsonParserImpl100Test extends TestBase {
     public void testDeserializationConfig() {
         String json = "{\"name\": \"Test\",\"unknownField\": \"value\"}";
 
-        JsonDeserializationConfig config = JDC.create().ignoreUnmatchedProperty(true);
+        JsonDeserConfig config = JsonDeserConfig.create().setIgnoreUnmatchedProperty(true);
 
         Person person = parser.deserialize(json, config, Person.class);
         assertEquals("Test", person.getName());
@@ -408,7 +408,7 @@ public class JsonParserImpl100Test extends TestBase {
 
         Dataset ds = N.newDataset(columnNames, columnList);
         ds.freeze();
-        String json = parser.serialize(ds, JSC.create().writeColumnType(true).prettyFormat(true).quotePropName(true));
+        String json = parser.serialize(ds, JsonSerConfig.create().setWriteColumnType(true).setPrettyFormat(true).setQuotePropName(true));
 
         assertTrue(json.contains("columnNames"));
         assertTrue(json.contains("columns"));
@@ -427,7 +427,8 @@ public class JsonParserImpl100Test extends TestBase {
         sheet.println();
 
         sheet.freeze();
-        String json = parser.serialize(sheet, JSC.create().writeColumnType(true).writeRowColumnKeyType(true).prettyFormat(true).quotePropName(true));
+        String json = parser.serialize(sheet,
+                JsonSerConfig.create().setWriteColumnType(true).setWriteRowColumnKeyType(true).setPrettyFormat(true).setQuotePropName(true));
 
         Sheet<String, String, Integer> sheet2 = parser.deserialize(json, Sheet.class);
         assertEquals(sheet, sheet2);
@@ -441,7 +442,7 @@ public class JsonParserImpl100Test extends TestBase {
         Sheet<String, Integer, Integer> sheet = new Sheet<>(rowKeys, columnKeys, data);
 
         sheet.freeze();
-        String json = parser.serialize(sheet, JSC.create().writeColumnType(true).writeRowColumnKeyType(true).quotePropName(true));
+        String json = parser.serialize(sheet, JsonSerConfig.create().setWriteColumnType(true).setWriteRowColumnKeyType(true).setQuotePropName(true));
 
         assertTrue(json.contains("\"columnKeyType\""));
 
@@ -491,7 +492,7 @@ public class JsonParserImpl100Test extends TestBase {
         person.setWriteOnly("WriteOnly");
         person.setReadOnly("ReadOnly");
 
-        JsonSerializationConfig config = JSC.create().skipTransientField(true);
+        JsonSerConfig config = JsonSerConfig.create().setSkipTransientField(true);
         String json = parser.serialize(person, config);
 
         assertFalse(json.contains("secret"));

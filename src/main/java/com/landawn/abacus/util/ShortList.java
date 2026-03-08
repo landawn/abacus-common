@@ -216,7 +216,7 @@ import com.landawn.abacus.util.stream.ShortStream;
  *   <li><b>Aggregation:</b> Sum, min, max operations via stream API</li>
  *   <li><b>Central Tendency:</b> Median calculation with efficient sorting</li>
  *   <li><b>Occurrence Counting:</b> {@code frequency()} for frequency analysis</li>
- *   <li><b>Duplicate Detection:</b> {@code hasDuplicates()}, {@code removeDuplicates()}</li>
+ *   <li><b>Duplicate Detection:</b> {@code containsDuplicates()}, {@code removeDuplicates()}</li>
  * </ul>
  *
  * <p><b>Comparison with Alternatives:</b>
@@ -1988,8 +1988,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return {@code true} if the list contains at least one duplicate element, {@code false} otherwise
      */
     @Override
-    public boolean hasDuplicates() {
-        return N.hasDuplicates(elementData, 0, size, false);
+    public boolean containsDuplicates() {
+        return N.containsDuplicates(elementData, 0, size, false);
     }
 
     /**

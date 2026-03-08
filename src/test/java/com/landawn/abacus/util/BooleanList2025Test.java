@@ -985,33 +985,33 @@ public class BooleanList2025Test extends TestBase {
     }
 
     @Test
-    public void test_hasDuplicates() {
+    public void test_containsDuplicates() {
         BooleanList list = BooleanList.of(true, false, true);
-        assertTrue(list.hasDuplicates());
+        assertTrue(list.containsDuplicates());
     }
 
     @Test
-    public void test_hasDuplicates_noDuplicates() {
+    public void test_containsDuplicates_noDuplicates() {
         BooleanList list = BooleanList.of(true, false);
-        assertFalse(list.hasDuplicates());
+        assertFalse(list.containsDuplicates());
     }
 
     @Test
-    public void test_hasDuplicates_empty() {
+    public void test_containsDuplicates_empty() {
         BooleanList list = new BooleanList();
-        assertFalse(list.hasDuplicates());
+        assertFalse(list.containsDuplicates());
     }
 
     @Test
-    public void test_hasDuplicates_sizeOne() {
+    public void test_containsDuplicates_sizeOne() {
         BooleanList list = BooleanList.of(true);
-        assertFalse(list.hasDuplicates());
+        assertFalse(list.containsDuplicates());
     }
 
     @Test
-    public void test_hasDuplicates_sizeTwo_same() {
+    public void test_containsDuplicates_sizeTwo_same() {
         BooleanList list = BooleanList.of(true, true);
-        assertTrue(list.hasDuplicates());
+        assertTrue(list.containsDuplicates());
     }
 
     @Test

@@ -25,7 +25,7 @@ import java.util.Objects;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedSQLException;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.Strings;
@@ -52,13 +52,13 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<String> type = TypeFactory.getType(String.class);
-     * Class<?> clazz = type.clazz();   // returns String.class
+     * Class<?> clazz = type.javaType();   // returns String.class
      * }</pre>
      *
      * @return the Class object for String.class
      */
     @Override
-    public Class<String> clazz() {
+    public Class<String> javaType() {
         return String.class;
     }
 
@@ -310,8 +310,8 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, String x, final JsonXmlSerializationConfig<?> config) throws IOException {
-        x = x == null && config != null && config.writeNullStringAsEmpty() ? Strings.EMPTY : x;
+    public void writeCharacter(final CharacterWriter writer, String x, final JsonXmlSerConfig<?> config) throws IOException {
+        x = x == null && config != null && config.isWriteNullStringAsEmpty() ? Strings.EMPTY : x;
 
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);

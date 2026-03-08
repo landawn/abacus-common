@@ -513,51 +513,51 @@ public class LongStream104Test extends TestBase {
     @Test
     public void testOnEach() {
         List<Long> collected = new ArrayList<>();
-        assertEquals(5, LongStream.of(1, 2, 3, 4, 5).onEach(collected::add).count());
+        assertEquals(5, LongStream.of(1, 2, 3, 4, 5).peek(collected::add).count());
         assertEquals(Arrays.asList(1L, 2L, 3L, 4L, 5L), collected);
 
         collected.clear();
-        assertEquals(4, LongStream.of(1, 2, 3, 4, 5).onEach(collected::add).skip(1).count());
+        assertEquals(4, LongStream.of(1, 2, 3, 4, 5).peek(collected::add).skip(1).count());
         assertEquals(Arrays.asList(1L, 2L, 3L, 4L, 5L), collected);
 
         collected.clear();
-        assertArrayEquals(new long[] { 1, 2, 3, 4, 5 }, LongStream.of(1, 2, 3, 4, 5).onEach(collected::add).toArray());
+        assertArrayEquals(new long[] { 1, 2, 3, 4, 5 }, LongStream.of(1, 2, 3, 4, 5).peek(collected::add).toArray());
         assertEquals(Arrays.asList(1L, 2L, 3L, 4L, 5L), collected);
 
         collected.clear();
-        assertArrayEquals(new long[] { 2, 3, 4, 5 }, LongStream.of(1, 2, 3, 4, 5).onEach(collected::add).skip(1).toArray());
+        assertArrayEquals(new long[] { 2, 3, 4, 5 }, LongStream.of(1, 2, 3, 4, 5).peek(collected::add).skip(1).toArray());
         assertEquals(Arrays.asList(1L, 2L, 3L, 4L, 5L), collected);
 
         collected.clear();
-        assertEquals(Arrays.asList(1L, 2L, 3L, 4L, 5L), LongStream.of(1, 2, 3, 4, 5).onEach(collected::add).toList());
+        assertEquals(Arrays.asList(1L, 2L, 3L, 4L, 5L), LongStream.of(1, 2, 3, 4, 5).peek(collected::add).toList());
         assertEquals(Arrays.asList(1L, 2L, 3L, 4L, 5L), collected);
 
         collected.clear();
-        assertEquals(Arrays.asList(2L, 3L, 4L, 5L), LongStream.of(1, 2, 3, 4, 5).onEach(collected::add).skip(1).toList());
+        assertEquals(Arrays.asList(2L, 3L, 4L, 5L), LongStream.of(1, 2, 3, 4, 5).peek(collected::add).skip(1).toList());
         assertEquals(Arrays.asList(1L, 2L, 3L, 4L, 5L), collected);
 
         collected.clear();
-        assertEquals(5, LongStream.of(1, 2, 3, 4, 5).map(e -> e).onEach(collected::add).count());
+        assertEquals(5, LongStream.of(1, 2, 3, 4, 5).map(e -> e).peek(collected::add).count());
         assertEquals(Arrays.asList(1L, 2L, 3L, 4L, 5L), collected);
 
         collected.clear();
-        assertEquals(4, LongStream.of(1, 2, 3, 4, 5).map(e -> e).onEach(collected::add).skip(1).count());
+        assertEquals(4, LongStream.of(1, 2, 3, 4, 5).map(e -> e).peek(collected::add).skip(1).count());
         assertEquals(Arrays.asList(1L, 2L, 3L, 4L, 5L), collected);
 
         collected.clear();
-        assertArrayEquals(new long[] { 1, 2, 3, 4, 5 }, LongStream.of(1, 2, 3, 4, 5).map(e -> e).onEach(collected::add).toArray());
+        assertArrayEquals(new long[] { 1, 2, 3, 4, 5 }, LongStream.of(1, 2, 3, 4, 5).map(e -> e).peek(collected::add).toArray());
         assertEquals(Arrays.asList(1L, 2L, 3L, 4L, 5L), collected);
 
         collected.clear();
-        assertArrayEquals(new long[] { 2, 3, 4, 5 }, LongStream.of(1, 2, 3, 4, 5).map(e -> e).onEach(collected::add).skip(1).toArray());
+        assertArrayEquals(new long[] { 2, 3, 4, 5 }, LongStream.of(1, 2, 3, 4, 5).map(e -> e).peek(collected::add).skip(1).toArray());
         assertEquals(Arrays.asList(1L, 2L, 3L, 4L, 5L), collected);
 
         collected.clear();
-        assertEquals(Arrays.asList(1L, 2L, 3L, 4L, 5L), LongStream.of(1, 2, 3, 4, 5).map(e -> e).onEach(collected::add).toList());
+        assertEquals(Arrays.asList(1L, 2L, 3L, 4L, 5L), LongStream.of(1, 2, 3, 4, 5).map(e -> e).peek(collected::add).toList());
         assertEquals(Arrays.asList(1L, 2L, 3L, 4L, 5L), collected);
 
         collected.clear();
-        assertEquals(Arrays.asList(2L, 3L, 4L, 5L), LongStream.of(1, 2, 3, 4, 5).map(e -> e).onEach(collected::add).skip(1).toList());
+        assertEquals(Arrays.asList(2L, 3L, 4L, 5L), LongStream.of(1, 2, 3, 4, 5).map(e -> e).peek(collected::add).skip(1).toList());
         assertEquals(Arrays.asList(1L, 2L, 3L, 4L, 5L), collected);
     }
 

@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.type.Type.SerializationType;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
@@ -35,13 +35,13 @@ public class AbstractType101Test extends TestBase {
 
     private Type<String> testType;
     private CharacterWriter writer;
-    private JsonXmlSerializationConfig<?> config;
+    private JsonXmlSerConfig<?> config;
 
     @BeforeEach
     public void setUp() {
         testType = createType("String");
         writer = createCharacterWriter();
-        config = mock(JsonXmlSerializationConfig.class);
+        config = mock(JsonXmlSerConfig.class);
     }
 
     @Test
@@ -62,7 +62,7 @@ public class AbstractType101Test extends TestBase {
 
     @Test
     public void testDefaultBooleanMethods() {
-        assertFalse(testType.isPrimitiveType());
+        assertFalse(testType.isPrimitive());
         assertFalse(testType.isPrimitiveWrapper());
         assertFalse(testType.isPrimitiveList());
         assertFalse(testType.isBoolean());
@@ -92,22 +92,22 @@ public class AbstractType101Test extends TestBase {
         assertTrue(testType.isComparable());
         assertTrue(testType.isSerializable());
         assertFalse(testType.isOptionalOrNullable());
-        assertFalse(testType.isObjectType());
+        assertFalse(testType.isObject());
     }
 
     @Test
     public void testGetSerializationType() {
-        assertEquals(SerializationType.SERIALIZABLE, testType.getSerializationType());
+        assertEquals(SerializationType.SERIALIZABLE, testType.serializationType());
     }
 
     @Test
     public void testGetElementType() {
-        assertNull(testType.getElementType());
+        assertNull(testType.elementType());
     }
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = testType.getParameterTypes();
+        Type<?>[] paramTypes = testType.parameterTypes();
         assertNotNull(paramTypes);
         assertEquals(0, paramTypes.length);
     }

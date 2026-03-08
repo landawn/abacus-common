@@ -1018,7 +1018,7 @@ public class FloatStream103Test extends TestBase {
         public void testOnEach() {
             List<Float> collected = new ArrayList<>();
             FloatStream stream = createFloatStream(1.0f, 2.0f, 3.0f);
-            float[] result = stream.onEach(collected::add).toArray();
+            float[] result = stream.peek(collected::add).toArray();
 
             assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f }, result);
             assertEquals(Arrays.asList(1.0f, 2.0f, 3.0f), collected);

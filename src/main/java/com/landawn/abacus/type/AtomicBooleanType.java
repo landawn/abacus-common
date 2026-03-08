@@ -21,7 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Strings;
 
@@ -51,7 +51,7 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * @return the Class object for {@code AtomicBoolean}
      */
     @Override
-    public Class<AtomicBoolean> clazz() {
+    public Class<AtomicBoolean> javaType() {
         return AtomicBoolean.class;
     }
 
@@ -121,7 +121,7 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      *
      * @param rs the ResultSet to retrieve the value from
      * @param columnIndex the column index (1-based) of the boolean value
-     * @return a new AtomicBoolean containing the retrieved value (false if SQL NULL)
+     * @return a new AtomicBoolean containing the retrieved value, or {@code null} if SQL NULL
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
@@ -138,7 +138,7 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * @param rs the ResultSet to retrieve the value from
      * @param columnName the label for the column specified with the SQL AS clause,
      *                    or the column name if no AS clause was specified
-     * @return a new AtomicBoolean containing the retrieved value (false if SQL NULL)
+     * @return a new AtomicBoolean containing the retrieved value, or {@code null} if SQL NULL
      * @throws SQLException if a database access error occurs or the columnName is invalid
      */
     @Override
@@ -151,11 +151,11 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
     /**
      * Sets an AtomicBoolean parameter in a PreparedStatement at the specified position.
      * The boolean value is extracted from the AtomicBoolean before setting.
-     * If the AtomicBoolean is {@code null}, sets {@code false} as the parameter value.
+     * If the AtomicBoolean is {@code null}, sets the parameter to SQL NULL.
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
-     * @param x the AtomicBoolean value to set, may be {@code null} (treated as false)
+     * @param x the AtomicBoolean value to set, may be {@code null} (set as SQL NULL)
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
@@ -170,11 +170,11 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
     /**
      * Sets a named AtomicBoolean parameter in a CallableStatement.
      * The boolean value is extracted from the AtomicBoolean before setting.
-     * If the AtomicBoolean is {@code null}, sets {@code false} as the parameter value.
+     * If the AtomicBoolean is {@code null}, sets the parameter to SQL NULL.
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
-     * @param x the AtomicBoolean value to set, may be {@code null} (treated as false)
+     * @param x the AtomicBoolean value to set, may be {@code null} (set as SQL NULL)
      * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override
@@ -209,7 +209,7 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final AtomicBoolean x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final AtomicBoolean x, final JsonXmlSerConfig<?> config) throws IOException {
         appendTo(writer, x);
     }
 }

@@ -46,8 +46,8 @@ public class XmlParserImpl2025Test extends TestBase {
     @Test
     public void test_constructor_withConfig() {
         if (ParserFactory.isXmlParserAvailable()) {
-            XmlSerializationConfig xsc = new XmlSerializationConfig();
-            XmlDeserializationConfig xdc = new XmlDeserializationConfig();
+            XmlSerConfig xsc = new XmlSerConfig();
+            XmlDeserConfig xdc = new XmlDeserConfig();
             XmlParser parser = new XmlParserImpl(XmlParserType.StAX, xsc, xdc);
             assertNotNull(parser);
         }

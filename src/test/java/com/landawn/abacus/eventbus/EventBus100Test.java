@@ -61,7 +61,7 @@ public class EventBus100Test extends TestBase {
         eventBus.register(subscriber1);
         eventBus.register(subscriber2);
 
-        List<Object> subscribers = eventBus.getSubscribers(String.class);
+        List<Object> subscribers = eventBus.subscribers(String.class);
         Assertions.assertEquals(2, subscribers.size());
         Assertions.assertTrue(subscribers.contains(subscriber1));
         Assertions.assertTrue(subscribers.contains(subscriber2));
@@ -75,11 +75,11 @@ public class EventBus100Test extends TestBase {
         eventBus.register(subscriber1, "event1");
         eventBus.register(subscriber2, "event2");
 
-        List<Object> subscribers = eventBus.getSubscribers("event1", String.class);
+        List<Object> subscribers = eventBus.subscribers("event1", String.class);
         Assertions.assertEquals(1, subscribers.size());
         Assertions.assertTrue(subscribers.contains(subscriber1));
 
-        subscribers = eventBus.getSubscribers("event2", String.class);
+        subscribers = eventBus.subscribers("event2", String.class);
         Assertions.assertEquals(1, subscribers.size());
         Assertions.assertTrue(subscribers.contains(subscriber2));
     }
@@ -89,12 +89,12 @@ public class EventBus100Test extends TestBase {
         TestSubscriber subscriber1 = new TestSubscriber();
         TestSubscriber subscriber2 = new TestSubscriber();
 
-        Assertions.assertEquals(0, eventBus.getAllSubscribers().size());
+        Assertions.assertEquals(0, eventBus.allSubscribers().size());
 
         eventBus.register(subscriber1);
         eventBus.register(subscriber2);
 
-        List<Object> allSubscribers = eventBus.getAllSubscribers();
+        List<Object> allSubscribers = eventBus.allSubscribers();
         Assertions.assertEquals(2, allSubscribers.size());
         Assertions.assertTrue(allSubscribers.contains(subscriber1));
         Assertions.assertTrue(allSubscribers.contains(subscriber2));
@@ -106,7 +106,7 @@ public class EventBus100Test extends TestBase {
         EventBus result = eventBus.register(subscriber);
 
         Assertions.assertSame(eventBus, result);
-        Assertions.assertEquals(1, eventBus.getAllSubscribers().size());
+        Assertions.assertEquals(1, eventBus.allSubscribers().size());
     }
 
     @Test
@@ -115,7 +115,7 @@ public class EventBus100Test extends TestBase {
         EventBus result = eventBus.register(subscriber, "testEvent");
 
         Assertions.assertSame(eventBus, result);
-        Assertions.assertEquals(1, eventBus.getSubscribers("testEvent", String.class).size());
+        Assertions.assertEquals(1, eventBus.subscribers("testEvent", String.class).size());
     }
 
     @Test
@@ -124,7 +124,7 @@ public class EventBus100Test extends TestBase {
         EventBus result = eventBus.register(subscriber, ThreadMode.DEFAULT);
 
         Assertions.assertSame(eventBus, result);
-        Assertions.assertEquals(1, eventBus.getAllSubscribers().size());
+        Assertions.assertEquals(1, eventBus.allSubscribers().size());
     }
 
     @Test
@@ -133,7 +133,7 @@ public class EventBus100Test extends TestBase {
         EventBus result = eventBus.register(subscriber, "testEvent", ThreadMode.DEFAULT);
 
         Assertions.assertSame(eventBus, result);
-        Assertions.assertEquals(1, eventBus.getSubscribers("testEvent", String.class).size());
+        Assertions.assertEquals(1, eventBus.subscribers("testEvent", String.class).size());
     }
 
     @Test
@@ -198,11 +198,11 @@ public class EventBus100Test extends TestBase {
         TestSubscriber subscriber = new TestSubscriber();
         eventBus.register(subscriber);
 
-        Assertions.assertEquals(1, eventBus.getAllSubscribers().size());
+        Assertions.assertEquals(1, eventBus.allSubscribers().size());
 
         EventBus result = eventBus.unregister(subscriber);
         Assertions.assertSame(eventBus, result);
-        Assertions.assertEquals(0, eventBus.getAllSubscribers().size());
+        Assertions.assertEquals(0, eventBus.allSubscribers().size());
     }
 
     @Test
@@ -294,10 +294,10 @@ public class EventBus100Test extends TestBase {
         boolean removed = eventBus.removeStickyEvents(String.class);
         Assertions.assertTrue(removed);
 
-        List<Object> remainingStrings = eventBus.getStickyEvents(String.class);
+        List<?> remainingStrings = eventBus.stickyEvents(String.class);
         Assertions.assertEquals(0, remainingStrings.size());
 
-        List<Object> remainingIntegers = eventBus.getStickyEvents(Integer.class);
+        List<?> remainingIntegers = eventBus.stickyEvents(Integer.class);
         Assertions.assertEquals(1, remainingIntegers.size());
     }
 
@@ -310,10 +310,10 @@ public class EventBus100Test extends TestBase {
         boolean removed = eventBus.removeStickyEvents("id1", String.class);
         Assertions.assertTrue(removed);
 
-        List<Object> remaining = eventBus.getStickyEvents("id1", String.class);
+        List<?> remaining = eventBus.stickyEvents("id1", String.class);
         Assertions.assertEquals(0, remaining.size());
 
-        remaining = eventBus.getStickyEvents("id2", String.class);
+        remaining = eventBus.stickyEvents("id2", String.class);
         Assertions.assertEquals(1, remaining.size());
     }
 
@@ -326,10 +326,10 @@ public class EventBus100Test extends TestBase {
         boolean removed = eventBus.removeStickyEvents("id1", String.class);
         Assertions.assertTrue(removed);
 
-        List<Object> remaining = eventBus.getStickyEvents("id1", String.class);
+        List<?> remaining = eventBus.stickyEvents("id1", String.class);
         Assertions.assertEquals(0, remaining.size());
 
-        remaining = eventBus.getStickyEvents("id2", String.class);
+        remaining = eventBus.stickyEvents("id2", String.class);
         Assertions.assertEquals(1, remaining.size());
     }
 
@@ -341,8 +341,8 @@ public class EventBus100Test extends TestBase {
 
         eventBus.removeAllStickyEvents();
 
-        Assertions.assertEquals(0, eventBus.getStickyEvents(String.class).size());
-        Assertions.assertEquals(0, eventBus.getStickyEvents(Integer.class).size());
+        Assertions.assertEquals(0, eventBus.stickyEvents(String.class).size());
+        Assertions.assertEquals(0, eventBus.stickyEvents(Integer.class).size());
     }
 
     @Test
@@ -351,10 +351,10 @@ public class EventBus100Test extends TestBase {
         eventBus.postSticky("Event 2");
         eventBus.postSticky(123);
 
-        List<Object> stringEvents = eventBus.getStickyEvents(String.class);
+        List<?> stringEvents = eventBus.stickyEvents(String.class);
         Assertions.assertEquals(2, stringEvents.size());
 
-        List<Object> integerEvents = eventBus.getStickyEvents(Integer.class);
+        List<?> integerEvents = eventBus.stickyEvents(Integer.class);
         Assertions.assertEquals(1, integerEvents.size());
     }
 
@@ -364,10 +364,10 @@ public class EventBus100Test extends TestBase {
         eventBus.postSticky("id2", "Event 2");
         eventBus.postSticky("id1", "Event 3");
 
-        List<Object> events = eventBus.getStickyEvents("id1", String.class);
+        List<?> events = eventBus.stickyEvents("id1", String.class);
         Assertions.assertEquals(2, events.size());
 
-        events = eventBus.getStickyEvents("id2", String.class);
+        events = eventBus.stickyEvents("id2", String.class);
         Assertions.assertEquals(1, events.size());
     }
 

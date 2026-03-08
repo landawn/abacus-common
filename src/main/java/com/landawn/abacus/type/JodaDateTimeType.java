@@ -56,14 +56,14 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<DateTime> type = TypeFactory.getType(DateTime.class);
-     * Class<DateTime> clazz = type.clazz();
+     * Class<DateTime> clazz = type.javaType();
      * System.out.println(clazz.getName());   // Outputs: org.joda.time.DateTime
      * }</pre>
      *
      * @return the Class object representing org.joda.time.DateTime
      */
     @Override
-    public Class<DateTime> clazz() {
+    public Class<DateTime> javaType() {
         return DateTime.class;
     }
 

@@ -24,7 +24,7 @@ public class DeserializationConfig2025Test extends TestBase {
 
     private TestDeserializationConfig config;
 
-    private static class TestDeserializationConfig extends DeserializationConfig<TestDeserializationConfig> {
+    private static class TestDeserializationConfig extends Deserialization<TestDeserializationConfig> {
         // Concrete implementation for testing
     }
 
@@ -86,26 +86,26 @@ public class DeserializationConfig2025Test extends TestBase {
 
     @Test
     public void test_ignoreUnmatchedProperty_defaultValue() {
-        assertTrue(config.ignoreUnmatchedProperty());
+        assertTrue(config.isIgnoreUnmatchedProperty());
     }
 
     @Test
     public void test_ignoreUnmatchedProperty_setTrue() {
-        config.ignoreUnmatchedProperty(true);
-        assertTrue(config.ignoreUnmatchedProperty());
+        config.setIgnoreUnmatchedProperty(true);
+        assertTrue(config.isIgnoreUnmatchedProperty());
     }
 
     @Test
     public void test_ignoreUnmatchedProperty_setFalse() {
-        config.ignoreUnmatchedProperty(false);
-        assertFalse(config.ignoreUnmatchedProperty());
+        config.setIgnoreUnmatchedProperty(false);
+        assertFalse(config.isIgnoreUnmatchedProperty());
     }
 
     @Test
     public void test_ignoreUnmatchedProperty_methodChaining() {
-        TestDeserializationConfig result = config.ignoreUnmatchedProperty(false);
+        TestDeserializationConfig result = config.setIgnoreUnmatchedProperty(false);
         assertEquals(config, result);
-        assertFalse(config.ignoreUnmatchedProperty());
+        assertFalse(config.isIgnoreUnmatchedProperty());
     }
 
     @Test
@@ -117,7 +117,7 @@ public class DeserializationConfig2025Test extends TestBase {
     public void test_setElementType_withClass() {
         config.setElementType(String.class);
         assertNotNull(config.getElementType());
-        assertEquals(String.class, config.getElementType().clazz());
+        assertEquals(String.class, config.getElementType().javaType());
     }
 
     @Test
@@ -131,7 +131,7 @@ public class DeserializationConfig2025Test extends TestBase {
     public void test_setElementType_withString() {
         config.setElementType("String");
         assertNotNull(config.getElementType());
-        assertEquals(String.class, config.getElementType().clazz());
+        assertEquals(String.class, config.getElementType().javaType());
     }
 
     @Test
@@ -149,7 +149,7 @@ public class DeserializationConfig2025Test extends TestBase {
     public void test_setMapKeyType_withClass() {
         config.setMapKeyType(String.class);
         assertNotNull(config.getMapKeyType());
-        assertEquals(String.class, config.getMapKeyType().clazz());
+        assertEquals(String.class, config.getMapKeyType().javaType());
     }
 
     @Test
@@ -163,7 +163,7 @@ public class DeserializationConfig2025Test extends TestBase {
     public void test_setMapKeyType_withString() {
         config.setMapKeyType("String");
         assertNotNull(config.getMapKeyType());
-        assertEquals(String.class, config.getMapKeyType().clazz());
+        assertEquals(String.class, config.getMapKeyType().javaType());
     }
 
     @Test
@@ -181,7 +181,7 @@ public class DeserializationConfig2025Test extends TestBase {
     public void test_setMapValueType_withClass() {
         config.setMapValueType(Integer.class);
         assertNotNull(config.getMapValueType());
-        assertEquals(Integer.class, config.getMapValueType().clazz());
+        assertEquals(Integer.class, config.getMapValueType().javaType());
     }
 
     @Test
@@ -195,7 +195,7 @@ public class DeserializationConfig2025Test extends TestBase {
     public void test_setMapValueType_withString() {
         config.setMapValueType("Integer");
         assertNotNull(config.getMapValueType());
-        assertEquals(Integer.class, config.getMapValueType().clazz());
+        assertEquals(Integer.class, config.getMapValueType().javaType());
     }
 
     @Test
@@ -238,7 +238,7 @@ public class DeserializationConfig2025Test extends TestBase {
         config.setValueType("name", String.class);
         Type<?> result = config.getValueType("name");
         assertNotNull(result);
-        assertEquals(String.class, result.clazz());
+        assertEquals(String.class, result.javaType());
     }
 
     @Test
@@ -295,11 +295,11 @@ public class DeserializationConfig2025Test extends TestBase {
     public void test_hashCode_withSameSettings() {
         TestDeserializationConfig config1 = new TestDeserializationConfig();
         config1.setElementType(String.class);
-        config1.ignoreUnmatchedProperty(false);
+        config1.setIgnoreUnmatchedProperty(false);
 
         TestDeserializationConfig config2 = new TestDeserializationConfig();
         config2.setElementType(String.class);
-        config2.ignoreUnmatchedProperty(false);
+        config2.setIgnoreUnmatchedProperty(false);
 
         assertEquals(config1.hashCode(), config2.hashCode());
     }
@@ -319,10 +319,10 @@ public class DeserializationConfig2025Test extends TestBase {
     @Test
     public void test_equals_withDifferentIgnoreUnmatchedProperty() {
         TestDeserializationConfig config1 = new TestDeserializationConfig();
-        config1.ignoreUnmatchedProperty(true);
+        config1.setIgnoreUnmatchedProperty(true);
 
         TestDeserializationConfig config2 = new TestDeserializationConfig();
-        config2.ignoreUnmatchedProperty(false);
+        config2.setIgnoreUnmatchedProperty(false);
 
         assertFalse(config1.equals(config2));
     }
@@ -401,26 +401,26 @@ public class DeserializationConfig2025Test extends TestBase {
         config.setElementType(String.class);
         config.setMapKeyType(String.class);
         config.setMapValueType(Integer.class);
-        config.ignoreUnmatchedProperty(false);
+        config.setIgnoreUnmatchedProperty(false);
 
         TestDeserializationConfig copy = config.copy();
 
         assertNotNull(copy.getElementType());
         assertNotNull(copy.getMapKeyType());
         assertNotNull(copy.getMapValueType());
-        assertFalse(copy.ignoreUnmatchedProperty());
+        assertFalse(copy.isIgnoreUnmatchedProperty());
     }
 
     @Test
     public void test_methodChaining_complex() {
-        TestDeserializationConfig result = config.ignoreUnmatchedProperty(false)
+        TestDeserializationConfig result = config.setIgnoreUnmatchedProperty(false)
                 .setElementType(String.class)
                 .setMapKeyType(String.class)
                 .setMapValueType(Integer.class)
                 .setValueType("name", String.class);
 
         assertEquals(config, result);
-        assertFalse(config.ignoreUnmatchedProperty());
+        assertFalse(config.isIgnoreUnmatchedProperty());
         assertNotNull(config.getElementType());
         assertNotNull(config.getMapKeyType());
         assertNotNull(config.getMapValueType());

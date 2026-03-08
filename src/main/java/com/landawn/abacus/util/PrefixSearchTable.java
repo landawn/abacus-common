@@ -37,7 +37,7 @@ import com.landawn.abacus.util.stream.EntryStream;
  * prefixes.
  * 
  * <br />
- * Note: coped from <a href="https://github.com/google/mug">google mug under</a> under Apache License, Version 2.0 and modified.
+ * Note: copied from <a href="https://github.com/google/mug">google mug</a> under Apache License, Version 2.0 and modified.
  *
  * @param <K> the type of key elements in the compound prefix
  * @param <V> the type of values stored in the table
@@ -209,7 +209,7 @@ public final class PrefixSearchTable<K, V> {
         }
     }
 
-    private static record Node<K, V>(V value, Map<K, Node<K, V>> children) {
+    private record Node<K, V>(V value, Map<K, Node<K, V>> children) {
 
         Builder<K, V> toBuilder() {
             Builder<K, V> builder = new Builder<>();

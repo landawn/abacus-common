@@ -474,7 +474,7 @@ public class MoreStreamTest {
     public void test_top() {
 
         IntStream.random(1, 100).limit(10).mapToObj(i -> i).peek(Fn.println()).top(5).println();
-        IntStream.random(1, 100).limit(10).onEach(N::println).top(5).println();
+        IntStream.random(1, 100).limit(10).peek(N::println).top(5).println();
 
     }
 
@@ -1039,11 +1039,11 @@ public class MoreStreamTest {
             assertEquals("4, 5, 1, 2, 3", Stream.of(1, 2, 3, 4, 5).rotated(2).join(", "));
             assertEquals("4, 5, 1, 2, 3", Stream.of(1, 2, 3, 4, 5).map(i -> i).parallel().rotated(2).sequential().join(", "));
 
-            assertFalse("1, 2, 3, 4, 5".equals(IntStream.of(1, 2, 3, 4, 5).shuffled().onEach(N::println).join(", ")));
-            assertFalse("1, 2, 3, 4, 5".equals(IntStream.of(1, 2, 3, 4, 5).parallel().shuffled().onEach(N::println).sequential().join(", ")));
+            assertFalse("1, 2, 3, 4, 5".equals(IntStream.of(1, 2, 3, 4, 5).shuffled().peek(N::println).join(", ")));
+            assertFalse("1, 2, 3, 4, 5".equals(IntStream.of(1, 2, 3, 4, 5).parallel().shuffled().peek(N::println).sequential().join(", ")));
 
-            assertFalse("1, 2, 3, 4, 5".equals(Stream.of(1, 2, 3, 4, 5).shuffled().onEach(N::println).join(", ")));
-            assertFalse("1, 2, 3, 4, 5".equals(Stream.of(1, 2, 3, 4, 5).parallel().shuffled().onEach(N::println).sequential().join(", ")));
+            assertFalse("1, 2, 3, 4, 5".equals(Stream.of(1, 2, 3, 4, 5).shuffled().peek(N::println).join(", ")));
+            assertFalse("1, 2, 3, 4, 5".equals(Stream.of(1, 2, 3, 4, 5).parallel().shuffled().peek(N::println).sequential().join(", ")));
         }
     }
 

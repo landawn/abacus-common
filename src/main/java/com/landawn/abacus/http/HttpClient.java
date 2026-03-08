@@ -192,7 +192,7 @@ import com.landawn.abacus.util.URLEncodedUtil;
  *     (javax.net.ssl.SSLSocketFactory) javax.net.ssl.SSLSocketFactory.getDefault();
  * HttpSettings secureSettings = HttpSettings.create()
  *     .setSSLSocketFactory(sslFactory);
- * HttpClient secureClient = HttpClient.create("http://localhost:18080",
+ * HttpClient secureClient = HttpClient.create("https://localhost:18080",
  *     16, 5000, 30000, secureSettings);
  *
  * // Proxy configuration with authentication
@@ -521,7 +521,13 @@ public final class HttpClient {
 
     /**
      * Gets the base URL configured for this HTTP client.
-     * 
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.create("http://localhost:18080");
+     * String baseUrl = client.url();
+     * }</pre>
+     *
      * @return The base URL as a string
      */
     public String url() {
@@ -1003,6 +1009,13 @@ public final class HttpClient {
     /**
      * Performs a GET request with query parameters and custom settings, returning the response as a String.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> params = Map.of("page", 1, "size", 10);
+     * HttpSettings settings = HttpSettings.create().header("Accept", "application/json");
+     * String response = client.get(params, settings);
+     * }</pre>
+     *
      * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return The response body as a String
@@ -1032,6 +1045,12 @@ public final class HttpClient {
     /**
      * Performs a GET request with custom settings and deserializes the response to the specified type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create().header("Accept", "application/json");
+     * String response = client.get(settings, String.class);
+     * }</pre>
+     *
      * @param <T> The type of the response object
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param resultClass The class of the expected response object (for deserialization)
@@ -1045,6 +1064,12 @@ public final class HttpClient {
     /**
      * Performs a GET request with query parameters and deserializes the response to the specified type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> params = Map.of("active", true);
+     * String response = client.get(params, String.class);
+     * }</pre>
+     *
      * @param <T> The type of the response object
      * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
      * @param resultClass The class of the expected response object (for deserialization)
@@ -1057,6 +1082,13 @@ public final class HttpClient {
 
     /**
      * Performs a GET request with all options and deserializes the response to the specified type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> params = Map.of("active", true);
+     * HttpSettings settings = HttpSettings.create().header("Accept", "application/json");
+     * String response = client.get(params, settings, String.class);
+     * }</pre>
      *
      * @param <T> The type of the response object
      * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
@@ -1087,6 +1119,12 @@ public final class HttpClient {
     /**
      * Performs a DELETE request with custom settings and returns the response as a String.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create().header("Accept", "application/json");
+     * String response = client.delete(settings);
+     * }</pre>
+     *
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return The response body as a String
      * @throws UncheckedIOException if an I/O error occurs
@@ -1098,6 +1136,12 @@ public final class HttpClient {
     /**
      * Performs a DELETE request with query parameters and returns the response as a String.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> params = Map.of("hardDelete", true);
+     * String response = client.delete(params);
+     * }</pre>
+     *
      * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
      * @return The response body as a String
      * @throws UncheckedIOException if an I/O error occurs
@@ -1108,6 +1152,13 @@ public final class HttpClient {
 
     /**
      * Performs a DELETE request with query parameters and custom settings, returning the response as a String.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> params = Map.of("hardDelete", true);
+     * HttpSettings settings = HttpSettings.create().header("Accept", "application/json");
+     * String response = client.delete(params, settings);
+     * }</pre>
      *
      * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
@@ -1121,6 +1172,11 @@ public final class HttpClient {
     /**
      * Performs a DELETE request and deserializes the response to the specified type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String response = client.delete(String.class);
+     * }</pre>
+     *
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object (for deserialization)
      * @return The deserialized response object
@@ -1132,6 +1188,12 @@ public final class HttpClient {
 
     /**
      * Performs a DELETE request with custom settings and deserializes the response to the specified type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create().header("Accept", "application/json");
+     * String response = client.delete(settings, String.class);
+     * }</pre>
      *
      * @param <T> The type of the response object
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
@@ -1146,6 +1208,12 @@ public final class HttpClient {
     /**
      * Performs a DELETE request with query parameters and deserializes the response to the specified type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> params = Map.of("hardDelete", true);
+     * String response = client.delete(params, String.class);
+     * }</pre>
+     *
      * @param <T> The type of the response object
      * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
      * @param resultClass The class of the expected response object (for deserialization)
@@ -1158,6 +1226,13 @@ public final class HttpClient {
 
     /**
      * Performs a DELETE request with all options and deserializes the response to the specified type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> params = Map.of("hardDelete", true);
+     * HttpSettings settings = HttpSettings.create().header("Accept", "application/json");
+     * String response = client.delete(params, settings, String.class);
+     * }</pre>
      *
      * @param <T> The type of the response object
      * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
@@ -1209,6 +1284,13 @@ public final class HttpClient {
     /**
      * Performs a POST request with custom settings and returns the response as a String.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create().header("Content-Type", "application/json");
+     * String requestBody = "{\"name\":\"John\"}";
+     * String response = client.post(requestBody, settings);
+     * }</pre>
+     *
      * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return The response body as a String
@@ -1220,6 +1302,13 @@ public final class HttpClient {
 
     /**
      * Performs a POST request with custom settings and deserializes the response to the specified type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create().header("Content-Type", "application/json");
+     * String requestBody = "{\"name\":\"John\"}";
+     * String response = client.post(requestBody, settings, String.class);
+     * }</pre>
      *
      * @param <T> The type of the response object
      * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
@@ -1252,6 +1341,12 @@ public final class HttpClient {
     /**
      * Performs a PUT request and deserializes the response to the specified type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String requestBody = "{\"name\":\"John\"}";
+     * String response = client.put(requestBody, String.class);
+     * }</pre>
+     *
      * @param <T> The type of the response object
      * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
      * @param resultClass The class of the expected response object (for deserialization)
@@ -1265,6 +1360,13 @@ public final class HttpClient {
     /**
      * Performs a PUT request with custom settings and returns the response as a String.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create().header("Content-Type", "application/json");
+     * String requestBody = "{\"name\":\"John\"}";
+     * String response = client.put(requestBody, settings);
+     * }</pre>
+     *
      * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return The response body as a String
@@ -1276,6 +1378,13 @@ public final class HttpClient {
 
     /**
      * Performs a PUT request with custom settings and deserializes the response to the specified type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create().header("Content-Type", "application/json");
+     * String requestBody = "{\"name\":\"John\"}";
+     * String response = client.put(requestBody, settings, String.class);
+     * }</pre>
      *
      * @param <T> The type of the response object
      * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
@@ -1306,6 +1415,12 @@ public final class HttpClient {
     /**
      * Performs a HEAD request with custom settings.
      * HEAD requests retrieve only headers without the response body.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create().header("Accept", "application/json");
+     * client.head(settings);
+     * }</pre>
      *
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @throws UncheckedIOException if an I/O error occurs

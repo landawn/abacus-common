@@ -34,7 +34,7 @@ public class PatternType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(Pattern.class, type.clazz());
+        assertEquals(Pattern.class, type.javaType());
     }
 
     @Test

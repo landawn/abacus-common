@@ -10,7 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -39,14 +39,14 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalBoolean> type = TypeFactory.getType(OptionalBoolean.class);
-     * Class<OptionalBoolean> clazz = type.clazz();
+     * Class<OptionalBoolean> clazz = type.javaType();
      * // Returns: OptionalBoolean.class
      * }</pre>
      *
      * @return the {@link OptionalBoolean} class object
      */
     @Override
-    public Class<OptionalBoolean> clazz() {
+    public Class<OptionalBoolean> javaType() {
         return OptionalBoolean.class;
     }
 
@@ -285,7 +285,7 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final OptionalBoolean x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final OptionalBoolean x, final JsonXmlSerConfig<?> config) throws IOException {
         writer.write((x == null || x.isEmpty()) ? NULL_CHAR_ARRAY : (x.get() ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY));
     }
 }

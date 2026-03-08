@@ -151,7 +151,7 @@ public abstract class TypeReference<T> {
      * TypeReference<List<Map<String, Integer>>> complexType =
      *     new TypeReference<List<Map<String, Integer>>>() {};
      *
-     * java.lang.reflect.Type type = complexType.getType();
+     * java.lang.reflect.Type type = complexType.javaType();
      *
      * // Use with serialization framework
      * Object result = deserializer.deserialize(data, type);
@@ -163,6 +163,12 @@ public abstract class TypeReference<T> {
      *     System.out.println("Type arguments: " + Arrays.toString(pt.getActualTypeArguments()));
      * }
      * }</pre>
+     *
+     * <p>The name {@code javaType()} is intentional here. {@code TypeReference} is primarily a
+     * bridge to Java's reflection type system, and callers typically use this accessor when they
+     * need the original {@link java.lang.reflect.Type} captured from the anonymous subclass. That
+     * differs from {@link Type#javaType()}, which returns the raw Java {@link Class} for the
+     * resolved Abacus {@link Type}.</p>
      *
      * @return the raw {@link java.lang.reflect.Type} instance representing the generic type T;
      *         never {@code null} (validated during construction).
@@ -209,7 +215,7 @@ public abstract class TypeReference<T> {
      *
      * // Or access type metadata
      * System.out.println("Type name: " + type.name());
-     * System.out.println("Type class: " + type.clazz());
+     * System.out.println("Reflect type: " + type.reflectType());
      * }</pre>
      *
      * @return the {@link Type} instance representing the generic type T;
@@ -256,7 +262,7 @@ public abstract class TypeReference<T> {
      * Type<List<String>> type = token.type();
      *
      * // Or access the raw java.lang.reflect.Type
-     * java.lang.reflect.Type rawType = token.getType();
+     * java.lang.reflect.Type rawType = token.javaType();
      *
      * // Use with framework operations
      * List<String> result = N.fromJson(json, type);

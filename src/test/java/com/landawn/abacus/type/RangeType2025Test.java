@@ -16,6 +16,7 @@ package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
@@ -40,7 +41,7 @@ public class RangeType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(Range.class, type.clazz());
+        assertEquals(Range.class, type.javaType());
     }
 
     @Test
@@ -59,6 +60,18 @@ public class RangeType2025Test extends TestBase {
     public void test_valueOf_String() {
         assertNull(type.valueOf((String) null));
         assertNull(type.valueOf(""));
+    }
+
+    @Test
+    public void test_valueOf_rejectsMalformedEndpointCount() {
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("[1]"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("[1,2,3]"));
+    }
+
+    @Test
+    public void test_valueOf_rejectsInvalidBoundDelimiters() {
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("{1,2]"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("[1,2}"));
     }
 
     @Test

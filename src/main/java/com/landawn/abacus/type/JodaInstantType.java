@@ -23,7 +23,7 @@ import java.sql.Timestamp;
 
 import org.joda.time.Instant;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.Dates;
@@ -55,14 +55,14 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Instant> type = TypeFactory.getType(Instant.class);
-     * Class<Instant> clazz = type.clazz();
+     * Class<Instant> clazz = type.javaType();
      * System.out.println(clazz.getName());   // Outputs: org.joda.time.Instant
      * }</pre>
      *
      * @return the Class object representing org.joda.time.Instant
      */
     @Override
-    public Class<Instant> clazz() {
+    public Class<Instant> javaType() {
         return Instant.class;
     }
 
@@ -357,12 +357,12 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * CharacterWriter writer = new CharacterWriter();
      *
      * // Write with LONG format (no quotes)
-     * JsonXmlSerializationConfig config1 = JsonXmlSerializationConfig.builder()
+     * JsonXmlSerConfig config1 = JsonXmlSerConfig.builder()
      *     .setDateTimeFormat(DateTimeFormat.LONG).build();
      * type.writeCharacter(writer, instant, config1);   // Writes: 1609459200000
      *
      * // Write with ISO_8601_TIMESTAMP format (with quotes)
-     * JsonXmlSerializationConfig config2 = JsonXmlSerializationConfig.builder()
+     * JsonXmlSerConfig config2 = JsonXmlSerConfig.builder()
      *     .setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP)
      *     .setStringQuotation('"').build();
      * type.writeCharacter(writer, instant, config2);   // Writes: "2021-01-01T10:30:00.123"
@@ -375,7 +375,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      */
     @SuppressWarnings("null")
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Instant x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Instant x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

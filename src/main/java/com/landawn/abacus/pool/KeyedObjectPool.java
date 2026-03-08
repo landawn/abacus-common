@@ -39,6 +39,21 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *   <li>Thread-safe operations</li>
  * </ul>
  *
+ * <p><b>API Design Note:</b> KeyedObjectPool follows {@link java.util.Map} naming conventions
+ * ({@code put}/{@code get}/{@code remove}/{@code peek}/{@code containsKey}) because each pooled
+ * object is associated with a unique key — callers store and retrieve objects by identity. This is
+ * in contrast to {@link ObjectPool}, which follows {@link java.util.concurrent.BlockingQueue} naming
+ * conventions ({@code add}/{@code take}/{@code contains}) because it models an unkeyed collection
+ * of interchangeable objects.</p>
+ *
+ * <table>
+ *   <caption>Method naming comparison between ObjectPool and KeyedObjectPool</caption>
+ *   <tr><th>Operation</th><th>ObjectPool (Queue-style)</th><th>KeyedObjectPool (Map-style)</th></tr>
+ *   <tr><td>Insert</td><td>{@code add(E)}</td><td>{@code put(K, E)}</td></tr>
+ *   <tr><td>Retrieve</td><td>{@code take()}</td><td>{@code get(K)}</td></tr>
+ *   <tr><td>Check</td><td>{@code contains(E)}</td><td>{@code containsKey(K)}</td></tr>
+ * </table>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * KeyedObjectPool<String, DBConnection> pool = PoolFactory.createKeyedObjectPool(100);
@@ -61,6 +76,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * @param <K> the type of keys maintained by this pool
  * @param <E> the type of pooled values, must implement Poolable
  * @see Pool
+ * @see ObjectPool
  * @see Poolable
  * @see PoolFactory
  */
@@ -80,7 +96,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * @param key the key with which the specified value is to be associated, must not be {@code null}
      * @param value the value to be associated with the specified key, must not be {@code null}
      * @return {@code true} if the value was successfully added, {@code false} otherwise
-     * @throws IllegalArgumentException if the key or element is null
+     * @throws IllegalArgumentException if the key or value is null
      * @throws IllegalStateException if the pool has been closed
      */
     boolean put(K key, E value);
@@ -113,7 +129,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * @param value the value to be associated with the specified key, must not be {@code null}
      * @param autoDestroyOnFailedToPut if {@code true}, calls value.destroy(PUT_ADD_FAILURE) if put fails
      * @return {@code true} if the value was successfully added, {@code false} otherwise
-     * @throws IllegalArgumentException if the key or element is null
+     * @throws IllegalArgumentException if the key or value is null
      * @throws IllegalStateException if the pool has been closed
      */
     boolean put(K key, E value, boolean autoDestroyOnFailedToPut);

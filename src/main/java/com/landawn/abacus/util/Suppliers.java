@@ -47,8 +47,10 @@ import java.util.TreeSet;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -243,6 +245,10 @@ public final class Suppliers {
     @SuppressWarnings("rawtypes")
     private static final Supplier<? super ConcurrentHashMap> CONCURRENT_HASH_MAP = ConcurrentHashMap::new;
 
+    /** The Constant CONCURRENT_SKIP_LIST_MAP. */
+    @SuppressWarnings("rawtypes")
+    private static final Supplier<? super ConcurrentSkipListMap> CONCURRENT_SKIP_LIST_MAP = ConcurrentSkipListMap::new;
+
     /** The Constant CONCURRENT_HASH_SET. */
     @SuppressWarnings("rawtypes")
     private static final Supplier<? super Set> CONCURRENT_HASH_SET = ConcurrentHashMap::newKeySet;
@@ -330,26 +336,26 @@ public final class Suppliers {
     }
 
     /**
-     * Returns a supplier that generates UUID strings.
+     * Returns a supplier that generates unique identifier (UUID) strings.
      * 
-     * <p>Each call to the supplier's get() method will generate a new UUID string.</p>
+     * <p>Each call to the supplier's get() method will generate a new unique identifier (UUID) string.</p>
      *
-     * @return a supplier that generates UUID strings
-     * @see #ofGUID()
+     * @return a supplier that generates unique identifier (UUID) strings
+     * @see #ofUuidWithoutHyphens()
      */
-    public static Supplier<String> ofUUID() {
+    public static Supplier<String> ofUuid() {
         return UUID;
     }
 
     /**
-     * Returns a supplier that generates GUID strings.
+     * Returns a supplier that generates unique identifier (UUID) strings without hyphens.
      * 
-     * <p>Each call to the supplier's get() method will generate a new GUID string.</p>
+     * <p>Each call to the supplier's get() method will generate a new unique identifier (UUID) string without hyphens.</p>
      *
-     * @return a supplier that generates GUID strings
-     * @see #ofUUID()
+     * @return a supplier that generates unique identifier (UUID) strings without hyphens
+     * @see #ofUuid()
      */
-    public static Supplier<String> ofGUID() {
+    public static Supplier<String> ofUuidWithoutHyphens() {
         return GUID;
     }
 
@@ -861,6 +867,20 @@ public final class Suppliers {
     }
 
     /**
+     * Returns a supplier that creates new ConcurrentNavigableMap instances (ConcurrentSkipListMap).
+     *
+     * <p>Each call to the supplier's get() method will create a new, empty ConcurrentSkipListMap.</p>
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @return a supplier that creates new ConcurrentSkipListMap instances
+     */
+    @SuppressWarnings("rawtypes")
+    public static <K, V> Supplier<ConcurrentNavigableMap<K, V>> ofConcurrentNavigableMap() {
+        return (Supplier) CONCURRENT_SKIP_LIST_MAP;
+    }
+
+    /**
      * Returns a supplier that creates new concurrent Set instances.
      * 
      * <p>Each call to the supplier's get() method will create a new, empty Set backed by ConcurrentHashMap.</p>
@@ -1225,8 +1245,12 @@ public final class Suppliers {
 
             if (Map.class.equals(targetType) || AbstractMap.class.equals(targetType) || HashMap.class.equals(targetType) || EnumMap.class.equals(targetType)) {
                 ret = ofMap();
+            } else if (ConcurrentMap.class.equals(targetType)) {
+                ret = ofConcurrentHashMap();
             } else if (LinkedHashMap.class.equals(targetType)) {
                 ret = ofLinkedHashMap();
+            } else if (ConcurrentNavigableMap.class.equals(targetType) || ConcurrentSkipListMap.class.equals(targetType)) {
+                ret = ofConcurrentNavigableMap();
             } else if (SortedMap.class.isAssignableFrom(targetType)) {
                 ret = ofSortedMap();
             } else if (IdentityHashMap.class.isAssignableFrom(targetType)) {

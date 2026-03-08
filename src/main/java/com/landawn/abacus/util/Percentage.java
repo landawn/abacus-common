@@ -147,8 +147,8 @@ public enum Percentage {
      *
      * @param startInclusive the starting percentage (inclusive), must not be {@code null}.
      * @param endExclusive the ending percentage (exclusive), must not be {@code null}.
-     * @return an immutable set containing all Percentage values in the specified range.
-     * @throws IllegalArgumentException if {@code startInclusive} or {@code endExclusive} is {@code null}.
+     * @return an immutable set containing all {@code Percentage} values in the specified range.
+     * @throws NullPointerException if {@code startInclusive} or {@code endExclusive} is {@code null}
      */
     public static ImmutableSet<Percentage> range(final Percentage startInclusive, final Percentage endExclusive) {
         final String key = "(" + startInclusive.str + ", " + endExclusive.str + ")";
@@ -184,8 +184,8 @@ public enum Percentage {
      * @param startInclusive the starting percentage (inclusive), must not be {@code null}.
      * @param endExclusive the ending percentage (exclusive), must not be {@code null}.
      * @param by the step increment between percentages, must not be {@code null}.
-     * @return an immutable set containing Percentage values at the specified intervals.
-     * @throws IllegalArgumentException if any parameter is {@code null}.
+     * @return an immutable set containing {@code Percentage} values at the specified intervals.
+     * @throws NullPointerException if any argument is {@code null}
      */
     public static ImmutableSet<Percentage> range(final Percentage startInclusive, final Percentage endExclusive, final Percentage by) {
         final String key = "(" + startInclusive.str + ", " + endExclusive.str + ", " + by.str + ")";
@@ -224,8 +224,8 @@ public enum Percentage {
      *
      * @param startInclusive the starting percentage (inclusive), must not be {@code null}.
      * @param endInclusive the ending percentage (inclusive), must not be {@code null}.
-     * @return an immutable set containing all Percentage values in the specified closed range.
-     * @throws IllegalArgumentException if {@code startInclusive} or {@code endInclusive} is {@code null}.
+     * @return an immutable set containing all {@code Percentage} values in the specified closed range.
+     * @throws NullPointerException if {@code startInclusive} or {@code endInclusive} is {@code null}
      */
     public static ImmutableSet<Percentage> rangeClosed(final Percentage startInclusive, final Percentage endInclusive) {
         final String key = "(" + startInclusive.str + ", " + endInclusive.str + "]";
@@ -255,14 +255,14 @@ public enum Percentage {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSet<Percentage> everyFifth = Percentage.rangeClosed(Percentage._5, Percentage._20, Percentage._5);
-     * // Returns set containing: _5, _10, _20
+     * // Returns set containing: _5, _10, _15, _20
      * }</pre>
      *
      * @param startInclusive the starting percentage (inclusive), must not be {@code null}.
      * @param endInclusive the ending percentage (inclusive), must not be {@code null}.
      * @param by the step increment between percentages, must not be {@code null}.
-     * @return an immutable set containing Percentage values at the specified intervals.
-     * @throws IllegalArgumentException if any parameter is {@code null}.
+     * @return an immutable set containing {@code Percentage} values at the specified intervals.
+     * @throws NullPointerException if any argument is {@code null}
      */
     public static ImmutableSet<Percentage> rangeClosed(final Percentage startInclusive, final Percentage endInclusive, final Percentage by) {
         final String key = "(" + startInclusive.str + ", " + endInclusive.str + ", " + by.str + "]";

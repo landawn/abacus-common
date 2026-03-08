@@ -4048,7 +4048,7 @@ sealed class CommonUtil permits N {
             if (typeA.isPrimitiveArray()) {
                 final Type<Object> typeB = typeOf(b.getClass());
 
-                return typeA.clazz().equals(typeB.clazz()) && typeA.equals(a, b);
+                return typeA.javaType().equals(typeB.javaType()) && typeA.equals(a, b);
             } else if (typeA.isObjectArray()) {
                 final Type<Object> typeB = typeOf(b.getClass());
 
@@ -8958,39 +8958,11 @@ sealed class CommonUtil permits N {
      * @param a the String array to check
      * @return an empty String array if the specified array is {@code null}, otherwise the original array
      * @see Strings#nullToEmpty(String)
-     * @see Strings#nullToEmpty(String[])
+     * @see Strings#nullElementsToEmpty(String[])
      */
     public static String[] nullToEmpty(final String[] a) {
 
         return a == null ? EMPTY_STRING_ARRAY : a;
-    }
-
-    /**
-     * Converts the specified String array to an empty {@code String[0]} if it's {@code null} and each {@code null} element String to empty String {@code ""}.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * nullElementsToEmpty(null);   // returns empty String array
-     * String[] array = {"a", null, "b"};
-     * nullElementsToEmpty(array);   // modifies array to {"a", "", "b"} and returns it
-     * }</pre>
-     *
-     * @param a the String array to check
-     * @return an empty String array if the specified array is {@code null}, otherwise the original array with each {@code null} element replaced by an empty string
-     * @see Strings#nullToEmpty(String)
-     * @see Strings#nullToEmpty(String[])
-     */
-    @Beta
-    public static String[] nullElementsToEmpty(final String[] a) { // nullToEmptyForAll is better?
-        if (a == null) {
-            return EMPTY_STRING_ARRAY;
-        }
-
-        for (int i = 0, len = a.length; i < len; i++) {
-            a[i] = a[i] == null ? Strings.EMPTY : a[i];
-        }
-
-        return a;
     }
 
     /**
@@ -10165,7 +10137,7 @@ sealed class CommonUtil permits N {
         BiFunction<Object, Class<?>, Object> converterFunc = null;
 
         if ((converterFunc = converterMap.get(srcClass)) != null) {
-            return (T) converterFunc.apply(srcObj, targetType.clazz());
+            return (T) converterFunc.apply(srcObj, targetType.javaType());
         }
 
         return convert(srcObj, srcClass, targetType);
@@ -10173,7 +10145,7 @@ sealed class CommonUtil permits N {
 
     @SuppressWarnings({ "rawtypes" })
     private static <T> T convert(final Object srcObj, final Class<?> srcClass, final Type<? extends T> targetType) {
-        if (targetType.clazz().isAssignableFrom(srcClass)) {
+        if (targetType.javaType().isAssignableFrom(srcClass)) {
             return (T) srcObj;
         }
 
@@ -10186,10 +10158,10 @@ sealed class CommonUtil permits N {
                 // fall through.
             } else if (srcType.isNumber()) {
                 return (T) Numbers.convert((Number) srcObj, (Type) targetType);
-            } else if (srcType.clazz().equals(Character.class) && (targetType.clazz().equals(int.class) || targetType.clazz().equals(Integer.class))) {
+            } else if (srcType.javaType().equals(Character.class) && (targetType.javaType().equals(int.class) || targetType.javaType().equals(Integer.class))) {
                 return (T) (Integer.valueOf((Character) srcObj)); //NOSONAR
-            } else if ((targetType.clazz().equals(long.class) || targetType.clazz().equals(Long.class))
-                    && java.util.Date.class.isAssignableFrom(srcType.clazz())) {
+            } else if ((targetType.javaType().equals(long.class) || targetType.javaType().equals(Long.class))
+                    && java.util.Date.class.isAssignableFrom(srcType.javaType())) {
                 return (T) (Long) ((java.util.Date) srcObj).getTime();
             }
 
@@ -10200,20 +10172,20 @@ sealed class CommonUtil permits N {
             } else {
                 return targetType.valueOf(srcObj);
             }
-        } else if ((targetType.clazz().equals(char.class) || targetType.clazz().equals(Character.class))) {
-            if (srcType.clazz().equals(Integer.class)) {
+        } else if ((targetType.javaType().equals(char.class) || targetType.javaType().equals(Character.class))) {
+            if (srcType.javaType().equals(Integer.class)) {
                 return (T) (Character.valueOf((char) ((Integer) srcObj).intValue()));
             } else {
                 return targetType.valueOf(srcObj);
             }
-        } else if (srcType.clazz().equals(Long.class)) {
-            if (targetType.clazz().equals(java.util.Date.class)) {
+        } else if (srcType.javaType().equals(Long.class)) {
+            if (targetType.javaType().equals(java.util.Date.class)) {
                 return (T) new java.util.Date((Long) srcObj);
-            } else if (targetType.clazz().equals(java.sql.Timestamp.class)) {
+            } else if (targetType.javaType().equals(java.sql.Timestamp.class)) {
                 return (T) new java.sql.Timestamp((Long) srcObj);
-            } else if (targetType.clazz().equals(java.sql.Date.class)) {
+            } else if (targetType.javaType().equals(java.sql.Date.class)) {
                 return (T) new java.sql.Date((Long) srcObj);
-            } else if (targetType.clazz().equals(java.sql.Time.class)) {
+            } else if (targetType.javaType().equals(java.sql.Time.class)) {
                 return (T) new java.sql.Time((Long) srcObj);
             } else {
                 return targetType.valueOf(srcObj);
@@ -10222,15 +10194,15 @@ sealed class CommonUtil permits N {
 
         if (targetType.isBean()) {
             if (srcType.isBean()) {
-                return Beans.copyAs(srcObj, targetType.clazz());
+                return Beans.copyAs(srcObj, targetType.javaType());
             } else if (srcType.isMap()) {
-                return Beans.mapToBean((Map<String, Object>) srcObj, targetType.clazz());
+                return Beans.mapToBean((Map<String, Object>) srcObj, targetType.javaType());
             }
         } else if (targetType.isMap()) {
-            if (srcType.isBean() && targetType.getParameterTypes()[0].clazz().isAssignableFrom(String.class)
-                    && Object.class.equals(targetType.getParameterTypes()[1].clazz())) {
+            if (srcType.isBean() && targetType.parameterTypes()[0].javaType().isAssignableFrom(String.class)
+                    && Object.class.equals(targetType.parameterTypes()[1].javaType())) {
                 try {
-                    final Map<String, Object> result = newMap((Class<Map>) targetType.clazz());
+                    final Map<String, Object> result = newMap((Class<Map>) targetType.javaType());
                     Beans.beanToMap(srcObj, result);
                     return (T) result;
                 } catch (final Exception e) {
@@ -10241,10 +10213,10 @@ sealed class CommonUtil permits N {
                 final Optional<Object> firstNonNullKeyOp = firstNonNull(srcMap.keySet());
                 final Optional<Object> firstNonNullValueOp = firstNonNull(srcMap.values());
 
-                if ((firstNonNullKeyOp.isEmpty() || targetType.getParameterTypes()[0].clazz().isAssignableFrom(firstNonNullKeyOp.get().getClass()))
+                if ((firstNonNullKeyOp.isEmpty() || targetType.parameterTypes()[0].javaType().isAssignableFrom(firstNonNullKeyOp.get().getClass()))
                         && (firstNonNullValueOp.isEmpty()
-                                || targetType.getParameterTypes()[1].clazz().isAssignableFrom(firstNonNullValueOp.get().getClass()))) {
-                    final Map result = newMap((Class<Map>) targetType.clazz(), srcMap.size());
+                                || targetType.parameterTypes()[1].javaType().isAssignableFrom(firstNonNullValueOp.get().getClass()))) {
+                    final Map result = newMap((Class<Map>) targetType.javaType(), srcMap.size());
                     result.putAll(srcMap);
                     return (T) result;
                 }
@@ -10256,18 +10228,18 @@ sealed class CommonUtil permits N {
                 final Collection srcColl = (Collection) srcObj;
                 final Optional<Object> op = firstNonNull(srcColl);
 
-                if (op.isEmpty() || targetType.getParameterTypes()[0].clazz().isAssignableFrom(op.get().getClass())) {
-                    final Collection result = newCollection((Class<Collection>) targetType.clazz(), srcColl.size());
+                if (op.isEmpty() || targetType.parameterTypes()[0].javaType().isAssignableFrom(op.get().getClass())) {
+                    final Collection result = newCollection((Class<Collection>) targetType.javaType(), srcColl.size());
                     result.addAll(srcColl);
                     return (T) result;
                 }
-            } else if (srcType.isObjectArray() && targetType.getParameterTypes()[0].clazz().isAssignableFrom(srcType.clazz().getComponentType())) {
+            } else if (srcType.isObjectArray() && targetType.parameterTypes()[0].javaType().isAssignableFrom(srcType.javaType().getComponentType())) {
                 final Object[] srcArray = (Object[]) srcObj;
-                final Collection result = newCollection((Class<Collection>) targetType.clazz(), srcArray.length);
+                final Collection result = newCollection((Class<Collection>) targetType.javaType(), srcArray.length);
                 result.addAll(Arrays.asList(srcArray));
                 return (T) result;
-            } else if (targetType.getElementType().clazz().isAssignableFrom(srcType.clazz())) {
-                final Collection result = newCollection((Class<Collection>) targetType.clazz(), 1);
+            } else if (targetType.elementType().javaType().isAssignableFrom(srcType.javaType())) {
+                final Collection result = newCollection((Class<Collection>) targetType.javaType(), 1);
                 result.add(srcObj);
                 return (T) result;
             }
@@ -10278,25 +10250,25 @@ sealed class CommonUtil permits N {
                 final Collection srcColl = (Collection) srcObj;
                 final Optional<Object> op = firstNonNull(srcColl);
 
-                if (op.isEmpty() || targetType.clazz().getComponentType().isAssignableFrom(op.get().getClass())) {
+                if (op.isEmpty() || targetType.javaType().getComponentType().isAssignableFrom(op.get().getClass())) {
                     try {
-                        final Object[] result = newArray(targetType.clazz().getComponentType(), srcColl.size());
+                        final Object[] result = newArray(targetType.javaType().getComponentType(), srcColl.size());
                         srcColl.toArray(result);
                         return (T) result;
                     } catch (final Exception e) {
                         // ignore;
                     }
                 }
-            } else if (targetType.getElementType().clazz().isAssignableFrom(srcType.clazz())) {
-                final Object[] result = newArray(targetType.clazz().getComponentType(), 1);
+            } else if (targetType.elementType().javaType().isAssignableFrom(srcType.javaType())) {
+                final Object[] result = newArray(targetType.javaType().getComponentType(), 1);
                 result[0] = srcObj;
                 return (T) result;
             }
 
         }
 
-        if (targetType.clazz().equals(byte[].class)) {
-            if (srcType.clazz().equals(Blob.class)) {
+        if (targetType.javaType().equals(byte[].class)) {
+            if (srcType.javaType().equals(Blob.class)) {
                 final Blob blob = (Blob) srcObj;
                 UncheckedSQLException primaryException = null;
 
@@ -10321,7 +10293,7 @@ sealed class CommonUtil permits N {
                         }
                     }
                 }
-            } else if (srcType.clazz().equals(InputStream.class)) {
+            } else if (srcType.javaType().equals(InputStream.class)) {
                 final InputStream is = (InputStream) srcObj;
 
                 try {
@@ -10330,8 +10302,8 @@ sealed class CommonUtil permits N {
                     IOUtil.close(is);
                 }
             }
-        } else if (targetType.clazz().equals(char[].class)) {
-            if (srcType.clazz().equals(Clob.class)) {
+        } else if (targetType.javaType().equals(char[].class)) {
+            if (srcType.javaType().equals(Clob.class)) {
                 final Clob clob = (Clob) srcObj;
                 UncheckedSQLException primaryException = null;
 
@@ -10356,7 +10328,7 @@ sealed class CommonUtil permits N {
                         }
                     }
                 }
-            } else if (srcType.clazz().equals(Reader.class)) {
+            } else if (srcType.javaType().equals(Reader.class)) {
                 final Reader reader = (Reader) srcObj;
 
                 try {
@@ -10364,7 +10336,7 @@ sealed class CommonUtil permits N {
                 } finally {
                     IOUtil.close(reader);
                 }
-            } else if (srcType.clazz().equals(InputStream.class)) {
+            } else if (srcType.javaType().equals(InputStream.class)) {
                 final InputStream is = (InputStream) srcObj;
 
                 try {
@@ -10373,10 +10345,10 @@ sealed class CommonUtil permits N {
                     IOUtil.close(is);
                 }
             }
-        } else if (targetType.clazz().equals(String.class)) {
-            if (CharSequence.class.isAssignableFrom(srcType.clazz())) {
+        } else if (targetType.javaType().equals(String.class)) {
+            if (CharSequence.class.isAssignableFrom(srcType.javaType())) {
                 return (T) ((CharSequence) srcObj).toString();
-            } else if (srcType.clazz().equals(Clob.class)) {
+            } else if (srcType.javaType().equals(Clob.class)) {
                 final Clob clob = (Clob) srcObj;
                 UncheckedSQLException primaryException = null;
 
@@ -10401,7 +10373,7 @@ sealed class CommonUtil permits N {
                         }
                     }
                 }
-            } else if (srcType.clazz().equals(Reader.class)) {
+            } else if (srcType.javaType().equals(Reader.class)) {
                 final Reader reader = (Reader) srcObj;
 
                 try {
@@ -10409,7 +10381,7 @@ sealed class CommonUtil permits N {
                 } finally {
                     IOUtil.close(reader);
                 }
-            } else if (srcType.clazz().equals(InputStream.class)) {
+            } else if (srcType.javaType().equals(InputStream.class)) {
                 final InputStream is = (InputStream) srcObj;
 
                 try {
@@ -10418,9 +10390,9 @@ sealed class CommonUtil permits N {
                     IOUtil.close(is);
                 }
             }
-        } else if (targetType.clazz().equals(InputStream.class) && srcType.clazz().equals(byte[].class)) {
+        } else if (targetType.javaType().equals(InputStream.class) && srcType.javaType().equals(byte[].class)) {
             return (T) new ByteArrayInputStream((byte[]) srcObj);
-        } else if (targetType.clazz().equals(Reader.class) && CharSequence.class.isAssignableFrom(srcType.clazz())) {
+        } else if (targetType.javaType().equals(Reader.class) && CharSequence.class.isAssignableFrom(srcType.javaType())) {
             return (T) new StringReader(srcObj.toString());
         }
 
@@ -10467,7 +10439,7 @@ sealed class CommonUtil permits N {
      */
     @Beta
     public static <T> Nullable<T> castIfAssignable(final Object val, final Type<? extends T> targetType) {
-        return castIfAssignable(val, targetType.clazz());
+        return castIfAssignable(val, targetType.javaType());
     }
 
     /**
@@ -16825,7 +16797,119 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a new modifiable {@code LinkedHashMap} containing the specified key-value pair.
+     *
+     * <p>Unlike {@link Map#of(Object, Object)}, this method supports {@code null} keys and values.</p>
+     *
+     * <p>The returned map preserves insertion order when iterating over entries.</p>
+     *
+     * @param <K> the type of keys in the Map
+     * @param <V> the type of values in the Map
+     * @param k1 the key to be placed in the Map. Can be {@code null}.
+     * @param v1 the value to be associated with {@code k1}. Can be {@code null}.
+     * @return a new modifiable {@code LinkedHashMap} containing {@code k1} and {@code v1}
+     */
+    @Beta
+    public static <K, V> Map<K, V> toLinkedHashMap(final K k1, final V v1) {
+        final Map<K, V> map = new LinkedHashMap<>();
+        map.put(k1, v1);
+        return map;
+    }
+
+    /**
+     * Returns a new modifiable {@code LinkedHashMap} containing the specified key-value pairs.
+     *
+     * <p>Unlike {@link Map#of(Object, Object, Object, Object)}, this method supports {@code null} keys and values.</p>
+     *
+     * <p>If duplicate keys are provided, the later value overwrites the earlier value.</p>
+     *
+     * <p>The returned map preserves insertion order when iterating over entries.</p>
+     *
+     * @param <K> the type of keys in the Map
+     * @param <V> the type of values in the Map
+     * @param k1 the first key to be placed in the Map. Can be {@code null}.
+     * @param v1 the value to be associated with {@code k1}. Can be {@code null}.
+     * @param k2 the second key to be placed in the Map. Can be {@code null}.
+     * @param v2 the value to be associated with {@code k2}. Can be {@code null}.
+     * @return a new modifiable {@code LinkedHashMap} containing the specified entries
+     */
+    @Beta
+    public static <K, V> Map<K, V> toLinkedHashMap(final K k1, final V v1, final K k2, final V v2) {
+        final Map<K, V> map = new LinkedHashMap<>();
+        map.put(k1, v1);
+        map.put(k2, v2);
+        return map;
+    }
+
+    /**
+     * Returns a new modifiable {@code LinkedHashMap} containing the specified key-value pairs.
+     *
+     * <p>Unlike {@link Map#of(Object, Object, Object, Object, Object, Object)}, this method supports {@code null} keys and values.</p>
+     *
+     * <p>If duplicate keys are provided, the later value overwrites the earlier value.</p>
+     *
+     * <p>The returned map preserves insertion order when iterating over entries.</p>
+     *
+     * @param <K> the type of keys in the Map
+     * @param <V> the type of values in the Map
+     * @param k1 the first key to be placed in the Map. Can be {@code null}.
+     * @param v1 the value to be associated with {@code k1}. Can be {@code null}.
+     * @param k2 the second key to be placed in the Map. Can be {@code null}.
+     * @param v2 the value to be associated with {@code k2}. Can be {@code null}.
+     * @param k3 the third key to be placed in the Map. Can be {@code null}.
+     * @param v3 the value to be associated with {@code k3}. Can be {@code null}.
+     * @return a new modifiable {@code LinkedHashMap} containing the specified entries
+     */
+    @Beta
+    public static <K, V> Map<K, V> toLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
+        final Map<K, V> map = new LinkedHashMap<>();
+        map.put(k1, v1);
+        map.put(k2, v2);
+        map.put(k3, v3);
+        return map;
+    }
+
+    /**
+     * Returns a new modifiable {@code LinkedHashMap} containing the specified key-value pairs.
+     *
+     * <p>The first entry is {@code (k1, v1)}. Additional entries are supplied in {@code keyValuePairs}
+     * as alternating key and value elements: {@code key2, value2, key3, value3, ...}.</p>
+     *
+     * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
+     *
+     * <p>If duplicate keys are provided, the later value overwrites the earlier value.</p>
+     *
+     * <p>The returned map preserves insertion order when iterating over entries.</p>
+     *
+     * @param <K> the type of keys in the Map
+     * @param <V> the type of values in the Map
+     * @param k1 the first key to be placed in the Map. Can be {@code null}.
+     * @param v1 the value to be associated with {@code k1}. Can be {@code null}.
+     * @param keyValuePairs additional keys and values in alternating order: key, value, key, value...
+     * @return a new modifiable {@code LinkedHashMap} containing the specified entries
+     * @throws IllegalArgumentException if {@code keyValuePairs} does not contain a valid sequence of key-value elements
+     */
+    @Beta
+    public static <K, V> Map<K, V> toLinkedHashMap(final K k1, final V v1, final Object... keyValuePairs) {
+        final int len = len(keyValuePairs);
+
+        if (len % 2 != 0) {
+            throw new IllegalArgumentException("The length of keyValuePairs array must be even: " + len);
+        }
+
+        final Map<K, V> map = new LinkedHashMap<>(len / 2 + 1);
+        map.put(k1, v1);
+
+        for (int i = 0; i < len; i += 2) {
+            map.put((K) keyValuePairs[i], (V) keyValuePairs[i + 1]);
+        }
+
+        return map;
+    }
+
+    /**
      * Returns an unmodifiable {@code ImmutableMap} with the specified key and value.
+     * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
      *
@@ -16851,6 +16935,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an unmodifiable {@code ImmutableMap} with the specified keys and values.
+     * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
      *
@@ -16868,6 +16953,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an unmodifiable {@code ImmutableMap} with the specified keys and values.
+     * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
      *
@@ -16887,6 +16973,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an unmodifiable {@code ImmutableMap} with the specified keys and values.
+     * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
      *
@@ -16908,6 +16995,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an unmodifiable {@code ImmutableMap} with the specified keys and values.
+     * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
      *
@@ -16932,6 +17020,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an unmodifiable {@code ImmutableMap} with the specified keys and values.
+     * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
      *
@@ -16958,6 +17047,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an unmodifiable {@code ImmutableMap} with the specified keys and values.
+     * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
      *
@@ -16986,6 +17076,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an unmodifiable {@code ImmutableMap} with the specified keys and values.
+     * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
      *
@@ -17016,6 +17107,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an unmodifiable {@code ImmutableMap} with the specified keys and values.
+     * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
      *
@@ -17785,6 +17877,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an unmodifiable {@code ImmutableSet} with the specified element.
+     * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Set#of(Object)}, this method supports {@code null} elements.</p>
      *
@@ -17798,6 +17891,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an unmodifiable {@code ImmutableSet} with the specified elements.
+     * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
      *
@@ -17812,6 +17906,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an unmodifiable {@code ImmutableSet} with the specified elements.
+     * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
      *
@@ -17827,6 +17922,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an unmodifiable {@code ImmutableSet} with the specified elements.
+     * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
      *
@@ -17843,6 +17939,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an unmodifiable {@code ImmutableSet} with the specified elements.
+     * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
      *
@@ -17860,6 +17957,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an unmodifiable {@code ImmutableSet} with the specified elements.
+     * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
      *
@@ -17878,6 +17976,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an unmodifiable {@code ImmutableSet} with the specified elements.
+     * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
      *
@@ -17897,6 +17996,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an unmodifiable {@code ImmutableSet} with the specified elements.
+     * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
      *
@@ -17917,6 +18017,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an unmodifiable {@code ImmutableSet} with the specified elements.
+     * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
      *
@@ -17938,6 +18039,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts an array of objects to an unmodifiable {@code ImmutableSet}, which is NOT backed with the input array.
+     * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
      *

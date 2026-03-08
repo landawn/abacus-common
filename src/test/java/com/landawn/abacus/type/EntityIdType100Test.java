@@ -24,7 +24,7 @@ public class EntityIdType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(EntityId.class, entityIdType.clazz());
+        assertEquals(EntityId.class, entityIdType.javaType());
     }
 
     @Test
@@ -39,7 +39,7 @@ public class EntityIdType100Test extends TestBase {
 
     @Test
     public void testGetSerializationType() {
-        assertEquals(Type.SerializationType.ENTITY_ID, entityIdType.getSerializationType());
+        assertEquals(Type.SerializationType.ENTITY_ID, entityIdType.serializationType());
     }
 
     @Test

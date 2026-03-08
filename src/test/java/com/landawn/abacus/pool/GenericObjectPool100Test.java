@@ -170,13 +170,27 @@ public class GenericObjectPool100Test extends TestBase {
     }
 
     @Test
+    public void testAddToSmallFullPoolWithDefaultAutoBalanceFactor() {
+        GenericObjectPool<TestPoolable> balancePool = new GenericObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f);
+        TestPoolable first = new TestPoolable("first");
+
+        assertTrue(balancePool.add(first));
+        assertTrue(balancePool.add(new TestPoolable("second")));
+        assertEquals(1, balancePool.size());
+        assertTrue(first.isDestroyed());
+
+        balancePool.close();
+    }
+
+    @Test
     public void testAddWithMemoryConstraint() {
         ObjectPool.MemoryMeasure<TestPoolable> measure = e -> 100;
         GenericObjectPool<TestPoolable> memPool = new GenericObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 250, measure);
 
         assertTrue(memPool.add(new TestPoolable("test1")));
         assertTrue(memPool.add(new TestPoolable("test2")));
-        assertFalse(memPool.add(new TestPoolable("test3")));
+        assertTrue(memPool.add(new TestPoolable("test3")));
+        assertEquals(2, memPool.size());
 
         memPool.close();
     }

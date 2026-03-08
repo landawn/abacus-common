@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
@@ -79,7 +79,7 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
      * @return the Class object for Timed
      */
     @Override
-    public Class<Timed<T>> clazz() {
+    public Class<Timed<T>> javaType() {
         return typeClass;
     }
 
@@ -90,7 +90,7 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
      * @return an array containing the value type
      */
     @Override
-    public Type<?>[] getParameterTypes() {
+    public Type<?>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -132,7 +132,7 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
         }
 
         final long timestamp = a[0] == null ? 0 : (a[0] instanceof Number ? ((Number) a[0]).longValue() : Numbers.toLong(a[0].toString()));
-        final T value = a[1] == null ? null : ((T) (valueType.clazz().isAssignableFrom(a[1].getClass()) ? a[1] : N.convert(a[1], valueType)));
+        final T value = a[1] == null ? null : ((T) (valueType.javaType().isAssignableFrom(a[1].getClass()) ? a[1] : N.convert(a[1], valueType)));
 
         return Timed.of(value, timestamp);
     }
@@ -195,7 +195,7 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Timed<T> x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Timed<T> x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

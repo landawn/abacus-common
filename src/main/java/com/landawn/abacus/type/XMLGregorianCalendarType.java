@@ -23,7 +23,7 @@ import java.sql.Timestamp;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.Dates;
@@ -92,13 +92,13 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<XMLGregorianCalendar> type = TypeFactory.getType(XMLGregorianCalendar.class);
-     * Class&lt;XMLGregorianCalendar&gt; clazz = type.clazz();   // Returns XMLGregorianCalendar.class
+     * Class&lt;XMLGregorianCalendar&gt; clazz = type.javaType();   // Returns XMLGregorianCalendar.class
      * }</pre>
      *
      * @return the Class object for XMLGregorianCalendar.class
      */
     @Override
-    public Class<XMLGregorianCalendar> clazz() {
+    public Class<XMLGregorianCalendar> javaType() {
         return XMLGregorianCalendar.class;
     }
 
@@ -321,7 +321,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharacterWriter writer = new CharacterWriter();
-     * JsonXmlSerializationConfig<?> config = JsonXmlSerializationConfig.of();
+     * JsonXmlSerConfig<?> config = JsonXmlSerConfig.of();
      * type.writeCharacter(writer, xmlGregorianCalendar, config);   // Writes formatted date/time
      * }</pre>
      *
@@ -332,7 +332,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      */
     @SuppressWarnings("null")
     @Override
-    public void writeCharacter(final CharacterWriter writer, final XMLGregorianCalendar x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final XMLGregorianCalendar x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

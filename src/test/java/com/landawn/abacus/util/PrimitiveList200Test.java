@@ -511,9 +511,9 @@ public class PrimitiveList200Test extends TestBase {
     @Test
     public void testHasDuplicates() {
         IntList listWithDuplicates = IntList.of(1, 2, 1, 3);
-        assertTrue(listWithDuplicates.hasDuplicates());
+        assertTrue(listWithDuplicates.containsDuplicates());
         IntList listWithoutDuplicates = IntList.of(1, 2, 3, 4);
-        assertFalse(listWithoutDuplicates.hasDuplicates());
+        assertFalse(listWithoutDuplicates.containsDuplicates());
     }
 
     @Test

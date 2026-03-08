@@ -106,7 +106,7 @@ public final class XmlMappers {
     }
 
     private XmlMappers() {
-        // singleton for utility class.
+        // Utility class - prevent instantiation
     }
 
     /**
@@ -1090,7 +1090,7 @@ public final class XmlMappers {
     }
 
     /**
-     * Creates a new DeserializationConfig instance with default settings.
+     * Creates a new {@link DeserializationConfig} instance with default settings.
      * This config can be customized and used with the fromXml methods for fine-grained control over deserialization.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -1101,7 +1101,7 @@ public final class XmlMappers {
      * Person person = XmlMappers.fromXml(xml, Person.class, config);
      * }</pre>
      *
-     * @return a new DeserializationConfig instance
+     * @return a new {@link DeserializationConfig} instance
      */
     public static DeserializationConfig createDeserializationConfig() {
         // final DeserializationConfig copy = defaultDeserializationConfigForCopy.without(deserializationFeatureNotEnabledByDefault);

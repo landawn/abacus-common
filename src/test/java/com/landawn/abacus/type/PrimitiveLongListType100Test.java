@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.LongList;
 
@@ -32,12 +32,12 @@ public class PrimitiveLongListType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(LongList.class, type.clazz());
+        assertEquals(LongList.class, type.javaType());
     }
 
     @Test
     public void testGetElementType() {
-        Type<?> elementType = type.getElementType();
+        Type<?> elementType = type.elementType();
         assertNotNull(elementType);
     }
 
@@ -119,7 +119,7 @@ public class PrimitiveLongListType100Test extends TestBase {
     public void testWriteCharacterEmptyList() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         LongList list = LongList.of(new long[0]);
-        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
         type.writeCharacter(writer, list, config);
         verify(writer).write('[');
@@ -130,7 +130,7 @@ public class PrimitiveLongListType100Test extends TestBase {
     public void testWriteCharacterNonEmptyList() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         LongList list = LongList.of(new long[] { 1L, 2L });
-        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
         type.writeCharacter(writer, list, config);
         verify(writer).write('[');

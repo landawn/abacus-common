@@ -1634,7 +1634,7 @@ public class EntryStream103Test extends TestBase {
     public void testOnEach() {
         List<String> processed = new ArrayList<>();
         EntryStream<String, Integer> stream = EntryStream.of(testMap);
-        Map<String, Integer> result = stream.onEach(e -> processed.add(e.getKey())).toMap();
+        Map<String, Integer> result = stream.peek(e -> processed.add(e.getKey())).toMap();
 
         assertEquals(3, result.size());
         assertEquals(3, processed.size());
@@ -1646,7 +1646,7 @@ public class EntryStream103Test extends TestBase {
         List<Integer> values = new ArrayList<>();
 
         EntryStream<String, Integer> stream = EntryStream.of(testMap);
-        Map<String, Integer> result = stream.onEach((k, v) -> {
+        Map<String, Integer> result = stream.peek((k, v) -> {
             keys.add(k);
             values.add(v);
         }).toMap();
@@ -1854,10 +1854,10 @@ public class EntryStream103Test extends TestBase {
         map.put("e", 5);
 
         EntryStream<String, Integer> stream = EntryStream.of(map);
-        assertTrue(stream.isMatchCountBetween(2, 3, e -> e.getValue() > 3));
+        assertTrue(stream.hasMatchCountBetween(2, 3, e -> e.getValue() > 3));
 
         EntryStream<String, Integer> stream2 = EntryStream.of(map);
-        assertFalse(stream2.isMatchCountBetween(4, 5, e -> e.getValue() > 3));
+        assertFalse(stream2.hasMatchCountBetween(4, 5, e -> e.getValue() > 3));
     }
 
     @Test
@@ -1868,10 +1868,10 @@ public class EntryStream103Test extends TestBase {
         map.put("c", 3);
 
         EntryStream<String, Integer> stream = EntryStream.of(map);
-        assertTrue(stream.isMatchCountBetween(1, 2, (k, v) -> v > 2));
+        assertTrue(stream.hasMatchCountBetween(1, 2, (k, v) -> v > 2));
 
         EntryStream<String, Integer> stream2 = EntryStream.of(map);
-        assertFalse(stream2.isMatchCountBetween(3, 3, (k, v) -> v > 2));
+        assertFalse(stream2.hasMatchCountBetween(3, 3, (k, v) -> v > 2));
     }
 
     @Test

@@ -60,7 +60,7 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * @return {@code Timestamp.class}
      */
     @Override
-    public Class<Timestamp> clazz() {
+    public Class<Timestamp> javaType() {
         return Timestamp.class;
     }
 

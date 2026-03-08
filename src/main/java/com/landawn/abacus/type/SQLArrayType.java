@@ -37,13 +37,13 @@ public class SQLArrayType extends AbstractType<Array> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Array> type = TypeFactory.getType(Array.class);
-     * Class<Array> clazz = type.clazz();   // Returns Array.class
+     * Class<Array> clazz = type.javaType();   // Returns Array.class
      * }</pre>
      *
      * @return the Class object for java.sql.Array.class
      */
     @Override
-    public Class<Array> clazz() {
+    public Class<Array> javaType() {
         return Array.class;
     }
 

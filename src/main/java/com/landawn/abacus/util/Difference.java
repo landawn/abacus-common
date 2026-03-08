@@ -87,7 +87,7 @@ import com.landawn.abacus.util.function.TriPredicate;
  *
  * List<String> common = diff.common();   // ["b", "c"]
  * List<String> onlyOnLeft = diff.onlyOnLeft();   // ["a", "b"]
- * List<String> onlyOnRight = diff.onlyOnRight();   // ["d", "c"]
+ * List<String> onlyOnRight = diff.onlyOnRight();   // ["c", "d"]
  * boolean equal = diff.areEqual();   // false
  *
  * // Array comparison with primitive types

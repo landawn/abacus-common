@@ -37,13 +37,13 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<SQLXML> type = TypeFactory.getType(SQLXML.class);
-     * Class<SQLXML> clazz = type.clazz();   // Returns SQLXML.class
+     * Class<SQLXML> clazz = type.javaType();   // Returns SQLXML.class
      * }</pre>
      *
      * @return the Class object for java.sql.SQLXML.class
      */
     @Override
-    public Class<SQLXML> clazz() {
+    public Class<SQLXML> javaType() {
         return SQLXML.class;
     }
 

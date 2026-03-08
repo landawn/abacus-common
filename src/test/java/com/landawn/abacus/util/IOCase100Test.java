@@ -150,21 +150,21 @@ public class IOCase100Test extends TestBase {
 
     @Test
     public void testCheckRegiocountMatchBetweenes() {
-        Assertions.assertTrue(IOCase.SENSITIVE.checkRegiocountMatchBetweenes("abcdef", 2, "cd"));
-        Assertions.assertFalse(IOCase.SENSITIVE.checkRegiocountMatchBetweenes("abcdef", 2, "CD"));
+        Assertions.assertTrue(IOCase.SENSITIVE.checkRegionMatches("abcdef", 2, "cd"));
+        Assertions.assertFalse(IOCase.SENSITIVE.checkRegionMatches("abcdef", 2, "CD"));
 
-        Assertions.assertTrue(IOCase.INSENSITIVE.checkRegiocountMatchBetweenes("abcdef", 2, "CD"));
-        Assertions.assertTrue(IOCase.INSENSITIVE.checkRegiocountMatchBetweenes("ABCDEF", 2, "cd"));
+        Assertions.assertTrue(IOCase.INSENSITIVE.checkRegionMatches("abcdef", 2, "CD"));
+        Assertions.assertTrue(IOCase.INSENSITIVE.checkRegionMatches("ABCDEF", 2, "cd"));
     }
 
     @Test
     public void testCheckRegiocountMatchBetweenesNullStrings() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            IOCase.SENSITIVE.checkRegiocountMatchBetweenes(null, 0, "test");
+            IOCase.SENSITIVE.checkRegionMatches(null, 0, "test");
         });
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            IOCase.SENSITIVE.checkRegiocountMatchBetweenes("test", 0, null);
+            IOCase.SENSITIVE.checkRegionMatches("test", 0, null);
         });
     }
 

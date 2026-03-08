@@ -97,7 +97,8 @@ import com.landawn.abacus.util.stream.IntStream;
  * IntList set2 = IntList.of(3, 4, 5, 6);
  * IntList intersection = set1.intersection(set2);   // [3, 4]
  * IntList difference = set1.difference(set2);   // [1, 2]
- * IntList union = set1.copy().addAll(set2).distinct();   // [1, 2, 3, 4, 5, 6]
+ * IntList union = set1.symmetricDifference(set2);   // [1, 2, 5, 6]
+ * // Or for full union: IntList u = set1.copy(); u.addAll(set2); u.removeDuplicates();
  *
  * // Sorting and searching
  * numbers.sort();   // Sort in ascending order
@@ -214,7 +215,7 @@ import com.landawn.abacus.util.stream.IntStream;
  *   <li><b>Aggregation:</b> Sum, min, max operations via stream API</li>
  *   <li><b>Central Tendency:</b> Median calculation with efficient sorting</li>
  *   <li><b>Occurrence Counting:</b> {@code frequency()} for frequency analysis</li>
- *   <li><b>Duplicate Detection:</b> {@code hasDuplicates()}, {@code removeDuplicates()}</li>
+ *   <li><b>Duplicate Detection:</b> {@code containsDuplicates()}, {@code removeDuplicates()}</li>
  * </ul>
  *
  * <p><b>Comparison with Alternatives:</b>
@@ -2048,8 +2049,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @return {@code true} if the list contains at least one duplicate element, {@code false} otherwise
      */
     @Override
-    public boolean hasDuplicates() {
-        return N.hasDuplicates(elementData, 0, size, false);
+    public boolean containsDuplicates() {
+        return N.containsDuplicates(elementData, 0, size, false);
     }
 
     /**

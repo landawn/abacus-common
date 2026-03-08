@@ -337,12 +337,12 @@ public class PrimitiveList100Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test hasDuplicates() method")
+    @DisplayName("Test containsDuplicates() method")
     public void testHasDuplicates() {
-        assertFalse(list.hasDuplicates());
+        assertFalse(list.containsDuplicates());
 
         IntList withDups = IntList.of(1, 2, 2, 3);
-        assertTrue(withDups.hasDuplicates());
+        assertTrue(withDups.containsDuplicates());
     }
 
     @Test
@@ -678,7 +678,7 @@ public class PrimitiveList100Test extends TestBase {
 
         assertTrue(emptyList.isEmpty());
         assertEquals(0, emptyList.size());
-        assertFalse(emptyList.hasDuplicates());
+        assertFalse(emptyList.containsDuplicates());
         assertTrue(emptyList.isSorted());
 
         assertThrows(IndexOutOfBoundsException.class, () -> list.copy(-1, 3));

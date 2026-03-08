@@ -23,10 +23,10 @@ public class PoolTest extends AbstractTest {
     @Test
     public void testMaxWaitTime() {
         final int capacity = 30;
-        final ObjectPool<PoolableWrapper> pool = PoolFactory.createObjectPool(capacity, 30);
+        final ObjectPool<PoolableAdapter> pool = PoolFactory.createObjectPool(capacity, 30);
 
         for (int i = 0; i < capacity; i++) {
-            pool.add(new PoolableWrapper<>(i, 600, 600));
+            pool.add(new PoolableAdapter<>(i, 600, 600));
         }
 
         final long startTime = System.currentTimeMillis();
@@ -38,7 +38,7 @@ public class PoolTest extends AbstractTest {
                 @Override
                 public void run() {
                     try {
-                        final PoolableWrapper result = pool.take(2, TimeUnit.SECONDS);
+                        final PoolableAdapter result = pool.take(2, TimeUnit.SECONDS);
 
                         if (result == null) {
                             counter.incrementAndGet();
@@ -68,7 +68,7 @@ public class PoolTest extends AbstractTest {
 
     @Test
     public void test_GenericObjectPool() throws InterruptedException {
-        ObjectPool<PoolableWrapper<String>> objectPool = PoolFactory.createObjectPool(3000, 1000, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f);
+        ObjectPool<PoolableAdapter<String>> objectPool = PoolFactory.createObjectPool(3000, 1000, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f);
 
         objectPool.add(Poolable.wrap("123"));
 
@@ -96,7 +96,7 @@ public class PoolTest extends AbstractTest {
 
         assertTrue(objectPool.add(Poolable.wrap("123"), 100, TimeUnit.MILLISECONDS));
 
-        final PoolableWrapper<String> value = Poolable.wrap("123", 10, 10);
+        final PoolableAdapter<String> value = Poolable.wrap("123", 10, 10);
         N.sleep(100);
 
         assertFalse(objectPool.add(value));
@@ -129,7 +129,7 @@ public class PoolTest extends AbstractTest {
 
         }
 
-        KeyedObjectPool<String, PoolableWrapper<String>> keyedObjectPool = PoolFactory.createKeyedObjectPool(1000, 100);
+        KeyedObjectPool<String, PoolableAdapter<String>> keyedObjectPool = PoolFactory.createKeyedObjectPool(1000, 100);
 
         keyedObjectPool.put("abc", Poolable.wrap("123"));
 
@@ -145,7 +145,7 @@ public class PoolTest extends AbstractTest {
 
         }
 
-        final PoolableWrapper<String> value = Poolable.wrap("123", 10, 10);
+        final PoolableAdapter<String> value = Poolable.wrap("123", 10, 10);
         N.sleep(100);
 
         assertFalse(keyedObjectPool.put("abc", value));
@@ -175,7 +175,7 @@ public class PoolTest extends AbstractTest {
 
     @Test
     public void testGenericKeyedObjectPool1() throws Exception {
-        final KeyedObjectPool<String, PoolableWrapper<String>> pool = PoolFactory.createKeyedObjectPool(100, 2000);
+        final KeyedObjectPool<String, PoolableAdapter<String>> pool = PoolFactory.createKeyedObjectPool(100, 2000);
         pool.put("a", Poolable.wrap("a", 1000, 1000));
         N.println(pool.size());
         assertEquals(1, pool.size());
@@ -186,7 +186,7 @@ public class PoolTest extends AbstractTest {
 
     @Test
     public void testGenericKeyedObjectPool2() throws Exception {
-        final KeyedObjectPool<String, PoolableWrapper<String>> pool = PoolFactory.createKeyedObjectPool(100, 2000);
+        final KeyedObjectPool<String, PoolableAdapter<String>> pool = PoolFactory.createKeyedObjectPool(100, 2000);
         pool.put("a", Poolable.wrap("a", 1000, 1000));
         N.println(pool.size());
         assertEquals(1, pool.size());
@@ -198,7 +198,7 @@ public class PoolTest extends AbstractTest {
 
     @Test
     public void testGenericKeyedObjectPool3() throws Exception {
-        final KeyedObjectPool<String, PoolableWrapper<String>> pool = PoolFactory.createKeyedObjectPool(100, 2000);
+        final KeyedObjectPool<String, PoolableAdapter<String>> pool = PoolFactory.createKeyedObjectPool(100, 2000);
         pool.put("a", Poolable.wrap("a", 1000, 1000));
         N.println(pool.size());
         assertEquals(1, pool.size());
@@ -213,7 +213,7 @@ public class PoolTest extends AbstractTest {
 
     @Test
     public void test_vacation() throws Exception {
-        KeyedObjectPool<String, PoolableWrapper<String>> pool = PoolFactory.createKeyedObjectPool(100, 2000, EvictionPolicy.LAST_ACCESS_TIME, true, 0.1f);
+        KeyedObjectPool<String, PoolableAdapter<String>> pool = PoolFactory.createKeyedObjectPool(100, 2000, EvictionPolicy.LAST_ACCESS_TIME, true, 0.1f);
 
         for (int i = 0; i < 1000; i++) {
             pool.put(String.valueOf(i), Poolable.wrap(String.valueOf(i)));
@@ -250,7 +250,7 @@ public class PoolTest extends AbstractTest {
 
     @Test
     public void test_vacation_2() throws Exception {
-        ObjectPool<PoolableWrapper<String>> pool = PoolFactory.createObjectPool(100, 2000, EvictionPolicy.LAST_ACCESS_TIME, true, 0.1f);
+        ObjectPool<PoolableAdapter<String>> pool = PoolFactory.createObjectPool(100, 2000, EvictionPolicy.LAST_ACCESS_TIME, true, 0.1f);
 
         for (int i = 0; i < 1000; i++) {
             pool.add(Poolable.wrap(String.valueOf(i)));
@@ -283,18 +283,18 @@ public class PoolTest extends AbstractTest {
 
     @Test
     public void test_Wrapper() {
-        PoolableWrapper<Seid> wrapper = Poolable.wrap(Seid.of(AccountPNL.ID, 1));
+        PoolableAdapter<Seid> wrapper = Poolable.wrap(Seid.of(AccountPNL.ID, 1));
 
         N.println(wrapper);
 
-        final PoolableWrapper<Seid> wrapper2 = Poolable.wrap(Seid.of(AccountPNL.ID, 1));
+        final PoolableAdapter<Seid> wrapper2 = Poolable.wrap(Seid.of(AccountPNL.ID, 1));
 
         assertTrue(wrapper.equals(wrapper2));
         assertTrue(N.toSet(wrapper).contains(wrapper2));
 
         N.println(wrapper.value());
 
-        wrapper = new PoolableWrapper<>(wrapper.value());
+        wrapper = new PoolableAdapter<>(wrapper.value());
         N.println(wrapper.value());
     }
 

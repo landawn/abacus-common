@@ -35,6 +35,19 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>Streaming large JSON arrays for memory-efficient processing</li>
  *   <li>Customizing serialization and deserialization behavior through configuration</li>
  * </ul>
+ *
+ * <p><b>{@code parse()} vs {@code deserialize()}:</b></p>
+ * <p>Both methods convert JSON text into Java objects, but they serve different purposes:</p>
+ * <ul>
+ *   <li>{@code parse()} — Designed for well-formatted JSON <b>string</b> input only. It also supports
+ *       JSON array-like strings that may not be strictly bracketed (e.g., CSV rows like {@code "a","b","c"}
+ *       without surrounding {@code []}). Use {@code parse()} when working directly with JSON strings,
+ *       especially for populating existing arrays, collections, or maps.</li>
+ *   <li>{@code deserialize()} — Inherited from {@link Parser}, this is the general-purpose deserialization
+ *       method that supports multiple input sources: {@code String}, {@code File}, {@code InputStream},
+ *       and {@code Reader}. Use {@code deserialize()} when reading from files, streams, or when you need
+ *       substring-based deserialization with {@code fromIndex}/{@code toIndex}.</li>
+ * </ul>
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -44,8 +57,8 @@ import com.landawn.abacus.util.stream.Stream;
  * Person person = parser.parse("{\"name\":\"John\",\"age\":30}", Person.class);
  *
  * // Parse JSON with configuration
- * JsonDeserializationConfig config = new JsonDeserializationConfig()
- *     .ignoreUnmatchedProperty(true);
+ * JsonDeserConfig config = new JsonDeserConfig()
+ *     .setIgnoreUnmatchedProperty(true);
  * Person person2 = parser.parse(jsonString, config, Person.class);
  *
  * // Stream parsing for large JSON arrays
@@ -55,11 +68,11 @@ import com.landawn.abacus.util.stream.Stream;
  * }
  * }</pre>
  * 
- * @see JsonSerializationConfig
- * @see JsonDeserializationConfig
+ * @see JsonSerConfig
+ * @see JsonDeserConfig
  * @see ParserFactory
  */
-public interface JsonParser extends Parser<JsonSerializationConfig, JsonDeserializationConfig> {
+public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
 
     /**
      * Parses a JSON string into an object of the specified type.
@@ -112,9 +125,9 @@ public interface JsonParser extends Parser<JsonSerializationConfig, JsonDeserial
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig()
-     *     .ignoreUnmatchedProperty(true)
-     *     .readNullToEmpty(true);
+     * JsonDeserConfig config = new JsonDeserConfig()
+     *     .setIgnoreUnmatchedProperty(true)
+     *     .setReadNullToEmpty(true);
      *
      * String json = "{\"name\":\"John\",\"age\":30,\"unknown\":\"value\"}";
      * Person person = parser.parse(json, config, Type.of(Person.class));
@@ -128,7 +141,7 @@ public interface JsonParser extends Parser<JsonSerializationConfig, JsonDeserial
      * @return the parsed object of type T, never {@code null}
      * @throws IllegalArgumentException if source or targetType is {@code null}, or if the source contains invalid JSON
      */
-    <T> T parse(String source, JsonDeserializationConfig config, Type<? extends T> targetType);
+    <T> T parse(String source, JsonDeserConfig config, Type<? extends T> targetType);
 
     /**
      * Parses a JSON string into an object of the specified type with custom configuration.
@@ -137,9 +150,9 @@ public interface JsonParser extends Parser<JsonSerializationConfig, JsonDeserial
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig()
-     *     .ignoreUnmatchedProperty(true)
-     *     .readNullToEmpty(true);
+     * JsonDeserConfig config = new JsonDeserConfig()
+     *     .setIgnoreUnmatchedProperty(true)
+     *     .setReadNullToEmpty(true);
      *
      * String json = "{\"name\":\"John\",\"age\":30,\"unknown\":\"value\"}";
      * Person person = parser.parse(json, config, Person.class);
@@ -153,7 +166,7 @@ public interface JsonParser extends Parser<JsonSerializationConfig, JsonDeserial
      * @return the parsed object of type T, never {@code null}
      * @throws IllegalArgumentException if source or targetType is {@code null}, or if the source contains invalid JSON
      */
-    <T> T parse(String source, JsonDeserializationConfig config, Class<? extends T> targetType);
+    <T> T parse(String source, JsonDeserConfig config, Class<? extends T> targetType);
 
     /**
      * Parses a JSON string into an existing array.
@@ -181,8 +194,8 @@ public interface JsonParser extends Parser<JsonSerializationConfig, JsonDeserial
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig()
-     *     .ignoreUnmatchedProperty(true);
+     * JsonDeserConfig config = new JsonDeserConfig()
+     *     .setIgnoreUnmatchedProperty(true);
      * String json = "[1, 2, 3]";
      * Integer[] numbers = new Integer[3];
      * parser.parse(json, config, numbers);
@@ -193,7 +206,7 @@ public interface JsonParser extends Parser<JsonSerializationConfig, JsonDeserial
      * @param output the pre-allocated array to populate with parsed values (must not be {@code null})
      * @throws IllegalArgumentException if source or output is {@code null}, or if the source contains invalid JSON, or if array size doesn't match
      */
-    void parse(String source, JsonDeserializationConfig config, Object[] output);
+    void parse(String source, JsonDeserConfig config, Object[] output);
 
     /**
      * Parses a JSON string into an existing Collection.
@@ -220,8 +233,8 @@ public interface JsonParser extends Parser<JsonSerializationConfig, JsonDeserial
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig()
-     *     .ignoreUnmatchedProperty(true);
+     * JsonDeserConfig config = new JsonDeserConfig()
+     *     .setIgnoreUnmatchedProperty(true);
      * String json = "[\"item1\", \"item2\"]";
      * List<String> items = new ArrayList<>();
      * parser.parse(json, config, items);
@@ -233,7 +246,7 @@ public interface JsonParser extends Parser<JsonSerializationConfig, JsonDeserial
      * @throws IllegalArgumentException if the source is {@code null} or invalid JSON
      * @throws UnsupportedOperationException if the collection is unmodifiable
      */
-    void parse(String source, JsonDeserializationConfig config, Collection<?> output);
+    void parse(String source, JsonDeserConfig config, Collection<?> output);
 
     /**
      * Parses a JSON string into an existing Map.
@@ -260,8 +273,8 @@ public interface JsonParser extends Parser<JsonSerializationConfig, JsonDeserial
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig()
-     *     .ignoreUnmatchedProperty(true);
+     * JsonDeserConfig config = new JsonDeserConfig()
+     *     .setIgnoreUnmatchedProperty(true);
      * String json = "{\"key1\":\"value1\",\"key2\":\"value2\"}";
      * Map<String, String> map = new HashMap<>();
      * parser.parse(json, config, map);
@@ -273,7 +286,7 @@ public interface JsonParser extends Parser<JsonSerializationConfig, JsonDeserial
      * @throws IllegalArgumentException if the source is {@code null} or invalid JSON
      * @throws UnsupportedOperationException if the map is unmodifiable
      */
-    void parse(String source, JsonDeserializationConfig config, Map<?, ?> output);
+    void parse(String source, JsonDeserConfig config, Map<?, ?> output);
 
     /**
      * Deserializes a substring of a JSON string into an object of the specified type.
@@ -326,8 +339,8 @@ public interface JsonParser extends Parser<JsonSerializationConfig, JsonDeserial
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig()
-     *     .ignoreUnmatchedProperty(true);
+     * JsonDeserConfig config = new JsonDeserConfig()
+     *     .setIgnoreUnmatchedProperty(true);
      * String json = "prefix{\"name\":\"John\",\"extra\":\"ignored\"}suffix";
      * Person person = parser.deserialize(json, 6, 40, config, Type.of(Person.class));
      * }</pre>
@@ -341,7 +354,7 @@ public interface JsonParser extends Parser<JsonSerializationConfig, JsonDeserial
      * @return the deserialized object of type T
      * @throws IndexOutOfBoundsException if the indices are out of bounds or fromIndex &gt; toIndex
      */
-    <T> T deserialize(String source, int fromIndex, int toIndex, JsonDeserializationConfig config, Type<? extends T> targetType);
+    <T> T deserialize(String source, int fromIndex, int toIndex, JsonDeserConfig config, Type<? extends T> targetType);
 
     /**
      * Deserializes a substring of a JSON string into an object with custom configuration.
@@ -350,8 +363,8 @@ public interface JsonParser extends Parser<JsonSerializationConfig, JsonDeserial
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig()
-     *     .ignoreUnmatchedProperty(true);
+     * JsonDeserConfig config = new JsonDeserConfig()
+     *     .setIgnoreUnmatchedProperty(true);
      * String json = "prefix{\"name\":\"John\",\"extra\":\"ignored\"}suffix";
      * Person person = parser.deserialize(json, 6, 40, config, Person.class);
      * }</pre>
@@ -365,7 +378,7 @@ public interface JsonParser extends Parser<JsonSerializationConfig, JsonDeserial
      * @return the deserialized object of type T
      * @throws IndexOutOfBoundsException if the indices are out of bounds or fromIndex &gt; toIndex
      */
-    <T> T deserialize(String source, int fromIndex, int toIndex, JsonDeserializationConfig config, Class<? extends T> targetType);
+    <T> T deserialize(String source, int fromIndex, int toIndex, JsonDeserConfig config, Class<? extends T> targetType);
 
     /**
      * Creates a stream for parsing JSON array elements lazily from a JSON string.
@@ -397,8 +410,8 @@ public interface JsonParser extends Parser<JsonSerializationConfig, JsonDeserial
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig()
-     *     .ignoreUnmatchedProperty(true);
+     * JsonDeserConfig config = new JsonDeserConfig()
+     *     .setIgnoreUnmatchedProperty(true);
      * String json = "[{\"id\":1,\"extra\":\"data\"},{\"id\":2}]";
      * try (Stream<MyObject> stream = parser.stream(json, config, Type.of(MyObject.class))) {
      *     stream.forEach(obj -> process(obj));
@@ -412,7 +425,7 @@ public interface JsonParser extends Parser<JsonSerializationConfig, JsonDeserial
      * @return a Stream of parsed elements that must be closed after use
      * @throws IllegalArgumentException if the source is {@code null}, invalid JSON, or not a JSON array
      */
-    <T> Stream<T> stream(String source, JsonDeserializationConfig config, Type<? extends T> elementType);
+    <T> Stream<T> stream(String source, JsonDeserConfig config, Type<? extends T> elementType);
 
     /**
      * Creates a stream for parsing JSON array elements from a file.
@@ -444,8 +457,8 @@ public interface JsonParser extends Parser<JsonSerializationConfig, JsonDeserial
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig()
-     *     .ignoreUnmatchedProperty(true);
+     * JsonDeserConfig config = new JsonDeserConfig()
+     *     .setIgnoreUnmatchedProperty(true);
      * File jsonFile = new File("data.json");
      * try (Stream<Person> stream = parser.stream(jsonFile, config, Type.of(Person.class))) {
      *     stream.forEach(person -> process(person));
@@ -459,7 +472,7 @@ public interface JsonParser extends Parser<JsonSerializationConfig, JsonDeserial
      * @return a Stream of parsed elements that must be closed after use
      * @throws IllegalArgumentException if the source is {@code null} or the file contains invalid JSON
      */
-    <T> Stream<T> stream(File source, JsonDeserializationConfig config, Type<? extends T> elementType);
+    <T> Stream<T> stream(File source, JsonDeserConfig config, Type<? extends T> elementType);
 
     /**
      * Creates a stream for parsing JSON array elements from an InputStream.
@@ -492,8 +505,8 @@ public interface JsonParser extends Parser<JsonSerializationConfig, JsonDeserial
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig()
-     *     .ignoreUnmatchedProperty(true);
+     * JsonDeserConfig config = new JsonDeserConfig()
+     *     .setIgnoreUnmatchedProperty(true);
      * try (InputStream is = new FileInputStream("data.json");
      *     Stream<Item> stream = parser.stream(is, true, config, Type.of(Item.class))) {
      *     stream.forEach(item -> process(item));
@@ -508,7 +521,7 @@ public interface JsonParser extends Parser<JsonSerializationConfig, JsonDeserial
      * @return a Stream of parsed elements that must be closed after use
      * @throws IllegalArgumentException if the source is {@code null} or contains invalid JSON
      */
-    <T> Stream<T> stream(InputStream source, boolean closeInputStreamWhenStreamIsClosed, JsonDeserializationConfig config, Type<? extends T> elementType);
+    <T> Stream<T> stream(InputStream source, boolean closeInputStreamWhenStreamIsClosed, JsonDeserConfig config, Type<? extends T> elementType);
 
     /**
      * Creates a stream for parsing JSON array elements from a Reader.
@@ -541,8 +554,8 @@ public interface JsonParser extends Parser<JsonSerializationConfig, JsonDeserial
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserializationConfig config = new JsonDeserializationConfig()
-     *     .ignoreUnmatchedProperty(true);
+     * JsonDeserConfig config = new JsonDeserConfig()
+     *     .setIgnoreUnmatchedProperty(true);
      * try (Reader reader = new FileReader("data.json");
      *      Stream<Product> stream = parser.stream(reader, true, config, Type.of(Product.class))) {
      *      stream.forEach(product -> process(product));
@@ -557,5 +570,5 @@ public interface JsonParser extends Parser<JsonSerializationConfig, JsonDeserial
      * @return a Stream of parsed elements that must be closed after use
      * @throws IllegalArgumentException if the source is {@code null} or contains invalid JSON
      */
-    <T> Stream<T> stream(Reader source, boolean closeReaderWhenStreamIsClosed, JsonDeserializationConfig config, Type<? extends T> elementType);
+    <T> Stream<T> stream(Reader source, boolean closeReaderWhenStreamIsClosed, JsonDeserConfig config, Type<? extends T> elementType);
 }

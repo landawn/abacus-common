@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -37,14 +37,14 @@ public class MapEntryType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<Map.Entry<String, Integer>> clazz = mapEntryType.clazz();
+        Class<Map.Entry<String, Integer>> clazz = mapEntryType.javaType();
         Assertions.assertNotNull(clazz);
         assertEquals(Map.Entry.class, clazz);
     }
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = mapEntryType.getParameterTypes();
+        Type<?>[] paramTypes = mapEntryType.parameterTypes();
         Assertions.assertNotNull(paramTypes);
         assertEquals(2, paramTypes.length);
     }
@@ -138,7 +138,7 @@ public class MapEntryType100Test extends TestBase {
     @Test
     public void testWriteCharacterWithNonNull() throws IOException {
         Map.Entry<String, Integer> entry = new AbstractMap.SimpleEntry<>("key", 123);
-        JsonXmlSerializationConfig<?> config = null;
+        JsonXmlSerConfig<?> config = null;
         mapEntryType.writeCharacter(characterWriter, entry, config);
     }
 }

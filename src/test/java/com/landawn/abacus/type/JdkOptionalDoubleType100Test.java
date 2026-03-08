@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -39,7 +39,7 @@ public class JdkOptionalDoubleType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(OptionalDouble.class, optionalDoubleType.clazz());
+        assertEquals(OptionalDouble.class, optionalDoubleType.javaType());
     }
 
     @Test
@@ -257,7 +257,7 @@ public class JdkOptionalDoubleType100Test extends TestBase {
     @Test
     public void testWriteCharacter_WithConfig() throws IOException {
         OptionalDouble opt = OptionalDouble.of(42.5);
-        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
         optionalDoubleType.writeCharacter(characterWriter, opt, config);
         verify(characterWriter).write(42.5);

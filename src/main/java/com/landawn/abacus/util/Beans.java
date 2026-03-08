@@ -1268,7 +1268,7 @@ public final class Beans {
     }
 
     private static boolean isGetMethod(final Method method) {
-        if (Object.class.equals(method.getDeclaringClass())) {
+        if (Object.class.equals(method.getDeclaringClass()) || Modifier.isStatic(method.getModifiers())) {
             return false;
         }
 
@@ -1321,7 +1321,8 @@ public final class Beans {
     private static boolean isSetMethod(final Method method) {
         final String mn = method.getName();
 
-        return (mn.startsWith(SET) || getDeclaredField(method.getDeclaringClass(), mn) != null) && N.len(method.getParameterTypes()) == 1
+        return !Modifier.isStatic(method.getModifiers()) && (mn.startsWith(SET) || getDeclaredField(method.getDeclaringClass(), mn) != null)
+                && N.len(method.getParameterTypes()) == 1
                 && (void.class.equals(method.getReturnType()) || method.getReturnType().isAssignableFrom(method.getDeclaringClass()))
                 && !nonGetSetMethodName.contains(mn);
     }
@@ -4749,7 +4750,7 @@ public final class Beans {
 
         if (Utils.kryoParser != null && targetType.equals(obj.getClass()) && !notKryoCompatible.contains(srcCls)) {
             try {
-                copy = Utils.kryoParser.clone(obj);
+                copy = Utils.kryoParser.deepCopy(obj);
             } catch (final Exception e) {
                 notKryoCompatible.add(srcCls);
 
@@ -4973,7 +4974,7 @@ public final class Beans {
 
             if (selectPropNames == null && Utils.kryoParser != null && targetType.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
                 try {
-                    final T copy = (T) Utils.kryoParser.copy(sourceBean);
+                    final T copy = (T) Utils.kryoParser.shallowCopy(sourceBean);
 
                     if (copy != null) {
                         return copy;
@@ -5074,7 +5075,7 @@ public final class Beans {
 
             if (propFilter == BiPredicates.alwaysTrue() && Utils.kryoParser != null && targetType.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
                 try {
-                    final T copy = (T) Utils.kryoParser.copy(sourceBean);
+                    final T copy = (T) Utils.kryoParser.shallowCopy(sourceBean);
 
                     if (copy != null) {
                         return copy;
@@ -5137,7 +5138,7 @@ public final class Beans {
 
             if (ignoredPropNames == null && Utils.kryoParser != null && targetType.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
                 try {
-                    final T copy = (T) Utils.kryoParser.copy(sourceBean);
+                    final T copy = (T) Utils.kryoParser.shallowCopy(sourceBean);
 
                     if (copy != null) {
                         return copy;

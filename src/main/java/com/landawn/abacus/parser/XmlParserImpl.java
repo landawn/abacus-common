@@ -40,7 +40,6 @@ import org.xml.sax.SAXException;
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
@@ -53,8 +52,8 @@ import com.landawn.abacus.util.MapEntity;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.Objectory;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.XmlUtil;
 
 /**
@@ -90,15 +89,15 @@ import com.landawn.abacus.util.XmlUtil;
  * MyBean restored = parser.deserialize(xml, MyBean.class);
  * 
  * // With configuration
- * XmlSerializationConfig config = new XmlSerializationConfig()
- *     .prettyFormat(true)
- *     .writeTypeInfo(false);
+ * XmlSerConfig config = new XmlSerConfig()
+ *     .setPrettyFormat(true)
+ *     .setWriteTypeInfo(false);
  * String xmlWithConfig = parser.serialize(bean, config);
  * }</pre>
  * 
  * @see XmlParser
- * @see XmlSerializationConfig
- * @see XmlDeserializationConfig
+ * @see XmlSerConfig
+ * @see XmlDeserConfig
  */
 final class XmlParserImpl extends AbstractXmlParser {
 
@@ -120,7 +119,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @param xsc the XML serialization configuration
      * @param xdc the XML deserialization configuration
      */
-    XmlParserImpl(final XmlParserType parserType, final XmlSerializationConfig xsc, final XmlDeserializationConfig xdc) {
+    XmlParserImpl(final XmlParserType parserType, final XmlSerConfig xsc, final XmlDeserConfig xdc) {
         super(xsc, xdc);
         this.parserType = parserType;
     }
@@ -141,9 +140,9 @@ final class XmlParserImpl extends AbstractXmlParser {
      * String xml = parser.serialize(user, null);
      *
      * // With configuration
-     * XmlSerializationConfig config = new XmlSerializationConfig()
-     *     .prettyFormat(true)
-     *     .writeTypeInfo(false);
+     * XmlSerConfig config = new XmlSerConfig()
+     *     .setPrettyFormat(true)
+     *     .setWriteTypeInfo(false);
      * String prettyXml = parser.serialize(user, config);
      * }</pre>
      *
@@ -154,13 +153,13 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @throws ParsingException if the object type is not supported for serialization
      */
     @Override
-    public String serialize(final Object obj, final XmlSerializationConfig config) {
+    public String serialize(final Object obj, final XmlSerConfig config) {
         if (obj == null) {
             return Strings.EMPTY;
         }
 
         final BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
-        final IdentityHashSet<Object> serializedObjects = config == null || !config.supportCircularReference() ? null : new IdentityHashSet<>();
+        final IdentityHashSet<Object> serializedObjects = config == null || !config.isSupportCircularReference() ? null : new IdentityHashSet<>();
 
         try {
             write(obj, config, null, serializedObjects, bw, false);
@@ -185,8 +184,8 @@ final class XmlParserImpl extends AbstractXmlParser {
      * User user = new User("Jane", "Smith");
      * File outputFile = new File("user.xml");
      *
-     * XmlSerializationConfig config = new XmlSerializationConfig()
-     *     .prettyFormat(true);
+     * XmlSerConfig config = new XmlSerConfig()
+     *     .setPrettyFormat(true);
      * parser.serialize(user, config, outputFile);
      * }</pre>
      *
@@ -197,7 +196,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @throws ParsingException if the object type is not supported for serialization
      */
     @Override
-    public void serialize(final Object obj, final XmlSerializationConfig config, final File output) {
+    public void serialize(final Object obj, final XmlSerConfig config, final File output) {
         Writer writer = null;
 
         try {
@@ -227,8 +226,8 @@ final class XmlParserImpl extends AbstractXmlParser {
      * User user = new User("Bob", "Johnson");
      *
      * try (OutputStream out = new FileOutputStream("user.xml")) {
-     *     XmlSerializationConfig config = new XmlSerializationConfig()
-     *         .prettyFormat(true);
+     *     XmlSerConfig config = new XmlSerConfig()
+     *         .setPrettyFormat(true);
      *     parser.serialize(user, config, out);
      * }
      * }</pre>
@@ -240,9 +239,9 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @throws ParsingException if the object type is not supported for serialization
      */
     @Override
-    public void serialize(final Object obj, final XmlSerializationConfig config, final OutputStream output) {
+    public void serialize(final Object obj, final XmlSerConfig config, final OutputStream output) {
         final BufferedXmlWriter bw = Objectory.createBufferedXmlWriter(output);
-        final IdentityHashSet<Object> serializedObjects = config == null || !config.supportCircularReference() ? null : new IdentityHashSet<>();
+        final IdentityHashSet<Object> serializedObjects = config == null || !config.isSupportCircularReference() ? null : new IdentityHashSet<>();
 
         try {
             write(obj, config, null, serializedObjects, bw, true);
@@ -266,9 +265,9 @@ final class XmlParserImpl extends AbstractXmlParser {
      * User user = new User("Alice", "Williams");
      *
      * StringWriter sw = new StringWriter();
-     * XmlSerializationConfig config = new XmlSerializationConfig()
-     *     .prettyFormat(true)
-     *     .writeTypeInfo(true);
+     * XmlSerConfig config = new XmlSerConfig()
+     *     .setPrettyFormat(true)
+     *     .setWriteTypeInfo(true);
      * parser.serialize(user, config, sw);
      * String xml = sw.toString();
      * }</pre>
@@ -280,10 +279,10 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @throws ParsingException if the object type is not supported for serialization
      */
     @Override
-    public void serialize(final Object obj, final XmlSerializationConfig config, final Writer output) {
+    public void serialize(final Object obj, final XmlSerConfig config, final Writer output) {
         final boolean isBufferedWriter = output instanceof BufferedXmlWriter;
         final BufferedXmlWriter bw = isBufferedWriter ? (BufferedXmlWriter) output : Objectory.createBufferedXmlWriter(output);
-        final IdentityHashSet<Object> serializedObjects = config == null || !config.supportCircularReference() ? null : new IdentityHashSet<>();
+        final IdentityHashSet<Object> serializedObjects = config == null || !config.isSupportCircularReference() ? null : new IdentityHashSet<>();
 
         try {
             write(obj, config, null, serializedObjects, bw, true);
@@ -308,9 +307,9 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @param flush whether to flush the writer after writing
      * @throws IOException if an I/O error occurs
      */
-    protected void write(final Object obj, final XmlSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
+    protected void write(final Object obj, final XmlSerConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final BufferedXmlWriter bw, final boolean flush) throws IOException {
-        final XmlSerializationConfig configToUse = check(config);
+        final XmlSerConfig configToUse = check(config);
 
         if (hasCircularReference(obj, serializedObjects, configToUse, bw)) {
             return;
@@ -324,7 +323,7 @@ final class XmlParserImpl extends AbstractXmlParser {
         final Class<?> cls = obj.getClass();
         final Type<Object> type = Type.of(cls);
 
-        switch (type.getSerializationType()) {
+        switch (type.serializationType()) {
             case SERIALIZABLE:
                 if (type.isObjectArray()) {
                     writeArray(obj, configToUse, indentation, serializedObjects, type, bw);
@@ -362,7 +361,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                 break;
 
             default:
-                if (config == null || config.failOnEmptyBean()) {
+                if (config == null || config.isFailOnEmptyBean()) {
                     throw new ParsingException("Unsupported class: " + ClassUtil.getCanonicalClassName(cls)
                             + ". Only Array/List/Map and Bean class with getter/setter methods are supported");
                 } else {
@@ -375,22 +374,22 @@ final class XmlParserImpl extends AbstractXmlParser {
         }
     }
 
-    protected void writeBean(final Object obj, final XmlSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
+    protected void writeBean(final Object obj, final XmlSerConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXmlWriter bw) throws IOException {
         //    if (hasCircularReference(obj, serializedObjects, config, bw)) {
         //        return;
         //    }
 
-        final Class<?> cls = type.clazz();
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(type.javaType());
+        final Class<?> cls = type.javaType();
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(type.reflectType());
 
         if (N.isEmpty(beanInfo.jsonXmlSerializablePropInfos)) {
             throw new ParsingException("No serializable property is found in class: " + ClassUtil.getCanonicalClassName(cls));
         }
 
-        final boolean tagByPropertyName = config.tagByPropertyName();
-        final boolean writeTypeInfo = config.writeTypeInfo();
-        final boolean isPrettyFormat = config.prettyFormat();
+        final boolean tagByPropertyName = config.isTagByPropertyName();
+        final boolean writeTypeInfo = config.isWriteTypeInfo();
+        final boolean isPrettyFormat = config.isPrettyFormat();
         final NamingPolicy jsonXmlNamingPolicy = config.getPropNamingPolicy() == null ? beanInfo.jsonXmlNamingPolicy : config.getPropNamingPolicy();
         final int nameTagIdx = jsonXmlNamingPolicy.ordinal();
 
@@ -432,14 +431,14 @@ final class XmlParserImpl extends AbstractXmlParser {
         }
     }
 
-    protected void writeProperties(final Object obj, final XmlSerializationConfig config, final String propIndentation,
-            final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedXmlWriter bw) throws IOException {
+    protected void writeProperties(final Object obj, final XmlSerConfig config, final String propIndentation, final IdentityHashSet<Object> serializedObjects,
+            final Type<Object> type, final BufferedXmlWriter bw) throws IOException {
         //    if (hasCircularReference(obj, serializedObjects, config, bw)) {
         //        return;
         //    }
 
-        final Class<?> cls = type.clazz();
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(type.javaType());
+        final Class<?> cls = type.javaType();
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(type.reflectType());
 
         final Exclusion exclusion = getExclusion(config, beanInfo);
 
@@ -447,14 +446,14 @@ final class XmlParserImpl extends AbstractXmlParser {
         final boolean ignoreDefaultProperty = (exclusion == Exclusion.DEFAULT);
 
         final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(cls);
-        final boolean tagByPropertyName = config.tagByPropertyName();
-        final boolean writeTypeInfo = config.writeTypeInfo();
-        final boolean isPrettyFormat = config.prettyFormat();
+        final boolean tagByPropertyName = config.isTagByPropertyName();
+        final boolean writeTypeInfo = config.isWriteTypeInfo();
+        final boolean isPrettyFormat = config.isPrettyFormat();
         final NamingPolicy jsonXmlNamingPolicy = config.getPropNamingPolicy() == null ? beanInfo.jsonXmlNamingPolicy : config.getPropNamingPolicy();
         final int nameTagIdx = jsonXmlNamingPolicy.ordinal();
 
         final String nextIndentation = isPrettyFormat ? ((propIndentation == null ? Strings.EMPTY : propIndentation) + config.getIndentation()) : null;
-        final PropInfo[] propInfoList = config.skipTransientField() ? beanInfo.nonTransientSeriPropInfos : beanInfo.jsonXmlSerializablePropInfos;
+        final PropInfo[] propInfoList = config.isSkipTransientField() ? beanInfo.nonTransientSeriPropInfos : beanInfo.jsonXmlSerializablePropInfos;
         PropInfo propInfo = null;
         String propName = null;
         Object propValue = null;
@@ -471,7 +470,7 @@ final class XmlParserImpl extends AbstractXmlParser {
             propValue = propInfo.getPropValue(obj);
 
             if ((ignoreNullProperty && propValue == null) || (ignoreDefaultProperty && propValue != null && (propInfo.jsonXmlType != null)
-                    && propInfo.jsonXmlType.isPrimitiveType() && propValue.equals(propInfo.jsonXmlType.defaultValue()))) {
+                    && propInfo.jsonXmlType.isPrimitive() && propValue.equals(propInfo.jsonXmlType.defaultValue()))) {
                 continue;
             }
 
@@ -526,17 +525,17 @@ final class XmlParserImpl extends AbstractXmlParser {
         }
     }
 
-    protected void writeMap(final Map<?, ?> m, final XmlSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
+    protected void writeMap(final Map<?, ?> m, final XmlSerConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXmlWriter bw) throws IOException {
         //    if (hasCircularReference(m, serializedObjects, config, bw)) {
         //        return;
         //    }
 
-        final Class<?> cls = type.clazz();
+        final Class<?> cls = type.javaType();
         final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(Map.class);
         // final boolean ignoreNullProperty = (config.getExclusion() == Exclusion.NULL) || (config.getExclusion() == Exclusion.DEFAULT);
-        final boolean writeTypeInfo = config.writeTypeInfo();
-        final boolean isPrettyFormat = config.prettyFormat();
+        final boolean writeTypeInfo = config.isWriteTypeInfo();
+        final boolean isPrettyFormat = config.isPrettyFormat();
 
         if (isPrettyFormat && indentation != null) {
             bw.write(IOUtil.LINE_SEPARATOR_UNIX);
@@ -618,18 +617,18 @@ final class XmlParserImpl extends AbstractXmlParser {
         bw.write(XmlConstants.MAP_ELE_END);
     }
 
-    protected void writeMapEntity(final MapEntity mapEntity, final XmlSerializationConfig config, final String indentation,
+    protected void writeMapEntity(final MapEntity mapEntity, final XmlSerConfig config, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedXmlWriter bw) throws IOException {
         //    if (hasCircularReference(mapEntity, serializedObjects, config, bw)) {
         //        return;
         //    }
 
-        final Class<?> cls = type.clazz();
+        final Class<?> cls = type.javaType();
         final NamingPolicy jsonXmlNamingPolicy = config.getPropNamingPolicy();
         final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(Map.class);
         // final boolean ignoreNullProperty = (config.getExclusion() == Exclusion.NULL) || (config.getExclusion() == Exclusion.DEFAULT);
-        final boolean writeTypeInfo = config.writeTypeInfo();
-        final boolean isPrettyFormat = config.prettyFormat();
+        final boolean writeTypeInfo = config.isWriteTypeInfo();
+        final boolean isPrettyFormat = config.isPrettyFormat();
 
         if (isPrettyFormat && indentation != null) {
             bw.write(IOUtil.LINE_SEPARATOR_UNIX);
@@ -713,15 +712,15 @@ final class XmlParserImpl extends AbstractXmlParser {
         bw.write(SK._GREATER_THAN);
     }
 
-    protected void writeArray(final Object obj, final XmlSerializationConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
+    protected void writeArray(final Object obj, final XmlSerConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXmlWriter bw) throws IOException {
         //    if (hasCircularReference(obj, serializedObjects, config, bw)) {
         //        return;
         //    }
 
-        final Class<?> cls = type.clazz();
-        final boolean writeTypeInfo = config.writeTypeInfo();
-        final boolean isPrettyFormat = config.prettyFormat();
+        final Class<?> cls = type.javaType();
+        final boolean writeTypeInfo = config.isWriteTypeInfo();
+        final boolean isPrettyFormat = config.isPrettyFormat();
 
         if (isPrettyFormat && indentation != null) {
             bw.write(IOUtil.LINE_SEPARATOR_UNIX);
@@ -765,15 +764,15 @@ final class XmlParserImpl extends AbstractXmlParser {
         bw.write(XmlConstants.ARRAY_ELE_END);
     }
 
-    protected void writeCollection(final Collection<?> c, final XmlSerializationConfig config, final String indentation,
-            final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedXmlWriter bw) throws IOException {
+    protected void writeCollection(final Collection<?> c, final XmlSerConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
+            final Type<Object> type, final BufferedXmlWriter bw) throws IOException {
         //    if (hasCircularReference(c, serializedObjects, config, bw)) {
         //        return;
         //    }
 
-        final Class<?> cls = type.clazz();
-        final boolean writeTypeInfo = config.writeTypeInfo();
-        final boolean isPrettyFormat = config.prettyFormat();
+        final Class<?> cls = type.javaType();
+        final boolean writeTypeInfo = config.isWriteTypeInfo();
+        final boolean isPrettyFormat = config.isPrettyFormat();
 
         if (isPrettyFormat && indentation != null) {
             bw.write(IOUtil.LINE_SEPARATOR_UNIX);
@@ -854,7 +853,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @param bw the XML writer
      * @throws IOException if an I/O error occurs
      */
-    protected void writeValue(final Object value, final XmlSerializationConfig config, final boolean isPrettyFormat, final String propIndentation,
+    protected void writeValue(final Object value, final XmlSerConfig config, final boolean isPrettyFormat, final String propIndentation,
             final String nextIndentation, final IdentityHashSet<Object> serializedObjects, final PropInfo propInfo, final Type<Object> valueType,
             final BufferedXmlWriter bw) throws IOException {
         //    if (hasCircularReference(value, serializedObjects)) {
@@ -994,8 +993,8 @@ final class XmlParserImpl extends AbstractXmlParser {
      * User user = parser.deserialize(xml, null, userType);
      *
      * // With configuration
-     * XmlDeserializationConfig config = new XmlDeserializationConfig()
-     *     .ignoreUnmatchedProperty(true);
+     * XmlDeserConfig config = new XmlDeserConfig()
+     *     .setIgnoreUnmatchedProperty(true);
      * User user2 = parser.deserialize(xml, config, userType);
      * }</pre>
      *
@@ -1008,7 +1007,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @throws ParsingException if the XML structure doesn't match the target type or is malformed
      */
     @Override
-    public <T> T deserialize(final String source, final XmlDeserializationConfig config, final Type<? extends T> targetType) {
+    public <T> T deserialize(final String source, final XmlDeserConfig config, final Type<? extends T> targetType) {
         if (Strings.isEmpty(source)) {
             return targetType.defaultValue();
         }
@@ -1025,7 +1024,7 @@ final class XmlParserImpl extends AbstractXmlParser {
     /**
      * {@inheritDoc}
      *
-     * <p>This is a convenience method that delegates to {@link #deserialize(String, XmlDeserializationConfig, Type)}
+     * <p>This is a convenience method that delegates to {@link #deserialize(String, XmlDeserConfig, Type)}
      * after wrapping the target class in a Type descriptor.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1045,7 +1044,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @throws ParsingException if the XML structure doesn't match the target type or is malformed
      */
     @Override
-    public <T> T deserialize(final String source, final XmlDeserializationConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final String source, final XmlDeserConfig config, final Class<? extends T> targetClass) {
         return deserialize(source, config, Type.of(targetClass));
     }
 
@@ -1064,8 +1063,8 @@ final class XmlParserImpl extends AbstractXmlParser {
      * User user = parser.deserialize(xmlFile, null, userType);
      *
      * // With configuration
-     * XmlDeserializationConfig config = new XmlDeserializationConfig()
-     *     .ignoreUnmatchedProperty(true);
+     * XmlDeserConfig config = new XmlDeserConfig()
+     *     .setIgnoreUnmatchedProperty(true);
      * User user2 = parser.deserialize(xmlFile, config, userType);
      * }</pre>
      *
@@ -1078,7 +1077,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @throws ParsingException if the XML structure doesn't match the target type or is malformed
      */
     @Override
-    public <T> T deserialize(final File source, final XmlDeserializationConfig config, final Type<? extends T> targetType) {
+    public <T> T deserialize(final File source, final XmlDeserConfig config, final Type<? extends T> targetType) {
         InputStream is = null;
 
         try {
@@ -1093,7 +1092,7 @@ final class XmlParserImpl extends AbstractXmlParser {
     /**
      * {@inheritDoc}
      *
-     * <p>This is a convenience method that delegates to {@link #deserialize(File, XmlDeserializationConfig, Type)}
+     * <p>This is a convenience method that delegates to {@link #deserialize(File, XmlDeserConfig, Type)}
      * after wrapping the target class in a Type descriptor.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1113,7 +1112,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @throws ParsingException if the XML structure doesn't match the target type or is malformed
      */
     @Override
-    public <T> T deserialize(final File source, final XmlDeserializationConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final File source, final XmlDeserConfig config, final Class<? extends T> targetClass) {
         return deserialize(source, config, Type.of(targetClass));
     }
 
@@ -1134,8 +1133,8 @@ final class XmlParserImpl extends AbstractXmlParser {
      *
      * // With configuration
      * try (InputStream in = new URL("http://api.example.com/user.xml").openStream()) {
-     *     XmlDeserializationConfig config = new XmlDeserializationConfig()
-     *         .ignoreUnmatchedProperty(true);
+     *     XmlDeserConfig config = new XmlDeserConfig()
+     *         .setIgnoreUnmatchedProperty(true);
      *     User user = parser.deserialize(in, config, Type.of(User.class));
      * }
      * }</pre>
@@ -1149,14 +1148,14 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @throws ParsingException if the XML structure doesn't match the target type or is malformed
      */
     @Override
-    public <T> T deserialize(final InputStream source, final XmlDeserializationConfig config, final Type<? extends T> targetType) {
+    public <T> T deserialize(final InputStream source, final XmlDeserConfig config, final Type<? extends T> targetType) {
         return read(source, config, null, targetType);
     }
 
     /**
      * {@inheritDoc}
      *
-     * <p>This is a convenience method that delegates to {@link #deserialize(InputStream, XmlDeserializationConfig, Type)}
+     * <p>This is a convenience method that delegates to {@link #deserialize(InputStream, XmlDeserConfig, Type)}
      * after wrapping the target class in a Type descriptor.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1177,7 +1176,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @throws ParsingException if the XML structure doesn't match the target type or is malformed
      */
     @Override
-    public <T> T deserialize(final InputStream source, final XmlDeserializationConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final InputStream source, final XmlDeserConfig config, final Class<? extends T> targetClass) {
         return deserialize(source, config, Type.of(targetClass));
     }
 
@@ -1211,7 +1210,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @throws ParsingException if the XML structure doesn't match the target type or is malformed
      */
     @Override
-    public <T> T deserialize(final Reader source, final XmlDeserializationConfig config, final Type<? extends T> targetType) {
+    public <T> T deserialize(final Reader source, final XmlDeserConfig config, final Type<? extends T> targetType) {
         // BufferedReader? will the target parser create the BufferedReader internally?
         return read(source, config, null, targetType);
     }
@@ -1219,7 +1218,7 @@ final class XmlParserImpl extends AbstractXmlParser {
     /**
      * {@inheritDoc}
      *
-     * <p>This is a convenience method that delegates to {@link #deserialize(Reader, XmlDeserializationConfig, Type)}
+     * <p>This is a convenience method that delegates to {@link #deserialize(Reader, XmlDeserConfig, Type)}
      * after wrapping the target class in a Type descriptor.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1240,7 +1239,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @throws ParsingException if the XML structure doesn't match the target type or is malformed
      */
     @Override
-    public <T> T deserialize(final Reader source, final XmlDeserializationConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final Reader source, final XmlDeserConfig config, final Class<? extends T> targetClass) {
         return deserialize(source, config, Type.of(targetClass));
     }
 
@@ -1277,14 +1276,14 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @throws ParsingException if the XML structure doesn't match the target type
      */
     @Override
-    public <T> T deserialize(final Node source, final XmlDeserializationConfig config, final Type<? extends T> targetType) {
+    public <T> T deserialize(final Node source, final XmlDeserConfig config, final Type<? extends T> targetType) {
         return readByDOMParser(source, config, targetType);
     }
 
     /**
      * {@inheritDoc}
      *
-     * <p>This is a convenience method that delegates to {@link #deserialize(Node, XmlDeserializationConfig, Type)}
+     * <p>This is a convenience method that delegates to {@link #deserialize(Node, XmlDeserConfig, Type)}
      * after wrapping the target class in a Type descriptor.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1306,7 +1305,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @throws ParsingException if the XML structure doesn't match the target type
      */
     @Override
-    public <T> T deserialize(final Node source, final XmlDeserializationConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final Node source, final XmlDeserConfig config, final Class<? extends T> targetClass) {
         return deserialize(source, config, Type.of(targetClass));
     }
 
@@ -1339,7 +1338,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @throws ParsingException if no matching type is found in nodeTypes or XML is malformed
      */
     @Override
-    public <T> T deserialize(final File source, final XmlDeserializationConfig config, final Map<String, Type<?>> nodeTypes) {
+    public <T> T deserialize(final File source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes) {
         InputStream is = null;
 
         try {
@@ -1380,7 +1379,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @throws ParsingException if no matching type is found in nodeTypes or XML is malformed
      */
     @Override
-    public <T> T deserialize(final InputStream source, final XmlDeserializationConfig config, final Map<String, Type<?>> nodeTypes) {
+    public <T> T deserialize(final InputStream source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes) {
         return read(source, config, nodeTypes, null);
     }
 
@@ -1413,7 +1412,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @throws ParsingException if no matching type is found in nodeTypes or XML is malformed
      */
     @Override
-    public <T> T deserialize(final Reader source, final XmlDeserializationConfig config, final Map<String, Type<?>> nodeTypes) {
+    public <T> T deserialize(final Reader source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes) {
         return read(source, config, nodeTypes, null);
     }
 
@@ -1449,7 +1448,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T deserialize(final Node source, final XmlDeserializationConfig config, final Map<String, Type<?>> nodeTypes) {
+    public <T> T deserialize(final Node source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes) {
         Type<? extends T> targetType = null;
 
         if (N.notEmpty(nodeTypes)) {
@@ -1470,8 +1469,8 @@ final class XmlParserImpl extends AbstractXmlParser {
     }
 
     @SuppressWarnings("unchecked")
-    protected <T> T read(final InputStream source, final XmlDeserializationConfig config, final Map<String, Type<?>> nodeTypes, Type<? extends T> targetType) {
-        final XmlDeserializationConfig configToUse = check(config);
+    protected <T> T read(final InputStream source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes, Type<? extends T> targetType) {
+        final XmlDeserConfig configToUse = check(config);
 
         switch (parserType) {
             case StAX:
@@ -1555,8 +1554,8 @@ final class XmlParserImpl extends AbstractXmlParser {
     }
 
     @SuppressWarnings("unchecked")
-    protected <T> T read(final Reader source, final XmlDeserializationConfig config, final Map<String, Type<?>> nodeTypes, Type<? extends T> targetType) {
-        final XmlDeserializationConfig configToUse = check(config);
+    protected <T> T read(final Reader source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes, Type<? extends T> targetType) {
+        final XmlDeserConfig configToUse = check(config);
 
         switch (parserType) {
             case StAX:
@@ -1639,26 +1638,26 @@ final class XmlParserImpl extends AbstractXmlParser {
         }
     }
 
-    protected <T> T readByStreamParser(final XMLStreamReader xmlReader, final XmlDeserializationConfig config, final Type<? extends T> targetType)
+    protected <T> T readByStreamParser(final XMLStreamReader xmlReader, final XmlDeserConfig config, final Type<? extends T> targetType)
             throws XMLStreamException {
         return readByStreamParser(xmlReader, config, null, null, targetType);
     }
 
     @SuppressWarnings({ "null", "deprecation" })
-    protected <T> T readByStreamParser(final XMLStreamReader xmlReader, final XmlDeserializationConfig config, PropInfo propInfo, Type<?> propType,
-            Type<?> targetType) throws XMLStreamException {
-        if (targetType.clazz().equals(Object.class)) {
+    protected <T> T readByStreamParser(final XMLStreamReader xmlReader, final XmlDeserConfig config, PropInfo propInfo, Type<?> propType, Type<?> targetType)
+            throws XMLStreamException {
+        if (targetType.javaType().equals(Object.class)) {
             targetType = mapEntityType;
         }
 
-        final XmlDeserializationConfig configToUse = check(config);
+        final XmlDeserConfig configToUse = check(config);
         final boolean hasPropTypes = configToUse.hasValueTypes();
 
         if (hasPropTypes && xmlReader.getEventType() == XMLStreamConstants.START_ELEMENT) {
             targetType = configToUse.getValueType(xmlReader.getLocalName(), targetType);
         }
 
-        final Class<?> targetClass = targetType.clazz();
+        final Class<?> targetClass = targetType.javaType();
         final SerializationType serializationType = getDeserializationType(targetType);
 
         String propName = null;
@@ -1668,9 +1667,9 @@ final class XmlParserImpl extends AbstractXmlParser {
 
         switch (serializationType) {
             case ENTITY: {
-                final boolean ignoreUnmatchedProperty = configToUse.ignoreUnmatchedProperty();
+                final boolean ignoreUnmatchedProperty = configToUse.isIgnoreUnmatchedProperty();
                 final Collection<String> ignoredClassPropNames = configToUse.getIgnoredPropNames(targetClass);
-                final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType.javaType());
+                final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType.reflectType());
                 final Object result = beanInfo.createBeanResult();
                 int attrCount = 0;
 
@@ -1733,9 +1732,8 @@ final class XmlParserImpl extends AbstractXmlParser {
                                         }
                                     }
                                 } else {
-                                    if (propType.isMap() || propType.isBean() || propType.isMapEntity() || propType.isObjectType()) {
-                                        propValue = readByStreamParser(xmlReader, configToUse, propInfo, propType,
-                                                propType.isObjectType() ? mapType : propType);
+                                    if (propType.isMap() || propType.isBean() || propType.isMapEntity() || propType.isObject()) {
+                                        propValue = readByStreamParser(xmlReader, configToUse, propInfo, propType, propType.isObject() ? mapType : propType);
 
                                         for (int startCount = 0, e = xmlReader.next();; e = xmlReader.next()) {
                                             startCount += (e == XMLStreamConstants.START_ELEMENT) ? 1 : (e == XMLStreamConstants.END_ELEMENT ? -1 : 0);
@@ -1747,8 +1745,8 @@ final class XmlParserImpl extends AbstractXmlParser {
 
                                     } else {
                                         @SuppressWarnings("rawtypes")
-                                        final Collection<Object> c = Collection.class.isAssignableFrom(propType.clazz())
-                                                ? N.newCollection((Class<Collection>) propType.clazz())
+                                        final Collection<Object> c = Collection.class.isAssignableFrom(propType.javaType())
+                                                ? N.newCollection((Class<Collection>) propType.javaType())
                                                 : new ArrayList<>();
 
                                         final Type<?> propEleType = getPropEleType(propType);
@@ -1858,27 +1856,25 @@ final class XmlParserImpl extends AbstractXmlParser {
                 final Collection<String> ignoredClassPropNames = configToUse.getIgnoredPropNames(Map.class);
                 Type<?> keyType = defaultKeyType;
 
-                if (propInfo != null && propInfo.jsonXmlType.getParameterTypes().length == 2 && !propInfo.jsonXmlType.getParameterTypes()[0].isObjectType()) {
-                    keyType = propInfo.jsonXmlType.getParameterTypes()[0];
-                } else if (propType != null && propType.getParameterTypes().length == 2 && propType.isMap()
-                        && !propType.getParameterTypes()[0].isObjectType()) {
-                    keyType = propType.getParameterTypes()[0];
+                if (propInfo != null && propInfo.jsonXmlType.parameterTypes().length == 2 && !propInfo.jsonXmlType.parameterTypes()[0].isObject()) {
+                    keyType = propInfo.jsonXmlType.parameterTypes()[0];
+                } else if (propType != null && propType.parameterTypes().length == 2 && propType.isMap() && !propType.parameterTypes()[0].isObject()) {
+                    keyType = propType.parameterTypes()[0];
                 } else {
-                    if (configToUse.getMapKeyType() != null && !configToUse.getMapKeyType().isObjectType()) {
+                    if (configToUse.getMapKeyType() != null && !configToUse.getMapKeyType().isObject()) {
                         keyType = configToUse.getMapKeyType();
                     }
                 }
 
-                final boolean isStringKey = keyType.clazz() == String.class;
+                final boolean isStringKey = keyType.javaType() == String.class;
                 Type<?> valueType = defaultValueType;
 
-                if (propInfo != null && propInfo.jsonXmlType.getParameterTypes().length == 2 && !propInfo.jsonXmlType.getParameterTypes()[1].isObjectType()) {
-                    valueType = propInfo.jsonXmlType.getParameterTypes()[1];
-                } else if (propType != null && propType.getParameterTypes().length == 2 && propType.isMap()
-                        && !propType.getParameterTypes()[1].isObjectType()) {
-                    valueType = propType.getParameterTypes()[1];
+                if (propInfo != null && propInfo.jsonXmlType.parameterTypes().length == 2 && !propInfo.jsonXmlType.parameterTypes()[1].isObject()) {
+                    valueType = propInfo.jsonXmlType.parameterTypes()[1];
+                } else if (propType != null && propType.parameterTypes().length == 2 && propType.isMap() && !propType.parameterTypes()[1].isObject()) {
+                    valueType = propType.parameterTypes()[1];
                 } else {
-                    if (configToUse.getMapValueType() != null && !configToUse.getMapValueType().isObjectType()) {
+                    if (configToUse.getMapValueType() != null && !configToUse.getMapValueType().isObject()) {
                         valueType = configToUse.getMapValueType();
                     }
                 }
@@ -1927,8 +1923,8 @@ final class XmlParserImpl extends AbstractXmlParser {
                                         }
                                     }
                                 } else {
-                                    if (propType.isMap() || propType.isBean() || propType.isMapEntity() || propType.isObjectType()) {
-                                        propValue = readByStreamParser(xmlReader, configToUse, null, propType, propType.isObjectType() ? mapType : propType);
+                                    if (propType.isMap() || propType.isBean() || propType.isMapEntity() || propType.isObject()) {
+                                        propValue = readByStreamParser(xmlReader, configToUse, null, propType, propType.isObject() ? mapType : propType);
 
                                         for (int startCount = 0, e = xmlReader.next();; e = xmlReader.next()) {
                                             startCount += (e == XMLStreamConstants.START_ELEMENT) ? 1 : (e == XMLStreamConstants.END_ELEMENT ? -1 : 0);
@@ -1940,8 +1936,8 @@ final class XmlParserImpl extends AbstractXmlParser {
 
                                     } else {
                                         @SuppressWarnings("rawtypes")
-                                        final Collection<Object> c = Collection.class.isAssignableFrom(propType.clazz())
-                                                ? N.newCollection((Class<Collection>) propType.clazz())
+                                        final Collection<Object> c = Collection.class.isAssignableFrom(propType.javaType())
+                                                ? N.newCollection((Class<Collection>) propType.javaType())
                                                 : new ArrayList<>();
 
                                         final Type<?> propEleType = getPropEleType(propType);
@@ -2044,13 +2040,12 @@ final class XmlParserImpl extends AbstractXmlParser {
                 final Collection<String> ignoredClassPropNames = configToUse.getIgnoredPropNames(Map.class);
                 Type<?> valueType = defaultValueType;
 
-                if (propInfo != null && propInfo.jsonXmlType.getParameterTypes().length == 2 && !propInfo.jsonXmlType.getParameterTypes()[1].isObjectType()) {
-                    valueType = propInfo.jsonXmlType.getParameterTypes()[1];
-                } else if (propType != null && propType.getParameterTypes().length == 2 && propType.isMap()
-                        && !propType.getParameterTypes()[1].isObjectType()) {
-                    valueType = propType.getParameterTypes()[1];
+                if (propInfo != null && propInfo.jsonXmlType.parameterTypes().length == 2 && !propInfo.jsonXmlType.parameterTypes()[1].isObject()) {
+                    valueType = propInfo.jsonXmlType.parameterTypes()[1];
+                } else if (propType != null && propType.parameterTypes().length == 2 && propType.isMap() && !propType.parameterTypes()[1].isObject()) {
+                    valueType = propType.parameterTypes()[1];
                 } else {
-                    if (configToUse.getMapValueType() != null && !configToUse.getMapValueType().isObjectType()) {
+                    if (configToUse.getMapValueType() != null && !configToUse.getMapValueType().isObject()) {
                         valueType = configToUse.getMapValueType();
                     }
                 }
@@ -2098,9 +2093,8 @@ final class XmlParserImpl extends AbstractXmlParser {
                                         }
                                     }
                                 } else {
-                                    if (propType.isMap() || propType.isBean() || propType.isMapEntity() || propType.isObjectType()) {
-                                        propValue = readByStreamParser(xmlReader, configToUse, null, propType,
-                                                propType.isObjectType() ? mapEntityType : propType);
+                                    if (propType.isMap() || propType.isBean() || propType.isMapEntity() || propType.isObject()) {
+                                        propValue = readByStreamParser(xmlReader, configToUse, null, propType, propType.isObject() ? mapEntityType : propType);
 
                                         for (int startCount = 0, e = xmlReader.next();; e = xmlReader.next()) {
                                             startCount += (e == XMLStreamConstants.START_ELEMENT) ? 1 : (e == XMLStreamConstants.END_ELEMENT ? -1 : 0);
@@ -2112,8 +2106,8 @@ final class XmlParserImpl extends AbstractXmlParser {
 
                                     } else {
                                         @SuppressWarnings("rawtypes")
-                                        final Collection<Object> c = Collection.class.isAssignableFrom(propType.clazz())
-                                                ? N.newCollection((Class<Collection>) propType.clazz())
+                                        final Collection<Object> c = Collection.class.isAssignableFrom(propType.javaType())
+                                                ? N.newCollection((Class<Collection>) propType.javaType())
                                                 : new ArrayList<>();
 
                                         final Type<?> propEleType = getPropEleType(propType);
@@ -2124,7 +2118,7 @@ final class XmlParserImpl extends AbstractXmlParser {
 
                                                 xmlReader.next();
                                             } else {
-                                                c.add(readByStreamParser(xmlReader, defaultXmlDeserializationConfig, null, propType, propEleType));
+                                                c.add(readByStreamParser(xmlReader, defaultXmlDeserConfig, null, propType, propEleType));
                                             }
                                         } while (xmlReader.hasNext() && xmlReader.next() == XMLStreamConstants.START_ELEMENT);
 
@@ -2223,10 +2217,10 @@ final class XmlParserImpl extends AbstractXmlParser {
                 if (propInfo != null && propInfo.clazz.isArray() && !Object.class.equals(propInfo.clazz.getComponentType())) {
                     eleType = Type.of(propInfo.clazz.getComponentType());
                 } else {
-                    if (configToUse.getElementType() != null && !configToUse.getElementType().isObjectType()) {
+                    if (configToUse.getElementType() != null && !configToUse.getElementType().isObject()) {
                         eleType = configToUse.getElementType();
                     } else {
-                        eleType = targetType.isArray() ? targetType.getElementType() : strType;
+                        eleType = targetType.isArray() ? targetType.elementType() : strType;
                     }
                 }
 
@@ -2238,7 +2232,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                             case XMLStreamConstants.START_ELEMENT: {
                                 if (xmlReader.getAttributeCount() > 0 && TRUE.equals(xmlReader.getAttributeValue(null, XmlConstants.IS_NULL))) {
                                     list.add(null);
-                                } else if (String.class == eleType.clazz() || Object.class == eleType.clazz()) {
+                                } else if (String.class == eleType.javaType() || Object.class == eleType.javaType()) {
                                     list.add(readByStreamParser(xmlReader, configToUse, null, eleType, mapType));
                                 } else {
                                     list.add(readByStreamParser(xmlReader, configToUse, null, eleType, eleType));
@@ -2270,10 +2264,10 @@ final class XmlParserImpl extends AbstractXmlParser {
                                     }
                                 }
 
-                                if (eleType.clazz() == String.class || eleType.clazz() == Object.class) {
+                                if (eleType.javaType() == String.class || eleType.javaType() == Object.class) {
                                     propValue = targetType.valueOf(text);
                                 } else {
-                                    propValue = jsonParser.deserialize(text, JDC.create().setElementType(eleType.clazz()), targetType);
+                                    propValue = jsonParser.deserialize(text, JsonDeserConfig.create().setElementType(eleType.javaType()), targetType);
                                 }
 
                                 if (event == XMLStreamConstants.END_ELEMENT) {
@@ -2312,11 +2306,11 @@ final class XmlParserImpl extends AbstractXmlParser {
 
                 if (propInfo != null && propInfo.clazz.isArray() && !Object.class.equals(propInfo.clazz.getComponentType())) {
                     eleType = Type.of(propInfo.clazz.getComponentType());
-                } else if (propType != null && propType.getParameterTypes().length == 1 && Collection.class.isAssignableFrom(propType.clazz())
-                        && !propType.getParameterTypes()[0].isObjectType()) {
-                    eleType = propType.getParameterTypes()[0];
+                } else if (propType != null && propType.parameterTypes().length == 1 && Collection.class.isAssignableFrom(propType.javaType())
+                        && !propType.parameterTypes()[0].isObject()) {
+                    eleType = propType.parameterTypes()[0];
                 } else {
-                    if (configToUse.getElementType() != null && !configToUse.getElementType().isObjectType()) {
+                    if (configToUse.getElementType() != null && !configToUse.getElementType().isObject()) {
                         eleType = configToUse.getElementType();
                     }
                 }
@@ -2329,7 +2323,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                         case XMLStreamConstants.START_ELEMENT: {
                             if (xmlReader.getAttributeCount() > 0 && TRUE.equals(xmlReader.getAttributeValue(null, XmlConstants.IS_NULL))) {
                                 result.add(null);
-                            } else if (String.class == eleType.clazz() || Object.class == eleType.clazz()) {
+                            } else if (String.class == eleType.javaType() || Object.class == eleType.javaType()) {
                                 result.add(readByStreamParser(xmlReader, configToUse, null, eleType, mapType));
                             } else {
                                 result.add(readByStreamParser(xmlReader, configToUse, null, eleType, eleType));
@@ -2360,10 +2354,10 @@ final class XmlParserImpl extends AbstractXmlParser {
                                 }
                             }
 
-                            if (eleType.clazz() == String.class || eleType.clazz() == Object.class) {
+                            if (eleType.javaType() == String.class || eleType.javaType() == Object.class) {
                                 propValue = targetType.valueOf(text);
                             } else {
-                                propValue = jsonParser.deserialize(text, JDC.create().setElementType(eleType.clazz()), targetType);
+                                propValue = jsonParser.deserialize(text, JsonDeserConfig.create().setElementType(eleType.javaType()), targetType);
                             }
 
                             if (event == XMLStreamConstants.END_ELEMENT) {
@@ -2399,24 +2393,24 @@ final class XmlParserImpl extends AbstractXmlParser {
         }
     }
 
-    protected <T> T readByDOMParser(final Node node, final XmlDeserializationConfig config, final Type<? extends T> targetType) {
-        final XmlDeserializationConfig configToUse = check(config);
+    protected <T> T readByDOMParser(final Node node, final XmlDeserConfig config, final Type<? extends T> targetType) {
+        final XmlDeserConfig configToUse = check(config);
 
         return readByDOMParser(node, configToUse, configToUse.getElementType(), false, false, false, true, targetType);
     }
 
     @SuppressWarnings({ "unchecked", "null", "deprecation" })
-    protected <T> T readByDOMParser(final Node node, final XmlDeserializationConfig config, Type<?> propType, boolean checkedAttr, boolean isTagByPropertyName,
+    protected <T> T readByDOMParser(final Node node, final XmlDeserConfig config, Type<?> propType, boolean checkedAttr, boolean isTagByPropertyName,
             boolean ignoreTypeInfo, final boolean isFirstCall, Type<? extends T> inputType) {
         if (node.getNodeType() == Document.TEXT_NODE) {
             return null;
         }
 
-        if (inputType.clazz().equals(Object.class)) {
+        if (inputType.javaType().equals(Object.class)) {
             inputType = (Type<T>) mapEntityType;
         }
 
-        final XmlDeserializationConfig configToUse = check(config);
+        final XmlDeserConfig configToUse = check(config);
 
         final boolean hasPropTypes = configToUse.hasValueTypes();
         Type<?> targetType = null;
@@ -2424,9 +2418,9 @@ final class XmlParserImpl extends AbstractXmlParser {
 
         if (isFirstCall) {
             targetType = inputType;
-            targetClass = targetType.clazz();
+            targetClass = targetType.javaType();
         } else {
-            if (propType == null || propType.isString() || propType.isObjectType()) {
+            if (propType == null || propType.isString() || propType.isObject()) {
                 String nodeName = null;
                 if (checkedAttr) {
                     nodeName = isTagByPropertyName ? node.getNodeName() : XmlUtil.getAttribute(node, XmlConstants.NAME);
@@ -2440,7 +2434,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                 targetType = propType;
             }
 
-            if (targetType == null || targetType.isString() || targetType.isObjectType()) {
+            if (targetType == null || targetType.isString() || targetType.isObject()) {
                 // if (isOneNode(node)) {
                 // targetClass = Map.class;
                 // } else {
@@ -2450,7 +2444,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                 targetType = listType;
             }
 
-            targetClass = targetType == null ? null : targetType.clazz();
+            targetClass = targetType == null ? null : targetType.javaType();
         }
 
         targetClass = checkedAttr ? (ignoreTypeInfo ? targetClass : getConcreteClass(node, targetClass)) : getConcreteClass(node, targetClass);
@@ -2462,8 +2456,8 @@ final class XmlParserImpl extends AbstractXmlParser {
 
             targetType = Type.of(targetClass);
         } else if (targetClass == null) {
-            targetClass = targetType.clazz();
-        } else if (!targetType.clazz().equals(targetClass)) {
+            targetClass = targetType.javaType();
+        } else if (!targetType.javaType().equals(targetClass)) {
             targetType = Type.of(targetClass);
         }
 
@@ -2478,9 +2472,9 @@ final class XmlParserImpl extends AbstractXmlParser {
 
         switch (deserializationType) {
             case ENTITY: {
-                final boolean ignoreUnmatchedProperty = configToUse.ignoreUnmatchedProperty();
+                final boolean ignoreUnmatchedProperty = configToUse.isIgnoreUnmatchedProperty();
                 final Collection<String> ignoredClassPropNames = configToUse.getIgnoredPropNames(targetClass);
-                final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType.javaType());
+                final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType.reflectType());
                 final Object result = beanInfo.createBeanResult();
 
                 for (int i = 0; i < propNodeLength; i++) {
@@ -2517,7 +2511,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                         if (propInfo.jsonXmlType.isSerializable()) {
                             propType = propInfo.jsonXmlType;
                         } else {
-                            propType = ignoreTypeInfo ? propInfo.jsonXmlType : Type.of(getConcreteClass(propNode, propInfo.jsonXmlType.clazz()));
+                            propType = ignoreTypeInfo ? propInfo.jsonXmlType : Type.of(getConcreteClass(propNode, propInfo.jsonXmlType.javaType()));
                         }
                     }
 
@@ -2537,22 +2531,22 @@ final class XmlParserImpl extends AbstractXmlParser {
                 final Collection<String> ignoredClassPropNames = configToUse.getIgnoredPropNames(Map.class);
                 Type<?> keyType = defaultKeyType;
 
-                if (propType != null && propType.isMap() && !propType.getParameterTypes()[0].isObjectType()) {
-                    keyType = propType.getParameterTypes()[0];
+                if (propType != null && propType.isMap() && !propType.parameterTypes()[0].isObject()) {
+                    keyType = propType.parameterTypes()[0];
                 } else {
-                    if (configToUse.getMapKeyType() != null && !configToUse.getMapKeyType().isObjectType()) {
+                    if (configToUse.getMapKeyType() != null && !configToUse.getMapKeyType().isObject()) {
                         keyType = configToUse.getMapKeyType();
                     }
                 }
 
-                final boolean isStringKey = keyType.clazz() == String.class;
+                final boolean isStringKey = keyType.javaType() == String.class;
 
                 Type<?> valueType = defaultValueType;
 
-                if (propType != null && propType.isMap() && !propType.getParameterTypes()[1].isObjectType()) {
-                    valueType = propType.getParameterTypes()[1];
+                if (propType != null && propType.isMap() && !propType.parameterTypes()[1].isObject()) {
+                    valueType = propType.parameterTypes()[1];
                 } else {
-                    if (configToUse.getMapValueType() != null && !configToUse.getMapValueType().isObjectType()) {
+                    if (configToUse.getMapValueType() != null && !configToUse.getMapValueType().isObject()) {
                         valueType = configToUse.getMapValueType();
                     }
                 }
@@ -2589,10 +2583,10 @@ final class XmlParserImpl extends AbstractXmlParser {
                     propType = hasPropTypes ? configToUse.getValueType(propName) : null;
 
                     if (propType == null) {
-                        propType = ignoreTypeInfo ? valueType : Type.of(getConcreteClass(propNode, valueType.clazz()));
+                        propType = ignoreTypeInfo ? valueType : Type.of(getConcreteClass(propNode, valueType.javaType()));
                     }
 
-                    if (propType.clazz() == Object.class) {
+                    if (propType.javaType() == Object.class) {
                         propType = defaultValueType;
                     }
 
@@ -2610,10 +2604,10 @@ final class XmlParserImpl extends AbstractXmlParser {
                 final Collection<String> ignoredClassPropNames = configToUse.getIgnoredPropNames(Map.class);
                 Type<?> valueType = null;
 
-                if (propType != null && propType.isMap() && !propType.getParameterTypes()[1].isObjectType()) {
-                    valueType = propType.getParameterTypes()[1];
+                if (propType != null && propType.isMap() && !propType.parameterTypes()[1].isObject()) {
+                    valueType = propType.parameterTypes()[1];
                 } else {
-                    if (configToUse.getMapValueType() != null && !configToUse.getMapValueType().isObjectType()) {
+                    if (configToUse.getMapValueType() != null && !configToUse.getMapValueType().isObject()) {
                         valueType = configToUse.getMapValueType();
                     } else {
                         valueType = objType;
@@ -2652,10 +2646,10 @@ final class XmlParserImpl extends AbstractXmlParser {
                     propType = hasPropTypes ? configToUse.getValueType(propName) : null;
 
                     if (propType == null) {
-                        propType = ignoreTypeInfo ? valueType : Type.of(getConcreteClass(propNode, valueType.clazz()));
+                        propType = ignoreTypeInfo ? valueType : Type.of(getConcreteClass(propNode, valueType.javaType()));
                     }
 
-                    if (propType.clazz() == Object.class) {
+                    if (propType.javaType() == Object.class) {
                         propType = defaultValueType;
                     }
 
@@ -2672,22 +2666,23 @@ final class XmlParserImpl extends AbstractXmlParser {
             case ARRAY: { //NOSONAR
                 Type<?> eleType = null;
 
-                if (propType != null && (propType.isArray() || propType.isCollection()) && propType.getElementType() != null
-                        && !propType.getElementType().isObjectType()) {
-                    eleType = propType.getElementType();
+                if (propType != null && (propType.isArray() || propType.isCollection()) && propType.elementType() != null
+                        && !propType.elementType().isObject()) {
+                    eleType = propType.elementType();
                 } else {
-                    if (configToUse.getElementType() != null && !configToUse.getElementType().isObjectType()) {
+                    if (configToUse.getElementType() != null && !configToUse.getElementType().isObject()) {
                         eleType = configToUse.getElementType();
                     } else {
-                        eleType = targetType.isCollection() || targetType.isArray() ? targetType.getElementType() : objType;
+                        eleType = targetType.isCollection() || targetType.isArray() ? targetType.elementType() : objType;
                     }
                 }
 
                 if (XmlUtil.isTextElement(node)) {
-                    if (eleType.clazz() == String.class || eleType.clazz() == Object.class) {
+                    if (eleType.javaType() == String.class || eleType.javaType() == Object.class) {
                         return (T) targetType.valueOf(XmlUtil.getTextContent(node));
                     } else {
-                        return (T) jsonParser.deserialize(XmlUtil.getTextContent(node), JDC.create().setElementType(eleType.clazz()), targetType);
+                        return (T) jsonParser.deserialize(XmlUtil.getTextContent(node), JsonDeserConfig.create().setElementType(eleType.javaType()),
+                                targetType);
                     }
                 }
 
@@ -2715,10 +2710,10 @@ final class XmlParserImpl extends AbstractXmlParser {
                         propType = hasPropTypes ? configToUse.getValueType(propName) : null;
 
                         if (propType == null) {
-                            propType = ignoreTypeInfo ? eleType : Type.of(getConcreteClass(eleNode, eleType.clazz()));
+                            propType = ignoreTypeInfo ? eleType : Type.of(getConcreteClass(eleNode, eleType.javaType()));
                         }
 
-                        if (propType.clazz() == Object.class) {
+                        if (propType.javaType() == Object.class) {
                             propType = defaultValueType;
                         }
 
@@ -2738,10 +2733,10 @@ final class XmlParserImpl extends AbstractXmlParser {
             case COLLECTION: {
                 Type<?> eleType = null;
 
-                if (propType != null && (propType.isCollection() || propType.isArray()) && !propType.getElementType().isObjectType()) {
-                    eleType = propType.getElementType();
+                if (propType != null && (propType.isCollection() || propType.isArray()) && !propType.elementType().isObject()) {
+                    eleType = propType.elementType();
                 } else {
-                    if (configToUse.getElementType() != null && !configToUse.getElementType().isObjectType()) {
+                    if (configToUse.getElementType() != null && !configToUse.getElementType().isObject()) {
                         eleType = configToUse.getElementType();
                     } else {
                         eleType = objType;
@@ -2749,10 +2744,11 @@ final class XmlParserImpl extends AbstractXmlParser {
                 }
 
                 if (XmlUtil.isTextElement(node)) {
-                    if (eleType.clazz() == String.class || eleType.clazz() == Object.class) {
+                    if (eleType.javaType() == String.class || eleType.javaType() == Object.class) {
                         return (T) targetType.valueOf(XmlUtil.getTextContent(node));
                     } else {
-                        return (T) jsonParser.deserialize(XmlUtil.getTextContent(node), JDC.create().setElementType(eleType.clazz()), targetType);
+                        return (T) jsonParser.deserialize(XmlUtil.getTextContent(node), JsonDeserConfig.create().setElementType(eleType.javaType()),
+                                targetType);
                     }
                 }
 
@@ -2779,10 +2775,10 @@ final class XmlParserImpl extends AbstractXmlParser {
                     propType = hasPropTypes ? configToUse.getValueType(propName) : null;
 
                     if (propType == null) {
-                        propType = ignoreTypeInfo ? eleType : Type.of(getConcreteClass(eleNode, eleType.clazz()));
+                        propType = ignoreTypeInfo ? eleType : Type.of(getConcreteClass(eleNode, eleType.javaType()));
                     }
 
-                    if (propType.clazz() == Object.class) {
+                    if (propType.javaType() == Object.class) {
                         propType = defaultValueType;
                     }
 
@@ -2802,7 +2798,7 @@ final class XmlParserImpl extends AbstractXmlParser {
         }
     }
 
-    private <T> Object getPropValue(Node propNode, final XmlDeserializationConfig config, final String propName, Type<?> propType, final PropInfo propInfo,
+    private <T> Object getPropValue(Node propNode, final XmlDeserConfig config, final String propName, Type<?> propType, final PropInfo propInfo,
             final boolean checkedAttr, final boolean isTagByPropertyName, final boolean ignoreTypeInfo, final boolean isProp, final Type<T> inputType) {
         Object propValue = null;
 
@@ -2814,12 +2810,13 @@ final class XmlParserImpl extends AbstractXmlParser {
                     propNode = checkOneNode(propNode);
                 }
 
-                propType = propType.isObjectType() ? (inputType.isMapEntity() ? inputType : mapType) : propType;
+                propType = propType.isObject() ? (inputType.isMapEntity() ? inputType : mapType) : propType;
 
                 propValue = readByDOMParser(propNode, config, propType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false, inputType);
             } else {
                 @SuppressWarnings("rawtypes")
-                final Collection<Object> coll = Collection.class.isAssignableFrom(propType.clazz()) ? N.newCollection((Class<Collection>) propType.clazz())
+                final Collection<Object> coll = Collection.class.isAssignableFrom(propType.javaType())
+                        ? N.newCollection((Class<Collection>) propType.javaType())
                         : new ArrayList<>();
 
                 final Type<?> propEleType = getPropEleType(propType);
@@ -2844,7 +2841,7 @@ final class XmlParserImpl extends AbstractXmlParser {
     }
 
     protected SerializationType getDeserializationType(final Type<?> type) {
-        SerializationType serializationType = type.getSerializationType();
+        SerializationType serializationType = type.serializationType();
 
         if (type.isSerializable()) {
             if (type.isObjectArray()) {
@@ -2860,10 +2857,10 @@ final class XmlParserImpl extends AbstractXmlParser {
     private Type<?> getPropEleType(final Type<?> propType) {
         Type<?> propEleType = null;
 
-        if (propType.clazz().isArray() && (propType.getElementType().isBean() || propType.getElementType().isMap())) {
-            propEleType = propType.getElementType();
-        } else if (propType.getParameterTypes().length == 1 && (propType.getParameterTypes()[0].isBean() || propType.getParameterTypes()[0].isMap())) {
-            propEleType = propType.getParameterTypes()[0];
+        if (propType.javaType().isArray() && (propType.elementType().isBean() || propType.elementType().isMap())) {
+            propEleType = propType.elementType();
+        } else if (propType.parameterTypes().length == 1 && (propType.parameterTypes()[0].isBean() || propType.parameterTypes()[0].isMap())) {
+            propEleType = propType.parameterTypes()[0];
         } else {
             propEleType = mapType;
         }

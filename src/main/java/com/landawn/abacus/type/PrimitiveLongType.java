@@ -42,7 +42,7 @@ public final class PrimitiveLongType extends AbstractLongType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Long> type = TypeFactory.getType(long.class);
-     * Class clazz = type.clazz();
+     * Class clazz = type.javaType();
      * System.out.println(clazz.getName());       // Output: long
      * System.out.println(clazz.isPrimitive());   // Output: true
      * }</pre>
@@ -51,7 +51,7 @@ public final class PrimitiveLongType extends AbstractLongType {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public Class clazz() {
+    public Class javaType() {
         return long.class;
     }
 
@@ -62,14 +62,14 @@ public final class PrimitiveLongType extends AbstractLongType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Long> type = TypeFactory.getType(long.class);
-     * boolean isPrimitive = type.isPrimitiveType();
+     * boolean isPrimitive = type.isPrimitive();
      * System.out.println(isPrimitive);   // Output: true
      * }</pre>
      *
      * @return {@code true}, indicating this is a primitive type
      */
     @Override
-    public boolean isPrimitiveType() {
+    public boolean isPrimitive() {
         return true;
     }
 

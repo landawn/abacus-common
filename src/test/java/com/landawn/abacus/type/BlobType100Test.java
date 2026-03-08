@@ -33,7 +33,7 @@ public class BlobType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<Blob> result = type.clazz();
+        Class<Blob> result = type.javaType();
         assertEquals(Blob.class, result);
     }
 

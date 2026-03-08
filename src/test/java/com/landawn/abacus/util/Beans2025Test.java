@@ -260,6 +260,38 @@ public class Beans2025Test extends TestBase {
         }
     }
 
+    public static class BeanWithStaticAccessors {
+        private String name;
+        private static String version;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public static String getVersion() {
+            return version;
+        }
+
+        public static void setVersion(String version) {
+            BeanWithStaticAccessors.version = version;
+        }
+    }
+
+    @Test
+    public void testStaticAccessorsAreNotTreatedAsBeanProperties() {
+        List<String> propNames = Beans.getPropNameList(BeanWithStaticAccessors.class);
+
+        assertTrue(propNames.contains("name"));
+        assertFalse(propNames.contains("version"));
+        assertNotNull(Beans.getPropGetter(BeanWithStaticAccessors.class, "name"));
+        assertNull(Beans.getPropGetter(BeanWithStaticAccessors.class, "version"));
+        assertNull(Beans.getPropSetter(BeanWithStaticAccessors.class, "version"));
+    }
+
     public static class NonBean {
         private String field;
     }

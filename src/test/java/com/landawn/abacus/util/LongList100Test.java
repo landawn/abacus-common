@@ -828,10 +828,10 @@ public class LongList100Test extends TestBase {
     @Test
     public void testHasDuplicates() {
         list.addAll(new long[] { 1L, 2L, 3L });
-        assertFalse(list.hasDuplicates());
+        assertFalse(list.containsDuplicates());
 
         list.add(2L);
-        assertTrue(list.hasDuplicates());
+        assertTrue(list.containsDuplicates());
     }
 
     @Test
@@ -1208,7 +1208,7 @@ public class LongList100Test extends TestBase {
         assertFalse(list.removeAllOccurrences(1L));
         assertFalse(list.removeIf(x -> true));
         assertFalse(list.removeDuplicates());
-        assertFalse(list.hasDuplicates());
+        assertFalse(list.containsDuplicates());
         assertTrue(list.isSorted());
 
         list.sort();

@@ -23,8 +23,7 @@ import com.google.common.collect.HashMultiset;
 import com.google.common.collect.LinkedHashMultiset;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.TreeMultiset;
-import com.landawn.abacus.parser.JsonDeserializationConfig;
-import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
+import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -52,7 +51,7 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
 
     private final boolean isOrdered;
 
-    private final JsonDeserializationConfig jdc;
+    private final JsonDeserConfig jdc;
 
     @SuppressWarnings("unchecked")
     GuavaMultisetType(final Class<T> typeClass, final String parameterTypeName) {
@@ -64,7 +63,7 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
         elementType = parameterTypes[0];
         isOrdered = LinkedHashMultiset.class.isAssignableFrom(typeClass) || TreeMultiset.class.isAssignableFrom(typeClass);
 
-        jdc = JDC.create().setMapKeyType(elementType).setMapValueType(Integer.class).setElementType(elementType);
+        jdc = JsonDeserConfig.create().setMapKeyType(elementType).setMapValueType(Integer.class).setElementType(elementType);
     }
 
     /**
@@ -92,14 +91,14 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<HashMultiset<String>> type = TypeFactory.getType("HashMultiset<String>");
-     * Class<?> clazz = type.clazz();
+     * Class<?> clazz = type.javaType();
      * // Returns: HashMultiset.class
      * }</pre>
      *
      * @return the Class object for the multiset type
      */
     @Override
-    public Class<T> clazz() {
+    public Class<T> javaType() {
         return typeClass;
     }
 
@@ -109,14 +108,14 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Multiset<String>> type = TypeFactory.getType("Multiset<String>");
-     * Type<String> elementType = type.getElementType();
+     * Type<String> elementType = type.elementType();
      * // Returns: Type instance for String
      * }</pre>
      *
      * @return the Type instance representing the element type of this multiset
      */
     @Override
-    public Type<E> getElementType() {
+    public Type<E> elementType() {
         return elementType;
     }
 
@@ -127,14 +126,14 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Multiset<String>> type = TypeFactory.getType("Multiset<String>");
-     * Type<?>[] paramTypes = type.getParameterTypes();
+     * Type<?>[] paramTypes = type.parameterTypes();
      * // Returns: [Type<String>]
      * }</pre>
      *
      * @return an array containing the element type as the only parameter type
      */
     @Override
-    public Type<E>[] getParameterTypes() {
+    public Type<E>[] parameterTypes() {
         return parameterTypes;
     }
 

@@ -21,9 +21,8 @@ import java.util.AbstractMap;
 import java.util.Map;
 
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.parser.JsonDeserializationConfig;
-import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonDeserConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Clazz;
 import com.landawn.abacus.util.IOUtil;
@@ -57,7 +56,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
 
     private final Type<?>[] parameterTypes;
 
-    private final JsonDeserializationConfig jdc;
+    private final JsonDeserConfig jdc;
 
     ImmutableMapEntryType(final String keyTypeName, final String valueTypeName) {
         super(getTypeName(keyTypeName, valueTypeName, false));
@@ -66,7 +65,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
         keyType = TypeFactory.getType(keyTypeName);
         valueType = TypeFactory.getType(valueTypeName);
         parameterTypes = new Type[] { keyType, valueType };
-        jdc = JDC.create().setMapKeyType(keyType).setMapValueType(valueType);
+        jdc = JsonDeserConfig.create().setMapKeyType(keyType).setMapValueType(valueType);
     }
 
     /**
@@ -86,7 +85,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      * @return the Class object for AbstractMap.SimpleImmutableEntry
      */
     @Override
-    public Class<AbstractMap.SimpleImmutableEntry<K, V>> clazz() {
+    public Class<AbstractMap.SimpleImmutableEntry<K, V>> javaType() {
         return typeClass;
     }
 
@@ -97,7 +96,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      * @return an array containing the key type and value type
      */
     @Override
-    public Type<?>[] getParameterTypes() {
+    public Type<?>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -240,7 +239,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      * Type<AbstractMap.SimpleImmutableEntry<String, Integer>> type =
      *     TypeFactory.getType("Map.ImmutableEntry<String, Integer>");
      * CharacterWriter writer = new CharacterWriter();
-     * JsonXmlSerializationConfig config = JsonXmlSerializationConfig.of();
+     * JsonXmlSerConfig config = JsonXmlSerConfig.of();
      * AbstractMap.SimpleImmutableEntry<String, Integer> entry =
      *     new AbstractMap.SimpleImmutableEntry<>("age", 25);
      * type.writeCharacter(writer, entry, config);
@@ -254,7 +253,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final AbstractMap.SimpleImmutableEntry<K, V> x, final JsonXmlSerializationConfig<?> config)
+    public void writeCharacter(final CharacterWriter writer, final AbstractMap.SimpleImmutableEntry<K, V> x, final JsonXmlSerConfig<?> config)
             throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);

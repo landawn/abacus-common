@@ -30,7 +30,7 @@ public class BooleanType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<Boolean> result = type.clazz();
+        Class<Boolean> result = type.javaType();
         assertEquals(Boolean.class, result);
     }
 

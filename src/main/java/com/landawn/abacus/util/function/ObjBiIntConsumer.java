@@ -61,6 +61,13 @@ public interface ObjBiIntConsumer<T> extends Throwables.ObjBiIntConsumer<T, Runt
      *   <li>Matrix operations where the object is the matrix and ints are coordinates</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ObjBiIntConsumer<StringBuilder> appendRange = (sb, start, end) ->
+     *     sb.append('[').append(start).append(", ").append(end).append(']');
+     * appendRange.accept(new StringBuilder(), 2, 5);
+     * }</pre>
+     *
      * @param t the object input argument
      * @param i the first int input argument
      * @param j the second int input argument
@@ -93,7 +100,8 @@ public interface ObjBiIntConsumer<T> extends Throwables.ObjBiIntConsumer<T, Runt
      * // Result: "Data: Range: [10, 20] Sum: 30"
      * }</pre>
      *
-     * @param after the operation to perform after this operation
+     * @param after the operation to perform after this operation; if {@code null},
+     *        the composed consumer throws {@link NullPointerException} when invoked
      * @return a composed {@code ObjBiIntConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
      */

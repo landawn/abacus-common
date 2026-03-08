@@ -15,7 +15,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Indexed;
 
@@ -26,7 +26,7 @@ public class IndexedType100Test extends TestBase {
     private CharacterWriter characterWriter;
 
     @Mock
-    private JsonXmlSerializationConfig<?> config;
+    private JsonXmlSerConfig<?> config;
 
     @BeforeEach
     public void setUp() {
@@ -45,12 +45,12 @@ public class IndexedType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(Indexed.class, indexedType.clazz());
+        assertEquals(Indexed.class, indexedType.javaType());
     }
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = indexedType.getParameterTypes();
+        Type<?>[] paramTypes = indexedType.parameterTypes();
         assertNotNull(paramTypes);
         assertEquals(1, paramTypes.length);
     }

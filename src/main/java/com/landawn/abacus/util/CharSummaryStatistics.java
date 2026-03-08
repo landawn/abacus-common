@@ -224,7 +224,7 @@ public class CharSummaryStatistics implements CharConsumer {
      *
      * @return the sum of values, as a {@code Long}
      */
-    public final Long getSum() {
+    public final long getSum() {
         return sum;
     }
 
@@ -246,7 +246,7 @@ public class CharSummaryStatistics implements CharConsumer {
      *
      * @return the arithmetic mean of values, or zero if none
      */
-    public final Double getAverage() {
+    public final double getAverage() {
         return getCount() > 0 ? (double) getSum() / getCount() : 0.0d;
     }
 

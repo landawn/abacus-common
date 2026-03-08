@@ -26,7 +26,7 @@ public class ByteBufferType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<ByteBuffer> result = type.clazz();
+        Class<ByteBuffer> result = type.javaType();
         assertEquals(ByteBuffer.class, result);
     }
 

@@ -1335,10 +1335,10 @@ public class AbstractStream102Test extends TestBase {
     @Test
     public void testHasDuplicates() {
         stream = createStream(1, 2, 3, 2, 4);
-        assertTrue(stream.hasDuplicates());
+        assertTrue(stream.containsDuplicates());
 
         stream = createStream(1, 2, 3, 4, 5);
-        assertFalse(stream.hasDuplicates());
+        assertFalse(stream.containsDuplicates());
     }
 
     @Test

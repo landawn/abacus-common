@@ -15,12 +15,15 @@
 package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Duration;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -35,28 +38,34 @@ public class JdkDurationType2025Test extends TestBase {
     @Test
     public void test_get_ResultSet_byIndex() throws SQLException {
         ResultSet rs = mock(ResultSet.class);
-        // Basic get test - actual implementation will vary by type
+        when(rs.getLong(1)).thenReturn(1000L);
         assertDoesNotThrow(() -> type.get(rs, 1));
     }
 
     @Test
     public void test_get_ResultSet_byLabel() throws SQLException {
         ResultSet rs = mock(ResultSet.class);
-        // Basic get test - actual implementation will vary by type
+        when(rs.getLong("col")).thenReturn(1000L);
         assertDoesNotThrow(() -> type.get(rs, "col"));
     }
 
     @Test
     public void test_set_PreparedStatement() throws SQLException {
         PreparedStatement stmt = mock(PreparedStatement.class);
-        // Basic set test - actual implementation will vary by type
-        assertDoesNotThrow(() -> type.set(stmt, 1, null));
+        assertDoesNotThrow(() -> type.set(stmt, 1, Duration.ofMillis(1000)));
+        verify(stmt).setLong(1, 1000L);
+
+        assertDoesNotThrow(() -> type.set(stmt, 2, null));
+        verify(stmt).setNull(2, java.sql.Types.BIGINT);
     }
 
     @Test
     public void test_set_CallableStatement() throws SQLException {
         CallableStatement stmt = mock(CallableStatement.class);
-        // Basic set test - actual implementation will vary by type
-        assertDoesNotThrow(() -> type.set(stmt, "param", null));
+        assertDoesNotThrow(() -> type.set(stmt, "param", Duration.ofMillis(1000)));
+        verify(stmt).setLong("param", 1000L);
+
+        assertDoesNotThrow(() -> type.set(stmt, "param2", null));
+        verify(stmt).setNull("param2", java.sql.Types.BIGINT);
     }
 }

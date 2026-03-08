@@ -25,7 +25,7 @@ public class BSONObjectIdType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<ObjectId> result = type.clazz();
+        Class<ObjectId> result = type.javaType();
         assertEquals(ObjectId.class, result);
     }
 

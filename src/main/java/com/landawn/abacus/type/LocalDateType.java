@@ -49,13 +49,13 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<LocalDate> type = TypeFactory.getType(LocalDate.class);
-     * Class<LocalDate> clazz = type.clazz();
+     * Class<LocalDate> clazz = type.javaType();
      * }</pre>
      *
      * @return The Class object for LocalDate
      */
     @Override
-    public Class<LocalDate> clazz() {
+    public Class<LocalDate> javaType() {
         return LocalDate.class;
     }
 

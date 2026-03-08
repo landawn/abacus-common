@@ -172,7 +172,7 @@ import com.landawn.abacus.util.function.TriFunction;
  *     .collect(Collectors.summarizingDouble(Double::doubleValue));
  *
  * // Teeing for parallel collection
- * Pair<Integer, Double> countAndAvg = numbers.stream()
+ * Pair<Long, Double> countAndAvg = numbers.stream()
  *     .collect(Collectors.teeing(
  *         Collectors.counting(),
  *         Collectors.averagingDouble(Number::doubleValue),
@@ -330,13 +330,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     static final Characteristics[] CH_UNORDERED_ID = { Characteristics.UNORDERED, Characteristics.IDENTITY_FINISH };
 
     /**
-     * @deprecated This class is not intended to be used.
+     * @deprecated This field is not intended to be used.
      */
     @Deprecated
     static final Characteristics[] CH_CONCURRENT_NOID = { Characteristics.CONCURRENT, Characteristics.UNORDERED };
 
     /**
-     * @deprecated This class is not intended to be used.
+     * @deprecated This field is not intended to be used.
      */
     @Deprecated
     static final Characteristics[] CH_CONCURRENT_ID = { Characteristics.CONCURRENT, Characteristics.UNORDERED, Characteristics.IDENTITY_FINISH };

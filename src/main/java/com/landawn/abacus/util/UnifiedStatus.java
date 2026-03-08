@@ -34,14 +34,14 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Using status in an entity
- * Status orderStatus = Status.PROCESSING;
+ * UnifiedStatus orderStatus = UnifiedStatus.PROCESSING;
  * int statusCode = orderStatus.code();   // Returns 32
- * 
+ *
  * // Retrieving status from code
- * Status retrieved = Status.fromCode(32);   // Returns PROCESSING
- * 
+ * UnifiedStatus retrieved = UnifiedStatus.fromCode(32);   // Returns PROCESSING
+ *
  * // Checking status
- * if (userStatus == Status.ACTIVE) {
+ * if (userStatus == UnifiedStatus.ACTIVE) {
  *     // Allow access
  * }
  * }</pre>
@@ -364,7 +364,7 @@ public enum UnifiedStatus {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Status status = Status.ACTIVE;
+     * UnifiedStatus status = UnifiedStatus.ACTIVE;
      * int code = status.code();   // Returns 1
      * }</pre>
      *
@@ -388,17 +388,17 @@ public enum UnifiedStatus {
     }
 
     /**
-     * Returns the Status enum constant associated with the specified code.
+     * Returns the UnifiedStatus enum constant associated with the specified code.
      * This method provides O(1) lookup performance for valid codes.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Status status = Status.fromCode(1);     // Returns ACTIVE
-     * Status invalid = Status.fromCode(999);   // Returns null
+     * UnifiedStatus status = UnifiedStatus.fromCode(1);     // Returns ACTIVE
+     * UnifiedStatus invalid = UnifiedStatus.fromCode(999);   // Returns null
      * }</pre>
      *
      * @param code the numeric code to look up
-     * @return the Status associated with the code, or {@code null} if no Status exists for that code
+     * @return the UnifiedStatus associated with the code, or {@code null} if no UnifiedStatus exists for that code
      */
     public static UnifiedStatus fromCode(final int code) {
         return code < 0 || code >= MAX_CODE ? null : cache[code];

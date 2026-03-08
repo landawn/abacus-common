@@ -79,87 +79,87 @@ public class HARUtil100Test extends TestBase {
         if (tempHARFile != null && tempHARFile.exists()) {
             tempHARFile.delete();
         }
-        HARUtil.resetHeaderFilter();
+        HARUtil.resetThreadLocalHeaderFilter();
     }
 
     @Test
     public void testSetHttpHeaderFilterForHARRequest() {
         BiPredicate<String, String> filter = (name, value) -> !name.equalsIgnoreCase("Authorization");
-        HARUtil.setHeaderFilter(filter);
+        HARUtil.setThreadLocalHeaderFilter(filter);
 
-        assertThrows(IllegalArgumentException.class, () -> HARUtil.setHeaderFilter(null));
+        assertThrows(IllegalArgumentException.class, () -> HARUtil.setThreadLocalHeaderFilter(null));
     }
 
     @Test
     public void testResetHeaderFilter() {
         BiPredicate<String, String> filter = (name, value) -> false;
-        HARUtil.setHeaderFilter(filter);
-        HARUtil.resetHeaderFilter();
+        HARUtil.setThreadLocalHeaderFilter(filter);
+        HARUtil.resetThreadLocalHeaderFilter();
     }
 
     @Test
     public void testLogRequestCurlForHARRequest() {
-        HARUtil.logCurl(true);
-        HARUtil.logCurl(false);
+        HARUtil.configureCurlLoggingForCurrentThread(true);
+        HARUtil.configureCurlLoggingForCurrentThread(false);
 
-        HARUtil.logCurl(true, '"');
-        HARUtil.logCurl(false, '\'');
+        HARUtil.configureCurlLoggingForCurrentThread(true, '"');
+        HARUtil.configureCurlLoggingForCurrentThread(false, '\'');
     }
 
     @Test
     public void testLogRequestCurlForHARRequestWithHandler() {
         Consumer<String> handler = curl -> System.out.println(curl);
-        HARUtil.logCurl(true, '\'', handler);
-        HARUtil.logCurl(false, '"', handler);
+        HARUtil.configureCurlLoggingForCurrentThread(true, '\'', handler);
+        HARUtil.configureCurlLoggingForCurrentThread(false, '"', handler);
     }
 
     @Test
     public void testSendRequestByHARWithFileAndExactUrl() {
-        assertThrows(RuntimeException.class, () -> HARUtil.sendRequestByHAR(tempHARFile, "https://api.example.com/nonexistent"));
+        assertThrows(RuntimeException.class, () -> HARUtil.sendRequest(tempHARFile, "https://api.example.com/nonexistent"));
     }
 
     @Test
     public void testSendRequestByHARWithFileAndFilter() {
         Predicate<String> filter = url -> url.contains("/users");
-        assertThrows(RuntimeException.class, () -> HARUtil.sendRequestByHAR(tempHARFile, filter));
+        assertThrows(RuntimeException.class, () -> HARUtil.sendRequest(tempHARFile, filter));
     }
 
     @Test
     public void testSendRequestByHARWithStringAndExactUrl() {
-        assertThrows(RuntimeException.class, () -> HARUtil.sendRequestByHAR(sampleHAR, "https://api.example.com/nonexistent"));
+        assertThrows(RuntimeException.class, () -> HARUtil.sendRequest(sampleHAR, "https://api.example.com/nonexistent"));
     }
 
     @Test
     public void testSendRequestByHARWithStringAndFilter() {
         Predicate<String> filter = url -> url.contains("/nonexistent");
-        assertThrows(RuntimeException.class, () -> HARUtil.sendRequestByHAR(sampleHAR, filter));
+        assertThrows(RuntimeException.class, () -> HARUtil.sendRequest(sampleHAR, filter));
     }
 
     @Test
     public void testSendMultiRequestsByHARWithFile() {
         Predicate<String> filter = url -> url.contains("/nonexistent");
-        List<String> results = HARUtil.sendMultiRequestsByHAR(tempHARFile, filter);
+        List<String> results = HARUtil.sendRequests(tempHARFile, filter);
         assertTrue(results.isEmpty());
     }
 
     @Test
     public void testSendMultiRequestsByHARWithString() {
         Predicate<String> filter = url -> url.contains("/nonexistent");
-        List<String> results = HARUtil.sendMultiRequestsByHAR(sampleHAR, filter);
+        List<String> results = HARUtil.sendRequests(sampleHAR, filter);
         assertTrue(results.isEmpty());
     }
 
     @Test
     public void testStreamMultiRequestsByHARWithFile() {
         Predicate<String> filter = url -> url.contains("/users");
-        Stream<Tuple.Tuple2<Map<String, Object>, HttpResponse>> stream = HARUtil.streamMultiRequestsByHAR(tempHARFile, filter);
+        Stream<Tuple.Tuple2<Map<String, Object>, HttpResponse>> stream = HARUtil.streamRequests(tempHARFile, filter);
         assertNotNull(stream);
     }
 
     @Test
     public void testStreamMultiRequestsByHARWithString() {
         Predicate<String> filter = url -> url.contains("/users");
-        Stream<Tuple.Tuple2<Map<String, Object>, HttpResponse>> stream = HARUtil.streamMultiRequestsByHAR(sampleHAR, filter);
+        Stream<Tuple.Tuple2<Map<String, Object>, HttpResponse>> stream = HARUtil.streamRequests(sampleHAR, filter);
         assertNotNull(stream);
     }
 
@@ -182,18 +182,18 @@ public class HARUtil100Test extends TestBase {
     @Test
     public void testGetRequestEntryByUrlFromHARWithFile() {
         Predicate<String> filter = url -> url.contains("/users");
-        Optional<Map<String, Object>> entry = HARUtil.getRequestEntryByURLFromHAR(tempHARFile, filter);
+        Optional<Map<String, Object>> entry = HARUtil.findRequestEntry(tempHARFile, filter);
         assertTrue(entry.isPresent());
     }
 
     @Test
     public void testGetRequestEntryByUrlFromHARWithString() {
         Predicate<String> filter = url -> url.contains("/users");
-        Optional<Map<String, Object>> entry = HARUtil.getRequestEntryByURLFromHAR(sampleHAR, filter);
+        Optional<Map<String, Object>> entry = HARUtil.findRequestEntry(sampleHAR, filter);
         assertTrue(entry.isPresent());
 
         filter = url -> url.contains("/nonexistent");
-        entry = HARUtil.getRequestEntryByURLFromHAR(sampleHAR, filter);
+        entry = HARUtil.findRequestEntry(sampleHAR, filter);
         assertFalse(entry.isPresent());
     }
 
@@ -202,7 +202,7 @@ public class HARUtil100Test extends TestBase {
         Map<String, Object> requestEntry = new HashMap<>();
         requestEntry.put("url", "https://api.example.com/test");
 
-        String url = HARUtil.getUrlByRequestEntry(requestEntry);
+        String url = HARUtil.getRequestUrl(requestEntry);
         assertEquals("https://api.example.com/test", url);
     }
 
@@ -245,7 +245,7 @@ public class HARUtil100Test extends TestBase {
     @Test
     public void testGetHeadersByRequestEntryWithFilter() {
         BiPredicate<String, String> filter = (name, value) -> !name.equalsIgnoreCase("Authorization");
-        HARUtil.setHeaderFilter(filter);
+        HARUtil.setThreadLocalHeaderFilter(filter);
 
         Map<String, Object> requestEntry = new HashMap<>();
         List<Map<String, String>> headers = new ArrayList<>();

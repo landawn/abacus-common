@@ -24,7 +24,9 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -70,7 +72,7 @@ public class Suppliers100Test extends TestBase {
 
     @Test
     public void testOfUUID() {
-        Supplier<String> uuidSupplier = Suppliers.ofUUID();
+        Supplier<String> uuidSupplier = Suppliers.ofUuid();
         String uuid1 = uuidSupplier.get();
         String uuid2 = uuidSupplier.get();
 
@@ -82,7 +84,7 @@ public class Suppliers100Test extends TestBase {
 
     @Test
     public void testOfGUID() {
-        Supplier<String> guidSupplier = Suppliers.ofGUID();
+        Supplier<String> guidSupplier = Suppliers.ofUuidWithoutHyphens();
         String guid1 = guidSupplier.get();
         String guid2 = guidSupplier.get();
 
@@ -250,6 +252,19 @@ public class Suppliers100Test extends TestBase {
         ConcurrentHashMap<String, Object> concurrentHashMap = Suppliers.<String, Object> ofConcurrentHashMap().get();
         Assertions.assertNotNull(concurrentHashMap);
         Assertions.assertTrue(concurrentHashMap.isEmpty());
+
+        ConcurrentNavigableMap<String, Object> concurrentNavigableMap = Suppliers.<String, Object> ofConcurrentNavigableMap().get();
+        Assertions.assertNotNull(concurrentNavigableMap);
+        Assertions.assertTrue(concurrentNavigableMap instanceof ConcurrentSkipListMap);
+
+        Map<String, Object> concurrentMapFromType = Suppliers.<String, Object> ofMap(ConcurrentMap.class).get();
+        Assertions.assertTrue(concurrentMapFromType instanceof ConcurrentHashMap);
+
+        Map<String, Object> concurrentNavigableMapFromType = Suppliers.<String, Object> ofMap(ConcurrentNavigableMap.class).get();
+        Assertions.assertTrue(concurrentNavigableMapFromType instanceof ConcurrentSkipListMap);
+
+        Map<String, Object> concurrentSkipListMapFromType = Suppliers.<String, Object> ofMap(ConcurrentSkipListMap.class).get();
+        Assertions.assertTrue(concurrentSkipListMapFromType instanceof ConcurrentSkipListMap);
     }
 
     @Test
@@ -379,6 +394,14 @@ public class Suppliers100Test extends TestBase {
         Supplier<? extends Map<String, Object>> sortedMapSupplier = Suppliers.ofMap(SortedMap.class);
         Map<String, Object> sortedMap = sortedMapSupplier.get();
         Assertions.assertTrue(sortedMap instanceof TreeMap);
+
+        Supplier<? extends Map<String, Object>> concurrentNavigableMapSupplier = Suppliers.ofMap(ConcurrentNavigableMap.class);
+        Map<String, Object> concurrentNavigableMap = concurrentNavigableMapSupplier.get();
+        Assertions.assertTrue(concurrentNavigableMap instanceof ConcurrentSkipListMap);
+
+        Supplier<? extends Map<String, Object>> concurrentSkipListMapSupplier = Suppliers.ofMap(ConcurrentSkipListMap.class);
+        Map<String, Object> concurrentSkipListMap = concurrentSkipListMapSupplier.get();
+        Assertions.assertTrue(concurrentSkipListMap instanceof ConcurrentSkipListMap);
     }
 
     @Test

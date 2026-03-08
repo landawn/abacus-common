@@ -39,7 +39,7 @@ public class TimeType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(Time.class, type.clazz());
+        assertEquals(Time.class, type.javaType());
     }
 
     @Test

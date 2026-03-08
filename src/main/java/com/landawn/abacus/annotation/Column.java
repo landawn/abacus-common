@@ -82,8 +82,8 @@ public @interface Column {
      * Common conventions include:</p>
      * <ul>
      *   <li>snake_case for PostgreSQL and MySQL</li>
-     *   <li>UPPER_CASE for Oracle</li>
-     *   <li>UpperCamelCase for SQL Server</li>
+     *   <li>UPPER_CASE for Oracle (default for unquoted identifiers)</li>
+     *   <li>PascalCase or mixed case for SQL Server</li>
      * </ul>
      * 
      * <p><b>Usage Examples:</b></p>

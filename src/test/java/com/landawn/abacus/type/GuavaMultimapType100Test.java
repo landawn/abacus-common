@@ -33,12 +33,12 @@ public class GuavaMultimapType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(Multimap.class, multimapType.clazz());
+        assertEquals(Multimap.class, multimapType.javaType());
     }
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = multimapType.getParameterTypes();
+        Type<?>[] paramTypes = multimapType.parameterTypes();
         assertNotNull(paramTypes);
         assertEquals(2, paramTypes.length);
     }

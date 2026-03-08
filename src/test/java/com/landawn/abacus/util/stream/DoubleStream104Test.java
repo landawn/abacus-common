@@ -1097,29 +1097,29 @@ public class DoubleStream104Test extends TestBase {
 
     @Test
     public void testStreamCreatedAfterOnEach() {
-        assertEquals(5, DoubleStream.of(1, 2, 3, 4, 5).onEach(d -> {
+        assertEquals(5, DoubleStream.of(1, 2, 3, 4, 5).peek(d -> {
         }).count());
-        assertEquals(4, DoubleStream.of(1, 2, 3, 4, 5).onEach(d -> {
+        assertEquals(4, DoubleStream.of(1, 2, 3, 4, 5).peek(d -> {
         }).skip(1).count());
-        assertArrayEquals(new double[] { 1, 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).onEach(d -> {
+        assertArrayEquals(new double[] { 1, 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).peek(d -> {
         }).toArray(), 0.0);
-        assertArrayEquals(new double[] { 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).onEach(d -> {
+        assertArrayEquals(new double[] { 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).peek(d -> {
         }).skip(1).toArray(), 0.0);
-        assertEquals(N.toList(1.0, 2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).onEach(d -> {
+        assertEquals(N.toList(1.0, 2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).peek(d -> {
         }).toList());
-        assertEquals(N.toList(2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).onEach(d -> {
+        assertEquals(N.toList(2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).peek(d -> {
         }).skip(1).toList());
-        assertEquals(5, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).onEach(d -> {
+        assertEquals(5, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).peek(d -> {
         }).count());
-        assertEquals(4, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).onEach(d -> {
+        assertEquals(4, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).peek(d -> {
         }).skip(1).count());
-        assertArrayEquals(new double[] { 1, 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).onEach(d -> {
+        assertArrayEquals(new double[] { 1, 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).peek(d -> {
         }).toArray(), 0.0);
-        assertArrayEquals(new double[] { 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).onEach(d -> {
+        assertArrayEquals(new double[] { 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).peek(d -> {
         }).skip(1).toArray(), 0.0);
-        assertEquals(N.toList(1.0, 2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).onEach(d -> {
+        assertEquals(N.toList(1.0, 2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).peek(d -> {
         }).toList());
-        assertEquals(N.toList(2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).onEach(d -> {
+        assertEquals(N.toList(2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).peek(d -> {
         }).skip(1).toList());
     }
 

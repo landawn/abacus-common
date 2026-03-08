@@ -125,8 +125,6 @@ import com.landawn.abacus.util.Strings.StrUtil;
  *
  * // Number validation and checking
  * boolean isInteger = Numbers.isMathematicalInteger(3.0);   // Returns true
- * boolean isFinite  = Numbers.isFinite(3.14159);            // Returns true
- * boolean isNormal  = Numbers.isNormal(3.14159);            // Returns true
  *
  * // Hyperbolic functions
  * double asinh = Numbers.asinh(1.0);                      // Inverse hyperbolic sine
@@ -135,8 +133,8 @@ import com.landawn.abacus.util.Strings.StrUtil;
  *
  * // Working with different number types
  * double doubleMean = Numbers.mean(1.5, 2.5, 3.5);       // Returns 2.5
- * long longMean     = Numbers.mean(1L, 2L, 3L);          // Returns 2L
- * int intMean       = Numbers.mean(1, 2, 3);             // Returns 2
+ * double longMean   = Numbers.mean(1L, 2L, 3L);          // Returns 2.0
+ * double intMean    = Numbers.mean(1, 2, 3);             // Returns 2.0
  * }</pre>
  *
  * <p><b>Rounding Operations:</b>
@@ -1083,7 +1081,7 @@ public final class Numbers {
             return targetType.defaultValue();
         }
 
-        final Map<Class<?>, UnaryOperator<Number>> temp = numberConverterFuncMap.get(targetType.clazz());
+        final Map<Class<?>, UnaryOperator<Number>> temp = numberConverterFuncMap.get(targetType.javaType());
         final UnaryOperator<Number> func = temp == null ? null : temp.get(value.getClass());
 
         if (func != null) {

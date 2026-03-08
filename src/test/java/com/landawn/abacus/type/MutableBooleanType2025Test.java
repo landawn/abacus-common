@@ -17,6 +17,7 @@ package com.landawn.abacus.type;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -29,12 +30,13 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.MutableBoolean;
@@ -75,6 +77,16 @@ public class MutableBooleanType2025Test extends TestBase {
     }
 
     @Test
+    public void test_get_ResultSet_nullReturnsNull() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+
+        when(rs.getBoolean("missing")).thenReturn(false);
+        when(rs.wasNull()).thenReturn(true);
+
+        assertNull(type.get(rs, "missing"));
+    }
+
+    @Test
     public void test_set_PreparedStatement() throws SQLException {
         PreparedStatement stmt = mock(PreparedStatement.class);
 
@@ -85,7 +97,7 @@ public class MutableBooleanType2025Test extends TestBase {
         verify(stmt).setBoolean(2, false);
 
         type.set(stmt, 3, null);
-        verify(stmt).setBoolean(3, false);
+        verify(stmt).setNull(3, Types.BOOLEAN);
     }
 
     @Test
@@ -99,7 +111,7 @@ public class MutableBooleanType2025Test extends TestBase {
         verify(stmt).setBoolean("param2", false);
 
         type.set(stmt, "param3", null);
-        verify(stmt).setBoolean("param3", false);
+        verify(stmt).setNull("param3", Types.BOOLEAN);
     }
 
     @Test
@@ -121,7 +133,7 @@ public class MutableBooleanType2025Test extends TestBase {
     @Test
     public void test_writeCharacter() throws IOException {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
-        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
         type.writeCharacter(writer, MutableBoolean.of(true), config);
         verify(writer).write(TRUE_CHAR_ARRAY);

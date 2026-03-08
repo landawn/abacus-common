@@ -15,9 +15,9 @@
 package com.landawn.abacus.util;
 
 /**
- * Enumeration representing different types of database operations.
- * Each operation type has an associated integer value that can be used for bitwise operations
- * to combine multiple operation types.
+ * Enumeration representing distinct types of database operations.
+ * Each operation type has an associated integer flag value that can participate in bitwise
+ * combinations, although this enum itself models only the individual operations.
  * 
  * <p>This enum is typically used in ORM frameworks and data access layers to specify
  * what type of operation is being performed on entities or database records.</p>
@@ -60,9 +60,9 @@ public enum OperationType {
     }
 
     /**
-     * Returns the integer value associated with this operation type.
-     * The values are designed to be used in bitwise operations, allowing
-     * multiple operation types to be combined into a single integer.
+     * Returns the integer flag associated with this operation type.
+     * The returned value can be combined with other flags in external code, but
+     * {@link #valueOf(int)} accepts only the exact values defined by this enum.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -77,8 +77,8 @@ public enum OperationType {
     }
 
     /**
-     * Returns the OperationType corresponding to the specified integer value.
-     * This method is the inverse of {@link #intValue()}.
+     * Returns the {@code OperationType} corresponding to the specified integer value.
+     * This method resolves only the exact flag value for a single enum constant.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -87,8 +87,9 @@ public enum OperationType {
      * }</pre>
      *
      * @param intValue the integer value to convert
-     * @return the corresponding OperationType
-     * @throws IllegalArgumentException if no OperationType exists for the given integer value
+     * @return the corresponding {@code OperationType}
+     * @throws IllegalArgumentException if {@code intValue} does not match one of the defined
+     *         enum constants exactly
      */
     public static OperationType valueOf(final int intValue) {
         switch (intValue) {

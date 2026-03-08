@@ -32,7 +32,7 @@ public class UUIDType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(UUID.class, type.clazz());
+        assertEquals(UUID.class, type.javaType());
     }
 
     @Test

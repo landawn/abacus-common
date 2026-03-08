@@ -60,8 +60,8 @@ public class ParserFactory100Test extends TestBase {
 
     @Test
     public void testCreateJsonParserWithConfig() {
-        JsonSerializationConfig jsc = new JsonSerializationConfig();
-        JsonDeserializationConfig jdc = new JsonDeserializationConfig();
+        JsonSerConfig jsc = new JsonSerConfig();
+        JsonDeserConfig jdc = new JsonDeserConfig();
 
         JsonParser parser = ParserFactory.createJsonParser(jsc, jdc);
         assertNotNull(parser);
@@ -78,8 +78,8 @@ public class ParserFactory100Test extends TestBase {
     @Test
     public void testCreateAbacusXmlParserWithConfig() {
         if (ParserFactory.isAbacusXmlParserAvailable()) {
-            XmlSerializationConfig xsc = new XmlSerializationConfig();
-            XmlDeserializationConfig xdc = new XmlDeserializationConfig();
+            XmlSerConfig xsc = new XmlSerConfig();
+            XmlDeserConfig xdc = new XmlDeserConfig();
 
             XmlParser parser = ParserFactory.createAbacusXmlParser(xsc, xdc);
             assertNotNull(parser);
@@ -97,8 +97,8 @@ public class ParserFactory100Test extends TestBase {
     @Test
     public void testCreateXmlParserWithConfig() {
         if (ParserFactory.isXmlParserAvailable()) {
-            XmlSerializationConfig xsc = new XmlSerializationConfig();
-            XmlDeserializationConfig xdc = new XmlDeserializationConfig();
+            XmlSerConfig xsc = new XmlSerConfig();
+            XmlDeserConfig xdc = new XmlDeserConfig();
 
             XmlParser parser = ParserFactory.createXmlParser(xsc, xdc);
             assertNotNull(parser);
@@ -113,8 +113,8 @@ public class ParserFactory100Test extends TestBase {
 
     @Test
     public void testCreateJaxbParserWithConfig() {
-        XmlSerializationConfig xsc = new XmlSerializationConfig();
-        XmlDeserializationConfig xdc = new XmlDeserializationConfig();
+        XmlSerConfig xsc = new XmlSerConfig();
+        XmlDeserConfig xdc = new XmlDeserConfig();
 
         XmlParser parser = ParserFactory.createJaxbParser(xsc, xdc);
         assertNotNull(parser);

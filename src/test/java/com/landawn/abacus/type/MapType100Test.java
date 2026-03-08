@@ -42,13 +42,13 @@ public class MapType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<Map<String, Integer>> clazz = mapType.clazz();
+        Class<Map<String, Integer>> clazz = mapType.javaType();
         Assertions.assertNotNull(clazz);
     }
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = mapType.getParameterTypes();
+        Type<?>[] paramTypes = mapType.parameterTypes();
         Assertions.assertNotNull(paramTypes);
         assertEquals(2, paramTypes.length);
     }
@@ -73,7 +73,7 @@ public class MapType100Test extends TestBase {
 
     @Test
     public void testGetSerializationType() {
-        Type.SerializationType serType = mapType.getSerializationType();
+        Type.SerializationType serType = mapType.serializationType();
         assertEquals(Type.SerializationType.MAP, serType);
     }
 

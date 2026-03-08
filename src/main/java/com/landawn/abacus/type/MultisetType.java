@@ -16,8 +16,7 @@ package com.landawn.abacus.type;
 
 import java.util.Map;
 
-import com.landawn.abacus.parser.JsonDeserializationConfig;
-import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
+import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
@@ -42,7 +41,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
 
     private final Type<E> elementType;
 
-    private final JsonDeserializationConfig jdc;
+    private final JsonDeserConfig jdc;
 
     @SuppressWarnings("unchecked")
     MultisetType(final String parameterTypeName) {
@@ -52,7 +51,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
         parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
         elementType = parameterTypes[0];
 
-        jdc = JDC.create().setMapKeyType(elementType).setMapValueType(Integer.class);
+        jdc = JsonDeserConfig.create().setMapKeyType(elementType).setMapValueType(Integer.class);
     }
 
     /**
@@ -79,14 +78,14 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Multiset<String>> type = TypeFactory.getType("Multiset<String>");
-     * Class<Multiset<String>> clazz = type.clazz();
+     * Class<Multiset<String>> clazz = type.javaType();
      * // Returns: Multiset.class
      * }</pre>
      *
      * @return The Class object for Multiset
      */
     @Override
-    public Class<Multiset<E>> clazz() {
+    public Class<Multiset<E>> javaType() {
         return (Class<Multiset<E>>) typeClass;
     }
 
@@ -96,14 +95,14 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Multiset<String>> type = TypeFactory.getType("Multiset<String>");
-     * Type<String> elemType = type.getElementType();
+     * Type<String> elemType = type.elementType();
      * // Returns: StringType instance
      * }</pre>
      *
      * @return the Type instance representing the element type of this multiset
      */
     @Override
-    public Type<E> getElementType() {
+    public Type<E> elementType() {
         return elementType;
     }
 
@@ -114,7 +113,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Multiset<String>> type = TypeFactory.getType("Multiset<String>");
-     * Type<?>[] paramTypes = type.getParameterTypes();
+     * Type<?>[] paramTypes = type.parameterTypes();
      * // Returns: [StringType]
      * // paramTypes[0] is the element type (String)
      * }</pre>
@@ -122,7 +121,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      * @return An array containing the element type
      */
     @Override
-    public Type<E>[] getParameterTypes() {
+    public Type<E>[] parameterTypes() {
         return parameterTypes;
     }
 

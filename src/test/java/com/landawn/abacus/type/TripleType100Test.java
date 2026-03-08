@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Triple;
 
@@ -43,14 +43,14 @@ public class TripleType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<?> clazz = tripleType.clazz();
+        Class<?> clazz = tripleType.javaType();
         assertNotNull(clazz);
         assertEquals(Triple.class, clazz);
     }
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = tripleType.getParameterTypes();
+        Type<?>[] paramTypes = tripleType.parameterTypes();
         assertNotNull(paramTypes);
         assertEquals(3, paramTypes.length);
     }
@@ -127,7 +127,7 @@ public class TripleType100Test extends TestBase {
     @Test
     public void testWriteCharacter() throws IOException {
         CharacterWriter writer = createCharacterWriter();
-        JsonXmlSerializationConfig<?> config = null;
+        JsonXmlSerConfig<?> config = null;
 
         tripleType.writeCharacter(writer, testTriple, config);
 
@@ -137,7 +137,7 @@ public class TripleType100Test extends TestBase {
     @Test
     public void testWriteCharacterNull() throws IOException {
         CharacterWriter writer = createCharacterWriter();
-        JsonXmlSerializationConfig<?> config = null;
+        JsonXmlSerConfig<?> config = null;
 
         tripleType.writeCharacter(writer, null, config);
 

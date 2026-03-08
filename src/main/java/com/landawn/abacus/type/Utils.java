@@ -14,11 +14,9 @@
 
 package com.landawn.abacus.type;
 
-import com.landawn.abacus.parser.JsonDeserializationConfig;
-import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
+import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.parser.JsonParser;
-import com.landawn.abacus.parser.JsonSerializationConfig;
-import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
+import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.parser.XmlParser;
 
@@ -62,15 +60,15 @@ final class Utils {
      * Default JSON serialization configuration used by type converters.
      * Created with standard settings suitable for most type conversions.
      */
-    static final JsonSerializationConfig jsc = JSC.create();
+    static final JsonSerConfig jsc = JsonSerConfig.create();
 
     /**
      * Default JSON deserialization configuration used by type converters.
      * Created with standard settings suitable for most type conversions.
      */
-    static final JsonDeserializationConfig jdc = JDC.create();
+    static final JsonDeserConfig jdc = JsonDeserConfig.create();
 
     private Utils() {
-        // singleton.
+        // Utility class - prevent instantiation
     }
 }

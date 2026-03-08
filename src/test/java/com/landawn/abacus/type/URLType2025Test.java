@@ -39,7 +39,7 @@ public class URLType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(URL.class, type.clazz());
+        assertEquals(URL.class, type.javaType());
     }
 
     @Test

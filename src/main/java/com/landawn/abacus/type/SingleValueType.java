@@ -30,7 +30,7 @@ import java.util.function.Function;
 import com.landawn.abacus.annotation.JsonXmlCreator;
 import com.landawn.abacus.annotation.JsonXmlValue;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ExceptionUtil;
@@ -199,7 +199,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * @return the Class object for type T
      */
     @Override
-    public Class<T> clazz() {
+    public Class<T> javaType() {
         return typeClass;
     }
 
@@ -219,7 +219,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * @return an array of Type objects representing the type parameters, or an empty array if not generic
      */
     @Override
-    public Type<?>[] getParameterTypes() {
+    public Type<?>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -229,7 +229,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * @return {@code true} if this is an object type, {@code false} otherwise
      */
     @Override
-    public boolean isObjectType() {
+    public boolean isObject() {
         return isObjectType;
     }
 
@@ -486,7 +486,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final T x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

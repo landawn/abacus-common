@@ -30,7 +30,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.XmlSerializationConfig.XSC;
+import com.landawn.abacus.parser.XmlSerConfig;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -80,7 +80,7 @@ public class AbacusXmlParserImpl100Test extends TestBase {
         person.setName("Jane");
         person.setAge(25);
 
-        XmlSerializationConfig config = new XmlSerializationConfig().prettyFormat(true).tagByPropertyName(true);
+        XmlSerConfig config = new XmlSerConfig().setPrettyFormat(true).setTagByPropertyName(true);
 
         String xml = staxParser.serialize(person, config);
         assertNotNull(xml);
@@ -145,7 +145,7 @@ public class AbacusXmlParserImpl100Test extends TestBase {
     public void testDeserializeWithConfig() {
         String xml = "<person><name>Emma</name><age>33</age></person>";
 
-        XmlDeserializationConfig config = new XmlDeserializationConfig().ignoreUnmatchedProperty(true);
+        XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnmatchedProperty(true);
 
         Person person = staxParser.deserialize(xml, config, Person.class);
         assertNotNull(person);
@@ -212,7 +212,7 @@ public class AbacusXmlParserImpl100Test extends TestBase {
         Map<String, Type<?>> nodeClasses = Map.of("person", Type.of(Person.class));
 
         ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-        Person person = staxParser.deserialize(bais, new XmlDeserializationConfig(), nodeClasses);
+        Person person = staxParser.deserialize(bais, new XmlDeserConfig(), nodeClasses);
 
         assertNotNull(person);
         assertEquals("Jack", person.getName());
@@ -268,7 +268,7 @@ public class AbacusXmlParserImpl100Test extends TestBase {
         {
             String[] array = { "a", "b", longString };
 
-            String xml = staxParser.serialize(array, XSC.create().writeTypeInfo(true));
+            String xml = staxParser.serialize(array, XmlSerConfig.create().setWriteTypeInfo(true));
             assertNotNull(xml);
             N.println(xml);
 
@@ -279,7 +279,7 @@ public class AbacusXmlParserImpl100Test extends TestBase {
         {
             List<String> coll = N.toList("a", "b", longString);
 
-            String xml = staxParser.serialize(coll, XSC.create().writeTypeInfo(true));
+            String xml = staxParser.serialize(coll, XmlSerConfig.create().setWriteTypeInfo(true));
             assertNotNull(xml);
             N.println(xml);
 
@@ -290,7 +290,7 @@ public class AbacusXmlParserImpl100Test extends TestBase {
         {
             Set<String> coll = N.toSet("a", "b", longString);
 
-            String xml = staxParser.serialize(coll, XSC.create().writeTypeInfo(true));
+            String xml = staxParser.serialize(coll, XmlSerConfig.create().setWriteTypeInfo(true));
             assertNotNull(xml);
             N.println(xml);
 
@@ -301,7 +301,7 @@ public class AbacusXmlParserImpl100Test extends TestBase {
         {
             Queue<String> coll = N.toQueue("a", "b", longString);
 
-            String xml = staxParser.serialize(coll, XSC.create().writeTypeInfo(true));
+            String xml = staxParser.serialize(coll, XmlSerConfig.create().setWriteTypeInfo(true));
             assertNotNull(xml);
             N.println(xml);
 
@@ -313,7 +313,7 @@ public class AbacusXmlParserImpl100Test extends TestBase {
             Map<String, Object> map = N.asMap("a", 1, "b", "2", "c", longString, "map", map = N.asMap("a", 1, "b", "2", "c", longString), "list",
                     N.toList("a", "b", longString), "listMap", N.asMap("a", N.toList("1", "2", longString), "b", N.toList("3", "4")));
 
-            String xml = staxParser.serialize(map, XSC.create().writeTypeInfo(true));
+            String xml = staxParser.serialize(map, XmlSerConfig.create().setWriteTypeInfo(true));
             assertNotNull(xml);
             N.println(xml);
 

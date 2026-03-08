@@ -225,7 +225,7 @@ import com.landawn.abacus.util.stream.CharStream;
  *   <li><b>Character Counting:</b> {@code frequency()} for frequency analysis</li>
  *   <li><b>Case Analysis:</b> Integration with Character.isUpperCase(), isLowerCase()</li>
  *   <li><b>Character Classification:</b> Letter, digit, whitespace detection via streams</li>
- *   <li><b>Duplicate Detection:</b> {@code hasDuplicates()}, {@code removeDuplicates()}</li>
+ *   <li><b>Duplicate Detection:</b> {@code containsDuplicates()}, {@code removeDuplicates()}</li>
  * </ul>
  *
  * <p><b>Comparison with Alternatives:</b>
@@ -1956,8 +1956,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *         Returns {@code false} for empty lists.
      */
     @Override
-    public boolean hasDuplicates() {
-        return N.hasDuplicates(elementData, 0, size, false);
+    public boolean containsDuplicates() {
+        return N.containsDuplicates(elementData, 0, size, false);
     }
 
     /**

@@ -1414,10 +1414,10 @@ public class Seq200Test extends TestBase {
     }
 
     @Test
-    public void test_hasDuplicates() throws Exception {
-        assertTrue(Seq.of(1, 2, 2, 3).hasDuplicates());
-        assertFalse(Seq.of(1, 2, 3, 4).hasDuplicates());
-        assertFalse(Seq.<Integer, Exception> empty().hasDuplicates());
+    public void test_containsDuplicates() throws Exception {
+        assertTrue(Seq.of(1, 2, 2, 3).containsDuplicates());
+        assertFalse(Seq.of(1, 2, 3, 4).containsDuplicates());
+        assertFalse(Seq.<Integer, Exception> empty().containsDuplicates());
     }
 
     @Test

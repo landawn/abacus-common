@@ -73,7 +73,7 @@ final class GuavaHasher implements Hasher {
      * Hasher wrapped = GuavaHasher.wrap(guavaHasher);
      * }</pre>
      *
-     * @param gHasher the Guava hasher to wrap (implicitly non-null)
+     * @param gHasher the Guava hasher to wrap, must not be {@code null}
      * @return a new GuavaHasher instance wrapping the given hasher
      */
     static GuavaHasher wrap(final com.google.common.hash.Hasher gHasher) {

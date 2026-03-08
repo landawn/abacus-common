@@ -10,7 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
@@ -41,14 +41,14 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalFloat> type = TypeFactory.getType(OptionalFloat.class);
-     * Class<OptionalFloat> clazz = type.clazz();
+     * Class<OptionalFloat> clazz = type.javaType();
      * // Returns: OptionalFloat.class
      * }</pre>
      *
      * @return the {@link OptionalFloat} class object
      */
     @Override
-    public Class<OptionalFloat> clazz() {
+    public Class<OptionalFloat> javaType() {
         return OptionalFloat.class;
     }
 
@@ -293,7 +293,7 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final OptionalFloat x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final OptionalFloat x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null || x.isEmpty()) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

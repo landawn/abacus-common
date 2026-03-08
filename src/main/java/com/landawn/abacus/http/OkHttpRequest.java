@@ -933,8 +933,8 @@ public final class OkHttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<User> users = OkHttpRequest.url("http://localhost:18080/users")
-     *     .get(new TypeToken<List<User>>(){}.getType());
+     * String response = OkHttpRequest.url("http://localhost:18080/users")
+     *     .get(String.class);
      * }</pre>
      *
      * @param <T> The type of the response object
@@ -1158,7 +1158,7 @@ public final class OkHttpRequest {
      * @param httpMethod The HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
      * @param resultClass The class of the expected response object
      * @return The deserialized response body
-     * @throws IllegalArgumentException if resultClass is HttpResponse
+     * @throws IllegalArgumentException if resultClass is HttpResponse (use OkHttp's {@code Response} class directly instead)
      * @throws IOException if the request could not be executed or the response indicates an error
      */
     @Beta
@@ -1297,11 +1297,11 @@ public final class OkHttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ContinuableFuture<List<User>> future = OkHttpRequest.url("http://localhost:18080/users")
-     *     .asyncGet(new TypeToken<List<User>>(){}.getType());
+     * ContinuableFuture<String> future = OkHttpRequest.url("http://localhost:18080/users")
+     *     .asyncGet(String.class);
      *
-     * future.getThenAccept(users -> {
-     *     // Process users
+     * future.getThenAccept(response -> {
+     *     // Process response
      * });
      * }</pre>
      *

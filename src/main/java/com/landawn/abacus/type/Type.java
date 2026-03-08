@@ -42,7 +42,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
@@ -742,7 +742,7 @@ public interface Type<T> {
      *
      * @return the class for this type
      */
-    Class<T> clazz();
+    Class<T> javaType();
 
     /**
      * Returns the Java reflection Type representing this type.
@@ -750,14 +750,14 @@ public interface Type<T> {
      *
      * @return the Java reflection type
      */
-    java.lang.reflect.Type javaType();
+    java.lang.reflect.Type reflectType();
 
     /**
      * Checks if this is a primitive type (int, long, double, etc.).
      *
      * @return {@code true} if this is a primitive type
      */
-    default boolean isPrimitiveType() {
+    default boolean isPrimitive() {
         return false; // Default implementation, can be overridden by specific types
     }
 
@@ -1005,9 +1005,9 @@ public interface Type<T> {
     }
 
     /**
-     * Checks if this type represents a DataSet type.
+     * Checks if this type represents a Dataset type.
      *
-     * @return {@code true} if this is a DataSet type, {@code false} otherwise
+     * @return {@code true} if this is a Dataset type, {@code false} otherwise
      */
     default boolean isDataset() {
         return false; // Default implementation, can be overridden by specific types
@@ -1105,16 +1105,16 @@ public interface Type<T> {
      *
      * @return {@code true} if this is the Object type, {@code false} otherwise
      */
-    default boolean isObjectType() {
+    default boolean isObject() {
         return false; // Default implementation, can be overridden by specific types
     }
 
     /**
-     * Gets the serialization type classification for this type.
+     * Returns the serialization type classification for this type.
      *
      * @return the serialization type
      */
-    SerializationType getSerializationType();
+    SerializationType serializationType();
 
     /**
      * Returns the element type for collection-like, array-like, or container types.
@@ -1123,12 +1123,12 @@ public interface Type<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<?> listType = Type.ofList(String.class);
-     * Type<?> elementType = listType.getElementType();
+     * Type<?> elementType = listType.elementType();
      * }</pre>
      *
      * @return the element type, or {@code null} if this type is not an element-based type
      */
-    Type<?> getElementType(); //NOSONAR
+    Type<?> elementType(); //NOSONAR
 
     /**
      * Returns the generic parameter types for this type declaration.
@@ -1137,12 +1137,12 @@ public interface Type<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<?> mapType = Type.ofMap(String.class, Integer.class);
-     * Type<?>[] parameterTypes = mapType.getParameterTypes();
+     * Type<?>[] parameterTypes = mapType.parameterTypes();
      * }</pre>
      *
      * @return an array of parameter types, or an empty array if this type is not parameterized
      */
-    Type<?>[] getParameterTypes(); //NOSONAR
+    Type<?>[] parameterTypes(); //NOSONAR
 
     /**
      * Returns the default value for this type.
@@ -1289,7 +1289,7 @@ public interface Type<T> {
      * @param config the serialization configuration, may be {@code null}
      * @throws IOException if an I/O error occurs
      */
-    void writeCharacter(CharacterWriter writer, T x, JsonXmlSerializationConfig<?> config) throws IOException;
+    void writeCharacter(CharacterWriter writer, T x, JsonXmlSerConfig<?> config) throws IOException;
 
     /**
      * Converts a collection to an array of this type.

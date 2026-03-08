@@ -30,20 +30,20 @@ public class MultisetType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<Multiset<String>> clazz = multisetType.clazz();
+        Class<Multiset<String>> clazz = multisetType.javaType();
         Assertions.assertNotNull(clazz);
         assertEquals(Multiset.class, clazz);
     }
 
     @Test
     public void testGetElementType() {
-        Type<String> elementType = multisetType.getElementType();
+        Type<String> elementType = multisetType.elementType();
         Assertions.assertNotNull(elementType);
     }
 
     @Test
     public void testGetParameterTypes() {
-        Type<String>[] paramTypes = multisetType.getParameterTypes();
+        Type<String>[] paramTypes = multisetType.parameterTypes();
         Assertions.assertNotNull(paramTypes);
         assertEquals(1, paramTypes.length);
     }

@@ -23,7 +23,7 @@ public class StringBufferType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(StringBuffer.class, stringBufferType.clazz());
+        assertEquals(StringBuffer.class, stringBufferType.javaType());
     }
 
     @Test

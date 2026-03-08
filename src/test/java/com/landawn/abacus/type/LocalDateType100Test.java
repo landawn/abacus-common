@@ -36,7 +36,7 @@ public class LocalDateType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(LocalDate.class, localDateType.clazz());
+        assertEquals(LocalDate.class, localDateType.javaType());
     }
 
     @Test

@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Pair;
 
@@ -28,14 +28,14 @@ public class PairType100Test extends TestBase {
     private PairType<String, Integer> stringIntPairType;
     private PairType<Double, Boolean> doubleBoolPairType;
     private CharacterWriter writer;
-    private JsonXmlSerializationConfig<?> config;
+    private JsonXmlSerConfig<?> config;
 
     @BeforeEach
     public void setUp() {
         stringIntPairType = (PairType<String, Integer>) createType("Pair<String, Integer>");
         doubleBoolPairType = (PairType<Double, Boolean>) createType("Pair<Double, Boolean>");
         writer = createCharacterWriter();
-        config = mock(JsonXmlSerializationConfig.class);
+        config = mock(JsonXmlSerConfig.class);
     }
 
     @Test
@@ -48,13 +48,13 @@ public class PairType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(Pair.class, stringIntPairType.clazz());
-        assertEquals(Pair.class, doubleBoolPairType.clazz());
+        assertEquals(Pair.class, stringIntPairType.javaType());
+        assertEquals(Pair.class, doubleBoolPairType.javaType());
     }
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = stringIntPairType.getParameterTypes();
+        Type<?>[] paramTypes = stringIntPairType.parameterTypes();
         assertNotNull(paramTypes);
         assertEquals(2, paramTypes.length);
         assertEquals("String", paramTypes[0].name());

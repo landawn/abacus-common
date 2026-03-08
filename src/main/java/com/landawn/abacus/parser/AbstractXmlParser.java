@@ -31,12 +31,11 @@ import org.xml.sax.Attributes;
 import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
-import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.XmlUtil;
 
 /**
@@ -62,10 +61,10 @@ import com.landawn.abacus.util.XmlUtil;
  *
  * @see XmlParser
  * @see AbstractParser
- * @see XmlSerializationConfig
- * @see XmlDeserializationConfig
+ * @see XmlSerConfig
+ * @see XmlDeserConfig
  */
-abstract class AbstractXmlParser extends AbstractParser<XmlSerializationConfig, XmlDeserializationConfig> implements XmlParser {
+abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserConfig> implements XmlParser {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractXmlParser.class);
 
@@ -74,35 +73,35 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerializationConfig, 
     protected static final JsonParser jsonParser = ParserFactory.createJsonParser();
 
     @SuppressWarnings("deprecation")
-    protected static final JsonSerializationConfig jsc = JSC.create().setCharQuotation(SK.CHAR_ZERO);
+    protected static final JsonSerConfig jsc = JsonSerConfig.create().setCharQuotation(SK.CHAR_ZERO);
 
     @SuppressWarnings("deprecation")
-    protected static final JsonSerializationConfig jscWithEmptyBeanSupported = JSC.create().setCharQuotation(SK.CHAR_ZERO).failOnEmptyBean(false);
+    protected static final JsonSerConfig jscWithEmptyBeanSupported = JsonSerConfig.create().setCharQuotation(SK.CHAR_ZERO).setFailOnEmptyBean(false);
 
     @SuppressWarnings("deprecation")
-    protected static final JsonSerializationConfig jscWithCircularRefSupported = JSC.create().setCharQuotation(SK.CHAR_ZERO).supportCircularReference(true);
+    protected static final JsonSerConfig jscWithCircularRefSupported = JsonSerConfig.create().setCharQuotation(SK.CHAR_ZERO).setSupportCircularReference(true);
 
     @SuppressWarnings("deprecation")
-    protected static final JsonSerializationConfig jscWithCircularRefAndEmptyBeanSupported = JSC.create()
+    protected static final JsonSerConfig jscWithCircularRefAndEmptyBeanSupported = JsonSerConfig.create()
             .setCharQuotation(SK.CHAR_ZERO)
-            .failOnEmptyBean(false)
-            .supportCircularReference(true);
+            .setFailOnEmptyBean(false)
+            .setSupportCircularReference(true);
 
     protected static final Type<?> defaultKeyType = objType;
 
     protected static final Type<?> defaultValueType = objType;
 
-    protected final XmlSerializationConfig defaultXmlSerializationConfig;
+    protected final XmlSerConfig defaultXmlSerConfig;
 
-    protected final XmlDeserializationConfig defaultXmlDeserializationConfig;
+    protected final XmlDeserConfig defaultXmlDeserConfig;
 
     protected AbstractXmlParser() {
         this(null, null);
     }
 
-    protected AbstractXmlParser(final XmlSerializationConfig xsc, final XmlDeserializationConfig xdc) {
-        defaultXmlSerializationConfig = xsc != null ? xsc : new XmlSerializationConfig();
-        defaultXmlDeserializationConfig = xdc != null ? xdc : new XmlDeserializationConfig();
+    protected AbstractXmlParser(final XmlSerConfig xsc, final XmlDeserConfig xdc) {
+        defaultXmlSerConfig = xsc != null ? xsc : new XmlSerConfig();
+        defaultXmlDeserConfig = xdc != null ? xdc : new XmlDeserConfig();
     }
 
     /**
@@ -165,8 +164,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerializationConfig, 
      * @throws UnsupportedOperationException always thrown in this abstract implementation
      */
     @Override
-    public <T> T deserialize(final File source, final XmlDeserializationConfig config, final Map<String, Type<?>> nodeTypes)
-            throws UnsupportedOperationException {
+    public <T> T deserialize(final File source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -188,8 +186,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerializationConfig, 
      * @throws UnsupportedOperationException always thrown in this abstract implementation
      */
     @Override
-    public <T> T deserialize(final InputStream source, final XmlDeserializationConfig config, final Map<String, Type<?>> nodeTypes)
-            throws UnsupportedOperationException {
+    public <T> T deserialize(final InputStream source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -211,8 +208,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerializationConfig, 
      * @throws UnsupportedOperationException always thrown in this abstract implementation
      */
     @Override
-    public <T> T deserialize(final Reader source, final XmlDeserializationConfig config, final Map<String, Type<?>> nodeTypes)
-            throws UnsupportedOperationException {
+    public <T> T deserialize(final Reader source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -235,8 +231,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerializationConfig, 
      * @throws UnsupportedOperationException always thrown in this abstract implementation
      */
     @Override
-    public <T> T deserialize(final Node source, final XmlDeserializationConfig config, final Map<String, Type<?>> nodeTypes)
-            throws UnsupportedOperationException {
+    public <T> T deserialize(final Node source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -309,12 +304,12 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerializationConfig, 
         }
     }
 
-    protected XmlSerializationConfig check(XmlSerializationConfig config) {
-        return config == null ? defaultXmlSerializationConfig : config;
+    protected XmlSerConfig check(XmlSerConfig config) {
+        return config == null ? defaultXmlSerConfig : config;
     }
 
-    protected XmlDeserializationConfig check(XmlDeserializationConfig config) {
-        return config == null ? defaultXmlDeserializationConfig : config;
+    protected XmlDeserConfig check(XmlDeserConfig config) {
+        return config == null ? defaultXmlDeserConfig : config;
     }
 
     @SuppressWarnings("unchecked")
@@ -423,7 +418,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerializationConfig, 
             return null;
         }
 
-        return Type.of(typeAttr).clazz();
+        return Type.of(typeAttr).javaType();
     }
 
     /**
@@ -450,7 +445,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerializationConfig, 
             return null;
         }
 
-        return Type.of(typeAttr).clazz();
+        return Type.of(typeAttr).javaType();
     }
 
     /**
@@ -477,7 +472,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerializationConfig, 
             return null;
         }
 
-        return Type.of(typeAttr).clazz();
+        return Type.of(typeAttr).javaType();
     }
 
     /**
@@ -595,25 +590,25 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerializationConfig, 
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlSerializationConfig xmlConfig = new XmlSerializationConfig().supportCircularReference(true);
-     * JsonSerializationConfig jsonConfig = getJSC(xmlConfig);
+     * XmlSerConfig xmlConfig = new XmlSerConfig().setSupportCircularReference(true);
+     * JsonSerConfig jsonConfig = getJSC(xmlConfig);
      * }</pre>
      *
      * @param config the XML serialization configuration to map, or {@code null} for default
      * @return a JSON serialization configuration with corresponding settings
      */
-    protected JsonSerializationConfig getJSC(final XmlSerializationConfig config) {
+    protected JsonSerConfig getJSC(final XmlSerConfig config) {
         if (config == null) {
             return jsc;
         }
 
-        if (config.supportCircularReference()) {
-            if (!config.failOnEmptyBean()) {
+        if (config.isSupportCircularReference()) {
+            if (!config.isFailOnEmptyBean()) {
                 return jscWithCircularRefAndEmptyBeanSupported;
             } else {
                 return jscWithCircularRefSupported;
             }
-        } else if (!config.failOnEmptyBean()) {
+        } else if (!config.isFailOnEmptyBean()) {
             return jscWithEmptyBeanSupported;
         }
 

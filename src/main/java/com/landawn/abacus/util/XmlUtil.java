@@ -219,7 +219,7 @@ public final class XmlUtil {
     }
 
     private XmlUtil() {
-        // singleton.
+        // Utility class - prevent instantiation
     }
 
     private static void setSaxParserFactoryFeature(final String featureName, final boolean value) {
@@ -1781,7 +1781,7 @@ public final class XmlUtil {
         final Type<?> type = Type.of(typeAttr);
 
         if (type != null) {
-            return type.clazz();
+            return type.javaType();
         }
 
         try {

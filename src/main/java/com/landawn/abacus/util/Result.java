@@ -353,10 +353,12 @@ public class Result<T, E extends Throwable> implements Immutable {
      *     }
      * }
      *
-     * // Chaining with conditional execution
-     * Result.success(computeValue())
-     *     .ifSuccess(value -> log.info("Computed: {}", value))
-     *     .ifFailure(ex -> log.error("Should never happen", ex));
+     * // Conditional execution
+     * Result<String, RuntimeException> successResult = Result.success(computeValue());
+     * successResult.ifSuccessOrElse(
+     *     value -> log.info("Computed: {}", value),
+     *     ex -> log.error("Should never happen", ex)
+     * );
      * }</pre>
      *
      * <p><b>Thread Safety:</b></p>
@@ -474,10 +476,12 @@ public class Result<T, E extends Throwable> implements Immutable {
      *     }
      * }
      *
-     * // Chaining with conditional execution
-     * Result.<String, RuntimeException>failure(new IllegalArgumentException("Invalid input"))
-     *     .ifSuccess(value -> log.info("Should never execute"))
-     *     .ifFailure(ex -> log.error("Error occurred: {}", ex.getMessage()));
+     * // Conditional execution on failure
+     * Result<String, RuntimeException> failureResult = Result.failure(new IllegalArgumentException("Invalid input"));
+     * failureResult.ifSuccessOrElse(
+     *     value -> log.info("Should never execute"),
+     *     ex -> log.error("Error occurred: {}", ex.getMessage())
+     * );
      *
      * // Transforming and re-throwing exceptions
      * Result<Data, SQLException> dbResult = fetchFromDatabase();
@@ -1043,7 +1047,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * the Result represents success or failure, providing complete visibility into the
      * Result's internal state for troubleshooting.</p>
      *
-     * <p><b>Example output:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * {value=success, exception=null}
      * {value=null, exception=java.io.IOException: Error}

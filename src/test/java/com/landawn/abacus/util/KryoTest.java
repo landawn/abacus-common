@@ -10,7 +10,7 @@ public class KryoTest {
 
     @Test
     public void test_01() {
-        N.println(kryoParser.clone(Pair.of("abc", 123)));
+        N.println(kryoParser.deepCopy(Pair.of("abc", 123)));
     }
 
 }

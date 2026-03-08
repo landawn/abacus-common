@@ -29,8 +29,8 @@ import com.landawn.abacus.entity.extendDirty.basic.Account;
 import com.landawn.abacus.entity.extendDirty.basic.AccountContact;
 import com.landawn.abacus.entity.extendDirty.basic.DataType;
 import com.landawn.abacus.entity.extendDirty.basic.ExtendDirtyBasicPNL.AccountPNL;
-import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
-import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
+import com.landawn.abacus.parser.JsonDeserConfig;
+import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 import com.landawn.abacus.util.function.BiConsumer;
@@ -123,10 +123,10 @@ public class DatasetTest extends AbstractTest {
         final Dataset ds = CommonUtil.newDataset(accountList);
         ds.println();
 
-        String json = N.toJson(ds, JSC.create().writeDatasetByRow(true));
+        String json = N.toJson(ds, JsonSerConfig.create().setWriteDatasetByRow(true));
         N.println(json);
 
-        json = N.toJson(ds, JSC.create().writeDatasetByRow(true).prettyFormat(true));
+        json = N.toJson(ds, JsonSerConfig.create().setWriteDatasetByRow(true).setPrettyFormat(true));
         N.println(json);
 
         final Dataset ds2 = N.fromJson(json, Dataset.class);
@@ -494,7 +494,7 @@ public class DatasetTest extends AbstractTest {
         N.println(Strings.repeat("=", 80));
         N.println(json);
 
-        final Dataset ds2 = N.fromJson(json, JDC.create().setValueTypesByBeanClass(Account.class), Dataset.class);
+        final Dataset ds2 = N.fromJson(json, JsonDeserConfig.create().setValueTypesByBeanClass(Account.class), Dataset.class);
         N.println(Strings.repeat("=", 80));
         ds2.println();
 
@@ -502,11 +502,11 @@ public class DatasetTest extends AbstractTest {
 
         final Map<Object, Object> map = CommonUtil.asMap("key", accountList);
 
-        final Map<String, Dataset> map2 = N.fromJson(N.toJson(map), JDC.create().setValueTypesByBeanClass(Account.class),
+        final Map<String, Dataset> map2 = N.fromJson(N.toJson(map), JsonDeserConfig.create().setValueTypesByBeanClass(Account.class),
                 Type.ofMap(String.class, Dataset.class));
         map2.entrySet().iterator().next().getValue().println();
 
-        final List<Dataset> list = N.fromJson(N.toJson(CommonUtil.toList(accountList)), JDC.create().setValueTypesByBeanClass(Account.class),
+        final List<Dataset> list = N.fromJson(N.toJson(CommonUtil.toList(accountList)), JsonDeserConfig.create().setValueTypesByBeanClass(Account.class),
                 Type.ofList(Dataset.class));
         list.get(0).println();
 
@@ -528,17 +528,17 @@ public class DatasetTest extends AbstractTest {
         N.println(Strings.repeat("=", 80));
         N.println(json);
 
-        Dataset ds2 = N.fromJson(json, JDC.create().setValueTypesByBeanClass(Account.class), Dataset.class);
+        Dataset ds2 = N.fromJson(json, JsonDeserConfig.create().setValueTypesByBeanClass(Account.class), Dataset.class);
         N.println(Strings.repeat("=", 80));
         ds2.println();
 
         json = N.toJson(CommonUtil.toList(accountList.get(0)));
 
-        ds2 = N.fromJson(json, JDC.create().setValueTypesByBeanClass(Account.class), Dataset.class);
+        ds2 = N.fromJson(json, JsonDeserConfig.create().setValueTypesByBeanClass(Account.class), Dataset.class);
         N.println(Strings.repeat("=", 80));
         ds2.println();
 
-        ds2 = N.fromJson("[]", JDC.create().setValueTypesByBeanClass(Account.class), Dataset.class);
+        ds2 = N.fromJson("[]", JsonDeserConfig.create().setValueTypesByBeanClass(Account.class), Dataset.class);
         N.println(Strings.repeat("=", 80));
         ds2.println();
 
@@ -581,7 +581,7 @@ public class DatasetTest extends AbstractTest {
 
         final List<Account> accounts = dataset.toMergedEntities(Account.class);
 
-        String json = N.toJson(accounts, JSC.create().prettyFormat(true));
+        String json = N.toJson(accounts, JsonSerConfig.create().setPrettyFormat(true));
         N.println(json);
     }
 

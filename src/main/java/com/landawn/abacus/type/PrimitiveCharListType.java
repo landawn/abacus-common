@@ -16,7 +16,7 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharList;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Strings;
@@ -46,7 +46,7 @@ public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharL
      * @return the Class object for CharList
      */
     @Override
-    public Class<CharList> clazz() {
+    public Class<CharList> javaType() {
         return CharList.class;
     }
 
@@ -56,7 +56,7 @@ public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharL
      * @return the Type object representing char elements
      */
     @Override
-    public Type<Character> getElementType() {
+    public Type<Character> elementType() {
         return elementType;
     }
 
@@ -64,10 +64,10 @@ public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharL
      * Returns the parameter types associated with this list type.
      *
      * @return an array containing the Character Type that describes the elements of this list type
-     * @see #getElementType()
+     * @see #elementType()
      */
     @Override
-    public Type<Character>[] getParameterTypes() {
+    public Type<Character>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -131,7 +131,7 @@ public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharL
      * @throws IOException if an I/O error occurs
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final CharList x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final CharList x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

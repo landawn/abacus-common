@@ -34,7 +34,7 @@ public class CurrencyType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(Currency.class, type.clazz());
+        assertEquals(Currency.class, type.javaType());
     }
 
     @Test

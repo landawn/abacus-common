@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -38,7 +38,7 @@ public class JdkDurationType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(Duration.class, durationType.clazz());
+        assertEquals(Duration.class, durationType.javaType());
     }
 
     @Test
@@ -144,7 +144,7 @@ public class JdkDurationType100Test extends TestBase {
         PreparedStatement stmt = mock(PreparedStatement.class);
 
         durationType.set(stmt, 1, null);
-        verify(stmt).setLong(1, 0L);
+        verify(stmt).setNull(1, java.sql.Types.BIGINT);
     }
 
     @Test
@@ -161,7 +161,7 @@ public class JdkDurationType100Test extends TestBase {
         CallableStatement stmt = mock(CallableStatement.class);
 
         durationType.set(stmt, "param_name", null);
-        verify(stmt).setLong("param_name", 0L);
+        verify(stmt).setNull("param_name", java.sql.Types.BIGINT);
     }
 
     @Test
@@ -198,7 +198,7 @@ public class JdkDurationType100Test extends TestBase {
     @Test
     public void testWriteCharacter_WithConfig() throws IOException {
         Duration duration = Duration.ofMillis(1000);
-        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
         durationType.writeCharacter(characterWriter, duration, config);
         verify(characterWriter).write(1000L);

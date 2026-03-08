@@ -179,7 +179,7 @@ public class ParallelIteratorCharStream201Test extends TestBase {
                 consumed.add(it);
             }
         };
-        stream.onEach(action).forEach(c -> {
+        stream.peek(action).forEach(c -> {
         });
         assertEquals(TEST_ARRAY.length, consumed.size());
 

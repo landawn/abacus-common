@@ -217,15 +217,14 @@ public final class Retry<T> {
      * }</pre>
      *
      * @param callable the callable operation to execute, which may throw an exception or return a result.
-     * @return the result of the successful execution of {@code callable}. If all retry attempts are exhausted and
-     *         the result still does not satisfy the retry condition, the last result obtained is returned (or an exception is thrown).
+     * @return the result produced by the first invocation whose outcome does not satisfy the retry condition,
+     *         or the initial result if no retry is needed.
      * @throws Exception any exception thrown by the {@code callable} operation. If the operation is retried and all retry attempts
      *                   are exhausted without success, the last exception encountered during the final retry attempt is thrown.
      *                   If the retry condition is not satisfied for a thrown exception, that exception is thrown immediately
      *                   without further retries.
-     * @throws RuntimeException if all retry attempts are exhausted and the {@code retryCondition2} still evaluates to {@code true}
-     *                          for the result (indicating the result remains unsatisfactory after all retries). The exception message
-     *                          includes the number of retry attempts and the final result value.
+     * @throws RuntimeException if all retry attempts are exhausted and the final result still satisfies {@code retryCondition2},
+     *                          indicating that every invocation completed with an unsatisfactory result.
      */
     @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE")
     public T call(final java.util.concurrent.Callable<T> callable) throws Exception {

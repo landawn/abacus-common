@@ -9,8 +9,9 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
@@ -40,14 +41,14 @@ public class MutableIntType extends NumberType<MutableInt> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<MutableInt> type = TypeFactory.getType(MutableInt.class);
-     * Class<MutableInt> clazz = type.clazz();
+     * Class<MutableInt> clazz = type.javaType();
      * // clazz equals MutableInt.class
      * }</pre>
      *
      * @return The Class object for MutableInt
      */
     @Override
-    public Class<MutableInt> clazz() {
+    public Class<MutableInt> javaType() {
         return MutableInt.class;
     }
 
@@ -121,7 +122,9 @@ public class MutableIntType extends NumberType<MutableInt> {
      */
     @Override
     public MutableInt get(final ResultSet rs, final int columnIndex) throws SQLException {
-        return MutableInt.of(rs.getInt(columnIndex));
+        final int value = rs.getInt(columnIndex);
+
+        return rs.wasNull() ? null : MutableInt.of(value);
     }
 
     /**
@@ -145,7 +148,9 @@ public class MutableIntType extends NumberType<MutableInt> {
      */
     @Override
     public MutableInt get(final ResultSet rs, final String columnName) throws SQLException {
-        return MutableInt.of(rs.getInt(columnName));
+        final int value = rs.getInt(columnName);
+
+        return rs.wasNull() ? null : MutableInt.of(value);
     }
 
     /**
@@ -172,7 +177,11 @@ public class MutableIntType extends NumberType<MutableInt> {
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final MutableInt x) throws SQLException {
-        stmt.setInt(columnIndex, (x == null) ? 0 : x.value());
+        if (x == null) {
+            stmt.setNull(columnIndex, Types.INTEGER);
+        } else {
+            stmt.setInt(columnIndex, x.value());
+        }
     }
 
     /**
@@ -199,7 +208,11 @@ public class MutableIntType extends NumberType<MutableInt> {
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final MutableInt x) throws SQLException {
-        stmt.setInt(parameterName, (x == null) ? 0 : x.value());
+        if (x == null) {
+            stmt.setNull(parameterName, Types.INTEGER);
+        } else {
+            stmt.setInt(parameterName, x.value());
+        }
     }
 
     /**
@@ -255,7 +268,7 @@ public class MutableIntType extends NumberType<MutableInt> {
      * @throws IOException if an I/O error occurs while writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final MutableInt x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final MutableInt x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

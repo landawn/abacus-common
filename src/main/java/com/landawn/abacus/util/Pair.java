@@ -474,7 +474,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * updated = pair.setIf((l, r) -> l.length() > r,
      *         "Test", 5);
-     * // updated == false, pair remains ("World", 20) because 4 is not > 20
+     * // updated == false, pair remains ("World", 20) because 5 is not > 20
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw
@@ -506,7 +506,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <pre>{@code
      * Pair<String, Integer> original = Pair.of("Hello", 42);
      * Pair<Integer, String> swapped = original.swap();
-     * // swapped.left() returns 42, reversed.right returns "Hello"
+     * // swapped.left() returns 42, swapped.right() returns "Hello"
      * // original remains unchanged
      * }</pre>
      *

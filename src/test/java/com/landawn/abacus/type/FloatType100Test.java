@@ -33,7 +33,7 @@ public class FloatType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(Float.class, floatType.clazz());
+        assertEquals(Float.class, floatType.javaType());
     }
 
     @Test

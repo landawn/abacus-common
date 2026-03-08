@@ -310,7 +310,7 @@ import com.landawn.abacus.util.ImmutableList;
 public abstract class Files { //NOSONAR
 
     private Files() {
-        // singleton
+        // Utility class - prevent instantiation
     }
 
     /**
@@ -603,7 +603,7 @@ public abstract class Files { //NOSONAR
     /**
      * Overwrites a file with the contents of a byte array.
      * If the file already exists, it will be overwritten. If the file does not exist,
-     * it will be created along with any necessary parent directories.
+     * it will be created, but the parent directory must already exist.
      *
      * <p>This method is equivalent to {@code asByteSink(to).write(from)}.
      *
@@ -673,11 +673,11 @@ public abstract class Files { //NOSONAR
     }
 
     /**
-     * Creates an empty file or updates the last updated timestamp on the same as the unix command of
+     * Creates an empty file or updates the last modified timestamp on the file, similar to the Unix command of
      * the same name. If the file already exists, its last modified time will be updated to the
      * current time. If the file does not exist, an empty file will be created.
      *
-     * <p>This method creates parent directories if necessary.
+     * <p>Note: This method does <b>not</b> create parent directories. Use {@link #createParentDirs(File)} if needed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -699,7 +699,7 @@ public abstract class Files { //NOSONAR
      * If the file already exists, its last modified time will be updated. If the file does not
      * exist, an empty file will be created.
      *
-     * <p>This method creates parent directories if necessary.
+     * <p>Note: This method does <b>not</b> create parent directories.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1553,7 +1553,7 @@ public abstract class Files { //NOSONAR
     public static final class MoreFiles extends Files {
 
         private MoreFiles() {
-            // singleton
+            // Utility class - prevent instantiation
         }
     }
 }

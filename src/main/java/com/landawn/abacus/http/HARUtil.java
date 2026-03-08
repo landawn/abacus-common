@@ -53,10 +53,10 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Send a single request from HAR file
- * String response = HARUtil.sendRequestByHAR(new File("capture.har"), "http://localhost:18080/data");
+ * String response = HARUtil.sendRequest(new File("capture.har"), "http://localhost:18080/data");
  * 
  * // Send multiple requests matching a pattern
- * List<String> responses = HARUtil.sendMultiRequestsByHAR(
+ * List<String> responses = HARUtil.sendRequests(
  *     new File("capture.har"), 
  *     url -> url.contains("/api/")
  * );
@@ -95,14 +95,14 @@ public final class HARUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Exclude authorization headers when replaying requests
-     * HARUtil.setHeaderFilter((name, value) -> 
+     * HARUtil.setThreadLocalHeaderFilter((name, value) ->
      *     !name.equalsIgnoreCase("Authorization"));
      * }</pre>
      * 
      * @param httpHeaderFilterForHARRequest the filter to apply to headers, must not be null
      * @throws IllegalArgumentException if httpHeaderFilterForHARRequest is null
      */
-    public static void setHeaderFilter(final BiPredicate<? super String, String> httpHeaderFilterForHARRequest) throws IllegalArgumentException {
+    public static void setThreadLocalHeaderFilter(final BiPredicate<? super String, String> httpHeaderFilterForHARRequest) throws IllegalArgumentException {
         N.checkArgNotNull(httpHeaderFilterForHARRequest, cs.httpHeaderFilterForHARRequest);
 
         httpHeaderFilterForHARRequest_TL.set(httpHeaderFilterForHARRequest);
@@ -119,10 +119,10 @@ public final class HARUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HARUtil.resetHeaderFilter();
+     * HARUtil.resetThreadLocalHeaderFilter();
      * }</pre>
      */
-    public static void resetHeaderFilter() {
+    public static void resetThreadLocalHeaderFilter() {
         httpHeaderFilterForHARRequest_TL.set(defaultHttpHeaderFilterForHARRequest);
     }
 
@@ -138,15 +138,15 @@ public final class HARUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HARUtil.logCurl(true);
+     * HARUtil.configureCurlLoggingForCurrentThread(true);
      * }</pre>
      *
      * @param logRequest {@code true} to enable curl logging, {@code false} to disable
-     * @see #logCurl(boolean, char)
-     * @see #logCurl(boolean, char, Consumer)
+     * @see #configureCurlLoggingForCurrentThread(boolean, char)
+     * @see #configureCurlLoggingForCurrentThread(boolean, char, Consumer)
      */
-    public static void logCurl(final boolean logRequest) {
-        logCurl(logRequest, '\'');
+    public static void configureCurlLoggingForCurrentThread(final boolean logRequest) {
+        configureCurlLoggingForCurrentThread(logRequest, '\'');
     }
 
     /**
@@ -157,15 +157,15 @@ public final class HARUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HARUtil.logCurl(true, '"');
+     * HARUtil.configureCurlLoggingForCurrentThread(true, '"');
      * }</pre>
      *
      * @param logRequest {@code true} to enable curl logging, {@code false} to disable
      * @param quoteChar the character to use for quoting in curl commands (typically ' or ")
-     * @see #logCurl(boolean)
-     * @see #logCurl(boolean, char, Consumer)
+     * @see #configureCurlLoggingForCurrentThread(boolean)
+     * @see #configureCurlLoggingForCurrentThread(boolean, char, Consumer)
      */
-    public static void logCurl(final boolean logRequest, final char quoteChar) {
+    public static void configureCurlLoggingForCurrentThread(final boolean logRequest, final char quoteChar) {
         logCurl_TL.set(Tuple.of(logRequest, quoteChar, defaultCurlLogHandler));
     }
 
@@ -178,7 +178,7 @@ public final class HARUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Log curl commands to a file instead of standard logger
-     * HARUtil.logCurl(true, '"', curl -> {
+     * HARUtil.configureCurlLoggingForCurrentThread(true, '"', curl -> {
      *     try {
      *         Files.write(Paths.get("curl-commands.txt"),
      *                 (curl + "\n").getBytes(),
@@ -192,10 +192,10 @@ public final class HARUtil {
      * @param logRequest {@code true} to enable curl logging, {@code false} to disable
      * @param quoteChar the character to use for quoting in curl commands
      * @param logHandler the consumer that will handle the generated curl command strings
-     * @see #logCurl(boolean)
-     * @see #logCurl(boolean, char)
+     * @see #configureCurlLoggingForCurrentThread(boolean)
+     * @see #configureCurlLoggingForCurrentThread(boolean, char)
      */
-    public static void logCurl(final boolean logRequest, final char quoteChar, final Consumer<? super String> logHandler) {
+    public static void configureCurlLoggingForCurrentThread(final boolean logRequest, final char quoteChar, final Consumer<? super String> logHandler) {
         N.checkArgNotNull(logHandler, "logHandler");
         logCurl_TL.set(Tuple.of(logRequest, quoteChar, logHandler));
     }
@@ -208,7 +208,7 @@ public final class HARUtil {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String response = HARUtil.sendRequestByHAR(
+     * String response = HARUtil.sendRequest(
      *     new File("capture.har"), 
      *     "http://localhost:18080/users/123"
      * );
@@ -221,8 +221,8 @@ public final class HARUtil {
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
-    public static String sendRequestByHAR(final File har, final String targetUrl) {
-        return sendRequestByHAR(har, Fn.equal(targetUrl));
+    public static String sendRequest(final File har, final String targetUrl) {
+        return sendRequest(har, Fn.equal(targetUrl));
     }
 
     /**
@@ -234,7 +234,7 @@ public final class HARUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Send request for first URL containing "/api/users"
-     * String response = HARUtil.sendRequestByHAR(
+     * String response = HARUtil.sendRequest(
      *     new File("capture.har"), 
      *     url -> url.contains("/api/users")
      * );
@@ -247,8 +247,8 @@ public final class HARUtil {
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
-    public static String sendRequestByHAR(final File har, final Predicate<? super String> filterForTargetUrl) {
-        return sendRequestByHAR(IOUtil.readAllToString(har), filterForTargetUrl);
+    public static String sendRequest(final File har, final Predicate<? super String> filterForTargetUrl) {
+        return sendRequest(IOUtil.readAllToString(har), filterForTargetUrl);
     }
 
     /**
@@ -259,7 +259,7 @@ public final class HARUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String response = HARUtil.sendRequestByHAR(harContent, "http://localhost:18080/users/123");
+     * String response = HARUtil.sendRequest(harContent, "http://localhost:18080/users/123");
      * }</pre>
      * 
      * @param har the HAR content as a JSON string
@@ -269,8 +269,8 @@ public final class HARUtil {
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
-    public static String sendRequestByHAR(final String har, final String targetUrl) {
-        return sendRequestByHAR(har, Fn.equal(targetUrl));
+    public static String sendRequest(final String har, final String targetUrl) {
+        return sendRequest(har, Fn.equal(targetUrl));
     }
 
     /**
@@ -290,7 +290,7 @@ public final class HARUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String response = HARUtil.sendRequestByHAR(harContent, url -> url.contains("/api/users"));
+     * String response = HARUtil.sendRequest(harContent, url -> url.contains("/api/users"));
      * }</pre>
      * 
      * @param har the HAR content as a JSON string
@@ -301,7 +301,7 @@ public final class HARUtil {
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
     @SuppressWarnings("rawtypes")
-    public static String sendRequestByHAR(final String har, final Predicate<? super String> filterForTargetUrl) {
+    public static String sendRequest(final String har, final Predicate<? super String> filterForTargetUrl) {
         final Map<String, ?> map = N.fromJson(har, Map.class);
         final List<Map> entries = Maps.getByPath(map, "log.entries"); //NOSONAR
 
@@ -325,7 +325,7 @@ public final class HARUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Send all API requests from the HAR file
-     * List<String> responses = HARUtil.sendMultiRequestsByHAR(
+     * List<String> responses = HARUtil.sendRequests(
      *     new File("capture.har"), 
      *     url -> url.startsWith("http://localhost:18080/")
      * );
@@ -337,8 +337,8 @@ public final class HARUtil {
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
-    public static List<String> sendMultiRequestsByHAR(final File har, final Predicate<? super String> filterForTargetUrl) {
-        return sendMultiRequestsByHAR(IOUtil.readAllToString(har), filterForTargetUrl);
+    public static List<String> sendRequests(final File har, final Predicate<? super String> filterForTargetUrl) {
+        return sendRequests(IOUtil.readAllToString(har), filterForTargetUrl);
     }
 
     /**
@@ -349,7 +349,7 @@ public final class HARUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<String> responses = HARUtil.sendMultiRequestsByHAR(harContent, url -> url.startsWith("http://localhost:18080/"));
+     * List<String> responses = HARUtil.sendRequests(harContent, url -> url.startsWith("http://localhost:18080/"));
      * }</pre>
      * 
      * @param har the HAR content as a JSON string
@@ -359,7 +359,7 @@ public final class HARUtil {
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
     @SuppressWarnings("rawtypes")
-    public static List<String> sendMultiRequestsByHAR(final String har, final Predicate<? super String> filterForTargetUrl) {
+    public static List<String> sendRequests(final String har, final Predicate<? super String> filterForTargetUrl) {
         final Map<String, ?> map = N.fromJson(har, Map.class);
         final List<Map> entries = Maps.getByPath(map, "log.entries");
 
@@ -381,7 +381,7 @@ public final class HARUtil {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HARUtil.streamMultiRequestsByHAR(harFile, url -> url.contains("/api/"))
+     * HARUtil.streamRequests(harFile, url -> url.contains("/api/"))
      *     .forEach(tuple -> {
      *         Map<String, Object> request = tuple._1;
      *         com.landawn.abacus.http.HttpResponse response = tuple._2;
@@ -396,9 +396,8 @@ public final class HARUtil {
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
-    public static Stream<Tuple2<Map<String, Object>, HttpResponse>> streamMultiRequestsByHAR(final File har,
-            final Predicate<? super String> filterForTargetUrl) {
-        return streamMultiRequestsByHAR(IOUtil.readAllToString(har), filterForTargetUrl);
+    public static Stream<Tuple2<Map<String, Object>, HttpResponse>> streamRequests(final File har, final Predicate<? super String> filterForTargetUrl) {
+        return streamRequests(IOUtil.readAllToString(har), filterForTargetUrl);
     }
 
     /**
@@ -410,7 +409,7 @@ public final class HARUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HARUtil.streamMultiRequestsByHAR(harContent, url -> url.contains("/api/"))
+     * HARUtil.streamRequests(harContent, url -> url.contains("/api/"))
      *     .map(tp -> tp._2.statusCode())
      *     .forEach(System.out::println);
      * }</pre>
@@ -422,8 +421,7 @@ public final class HARUtil {
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
     @SuppressWarnings("rawtypes")
-    public static Stream<Tuple2<Map<String, Object>, HttpResponse>> streamMultiRequestsByHAR(final String har,
-            final Predicate<? super String> filterForTargetUrl) {
+    public static Stream<Tuple2<Map<String, Object>, HttpResponse>> streamRequests(final String har, final Predicate<? super String> filterForTargetUrl) {
         final Map<String, ?> map = N.fromJson(har, Map.class);
         final List<Map> entries = Maps.getByPath(map, "log.entries");
 
@@ -459,7 +457,7 @@ public final class HARUtil {
      * @throws RuntimeException if the HTTP request execution fails
      */
     public static <T> T sendRequestByRequestEntry(final Map<String, Object> requestEntry, final Class<T> responseClass) {
-        final String url = getUrlByRequestEntry(requestEntry);
+        final String url = getRequestUrl(requestEntry);
         final HttpMethod httpMethod = getHttpMethodByRequestEntry(requestEntry);
 
         final HttpHeaders httpHeaders = getHeadersByRequestEntry(requestEntry);
@@ -488,13 +486,13 @@ public final class HARUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * com.landawn.abacus.util.u.Optional<Map<String, Object>> requestOpt = HARUtil.getRequestEntryByURLFromHAR(
+     * com.landawn.abacus.util.u.Optional<Map<String, Object>> requestOpt = HARUtil.findRequestEntry(
      *     new File("capture.har"),
      *     url -> url.contains("/api/users")
      * );
      *
      * requestOpt.ifPresent(request -> {
-     *     String url = HARUtil.getUrlByRequestEntry(request);
+     *     String url = HARUtil.getRequestUrl(request);
      *     HttpMethod method = HARUtil.getHttpMethodByRequestEntry(request);
      *     com.landawn.abacus.http.HttpHeaders headers = HARUtil.getHeadersByRequestEntry(request);
      *     System.out.println("Found request: " + method + " " + url);
@@ -505,8 +503,8 @@ public final class HARUtil {
      * @param filterForTargetUrl predicate to test URLs
      * @return an Optional containing the first matching request entry map, or empty if no match is found
      */
-    public static Optional<Map<String, Object>> getRequestEntryByURLFromHAR(final File har, final Predicate<? super String> filterForTargetUrl) {
-        return getRequestEntryByURLFromHAR(IOUtil.readAllToString(har), filterForTargetUrl);
+    public static Optional<Map<String, Object>> findRequestEntry(final File har, final Predicate<? super String> filterForTargetUrl) {
+        return findRequestEntry(IOUtil.readAllToString(har), filterForTargetUrl);
     }
 
     /**
@@ -518,7 +516,7 @@ public final class HARUtil {
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * com.landawn.abacus.util.u.Optional<Map<String, Object>> requestOpt = HARUtil.getRequestEntryByURLFromHAR(
+     * com.landawn.abacus.util.u.Optional<Map<String, Object>> requestOpt = HARUtil.findRequestEntry(
      *     harContent, 
      *     url -> url.endsWith("/login")
      * );
@@ -535,7 +533,7 @@ public final class HARUtil {
      * @return an Optional containing the first matching request entry map, or empty if no match is found
      */
     @SuppressWarnings("rawtypes")
-    public static Optional<Map<String, Object>> getRequestEntryByURLFromHAR(final String har, final Predicate<? super String> filterForTargetUrl) {
+    public static Optional<Map<String, Object>> findRequestEntry(final String har, final Predicate<? super String> filterForTargetUrl) {
         final Map<String, ?> map = N.fromJson(har, Map.class);
         final List<Map> entries = Maps.getByPath(map, "log.entries");
 
@@ -550,13 +548,13 @@ public final class HARUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String url = HARUtil.getUrlByRequestEntry(requestEntry);
+     * String url = HARUtil.getRequestUrl(requestEntry);
      * }</pre>
      * 
      * @param requestEntry the HAR request entry map
      * @return the URL string from the request entry
      */
-    public static String getUrlByRequestEntry(final Map<String, Object> requestEntry) {
+    public static String getRequestUrl(final Map<String, Object> requestEntry) {
         return (String) requestEntry.get("url");
     }
 
@@ -586,7 +584,7 @@ public final class HARUtil {
      * configured header filter to determine which headers should be included.
      * Headers that don't pass the filter are excluded from the returned HttpHeaders object.</p>
      * 
-     * <p>The header filter can be configured using {@link #setHeaderFilter(BiPredicate)}.</p>
+     * <p>The header filter can be configured using {@link #setThreadLocalHeaderFilter(BiPredicate)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

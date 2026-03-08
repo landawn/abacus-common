@@ -36,18 +36,18 @@ public class ImmutableSetType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(ImmutableSet.class, immutableSetType.clazz());
+        assertEquals(ImmutableSet.class, immutableSetType.javaType());
     }
 
     @Test
     public void testGetElementType() {
-        Type<?> elementType = immutableSetType.getElementType();
+        Type<?> elementType = immutableSetType.elementType();
         assertNotNull(elementType);
     }
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = immutableSetType.getParameterTypes();
+        Type<?>[] paramTypes = immutableSetType.parameterTypes();
         assertNotNull(paramTypes);
         assertEquals(1, paramTypes.length);
     }
@@ -75,7 +75,7 @@ public class ImmutableSetType100Test extends TestBase {
 
     @Test
     public void testGetSerializationType() {
-        Type.SerializationType serType = immutableSetType.getSerializationType();
+        Type.SerializationType serType = immutableSetType.serializationType();
         assertNotNull(serType);
         assertTrue(serType == Type.SerializationType.SERIALIZABLE || serType == Type.SerializationType.COLLECTION);
     }

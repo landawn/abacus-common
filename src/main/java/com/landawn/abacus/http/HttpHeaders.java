@@ -32,9 +32,9 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.cs;
 
 /**
- * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
- *
  * A container for HTTP headers with a fluent API for setting and retrieving header values.
+ *
+ * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
  * This class provides convenient methods for working with common HTTP headers and supports
  * all standard HTTP header fields as defined in various RFCs.
  *
@@ -62,9 +62,9 @@ public final class HttpHeaders {
     static final char LF = Strings.LF.charAt(0);
 
     /**
-     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
-     * 
      * Standard HTTP header field names as defined in various RFCs.
+     *
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
      * This class contains constants for all standard HTTP request and response headers.
      * 
      * <p>The constants are organized into categories:</p>
@@ -81,7 +81,7 @@ public final class HttpHeaders {
          * Private constructor to prevent instantiation of this constants class.
          */
         private Names() {
-            // singleton.
+            // Utility class - prevent instantiation
         }
 
         // HTTP Request and Response header fields
@@ -121,7 +121,7 @@ public final class HttpHeaders {
         static final String L_ACCEPT_ENCODING = "accept-encoding";
         /** The HTTP {@code Accept-Charset} header field name. */
         public static final String ACCEPT_CHARSET = "Accept-Charset";
-        /** The HTTP {@code Accept-Charset} header field name. */
+        /** The HTTP {@code Accept-Charset} header field name in lowercase. */
         static final String L_ACCEPT_CHARSET = "accept-charset";
         /** The HTTP {@code Accept-Language} header field name. */
         public static final String ACCEPT_LANGUAGE = "Accept-Language";
@@ -422,7 +422,7 @@ public final class HttpHeaders {
          * Private constructor to prevent instantiation of this constants class.
          */
         private Values() {
-            // singleton.
+            // Utility class - prevent instantiation
         }
 
         // application/content type.

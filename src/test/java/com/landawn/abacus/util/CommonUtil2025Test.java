@@ -3294,6 +3294,31 @@ public class CommonUtil2025Test extends TestBase {
     //     }
 
     @Test
+    public void testToLinkedHashMap() {
+        Map<String, Integer> map = CommonUtil.toLinkedHashMap("a", 1);
+        assertTrue(map instanceof LinkedHashMap);
+        assertEquals(1, map.size());
+
+        map = CommonUtil.toLinkedHashMap("a", 1, "b", 2);
+        assertEquals(2, map.size());
+
+        map = CommonUtil.toLinkedHashMap("a", 1, "b", 2, "c", 3);
+        assertEquals(3, map.size());
+
+        map = CommonUtil.toLinkedHashMap("a", 1, "b", 2, "c", 3, "d", 4, "e", 5);
+        assertEquals(5, map.size());
+
+        Iterator<String> iter = map.keySet().iterator();
+        assertEquals("a", iter.next());
+        assertEquals("b", iter.next());
+        assertEquals("c", iter.next());
+        assertEquals("d", iter.next());
+        assertEquals("e", iter.next());
+
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.toLinkedHashMap("a", 1, "b"));
+    }
+
+    @Test
     public void testAsMap() {
         Map<String, Integer> map = CommonUtil.asMap("a", 1, "b", 2, "c", 3, "d", 4, "e", 5, "f", 6, "g", 7, "h", 8, "i", 9);
         assertTrue(map instanceof ImmutableMap);
@@ -4127,16 +4152,6 @@ public class CommonUtil2025Test extends TestBase {
     }
 
     @Test
-    public void testNullToEmptyForEach() {
-        String[] arr = { null, "a", null, "b" };
-        CommonUtil.nullElementsToEmpty(arr);
-        assertEquals("", arr[0]);
-        assertEquals("a", arr[1]);
-        assertEquals("", arr[2]);
-        assertEquals("b", arr[3]);
-    }
-
-    @Test
     public void testNewArray() {
         String[] arr = CommonUtil.newArray(String.class, 3);
         assertEquals(3, arr.length);
@@ -4330,7 +4345,7 @@ public class CommonUtil2025Test extends TestBase {
     public void testTypeOf() {
         com.landawn.abacus.type.Type<String> type = CommonUtil.typeOf(String.class);
         assertNotNull(type);
-        assertEquals(String.class, type.clazz());
+        assertEquals(String.class, type.javaType());
     }
 
     @Test

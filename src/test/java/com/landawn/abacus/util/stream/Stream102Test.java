@@ -609,7 +609,7 @@ public class Stream102Test extends TestBase {
     @Test
     public void testOnEach() {
         List<Integer> collected = new ArrayList<>();
-        Stream<Integer> onEachStream = stream.onEach(collected::add);
+        Stream<Integer> onEachStream = stream.peek(collected::add);
         onEachStream.forEach(e -> {
         });
         assertEquals(testList, collected);
@@ -1261,7 +1261,7 @@ public class Stream102Test extends TestBase {
 
     @Test
     public void testNMatch() {
-        assertTrue(stream.isMatchCountBetween(2, 3, n -> n > 2));
+        assertTrue(stream.hasMatchCountBetween(2, 3, n -> n > 2));
     }
 
     @Test

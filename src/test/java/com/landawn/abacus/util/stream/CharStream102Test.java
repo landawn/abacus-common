@@ -469,35 +469,35 @@ public class CharStream102Test extends TestBase {
     @Test
     public void testStreamCreatedAfterOnEach() {
         List<Character> collected = new ArrayList<>();
-        assertEquals(5, CharStream.of((char) 1, (char) 2, (char) 3, (char) 4, (char) 5).onEach(collected::add).count());
+        assertEquals(5, CharStream.of((char) 1, (char) 2, (char) 3, (char) 4, (char) 5).peek(collected::add).count());
         collected.clear();
-        assertEquals(4, CharStream.of((char) 1, (char) 2, (char) 3, (char) 4, (char) 5).onEach(collected::add).skip(1).count());
+        assertEquals(4, CharStream.of((char) 1, (char) 2, (char) 3, (char) 4, (char) 5).peek(collected::add).skip(1).count());
         collected.clear();
-        assertArrayEquals(new char[] { 1, 2, 3, 4, 5 }, CharStream.of((char) 1, (char) 2, (char) 3, (char) 4, (char) 5).onEach(collected::add).toArray());
+        assertArrayEquals(new char[] { 1, 2, 3, 4, 5 }, CharStream.of((char) 1, (char) 2, (char) 3, (char) 4, (char) 5).peek(collected::add).toArray());
         collected.clear();
-        assertArrayEquals(new char[] { 2, 3, 4, 5 }, CharStream.of((char) 1, (char) 2, (char) 3, (char) 4, (char) 5).onEach(collected::add).skip(1).toArray());
+        assertArrayEquals(new char[] { 2, 3, 4, 5 }, CharStream.of((char) 1, (char) 2, (char) 3, (char) 4, (char) 5).peek(collected::add).skip(1).toArray());
         collected.clear();
         assertEquals(N.toList((char) 1, (char) 2, (char) 3, (char) 4, (char) 5),
-                CharStream.of((char) 1, (char) 2, (char) 3, (char) 4, (char) 5).onEach(collected::add).toList());
+                CharStream.of((char) 1, (char) 2, (char) 3, (char) 4, (char) 5).peek(collected::add).toList());
         collected.clear();
         assertEquals(N.toList((char) 2, (char) 3, (char) 4, (char) 5),
-                CharStream.of((char) 1, (char) 2, (char) 3, (char) 4, (char) 5).onEach(collected::add).skip(1).toList());
+                CharStream.of((char) 1, (char) 2, (char) 3, (char) 4, (char) 5).peek(collected::add).skip(1).toList());
         collected.clear();
-        assertEquals(5, CharStream.of((char) 1, (char) 2, (char) 3, (char) 4, (char) 5).map(e -> e).onEach(collected::add).count());
+        assertEquals(5, CharStream.of((char) 1, (char) 2, (char) 3, (char) 4, (char) 5).map(e -> e).peek(collected::add).count());
         collected.clear();
-        assertEquals(4, CharStream.of((char) 1, (char) 2, (char) 3, (char) 4, (char) 5).map(e -> e).onEach(collected::add).skip(1).count());
+        assertEquals(4, CharStream.of((char) 1, (char) 2, (char) 3, (char) 4, (char) 5).map(e -> e).peek(collected::add).skip(1).count());
         collected.clear();
         assertArrayEquals(new char[] { 1, 2, 3, 4, 5 },
-                CharStream.of((char) 1, (char) 2, (char) 3, (char) 4, (char) 5).map(e -> e).onEach(collected::add).toArray());
+                CharStream.of((char) 1, (char) 2, (char) 3, (char) 4, (char) 5).map(e -> e).peek(collected::add).toArray());
         collected.clear();
         assertArrayEquals(new char[] { 2, 3, 4, 5 },
-                CharStream.of((char) 1, (char) 2, (char) 3, (char) 4, (char) 5).map(e -> e).onEach(collected::add).skip(1).toArray());
+                CharStream.of((char) 1, (char) 2, (char) 3, (char) 4, (char) 5).map(e -> e).peek(collected::add).skip(1).toArray());
         collected.clear();
         assertEquals(N.toList((char) 1, (char) 2, (char) 3, (char) 4, (char) 5),
-                CharStream.of((char) 1, (char) 2, (char) 3, (char) 4, (char) 5).map(e -> e).onEach(collected::add).toList());
+                CharStream.of((char) 1, (char) 2, (char) 3, (char) 4, (char) 5).map(e -> e).peek(collected::add).toList());
         collected.clear();
         assertEquals(N.toList((char) 2, (char) 3, (char) 4, (char) 5),
-                CharStream.of((char) 1, (char) 2, (char) 3, (char) 4, (char) 5).map(e -> e).onEach(collected::add).skip(1).toList());
+                CharStream.of((char) 1, (char) 2, (char) 3, (char) 4, (char) 5).map(e -> e).peek(collected::add).skip(1).toList());
     }
 
     @Test

@@ -257,7 +257,7 @@ public class ParallelIteratorFloatStream100Test extends TestBase {
                 capturedValues.add(it);
             }
         };
-        FloatStream result = parallelStream.onEach(action);
+        FloatStream result = parallelStream.peek(action);
 
         float[] array = result.toArray();
 

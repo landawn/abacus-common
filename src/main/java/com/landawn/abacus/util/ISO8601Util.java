@@ -63,7 +63,7 @@ final class ISO8601Util {
     static final TimeZone TIMEZONE_Z = Dates.UTC_TIME_ZONE;
 
     private ISO8601Util() {
-        // singleton
+        // Utility class - prevent instantiation
     }
 
     // -------------------------------------------------------------------------

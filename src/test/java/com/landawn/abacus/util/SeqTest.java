@@ -42,32 +42,32 @@ public class SeqTest extends AbstractTest {
     @Test
     public void test_transform() throws Exception {
 
-        assertThrows(SQLException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).onEach(e -> {
+        assertThrows(SQLException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).peek(e -> {
             throw new SQLException("TheXyzSQLException");
         }).println());
 
-        assertThrows(SQLException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).onEach(e -> {
+        assertThrows(SQLException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).peek(e -> {
             throw new SQLException("TheXyzSQLException");
         }).transformB(s -> s.map(e -> e * 2)).println());
 
-        assertThrows(SQLException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).onEach(e -> {
+        assertThrows(SQLException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).peek(e -> {
             throw new SQLException("TheXyzSQLException");
         }).transformB(s -> s.map(e -> e * 2), false).println());
 
-        assertThrows(SQLException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).onEach(e -> {
+        assertThrows(SQLException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).peek(e -> {
             throw new SQLException("TheXyzSQLException");
         }).transformB(s -> s.map(e -> e * 2), true).println());
 
-        assertThrows(SQLException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).onEach(e -> {
+        assertThrows(SQLException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).peek(e -> {
             throw new SQLException("TheXyzSQLException");
         }).sps(s -> s.map(e -> e * 2)).println());
 
-        assertThrows(SQLException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).onEach(e -> {
+        assertThrows(SQLException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).peek(e -> {
             throw new SQLException("TheXyzSQLException");
         }).sps(64, s -> s.map(e -> e * 2)).println());
 
         try {
-            Seq.<Integer, SQLException> of(1, 2, 3).onEach(e -> {
+            Seq.<Integer, SQLException> of(1, 2, 3).peek(e -> {
                 throw new SQLException("TheXyzSQLException");
             }).transformB(s -> s.map(e -> e * 2)).println();
         } catch (final SQLException e) {
@@ -75,7 +75,7 @@ public class SeqTest extends AbstractTest {
         }
 
         try {
-            Seq.<Integer, SQLException> of(1, 2, 3).onEach(e -> {
+            Seq.<Integer, SQLException> of(1, 2, 3).peek(e -> {
                 throw new SQLException("TheXyzSQLException");
             }).transformB(s -> s.map(e -> e * 2), true).println();
         } catch (final SQLException e) {
@@ -83,7 +83,7 @@ public class SeqTest extends AbstractTest {
         }
 
         try {
-            Seq.<Integer, SQLException> of(1, 2, 3).onEach(e -> {
+            Seq.<Integer, SQLException> of(1, 2, 3).peek(e -> {
                 throw new SQLException("TheXyzSQLException");
             }).sps(s -> s.map(e -> e * 2)).println();
         } catch (final SQLException e) {
@@ -93,26 +93,26 @@ public class SeqTest extends AbstractTest {
 
     @Test
     public void test_transform2() throws Exception {
-        assertThrows(SQLException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).transformB(s -> s.map(e -> e * 2).onEachE(e -> {
+        assertThrows(SQLException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).transformB(s -> s.map(e -> e * 2).peek(Fn.cc(e -> {
             throw new SQLException("TheXyzSQLException");
-        })).println());
+        }))).println());
 
-        assertThrows(SQLException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).sps(s -> s.map(e -> e * 2).onEachE(e -> {
+        assertThrows(SQLException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).sps(s -> s.map(e -> e * 2).peek(Fn.cc(e -> {
             throw new SQLException("TheXyzSQLException");
-        })).println());
+        }))).println());
 
         try {
-            Seq.<Integer, SQLException> of(1, 2, 3).transformB(s -> s.map(e -> e * 2).onEachE(e -> {
+            Seq.<Integer, SQLException> of(1, 2, 3).transformB(s -> s.map(e -> e * 2).peek(Fn.cc(e -> {
                 throw new SQLException("TheXyzSQLException");
-            })).println();
+            }))).println();
         } catch (final SQLException e) {
             assertEquals("TheXyzSQLException", e.getMessage());
         }
 
         try {
-            Seq.<Integer, SQLException> of(1, 2, 3).sps(s -> s.map(e -> e * 2).onEachE(e -> {
+            Seq.<Integer, SQLException> of(1, 2, 3).sps(s -> s.map(e -> e * 2).peek(Fn.cc(e -> {
                 throw new SQLException("TheXyzSQLException");
-            })).println();
+            }))).println();
         } catch (final SQLException e) {
             assertEquals("TheXyzSQLException", e.getMessage());
         }
@@ -120,26 +120,26 @@ public class SeqTest extends AbstractTest {
 
     @Test
     public void test_transform3() throws Exception {
-        assertThrows(IOException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).transformB(s -> s.map(e -> e * 2).onEachE(e -> {
+        assertThrows(IOException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).transformB(s -> s.map(e -> e * 2).peek(Fn.cc(e -> {
             throw new IOException("TheXyzIOException");
-        })).println());
+        }))).println());
 
-        assertThrows(IOException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).sps(s -> s.map(e -> e * 2).onEachE(e -> {
+        assertThrows(IOException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).sps(s -> s.map(e -> e * 2).peek(Fn.cc(e -> {
             throw new IOException("TheXyzIOException");
-        })).println());
+        }))).println());
 
         try {
-            Seq.<Integer, SQLException> of(1, 2, 3).transformB(s -> s.map(e -> e * 2).onEachE(e -> {
+            Seq.<Integer, SQLException> of(1, 2, 3).transformB(s -> s.map(e -> e * 2).peek(Fn.cc(e -> {
                 throw new IOException("TheXyzIOException");
-            })).println();
+            }))).println();
         } catch (final Exception e) {
             assertEquals("TheXyzIOException", e.getMessage());
         }
 
         try {
-            Seq.<Integer, SQLException> of(1, 2, 3).sps(s -> s.map(e -> e * 2).onEachE(e -> {
+            Seq.<Integer, SQLException> of(1, 2, 3).sps(s -> s.map(e -> e * 2).peek(Fn.cc(e -> {
                 throw new IOException("TheXyzIOException");
-            })).println();
+            }))).println();
         } catch (final Exception e) {
             assertEquals("TheXyzIOException", e.getMessage());
         }
@@ -181,7 +181,7 @@ public class SeqTest extends AbstractTest {
         Seq.<String, SQLException> of("a", "b").transform(s -> s.map(String::length));
         Seq.of(CommonUtil.toList("a", "b"), SQLException.class)
                 .cast()
-                .onEach(it -> IOUtils.readLines(new FileInputStream(new File("./test.txt")), Charsets.DEFAULT));
+                .peek(it -> IOUtils.readLines(new FileInputStream(new File("./test.txt")), Charsets.DEFAULT));
     }
 
     @Test

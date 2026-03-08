@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BooleanList;
 import com.landawn.abacus.util.CharacterWriter;
 
@@ -27,24 +27,24 @@ public class PrimitiveBooleanListType100Test extends TestBase {
 
     private PrimitiveBooleanListType booleanListType;
     private CharacterWriter writer;
-    private JsonXmlSerializationConfig<?> config;
+    private JsonXmlSerConfig<?> config;
 
     @BeforeEach
     public void setUp() {
         booleanListType = (PrimitiveBooleanListType) createType("BooleanList");
         writer = createCharacterWriter();
-        config = mock(JsonXmlSerializationConfig.class);
+        config = mock(JsonXmlSerConfig.class);
     }
 
     @Test
     public void testClazz() {
-        assertEquals(BooleanList.class, booleanListType.clazz());
+        assertEquals(BooleanList.class, booleanListType.javaType());
     }
 
     @Test
     public void testGetElementType() {
-        assertNotNull(booleanListType.getElementType());
-        assertEquals("boolean", booleanListType.getElementType().name());
+        assertNotNull(booleanListType.elementType());
+        assertEquals("boolean", booleanListType.elementType().name());
     }
 
     @Test

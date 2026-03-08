@@ -20,9 +20,8 @@ import java.io.Writer;
 import java.util.Collection;
 
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.parser.JsonDeserializationConfig;
-import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonDeserConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
@@ -72,7 +71,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     protected final Type<T> elementType;
     protected final Type<T>[] parameterTypes;
 
-    protected final JsonDeserializationConfig jdc;
+    protected final JsonDeserConfig jdc;
 
     /**
      * Constructs an ObjectArrayType for the specified array class.
@@ -87,7 +86,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
         elementType = TypeFactory.getType(arrayClass.getComponentType());
         this.parameterTypes = new Type[] { elementType };
 
-        jdc = JDC.create().setElementType(elementType);
+        jdc = JsonDeserConfig.create().setElementType(elementType);
     }
 
     /**
@@ -99,11 +98,11 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     ObjectArrayType(final Type<T> elementType) {
         super(elementType.name() + "[]");
 
-        typeClass = (Class<T[]>) N.newArray(elementType.clazz(), 0).getClass();
+        typeClass = (Class<T[]>) N.newArray(elementType.javaType(), 0).getClass();
         this.elementType = elementType;
         this.parameterTypes = new Type[] { elementType };
 
-        jdc = JDC.create().setElementType(elementType);
+        jdc = JsonDeserConfig.create().setElementType(elementType);
     }
 
     /**
@@ -112,7 +111,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * @return the array class object
      */
     @Override
-    public Class<T[]> clazz() {
+    public Class<T[]> javaType() {
         return typeClass;
     }
 
@@ -122,12 +121,12 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * @return the Type handler for array elements
      */
     @Override
-    public Type<T> getElementType() {
+    public Type<T> elementType() {
         return elementType;
     }
 
     @Override
-    public Type<T>[] getParameterTypes() {
+    public Type<T>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -213,7 +212,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
         } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
-            return Array.newInstance(elementType.clazz(), 0);
+            return Array.newInstance(elementType.javaType(), 0);
         } else {
             return Utils.jsonParser.deserialize(str, jdc, typeClass);
         }
@@ -292,7 +291,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final T[] x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final T[] x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

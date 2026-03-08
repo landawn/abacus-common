@@ -271,15 +271,15 @@ public class HttpResponse {
     public <T> T body(final Type<T> resultType) throws IllegalArgumentException {
         N.checkArgNotNull(resultType, cs.resultType);
 
-        if (resultType.clazz().equals(String.class)) {
+        if (resultType.javaType().equals(String.class)) {
             return (T) new String(body, respCharset);
-        } else if (resultType.clazz().equals(byte[].class)) {
+        } else if (resultType.javaType().equals(byte[].class)) {
             return (T) body;
         } else {
             if (bodyFormat == ContentFormat.KRYO && HttpUtil.kryoParser != null) {
                 return HttpUtil.kryoParser.deserialize(new ByteArrayInputStream(body), null, resultType);
             } else if (bodyFormat == ContentFormat.FORM_URL_ENCODED) {
-                return N.convert(URLEncodedUtil.decode(new String(body, respCharset), resultType.clazz()), resultType);
+                return N.convert(URLEncodedUtil.decode(new String(body, respCharset), resultType.javaType()), resultType);
             } else if (bodyFormat.name().contains("JSON")) {
                 return N.fromJson(new String(body, respCharset), resultType);
             } else if (bodyFormat.name().contains("XML")) {

@@ -628,14 +628,14 @@ public class Strings2025Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test nullToEmpty() with array")
-    public void testNullToEmpty_Array() {
+    @DisplayName("Test nullElementsToEmpty() with array")
+    public void testNullElementsToEmpty_Array() {
         String[] array = { null, "abc", null, "xyz" };
-        Strings.nullToEmpty(array);
+        Strings.nullElementsToEmpty(array);
         assertArrayEquals(new String[] { "", "abc", "", "xyz" }, array);
 
         String[] emptyArray = {};
-        Strings.nullToEmpty(emptyArray);
+        Strings.nullElementsToEmpty(emptyArray);
         assertArrayEquals(new String[] {}, emptyArray);
     }
 
@@ -649,10 +649,10 @@ public class Strings2025Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test emptyToNull() with array")
-    public void testEmptyToNull_Array() {
+    @DisplayName("Test emptyElementsToNull() with array")
+    public void testEmptyElementsToNull_Array() {
         String[] array = { "", "abc", "", "xyz" };
-        Strings.emptyToNull(array);
+        Strings.emptyElementsToNull(array);
         assertArrayEquals(new String[] { null, "abc", null, "xyz" }, array);
     }
 
@@ -667,10 +667,10 @@ public class Strings2025Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test blankToEmpty() with array")
-    public void testBlankToEmpty_Array() {
+    @DisplayName("Test blankElementsToEmpty() with array")
+    public void testBlankElementsToEmpty_Array() {
         String[] array = { null, "abc", "  ", "xyz" };
-        Strings.blankToEmpty(array);
+        Strings.blankElementsToEmpty(array);
         assertArrayEquals(new String[] { "", "abc", "", "xyz" }, array);
     }
 
@@ -685,10 +685,10 @@ public class Strings2025Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test blankToNull() with array")
-    public void testBlankToNull_Array() {
+    @DisplayName("Test blankElementsToNull() with array")
+    public void testBlankElementsToNull_Array() {
         String[] array = { "  ", "abc", "", "xyz" };
-        Strings.blankToNull(array);
+        Strings.blankElementsToNull(array);
         assertArrayEquals(new String[] { null, "abc", null, "xyz" }, array);
     }
 

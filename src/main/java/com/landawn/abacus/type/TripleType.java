@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
@@ -95,7 +95,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      * @return the Class object for Triple
      */
     @Override
-    public Class<Triple<L, M, R>> clazz() {
+    public Class<Triple<L, M, R>> javaType() {
         return typeClass;
     }
 
@@ -106,14 +106,14 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Triple<String, Integer, Double>> type = TypeFactory.getType("Triple<String, Integer, Double>");
-     * Type<?>[] paramTypes = type.getParameterTypes();
+     * Type<?>[] paramTypes = type.parameterTypes();
      * // paramTypes[0] is Type<String>, paramTypes[1] is Type<Integer>, paramTypes[2] is Type<Double>
      * }</pre>
      *
      * @return an array containing the left, middle, and right types
      */
     @Override
-    public Type<?>[] getParameterTypes() {
+    public Type<?>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -168,9 +168,9 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
             throw new IllegalArgumentException("Invalid Triple format. Expected array with at least 3 elements but got: " + str);
         }
 
-        final L left = a[0] == null ? null : ((L) (leftType.clazz().isAssignableFrom(a[0].getClass()) ? a[0] : N.convert(a[0], leftType)));
-        final M middle = a[1] == null ? null : ((M) (middleType.clazz().isAssignableFrom(a[1].getClass()) ? a[1] : N.convert(a[1], middleType)));
-        final R right = a[2] == null ? null : ((R) (rightType.clazz().isAssignableFrom(a[2].getClass()) ? a[2] : N.convert(a[2], rightType)));
+        final L left = a[0] == null ? null : ((L) (leftType.javaType().isAssignableFrom(a[0].getClass()) ? a[0] : N.convert(a[0], leftType)));
+        final M middle = a[1] == null ? null : ((M) (middleType.javaType().isAssignableFrom(a[1].getClass()) ? a[1] : N.convert(a[1], middleType)));
+        final R right = a[2] == null ? null : ((R) (rightType.javaType().isAssignableFrom(a[2].getClass()) ? a[2] : N.convert(a[2], rightType)));
 
         return Triple.of(left, middle, right);
     }
@@ -237,7 +237,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Triple<L, M, R> x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Triple<L, M, R> x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

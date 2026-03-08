@@ -27,6 +27,7 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.BiIterator;
@@ -151,6 +152,48 @@ public class EntryStream2025Test extends TestBase {
     public void testOf_Map() {
         EntryStream<String, Integer> stream = EntryStream.of(testMap);
         assertEquals(5, stream.count());
+    }
+
+    @Test
+    public void testKeysRejectClosedMapBackedStream() {
+        EntryStream<String, Integer> stream = EntryStream.of(testMap);
+        stream.close();
+
+        Assertions.assertThrows(IllegalStateException.class, stream::keys);
+    }
+
+    @Test
+    public void testValuesRejectClosedMapBackedStream() {
+        EntryStream<String, Integer> stream = EntryStream.of(testMap);
+        stream.close();
+
+        Assertions.assertThrows(IllegalStateException.class, stream::values);
+    }
+
+    @Test
+    public void testEntriesRejectClosedStreamImmediately() {
+        EntryStream<String, Integer> stream = EntryStream.of(testMap);
+        stream.close();
+
+        Assertions.assertThrows(IllegalStateException.class, stream::entries);
+    }
+
+    @Test
+    public void testKeysPropagateCloseHandlers() {
+        AtomicInteger closeCount = new AtomicInteger();
+
+        EntryStream.of(testMap).onClose(closeCount::incrementAndGet).keys().count();
+
+        assertEquals(1, closeCount.get());
+    }
+
+    @Test
+    public void testValuesPropagateCloseHandlers() {
+        AtomicInteger closeCount = new AtomicInteger();
+
+        EntryStream.of(testMap).onClose(closeCount::incrementAndGet).values().count();
+
+        assertEquals(1, closeCount.get());
     }
 
     @Test
@@ -943,7 +986,7 @@ public class EntryStream2025Test extends TestBase {
     @Test
     public void testOnEach_Consumer() {
         AtomicInteger count = new AtomicInteger(0);
-        List<Entry<String, Integer>> result = EntryStream.of(testMap).onEach(e -> count.incrementAndGet()).toList();
+        List<Entry<String, Integer>> result = EntryStream.of(testMap).peek(e -> count.incrementAndGet()).toList();
         assertEquals(5, result.size());
         assertEquals(5, count.get());
     }
@@ -951,7 +994,7 @@ public class EntryStream2025Test extends TestBase {
     @Test
     public void testOnEach_BiConsumer() {
         AtomicInteger sum = new AtomicInteger(0);
-        List<Entry<String, Integer>> result = EntryStream.of(testMap).onEach((k, v) -> sum.addAndGet(v)).toList();
+        List<Entry<String, Integer>> result = EntryStream.of(testMap).peek((k, v) -> sum.addAndGet(v)).toList();
         assertEquals(5, result.size());
         assertEquals(15, sum.get());
     }
@@ -1071,14 +1114,14 @@ public class EntryStream2025Test extends TestBase {
 
     @Test
     public void testNMatch_Predicate() {
-        assertTrue(EntryStream.of(testMap).isMatchCountBetween(2, 3, e -> e.getValue() > 3));
-        assertFalse(EntryStream.of(testMap).isMatchCountBetween(5, 10, e -> e.getValue() > 3));
+        assertTrue(EntryStream.of(testMap).hasMatchCountBetween(2, 3, e -> e.getValue() > 3));
+        assertFalse(EntryStream.of(testMap).hasMatchCountBetween(5, 10, e -> e.getValue() > 3));
     }
 
     @Test
     public void testNMatch_BiPredicate() {
-        assertTrue(EntryStream.of(testMap).isMatchCountBetween(2, 3, (k, v) -> v > 3));
-        assertFalse(EntryStream.of(testMap).isMatchCountBetween(5, 10, (k, v) -> v > 3));
+        assertTrue(EntryStream.of(testMap).hasMatchCountBetween(2, 3, (k, v) -> v > 3));
+        assertFalse(EntryStream.of(testMap).hasMatchCountBetween(5, 10, (k, v) -> v > 3));
     }
 
     @Test
@@ -1570,7 +1613,7 @@ public class EntryStream2025Test extends TestBase {
     public void testOnEach_ConsumerFromBase() {
         AtomicInteger count = new AtomicInteger(0);
         List<Entry<String, Integer>> result = EntryStream.of(testMap)
-                .onEach((java.util.function.Consumer<Entry<String, Integer>>) e -> count.incrementAndGet())
+                .peek((java.util.function.Consumer<Entry<String, Integer>>) e -> count.incrementAndGet())
                 .toList();
         assertEquals(5, result.size());
         assertEquals(5, count.get());

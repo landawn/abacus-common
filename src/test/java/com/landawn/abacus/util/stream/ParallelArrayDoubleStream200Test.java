@@ -232,7 +232,7 @@ public class ParallelArrayDoubleStream200Test extends TestBase {
                 consumed.add(it);
             }
         };
-        stream.onEach(action).forEach(d -> {
+        stream.peek(action).forEach(d -> {
         });
         assertEquals(TEST_ARRAY.length, consumed.size());
 

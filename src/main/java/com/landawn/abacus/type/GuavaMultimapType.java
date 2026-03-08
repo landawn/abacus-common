@@ -32,8 +32,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.SortedSetMultimap;
 import com.google.common.collect.TreeMultimap;
-import com.landawn.abacus.parser.JsonDeserializationConfig;
-import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
+import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
@@ -57,7 +56,7 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
 
     private final Type<?>[] parameterTypes;
 
-    private final JsonDeserializationConfig jdc;
+    private final JsonDeserConfig jdc;
 
     GuavaMultimapType(final Class<T> typeClass, final String keyTypeName, final String valueTypeName) {
         super(getTypeName(typeClass, keyTypeName, valueTypeName, false));
@@ -72,7 +71,7 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
             parameterTypes = new Type[] { TypeFactory.getType(keyTypeName), TypeFactory.getType("List<" + valueTypeName + ">") };
         }
 
-        jdc = JDC.create().setMapKeyType(parameterTypes[0]).setMapValueType(parameterTypes[1]).setElementType(parameterTypes[1].getElementType());
+        jdc = JsonDeserConfig.create().setMapKeyType(parameterTypes[0]).setMapValueType(parameterTypes[1]).setElementType(parameterTypes[1].elementType());
     }
 
     /**
@@ -101,14 +100,14 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      * <pre>{@code
      * Type<ArrayListMultimap<String, Integer>> type =
      *     TypeFactory.getType("ArrayListMultimap<String, Integer>");
-     * Class<?> clazz = type.clazz();
+     * Class<?> clazz = type.javaType();
      * // Returns: ArrayListMultimap.class
      * }</pre>
      *
      * @return the Class object for the multimap type
      */
     @Override
-    public Class<T> clazz() {
+    public Class<T> javaType() {
         return typeClass;
     }
 
@@ -120,18 +119,18 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Multimap<String, Integer>> type = TypeFactory.getType("Multimap<String, Integer>");
-     * Type<?>[] paramTypes = type.getParameterTypes();
+     * Type<?>[] paramTypes = type.parameterTypes();
      * // Returns: [Type<String>, Type<List<Integer>>]
      *
      * Type<SetMultimap<String, Integer>> setType = TypeFactory.getType("SetMultimap<String, Integer>");
-     * Type<?>[] setParamTypes = setType.getParameterTypes();
+     * Type<?>[] setParamTypes = setType.parameterTypes();
      * // Returns: [Type<String>, Type<Set<Integer>>]
      * }</pre>
      *
      * @return an array containing the key type and collection value type
      */
     @Override
-    public Type<?>[] getParameterTypes() {
+    public Type<?>[] parameterTypes() {
         return parameterTypes;
     }
 

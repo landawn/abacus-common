@@ -34,7 +34,7 @@ public class ClobType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<Clob> result = type.clazz();
+        Class<Clob> result = type.javaType();
         assertEquals(Clob.class, result);
     }
 

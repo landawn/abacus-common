@@ -29,7 +29,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.parser.AvroDeserializationConfig.ADC;
+import com.landawn.abacus.parser.AvroDeserConfig;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
@@ -59,7 +59,7 @@ public class AvroParser101Test extends TestBase {
         record.put("name", "John");
         record.put("age", 30);
 
-        AvroSerializationConfig config = new AvroSerializationConfig();
+        AvroSerConfig config = new AvroSerConfig();
         config.setSchema(testSchema);
 
         String result = parser.serialize(record, config);
@@ -74,7 +74,7 @@ public class AvroParser101Test extends TestBase {
         data.put("name", "John");
         data.put("age", 30);
 
-        AvroSerializationConfig config = new AvroSerializationConfig();
+        AvroSerConfig config = new AvroSerConfig();
 
         assertThrows(IllegalArgumentException.class, () -> parser.serialize(data, config));
     }
@@ -85,7 +85,7 @@ public class AvroParser101Test extends TestBase {
         record.put("name", "Jane");
         record.put("age", 25);
 
-        AvroSerializationConfig config = new AvroSerializationConfig();
+        AvroSerConfig config = new AvroSerConfig();
         config.setSchema(testSchema);
 
         File outputFile = new File(tempDir, "test.avro");
@@ -101,7 +101,7 @@ public class AvroParser101Test extends TestBase {
         record.put("name", "Bob");
         record.put("age", 35);
 
-        AvroSerializationConfig config = new AvroSerializationConfig();
+        AvroSerConfig config = new AvroSerConfig();
         config.setSchema(testSchema);
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -117,7 +117,7 @@ public class AvroParser101Test extends TestBase {
         record.put("name", "Alice");
         record.put("age", 28);
 
-        AvroSerializationConfig config = new AvroSerializationConfig();
+        AvroSerConfig config = new AvroSerConfig();
         config.setSchema(testSchema);
 
         Writer writer = new StringWriter();
@@ -131,7 +131,7 @@ public class AvroParser101Test extends TestBase {
         map.put("name", "MapUser");
         map.put("age", 40);
 
-        AvroSerializationConfig config = new AvroSerializationConfig();
+        AvroSerConfig config = new AvroSerConfig();
         config.setSchema(testSchema);
 
         String result = parser.serialize(map, config);
@@ -143,7 +143,7 @@ public class AvroParser101Test extends TestBase {
     public void testSerializeCollectionWithSchema() {
         List<String> list = Arrays.asList("one", "two", "three");
 
-        AvroSerializationConfig config = new AvroSerializationConfig();
+        AvroSerConfig config = new AvroSerConfig();
         config.setSchema(arraySchema);
 
         String result = parser.serialize(list, config);
@@ -157,7 +157,7 @@ public class AvroParser101Test extends TestBase {
 
         Schema intArraySchema = new Schema.Parser().parse("{\"type\":\"array\",\"items\":\"int\"}");
 
-        AvroSerializationConfig config = new AvroSerializationConfig();
+        AvroSerConfig config = new AvroSerConfig();
         config.setSchema(intArraySchema);
 
         String result = parser.serialize(N.toList(array), config);
@@ -169,7 +169,7 @@ public class AvroParser101Test extends TestBase {
     public void testSerializeUnsupportedType() {
         StringBuilder sb = new StringBuilder("test");
 
-        AvroSerializationConfig config = new AvroSerializationConfig();
+        AvroSerConfig config = new AvroSerConfig();
         config.setSchema(testSchema);
 
         assertThrows(IllegalArgumentException.class, () -> parser.serialize(sb, config));
@@ -181,12 +181,12 @@ public class AvroParser101Test extends TestBase {
         record.put("name", "TestUser");
         record.put("age", 50);
 
-        AvroSerializationConfig serConfig = new AvroSerializationConfig();
+        AvroSerConfig serConfig = new AvroSerConfig();
         serConfig.setSchema(testSchema);
 
         String serialized = parser.serialize(record, serConfig);
 
-        AvroDeserializationConfig deserConfig = new AvroDeserializationConfig();
+        AvroDeserConfig deserConfig = new AvroDeserConfig();
         deserConfig.setSchema(testSchema);
 
         GenericRecord result = parser.deserialize(serialized, deserConfig, GenericRecord.class);
@@ -201,13 +201,13 @@ public class AvroParser101Test extends TestBase {
         record.put("name", "FileUser");
         record.put("age", 45);
 
-        AvroSerializationConfig serConfig = new AvroSerializationConfig();
+        AvroSerConfig serConfig = new AvroSerConfig();
         serConfig.setSchema(testSchema);
 
         File file = new File(tempDir, "deserialize_test.avro");
         parser.serialize(record, serConfig, file);
 
-        AvroDeserializationConfig deserConfig = new AvroDeserializationConfig();
+        AvroDeserConfig deserConfig = new AvroDeserConfig();
         deserConfig.setSchema(testSchema);
 
         GenericRecord result = parser.deserialize(file, deserConfig, GenericRecord.class);
@@ -222,14 +222,14 @@ public class AvroParser101Test extends TestBase {
         record.put("name", "StreamUser");
         record.put("age", 55);
 
-        AvroSerializationConfig serConfig = new AvroSerializationConfig();
+        AvroSerConfig serConfig = new AvroSerConfig();
         serConfig.setSchema(testSchema);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         parser.serialize(record, serConfig, baos);
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        AvroDeserializationConfig deserConfig = new AvroDeserializationConfig();
+        AvroDeserConfig deserConfig = new AvroDeserConfig();
         deserConfig.setSchema(testSchema);
 
         GenericRecord result = parser.deserialize(bais, deserConfig, GenericRecord.class);
@@ -240,7 +240,7 @@ public class AvroParser101Test extends TestBase {
 
     @Test
     public void testDeserializeFromReader() {
-        AvroDeserializationConfig config = ADC.create().setSchema(testSchema);
+        AvroDeserConfig config = AvroDeserConfig.create().setSchema(testSchema);
 
         assertThrows(UnsupportedOperationException.class, () -> parser.deserialize(new java.io.StringReader("test"), config, GenericRecord.class));
     }
@@ -251,14 +251,14 @@ public class AvroParser101Test extends TestBase {
         record.put("name", "MapDeserializeUser");
         record.put("age", 60);
 
-        AvroSerializationConfig serConfig = new AvroSerializationConfig();
+        AvroSerConfig serConfig = new AvroSerConfig();
         serConfig.setSchema(testSchema);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         parser.serialize(record, serConfig, baos);
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        AvroDeserializationConfig deserConfig = new AvroDeserializationConfig();
+        AvroDeserConfig deserConfig = new AvroDeserConfig();
         deserConfig.setSchema(testSchema);
 
         Map<String, Object> result = parser.deserialize(bais, deserConfig, HashMap.class);
@@ -273,14 +273,14 @@ public class AvroParser101Test extends TestBase {
 
         List<String> originalList = Arrays.asList("alpha", "beta", "gamma");
 
-        AvroSerializationConfig serConfig = new AvroSerializationConfig();
+        AvroSerConfig serConfig = new AvroSerConfig();
         serConfig.setSchema(stringArraySchema);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         parser.serialize(originalList, serConfig, baos);
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        AvroDeserializationConfig deserConfig = new AvroDeserializationConfig();
+        AvroDeserConfig deserConfig = new AvroDeserConfig();
         deserConfig.setSchema(stringArraySchema);
 
         List<String> result = parser.deserialize(bais, deserConfig, List.class);
@@ -292,7 +292,7 @@ public class AvroParser101Test extends TestBase {
     public void testDeserializeWithoutSchema() {
         String base64Data = Strings.base64Encode("dummy data".getBytes());
 
-        AvroDeserializationConfig config = new AvroDeserializationConfig();
+        AvroDeserConfig config = new AvroDeserConfig();
 
         assertThrows(IllegalArgumentException.class, () -> parser.deserialize(base64Data, config, Map.class));
     }
@@ -310,7 +310,7 @@ public class AvroParser101Test extends TestBase {
         map2.put("age", 25);
         list.add(map2);
 
-        AvroSerializationConfig config = new AvroSerializationConfig();
+        AvroSerConfig config = new AvroSerConfig();
         config.setSchema(testSchema);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -325,7 +325,7 @@ public class AvroParser101Test extends TestBase {
         bean.setName("BeanUser");
         bean.setAge(40);
 
-        AvroSerializationConfig config = new AvroSerializationConfig();
+        AvroSerConfig config = new AvroSerConfig();
         config.setSchema(testSchema);
 
         String result = parser.serialize(bean, config);
@@ -339,14 +339,14 @@ public class AvroParser101Test extends TestBase {
         record.put("name", "BeanDeserializeUser");
         record.put("age", 65);
 
-        AvroSerializationConfig serConfig = new AvroSerializationConfig();
+        AvroSerConfig serConfig = new AvroSerConfig();
         serConfig.setSchema(testSchema);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         parser.serialize(record, serConfig, baos);
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        AvroDeserializationConfig deserConfig = new AvroDeserializationConfig();
+        AvroDeserConfig deserConfig = new AvroDeserConfig();
         deserConfig.setSchema(testSchema);
 
         TestBean result = parser.deserialize(bais, deserConfig, TestBean.class);
@@ -359,14 +359,14 @@ public class AvroParser101Test extends TestBase {
     public void testSerializeEmptyCollection() {
         List<Object> emptyList = new ArrayList<>();
 
-        AvroSerializationConfig config = new AvroSerializationConfig();
+        AvroSerConfig config = new AvroSerConfig();
         config.setSchema(arraySchema);
 
         String result = parser.serialize(emptyList, config);
 
         N.println("Testing serialization of empty collection: " + result);
 
-        AvroDeserializationConfig adc = ADC.create().setSchema(arraySchema).setElementType(String.class);
+        AvroDeserConfig adc = AvroDeserConfig.create().setSchema(arraySchema).setElementType(String.class);
 
         List<String> newList = parser.deserialize(result, adc, List.class);
         N.println("Deserialized empty collection: " + newList);
@@ -378,7 +378,7 @@ public class AvroParser101Test extends TestBase {
         record.put("name", "Test");
         record.put("age", 30);
 
-        AvroSerializationConfig config = new AvroSerializationConfig();
+        AvroSerConfig config = new AvroSerConfig();
         config.setSchema(testSchema);
 
         File invalidFile = tempDir;
@@ -388,7 +388,7 @@ public class AvroParser101Test extends TestBase {
 
     @Test
     public void testDeserializeUnsupportedType() {
-        AvroDeserializationConfig config = new AvroDeserializationConfig();
+        AvroDeserConfig config = new AvroDeserConfig();
         config.setSchema(testSchema);
 
         ByteArrayInputStream bais = new ByteArrayInputStream(new byte[0]);
@@ -501,7 +501,7 @@ public class AvroParser101Test extends TestBase {
         parser.serialize(original, null, baos);
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        AvroDeserializationConfig config = new AvroDeserializationConfig();
+        AvroDeserConfig config = new AvroDeserConfig();
         config.setElementType(MockSpecificRecord.class);
 
         assertThrows(ClassCastException.class, () -> {
@@ -528,7 +528,7 @@ public class AvroParser101Test extends TestBase {
         record2.put("age", 20);
         records.add(record2);
 
-        AvroSerializationConfig config = new AvroSerializationConfig();
+        AvroSerConfig config = new AvroSerConfig();
         config.setSchema(testSchema);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -550,14 +550,14 @@ public class AvroParser101Test extends TestBase {
         map2.put("age", 25);
         original.add(map2);
 
-        AvroSerializationConfig serConfig = new AvroSerializationConfig();
+        AvroSerConfig serConfig = new AvroSerConfig();
         serConfig.setSchema(testSchema);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         parser.serialize(original, serConfig, baos);
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        AvroDeserializationConfig deserConfig = new AvroDeserializationConfig();
+        AvroDeserConfig deserConfig = new AvroDeserConfig();
         deserConfig.setSchema(testSchema);
         deserConfig.setElementType(HashMap.class);
 

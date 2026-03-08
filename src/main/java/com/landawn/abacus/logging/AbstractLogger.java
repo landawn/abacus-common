@@ -1377,8 +1377,10 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Formats a message template with one argument.
      *
-     * <p>Supports both {} and %s placeholders. If no placeholder is found,
-     * the argument is appended in square brackets.</p>
+     * <p>Supports {} (SLF4J-style) or %s (printf-style) placeholders.
+     * If the template contains {}, that style is used; otherwise %s is tried.
+     * The two styles cannot be mixed in a single template.
+     * If no placeholder is found, the argument is appended in square brackets.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1395,7 +1397,7 @@ public abstract class AbstractLogger implements Logger {
     static String format(String template, final Object arg) {
         template = String.valueOf(template); // null -> "null"
 
-        // start substituting the arguments into the '%s' placeholders
+        // start substituting the arguments into the '{}' or '%s' placeholders
         final StringBuilder sb = Objectory.createStringBuilder(template.length() + 16);
 
         String placeholder = "{}";
@@ -1427,8 +1429,10 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Formats a message template with two arguments.
      *
-     * <p>Supports both {} and %s placeholders. Extra arguments are appended
-     * in square brackets if there are fewer placeholders than arguments.</p>
+     * <p>Supports {} (SLF4J-style) or %s (printf-style) placeholders.
+     * If the template contains {}, that style is used; otherwise %s is tried.
+     * The two styles cannot be mixed in a single template.
+     * Extra arguments are appended in square brackets if there are fewer placeholders than arguments.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1446,7 +1450,7 @@ public abstract class AbstractLogger implements Logger {
     static String format(String template, final Object arg1, final Object arg2) {
         template = String.valueOf(template); // null -> "null"
 
-        // start substituting the arguments into the '%s' placeholders
+        // start substituting the arguments into the '{}' or '%s' placeholders
         final StringBuilder sb = Objectory.createStringBuilder(template.length() + 32);
 
         String placeholder = "{}";
@@ -1500,8 +1504,10 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Formats a message template with three arguments.
      *
-     * <p>Supports both {} and %s placeholders. Extra arguments are appended
-     * in square brackets if there are fewer placeholders than arguments.</p>
+     * <p>Supports {} (SLF4J-style) or %s (printf-style) placeholders.
+     * If the template contains {}, that style is used; otherwise %s is tried.
+     * The two styles cannot be mixed in a single template.
+     * Extra arguments are appended in square brackets if there are fewer placeholders than arguments.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1521,7 +1527,7 @@ public abstract class AbstractLogger implements Logger {
     static String format(String template, final Object arg1, final Object arg2, final Object arg3) {
         template = String.valueOf(template); // null -> "null"
 
-        // start substituting the arguments into the '%s' placeholders
+        // start substituting the arguments into the '{}' or '%s' placeholders
         final StringBuilder sb = Objectory.createStringBuilder(template.length() + 48);
 
         String placeholder = "{}";
@@ -1602,9 +1608,9 @@ public abstract class AbstractLogger implements Logger {
      *                     username, opCount, duration);
      * }</pre>
      *
-     * @param template a {@code non-null} string containing 0 or more {} or %s placeholders
+     * @param template the message template containing 0 or more {} or %s placeholders, may be {@code null} (converted to "null")
      * @param args the arguments to be substituted into the message template. Arguments
-     *     are converted to strings using {@link String#valueOf(Object)}. Arguments can be {@code null}.
+     *     are converted to strings using {@code N.toString(Object)}. Arguments can be {@code null}.
      * @return the formatted message
      */
     // Note that this is somewhat-improperly used from Verify.java as well.
@@ -1615,7 +1621,7 @@ public abstract class AbstractLogger implements Logger {
             return template;
         }
 
-        // start substituting the arguments into the '%s' placeholders
+        // start substituting the arguments into the '{}' or '%s' placeholders
         final StringBuilder sb = Objectory.createStringBuilder(template.length() + 16 * args.length);
         int templateStart = 0;
         int i = 0;

@@ -20,9 +20,8 @@ import java.io.Writer;
 import java.util.Map;
 
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.parser.JsonDeserializationConfig;
-import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonDeserConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Clazz;
 import com.landawn.abacus.util.IOUtil;
@@ -52,7 +51,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
 
     private final Type<?>[] parameterTypes;
 
-    private final JsonDeserializationConfig jdc;
+    private final JsonDeserConfig jdc;
 
     MapEntryType(final String keyTypeName, final String valueTypeName) {
         super(getTypeName(keyTypeName, valueTypeName, false));
@@ -61,7 +60,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
         keyType = TypeFactory.getType(keyTypeName);
         valueType = TypeFactory.getType(valueTypeName);
         parameterTypes = new Type[] { keyType, valueType };
-        jdc = JDC.create().setMapKeyType(keyType).setMapValueType(valueType);
+        jdc = JsonDeserConfig.create().setMapKeyType(keyType).setMapValueType(valueType);
     }
 
     /**
@@ -88,14 +87,14 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Map.Entry<String, Integer>> type = TypeFactory.getType("Map.Entry<String, Integer>");
-     * Class<Map.Entry<String, Integer>> clazz = type.clazz();
+     * Class<Map.Entry<String, Integer>> clazz = type.javaType();
      * // Returns: Map.Entry.class
      * }</pre>
      *
      * @return The Class object for Map.Entry
      */
     @Override
-    public Class<Map.Entry<K, V>> clazz() {
+    public Class<Map.Entry<K, V>> javaType() {
         return typeClass;
     }
 
@@ -106,7 +105,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Map.Entry<String, Integer>> type = TypeFactory.getType("Map.Entry<String, Integer>");
-     * Type<?>[] paramTypes = type.getParameterTypes();
+     * Type<?>[] paramTypes = type.parameterTypes();
      * // Returns: [StringType, IntegerType]
      * // paramTypes[0] is the key type (String)
      * // paramTypes[1] is the value type (Integer)
@@ -115,7 +114,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * @return An array containing the key type and value type
      */
     @Override
-    public Type<?>[] getParameterTypes() {
+    public Type<?>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -273,7 +272,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * Type<Map.Entry<String, Integer>> type = TypeFactory.getType("Map.Entry<String, Integer>");
      * Map.Entry<String, Integer> entry = Map.entry("age", 25);
      * CharacterWriter writer = CharacterWriter.of(new StringWriter());
-     * JsonXmlSerializationConfig<?> config = JsonXmlSerializationConfig.of();
+     * JsonXmlSerConfig<?> config = JsonXmlSerConfig.of();
      *
      * type.writeCharacter(writer, entry, config);
      * // writer now contains: {"age":25}
@@ -288,7 +287,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * @throws IOException if an I/O error occurs while writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Map.Entry<K, V> x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Map.Entry<K, V> x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

@@ -114,11 +114,11 @@ import com.landawn.abacus.annotation.Beta;
  * <pre>{@code
  * // Beta feature: action with initialization parameter
  * If.notEmpty(dataList)
- *   .then(new ProcessingContext(), (context, list) -> {
+ *   .then(new ProcessingContext(), context -> {
  *       context.initialize();
- *       processDataWithContext(context, list);
+ *       processDataWithContext(context, dataList);
  *   })
- *   .orElse(context -> handleEmptyData(context));
+ *   .orElse(() -> handleEmptyData());
  *
  * // Chaining multiple conditions
  * public void processUser(User user) {
@@ -264,11 +264,11 @@ import com.landawn.abacus.annotation.Beta;
  *           .orElse(() -> queueForLaterProcessing(user));
  *
  *         If.notEmpty(user.getPreferences())
- *           .then(context, (ctx, prefs) -> {
+ *           .then(context, ctx -> {
  *               ctx.setProcessingMode(CUSTOM);
- *               applyUserPreferences(prefs, ctx);
+ *               applyUserPreferences(user.getPreferences(), ctx);
  *           })
- *           .orElse(ctx -> ctx.setProcessingMode(DEFAULT));
+ *           .orElse(() -> context.setProcessingMode(DEFAULT));
  *     }
  * }
  * }</pre>
@@ -1052,11 +1052,11 @@ public final class If {
      * // Example 2: Conditional initialization with parameter
      * ProcessingContext context = new ProcessingContext();
      * If.notEmpty(dataList)
-     *   .then(context, (ctx, list) -> {
+     *   .then(context, ctx -> {
      *       ctx.initialize();
      *       processDataWithContext(ctx, dataList);
      *   })
-     *   .orElse(ctx -> handleEmptyData(ctx));
+     *   .orElse(() -> handleEmptyData());
      * }</pre>
      *
      * @param <T> the type of the input to the consumer.

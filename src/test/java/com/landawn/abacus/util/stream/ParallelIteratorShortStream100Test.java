@@ -209,7 +209,7 @@ public class ParallelIteratorShortStream100Test extends TestBase {
                 capturedValues.add(it);
             }
         };
-        ShortStream result = parallelStream.onEach(action);
+        ShortStream result = parallelStream.peek(action);
 
         short[] array = result.toArray();
 

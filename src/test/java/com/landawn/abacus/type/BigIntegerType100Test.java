@@ -31,7 +31,7 @@ public class BigIntegerType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(BigInteger.class, bigIntegerType.clazz());
+        assertEquals(BigInteger.class, bigIntegerType.javaType());
     }
 
     @Test

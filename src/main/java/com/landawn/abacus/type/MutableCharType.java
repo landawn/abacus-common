@@ -9,8 +9,9 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.MutableChar;
 import com.landawn.abacus.util.N;
@@ -39,14 +40,14 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<MutableChar> type = TypeFactory.getType(MutableChar.class);
-     * Class<MutableChar> clazz = type.clazz();
+     * Class<MutableChar> clazz = type.javaType();
      * // clazz equals MutableChar.class
      * }</pre>
      *
      * @return The Class object for MutableChar
      */
     @Override
-    public Class<MutableChar> clazz() {
+    public Class<MutableChar> javaType() {
         return MutableChar.class;
     }
 
@@ -119,7 +120,9 @@ public class MutableCharType extends AbstractType<MutableChar> {
      */
     @Override
     public MutableChar get(final ResultSet rs, final int columnIndex) throws SQLException {
-        return MutableChar.of((char) rs.getInt(columnIndex));
+        final int value = rs.getInt(columnIndex);
+
+        return rs.wasNull() ? null : MutableChar.of((char) value);
     }
 
     /**
@@ -143,7 +146,9 @@ public class MutableCharType extends AbstractType<MutableChar> {
      */
     @Override
     public MutableChar get(final ResultSet rs, final String columnName) throws SQLException {
-        return MutableChar.of((char) rs.getInt(columnName));
+        final int value = rs.getInt(columnName);
+
+        return rs.wasNull() ? null : MutableChar.of((char) value);
     }
 
     /**
@@ -170,7 +175,11 @@ public class MutableCharType extends AbstractType<MutableChar> {
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final MutableChar x) throws SQLException {
-        stmt.setInt(columnIndex, (x == null) ? 0 : x.value());
+        if (x == null) {
+            stmt.setNull(columnIndex, Types.INTEGER);
+        } else {
+            stmt.setInt(columnIndex, x.value());
+        }
     }
 
     /**
@@ -197,7 +206,11 @@ public class MutableCharType extends AbstractType<MutableChar> {
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final MutableChar x) throws SQLException {
-        stmt.setInt(parameterName, (x == null) ? 0 : x.value());
+        if (x == null) {
+            stmt.setNull(parameterName, Types.INTEGER);
+        } else {
+            stmt.setInt(parameterName, x.value());
+        }
     }
 
     /**
@@ -245,7 +258,7 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * // Writes: D
      *
      * // With quotation configured (using concrete subclass)
-     * JsonSerializationConfig config = JsonSerializationConfig.create();
+     * JsonSerConfig config = JsonSerConfig.create();
      * config.setCharQuotation('\'');
      * type.writeCharacter(writer, mc, config);
      * // Writes: 'D'
@@ -261,7 +274,7 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * @throws IOException if an I/O error occurs while writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final MutableChar x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final MutableChar x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

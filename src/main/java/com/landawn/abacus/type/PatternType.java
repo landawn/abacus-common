@@ -54,7 +54,7 @@ public class PatternType extends AbstractType<Pattern> {
      * @return the Class object for java.util.regex.Pattern
      */
     @Override
-    public Class<Pattern> clazz() {
+    public Class<Pattern> javaType() {
         return Pattern.class;
     }
 

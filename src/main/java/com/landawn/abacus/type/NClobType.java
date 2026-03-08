@@ -69,7 +69,7 @@ public class NClobType extends AbstractType<NClob> {
      * @return the {@link NClob} class object
      */
     @Override
-    public Class<NClob> clazz() {
+    public Class<NClob> javaType() {
         return clazz;
     }
 

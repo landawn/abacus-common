@@ -48,16 +48,16 @@ public class SerializationConfig100Test extends TestBase {
 
     @Test
     public void testSkipTransientField() {
-        assertTrue(config.skipTransientField());
+        assertTrue(config.isSkipTransientField());
     }
 
     @Test
     public void testSkipTransientFieldSetter() {
-        config.skipTransientField(false);
-        assertFalse(config.skipTransientField());
+        config.setSkipTransientField(false);
+        assertFalse(config.isSkipTransientField());
 
-        config.skipTransientField(true);
-        assertTrue(config.skipTransientField());
+        config.setSkipTransientField(true);
+        assertTrue(config.isSkipTransientField());
     }
 
     @Test
@@ -90,10 +90,10 @@ public class SerializationConfig100Test extends TestBase {
         config2.setExclusion(Exclusion.NULL);
         assertTrue(config1.equals(config2));
 
-        config1.skipTransientField(false);
+        config1.setSkipTransientField(false);
         assertFalse(config1.equals(config2));
 
-        config2.skipTransientField(false);
+        config2.setSkipTransientField(false);
         assertTrue(config1.equals(config2));
 
         Set<String> ignoredProps = new HashSet<>();

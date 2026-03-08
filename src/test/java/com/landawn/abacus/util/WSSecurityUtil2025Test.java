@@ -260,6 +260,206 @@ public class WSSecurityUtil2025Test extends TestBase {
         Assertions.assertEquals(digestFromString, digestFromBytes, "String and byte array versions should produce same digest");
     }
 
+    // ============================================================
+    // Tests for algorithm-accepting overloads
+    // ============================================================
+
+    @Test
+    public void testGenerateDigest_withAlgorithm_SHA256() {
+        String input = "Hello World";
+        byte[] digest = WSSecurityUtil.generateDigest(input.getBytes(StandardCharsets.UTF_8), "SHA-256");
+
+        Assertions.assertNotNull(digest);
+        Assertions.assertEquals(32, digest.length, "SHA-256 digest should be 32 bytes");
+    }
+
+    @Test
+    public void testGenerateDigest_withAlgorithm_SHA512() {
+        String input = "Hello World";
+        byte[] digest = WSSecurityUtil.generateDigest(input.getBytes(StandardCharsets.UTF_8), "SHA-512");
+
+        Assertions.assertNotNull(digest);
+        Assertions.assertEquals(64, digest.length, "SHA-512 digest should be 64 bytes");
+    }
+
+    @Test
+    public void testGenerateDigest_withAlgorithm_SHA1_matchesDefault() {
+        byte[] input = "test data".getBytes(StandardCharsets.UTF_8);
+
+        byte[] defaultDigest = WSSecurityUtil.generateDigest(input);
+        byte[] sha1Digest = WSSecurityUtil.generateDigest(input, "SHA-1");
+
+        Assertions.assertArrayEquals(defaultDigest, sha1Digest, "SHA-1 via algorithm param should match default");
+    }
+
+    @Test
+    public void testGenerateDigest_withAlgorithm_consistency() {
+        byte[] input = "consistent input".getBytes(StandardCharsets.UTF_8);
+
+        byte[] digest1 = WSSecurityUtil.generateDigest(input, "SHA-256");
+        byte[] digest2 = WSSecurityUtil.generateDigest(input, "SHA-256");
+
+        Assertions.assertArrayEquals(digest1, digest2, "Same input should produce same digest");
+    }
+
+    @Test
+    public void testGenerateDigest_withAlgorithm_differentInputs() {
+        byte[] digest1 = WSSecurityUtil.generateDigest("input1".getBytes(StandardCharsets.UTF_8), "SHA-256");
+        byte[] digest2 = WSSecurityUtil.generateDigest("input2".getBytes(StandardCharsets.UTF_8), "SHA-256");
+
+        Assertions.assertFalse(CommonUtil.equals(digest1, digest2), "Different inputs should produce different digests");
+    }
+
+    @Test
+    public void testGenerateDigest_withAlgorithm_nullInput() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            WSSecurityUtil.generateDigest(null, "SHA-256");
+        });
+    }
+
+    @Test
+    public void testGenerateDigest_withAlgorithm_nullAlgorithm() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            WSSecurityUtil.generateDigest("test".getBytes(StandardCharsets.UTF_8), null);
+        });
+    }
+
+    @Test
+    public void testGenerateDigest_withAlgorithm_invalidAlgorithm() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            WSSecurityUtil.generateDigest("test".getBytes(StandardCharsets.UTF_8), "INVALID-ALG");
+        });
+    }
+
+    @Test
+    public void testDoPasswordDigest_withAlgorithm_bytes_SHA256() {
+        byte[] nonce = WSSecurityUtil.generateNonce(16);
+        byte[] created = "2024-01-01T12:00:00Z".getBytes(StandardCharsets.UTF_8);
+        byte[] password = "secretPassword".getBytes(StandardCharsets.UTF_8);
+
+        String digest = WSSecurityUtil.computePasswordDigest(nonce, created, password, "SHA-256");
+
+        Assertions.assertNotNull(digest);
+        Assertions.assertTrue(digest.length() > 0);
+
+        Assertions.assertDoesNotThrow(() -> {
+            Base64.getDecoder().decode(digest);
+        });
+    }
+
+    @Test
+    public void testDoPasswordDigest_withAlgorithm_bytes_matchesDefaultForSHA1() {
+        byte[] nonce = new byte[] { 1, 2, 3, 4 };
+        byte[] created = "2024-01-01T12:00:00Z".getBytes(StandardCharsets.UTF_8);
+        byte[] password = "secret".getBytes(StandardCharsets.UTF_8);
+
+        String defaultDigest = WSSecurityUtil.computePasswordDigest(nonce, created, password);
+        String sha1Digest = WSSecurityUtil.computePasswordDigest(nonce, created, password, "SHA-1");
+
+        Assertions.assertEquals(defaultDigest, sha1Digest, "SHA-1 via algorithm param should match default");
+    }
+
+    @Test
+    public void testDoPasswordDigest_withAlgorithm_bytes_differentFromSHA1() {
+        byte[] nonce = new byte[] { 1, 2, 3, 4 };
+        byte[] created = "2024-01-01T12:00:00Z".getBytes(StandardCharsets.UTF_8);
+        byte[] password = "secret".getBytes(StandardCharsets.UTF_8);
+
+        String sha1Digest = WSSecurityUtil.computePasswordDigest(nonce, created, password, "SHA-1");
+        String sha256Digest = WSSecurityUtil.computePasswordDigest(nonce, created, password, "SHA-256");
+
+        Assertions.assertNotEquals(sha1Digest, sha256Digest, "SHA-1 and SHA-256 should produce different digests");
+    }
+
+    @Test
+    public void testDoPasswordDigest_withAlgorithm_bytes_consistency() {
+        byte[] nonce = new byte[] { 10, 20, 30 };
+        byte[] created = "2024-06-15T08:00:00Z".getBytes(StandardCharsets.UTF_8);
+        byte[] password = "password123".getBytes(StandardCharsets.UTF_8);
+
+        String digest1 = WSSecurityUtil.computePasswordDigest(nonce, created, password, "SHA-256");
+        String digest2 = WSSecurityUtil.computePasswordDigest(nonce, created, password, "SHA-256");
+
+        Assertions.assertEquals(digest1, digest2, "Same inputs should produce same digest");
+    }
+
+    @Test
+    public void testDoPasswordDigest_withAlgorithm_bytes_nullParams() {
+        byte[] nonce = WSSecurityUtil.generateNonce(16);
+        byte[] created = "2024-01-01T12:00:00Z".getBytes(StandardCharsets.UTF_8);
+        byte[] password = "secret".getBytes(StandardCharsets.UTF_8);
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> WSSecurityUtil.computePasswordDigest(null, created, password, "SHA-256"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> WSSecurityUtil.computePasswordDigest(nonce, null, password, "SHA-256"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> WSSecurityUtil.computePasswordDigest(nonce, created, null, "SHA-256"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> WSSecurityUtil.computePasswordDigest(nonce, created, password, (String) null));
+    }
+
+    @Test
+    public void testDoPasswordDigest_withAlgorithm_strings_SHA256() {
+        String nonce = "randomNonce";
+        String created = "2024-01-01T12:00:00Z";
+        String password = "secretPassword";
+
+        String digest = WSSecurityUtil.computePasswordDigest(nonce, created, password, "SHA-256");
+
+        Assertions.assertNotNull(digest);
+        Assertions.assertTrue(digest.length() > 0);
+
+        Assertions.assertDoesNotThrow(() -> {
+            Base64.getDecoder().decode(digest);
+        });
+    }
+
+    @Test
+    public void testDoPasswordDigest_withAlgorithm_strings_consistency() {
+        String nonce = "testNonce";
+        String created = "2024-01-01T12:00:00Z";
+        String password = "testPassword";
+
+        String digest1 = WSSecurityUtil.computePasswordDigest(nonce, created, password, "SHA-256");
+        String digest2 = WSSecurityUtil.computePasswordDigest(nonce, created, password, "SHA-256");
+
+        Assertions.assertEquals(digest1, digest2, "Same inputs should produce same digest");
+    }
+
+    @Test
+    public void testDoPasswordDigest_withAlgorithm_strings_nullParams() {
+        String nonce = "nonce";
+        String created = "2024-01-01T12:00:00Z";
+        String password = "secret";
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> WSSecurityUtil.computePasswordDigest(null, created, password, "SHA-256"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> WSSecurityUtil.computePasswordDigest(nonce, null, password, "SHA-256"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> WSSecurityUtil.computePasswordDigest(nonce, created, null, "SHA-256"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> WSSecurityUtil.computePasswordDigest(nonce, created, password, (String) null));
+    }
+
+    @Test
+    public void testDoPasswordDigest_withAlgorithm_stringAndByteConsistency() {
+        String nonceStr = "testNonce";
+        String createdStr = "2024-01-01T12:00:00Z";
+        String passwordStr = "testPassword";
+
+        byte[] nonceBytes = nonceStr.getBytes(Charsets.DEFAULT);
+        byte[] createdBytes = createdStr.getBytes(Charsets.DEFAULT);
+        byte[] passwordBytes = passwordStr.getBytes(Charsets.DEFAULT);
+
+        String fromStrings = WSSecurityUtil.computePasswordDigest(nonceStr, createdStr, passwordStr, "SHA-256");
+        String fromBytes = WSSecurityUtil.computePasswordDigest(nonceBytes, createdBytes, passwordBytes, "SHA-256");
+
+        Assertions.assertEquals(fromStrings, fromBytes, "String and byte array versions should produce same digest");
+    }
+
+    @Test
+    public void testDoPasswordDigest_withAlgorithm_invalidAlgorithm() {
+        byte[] nonce = new byte[] { 1, 2, 3 };
+        byte[] created = "ts".getBytes(StandardCharsets.UTF_8);
+        byte[] password = "pw".getBytes(StandardCharsets.UTF_8);
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> WSSecurityUtil.computePasswordDigest(nonce, created, password, "INVALID-ALG"));
+    }
+
     @Test
     public void testThreadSafety_generateNonce() throws InterruptedException {
         final int numThreads = 10;

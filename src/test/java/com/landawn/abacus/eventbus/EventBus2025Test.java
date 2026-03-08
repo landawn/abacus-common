@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -140,10 +141,10 @@ public class EventBus2025Test extends TestBase {
 
         eventBus.register(handler);
         assertEquals("sticky message", result.get());
-        assertEquals(1, eventBus.getStickyEvents("", String.class).size());
-        assertEquals(1, eventBus.getStickyEvents(String.class).size());
+        assertEquals(1, eventBus.stickyEvents("", String.class).size());
+        assertEquals(1, eventBus.stickyEvents(String.class).size());
         assertTrue(eventBus.removeStickyEvent("", "sticky message"));
-        assertTrue(eventBus.getStickyEvents(String.class).isEmpty());
+        assertTrue(eventBus.stickyEvents(String.class).isEmpty());
 
         eventBus.unregister(handler);
     }
@@ -162,7 +163,7 @@ public class EventBus2025Test extends TestBase {
         };
         eventBus.register(subscriber, "testId");
 
-        List<Object> subscribers = eventBus.getSubscribers("testId", String.class);
+        List<Object> subscribers = eventBus.subscribers("testId", String.class);
         assertTrue(subscribers.contains(subscriber));
 
         eventBus.unregister(subscriber);
@@ -178,7 +179,7 @@ public class EventBus2025Test extends TestBase {
         eventBus.register(subscriber1, "id1");
         eventBus.register(subscriber2, "id2");
 
-        List<Object> allSubscribers = eventBus.getAllSubscribers();
+        List<Object> allSubscribers = eventBus.allSubscribers();
         assertEquals(2, allSubscribers.size());
         assertTrue(allSubscribers.contains(subscriber1));
         assertTrue(allSubscribers.contains(subscriber2));
@@ -230,11 +231,42 @@ public class EventBus2025Test extends TestBase {
     }
 
     @Test
+    public void testEqualSubscribersAreTrackedByIdentity() {
+        EqualSubscriber first = new EqualSubscriber("same");
+        EqualSubscriber second = new EqualSubscriber("same");
+
+        eventBus.register(first);
+        eventBus.register(second);
+        eventBus.post("event");
+
+        assertEquals(List.of("event"), first.events);
+        assertEquals(List.of("event"), second.events);
+        assertEquals(2, eventBus.allSubscribers().size());
+
+        eventBus.unregister(first);
+        eventBus.post("event2");
+
+        assertEquals(List.of("event"), first.events);
+        assertEquals(List.of("event", "event2"), second.events);
+    }
+
+    @Test
+    public void testSubclassOverrideKeepsSubclassSubscriptionMetadata() {
+        ChildOverrideSubscriber subscriber = new ChildOverrideSubscriber();
+
+        eventBus.register(subscriber);
+        eventBus.post("base", "ignored");
+        eventBus.post("child", "handled");
+
+        assertEquals(List.of("handled"), subscriber.events);
+    }
+
+    @Test
     public void testGetStickyEvents() {
         eventBus.postSticky("event1", "sticky1");
         eventBus.postSticky("event1", "sticky2");
 
-        List<Object> events = eventBus.getStickyEvents("event1", String.class);
+        List<?> events = eventBus.stickyEvents("event1", String.class);
         assertEquals(2, events.size());
 
         eventBus.removeAllStickyEvents();
@@ -246,7 +278,7 @@ public class EventBus2025Test extends TestBase {
         eventBus.postSticky("eventId", "test2");
 
         assertTrue(eventBus.removeStickyEvents("eventId", String.class));
-        List<Object> events = eventBus.getStickyEvents("eventId", String.class);
+        List<?> events = eventBus.stickyEvents("eventId", String.class);
         assertEquals(0, events.size());
     }
 
@@ -256,7 +288,7 @@ public class EventBus2025Test extends TestBase {
         eventBus.postSticky("", "test2");
 
         assertTrue(eventBus.removeStickyEvents("", String.class));
-        assertEquals(0, eventBus.getStickyEvents("", String.class).size());
+        assertEquals(0, eventBus.stickyEvents("", String.class).size());
     }
 
     static class TestHandler {
@@ -265,6 +297,47 @@ public class EventBus2025Test extends TestBase {
         @Subscribe
         public void onEvent(String event) {
             this.lastEvent = event;
+        }
+    }
+
+    static final class EqualSubscriber {
+        final String id;
+        final List<String> events = new ArrayList<>();
+
+        EqualSubscriber(String id) {
+            this.id = id;
+        }
+
+        @Subscribe
+        public void onEvent(String event) {
+            events.add(event);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof EqualSubscriber other && id.equals(other.id);
+        }
+
+        @Override
+        public int hashCode() {
+            return id.hashCode();
+        }
+    }
+
+    static class BaseOverrideSubscriber {
+        @Subscribe(eventId = "base")
+        public void onEvent(String event) {
+            throw new AssertionError("Base subscriber metadata should be overridden");
+        }
+    }
+
+    static final class ChildOverrideSubscriber extends BaseOverrideSubscriber {
+        final List<String> events = new ArrayList<>();
+
+        @Override
+        @Subscribe(eventId = "child")
+        public void onEvent(String event) {
+            events.add(event);
         }
     }
 }

@@ -104,7 +104,7 @@ public final class FilenameUtil {
     }
 
     private FilenameUtil() {
-        // singleton for utility class.
+        // Utility class - prevent instantiation
     }
 
     //-----------------------------------------------------------------------
@@ -1292,7 +1292,7 @@ public final class FilenameUtil {
                         }
                     } else {
                         // matching from current position
-                        if (!caseSensitivity.checkRegiocountMatchBetweenes(filename, textIdx, wcs[wcsIdx])) {
+                        if (!caseSensitivity.checkRegionMatches(filename, textIdx, wcs[wcsIdx])) {
                             // couldn't match token
                             break;
                         }

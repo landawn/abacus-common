@@ -77,7 +77,7 @@ public class JSONType<T> extends AbstractType<T> {
      * @return the Class object representing the type T
      */
     @Override
-    public Class<T> clazz() {
+    public Class<T> javaType() {
         return typeClass;
     }
 

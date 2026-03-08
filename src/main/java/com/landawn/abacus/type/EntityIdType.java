@@ -60,7 +60,7 @@ public class EntityIdType extends AbstractType<EntityId> {
      * @return The Class object representing EntityId.class
      */
     @Override
-    public Class<EntityId> clazz() {
+    public Class<EntityId> javaType() {
         return typeClass;
     }
 
@@ -92,7 +92,7 @@ public class EntityIdType extends AbstractType<EntityId> {
      * @return SerializationType.ENTITY_ID, indicating special EntityId serialization handling
      */
     @Override
-    public SerializationType getSerializationType() {
+    public SerializationType serializationType() {
         return SerializationType.ENTITY_ID;
     }
 

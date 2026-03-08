@@ -1350,7 +1350,7 @@ public class ByteStream200Test extends TestBase {
     public void testOnEach() {
         byteStream = createByteStream(new byte[] { 1, 2, 3 });
         List<Byte> peekingList = new ArrayList<>();
-        List<Byte> result = byteStream.onEach(peekingList::add).toList();
+        List<Byte> result = byteStream.peek(peekingList::add).toList();
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3), result);
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3), peekingList);
     }

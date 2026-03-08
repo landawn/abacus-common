@@ -117,7 +117,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * // Parallel processing operations
  * ExecutorService executor = Executors.newFixedThreadPool(4);
- * Iterator<String> data = largeDataSet.iterator();
+ * Iterator<String> data = largeDataset.iterator();
  * 
  * // Parallel forEach processing
  * Iterators.forEach(data, executor, item -> processItem(item));
@@ -372,7 +372,11 @@ public final class Iterators {
 
     /**
      * Counts the occurrences of a specific value in the given iterator.
-     * This method can be used to find the frequency of a particular value in the iterator.
+     *
+     * <p><b>Note:</b> {@code frequency()} counts occurrences of a specific <b>value</b> using equality comparison,
+     * while {@link #count(Iterator, Predicate)} counts elements matching a <b>predicate</b>.
+     * Use {@code frequency()} when you know the exact value to search for;
+     * use {@code count()} when you need a custom matching condition.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -417,6 +421,11 @@ public final class Iterators {
     /**
      * Counts the number of elements in the given iterator.
      *
+     * <p><b>Note:</b> {@code count()} counts elements (optionally matching a <b>predicate</b>),
+     * while {@link #frequency(Iterator, Object)} counts occurrences of a specific <b>value</b> using equality comparison.
+     * Use {@code count()} when counting all elements or when you need flexible matching logic;
+     * use {@code frequency()} when you know the exact value to search for.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("A", "B", "C", "D").iterator();
@@ -432,6 +441,7 @@ public final class Iterators {
      * @return the number of elements in the iterator, or {@code 0} if {@code iter} is {@code null}.
      * @see N#count(Iterator)
      * @see #count(Iterator, Predicate)
+     * @see #frequency(Iterator, Object)
      */
     public static long count(final Iterator<?> iter) {
         if (iter == null) {

@@ -61,7 +61,7 @@ public class DigestUtil {
     static final int BUFFER_SIZE = 1024;
 
     private DigestUtil() {
-        // Singleton for utility class
+        // Utility class - prevent instantiation
     }
 
     /**

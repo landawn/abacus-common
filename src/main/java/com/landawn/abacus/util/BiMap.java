@@ -75,11 +75,12 @@ import com.landawn.abacus.annotation.Internal;
  * String userName = userIdMap.getByValue(1002);   // "bob"
  *
  * // Inverse view with swapped keys and values
- * BiMap<Integer, String> idUserMap = userIdMap.invert();
+ * BiMap<Integer, String> idUserMap = userIdMap.inverted();
  * String user = idUserMap.get(1003);   // "charlie"
  *
  * // Bijective constraint enforcement
- * userIdMap.put("david", 1001);   // Removes "alice" -> 1001 mapping
+ * // userIdMap.put("david", 1001);   // Would throw IllegalArgumentException: value 1001 already exists
+ * userIdMap.forcePut("david", 1001);   // Forces mapping, removes "alice" -> 1001
  * userIdMap.forcePut("eve", 1002);   // Forces mapping, removes conflicting entries
  *
  * // Builder pattern for complex construction

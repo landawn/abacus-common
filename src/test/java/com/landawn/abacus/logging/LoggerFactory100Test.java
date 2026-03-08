@@ -53,6 +53,14 @@ public class LoggerFactory100Test extends TestBase {
     }
 
     @Test
+    @DisplayName("Test getLogger with null String throws NullPointerException")
+    public void testGetLoggerWithNullString() {
+        assertThrows(NullPointerException.class, () -> {
+            LoggerFactory.getLogger((String) null);
+        });
+    }
+
+    @Test
     @DisplayName("Test getLogger with different names returns different loggers")
     public void testGetLoggerWithDifferentNames() {
         Logger logger1 = LoggerFactory.getLogger("logger1");

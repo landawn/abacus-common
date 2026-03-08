@@ -49,7 +49,7 @@ public class ClobType extends AbstractType<Clob> {
      * @return The Class object representing Clob.class
      */
     @Override
-    public Class<Clob> clazz() {
+    public Class<Clob> javaType() {
         return clazz;
     }
 

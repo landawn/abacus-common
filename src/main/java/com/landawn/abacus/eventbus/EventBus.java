@@ -122,7 +122,7 @@ public class EventBus {
         }
     }
 
-    private final Map<Object, List<SubIdentifier>> registeredSubMap = new LinkedHashMap<>();
+    private final Map<Object, List<SubIdentifier>> registeredSubMap = new IdentityHashMap<>();
 
     private final Map<String, Set<SubIdentifier>> registeredEventIdSubMap = new HashMap<>();
 
@@ -137,6 +137,9 @@ public class EventBus {
     private volatile List<List<SubIdentifier>> listOfSubEventSubs = null;
 
     private volatile Map<Object, String> mapOfStickyEvent = null;
+
+    @SuppressWarnings("unused")
+    private transient Thread shutdownHook;
 
     private static final EventBus INSTANCE = new EventBus("default");
 
@@ -172,7 +175,7 @@ public class EventBus {
         this.executor = executor == null ? DEFAULT_EXECUTOR : executor;
 
         if (executor != DEFAULT_EXECUTOR && executor instanceof ExecutorService executorService) {
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            shutdownHook = new Thread(() -> {
 
                 logger.warn("Starting EventBus shutdown");
 
@@ -187,7 +190,9 @@ public class EventBus {
                 } finally {
                     logger.warn("EventBus shutdown completed");
                 }
-            }));
+            });
+
+            Runtime.getRuntime().addShutdownHook(shutdownHook);
         }
     }
 
@@ -275,33 +280,33 @@ public class EventBus {
     /**
      * Returns all subscribers that are registered to receive events of the specified type or its subtypes.
      * This method searches for subscribers registered with {@code null} event ID.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<Object> stringSubscribers = eventBus.getSubscribers(String.class);
+     * int stringSubscriberCount = eventBus.subscribers(String.class).size();
      * }</pre>
      *
      * @param eventType the event type to search for
-     * @return a list of subscribers registered for the specified event type
+     * @return a snapshot list of subscribers registered for the specified event type
      */
-    public List<Object> getSubscribers(final Class<?> eventType) {
-        return getSubscribers(null, eventType);
+    public List<Object> subscribers(final Class<?> eventType) {
+        return subscribers(null, eventType);
     }
 
     /**
      * Returns all subscribers that are registered to receive events of the specified type and event ID.
      * The method checks both the event type hierarchy and the event ID when searching for subscribers.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<Object> subscribers = eventBus.getSubscribers("userEvents", User.class);
+     * int stringSubscriberCount = eventBus.subscribers("textEvents", String.class).size();
      * }</pre>
      *
      * @param eventId the event ID to match, or {@code null} for subscribers without event ID
      * @param eventType the event type to search for
-     * @return a list of subscribers registered for the specified event type and ID
+     * @return a snapshot list of subscribers registered for the specified event type and ID
      */
-    public List<Object> getSubscribers(final String eventId, final Class<?> eventType) {
+    public List<Object> subscribers(final String eventId, final Class<?> eventType) {
         final List<Object> eventSubs = new ArrayList<>();
 
         synchronized (registeredSubMap) {
@@ -321,16 +326,15 @@ public class EventBus {
 
     /**
      * Returns all currently registered subscribers in this EventBus.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<Object> allSubscribers = eventBus.getAllSubscribers();
-     * System.out.println("Total subscribers: " + allSubscribers.size());
+     * int registeredSubscriberCount = eventBus.allSubscribers().size();
      * }</pre>
      *
-     * @return a list of all registered subscribers
+     * @return a snapshot list of all currently registered subscribers
      */
-    public List<Object> getAllSubscribers() {
+    public List<Object> allSubscribers() {
         synchronized (registeredSubMap) {
             return new ArrayList<>(registeredSubMap.keySet());
         }
@@ -533,8 +537,7 @@ public class EventBus {
             List<SubIdentifier> subscriberMethods = classMetaSubMap.get(subscriberClass);
 
             if (subscriberMethods == null) {
-                subscriberMethods = new ArrayList<>();
-                final Set<String> addedMethodSignatures = N.newHashSet();
+                final Map<String, SubIdentifier> subscriberMethodMap = new LinkedHashMap<>();
 
                 final Set<Class<?>> allTypes = ClassUtil.getAllSuperTypes(subscriberClass);
                 allTypes.add(subscriberClass);
@@ -559,9 +562,10 @@ public class EventBus {
                             }
 
                             final String methodSignature = method.getName() + "#" + parameterTypes[0].getName();
+                            final SubIdentifier existing = subscriberMethodMap.get(methodSignature);
 
-                            if (addedMethodSignatures.add(methodSignature)) {
-                                subscriberMethods.add(new SubIdentifier(method));
+                            if (existing == null || existing.method.getDeclaringClass().isAssignableFrom(method.getDeclaringClass())) {
+                                subscriberMethodMap.put(methodSignature, new SubIdentifier(method));
                             }
                         }
                     }
@@ -583,12 +587,13 @@ public class EventBus {
                         }
                     }
 
-                    if (subscriberMethod != null
-                            && addedMethodSignatures.add(subscriberMethod.getName() + "#" + subscriberMethod.getParameterTypes()[0].getName())) {
-                        subscriberMethods.add(new SubIdentifier(subscriberMethod));
+                    if (subscriberMethod != null) {
+                        subscriberMethodMap.putIfAbsent(subscriberMethod.getName() + "#" + subscriberMethod.getParameterTypes()[0].getName(),
+                                new SubIdentifier(subscriberMethod));
                     }
                 }
 
+                subscriberMethods = new ArrayList<>(subscriberMethodMap.values());
                 classMetaSubMap.put(subscriberClass, subscriberMethods);
             }
 
@@ -851,6 +856,7 @@ public class EventBus {
      * Configuration config = getConfiguration();
      * eventBus.removeStickyEvent("appConfig", config);
      * }</pre>
+     *
      * @param eventId the event ID the sticky event was posted with
      * @param event the sticky event to remove
      *
@@ -954,17 +960,18 @@ public class EventBus {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<Object> configs = eventBus.getStickyEvents(Configuration.class);
-     * for (Object config : configs) {
-     *     processConfig((Configuration) config);
+     * List<Configuration> configs = eventBus.stickyEvents(Configuration.class);
+     * for (Configuration config : configs) {
+     *     processConfig(config);
      * }
      * }</pre>
      *
+     * @param <T> the event type
      * @param eventType the class type to search for
      * @return a list of sticky events that can be assigned to the specified type
      */
-    public List<Object> getStickyEvents(final Class<?> eventType) {
-        return getStickyEvents(null, eventType);
+    public <T> List<T> stickyEvents(final Class<T> eventType) {
+        return stickyEvents(null, eventType);
     }
 
     /**
@@ -973,22 +980,23 @@ public class EventBus {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<Object> userConfigs = eventBus.getStickyEvents("userConfig", Configuration.class);
+     * List<Configuration> userConfigs = eventBus.stickyEvents("userConfig", Configuration.class);
      * }</pre>
      *
+     * @param <T> the event type
      * @param eventId the event ID to match, or {@code null} for events without ID
      * @param eventType the class type to search for
      * @return a list of sticky events matching both the type and event ID
      */
-    public List<Object> getStickyEvents(final String eventId, final Class<?> eventType) {
+    public <T> List<T> stickyEvents(final String eventId, final Class<T> eventType) {
         final String normalizedEventId = Strings.isEmpty(eventId) ? null : eventId;
-        final List<Object> result = new ArrayList<>();
+        final List<T> result = new ArrayList<>();
 
         synchronized (stickyEventMap) {
             for (final Map.Entry<Object, String> entry : stickyEventMap.entrySet()) {
                 if (N.equals(Strings.isEmpty(entry.getValue()) ? null : entry.getValue(), normalizedEventId)
                         && eventType.isAssignableFrom(entry.getKey().getClass())) {
-                    result.add(entry.getKey());
+                    result.add(eventType.cast(entry.getKey()));
                 }
             }
         }
@@ -1080,7 +1088,7 @@ public class EventBus {
      * @param identifier the subscriber identifier containing delivery configuration including thread mode,
      *                   subscriber instance, and method to invoke
      * @param event the event object to dispatch to the subscriber
-     * @throws RuntimeException if the thread mode is not supported (should not happen if isSupportedThreadMode is properly implemented)
+     * @throws RuntimeException if the thread mode is not one of the supported values
      */
     protected void dispatch(final SubIdentifier identifier, final Object event) {
         switch (identifier.threadMode) {
@@ -1261,7 +1269,7 @@ public class EventBus {
         @Override
         public int hashCode() {
             int h = 17;
-            h = 31 * h + N.hashCode(instance);
+            h = 31 * h + System.identityHashCode(instance);
             h = 31 * h + N.hashCode(method);
             h = 31 * h + N.hashCode(parameterType);
             h = 31 * h + N.hashCode(eventId);
@@ -1281,7 +1289,7 @@ public class EventBus {
             }
 
             if (obj instanceof SubIdentifier other) {
-                return N.equals(instance, other.instance) && N.equals(method, other.method) && N.equals(parameterType, other.parameterType)
+                return instance == other.instance && N.equals(method, other.method) && N.equals(parameterType, other.parameterType)
                         && N.equals(eventId, other.eventId) && N.equals(threadMode, other.threadMode) && N.equals(strictEventType, other.strictEventType)
                         && N.equals(sticky, other.sticky) && N.equals(intervalInMillis, other.intervalInMillis) && N.equals(deduplicate, other.deduplicate)
                         && N.equals(isPossibleLambdaSubscriber, other.isPossibleLambdaSubscriber);

@@ -17,7 +17,7 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.util.Set;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ImmutableSet;
@@ -72,7 +72,7 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * @return the Class object for ImmutableSet
      */
     @Override
-    public Class<ImmutableSet<E>> clazz() {
+    public Class<ImmutableSet<E>> javaType() {
         return typeClass;
     }
 
@@ -82,7 +82,7 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * @return the Type instance representing the element type of this immutable set
      */
     @Override
-    public Type<E> getElementType() {
+    public Type<E> elementType() {
         return elementType;
     }
 
@@ -93,7 +93,7 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * @return an array containing the element type as the only parameter type
      */
     @Override
-    public Type<E>[] getParameterTypes() {
+    public Type<E>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -142,7 +142,7 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * @return SerializationType.SERIALIZABLE if elements are serializable, SerializationType.COLLECTION otherwise
      */
     @Override
-    public SerializationType getSerializationType() {
+    public SerializationType serializationType() {
         return isSerializable() ? SerializationType.SERIALIZABLE : SerializationType.COLLECTION;
     }
 
@@ -233,7 +233,7 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * <pre>{@code
      * Type<ImmutableSet<String>> type = TypeFactory.getType("ImmutableSet<String>");
      * CharacterWriter writer = new CharacterWriter();
-     * JsonXmlSerializationConfig config = JsonXmlSerializationConfig.of();
+     * JsonXmlSerConfig config = JsonXmlSerConfig.of();
      * ImmutableSet<String> set = ImmutableSet.of("apple", "banana");
      * type.writeCharacter(writer, set, config);
      * String result = writer.toString();
@@ -246,7 +246,7 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final ImmutableSet<E> x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final ImmutableSet<E> x, final JsonXmlSerConfig<?> config) throws IOException {
         setType.writeCharacter(writer, x, config);
     }
 

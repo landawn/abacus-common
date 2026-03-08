@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
@@ -43,7 +43,7 @@ public class BooleanType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(Boolean.class, type.clazz());
+        assertEquals(Boolean.class, type.javaType());
     }
 
     @Test
@@ -249,8 +249,8 @@ public class BooleanType2025Test extends TestBase {
     @Test
     public void test_writeCharacter_withConfig_writeNullAsFalse() throws Exception {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
-        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
-        when(config.writeNullBooleanAsFalse()).thenReturn(true);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
+        when(config.isWriteNullBooleanAsFalse()).thenReturn(true);
 
         // Test null with writeNullBooleanAsFalse
         type.writeCharacter(writer, null, config);

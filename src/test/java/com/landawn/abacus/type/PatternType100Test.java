@@ -28,7 +28,7 @@ public class PatternType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(Pattern.class, patternType.clazz());
+        assertEquals(Pattern.class, patternType.javaType());
     }
 
     @Test

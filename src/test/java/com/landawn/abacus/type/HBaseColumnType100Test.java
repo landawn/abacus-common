@@ -32,18 +32,18 @@ public class HBaseColumnType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(HBaseColumn.class, hbaseColumnType.clazz());
+        assertEquals(HBaseColumn.class, hbaseColumnType.javaType());
     }
 
     @Test
     public void testGetElementType() {
-        Type<?> elementType = hbaseColumnType.getElementType();
+        Type<?> elementType = hbaseColumnType.elementType();
         assertNotNull(elementType);
     }
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = hbaseColumnType.getParameterTypes();
+        Type<?>[] paramTypes = hbaseColumnType.parameterTypes();
         assertNotNull(paramTypes);
         assertEquals(1, paramTypes.length);
     }

@@ -27,6 +27,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -41,7 +42,7 @@ public class MutableShortType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(MutableShort.class, type.clazz());
+        assertEquals(MutableShort.class, type.javaType());
     }
 
     @Test
@@ -86,6 +87,16 @@ public class MutableShortType2025Test extends TestBase {
     }
 
     @Test
+    public void test_get_ResultSet_nullReturnsNull() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+
+        when(rs.getShort("missing")).thenReturn((short) 0);
+        when(rs.wasNull()).thenReturn(true);
+
+        assertNull(type.get(rs, "missing"));
+    }
+
+    @Test
     public void test_set_PreparedStatement() throws SQLException {
         PreparedStatement stmt = mock(PreparedStatement.class);
 
@@ -93,7 +104,7 @@ public class MutableShortType2025Test extends TestBase {
         verify(stmt).setShort(1, (short) 100);
 
         type.set(stmt, 2, null);
-        verify(stmt).setShort(2, (short) 0);
+        verify(stmt).setNull(2, Types.SMALLINT);
     }
 
     @Test
@@ -104,7 +115,7 @@ public class MutableShortType2025Test extends TestBase {
         verify(stmt).setShort("param", (short) 100);
 
         type.set(stmt, "param2", null);
-        verify(stmt).setShort("param2", (short) 0);
+        verify(stmt).setNull("param2", Types.SMALLINT);
     }
 
     @Test

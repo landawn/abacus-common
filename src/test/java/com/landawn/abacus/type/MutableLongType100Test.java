@@ -8,6 +8,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +40,7 @@ public class MutableLongType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<MutableLong> clazz = mutableLongType.clazz();
+        Class<MutableLong> clazz = mutableLongType.javaType();
         assertEquals(MutableLong.class, clazz);
     }
 
@@ -101,7 +102,7 @@ public class MutableLongType100Test extends TestBase {
     @Test
     public void testSetPreparedStatementWithNull() throws SQLException {
         mutableLongType.set(mockPreparedStatement, 1, null);
-        Mockito.verify(mockPreparedStatement).setLong(1, 0L);
+        Mockito.verify(mockPreparedStatement).setNull(1, Types.BIGINT);
     }
 
     @Test
@@ -113,7 +114,7 @@ public class MutableLongType100Test extends TestBase {
     @Test
     public void testSetCallableStatementWithNull() throws SQLException {
         mutableLongType.set(mockCallableStatement, "param", null);
-        Mockito.verify(mockCallableStatement).setLong("param", 0L);
+        Mockito.verify(mockCallableStatement).setNull("param", Types.BIGINT);
     }
 
     @Test

@@ -10,7 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.SK;
@@ -67,7 +67,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      */
     @SuppressWarnings("rawtypes")
     @Override
-    public Class<Nullable<T>> clazz() {
+    public Class<Nullable<T>> javaType() {
         return (Class) Nullable.class;
     }
 
@@ -77,7 +77,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * @return the Type handler for the wrapped element type
      */
     @Override
-    public Type<T> getElementType() {
+    public Type<T> elementType() {
         return elementType;
     }
 
@@ -88,7 +88,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * @return an array containing the element type
      */
     @Override
-    public Type<T>[] getParameterTypes() {
+    public Type<T>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -144,10 +144,10 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      */
     @Override
     public Nullable<T> get(final ResultSet rs, final int columnIndex) throws SQLException {
-        final T result = getColumnValue(rs, columnIndex, elementType.clazz());
+        final T result = getColumnValue(rs, columnIndex, elementType.javaType());
 
         return result == null ? Nullable.of((T) null)
-                : Nullable.of(elementType.clazz().isAssignableFrom(result.getClass()) ? result : N.convert(result, elementType));
+                : Nullable.of(elementType.javaType().isAssignableFrom(result.getClass()) ? result : N.convert(result, elementType));
     }
 
     /**
@@ -161,10 +161,10 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      */
     @Override
     public Nullable<T> get(final ResultSet rs, final String columnName) throws SQLException {
-        final T result = getColumnValue(rs, columnName, elementType.clazz());
+        final T result = getColumnValue(rs, columnName, elementType.javaType());
 
         return result == null ? Nullable.of((T) null)
-                : Nullable.of(elementType.clazz().isAssignableFrom(result.getClass()) ? result : N.convert(result, elementType));
+                : Nullable.of(elementType.javaType().isAssignableFrom(result.getClass()) ? result : N.convert(result, elementType));
     }
 
     /**
@@ -226,7 +226,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Nullable<T> x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Nullable<T> x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null || x.isNull()) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

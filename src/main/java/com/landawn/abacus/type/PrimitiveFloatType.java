@@ -56,7 +56,7 @@ public final class PrimitiveFloatType extends AbstractFloatType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Float> type = TypeFactory.getType(float.class);
-     * Class<?> clazz = type.clazz();
+     * Class<?> clazz = type.javaType();
      * // Returns: float.class (primitive type)
      * }</pre>
      *
@@ -64,7 +64,7 @@ public final class PrimitiveFloatType extends AbstractFloatType {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public Class clazz() {
+    public Class javaType() {
         return float.class;
     }
 
@@ -75,14 +75,14 @@ public final class PrimitiveFloatType extends AbstractFloatType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Float> type = TypeFactory.getType(float.class);
-     * boolean isPrimitive = type.isPrimitiveType();
+     * boolean isPrimitive = type.isPrimitive();
      * // Returns: true
      * }</pre>
      *
      * @return {@code true}, as this type handler is for primitive float
      */
     @Override
-    public boolean isPrimitiveType() {
+    public boolean isPrimitive() {
         return true;
     }
 

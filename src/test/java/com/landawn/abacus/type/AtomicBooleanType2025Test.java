@@ -39,7 +39,7 @@ public class AtomicBooleanType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(AtomicBoolean.class, type.clazz());
+        assertEquals(AtomicBoolean.class, type.javaType());
     }
 
     @Test

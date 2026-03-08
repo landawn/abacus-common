@@ -57,7 +57,7 @@ public final class PrimitiveDoubleType extends AbstractDoubleType {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public Class clazz() {
+    public Class javaType() {
         return double.class;
     }
 
@@ -68,7 +68,7 @@ public final class PrimitiveDoubleType extends AbstractDoubleType {
      * @return {@code true}, as this type handler is for primitive double
      */
     @Override
-    public boolean isPrimitiveType() {
+    public boolean isPrimitive() {
         return true;
     }
 

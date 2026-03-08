@@ -257,7 +257,7 @@ public class ParallelArrayLongStream100Test extends TestBase {
                 capturedValues.add(it);
             }
         };
-        LongStream result = parallelStream.onEach(action);
+        LongStream result = parallelStream.peek(action);
 
         long[] array = result.toArray();
 

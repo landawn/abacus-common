@@ -1592,7 +1592,7 @@ public class Files2025Test extends TestBase {
     }
 
     @Test
-    public void testReadString_Default_UTF8() throws IOException {
+    public void testReadString_Default_Utf8() throws IOException {
         File file = new File(tempDir.toFile(), "string.txt");
         filesToCleanup.add(file);
         Files.write("UTF-8 content".getBytes(StandardCharsets.UTF_8), file);
@@ -1650,7 +1650,7 @@ public class Files2025Test extends TestBase {
     }
 
     @Test
-    public void testReadAllLines_Default_UTF8() throws IOException {
+    public void testReadAllLines_Default_Utf8() throws IOException {
         File file = new File(tempDir.toFile(), "lines.txt");
         filesToCleanup.add(file);
         Files.write("Line 1\nLine 2\nLine 3".getBytes(StandardCharsets.UTF_8), file);

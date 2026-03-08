@@ -678,21 +678,21 @@ public class BooleanList100Test extends TestBase {
 
     @Test
     public void testHasDuplicates() {
-        assertFalse(list.hasDuplicates());
+        assertFalse(list.containsDuplicates());
 
         list.add(true);
-        assertFalse(list.hasDuplicates());
+        assertFalse(list.containsDuplicates());
 
         list.add(true);
-        assertTrue(list.hasDuplicates());
+        assertTrue(list.containsDuplicates());
 
         list.clear();
         list.add(true);
         list.add(false);
-        assertFalse(list.hasDuplicates());
+        assertFalse(list.containsDuplicates());
 
         list.add(true);
-        assertTrue(list.hasDuplicates());
+        assertTrue(list.containsDuplicates());
     }
 
     @Test

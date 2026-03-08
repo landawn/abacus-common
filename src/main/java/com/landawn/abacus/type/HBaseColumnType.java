@@ -33,6 +33,7 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
 
     private static final char _SEPARATOR = ':';
 
+    /** The type name constant for HBaseColumn type identification. */
     public static final String HBASE_COLUMN = "HBaseColumn";
 
     private final String declaringName;
@@ -95,14 +96,14 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<HBaseColumn<String>> type = TypeFactory.getType("HBaseColumn<String>");
-     * Class<?> clazz = type.clazz();
+     * Class<?> clazz = type.javaType();
      * // Returns: HBaseColumn.class
      * }</pre>
      *
      * @return the Class object for HBaseColumn
      */
     @Override
-    public Class<HBaseColumn<T>> clazz() {
+    public Class<HBaseColumn<T>> javaType() {
         return typeClass;
     }
 
@@ -113,14 +114,14 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<HBaseColumn<String>> type = TypeFactory.getType("HBaseColumn<String>");
-     * Type<String> elementType = type.getElementType();
+     * Type<String> elementType = type.elementType();
      * // Returns: Type instance for String
      * }</pre>
      *
      * @return the Type instance representing the value type of this HBaseColumn
      */
     @Override
-    public Type<T> getElementType() {
+    public Type<T> elementType() {
         return elementType;
     }
 
@@ -131,14 +132,14 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<HBaseColumn<String>> type = TypeFactory.getType("HBaseColumn<String>");
-     * Type<?>[] paramTypes = type.getParameterTypes();
+     * Type<?>[] paramTypes = type.parameterTypes();
      * // Returns: [Type<String>]
      * }</pre>
      *
      * @return an array containing the value type as the only parameter type
      */
     @Override
-    public Type<T>[] getParameterTypes() {
+    public Type<T>[] parameterTypes() {
         return parameterTypes;
     }
 

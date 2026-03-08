@@ -73,8 +73,8 @@ class JsonStreamReader extends JsonStringReader {
      *   <li>Structural tokens (braces, brackets, colons, commas)</li>
      * </ul>
      *
-     * @return the token identifier, or -1 if no next token is found
      * @param nextTokenValueType the expected type of the next token value
+     * @return the token identifier, or -1 if no next token is found
      * @throws UncheckedIOException if an I/O error occurs during reading
      */
     @Override

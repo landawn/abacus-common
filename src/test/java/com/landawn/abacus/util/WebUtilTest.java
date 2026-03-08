@@ -28,10 +28,10 @@ class WebUtilTest {
                    -d '{"productId": "abd\\\'123", "quantity": 100}'
                                                     """;
 
-        String httpRequestCode = WebUtil.convertCurlToHttpRequest(curl);
+        String httpRequestCode = WebUtil.curlToHttpRequestCode(curl);
         N.println(httpRequestCode);
 
-        httpRequestCode = WebUtil.convertCurlToOkHttpRequest(curl);
+        httpRequestCode = WebUtil.curlToOkHttpRequestCode(curl);
         N.println(httpRequestCode);
 
         {
@@ -51,12 +51,12 @@ class WebUtilTest {
     public void test_httpRequest2Curl() throws IOException {
 
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), "{\"productId\": \"abc'\\\\\"\", \"quantity\": 100}");
-        WebUtil.createOkHttpRequestForCurl("https://reqbin.com/echo/post/json", System.out::println)
+        WebUtil.createCurlLoggingOkHttpRequest("https://reqbin.com/echo/post/json", System.out::println)
                 .header("Content-Type", "application/json;charset = utf-8")
                 .body(requestBody)
                 .post();
 
-        WebUtil.createOkHttpRequestForCurl("https://reqbin.com/echo/post/json", '"', System.out::println)
+        WebUtil.createCurlLoggingOkHttpRequest("https://reqbin.com/echo/post/json", '"', System.out::println)
                 .header("Content-Type", "application/json")
                 .body(requestBody)
                 .post();
@@ -64,23 +64,23 @@ class WebUtilTest {
     }
 
     @Test
-    public void test_sendRequestByHAR() {
-        HARUtil.logCurl(true, '"');
+    public void test_sendRequest() {
+        HARUtil.configureCurlLoggingForCurrentThread(true, '"');
         File file = new File("./src/test/resources/sjpermits.org.har");
         final String targetUrl = "https://sjpermits.org/permits/ir/detail_5.asp";
 
-        String resp = HARUtil.sendRequestByHAR(file, Fn.startsWith(targetUrl));
+        String resp = HARUtil.sendRequest(file, Fn.startsWith(targetUrl));
 
         String prefix = "<input type=\"hidden\" name=\"hRequestDate\" value=\"";
         String result = Strings.substringBetween(resp, prefix, "\">");
         N.println(result);
 
-        resp = HARUtil.sendRequestByHAR(file, Fn.startsWith(targetUrl));
+        resp = HARUtil.sendRequest(file, Fn.startsWith(targetUrl));
 
         result = Strings.substringBetween(resp, prefix, "\">");
         N.println(result);
 
-        HARUtil.streamMultiRequestsByHAR(file, Fn.startsWith(targetUrl))
+        HARUtil.streamRequests(file, Fn.startsWith(targetUrl))
                 .map(it -> Strings.substringBetween(it._2.body(String.class), prefix, "\">"))
                 .forEach(Fn.println());
     }

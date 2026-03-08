@@ -780,10 +780,10 @@ public class FloatList100Test extends TestBase {
     @Test
     public void testHasDuplicates() {
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f });
-        assertFalse(list.hasDuplicates());
+        assertFalse(list.containsDuplicates());
 
         list.add(2.2f);
-        assertTrue(list.hasDuplicates());
+        assertTrue(list.containsDuplicates());
     }
 
     @Test
@@ -1151,7 +1151,7 @@ public class FloatList100Test extends TestBase {
         assertFalse(list.removeAllOccurrences(1.1f));
         assertFalse(list.removeIf(x -> true));
         assertFalse(list.removeDuplicates());
-        assertFalse(list.hasDuplicates());
+        assertFalse(list.containsDuplicates());
         assertTrue(list.isSorted());
 
         list.sort();

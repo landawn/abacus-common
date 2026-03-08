@@ -50,7 +50,7 @@ public interface FloatBinaryOperator extends Throwables.FloatBinaryOperator<Runt
      *   <li>Bitwise operations on float bit representations</li>
      * </ul>
      *
-     * <p>Example implementations:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatBinaryOperator add = (a, b) -> a + b;
      * FloatBinaryOperator multiply = (a, b) -> a * b;
@@ -58,9 +58,9 @@ public interface FloatBinaryOperator extends Throwables.FloatBinaryOperator<Runt
      * FloatBinaryOperator safeDivide = (a, b) -> b != 0 ? a / b : Float.NaN;
      * }</pre>
      *
-     * @param a the first operand
-     * @param b the second operand
-     * @return the result of applying this operator to the operands
+     * @param a the left operand
+     * @param b the right operand
+     * @return the float result produced by combining {@code a} and {@code b}
      */
     @Override
     float applyAsFloat(float a, float b);

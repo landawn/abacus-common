@@ -226,7 +226,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param key the key with which the specified value is to be associated
      * @param value the value to be associated with the specified key
      * @return {@code true} if the mapping was successfully added, {@code false} otherwise
-     * @throws IllegalArgumentException if the key or element is null
+     * @throws IllegalArgumentException if the key or value is null
      * @throws IllegalStateException if the pool has been closed
      */
     @Override
@@ -323,7 +323,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param value the value to be associated with the specified key
      * @param autoDestroyOnFailedToPut if {@code true}, calls {@code value.destroy(PUT_ADD_FAILURE)} when put fails
      * @return {@code true} if the mapping was successfully added, {@code false} otherwise
-     * @throws IllegalArgumentException if the key or element is null
+     * @throws IllegalArgumentException if the key or value is null
      * @throws IllegalStateException if the pool has been closed
      */
     @Override
@@ -646,6 +646,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             lock.unlock();
         }
 
+        removeShutdownHook();
+
         try {
             if (scheduleFuture != null) {
                 scheduleFuture.cancel(true);
@@ -668,7 +670,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         lock.lock();
 
         try {
-            evict((int) (pool.size() * balanceFactor)); // NOSONAR
+            evict(numberToAutoBalance()); // NOSONAR
 
             notFull.signalAll();
         } finally {
@@ -751,7 +753,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
     /**
      * Removes the specified number of entries from the pool based on the eviction policy.
-     * This method is called internally during vacate operations.
+     * This method is called internally during eviction operations.
      *
      * @param numberToEvict the number of entries to remove
      */
@@ -785,6 +787,14 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
             destroyAll(removingObjects, Caller.VACATE);
         }
+    }
+
+    private int numberToAutoBalance() {
+        if (pool.isEmpty()) {
+            return 0;
+        }
+
+        return Math.max(1, (int) (pool.size() * balanceFactor));
     }
 
     /**
@@ -915,8 +925,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Deserializes this pool from an ObjectInputStream.
-     * The pool is locked during deserialization to ensure consistency.
+     * Deserializes this pool from an ObjectInputStream and reinitializes transient fields
+     * (lock, conditions, comparator, and eviction task).
      *
      * @param is the input stream
      * @throws IOException if an I/O error occurs

@@ -1356,9 +1356,9 @@ public class Seq100Test extends TestBase {
     }
 
     @Test
-    public void testOnEach() throws Exception {
+    public void testPeek() throws Exception {
         List<Integer> collected = new ArrayList<>();
-        List<Integer> result = Seq.of(1, 2, 3).onEach(collected::add).toList();
+        List<Integer> result = Seq.of(1, 2, 3).peek(collected::add).toList();
 
         assertEquals(Arrays.asList(1, 2, 3), result);
         assertEquals(Arrays.asList(1, 2, 3), collected);
@@ -1380,15 +1380,6 @@ public class Seq100Test extends TestBase {
 
         assertEquals(Arrays.asList(1, 2, 3), result);
         assertEquals(Arrays.asList(3), collected);
-    }
-
-    @Test
-    public void testPeek() throws Exception {
-        List<Integer> peeked = new ArrayList<>();
-        List<Integer> result = Seq.of(1, 2, 3).peek(peeked::add).toList();
-
-        assertEquals(Arrays.asList(1, 2, 3), result);
-        assertEquals(Arrays.asList(1, 2, 3), peeked);
     }
 
     @Test
@@ -1790,9 +1781,9 @@ public class Seq100Test extends TestBase {
 
     @Test
     public void testHasDuplicates() throws Exception {
-        assertTrue(Seq.of(1, 2, 3, 2, 4).hasDuplicates());
-        assertFalse(Seq.of(1, 2, 3, 4, 5).hasDuplicates());
-        assertFalse(Seq.<Integer, Exception> empty().hasDuplicates());
+        assertTrue(Seq.of(1, 2, 3, 2, 4).containsDuplicates());
+        assertFalse(Seq.of(1, 2, 3, 4, 5).containsDuplicates());
+        assertFalse(Seq.<Integer, Exception> empty().containsDuplicates());
     }
 
     @Test

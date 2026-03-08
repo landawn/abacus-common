@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -28,13 +28,13 @@ public class AbstractShortType100Test extends TestBase {
 
     private Type<Number> shortType;
     private CharacterWriter writer;
-    private JsonXmlSerializationConfig<?> config;
+    private JsonXmlSerConfig<?> config;
 
     @BeforeEach
     public void setUp() {
         shortType = createType("Short");
         writer = createCharacterWriter();
-        config = mock(JsonXmlSerializationConfig.class);
+        config = mock(JsonXmlSerConfig.class);
     }
 
     @Test
@@ -162,7 +162,7 @@ public class AbstractShortType100Test extends TestBase {
         shortType.writeCharacter(writer, (short) 123, null);
         verify(writer).write((short) 123);
 
-        when(config.writeNullNumberAsZero()).thenReturn(true);
+        when(config.isWriteNullNumberAsZero()).thenReturn(true);
         shortType.writeCharacter(writer, null, config);
         verify(writer).write((short) 0);
     }

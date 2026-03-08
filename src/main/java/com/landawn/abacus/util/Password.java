@@ -21,11 +21,13 @@ import java.util.Objects;
 import com.landawn.abacus.annotation.MayReturnNull;
 
 /**
- * A utility class for password encryption and verification using various hashing algorithms.
- * This class provides thread-safe password encryption functionality using MessageDigest
- * and Base64 encoding. It supports any algorithm available through the Java security provider.
+ * A utility class for password hashing and verification using {@link MessageDigest}.
+ * This class hashes passwords with the configured digest algorithm and returns the
+ * digest encoded as Base64 text. It supports any algorithm available through the
+ * active Java security providers.
  * 
- * <p>This class is immutable and thread-safe for password operations.</p>
+ * <p>This class is immutable. Hashing operations are synchronized because
+ * {@link MessageDigest} instances are not thread-safe.</p>
  * 
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -44,7 +46,7 @@ public final class Password {
     private final MessageDigest msgDigest;
 
     /**
-     * Creates a new Password instance with the specified hashing algorithm.
+     * Creates a new {@code Password} instance with the specified hashing algorithm.
      * The algorithm must be one supported by the Java security provider
      * (e.g., "MD5", "SHA-1", "SHA-256", "SHA-512").
      * 
@@ -84,9 +86,9 @@ public final class Password {
     }
 
     /**
-     * Encrypts the given password string using the configured hashing algorithm
-     * and returns the result encoded in Base64 format. This method is thread-safe
-     * due to synchronization.
+     * Hashes the given password string with the configured digest algorithm and returns
+     * the resulting digest encoded in Base64 format. This method is synchronized because
+     * the underlying {@link MessageDigest} instance is reused.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -95,8 +97,8 @@ public final class Password {
      * // encrypted contains the Base64-encoded hash
      * }</pre>
      *
-     * @param x the plain text password to encrypt
-     * @return the encrypted password encoded in Base64, or {@code null} if input is {@code null}
+     * @param x the plain-text password to hash
+     * @return the Base64-encoded digest, or {@code null} if {@code x} is {@code null}
      */
     @MayReturnNull
     public synchronized String encrypt(final String x) {
@@ -112,9 +114,9 @@ public final class Password {
     }
 
     /**
-     * Verifies if a plain text password matches an encrypted password.
-     * This method encrypts the plain password and compares it with the provided
-     * encrypted password for equality.
+     * Verifies whether a plain-text password matches a previously hashed password.
+     * This method hashes {@code plainPassword} with the configured algorithm and compares
+     * the resulting Base64 text against {@code encryptedPassword}.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -125,8 +127,8 @@ public final class Password {
      * boolean notMatches = password.isEqual("wrongPassword", encrypted);   // false
      * }</pre>
      *
-     * @param plainPassword the plain text password to verify
-     * @param encryptedPassword the encrypted password to compare against
+     * @param plainPassword the plain-text password to verify
+     * @param encryptedPassword the Base64-encoded hashed password to compare against
      * @return {@code true} if the passwords match, {@code false} otherwise.
      *         Returns {@code true} if both are {@code null}, {@code false} if only one is {@code null}
      */

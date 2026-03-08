@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
+import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.parser.entity.XBean;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Beans;
@@ -25,7 +25,7 @@ class JsonMappersTest {
         Map map = N.fromJson(json, Map.class);
         N.println(map);
 
-        map = N.fromJson(json, JDC.create().setMapValueType(Type.of("List<Integer>>")), Map.class);
+        map = N.fromJson(json, JsonDeserConfig.create().setMapValueType(Type.of("List<Integer>>")), Map.class);
         N.println(map);
 
         IOUtil.deleteIfExists(outputFile);

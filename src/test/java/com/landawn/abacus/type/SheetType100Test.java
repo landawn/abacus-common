@@ -32,12 +32,12 @@ public class SheetType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(Sheet.class, sheetType.clazz());
+        assertEquals(Sheet.class, sheetType.javaType());
     }
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = sheetType.getParameterTypes();
+        Type<?>[] paramTypes = sheetType.parameterTypes();
         assertNotNull(paramTypes);
         assertEquals(3, paramTypes.length);
     }
@@ -54,7 +54,7 @@ public class SheetType100Test extends TestBase {
 
     @Test
     public void testGetSerializationType() {
-        assertEquals(Type.SerializationType.SHEET, sheetType.getSerializationType());
+        assertEquals(Type.SerializationType.SHEET, sheetType.serializationType());
     }
 
     @Test

@@ -24,12 +24,12 @@ public class PrimitiveCharType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(char.class, type.clazz());
+        assertEquals(char.class, type.javaType());
     }
 
     @Test
-    public void testIsPrimitiveType() {
-        assertTrue(type.isPrimitiveType());
+    public void testIsPrimitive() {
+        assertTrue(type.isPrimitive());
     }
 
     @Test

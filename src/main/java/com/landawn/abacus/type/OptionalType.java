@@ -10,7 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.SK;
@@ -74,7 +74,7 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
      */
     @SuppressWarnings("rawtypes")
     @Override
-    public Class<Optional<T>> clazz() {
+    public Class<Optional<T>> javaType() {
         return (Class) Optional.class;
     }
 
@@ -84,7 +84,7 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
      * @return the Type handler for the wrapped element type
      */
     @Override
-    public Type<T> getElementType() {
+    public Type<T> elementType() {
         return elementType;
     }
 
@@ -95,7 +95,7 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
      * @return an array containing the element type
      */
     @Override
-    public Type<T>[] getParameterTypes() {
+    public Type<T>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -204,10 +204,10 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
      */
     @Override
     public Optional<T> get(final ResultSet rs, final int columnIndex) throws SQLException {
-        final T result = getColumnValue(rs, columnIndex, elementType.clazz());
+        final T result = getColumnValue(rs, columnIndex, elementType.javaType());
 
         return result == null ? (Optional<T>) Optional.empty()
-                : Optional.of(elementType.clazz().isAssignableFrom(result.getClass()) ? result : N.convert(result, elementType));
+                : Optional.of(elementType.javaType().isAssignableFrom(result.getClass()) ? result : N.convert(result, elementType));
     }
 
     /**
@@ -221,10 +221,10 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
      */
     @Override
     public Optional<T> get(final ResultSet rs, final String columnName) throws SQLException {
-        final T result = getColumnValue(rs, columnName, elementType.clazz());
+        final T result = getColumnValue(rs, columnName, elementType.javaType());
 
         return result == null ? (Optional<T>) Optional.empty()
-                : Optional.of(elementType.clazz().isAssignableFrom(result.getClass()) ? result : N.convert(result, elementType));
+                : Optional.of(elementType.javaType().isAssignableFrom(result.getClass()) ? result : N.convert(result, elementType));
     }
 
     /**
@@ -286,7 +286,7 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Optional<T> x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Optional<T> x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null || x.isEmpty()) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

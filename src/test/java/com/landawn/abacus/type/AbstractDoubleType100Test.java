@@ -20,7 +20,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -38,7 +38,7 @@ public class AbstractDoubleType100Test extends TestBase {
     private CallableStatement callableStatement;
 
     @Mock
-    private JsonXmlSerializationConfig<?> config;
+    private JsonXmlSerConfig<?> config;
 
     @BeforeEach
     public void setUp() {
@@ -218,13 +218,13 @@ public class AbstractDoubleType100Test extends TestBase {
 
     @Test
     public void testWriteCharacter_Null_WithWriteNullNumberAsZero() throws IOException {
-        when(config.writeNullNumberAsZero()).thenReturn(true);
+        when(config.isWriteNullNumberAsZero()).thenReturn(true);
         type.writeCharacter(writer, null, config);
     }
 
     @Test
     public void testWriteCharacter_Null_WithoutWriteNullNumberAsZero() throws IOException {
-        when(config.writeNullNumberAsZero()).thenReturn(false);
+        when(config.isWriteNullNumberAsZero()).thenReturn(false);
         type.writeCharacter(writer, null, config);
     }
 

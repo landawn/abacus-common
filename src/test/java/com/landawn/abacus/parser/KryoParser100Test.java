@@ -114,14 +114,14 @@ public class KryoParser100Test extends TestBase {
     @Test
     public void testSerializeToString() {
         TestObject obj = new TestObject("test", 123);
-        String result = parser.serialize(obj, (KryoSerializationConfig) null);
+        String result = parser.serialize(obj, (KryoSerConfig) null);
         assertNotNull(result);
         assertTrue(Strings.base64Decode(result).length > 0);
     }
 
     @Test
     public void testSerializeNull() {
-        assertThrows(IllegalArgumentException.class, () -> parser.serialize(null, (KryoSerializationConfig) null));
+        assertThrows(IllegalArgumentException.class, () -> parser.serialize(null, (KryoSerConfig) null));
     }
 
     @Test
@@ -161,7 +161,7 @@ public class KryoParser100Test extends TestBase {
     @Test
     public void testDeserializeFromString() {
         TestObject original = new TestObject("test", 123);
-        String serialized = parser.serialize(original, (KryoSerializationConfig) null);
+        String serialized = parser.serialize(original, (KryoSerConfig) null);
 
         TestObject result = parser.deserialize(serialized, null, TestObject.class);
 
@@ -209,18 +209,18 @@ public class KryoParser100Test extends TestBase {
     }
 
     @Test
-    public void testCopy() {
+    public void testShallowCopy() {
         TestObject original = new TestObject("test", 123);
-        TestObject copy = parser.copy(original);
+        TestObject copy = parser.shallowCopy(original);
 
         assertEquals(original, copy);
         assertNotSame(original, copy);
     }
 
     @Test
-    public void testClone() {
+    public void testDeepCopy() {
         TestObject original = new TestObject("test", 123);
-        TestObject cloned = parser.clone(original);
+        TestObject cloned = parser.deepCopy(original);
 
         assertEquals(original, cloned);
         assertNotSame(original, cloned);
@@ -278,8 +278,8 @@ public class KryoParser100Test extends TestBase {
     @Test
     public void testSerializationWithConfig() {
         TestObject obj = new TestObject("test", 123);
-        KryoSerializationConfig config = new KryoSerializationConfig();
-        config.writeClass(true);
+        KryoSerConfig config = new KryoSerConfig();
+        config.setWriteClass(true);
 
         String result = parser.serialize(obj, config);
         assertNotNull(result);
@@ -288,11 +288,11 @@ public class KryoParser100Test extends TestBase {
     @Test
     public void testDeserializationWithConfig() {
         TestObject original = new TestObject("test", 123);
-        KryoSerializationConfig serConfig = new KryoSerializationConfig();
-        serConfig.writeClass(true);
+        KryoSerConfig serConfig = new KryoSerConfig();
+        serConfig.setWriteClass(true);
         String serialized = parser.serialize(original, serConfig);
 
-        KryoDeserializationConfig deserConfig = new KryoDeserializationConfig();
+        KryoDeserConfig deserConfig = new KryoDeserConfig();
         TestObject result = parser.deserialize(serialized, deserConfig, (Class<TestObject>) null);
 
         assertEquals(original, result);
@@ -301,7 +301,7 @@ public class KryoParser100Test extends TestBase {
     @Test
     public void testSerializeCollection() {
         List<String> list = Arrays.asList("one", "two", "three");
-        String serialized = parser.serialize(list, (KryoSerializationConfig) null);
+        String serialized = parser.serialize(list, (KryoSerConfig) null);
         assertNotNull(serialized);
 
         List<String> deserialized = parser.deserialize(serialized, null, ArrayList.class);
@@ -314,7 +314,7 @@ public class KryoParser100Test extends TestBase {
         map.put("one", 1);
         map.put("two", 2);
 
-        String serialized = parser.serialize(map, (KryoSerializationConfig) null);
+        String serialized = parser.serialize(map, (KryoSerConfig) null);
         assertNotNull(serialized);
 
         Map<String, Integer> deserialized = parser.deserialize(serialized, null, HashMap.class);
@@ -324,7 +324,7 @@ public class KryoParser100Test extends TestBase {
     @Test
     public void testSerializeArray() {
         int[] array = { 1, 2, 3, 4, 5 };
-        String serialized = parser.serialize(array, (KryoSerializationConfig) null);
+        String serialized = parser.serialize(array, (KryoSerConfig) null);
         assertNotNull(serialized);
 
         int[] deserialized = parser.deserialize(serialized, null, int[].class);

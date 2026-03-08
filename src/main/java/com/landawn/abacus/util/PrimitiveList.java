@@ -866,16 +866,16 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list1 = IntList.of(1, 2, 3, 4);
-     * boolean result1 = list1.hasDuplicates();   // returns false
+     * boolean result1 = list1.containsDuplicates();   // returns false
      * 
      * IntList list2 = IntList.of(1, 2, 3, 2);
-     * boolean result2 = list2.hasDuplicates();   // returns true
+     * boolean result2 = list2.containsDuplicates();   // returns true
      * }</pre>
      *
      * @return {@code true} if the list contains at least one duplicate element,
      *         {@code false} otherwise
      */
-    public abstract boolean hasDuplicates();
+    public abstract boolean containsDuplicates();
 
     /**
      * Returns a new list containing only the distinct elements from this list.

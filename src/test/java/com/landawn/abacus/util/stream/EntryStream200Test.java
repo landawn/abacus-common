@@ -1217,9 +1217,9 @@ public class EntryStream200Test extends TestBase {
     @Test
     public void testNMatch() {
         Map<String, Integer> map = N.asMap("a", 1, "b", 2, "c", 3, "d", 4);
-        assertTrue(EntryStream.of(map).isMatchCountBetween(2, 2, e -> e.getValue() % 2 == 0));
-        assertFalse(EntryStream.of(map).isMatchCountBetween(3, 3, e -> e.getValue() % 2 == 0));
-        assertTrue(EntryStream.of(map).isMatchCountBetween(1, 3, e -> e.getValue() % 2 == 0));
+        assertTrue(EntryStream.of(map).hasMatchCountBetween(2, 2, e -> e.getValue() % 2 == 0));
+        assertFalse(EntryStream.of(map).hasMatchCountBetween(3, 3, e -> e.getValue() % 2 == 0));
+        assertTrue(EntryStream.of(map).hasMatchCountBetween(1, 3, e -> e.getValue() % 2 == 0));
     }
 
     @Test

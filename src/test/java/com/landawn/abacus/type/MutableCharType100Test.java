@@ -8,6 +8,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.MutableChar;
 
@@ -40,7 +41,7 @@ public class MutableCharType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<MutableChar> clazz = mutableCharType.clazz();
+        Class<MutableChar> clazz = mutableCharType.javaType();
         assertEquals(MutableChar.class, clazz);
     }
 
@@ -95,7 +96,7 @@ public class MutableCharType100Test extends TestBase {
     @Test
     public void testSetPreparedStatementWithNull() throws SQLException {
         mutableCharType.set(mockPreparedStatement, 1, null);
-        Mockito.verify(mockPreparedStatement).setInt(1, 0);
+        Mockito.verify(mockPreparedStatement).setNull(1, Types.INTEGER);
     }
 
     @Test
@@ -107,7 +108,7 @@ public class MutableCharType100Test extends TestBase {
     @Test
     public void testSetCallableStatementWithNull() throws SQLException {
         mutableCharType.set(mockCallableStatement, "param", null);
-        Mockito.verify(mockCallableStatement).setInt("param", 0);
+        Mockito.verify(mockCallableStatement).setNull("param", Types.INTEGER);
     }
 
     @Test
@@ -137,14 +138,14 @@ public class MutableCharType100Test extends TestBase {
 
     @Test
     public void testWriteCharacterWithNonNullNoQuotation() throws IOException {
-        JsonXmlSerializationConfig<?> config = Mockito.mock(JsonXmlSerializationConfig.class);
+        JsonXmlSerConfig<?> config = Mockito.mock(JsonXmlSerConfig.class);
         Mockito.when(config.getCharQuotation()).thenReturn((char) 0);
         mutableCharType.writeCharacter(characterWriter, MutableChar.of('R'), config);
     }
 
     @Test
     public void testWriteCharacterWithNonNullWithQuotation() throws IOException {
-        JsonXmlSerializationConfig<?> config = Mockito.mock(JsonXmlSerializationConfig.class);
+        JsonXmlSerConfig<?> config = Mockito.mock(JsonXmlSerConfig.class);
         Mockito.when(config.getCharQuotation()).thenReturn('"');
         mutableCharType.writeCharacter(characterWriter, MutableChar.of('S'), config);
     }

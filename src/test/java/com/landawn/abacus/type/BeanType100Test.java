@@ -26,7 +26,7 @@ public class BeanType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(TestBean.class, beanType.clazz());
+        assertEquals(TestBean.class, beanType.javaType());
     }
 
     @Test
@@ -41,7 +41,7 @@ public class BeanType100Test extends TestBase {
 
     @Test
     public void testGetSerializationType() {
-        assertEquals(SerializationType.ENTITY, beanType.getSerializationType());
+        assertEquals(SerializationType.ENTITY, beanType.serializationType());
     }
 
     @Test

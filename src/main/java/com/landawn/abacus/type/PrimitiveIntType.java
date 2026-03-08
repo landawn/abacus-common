@@ -42,7 +42,7 @@ public final class PrimitiveIntType extends AbstractIntegerType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Integer> type = TypeFactory.getType(int.class);
-     * Class<?> clazz = type.clazz();
+     * Class<?> clazz = type.javaType();
      * // clazz equals int.class
      * }</pre>
      *
@@ -50,7 +50,7 @@ public final class PrimitiveIntType extends AbstractIntegerType {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public Class clazz() {
+    public Class javaType() {
         return int.class;
     }
 
@@ -61,14 +61,14 @@ public final class PrimitiveIntType extends AbstractIntegerType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Integer> type = TypeFactory.getType(int.class);
-     * boolean isPrimitive = type.isPrimitiveType();
+     * boolean isPrimitive = type.isPrimitive();
      * // isPrimitive is true
      * }</pre>
      *
      * @return {@code true}, indicating this is a primitive type
      */
     @Override
-    public boolean isPrimitiveType() {
+    public boolean isPrimitive() {
         return true;
     }
 

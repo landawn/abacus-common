@@ -35,11 +35,9 @@ import java.util.function.Predicate;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.parser.JsonDeserializationConfig;
-import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
+import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.parser.JsonParser;
-import com.landawn.abacus.parser.JsonSerializationConfig;
-import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
+import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
@@ -50,7 +48,7 @@ import com.landawn.abacus.util.function.TriConsumer;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * This utility class providing advanced CSV (Comma-Separated Values) data processing
+ * A utility class providing advanced CSV (Comma-Separated Values) data processing
  * capabilities including high-performance parsing, streaming operations, type-safe conversions, and seamless
  * integration with Dataset objects for efficient data manipulation and analysis. This class serves as a powerful
  * toolkit for ETL (Extract, Transform, Load) operations, data import/export scenarios, and bulk data processing
@@ -78,7 +76,7 @@ public final class CsvUtil {
     public static final JsonParser jsonParser = ParserFactory.createJsonParser();
 
     /** JSON deserialization configuration for deserializing String element types. */
-    static final JsonDeserializationConfig jdc = JDC.create().setElementType(String.class);
+    static final JsonDeserConfig jdc = JsonDeserConfig.create().setElementType(String.class);
 
     static final Splitter lineSplitter = Splitter.with(',').trimResults();
 
@@ -379,7 +377,7 @@ public final class CsvUtil {
     }
 
     @SuppressWarnings("deprecation")
-    static final JsonSerializationConfig config = JSC.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP).setStringQuotation(SK._DOUBLE_QUOTE);
+    static final JsonSerConfig config = JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP).setStringQuotation(SK._DOUBLE_QUOTE);
     static final Type<String> strType = Type.of(String.class);
 
     /**

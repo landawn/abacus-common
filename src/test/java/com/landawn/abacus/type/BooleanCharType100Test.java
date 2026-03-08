@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @Tag("new-test")
@@ -35,7 +35,7 @@ public class BooleanCharType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<Boolean> result = type.clazz();
+        Class<Boolean> result = type.javaType();
         assertEquals(Boolean.class, result);
     }
 
@@ -245,7 +245,7 @@ public class BooleanCharType100Test extends TestBase {
     @Test
     public void testWriteCharacter_NoQuotation() throws IOException {
         CharacterWriter mockWriter = createCharacterWriter();
-        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getCharQuotation()).thenReturn((char) 0);
 
         type.writeCharacter(mockWriter, Boolean.TRUE, config);
@@ -256,7 +256,7 @@ public class BooleanCharType100Test extends TestBase {
     @Test
     public void testWriteCharacter_WithQuotation() throws IOException {
         CharacterWriter mockWriter = createCharacterWriter();
-        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getCharQuotation()).thenReturn('\'');
 
         type.writeCharacter(mockWriter, Boolean.FALSE, config);

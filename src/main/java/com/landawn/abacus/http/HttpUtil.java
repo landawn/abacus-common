@@ -46,7 +46,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import com.landawn.abacus.annotation.Internal;
-import com.landawn.abacus.parser.DeserializationConfig;
+import com.landawn.abacus.parser.Deserialization;
 import com.landawn.abacus.parser.JsonParser;
 import com.landawn.abacus.parser.KryoParser;
 import com.landawn.abacus.parser.Parser;
@@ -66,8 +66,8 @@ import com.landawn.abacus.util.RegExUtil;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Utility class for HTTP operations.
- * This class provides static utility methods for working with HTTP connections,
+ * Internal utility class for HTTP operations. This class is not intended for direct use by application code.
+ * It provides static utility methods for working with HTTP connections,
  * including content type/encoding handling, stream wrapping, and response validation.
  * 
  * <p>Key features:</p>
@@ -213,7 +213,7 @@ public final class HttpUtil {
     }
 
     private HttpUtil() {
-        // Singleton for utility class.
+        // Utility class - prevent instantiation
     }
 
     /**
@@ -989,7 +989,7 @@ public final class HttpUtil {
      * @return The parser for the content format
      * @throws IllegalArgumentException if the content format is not supported
      */
-    public static <SC extends SerializationConfig<?>, DC extends DeserializationConfig<?>> Parser<SC, DC> getParser(final ContentFormat contentFormat) {
+    public static <SC extends SerializationConfig<?>, DC extends Deserialization<?>> Parser<SC, DC> getParser(final ContentFormat contentFormat) {
         if (contentFormat == null) {
             return (Parser<SC, DC>) jsonParser;
         }

@@ -24,7 +24,7 @@ public class ClazzType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<Class> result = type.clazz();
+        Class<Class> result = type.javaType();
         Assertions.assertNotNull(result);
     }
 

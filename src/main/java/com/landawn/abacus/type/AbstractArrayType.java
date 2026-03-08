@@ -57,7 +57,7 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
      * @return the appropriate {@link SerializationType} for this array type
      */
     @Override
-    public SerializationType getSerializationType() {
+    public SerializationType serializationType() {
         return isSerializable() ? SerializationType.SERIALIZABLE : SerializationType.ARRAY;
     }
 

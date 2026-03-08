@@ -24,7 +24,7 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.N;
@@ -96,13 +96,13 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<ZonedDateTime> type = TypeFactory.getType(ZonedDateTime.class);
-     * Class&lt;ZonedDateTime&gt; clazz = type.clazz();   // Returns ZonedDateTime.class
+     * Class&lt;ZonedDateTime&gt; clazz = type.javaType();   // Returns ZonedDateTime.class
      * }</pre>
      *
      * @return the Class object for ZonedDateTime.class
      */
     @Override
-    public Class<ZonedDateTime> clazz() {
+    public Class<ZonedDateTime> javaType() {
         return ZonedDateTime.class;
     }
 
@@ -378,7 +378,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharacterWriter writer = new CharacterWriter();
-     * JsonXmlSerializationConfig<?> config = JsonXmlSerializationConfig.of();
+     * JsonXmlSerConfig<?> config = JsonXmlSerConfig.of();
      * type.writeCharacter(writer, ZonedDateTime.now(), config);   // Writes formatted date/time
      * }</pre>
      *
@@ -389,7 +389,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      */
     @SuppressWarnings("null")
     @Override
-    public void writeCharacter(final CharacterWriter writer, final ZonedDateTime x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final ZonedDateTime x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

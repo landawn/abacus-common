@@ -39,6 +39,21 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *   <li>Memory-based capacity constraints via MemoryMeasure</li>
  * </ul>
  *
+ * <p><b>API Design Note:</b> ObjectPool follows {@link java.util.concurrent.BlockingQueue} naming
+ * conventions ({@code add}/{@code take}/{@code contains}) because it models an <em>unkeyed</em>
+ * collection of interchangeable objects — callers deposit and withdraw objects without specifying
+ * an identity. This is in contrast to {@link KeyedObjectPool}, which follows {@link java.util.Map}
+ * naming conventions ({@code put}/{@code get}/{@code containsKey}) because each object is
+ * associated with a unique key.</p>
+ *
+ * <table>
+ *   <caption>Method naming comparison between ObjectPool and KeyedObjectPool</caption>
+ *   <tr><th>Operation</th><th>ObjectPool (Queue-style)</th><th>KeyedObjectPool (Map-style)</th></tr>
+ *   <tr><td>Insert</td><td>{@code add(E)}</td><td>{@code put(K, E)}</td></tr>
+ *   <tr><td>Retrieve</td><td>{@code take()}</td><td>{@code get(K)}</td></tr>
+ *   <tr><td>Check</td><td>{@code contains(E)}</td><td>{@code containsKey(K)}</td></tr>
+ * </table>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ObjectPool<MyPoolable> pool = PoolFactory.createObjectPool(10);
@@ -60,6 +75,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *
  * @param <E> the type of objects in this pool, must implement Poolable
  * @see Pool
+ * @see KeyedObjectPool
  * @see Poolable
  * @see PoolFactory
  */
@@ -78,7 +94,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      *
      * @param element the object to be added to the pool, must not be {@code null}
      * @return {@code true} if the object was successfully added, {@code false} otherwise
-     * @throws IllegalArgumentException if the object is null
+     * @throws IllegalArgumentException if the element is null
      * @throws IllegalStateException if the pool has been closed
      */
     boolean add(E element);
@@ -107,7 +123,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * @param element the object to be added to the pool, must not be {@code null}
      * @param autoDestroyOnFailedToAdd if {@code true}, calls element.destroy(PUT_ADD_FAILURE) if add fails
      * @return {@code true} if the object was successfully added, {@code false} otherwise
-     * @throws IllegalArgumentException if the object is null
+     * @throws IllegalArgumentException if the element is null
      * @throws IllegalStateException if the pool has been closed
      */
     boolean add(E element, boolean autoDestroyOnFailedToAdd);
@@ -132,7 +148,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * @param unit the time unit of the timeout argument
      * @return {@code true} if successful, {@code false} if timeout elapsed before space was available
      * @throws InterruptedException if interrupted while waiting
-     * @throws IllegalArgumentException if the object is null
+     * @throws IllegalArgumentException if the element is null
      * @throws IllegalStateException if the pool has been closed
      */
     boolean add(E element, long timeout, TimeUnit unit) throws InterruptedException;
@@ -157,7 +173,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * @param autoDestroyOnFailedToAdd if {@code true}, calls element.destroy(PUT_ADD_FAILURE) if add fails
      * @return {@code true} if successful, {@code false} if timeout elapsed or add failed
      * @throws InterruptedException if interrupted while waiting
-     * @throws IllegalArgumentException if the object is null
+     * @throws IllegalArgumentException if the element is null
      * @throws IllegalStateException if the pool has been closed
      */
     boolean add(E element, long timeout, TimeUnit unit, boolean autoDestroyOnFailedToAdd) throws InterruptedException;

@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,8 +36,10 @@ public class MillisTimestampType100Test extends TestBase {
     @Test
     public void testGetByIndexWithZeroValue() throws SQLException {
         Mockito.when(mockResultSet.getLong(1)).thenReturn(0L);
+        Mockito.when(mockResultSet.wasNull()).thenReturn(false);
         Timestamp result = millisTimestampType.get(mockResultSet, 1);
-        Assertions.assertNull(result);
+        Assertions.assertNotNull(result);
+        assertEquals(0L, result.getTime());
     }
 
     @Test
@@ -51,6 +54,24 @@ public class MillisTimestampType100Test extends TestBase {
     @Test
     public void testGetByLabelWithZeroValue() throws SQLException {
         Mockito.when(mockResultSet.getLong("timestampColumn")).thenReturn(0L);
+        Mockito.when(mockResultSet.wasNull()).thenReturn(false);
+        Timestamp result = millisTimestampType.get(mockResultSet, "timestampColumn");
+        Assertions.assertNotNull(result);
+        assertEquals(0L, result.getTime());
+    }
+
+    @Test
+    public void testGetByIndexWithSqlNull() throws SQLException {
+        Mockito.when(mockResultSet.getLong(1)).thenReturn(0L);
+        Mockito.when(mockResultSet.wasNull()).thenReturn(true);
+        Timestamp result = millisTimestampType.get(mockResultSet, 1);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testGetByLabelWithSqlNull() throws SQLException {
+        Mockito.when(mockResultSet.getLong("timestampColumn")).thenReturn(0L);
+        Mockito.when(mockResultSet.wasNull()).thenReturn(true);
         Timestamp result = millisTimestampType.get(mockResultSet, "timestampColumn");
         Assertions.assertNull(result);
     }
@@ -67,7 +88,7 @@ public class MillisTimestampType100Test extends TestBase {
     @Test
     public void testSetPreparedStatementWithNull() throws SQLException {
         millisTimestampType.set(mockPreparedStatement, 1, null);
-        Mockito.verify(mockPreparedStatement).setLong(1, 0L);
+        Mockito.verify(mockPreparedStatement).setNull(1, Types.BIGINT);
     }
 
     @Test
@@ -81,7 +102,7 @@ public class MillisTimestampType100Test extends TestBase {
     @Test
     public void testSetCallableStatementWithNull() throws SQLException {
         millisTimestampType.set(mockCallableStatement, "timestampParam", null);
-        Mockito.verify(mockCallableStatement).setLong("timestampParam", 0L);
+        Mockito.verify(mockCallableStatement).setNull("timestampParam", Types.BIGINT);
     }
 
     @Test

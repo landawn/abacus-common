@@ -215,7 +215,7 @@ public class Stream100Test extends TestBase {
     public void test_lazyEvalation() throws Exception {
         final MutableBoolean moved = MutableBoolean.of(false);
 
-        Stream<String> s = Stream.of("a", "b", "c", "d").peek(Fn.println()).onEach(it -> {
+        Stream<String> s = Stream.of("a", "b", "c", "d").peek(Fn.println()).peek(it -> {
             new RuntimeException("Testing lazy evaluation").printStackTrace();
             moved.setTrue();
         })
@@ -264,7 +264,7 @@ public class Stream100Test extends TestBase {
         final List<ByteStream> list = new ArrayList<>();
 
         for (int i = 0; i < 10; i++) {
-            list.add(ByteStream.range((byte) 0, (byte) i).onEach(it -> moved.setTrue()).onEach(N::println));
+            list.add(ByteStream.range((byte) 0, (byte) i).peek(it -> moved.setTrue()).peek(N::println));
         }
 
         ByteStream bs = ByteStream.merge(list, (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
@@ -282,7 +282,7 @@ public class Stream100Test extends TestBase {
         moved.setFalse();
 
         final IntStream is = Stream.range(0, 10_000)
-                .onEach(it -> moved.setTrue())
+                .peek(it -> moved.setTrue())
                 .parallel(128)
                 .map(it -> it - 0)
                 .map(it -> it + 0)
@@ -291,7 +291,7 @@ public class Stream100Test extends TestBase {
                 .map(it -> it - 1)
                 .filter(it -> it >= 0)
                 .buffered(1024)
-                .onEach(it -> {
+                .peek(it -> {
                     if (it % 37 == 0) {
                         N.sleep(3);
                     }
@@ -305,7 +305,7 @@ public class Stream100Test extends TestBase {
                 .filter(it -> it >= 0)
                 .buffered(1024)
                 .reverseSorted()
-                .onEach(it -> {
+                .peek(it -> {
                     if (it % 79 == 0) {
                         N.sleep(3);
                     }
@@ -317,7 +317,7 @@ public class Stream100Test extends TestBase {
                 .map(it -> it - 1)
                 .filter(it -> it >= 0)
                 .buffered(1024)
-                .onEach(it -> {
+                .peek(it -> {
                     if (it % 137 == 0) {
                         N.sleep(3);
                     }
@@ -330,7 +330,7 @@ public class Stream100Test extends TestBase {
                 .map(it -> it - 1)
                 .filter(it -> it >= 0)
                 .buffered(137)
-                .onEach(it -> {
+                .peek(it -> {
                     if (it % 537 == 0) {
                         N.sleep(3);
                     }
@@ -751,7 +751,7 @@ public class Stream100Test extends TestBase {
     @Test
     public void testOnEach() {
         List<Integer> collected = new ArrayList<>();
-        Stream<Integer> onEachStream = stream.onEach(collected::add);
+        Stream<Integer> onEachStream = stream.peek(collected::add);
         onEachStream.forEach(e -> {
         });
         assertEquals(testList, collected);
@@ -1496,7 +1496,7 @@ public class Stream100Test extends TestBase {
 
     @Test
     public void testNMatch() {
-        assertTrue(stream.isMatchCountBetween(2, 3, n -> n > 2));
+        assertTrue(stream.hasMatchCountBetween(2, 3, n -> n > 2));
     }
 
     @Test

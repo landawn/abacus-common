@@ -24,7 +24,7 @@ public class FractionType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(Fraction.class, fractionType.clazz());
+        assertEquals(Fraction.class, fractionType.javaType());
     }
 
     @Test

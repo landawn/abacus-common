@@ -25,7 +25,7 @@ import java.util.Collection;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedSQLException;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
@@ -62,7 +62,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @return the Class object for byte[]
      */
     @Override
-    public Class<byte[]> clazz() {
+    public Class<byte[]> javaType() {
         return byte[].class;
     }
 
@@ -72,7 +72,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @return the Type object representing Byte/byte elements
      */
     @Override
-    public Type<Byte> getElementType() {
+    public Type<Byte> elementType() {
         return elementType;
     }
 
@@ -80,10 +80,10 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * Returns the parameter types associated with this array type.
      *
      * @return an array containing the Byte Type that describes the elements of this array type
-     * @see #getElementType()
+     * @see #elementType()
      */
     @Override
-    public Type<Byte>[] getParameterTypes() {
+    public Type<Byte>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -307,7 +307,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @throws IOException if an I/O error occurs
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final byte[] x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final byte[] x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

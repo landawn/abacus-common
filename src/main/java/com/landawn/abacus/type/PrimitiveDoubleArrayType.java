@@ -17,7 +17,7 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.util.Collection;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -49,7 +49,7 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
      * @return the Class object for double[]
      */
     @Override
-    public Class<double[]> clazz() {
+    public Class<double[]> javaType() {
         return double[].class;
     }
 
@@ -59,7 +59,7 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
      * @return the Type object representing Double/double elements
      */
     @Override
-    public Type<Double> getElementType() {
+    public Type<Double> elementType() {
         return elementType;
     }
 
@@ -67,10 +67,10 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
      * Returns the parameter types associated with this array type.
      *
      * @return an array containing the Double Type that describes the elements of this array type
-     * @see #getElementType()
+     * @see #elementType()
      */
     @Override
-    public Type<Double>[] getParameterTypes() {
+    public Type<Double>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -161,7 +161,7 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
      * @throws IOException if an I/O error occurs
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final double[] x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final double[] x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

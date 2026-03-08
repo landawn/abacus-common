@@ -1141,6 +1141,7 @@ public class Dates100Test extends TestBase {
     @Test
     public void testTruncatedEqualsCalendars() {
         Calendar cal1 = Calendar.getInstance();
+        cal1.setTimeInMillis(FIXED_TIME_MILLIS);
         Calendar cal2 = (Calendar) cal1.clone();
         cal2.add(Calendar.SECOND, 1);
 
@@ -1150,7 +1151,7 @@ public class Dates100Test extends TestBase {
 
     @Test
     public void testTruncatedEqualsDatesWithCalendarField() {
-        java.util.Date date1 = new java.util.Date();
+        java.util.Date date1 = new java.util.Date(FIXED_TIME_MILLIS);
         java.util.Date date2 = new java.util.Date(date1.getTime() + 1000);
 
         assertTrue(Dates.truncatedEquals(date1, date2, CalendarField.MINUTE));
@@ -1169,6 +1170,7 @@ public class Dates100Test extends TestBase {
     @Test
     public void testTruncatedCompareToCalendarsWithCalendarField() {
         Calendar cal1 = Calendar.getInstance();
+        cal1.setTimeInMillis(FIXED_TIME_MILLIS + TimeUnit.HOURS.toMillis(12));
         Calendar cal2 = (Calendar) cal1.clone();
         cal2.add(Calendar.HOUR_OF_DAY, 1);
 
@@ -1188,8 +1190,8 @@ public class Dates100Test extends TestBase {
 
     @Test
     public void testTruncatedCompareToDatesWithCalendarField() {
-        java.util.Date date1 = new java.util.Date();
-        java.util.Date date2 = new java.util.Date(date1.getTime() + 3600000);
+        java.util.Date date1 = new java.util.Date(FIXED_TIME_MILLIS + TimeUnit.HOURS.toMillis(12));
+        java.util.Date date2 = new java.util.Date(date1.getTime() + TimeUnit.HOURS.toMillis(1));
 
         assertEquals(0, Dates.truncatedCompareTo(date1, date2, CalendarField.DAY_OF_MONTH));
         assertTrue(Dates.truncatedCompareTo(date1, date2, CalendarField.HOUR_OF_DAY) < 0);

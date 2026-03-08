@@ -69,14 +69,14 @@ public class JUDateType extends AbstractDateType<Date> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<java.util.Date> type = TypeFactory.getType(java.util.Date.class);
-     * Class<Date> clazz = type.clazz();
+     * Class<Date> clazz = type.javaType();
      * System.out.println(clazz.getName());   // Outputs: java.util.Date
      * }</pre>
      *
      * @return the Class object representing java.util.Date
      */
     @Override
-    public Class<Date> clazz() {
+    public Class<Date> javaType() {
         return Date.class;
     }
 

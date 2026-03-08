@@ -28,7 +28,7 @@ import com.landawn.abacus.util.N;
  * <pre>{@code
  * SerializationConfig config = new MySerializationConfig()
  *     .setExclusion(Exclusion.NULL)
- *     .skipTransientField(true);
+ *     .setSkipTransientField(true);
  * }</pre>
  *
  * @param <C> the concrete configuration type for method chaining
@@ -91,33 +91,33 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
 
     /**
      * Checks whether transient fields should be skipped during serialization.
-     * 
+     *
      * <p>When {@code true}, fields marked with the {@code transient} keyword or
      * {@code @Transient} annotation will be excluded from serialization.</p>
      *
      * @return {@code true} if transient fields should be skipped, {@code false} otherwise
      */
-    public boolean skipTransientField() {
+    public boolean isSkipTransientField() {
         return skipTransientField;
     }
 
     /**
      * Sets whether transient fields should be skipped during serialization.
-     * 
+     *
      * <p>When set to {@code true}, fields marked with the {@code transient} keyword or
      * {@code @Transient} annotation will be excluded from serialization.
      * This is useful for excluding fields that should not be persisted or transmitted.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * config.skipTransientField(true);    // Skip transient fields
-     * config.skipTransientField(false);   // Include transient fields
+     * config.setSkipTransientField(true);    // Skip transient fields
+     * config.setSkipTransientField(false);   // Include transient fields
      * }</pre>
      *
      * @param skipTransientField {@code true} to skip transient fields, {@code false} to include them
      * @return this configuration instance for method chaining
      */
-    public C skipTransientField(final boolean skipTransientField) {
+    public C setSkipTransientField(final boolean skipTransientField) {
         this.skipTransientField = skipTransientField;
 
         return (C) this;

@@ -1,16 +1,29 @@
 package com.landawn.abacus.logging;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.slf4j.spi.LocationAwareLogger.DEBUG_INT;
+import static org.slf4j.spi.LocationAwareLogger.ERROR_INT;
+import static org.slf4j.spi.LocationAwareLogger.INFO_INT;
+import static org.slf4j.spi.LocationAwareLogger.TRACE_INT;
+import static org.slf4j.spi.LocationAwareLogger.WARN_INT;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
+import org.slf4j.Logger;
+import org.slf4j.Marker;
+import org.slf4j.spi.LocationAwareLogger;
 
 import com.landawn.abacus.TestBase;
 
@@ -163,6 +176,30 @@ public class SLFJLogger100Test extends TestBase {
         });
     }
 
+    @Test
+    @DisplayName("Test LocationAwareLogger is used for all direct levels")
+    public void testInjectedLocationAwareLoggerForAllLevels() {
+        final RecordingLocationAwareLogger handler = new RecordingLocationAwareLogger("test.location.aware");
+        final SLF4JLogger logger = new SLF4JLogger("test.location.aware", handler.proxy());
+
+        logger.trace("Trace message");
+        assertRecordedLog(handler, TRACE_INT, "Trace message", null);
+
+        logger.debug("Debug message");
+        assertRecordedLog(handler, DEBUG_INT, "Debug message", null);
+
+        logger.info("Info {}", 123);
+        assertRecordedLog(handler, INFO_INT, "Info 123", null);
+
+        final Exception warnException = new Exception("warn");
+        logger.warn("Warn message", warnException);
+        assertRecordedLog(handler, WARN_INT, "Warn message", warnException);
+
+        final Exception errorException = new Exception("error");
+        logger.error(errorException, "Error {}", 456);
+        assertRecordedLog(handler, ERROR_INT, "Error 456", errorException);
+    }
+
     @DisplayName("Test special logger names")
     @EnabledIf("isSLF4JAvailable")
     @Test
@@ -195,6 +232,98 @@ public class SLFJLogger100Test extends TestBase {
                 new SLF4JLogger("test");
             });
             assertEquals("Failed to initialize SLF4J Logger Factory", exception.getMessage());
+        }
+    }
+
+    private static void assertRecordedLog(final RecordingLocationAwareLogger handler, final int level, final String message, final Throwable throwable) {
+        assertEquals(SLF4JLogger.class.getName(), handler.lastFqcn);
+        assertEquals(level, handler.lastLevel);
+        assertEquals(message, handler.lastMessage);
+        assertEquals(throwable, handler.lastThrowable);
+        assertNull(handler.lastMarker);
+        assertNull(handler.lastArgArray);
+    }
+
+    private static final class RecordingLocationAwareLogger implements InvocationHandler {
+
+        private final String name;
+
+        private int lastLevel;
+
+        private String lastFqcn;
+
+        private String lastMessage;
+
+        private Object[] lastArgArray;
+
+        private Throwable lastThrowable;
+
+        private Marker lastMarker;
+
+        private RecordingLocationAwareLogger(final String name) {
+            this.name = name;
+        }
+
+        private LocationAwareLogger proxy() {
+            return (LocationAwareLogger) Proxy.newProxyInstance(LocationAwareLogger.class.getClassLoader(), new Class<?>[] { LocationAwareLogger.class }, this);
+        }
+
+        @Override
+        public Object invoke(final Object proxy, final Method method, final Object[] args) {
+            return switch (method.getName()) {
+                case "getName" -> name;
+                case "log" -> {
+                    lastMarker = (Marker) args[0];
+                    lastFqcn = (String) args[1];
+                    lastLevel = (Integer) args[2];
+                    lastMessage = (String) args[3];
+                    lastArgArray = (Object[]) args[4];
+                    lastThrowable = (Throwable) args[5];
+                    yield null;
+                }
+                case "isTraceEnabled", "isDebugEnabled", "isInfoEnabled", "isWarnEnabled", "isErrorEnabled" -> true;
+                case "trace", "debug", "info", "warn", "error" -> null;
+                case "toString" -> "RecordingLocationAwareLogger[" + name + "]";
+                case "hashCode" -> System.identityHashCode(this);
+                case "equals" -> proxy == args[0];
+                default -> defaultValue(method.getReturnType());
+            };
+        }
+
+        private static Object defaultValue(final Class<?> returnType) {
+            if (returnType == boolean.class) {
+                return false;
+            }
+
+            if (returnType == byte.class) {
+                return (byte) 0;
+            }
+
+            if (returnType == short.class) {
+                return (short) 0;
+            }
+
+            if (returnType == int.class) {
+                return 0;
+            }
+
+            if (returnType == long.class) {
+                return 0L;
+            }
+
+            if (returnType == float.class) {
+                return 0F;
+            }
+
+            if (returnType == double.class) {
+                return 0D;
+            }
+
+            if (returnType == char.class) {
+                return '\0';
+            }
+
+            return null;
         }
     }
 }

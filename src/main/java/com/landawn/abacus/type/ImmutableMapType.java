@@ -17,8 +17,7 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.io.Writer;
 
-import com.landawn.abacus.parser.JsonDeserializationConfig;
-import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
+import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ImmutableMap;
 import com.landawn.abacus.util.Strings;
@@ -27,7 +26,6 @@ import com.landawn.abacus.util.SK;
 /**
  * Type handler for ImmutableMap objects with generic key and value types.
  * This class handles serialization and deserialization of ImmutableMap instances.
- * Special support is provided for Spring's MultiValueMap where values are Lists.
  *
  * @param <K> the key type
  * @param <V> the value type
@@ -42,7 +40,7 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
 
     private final Type<?>[] parameterTypes;
 
-    private final JsonDeserializationConfig jdc;
+    private final JsonDeserConfig jdc;
 
     @SuppressWarnings("rawtypes")
     ImmutableMapType(final String keyTypeName, final String valueTypeName) {
@@ -54,7 +52,7 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
 
         parameterTypes = new Type[] { TypeFactory.getType(keyTypeName), TypeFactory.getType(valueTypeName) };
 
-        jdc = JDC.create().setMapKeyType(parameterTypes[0]).setMapValueType(parameterTypes[1]);
+        jdc = JsonDeserConfig.create().setMapKeyType(parameterTypes[0]).setMapValueType(parameterTypes[1]);
     }
 
     /**
@@ -74,27 +72,26 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
      * @return The Class object for the ImmutableMap implementation
      */
     @Override
-    public Class<T> clazz() {
+    public Class<T> javaType() {
         return typeClass;
     }
 
     /**
      * Gets the parameter types for this generic ImmutableMap type.
      * The array contains two elements: the key type at index 0 and the value type at index 1.
-     * For Spring MultiValueMap, the value type will be List&lt;V&gt; instead of V.
      *
      * @return An array containing the key type and value type
      */
     @Override
-    public Type<?>[] getParameterTypes() {
+    public Type<?>[] parameterTypes() {
         return parameterTypes;
     }
 
     /**
-     * Indicates whether this type represents a ImmutableMap.
+     * Indicates whether this type represents an ImmutableMap.
      * For ImmutableMapType, this always returns {@code true}.
      *
-     * @return {@code true}, indicating that this type represents a ImmutableMap
+     * @return {@code true}, indicating that this type represents an ImmutableMap
      */
     @Override
     public boolean isMap() {
@@ -130,12 +127,12 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
      * @return SerializationType.MAP
      */
     @Override
-    public SerializationType getSerializationType() {
+    public SerializationType serializationType() {
         return SerializationType.MAP;
     }
 
     /**
-     * Converts a ImmutableMap object to its JSON string representation.
+     * Converts an ImmutableMap object to its JSON string representation.
      * Empty ImmutableMaps are represented as "{}".
      *
      * <p><b>Usage Examples:</b></p>
@@ -165,11 +162,11 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
     }
 
     /**
-     * Parses a JSON string to create a ImmutableMap object.
+     * Parses a JSON string to create an ImmutableMap object.
      * The method handles:
-     * - {@code null} input returns null
-     * - Empty string or "{}" returns an empty ImmutableMap of the appropriate type
-     * - Valid JSON object strings are deserialized into the ImmutableMap
+     * - {@code null} or empty/blank string: returns {@code null}
+     * - "{}": returns an empty ImmutableMap of the appropriate type
+     * - Valid JSON object strings: deserialized into an ImmutableMap
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -199,7 +196,7 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
     }
 
     /**
-     * Appends the string representation of a ImmutableMap to an Appendable.
+     * Appends the string representation of an ImmutableMap to an Appendable.
      * The ImmutableMap is serialized as a JSON object. If the Appendable is a Writer,
      * the serialization is performed directly to the Writer for better performance.
      *
@@ -233,7 +230,7 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
     }
 
     /**
-     * Generates the type name for a ImmutableMap with the specified implementation class, key and value types.
+     * Generates the type name for an ImmutableMap with the specified implementation class, key and value types.
      *
      * @param typeClass The ImmutableMap implementation class
      * @param keyTypeName The name of the key type

@@ -44,7 +44,7 @@ public class InstantType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(Instant.class, type.clazz());
+        assertEquals(Instant.class, type.javaType());
     }
 
     @Test

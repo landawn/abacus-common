@@ -48,7 +48,7 @@ public class DurationType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(Duration.class, durationType.clazz());
+        assertEquals(Duration.class, durationType.javaType());
     }
 
     @Test
@@ -108,7 +108,7 @@ public class DurationType100Test extends TestBase {
         verify(preparedStatement).setLong(1, 1000);
 
         durationType.set(preparedStatement, 2, null);
-        verify(preparedStatement).setLong(2, 0);
+        verify(preparedStatement).setNull(2, java.sql.Types.BIGINT);
     }
 
     @Test
@@ -118,7 +118,7 @@ public class DurationType100Test extends TestBase {
         verify(callableStatement).setLong("durationParam", 2000);
 
         durationType.set(callableStatement, "nullParam", null);
-        verify(callableStatement).setLong("nullParam", 0);
+        verify(callableStatement).setNull("nullParam", java.sql.Types.BIGINT);
     }
 
     @Test

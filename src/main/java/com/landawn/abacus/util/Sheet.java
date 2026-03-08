@@ -291,8 +291,8 @@ public final class Sheet<R, C, V> implements Cloneable {
     public Sheet(final Collection<R> rowKeySet, final Collection<C> columnKeySet) throws IllegalArgumentException {
         N.checkArgument(!N.anyNull(rowKeySet), "Row key cannot be null");
         N.checkArgument(!N.anyNull(columnKeySet), "Column key cannot be null");
-        N.checkArgument(!N.hasDuplicates(rowKeySet), "Duplicate row keys are not allowed");
-        N.checkArgument(!N.hasDuplicates(columnKeySet), "Duplicate column keys are not allowed");
+        N.checkArgument(!N.containsDuplicates(rowKeySet), "Duplicate row keys are not allowed");
+        N.checkArgument(!N.containsDuplicates(columnKeySet), "Duplicate column keys are not allowed");
 
         _rowKeySet = N.newLinkedHashSet(rowKeySet);
         _columnKeySet = N.newLinkedHashSet(columnKeySet);
@@ -1340,7 +1340,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param value the value to search for in all cells
      * @return {@code true} if any cell contains the specified value, {@code false} otherwise
      * @see #containsValueAt(Object, Object, Object)
-     * @see #countOfNonNullValues()
+     * @see #nonNullValueCount()
      */
     public boolean containsValue(final Object value) {
         if (rowCount() == 0 || columnCount() == 0) {
@@ -3711,7 +3711,7 @@ public final class Sheet<R, C, V> implements Cloneable {
             throw new UnsupportedOperationException("Kryo library is required for deep cloning. Please add Kryo to your classpath or use copy() instead.");
         }
 
-        final Sheet<R, C, V> copy = kryoParser.clone(this);
+        final Sheet<R, C, V> copy = kryoParser.deepCopy(this);
 
         copy._isFrozen = freeze;
 
@@ -4008,13 +4008,13 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, null, 3}, {4, 5, null}}
      * );
      * 
-     * long count = sheet.countOfNonNullValues();   // returns 4
+     * long count = sheet.nonNullValueCount();   // returns 4
      * }</pre>
      *
      * @return the number of {@code non-null} values in the Sheet
      * @see #isEmpty()
      */
-    public long countOfNonNullValues() {
+    public long nonNullValueCount() {
         if (_isInitialized) {
             long count = 0;
 
@@ -6305,7 +6305,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * sheet.accept(s -> {
      *     System.out.println("Rows: " + s.rowLength());
      *     System.out.println("Columns: " + s.columnLength());
-     *     System.out.println("Non-null values: " + s.countOfNonNullValues());
+     *     System.out.println("Non-null values: " + s.nonNullValueCount());
      * });
      * }</pre>
      *

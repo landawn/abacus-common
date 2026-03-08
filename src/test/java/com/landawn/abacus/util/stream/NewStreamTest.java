@@ -25,9 +25,9 @@ public class NewStreamTest {
         Stream.of("c", "d").peek(Fn.println()).appendIfEmpty(() -> Stream.of("a", "b")).println();
 
         IntStream.empty().appendIfEmpty(() -> IntStream.of(1, 2)).println();
-        IntStream.empty().onEach(N::println).appendIfEmpty(() -> IntStream.of(1, 2)).println();
+        IntStream.empty().peek(N::println).appendIfEmpty(() -> IntStream.of(1, 2)).println();
         IntStream.of(3, 4).appendIfEmpty(() -> IntStream.of(1, 2)).println();
-        IntStream.of(3, 4).onEach(N::println).appendIfEmpty(() -> IntStream.of(1, 2)).println();
+        IntStream.of(3, 4).peek(N::println).appendIfEmpty(() -> IntStream.of(1, 2)).println();
     }
 
     @Test

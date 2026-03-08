@@ -27,7 +27,7 @@ public class UUIDType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<?> clazz = uuidType.clazz();
+        Class<?> clazz = uuidType.javaType();
         assertNotNull(clazz);
         assertEquals(UUID.class, clazz);
     }

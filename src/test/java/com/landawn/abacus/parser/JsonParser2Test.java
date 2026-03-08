@@ -39,7 +39,7 @@ import com.landawn.abacus.AbstractParserTest;
 import com.landawn.abacus.entity.extendDirty.basic.Account;
 import com.landawn.abacus.entity.extendDirty.basic.AccountContact;
 import com.landawn.abacus.entity.extendDirty.basic.ExtendDirtyBasicPNL.AccountPNL;
-import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
+import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.types.WeekDay;
 import com.landawn.abacus.util.Beans;
@@ -137,7 +137,7 @@ public class JsonParser2Test extends AbstractParserTest {
                 "Integer.MIN_VALUE", Integer.MIN_VALUE);
         N.println(N.toJson(map));
 
-        N.println(N.toJson(map, JSC.create().writeLongAsString(true)));
+        N.println(N.toJson(map, JsonSerConfig.create().setWriteLongAsString(true)));
     }
 
     @Data
@@ -334,7 +334,7 @@ public class JsonParser2Test extends AbstractParserTest {
         Account account = createAccountWithContact(Account.class);
         account.setId(100);
 
-        JsonSerializationConfig config = JSC.create().quotePropName(true).quoteMapKey(true).prettyFormat(true).setIndentation("    ");
+        JsonSerConfig config = JsonSerConfig.create().setQuotePropName(true).setQuoteMapKey(true).setPrettyFormat(true).setIndentation("    ");
 
         String str = jsonParser.serialize(account, config);
         N.println("============account=====================================================================================================");
@@ -510,7 +510,7 @@ public class JsonParser2Test extends AbstractParserTest {
     @Test
     public void testSerialize_map() {
         Map<String, Object> m = N.asMap("firstName", "fn", "lastName", "ln", "birthday", "2003-08-08");
-        String str = jsonParser.serialize(m, JSC.of(false, false));
+        String str = jsonParser.serialize(m, JsonSerConfig.create().setQuotePropName(false).setQuoteMapKey(false));
         N.println(str);
 
         Map<String, Object> m2 = jsonParser.deserialize(str, Map.class);

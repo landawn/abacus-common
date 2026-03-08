@@ -119,7 +119,7 @@ public final class HttpSettings {
      * will be thrown. A timeout of 0 means infinite timeout (wait indefinitely), which is not recommended
      * for production environments.</p>
      *
-     * <p><b>Important:</b> This setting only applies to {@code HttpClient}, not {@code OKHttpClient}.</p>
+     * <p><b>Important:</b> This setting only applies to {@code HttpClient}, not {@code OkHttpClient}.</p>
      *
      * <p><b>Recommended Values:</b></p>
      * <ul>
@@ -162,7 +162,7 @@ public final class HttpSettings {
      * The read timeout is the time to wait for data to be available for reading.
      * A timeout of 0 means infinite timeout.
      *
-     * <p><b>Note:</b> Only for {@code HttpClient}, not for {@code OKHttpClient}.
+     * <p><b>Note:</b> Only for {@code HttpClient}, not for {@code OkHttpClient}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -249,7 +249,7 @@ public final class HttpSettings {
      * Sets whether to use caches for HTTP connections.
      * When enabled, the HTTP implementation may cache responses.
      *
-     * <p><b>Note:</b> Only for {@code HttpClient}, not for {@code OKHttpClient}.
+     * <p><b>Note:</b> Only for {@code HttpClient}, not for {@code OkHttpClient}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -281,7 +281,7 @@ public final class HttpSettings {
      * Sets whether the connection will be used for input.
      * This should almost always be {@code true} (the default).
      *
-     * <p><b>Note:</b> Only for {@code HttpClient}, not for {@code OKHttpClient}.
+     * <p><b>Note:</b> Only for {@code HttpClient}, not for {@code OkHttpClient}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -314,7 +314,7 @@ public final class HttpSettings {
      * Sets whether the connection will be used for output.
      * This is automatically set to {@code true} for POST and PUT requests.
      *
-     * <p><b>Note:</b> Only for {@code HttpClient}, not for {@code OKHttpClient}.
+     * <p><b>Note:</b> Only for {@code HttpClient}, not for {@code OkHttpClient}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

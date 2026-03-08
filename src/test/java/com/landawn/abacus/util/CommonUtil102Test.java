@@ -511,21 +511,6 @@ public class CommonUtil102Test extends TestBase {
     }
 
     @Test
-    public void testNullToEmptyForEach() {
-        String[] nullArray = null;
-        String[] result = CommonUtil.nullElementsToEmpty(nullArray);
-        assertNotNull(result);
-        assertEquals(0, result.length);
-
-        String[] arrayWithNulls = { "test", null, "test2", null };
-        String[] converted = CommonUtil.nullElementsToEmpty(arrayWithNulls);
-        assertEquals("test", converted[0]);
-        assertEquals("", converted[1]);
-        assertEquals("test2", converted[2]);
-        assertEquals("", converted[3]);
-    }
-
-    @Test
     public void testNullToEmpty_ImmutableCollections() {
         ImmutableCollection<String> nullColl = null;
         ImmutableCollection<String> emptyColl = CommonUtil.nullToEmpty(nullColl);
@@ -758,11 +743,11 @@ public class CommonUtil102Test extends TestBase {
     public void testTypeOf_String() {
         Type<String> stringType = CommonUtil.typeOf("java.lang.String");
         assertNotNull(stringType);
-        assertEquals(String.class, stringType.clazz());
+        assertEquals(String.class, stringType.javaType());
 
         Type<Integer> intType = CommonUtil.typeOf("int");
         assertNotNull(intType);
-        assertEquals(int.class, intType.clazz());
+        assertEquals(int.class, intType.javaType());
 
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.typeOf((String) null));
     }
@@ -771,11 +756,11 @@ public class CommonUtil102Test extends TestBase {
     public void testTypeOf_Class() {
         Type<String> stringType = CommonUtil.typeOf(String.class);
         assertNotNull(stringType);
-        assertEquals(String.class, stringType.clazz());
+        assertEquals(String.class, stringType.javaType());
 
         Type<Integer> intType = CommonUtil.typeOf(int.class);
         assertNotNull(intType);
-        assertEquals(int.class, intType.clazz());
+        assertEquals(int.class, intType.javaType());
 
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.typeOf((Class<?>) null));
     }

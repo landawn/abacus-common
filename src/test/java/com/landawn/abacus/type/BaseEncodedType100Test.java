@@ -23,7 +23,7 @@ public class BaseEncodedType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(byte[].class, base64Type.clazz());
+        assertEquals(byte[].class, base64Type.javaType());
     }
 
     @Test

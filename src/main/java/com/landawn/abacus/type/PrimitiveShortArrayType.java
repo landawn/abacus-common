@@ -17,7 +17,7 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.util.Collection;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -47,7 +47,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<short[]> type = TypeFactory.getType(short[].class);
-     * Class clazz = type.clazz();
+     * Class clazz = type.javaType();
      * System.out.println(clazz.getName());   // Output: [S
      * System.out.println(clazz.isArray());   // Output: true
      * }</pre>
@@ -56,7 +56,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public Class clazz() {
+    public Class javaType() {
         return short[].class;
     }
 
@@ -67,14 +67,14 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<short[]> type = TypeFactory.getType(short[].class);
-     * Type<Short> elementType = type.getElementType();
+     * Type<Short> elementType = type.elementType();
      * System.out.println(elementType.name());   // Output: short
      * }</pre>
      *
      * @return the Type instance representing Short type for array elements
      */
     @Override
-    public Type<Short> getElementType() {
+    public Type<Short> elementType() {
         return elementType;
     }
 
@@ -84,16 +84,16 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<short[]> type = TypeFactory.getType(short[].class);
-     * Type<Short>[] paramTypes = type.getParameterTypes();
+     * Type<Short>[] paramTypes = type.parameterTypes();
      * System.out.println(paramTypes.length);      // Output: 1
      * System.out.println(paramTypes[0].name());   // Output: short
      * }</pre>
      *
      * @return an array containing the Short Type that describes the elements of this array type
-     * @see #getElementType()
+     * @see #elementType()
      */
     @Override
-    public Type<Short>[] getParameterTypes() {
+    public Type<Short>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -224,7 +224,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * Type<short[]> type = TypeFactory.getType(short[].class);
      * short[] array = {100, 200, 300};
      * CharacterWriter writer = new CharacterWriter();
-     * JsonXmlSerializationConfig<?> config = new JsonXmlSerializationConfig<>();
+     * JsonXmlSerConfig<?> config = new JsonXmlSerConfig<>();
      * type.writeCharacter(writer, array, config);
      * System.out.println(writer.toString());   // Output: [100, 200, 300]
      *
@@ -239,7 +239,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final short[] x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final short[] x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

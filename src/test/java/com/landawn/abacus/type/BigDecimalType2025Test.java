@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
@@ -42,7 +42,7 @@ public class BigDecimalType2025Test extends TestBase {
 
     @Test
     public void test_clazz() {
-        assertEquals(BigDecimal.class, type.clazz());
+        assertEquals(BigDecimal.class, type.javaType());
     }
 
     @Test
@@ -161,8 +161,8 @@ public class BigDecimalType2025Test extends TestBase {
     @Test
     public void test_writeCharacter_withConfig_asPlain() throws Exception {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
-        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
-        when(config.writeBigDecimalAsPlain()).thenReturn(true);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
+        when(config.isWriteBigDecimalAsPlain()).thenReturn(true);
 
         BigDecimal value = new BigDecimal("1.23E+3");
         type.writeCharacter(writer, value, config);

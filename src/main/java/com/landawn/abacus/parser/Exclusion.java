@@ -21,7 +21,7 @@ package com.landawn.abacus.parser;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Exclude properties with null values
- * JsonSerializationConfig config = new JsonSerializationConfig()
+ * JsonSerConfig config = new JsonSerConfig()
  *     .setExclusion(Exclusion.NULL);
  *
  * // Exclude properties with default values (including null)

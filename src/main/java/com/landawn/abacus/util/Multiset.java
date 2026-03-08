@@ -673,7 +673,7 @@ public final class Multiset<E> implements Collection<E> {
      *
      * @param element the element to count occurrences of.
      * @return the number of occurrences of the element; zero if not present.
-     * @see #occurrences(Object)
+     * @see Collections#frequency(java.util.Collection, Object)
      */
     public int getCount(final Object element) {
         @SuppressWarnings("SuspiciousMethodCalls")

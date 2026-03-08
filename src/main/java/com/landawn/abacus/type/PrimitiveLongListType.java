@@ -16,7 +16,7 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.LongList;
 import com.landawn.abacus.util.Strings;
@@ -44,14 +44,14 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<LongList> type = TypeFactory.getType(LongList.class);
-     * Class<LongList> clazz = type.clazz();
+     * Class<LongList> clazz = type.javaType();
      * System.out.println(clazz.getName());   // Output: com.landawn.abacus.util.LongList
      * }</pre>
      *
      * @return the Class object for LongList.class
      */
     @Override
-    public Class<LongList> clazz() {
+    public Class<LongList> javaType() {
         return LongList.class;
     }
 
@@ -62,14 +62,14 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<LongList> type = TypeFactory.getType(LongList.class);
-     * Type<?> elementType = type.getElementType();
+     * Type<?> elementType = type.elementType();
      * System.out.println(elementType.name());   // Output: long
      * }</pre>
      *
      * @return the Type instance representing long type for list elements
      */
     @Override
-    public Type<?> getElementType() {
+    public Type<?> elementType() {
         return elementType;
     }
 
@@ -79,16 +79,16 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<LongList> type = TypeFactory.getType(LongList.class);
-     * Type<Long>[] paramTypes = type.getParameterTypes();
+     * Type<Long>[] paramTypes = type.parameterTypes();
      * System.out.println(paramTypes.length);      // Output: 1
      * System.out.println(paramTypes[0].name());   // Output: long
      * }</pre>
      *
      * @return an array containing the Long Type that describes the elements of this list type
-     * @see #getElementType()
+     * @see #elementType()
      */
     @Override
-    public Type<Long>[] getParameterTypes() {
+    public Type<Long>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -190,7 +190,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * Type<LongList> type = TypeFactory.getType(LongList.class);
      * LongList list = LongList.of(100L, 200L, 300L);
      * BufferedJsonWriter writer = new BufferedJsonWriter();
-     * JsonXmlSerializationConfig<?> config = null;
+     * JsonXmlSerConfig<?> config = null;
      * type.writeCharacter(writer, list, config);
      * System.out.println(writer.toString());   // Output: [100, 200, 300]
      *
@@ -205,7 +205,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final LongList x, final JsonXmlSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final LongList x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

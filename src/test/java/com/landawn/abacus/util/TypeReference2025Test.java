@@ -155,7 +155,7 @@ public class TypeReference2025Test extends TestBase {
         Type<String> type = ref.type();
 
         Assertions.assertNotNull(type);
-        Assertions.assertEquals(String.class, type.clazz());
+        Assertions.assertEquals(String.class, type.javaType());
     }
 
     @Test
@@ -165,7 +165,7 @@ public class TypeReference2025Test extends TestBase {
         Type<List<String>> type = ref.type();
 
         Assertions.assertNotNull(type);
-        Assertions.assertEquals(List.class, type.clazz());
+        Assertions.assertEquals(List.class, type.javaType());
     }
 
     @Test
@@ -175,7 +175,7 @@ public class TypeReference2025Test extends TestBase {
         Type<Map<String, Integer>> type = ref.type();
 
         Assertions.assertNotNull(type);
-        Assertions.assertEquals(Map.class, type.clazz());
+        Assertions.assertEquals(Map.class, type.javaType());
     }
 
     @Test
@@ -185,7 +185,7 @@ public class TypeReference2025Test extends TestBase {
         Type<Map<String, List<Integer>>> type = ref.type();
 
         Assertions.assertNotNull(type);
-        Assertions.assertEquals(Map.class, type.clazz());
+        Assertions.assertEquals(Map.class, type.javaType());
     }
 
     @Test
@@ -195,7 +195,7 @@ public class TypeReference2025Test extends TestBase {
         Type<Integer[]> type = ref.type();
 
         Assertions.assertNotNull(type);
-        Assertions.assertEquals(Integer[].class, type.clazz());
+        Assertions.assertEquals(Integer[].class, type.javaType());
     }
 
     @Test
@@ -251,7 +251,7 @@ public class TypeReference2025Test extends TestBase {
         Type<List<? extends Number>> type = ref.type();
 
         Assertions.assertNotNull(type);
-        Assertions.assertEquals(List.class, type.clazz());
+        Assertions.assertEquals(List.class, type.javaType());
     }
 
     @Test
@@ -261,7 +261,7 @@ public class TypeReference2025Test extends TestBase {
         Type<String> type = token.type();
 
         Assertions.assertNotNull(type);
-        Assertions.assertEquals(String.class, type.clazz());
+        Assertions.assertEquals(String.class, type.javaType());
     }
 
     @Test
@@ -271,7 +271,7 @@ public class TypeReference2025Test extends TestBase {
         Type<List<String>> type = token.type();
 
         Assertions.assertNotNull(type);
-        Assertions.assertEquals(List.class, type.clazz());
+        Assertions.assertEquals(List.class, type.javaType());
     }
 
     @Test
@@ -307,7 +307,7 @@ public class TypeReference2025Test extends TestBase {
         Type<Map<String, List<Integer>>> type = token.type();
 
         Assertions.assertNotNull(type);
-        Assertions.assertEquals(Map.class, type.clazz());
+        Assertions.assertEquals(Map.class, type.javaType());
     }
 
     @Test
@@ -336,7 +336,7 @@ public class TypeReference2025Test extends TestBase {
         Type<TestBean> type = ref.type();
 
         Assertions.assertNotNull(type);
-        Assertions.assertEquals(TestBean.class, type.clazz());
+        Assertions.assertEquals(TestBean.class, type.javaType());
     }
 
     @Test
@@ -346,7 +346,7 @@ public class TypeReference2025Test extends TestBase {
         Type<GenericBean<String, Integer>> type = ref.type();
 
         Assertions.assertNotNull(type);
-        Assertions.assertEquals(GenericBean.class, type.clazz());
+        Assertions.assertEquals(GenericBean.class, type.javaType());
     }
 
     @Test
@@ -366,7 +366,7 @@ public class TypeReference2025Test extends TestBase {
         Type<String[][]> type = ref.type();
 
         Assertions.assertNotNull(type);
-        Assertions.assertEquals(String[][].class, type.clazz());
+        Assertions.assertEquals(String[][].class, type.javaType());
     }
 
     @Test
@@ -376,7 +376,7 @@ public class TypeReference2025Test extends TestBase {
         Type<int[]> type = ref.type();
 
         Assertions.assertNotNull(type);
-        Assertions.assertEquals(int[].class, type.clazz());
+        Assertions.assertEquals(int[].class, type.javaType());
     }
 
     @Test

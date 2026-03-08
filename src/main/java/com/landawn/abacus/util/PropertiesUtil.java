@@ -50,8 +50,7 @@ import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.Exclusion;
-import com.landawn.abacus.parser.XmlSerializationConfig;
-import com.landawn.abacus.parser.XmlSerializationConfig.XSC;
+import com.landawn.abacus.parser.XmlSerConfig;
 import com.landawn.abacus.type.Type;
 
 /**
@@ -137,9 +136,9 @@ public final class PropertiesUtil {
 
     private static final String TYPE = "type";
 
-    private static final XmlSerializationConfig xsc = XSC.create()
-            .tagByPropertyName(true)
-            .writeTypeInfo(false)
+    private static final XmlSerConfig xsc = XmlSerConfig.create()
+            .setTagByPropertyName(true)
+            .setWriteTypeInfo(false)
             .setDateTimeFormat(DateTimeFormat.ISO_8601_DATE_TIME)
             .setExclusion(Exclusion.NONE)
             .setIgnoredPropNames((Map<Class<?>, Set<String>>) null);
@@ -208,7 +207,7 @@ public final class PropertiesUtil {
     }
 
     private PropertiesUtil() {
-        // singleton.
+        // Utility class - prevent instantiation
     }
 
     /**
@@ -1302,8 +1301,8 @@ public final class PropertiesUtil {
                             type = Type.of(e.getClass());
 
                             if (writeTypeInfo) {
-                                if (ClassUtil.isPrimitiveWrapper(type.clazz())) {
-                                    bw.write("<" + elementPropName + " type=\"" + ClassUtil.getSimpleClassName(ClassUtil.unwrap(type.clazz())) + "\">");
+                                if (ClassUtil.isPrimitiveWrapper(type.javaType())) {
+                                    bw.write("<" + elementPropName + " type=\"" + ClassUtil.getSimpleClassName(ClassUtil.unwrap(type.javaType())) + "\">");
                                 } else {
                                     bw.write("<" + elementPropName + " type=\"" + type.declaringName() + "\">");
                                 }
@@ -1325,8 +1324,8 @@ public final class PropertiesUtil {
                     type = Type.of(propValue.getClass());
 
                     if (writeTypeInfo) {
-                        if (ClassUtil.isPrimitiveWrapper(type.clazz())) {
-                            bw.write("<" + propName + " type=\"" + ClassUtil.getSimpleClassName(ClassUtil.unwrap(type.clazz())) + "\">");
+                        if (ClassUtil.isPrimitiveWrapper(type.javaType())) {
+                            bw.write("<" + propName + " type=\"" + ClassUtil.getSimpleClassName(ClassUtil.unwrap(type.javaType())) + "\">");
                         } else {
                             bw.write("<" + propName + " type=\"" + type.declaringName() + "\">");
                         }
@@ -1701,12 +1700,12 @@ public final class PropertiesUtil {
             if (Strings.isNotEmpty(attr)) {
                 type = Type.of(attr);
                 if (type != null) {
-                    final Class<?> typeClass = type.clazz();
+                    final Class<?> typeClass = type.javaType();
                     if (typeClass.getCanonicalName().startsWith("java.lang") || ClassUtil.isPrimitiveType(typeClass)
                             || (typeClass.isArray() && ClassUtil.isPrimitiveType(typeClass.getComponentType()))) {
                         // ignore
                     } else {
-                        result.add(type.clazz().getCanonicalName());
+                        result.add(type.javaType().getCanonicalName());
                     }
 
                 }
@@ -1723,7 +1722,7 @@ public final class PropertiesUtil {
     private static void writeMethod(final String spaces, final String propName, final String typeName, final Set<String> duplicatedPropNameSet,
             final Writer output) throws IOException {
         final String listPropName = propName + "List";
-        final String elementTypeName = Type.of(typeName).isPrimitiveType() ? ClassUtil.getSimpleClassName(ClassUtil.wrap(Type.of(typeName).clazz())) : typeName;
+        final String elementTypeName = Type.of(typeName).isPrimitive() ? ClassUtil.getSimpleClassName(ClassUtil.wrap(Type.of(typeName).javaType())) : typeName;
 
         output.write(spaces + "public " + typeName + " get" + Strings.capitalize(propName) + "() {" + IOUtil.LINE_SEPARATOR_UNIX);
         output.write(spaces + "    " + "return (" + typeName + ") super.get(\"" + propName + "\");" + IOUtil.LINE_SEPARATOR_UNIX);
@@ -1783,7 +1782,7 @@ public final class PropertiesUtil {
             } else {
                 final Type<?> type = Type.of(typeAttr);
                 if (type != null) {
-                    typeName = type.clazz().getSimpleName();
+                    typeName = type.javaType().getSimpleName();
                 }
             }
         }

@@ -30,7 +30,7 @@ public class CharacterType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<Character> result = type.clazz();
+        Class<Character> result = type.javaType();
         assertEquals(Character.class, result);
     }
 

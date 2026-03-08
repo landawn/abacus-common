@@ -15,13 +15,11 @@
 package com.landawn.abacus.util;
 
 import com.landawn.abacus.parser.JsonParser;
-import com.landawn.abacus.parser.JsonSerializationConfig;
-import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
+import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.KryoParser;
 import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.parser.XmlParser;
-import com.landawn.abacus.parser.XmlSerializationConfig;
-import com.landawn.abacus.parser.XmlSerializationConfig.XSC;
+import com.landawn.abacus.parser.XmlSerConfig;
 import com.landawn.abacus.type.Type;
 
 /**
@@ -48,8 +46,8 @@ import com.landawn.abacus.type.Type;
  * </ul>
  * 
  * @see ParserFactory
- * @see JsonSerializationConfig
- * @see XmlSerializationConfig
+ * @see JsonSerConfig
+ * @see XmlSerConfig
  */
 final class Utils {
 
@@ -62,15 +60,15 @@ final class Utils {
 
     static final KryoParser kryoParser = ParserFactory.isKryoParserAvailable() ? ParserFactory.createKryoParser() : null;
 
-    static final JsonSerializationConfig jsc = JSC.create().quotePropName(true).quoteMapKey(true);
+    static final JsonSerConfig jsc = JsonSerConfig.create().setQuotePropName(true).setQuoteMapKey(true);
 
-    static final JsonSerializationConfig jscPrettyFormat = JSC.create().quotePropName(true).quoteMapKey(true).prettyFormat(true);
+    static final JsonSerConfig jscPrettyFormat = JsonSerConfig.create().setQuotePropName(true).setQuoteMapKey(true).setPrettyFormat(true);
 
-    static final XmlSerializationConfig xsc = XSC.create();
+    static final XmlSerConfig xsc = XmlSerConfig.create();
 
-    static final XmlSerializationConfig xscPrettyFormat = XSC.create().prettyFormat(true);
+    static final XmlSerConfig xscPrettyFormat = XmlSerConfig.create().setPrettyFormat(true);
 
-    static final XmlSerializationConfig xscForClone = XSC.create().writeTypeInfo(true);
+    static final XmlSerConfig xscForClone = XmlSerConfig.create().setWriteTypeInfo(true);
 
     static final Type<Boolean> booleanType = Type.of(boolean.class);
 
@@ -89,7 +87,7 @@ final class Utils {
     static final Type<Double> doubleType = Type.of(double.class);
 
     private Utils() {
-        // singleton.
+        // Utility class - prevent instantiation
     }
 
 }

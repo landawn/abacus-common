@@ -407,8 +407,8 @@ public class LongList200Test extends TestBase {
 
     @Test
     public void testHasDuplicates() {
-        assertTrue(LongList.of(1L, 2L, 1L).hasDuplicates());
-        assertFalse(LongList.of(1L, 2L, 3L).hasDuplicates());
+        assertTrue(LongList.of(1L, 2L, 1L).containsDuplicates());
+        assertFalse(LongList.of(1L, 2L, 3L).containsDuplicates());
     }
 
     @Test

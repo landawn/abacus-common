@@ -72,13 +72,13 @@ public class URIType extends AbstractType<URI> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<URI> type = TypeFactory.getType(URI.class);
-     * Class<URI> clazz = type.clazz();   // Returns URI.class
+     * Class<URI> clazz = type.javaType();   // Returns URI.class
      * }</pre>
      *
      * @return the Class object for URI.class
      */
     @Override
-    public Class<URI> clazz() {
+    public Class<URI> javaType() {
         return URI.class;
     }
 

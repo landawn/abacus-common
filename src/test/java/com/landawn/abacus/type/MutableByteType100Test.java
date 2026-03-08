@@ -8,6 +8,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +40,7 @@ public class MutableByteType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<MutableByte> clazz = mutableByteType.clazz();
+        Class<MutableByte> clazz = mutableByteType.javaType();
         assertEquals(MutableByte.class, clazz);
     }
 
@@ -101,7 +102,7 @@ public class MutableByteType100Test extends TestBase {
     @Test
     public void testSetPreparedStatementWithNull() throws SQLException {
         mutableByteType.set(mockPreparedStatement, 1, null);
-        Mockito.verify(mockPreparedStatement).setByte(1, (byte) 0);
+        Mockito.verify(mockPreparedStatement).setNull(1, Types.TINYINT);
     }
 
     @Test
@@ -113,7 +114,7 @@ public class MutableByteType100Test extends TestBase {
     @Test
     public void testSetCallableStatementWithNull() throws SQLException {
         mutableByteType.set(mockCallableStatement, "param", null);
-        Mockito.verify(mockCallableStatement).setByte("param", (byte) 0);
+        Mockito.verify(mockCallableStatement).setNull("param", Types.TINYINT);
     }
 
     @Test

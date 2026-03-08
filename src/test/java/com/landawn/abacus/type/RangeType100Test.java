@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonXmlSerializationConfig;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Range;
 
@@ -36,19 +36,19 @@ public class RangeType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(Range.class, rangeType.clazz());
+        assertEquals(Range.class, rangeType.javaType());
     }
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = rangeType.getParameterTypes();
+        Type<?>[] paramTypes = rangeType.parameterTypes();
         assertNotNull(paramTypes);
         assertEquals(1, paramTypes.length);
     }
 
     @Test
     public void testGetElementType() {
-        assertNotNull(rangeType.getElementType());
+        assertNotNull(rangeType.elementType());
     }
 
     @Test
@@ -116,7 +116,7 @@ public class RangeType100Test extends TestBase {
     @Test
     public void testWriteCharacter() throws IOException {
         CharacterWriter writer = createCharacterWriter();
-        JsonXmlSerializationConfig<?> config = mock(JsonXmlSerializationConfig.class);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
         Range<Integer> range = Range.closed(1, 5);
         rangeType.writeCharacter(writer, range, config);

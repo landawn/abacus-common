@@ -56,6 +56,10 @@ import com.landawn.abacus.util.cs;
  * @see RuntimeException
  * @see UncheckedIOException
  * @see UncheckedSQLException
+ * @see UncheckedExecutionException
+ * @see UncheckedInterruptedException
+ * @see UncheckedParseException
+ * @see UncheckedReflectiveOperationException
  */
 public class UncheckedException extends RuntimeException {
 

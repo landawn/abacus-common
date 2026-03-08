@@ -382,7 +382,7 @@ public class ParallelIteratorStream100Test extends TestBase {
     public void testOnEach() {
         List<Integer> sideEffectList = new CopyOnWriteArrayList<>();
 
-        List<Integer> result = stream.onEach(sideEffectList::add).toList();
+        List<Integer> result = stream.peek(sideEffectList::add).toList();
 
         assertHaveSameElements(TEST_DATA, result);
         assertHaveSameElements(TEST_DATA, sideEffectList);
@@ -602,7 +602,7 @@ public class ParallelIteratorStream100Test extends TestBase {
 
     @Test
     public void testNMatch() throws Exception {
-        boolean result = stream.isMatchCountBetween(3, 5, n -> n % 2 == 0);
+        boolean result = stream.hasMatchCountBetween(3, 5, n -> n % 2 == 0);
 
         assertTrue(result);
     }

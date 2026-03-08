@@ -36,13 +36,13 @@ public class MultimapType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<?> clazz = listMultimapType.clazz();
+        Class<?> clazz = listMultimapType.javaType();
         Assertions.assertNotNull(clazz);
     }
 
     @Test
     public void testGetParameterTypes() {
-        Type<?>[] paramTypes = listMultimapType.getParameterTypes();
+        Type<?>[] paramTypes = listMultimapType.parameterTypes();
         Assertions.assertNotNull(paramTypes);
         Assertions.assertTrue(paramTypes.length >= 2);
     }

@@ -166,13 +166,19 @@ public final class CodeGenerationUtil {
     public static final String NOSONAR_COMMENTS = " // NOSONAR";
 
     private CodeGenerationUtil() {
-        // singleton for utility class.
+        // Utility class - prevent instantiation
     }
 
     /**
      * Generates source for an inner property-name interface in the target entity.
      *
      * <p>The generated interface name defaults to {@value #X}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String source = CodeGenerationUtil.generatePropNameTableClass(User.class);
+     * System.out.println(source);
+     * }</pre>
      *
      * @param entityClass the entity class that contributes bean property names
      * @return generated Java source that declares the inner interface and constants
@@ -185,6 +191,12 @@ public final class CodeGenerationUtil {
 
     /**
      * Generates source for an inner property-name interface with a custom interface name.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String source = CodeGenerationUtil.generatePropNameTableClass(User.class, "Props");
+     * System.out.println(source);
+     * }</pre>
      *
      * @param entityClass the entity class that contributes bean property names
      * @param propNameTableClassName interface name for generated constants
@@ -202,6 +214,12 @@ public final class CodeGenerationUtil {
      * <p>When {@code srcDir} is not empty, this method loads the entity source file, replaces a
      * previously generated interface with the same name (if present), and inserts the new interface
      * before the entity's closing brace.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String source = CodeGenerationUtil.generatePropNameTableClass(User.class, "Props", "src/main/java");
+     * System.out.println(source);
+     * }</pre>
      *
      * @param entityClass the entity class that contributes bean property names
      * @param propNameTableClassName interface name for generated constants
@@ -311,6 +329,12 @@ public final class CodeGenerationUtil {
      *
      * <p>The generated top-level interface name defaults to {@value #X} for compatibility.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String source = CodeGenerationUtil.generatePropNameTableClasses(Arrays.asList(User.class, Order.class));
+     * System.out.println(source);
+     * }</pre>
+     *
      * @param entityClasses entity classes that contribute bean property names
      * @return generated Java source for the standalone property-name table
      * @see #generatePropNameTableClasses(Collection, String)
@@ -321,6 +345,12 @@ public final class CodeGenerationUtil {
 
     /**
      * Generates a standalone property-name table for multiple entity classes with a custom name.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String source = CodeGenerationUtil.generatePropNameTableClasses(Arrays.asList(User.class, Order.class), "Props");
+     * System.out.println(source);
+     * }</pre>
      *
      * @param entityClasses entity classes that contribute bean property names
      * @param propNameTableClassName top-level interface name to generate
@@ -333,6 +363,12 @@ public final class CodeGenerationUtil {
 
     /**
      * Generates a standalone property-name table for multiple entities with package/file options.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String source = CodeGenerationUtil.generatePropNameTableClasses(
+     *         Arrays.asList(User.class, Order.class), "Props", "com.example.props", "src/main/java");
+     * }</pre>
      *
      * @param entityClasses entity classes that contribute bean property names
      * @param propNameTableClassName top-level interface name to generate
@@ -362,6 +398,15 @@ public final class CodeGenerationUtil {
      * <p>This overload supports property-name remapping, optional case-specific nested interfaces,
      * function-based property constants, class-level property lists, inherited interfaces, and
      * optional write-to-file behavior.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
+     *         .entityClasses(Arrays.asList(User.class, Order.class))
+     *         .className("Props")
+     *         .build();
+     * String source = CodeGenerationUtil.generatePropNameTableClasses(config);
+     * }</pre>
      *
      * @param codeConfig full generation configuration
      * @return generated Java source for the property-name table class
@@ -411,7 +456,7 @@ public final class CodeGenerationUtil {
 
         final String allClassName = StreamEx.of(entityClassesToUse).map(ClassUtil::getSimpleClassName).join(", ", "[", "]");
 
-        if (generateClassPropNameList && StreamEx.of(entityClassesToUse).map(ClassUtil::getSimpleClassName).hasDuplicates()) {
+        if (generateClassPropNameList && StreamEx.of(entityClassesToUse).map(ClassUtil::getSimpleClassName).containsDuplicates()) {
             throw new IllegalArgumentException(
                     "Duplicate simple class names found: " + allClassName + ". It's not supported when generateClassPropNameList is true");
         }

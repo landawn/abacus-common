@@ -23,7 +23,7 @@ package com.landawn.abacus.util;
  * 
  * <p><b>Status progression example:</b></p>
  * <pre>{@code
- * ServiceStatus status = ServiceStatus.DEFAULT;
+ * ServiceStatus status = ServiceStatus.BLANK;
  * // Service becomes active
  * status = ServiceStatus.ACTIVE;
  * // Service expires

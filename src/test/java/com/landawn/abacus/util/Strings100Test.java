@@ -1496,42 +1496,42 @@ public class Strings100Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test nullToEmpty(String[])")
-    public void testNullToEmptyArray() {
+    @DisplayName("Test nullElementsToEmpty(String[])")
+    public void testNullElementsToEmptyArray() {
         String[] strs = { "a", null, "b", null };
-        Strings.nullToEmpty(strs);
+        Strings.nullElementsToEmpty(strs);
         assertArrayEquals(new String[] { "a", "", "b", "" }, strs);
 
-        Strings.nullToEmpty((String[]) null);
+        Strings.nullElementsToEmpty((String[]) null);
 
         String[] empty = new String[0];
-        Strings.nullToEmpty(empty);
+        Strings.nullElementsToEmpty(empty);
         assertArrayEquals(new String[0], empty);
     }
 
     @Test
-    @DisplayName("Test emptyToNull(T[])")
-    public void testEmptyToNullArray() {
+    @DisplayName("Test emptyElementsToNull(T[])")
+    public void testEmptyElementsToNullArray() {
         String[] strs = { "a", "", "b", "" };
-        Strings.emptyToNull(strs);
+        Strings.emptyElementsToNull(strs);
         assertArrayEquals(new String[] { "a", null, "b", null }, strs);
 
-        Strings.emptyToNull((String[]) null);
+        Strings.emptyElementsToNull((String[]) null);
     }
 
     @Test
-    @DisplayName("Test blankToEmpty(String[])")
-    public void testBlankToEmptyArray() {
+    @DisplayName("Test blankElementsToEmpty(String[])")
+    public void testBlankElementsToEmptyArray() {
         String[] strs = { "a", "  ", "b", null };
-        Strings.blankToEmpty(strs);
+        Strings.blankElementsToEmpty(strs);
         assertArrayEquals(new String[] { "a", "", "b", "" }, strs);
     }
 
     @Test
-    @DisplayName("Test blankToNull(T[])")
-    public void testBlankToNullArray() {
+    @DisplayName("Test blankElementsToNull(T[])")
+    public void testBlankElementsToNullArray() {
         String[] strs = { "a", "  ", "b", "" };
-        Strings.blankToNull(strs);
+        Strings.blankElementsToNull(strs);
         assertArrayEquals(new String[] { "a", null, "b", null }, strs);
     }
 

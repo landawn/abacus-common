@@ -47,7 +47,7 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      * @return the Class object for java.nio.ByteBuffer
      */
     @Override
-    public Class<ByteBuffer> clazz() {
+    public Class<ByteBuffer> javaType() {
         return ByteBuffer.class;
     }
 

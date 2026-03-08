@@ -78,14 +78,14 @@ public class RefType extends AbstractType<Ref> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Ref> type = TypeFactory.getType(Ref.class);
-     * Class<Ref> clazz = type.clazz();
+     * Class<Ref> clazz = type.javaType();
      * System.out.println(clazz.getName());   // Output: java.sql.Ref
      * }</pre>
      *
      * @return the Class object for java.sql.Ref.class
      */
     @Override
-    public Class<Ref> clazz() {
+    public Class<Ref> javaType() {
         return Ref.class;
     }
 

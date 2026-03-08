@@ -24,8 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
-import com.landawn.abacus.parser.JsonSerializationConfig.JSC;
+import com.landawn.abacus.parser.JsonDeserConfig;
+import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.Fn;
@@ -51,8 +51,8 @@ public class JsonParserImpl101Test extends TestBase {
         JsonParserImpl parser1 = new JsonParserImpl();
         Assertions.assertNotNull(parser1);
 
-        JsonSerializationConfig jsc = JSC.create();
-        JsonDeserializationConfig jdc = JDC.create();
+        JsonSerConfig jsc = JsonSerConfig.create();
+        JsonDeserConfig jdc = JsonDeserConfig.create();
         JsonParserImpl parser2 = new JsonParserImpl(jsc, jdc);
         Assertions.assertNotNull(parser2);
     }
@@ -77,7 +77,7 @@ public class JsonParserImpl101Test extends TestBase {
 
     @Test
     public void testparse_WithConfig() {
-        JsonDeserializationConfig config = JDC.create().readNullToEmpty(true);
+        JsonDeserConfig config = JsonDeserConfig.create().setReadNullToEmpty(true);
 
         String result1 = parser.parse(null, config, String.class);
         Assertions.assertEquals("", result1);
@@ -196,7 +196,7 @@ public class JsonParserImpl101Test extends TestBase {
 
     @Test
     public void testSerialize_WithConfig() {
-        JsonSerializationConfig config = JSC.create().prettyFormat(true);
+        JsonSerConfig config = JsonSerConfig.create().setPrettyFormat(true);
 
         Map<String, Object> map = new HashMap<>();
         map.put("key1", "value1");
@@ -278,7 +278,7 @@ public class JsonParserImpl101Test extends TestBase {
         String result5 = parser.deserialize((String) null, null, String.class);
         Assertions.assertNull(result5);
 
-        JsonDeserializationConfig config = JDC.create().readNullToEmpty(true);
+        JsonDeserConfig config = JsonDeserConfig.create().setReadNullToEmpty(true);
         String result6 = parser.deserialize("", config, String.class);
         Assertions.assertEquals("", result6);
     }
@@ -298,7 +298,7 @@ public class JsonParserImpl101Test extends TestBase {
         String result3 = parser.deserialize(json, 5, 5, null, String.class);
         Assertions.assertEquals("", result3);
 
-        JsonDeserializationConfig config = JDC.create().readNullToEmpty(true);
+        JsonDeserConfig config = JsonDeserConfig.create().setReadNullToEmpty(true);
         List<String> result4 = parser.deserialize(json, 5, 5, config, List.class);
         Assertions.assertNotNull(result4);
         Assertions.assertTrue(result4.isEmpty());
@@ -428,7 +428,7 @@ public class JsonParserImpl101Test extends TestBase {
 
     @Test
     public void testSpecialCases_CircularReference() {
-        JsonSerializationConfig config = JSC.create().supportCircularReference(true);
+        JsonSerConfig config = JsonSerConfig.create().setSupportCircularReference(true);
 
         Map<String, Object> map = new HashMap<>();
         map.put("self", map);
@@ -440,8 +440,8 @@ public class JsonParserImpl101Test extends TestBase {
 
     @Test
     public void testSpecialCases_EmptyAndNull() {
-        JsonDeserializationConfig readConfig = JDC.create().readNullToEmpty(true);
-        JsonSerializationConfig writeConfig = JSC.create().writeNullToEmpty(true);
+        JsonDeserConfig readConfig = JsonDeserConfig.create().setReadNullToEmpty(true);
+        JsonSerConfig writeConfig = JsonSerConfig.create().setWriteNullToEmpty(true);
 
         List<String> list1 = parser.deserialize("", readConfig, List.class);
         Assertions.assertNotNull(list1);
@@ -503,7 +503,7 @@ public class JsonParserImpl101Test extends TestBase {
 
     @Test
     public void testConfiguration_IgnoredProperties() {
-        JsonDeserializationConfig config = JDC.create().ignoreUnmatchedProperty(true).setIgnoredPropNames(Map.class, N.toSet("ignored"));
+        JsonDeserConfig config = JsonDeserConfig.create().setIgnoreUnmatchedProperty(true).setIgnoredPropNames(Map.class, N.toSet("ignored"));
 
         String json = "{\"ignored\":\"value1\",\"kept\":\"value2\",\"unknown\":\"value3\"}";
         Map<String, Object> result = parser.deserialize(json, config, Map.class);
@@ -515,7 +515,7 @@ public class JsonParserImpl101Test extends TestBase {
 
     @Test
     public void testConfiguration_PrettyFormat() {
-        JsonSerializationConfig config = JSC.create().prettyFormat(true).setIndentation("    ");
+        JsonSerConfig config = JsonSerConfig.create().setPrettyFormat(true).setIndentation("    ");
 
         Map<String, Object> data = new HashMap<>();
         data.put("field1", "value1");
@@ -529,8 +529,8 @@ public class JsonParserImpl101Test extends TestBase {
 
     @Test
     public void testConfiguration_QuoteOptions() {
-        JsonSerializationConfig config1 = JSC.create().quotePropName(false);
-        JsonSerializationConfig config2 = JSC.create().quoteMapKey(false);
+        JsonSerConfig config1 = JsonSerConfig.create().setQuotePropName(false);
+        JsonSerConfig config2 = JsonSerConfig.create().setQuoteMapKey(false);
 
         Map<String, Object> map = new HashMap<>();
         map.put("key", "value");

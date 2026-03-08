@@ -140,8 +140,8 @@ import lombok.Data;
  *   <tr>
  *     <td>Stream Processing</td>
  *     <td>streamSheet()</td>
- *     <td>Low</td>
- *     <td>Memory-efficient processing of large Excel files</td>
+ *     <td>Medium to High</td>
+ *     <td>Stream-based row processing with functional-style operations</td>
  *   </tr>
  * </table>
  *
@@ -266,7 +266,7 @@ import lombok.Data;
  *
  * <p><b>Performance Considerations:</b>
  * <ul>
- *   <li><b>Streaming Support:</b> Use {@code streamSheet()} for memory-efficient row-by-row processing</li>
+ *   <li><b>Stream API:</b> Use {@code streamSheet()} for Stream-based row processing with functional-style operations</li>
  *   <li><b>Resource Cleanup:</b> Stream methods include proper resource cleanup via {@code onClose()}</li>
  *   <li><b>Direct Loading:</b> Use {@code loadSheet()} for smaller files that fit in memory</li>
  *   <li><b>Workbook Format:</b> XLSX files generally perform better than XLS for large datasets</li>
@@ -276,7 +276,7 @@ import lombok.Data;
  * <p><b>Error Handling:</b>
  * <ul>
  *   <li><b>File Format Detection:</b> Apache POI automatically detects XLS vs XLSX format</li>
- *   <li><b>Unchecked Exceptions:</b> I/O errors wrapped in {@link UncheckedException} for cleaner code</li>
+ *   <li><b>Unchecked Exceptions:</b> I/O errors wrapped in {@link UncheckedException} or {@link com.landawn.abacus.exception.UncheckedIOException} for cleaner code</li>
  *   <li><b>Sheet Validation:</b> {@code IllegalArgumentException} thrown for missing sheet names</li>
  *   <li><b>Cell Type Errors:</b> {@code RuntimeException} thrown for unsupported cell types</li>
  *   <li><b>Resource Safety:</b> Proper resource cleanup even when exceptions occur</li>
@@ -286,7 +286,7 @@ import lombok.Data;
  * <ul>
  *   <li><b>Dataset Integration:</b> Direct loading into Dataset objects via {@code loadSheet()}</li>
  *   <li><b>CSV Interoperability:</b> Export Excel sheets to CSV format via {@code saveSheetAsCsv()}</li>
- *   <li><b>Stream API:</b> Memory-efficient streaming via {@code streamSheet()} with proper resource cleanup</li>
+ *   <li><b>Stream API:</b> Stream-based row processing via {@code streamSheet()} with proper resource cleanup</li>
  *   <li><b>CsvUtil Compatibility:</b> Works alongside {@link CsvUtil} for comprehensive data format support</li>
  * </ul>
  *
@@ -748,13 +748,13 @@ public final class ExcelUtil {
 
     /**
      * Creates a stream of Row objects from the specified sheet in the Excel file.
-     * This method enables lazy, memory-efficient processing of large Excel files by streaming
-     * rows one at a time instead of loading the entire sheet into memory. Ideal for processing
-     * files that are too large to fit comfortably in memory or when early termination is possible.
+     * This method provides a convenient Stream-based API for processing rows, supporting
+     * functional-style operations like filtering, mapping, and reduction.
      *
-     * <p>The stream leverages Java's Stream API, allowing functional-style operations like
-     * filtering, mapping, and reduction. This enables powerful data processing pipelines while
-     * maintaining low memory footprint.</p>
+     * <p><b>Note:</b> The entire workbook is still loaded into memory via {@code WorkbookFactory.create()}.
+     * The "streaming" refers to iterating over the already-loaded rows via Stream API, not to
+     * memory-efficient incremental parsing. For truly memory-efficient streaming of very large files,
+     * consider using Apache POI's SAX-based or SXSSF-based APIs directly.</p>
      *
      * <p><strong>Important:</strong> The Stream must be closed after use to release file handles
      * and workbook resources. Always use try-with-resources or explicitly call {@code close()}
@@ -809,13 +809,13 @@ public final class ExcelUtil {
 
     /**
      * Creates a stream of Row objects from the sheet with the specified name.
-     * This method combines named sheet access with memory-efficient streaming, enabling
-     * lazy processing of specific worksheets in large Excel files. Particularly useful for
+     * This method combines named sheet access with Stream-based row iteration, enabling
+     * functional-style processing of specific worksheets. Particularly useful for
      * multi-sheet workbooks where only certain sheets need to be processed.
      *
-     * <p>Streaming allows for early termination, filtering, and transformation operations
-     * without loading the entire sheet into memory. This is essential for handling large
-     * datasets or when processing can be short-circuited based on conditions.</p>
+     * <p><b>Note:</b> The entire workbook is still loaded into memory via {@code WorkbookFactory.create()}.
+     * The Stream API provides convenient iteration and early termination support, but does not
+     * reduce memory usage compared to {@code loadSheet()}.</p>
      *
      * <p><strong>Important:</strong> The Stream must be closed after use to release file handles
      * and workbook resources. Always use try-with-resources or explicitly call {@code close()}
@@ -877,8 +877,9 @@ public final class ExcelUtil {
      * with the provided headers and data rows.
      *
      * <p>Cell values are automatically converted based on their Java types: String, Boolean,
-     * Date, Calendar, Integer, and Double are set using type-specific cell methods, while
-     * other types are converted to strings.</p>
+     * Date, LocalDate, LocalDateTime, Calendar, Integer, and other Number types (set as double)
+     * are set using type-specific cell methods, while other types are converted to strings.
+     * {@code null} values result in blank cells.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1192,10 +1193,10 @@ public final class ExcelUtil {
     }
 
     /**
-     * Converts the specified sheet from an Excel file to a CSV file using default charset.
+     * Converts the specified sheet from an Excel file to a CSV file.
      * This convenience method exports an Excel sheet to comma-separated values format,
-     * preserving all data including the header row. Uses the platform's default charset
-     * for text encoding.
+     * preserving all data including the header row. The charset depends on the
+     * underlying {@code IOUtil.newFileWriter} implementation.
      *
      * <p>Cell values are converted to their string representations: numeric cells are
      * formatted as numbers, formulas are exported as formula text, and blank cells
@@ -1261,13 +1262,12 @@ public final class ExcelUtil {
     /**
      * Converts the specified sheet from an Excel file to a CSV file with custom options.
      * This method provides full control over the CSV export process, allowing you to replace
-     * the original Excel headers with custom headers and specify the character encoding for
-     * the output file. When custom headers are provided, the first row of the Excel sheet
-     * is skipped and replaced with the custom headers.
+     * the original Excel headers with custom headers. When custom headers are provided, the
+     * first row of the Excel sheet is skipped and replaced with the custom headers.
      *
-     * <p>The charset parameter is particularly important for international data or when
-     * the CSV will be consumed by systems with specific encoding requirements. Common
-     * choices include UTF-8 for universal compatibility or ISO-8859-1 for legacy systems.</p>
+     * <p>The character encoding is determined by the {@code Writer} provided by the caller.
+     * For specific encoding requirements, wrap a {@code FileOutputStream} with an
+     * {@code OutputStreamWriter} specifying the desired charset.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1442,7 +1442,7 @@ public final class ExcelUtil {
      * );
      *
      * // Create custom mapper with pipe separator
-     * Function<Row, String> pipeMapper = RowMappers.toString("|");
+     * Function<Row, String> pipeMapper = RowMappers.toDelimitedString("|");
      * List<String> pipeDelimited = ExcelUtil.readSheet(file, 0, true, pipeMapper);
      *
      * // Create strongly-typed mapper for numeric data

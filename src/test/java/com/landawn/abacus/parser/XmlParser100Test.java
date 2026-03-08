@@ -38,7 +38,7 @@ public class XmlParser100Test extends TestBase {
         }
 
         @Override
-        public String serialize(Object obj, XmlSerializationConfig config) {
+        public String serialize(Object obj, XmlSerConfig config) {
             return serialize(obj);
         }
 
@@ -52,7 +52,7 @@ public class XmlParser100Test extends TestBase {
         }
 
         @Override
-        public void serialize(Object obj, XmlSerializationConfig config, File output) {
+        public void serialize(Object obj, XmlSerConfig config, File output) {
             serialize(obj, output);
         }
 
@@ -66,7 +66,7 @@ public class XmlParser100Test extends TestBase {
         }
 
         @Override
-        public void serialize(Object obj, XmlSerializationConfig config, OutputStream output) {
+        public void serialize(Object obj, XmlSerConfig config, OutputStream output) {
             serialize(obj, output);
         }
 
@@ -80,7 +80,7 @@ public class XmlParser100Test extends TestBase {
         }
 
         @Override
-        public void serialize(Object obj, XmlSerializationConfig config, Writer output) {
+        public void serialize(Object obj, XmlSerConfig config, Writer output) {
             serialize(obj, output);
         }
 
@@ -94,7 +94,7 @@ public class XmlParser100Test extends TestBase {
         }
 
         @Override
-        public <T> T deserialize(String source, XmlDeserializationConfig config, Class<? extends T> targetClass) {
+        public <T> T deserialize(String source, XmlDeserConfig config, Class<? extends T> targetClass) {
             return deserialize(source, targetClass);
         }
 
@@ -104,7 +104,7 @@ public class XmlParser100Test extends TestBase {
         }
 
         @Override
-        public <T> T deserialize(File source, XmlDeserializationConfig config, Class<? extends T> targetClass) {
+        public <T> T deserialize(File source, XmlDeserConfig config, Class<? extends T> targetClass) {
             return deserialize(source, targetClass);
         }
 
@@ -114,7 +114,7 @@ public class XmlParser100Test extends TestBase {
         }
 
         @Override
-        public <T> T deserialize(InputStream source, XmlDeserializationConfig config, Class<? extends T> targetClass) {
+        public <T> T deserialize(InputStream source, XmlDeserConfig config, Class<? extends T> targetClass) {
             return deserialize(source, targetClass);
         }
 
@@ -124,7 +124,7 @@ public class XmlParser100Test extends TestBase {
         }
 
         @Override
-        public <T> T deserialize(Reader source, XmlDeserializationConfig config, Class<? extends T> targetClass) {
+        public <T> T deserialize(Reader source, XmlDeserConfig config, Class<? extends T> targetClass) {
             return deserialize(source, targetClass);
         }
 
@@ -134,12 +134,12 @@ public class XmlParser100Test extends TestBase {
         }
 
         @Override
-        public <T> T deserialize(Node source, XmlDeserializationConfig config, Class<? extends T> targetClass) {
+        public <T> T deserialize(Node source, XmlDeserConfig config, Class<? extends T> targetClass) {
             return deserialize(source, targetClass);
         }
 
         @Override
-        public <T> T deserialize(InputStream source, XmlDeserializationConfig config, Map<String, Type<?>> nodeClasses) {
+        public <T> T deserialize(InputStream source, XmlDeserConfig config, Map<String, Type<?>> nodeClasses) {
             if (nodeClasses.containsKey("test")) {
                 return (T) deserialize("", nodeClasses.get("test"));
             }
@@ -147,7 +147,7 @@ public class XmlParser100Test extends TestBase {
         }
 
         @Override
-        public <T> T deserialize(Reader source, XmlDeserializationConfig config, Map<String, Type<?>> nodeClasses) {
+        public <T> T deserialize(Reader source, XmlDeserConfig config, Map<String, Type<?>> nodeClasses) {
             if (nodeClasses.containsKey("test")) {
                 return (T) deserialize("", nodeClasses.get("test"));
             }
@@ -155,7 +155,7 @@ public class XmlParser100Test extends TestBase {
         }
 
         @Override
-        public <T> T deserialize(Node source, XmlDeserializationConfig config, Map<String, Type<?>> nodeClasses) {
+        public <T> T deserialize(Node source, XmlDeserConfig config, Map<String, Type<?>> nodeClasses) {
             if (nodeClasses.containsKey("test")) {
                 return (T) deserialize("", nodeClasses.get("test"));
             }
@@ -164,56 +164,56 @@ public class XmlParser100Test extends TestBase {
 
         @Override
         public <T> T deserialize(String source, Type<? extends T> targetType) {
-            return deserialize(source, targetType.clazz());
+            return deserialize(source, targetType.javaType());
         }
 
         @Override
-        public <T> T deserialize(String source, XmlDeserializationConfig config, Type<? extends T> targetType) {
-            return deserialize(source, config, targetType.clazz());
+        public <T> T deserialize(String source, XmlDeserConfig config, Type<? extends T> targetType) {
+            return deserialize(source, config, targetType.javaType());
         }
 
         @Override
         public <T> T deserialize(File source, Type<? extends T> targetType) {
-            return deserialize(source, targetType.clazz());
+            return deserialize(source, targetType.javaType());
         }
 
         @Override
-        public <T> T deserialize(File source, XmlDeserializationConfig config, Type<? extends T> targetType) {
-            return deserialize(source, config, targetType.clazz());
+        public <T> T deserialize(File source, XmlDeserConfig config, Type<? extends T> targetType) {
+            return deserialize(source, config, targetType.javaType());
         }
 
         @Override
         public <T> T deserialize(InputStream source, Type<? extends T> targetType) {
-            return deserialize(source, targetType.clazz());
+            return deserialize(source, targetType.javaType());
         }
 
         @Override
-        public <T> T deserialize(InputStream source, XmlDeserializationConfig config, Type<? extends T> targetType) {
-            return deserialize(source, config, targetType.clazz());
+        public <T> T deserialize(InputStream source, XmlDeserConfig config, Type<? extends T> targetType) {
+            return deserialize(source, config, targetType.javaType());
         }
 
         @Override
         public <T> T deserialize(Reader source, Type<? extends T> targetType) {
-            return deserialize(source, targetType.clazz());
+            return deserialize(source, targetType.javaType());
         }
 
         @Override
-        public <T> T deserialize(Reader source, XmlDeserializationConfig config, Type<? extends T> targetType) {
-            return deserialize(source, config, targetType.clazz());
+        public <T> T deserialize(Reader source, XmlDeserConfig config, Type<? extends T> targetType) {
+            return deserialize(source, config, targetType.javaType());
         }
 
         @Override
         public <T> T deserialize(Node source, Type<? extends T> targetType) {
-            return deserialize(source, targetType.clazz());
+            return deserialize(source, targetType.javaType());
         }
 
         @Override
-        public <T> T deserialize(Node source, XmlDeserializationConfig config, Type<? extends T> targetType) {
-            return deserialize(source, config, targetType.clazz());
+        public <T> T deserialize(Node source, XmlDeserConfig config, Type<? extends T> targetType) {
+            return deserialize(source, config, targetType.javaType());
         }
 
         @Override
-        public <T> T deserialize(File source, XmlDeserializationConfig config, Map<String, Type<?>> nodeTypes) {
+        public <T> T deserialize(File source, XmlDeserConfig config, Map<String, Type<?>> nodeTypes) {
             return deserialize(source, config, nodeTypes);
         }
     }
@@ -245,7 +245,7 @@ public class XmlParser100Test extends TestBase {
         Document doc = builder.parse(new ByteArrayInputStream("<test/>".getBytes()));
         Node node = doc.getFirstChild();
 
-        XmlDeserializationConfig config = new XmlDeserializationConfig();
+        XmlDeserConfig config = new XmlDeserConfig();
         TestObject result = parser.deserialize(node, config, TestObject.class);
         assertNotNull(result);
     }
@@ -256,7 +256,7 @@ public class XmlParser100Test extends TestBase {
         nodeClasses.put("test", Type.of(TestObject.class));
 
         ByteArrayInputStream bais = new ByteArrayInputStream("<test/>".getBytes());
-        XmlDeserializationConfig config = new XmlDeserializationConfig();
+        XmlDeserConfig config = new XmlDeserConfig();
 
         TestObject result = parser.deserialize(bais, config, nodeClasses);
         assertNotNull(result);
@@ -268,7 +268,7 @@ public class XmlParser100Test extends TestBase {
         nodeClasses.put("test", Type.of(TestObject.class));
 
         StringReader reader = new StringReader("<test/>");
-        XmlDeserializationConfig config = new XmlDeserializationConfig();
+        XmlDeserConfig config = new XmlDeserConfig();
 
         TestObject result = parser.deserialize(reader, config, nodeClasses);
         assertNotNull(result);
@@ -284,7 +284,7 @@ public class XmlParser100Test extends TestBase {
         Document doc = builder.parse(new ByteArrayInputStream("<test/>".getBytes()));
         Node node = doc.getFirstChild();
 
-        XmlDeserializationConfig config = new XmlDeserializationConfig();
+        XmlDeserConfig config = new XmlDeserConfig();
         TestObject result = parser.deserialize(node, config, nodeClasses);
         assertNotNull(result);
     }

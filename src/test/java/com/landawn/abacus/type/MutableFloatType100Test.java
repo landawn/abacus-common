@@ -8,6 +8,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +40,7 @@ public class MutableFloatType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        Class<MutableFloat> clazz = mutableFloatType.clazz();
+        Class<MutableFloat> clazz = mutableFloatType.javaType();
         assertEquals(MutableFloat.class, clazz);
     }
 
@@ -101,7 +102,7 @@ public class MutableFloatType100Test extends TestBase {
     @Test
     public void testSetPreparedStatementWithNull() throws SQLException {
         mutableFloatType.set(mockPreparedStatement, 1, null);
-        Mockito.verify(mockPreparedStatement).setFloat(1, 0.0f);
+        Mockito.verify(mockPreparedStatement).setNull(1, Types.FLOAT);
     }
 
     @Test
@@ -113,7 +114,7 @@ public class MutableFloatType100Test extends TestBase {
     @Test
     public void testSetCallableStatementWithNull() throws SQLException {
         mutableFloatType.set(mockCallableStatement, "param", null);
-        Mockito.verify(mockCallableStatement).setFloat("param", 0.0f);
+        Mockito.verify(mockCallableStatement).setNull("param", Types.FLOAT);
     }
 
     @Test

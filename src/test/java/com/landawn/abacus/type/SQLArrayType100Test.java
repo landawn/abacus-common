@@ -31,7 +31,7 @@ public class SQLArrayType100Test extends TestBase {
 
     @Test
     public void testClazz() {
-        assertEquals(Array.class, sqlArrayType.clazz());
+        assertEquals(Array.class, sqlArrayType.javaType());
     }
 
     @Test

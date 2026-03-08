@@ -18,8 +18,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.base.Strings;
 import com.landawn.abacus.TestBase;
@@ -1030,7 +1030,7 @@ public class CharStream201Test extends TestBase {
         assertEquals(4, stats.getCount());
         assertEquals('w', stats.getMin());
         assertEquals('z', stats.getMax());
-        assertEquals((int) 'z' + (int) 'y' + (int) 'x' + (int) 'w', stats.getSum().intValue());
+        assertEquals((int) 'z' + (int) 'y' + (int) 'x' + (int) 'w', stats.getSum());
 
         stats = createCharStream(new char[] {}).summaryStatistics();
         assertEquals(0, stats.getCount());
@@ -1046,7 +1046,7 @@ public class CharStream201Test extends TestBase {
         assertEquals(5, stats.getCount());
         assertEquals('1', stats.getMin());
         assertEquals('5', stats.getMax());
-        assertEquals((int) '1' + (int) '2' + (int) '3' + (int) '4' + (int) '5', stats.getSum().intValue());
+        assertEquals((int) '1' + (int) '2' + (int) '3' + (int) '4' + (int) '5', stats.getSum());
         assertTrue(percentiles.isPresent());
 
         summary = createCharStream(new char[] {}).summaryStatisticsAndPercentiles();

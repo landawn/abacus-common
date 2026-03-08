@@ -59,14 +59,14 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<GregorianCalendar> type = TypeFactory.getType(GregorianCalendar.class);
-     * Class<GregorianCalendar> clazz = type.clazz();
+     * Class<GregorianCalendar> clazz = type.javaType();
      * // Returns: GregorianCalendar.class
      * }</pre>
      *
      * @return GregorianCalendar.class
      */
     @Override
-    public Class<GregorianCalendar> clazz() {
+    public Class<GregorianCalendar> javaType() {
         return GregorianCalendar.class;
     }
 

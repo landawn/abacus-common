@@ -1000,13 +1000,13 @@ public class CharList2025Test extends TestBase {
     }
 
     @Test
-    @DisplayName("Test hasDuplicates()")
+    @DisplayName("Test containsDuplicates()")
     public void testHasDuplicates() {
         CharList list1 = CharList.of('a', 'b', 'a');
-        assertTrue(list1.hasDuplicates());
+        assertTrue(list1.containsDuplicates());
 
         CharList list2 = CharList.of('a', 'b', 'c');
-        assertFalse(list2.hasDuplicates());
+        assertFalse(list2.containsDuplicates());
     }
 
     @Test

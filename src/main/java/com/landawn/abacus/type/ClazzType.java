@@ -43,7 +43,7 @@ public class ClazzType extends AbstractType<Class> {
      * @return The Class object loaded from the type name provided in constructor
      */
     @Override
-    public Class<Class> clazz() {
+    public Class<Class> javaType() {
         return clazz;
     }
 

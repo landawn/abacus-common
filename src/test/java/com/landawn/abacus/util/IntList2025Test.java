@@ -1163,15 +1163,15 @@ public class IntList2025Test extends TestBase {
     }
 
     @Test
-    public void test_hasDuplicates() {
+    public void test_containsDuplicates() {
         IntList list = IntList.of(1, 2, 2, 3);
-        assertTrue(list.hasDuplicates());
+        assertTrue(list.containsDuplicates());
     }
 
     @Test
-    public void test_hasDuplicates_none() {
+    public void test_containsDuplicates_none() {
         IntList list = IntList.of(1, 2, 3, 4);
-        assertFalse(list.hasDuplicates());
+        assertFalse(list.containsDuplicates());
     }
 
     @Test

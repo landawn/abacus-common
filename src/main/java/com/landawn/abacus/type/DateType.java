@@ -61,7 +61,7 @@ public class DateType extends AbstractDateType<Date> {
      * @return The Class object representing java.sql.Date.class
      */
     @Override
-    public Class<Date> clazz() {
+    public Class<Date> javaType() {
         return Date.class;
     }
 

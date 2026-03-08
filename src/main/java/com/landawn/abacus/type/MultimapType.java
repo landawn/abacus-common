@@ -18,8 +18,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import com.landawn.abacus.parser.JsonDeserializationConfig;
-import com.landawn.abacus.parser.JsonDeserializationConfig.JDC;
+import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.Multimap;
@@ -47,7 +46,7 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
 
     private final Type<?>[] parameterTypes;
 
-    protected final JsonDeserializationConfig jdc;
+    protected final JsonDeserConfig jdc;
 
     MultimapType(final Class<?> typeClass, final String keyTypeName, final String valueElementTypeName, final String valueTypeName) {
         super(getTypeName(typeClass, keyTypeName, valueElementTypeName, valueTypeName, false));
@@ -60,7 +59,7 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
 
         declaringName = getTypeName(typeClass, keyTypeName, valueElementTypeName, valueTypeName, true);
 
-        jdc = JDC.create().setMapKeyType(parameterTypes[0]);
+        jdc = JsonDeserConfig.create().setMapKeyType(parameterTypes[0]);
 
         if (Strings.isEmpty(valueElementTypeName)) {
             if (!(parameterTypes[1] instanceof CollectionType)) {
@@ -68,7 +67,7 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
             }
 
             jdc.setMapValueType(parameterTypes[1]);
-            jdc.setElementType(parameterTypes[1].getElementType());
+            jdc.setElementType(parameterTypes[1].elementType());
         } else if (Strings.isEmpty(valueTypeName)) {
             if (ListMultimap.class.isAssignableFrom(typeClass)) {
                 jdc.setMapValueType(TypeFactory.getType("List<" + parameterTypes[1].name() + ">"));
@@ -113,7 +112,7 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<ListMultimap<String, Integer>> type = TypeFactory.getType("ListMultimap<String, Integer>");
-     * Class<?> clazz = type.clazz();
+     * Class<?> clazz = type.javaType();
      * // Returns: ListMultimap.class
      * }</pre>
      *
@@ -121,7 +120,7 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      */
     @SuppressWarnings({ "rawtypes" })
     @Override
-    public Class<T> clazz() {
+    public Class<T> javaType() {
         return (Class) typeClass;
     }
 
@@ -134,7 +133,7 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<ListMultimap<String, Integer>> type = TypeFactory.getType("ListMultimap<String, Integer>");
-     * Type<?>[] paramTypes = type.getParameterTypes();
+     * Type<?>[] paramTypes = type.parameterTypes();
      * // Returns: [StringType, IntegerType]
      * // paramTypes[0] is the key type (String)
      * // paramTypes[1] is the element type (Integer)
@@ -143,7 +142,7 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      * @return An array containing the parameter types
      */
     @Override
-    public Type<?>[] getParameterTypes() {
+    public Type<?>[] parameterTypes() {
         return parameterTypes;
     }
 
@@ -236,7 +235,7 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
         // Determine the value collection type: use parameterTypes[2] if available, otherwise parameterTypes[1]
         final Type<?> valueCollectionType = parameterTypes.length > 2 ? parameterTypes[2] : parameterTypes[1];
 
-        if (Set.class.isAssignableFrom(valueCollectionType.clazz())) {
+        if (Set.class.isAssignableFrom(valueCollectionType.javaType())) {
             final Multimap<K, E, V> multiMap = (Multimap<K, E, V>) N.newLinkedSetMultimap(map.size());
 
             for (final Map.Entry<K, Collection<E>> entry : map.entrySet()) {

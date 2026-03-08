@@ -60,7 +60,7 @@ public class TimeType extends AbstractDateType<Time> {
      * @return the Class object for java.sql.Time
      */
     @Override
-    public Class<Time> clazz() {
+    public Class<Time> javaType() {
         return Time.class;
     }
 
