@@ -26,6 +26,7 @@
 3. *Powerful and extensive*:
    The library provides thousands of utility methods — covering everything from daily-use helpers to advanced support for I/O, concurrency, JSON/XML serialization, and functional programming(e.g.,`Stream.of(persons).map(Person::getEmail())...filter(Strings::isNotEmpty).groupBy(Person::getLastName).persist(file)...`).
 
+4. *Fully reviewed by Claude Code and ChatGPT Codex*.
 
 ##### Why abacus-common?
 
