@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.AbstractTest;
 
 @Tag("old-test")
-public class SQLExecutorTest extends AbstractTest {
+public class AsyncSqlExecutorTest extends AbstractTest {
 
     @Test
     public void test_01() {
