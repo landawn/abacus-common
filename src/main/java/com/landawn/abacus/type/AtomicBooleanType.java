@@ -108,7 +108,7 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * }</pre>
      *
      * @param str the string to parse (case-insensitive "true" results in {@code true}, all else false)
-     * @return a new AtomicBoolean containing the parsed value, or {@code null} if str is {@code null} or empty
+     * @return a new AtomicBoolean containing the parsed value, or {@code null} if str is {@code null}, empty, or blank
      */
     @Override
     public AtomicBoolean valueOf(final String str) {

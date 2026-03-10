@@ -389,10 +389,10 @@ public abstract class Tuple<TP> implements Immutable {
      * }</pre>
      *
      * @param <A> the component type of the array to contain the tuple elements.
-     * @param a the array into which the elements of this tuple are to be stored, if it is big enough;.
+     * @param a the array into which the elements of this tuple are to be stored, if it is big enough;
      *          otherwise, a new array of the same runtime type is allocated for this purpose
      * @return an array containing all elements of this tuple.
-     * @throws ArrayStoreException if the runtime type of the specified array is not a supertype.
+     * @throws ArrayStoreException if the runtime type of the specified array is not a supertype
      *         of the runtime type of every element in this tuple
      */
     public abstract <A> A[] toArray(A[] a);

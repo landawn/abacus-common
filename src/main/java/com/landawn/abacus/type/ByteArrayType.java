@@ -34,6 +34,10 @@ import com.landawn.abacus.util.SK;
  */
 public final class ByteArrayType extends ObjectArrayType<Byte> {
 
+    /**
+     * Package-private constructor for ByteArrayType.
+     * This constructor is called by the TypeFactory to create Byte[] type instances.
+     */
     ByteArrayType() {
         super(Byte[].class);
     }

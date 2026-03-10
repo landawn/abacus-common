@@ -229,16 +229,10 @@ public final class EscapeUtil {
     /* Helper functions */
 
     /**
-     * <p>{@code StringEscapeUtils} instances should NOT be constructed in
-     * standard programming.</p>
+     * Private constructor to prevent instantiation of this utility class.
      *
      * <p>Instead, the class should be used as:</p>
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code StringEscapeUtils.escapeJava("foo"); }</pre>
-     *
-     * <p>This constructor is public to permit tools that require a JavaBean
-     * instance to operate.</p>
+     * <pre>{@code EscapeUtil.escapeJava("foo"); }</pre>
      */
     private EscapeUtil() {
         // Utility class - prevent instantiation

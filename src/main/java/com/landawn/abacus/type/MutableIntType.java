@@ -155,7 +155,7 @@ public class MutableIntType extends NumberType<MutableInt> {
 
     /**
      * Sets a MutableInt parameter in a PreparedStatement at the specified position.
-     * If the MutableInt is {@code null}, 0 is stored. Otherwise, the wrapped integer value is stored.
+     * If the MutableInt is {@code null}, SQL NULL is set. Otherwise, the wrapped integer value is stored.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -167,7 +167,7 @@ public class MutableIntType extends NumberType<MutableInt> {
      *
      * // For null value
      * type.set(stmt, 1, null);
-     * // This sets the parameter to 0
+     * // This sets the parameter to SQL NULL
      * }</pre>
      *
      * @param stmt The PreparedStatement to set the parameter on
@@ -186,7 +186,7 @@ public class MutableIntType extends NumberType<MutableInt> {
 
     /**
      * Sets a MutableInt parameter in a CallableStatement using the specified parameter name.
-     * If the MutableInt is {@code null}, 0 is stored. Otherwise, the wrapped integer value is stored.
+     * If the MutableInt is {@code null}, SQL NULL is set. Otherwise, the wrapped integer value is stored.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -198,7 +198,7 @@ public class MutableIntType extends NumberType<MutableInt> {
      *
      * // For null value
      * type.set(stmt, "counter", null);
-     * // This sets the parameter to 0
+     * // This sets the parameter to SQL NULL
      * }</pre>
      *
      * @param stmt The CallableStatement to set the parameter on

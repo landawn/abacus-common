@@ -46,7 +46,7 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * the string representation of the boolean value ("true" or "false").
      *
      * @param b the Boolean value to convert
-     * @return the string representation of the boolean value, or  {@code null} if input is {@code null}
+     * @return the string representation of the boolean value, or {@code null} if input is {@code null}
      */
     @Override
     public String stringOf(final Boolean b) {
@@ -60,8 +60,9 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      *   <li>{@code null} returns the default value</li>
      *   <li>Boolean instances are returned as-is</li>
      *   <li>Numbers are converted to {@code true} if greater than 0, {@code false} otherwise</li>
-     *   <li>Single character strings: 'Y', 'y', or '1' return {@code true}</li>
-     *   <li>Other strings are parsed using {@link Boolean#valueOf(String)}</li>
+     *   <li>CharSequence instances: single character 'Y', 'y', or '1' returns {@code true};
+     *       otherwise parsed using {@link Boolean#valueOf(String)}</li>
+     *   <li>Other objects are converted via {@code Boolean.valueOf(obj.toString())}</li>
      * </ul>
      *
      * @param obj the source object to convert
@@ -111,8 +112,13 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
 
     /**
      * Converts a character array to a Boolean value.
-     * This method checks if the character array contains "true" (case-insensitive).
-     * Any other value, including {@code null} or empty array, returns {@code false}.
+     * Handles the following cases:
+     * <ul>
+     *   <li>{@code null} or empty array returns the default value</li>
+     *   <li>Single character 'Y', 'y', or '1' returns {@code true}</li>
+     *   <li>"true" (case-insensitive) returns {@code true}</li>
+     *   <li>Any other value returns {@code false}</li>
+     * </ul>
      *
      * @param cbuf the character array to convert
      * @param offset the starting position in the array

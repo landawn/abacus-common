@@ -30,14 +30,25 @@ import com.landawn.abacus.exception.UncheckedSQLException;
  */
 public class ClobType extends AbstractType<Clob> {
 
+    /** The type name constant for Clob type identification. */
     public static final String CLOB = Clob.class.getSimpleName();
 
+    /** The specific Clob implementation class. */
     private final Class<Clob> clazz;
 
+    /**
+     * Package-private constructor for ClobType.
+     * This constructor is called by the TypeFactory to create Clob type instances.
+     */
     ClobType() {
         this(Clob.class);
     }
 
+    /**
+     * Package-private constructor for ClobType with a specific Clob implementation class.
+     *
+     * @param clazz the specific Clob implementation class
+     */
     ClobType(Class<? extends Clob> clazz) {
         super(CLOB);
         this.clazz = (Class<Clob>) clazz;

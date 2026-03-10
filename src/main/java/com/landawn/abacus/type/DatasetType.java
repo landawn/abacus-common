@@ -55,6 +55,10 @@ public class DatasetType extends AbstractType<Dataset> {
 
     private final Class<Dataset> typeClass;
 
+    /**
+     * Package-private constructor for DatasetType.
+     * This constructor is called by the TypeFactory to create Dataset type instances.
+     */
     DatasetType() {
         super(DATA_SET);
 

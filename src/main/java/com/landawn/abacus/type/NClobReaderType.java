@@ -24,8 +24,7 @@ import java.sql.SQLException;
 /**
  * Type handler for NClobReader objects, providing database interaction capabilities
  * for handling National Character Large Objects (NCLOB) as Reader streams.
- * This type automatically converts NCLOB database values to Reader objects and manages
- * the lifecycle of the NCLOB resources.
+ * This type automatically converts NCLOB database values to Reader objects.
  */
 public class NClobReaderType extends ReaderType {
 
@@ -205,15 +204,15 @@ public class NClobReaderType extends ReaderType {
     }
 
     /**
-     * Converts an NCLOB object to a Reader and frees the NCLOB resource.
-     * This method extracts the character stream from the NCLOB and then releases
-     * the NCLOB resources to prevent memory leaks.
+     * Converts an NCLOB object to a Reader.
+     * This method extracts the character stream from the NCLOB.
+     * Note that the NCLOB is not freed by this method; the caller is responsible
+     * for managing the NCLOB lifecycle.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * NClob nclob = resultSet.getNClob(1);
      * Reader reader = NClobReaderType.clobToReader(nclob);
-     * // NCLOB is automatically freed after conversion
      * }</pre>
      *
      * @param clob the NCLOB to convert to a Reader

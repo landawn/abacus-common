@@ -234,9 +234,9 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
     /**
      * Parses a JSON string to create a Map object.
      * The method handles:
-     * - {@code null} input returns null
-     * - Empty string or "{}" returns an empty Map of the appropriate type
-     * - Valid JSON object strings are deserialized into the Map
+     * - {@code null} or empty/blank string: returns {@code null}
+     * - "{}": returns an empty Map of the appropriate type
+     * - Valid JSON object strings: deserialized into the Map
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -253,7 +253,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      * }</pre>
      *
      * @param str The JSON string to parse
-     * @return The parsed Map object, or {@code null} if the input is null
+     * @return The parsed Map object, or {@code null} if the input is {@code null} or blank
      */
     @Override
     public T valueOf(final String str) {

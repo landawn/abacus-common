@@ -180,7 +180,7 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
      * }</pre>
      *
      * @param str The JSON string to parse
-     * @return The parsed ImmutableMap object, or {@code null} if the input is null
+     * @return The parsed ImmutableMap object, or {@code null} if the input is {@code null} or blank
      */
     @Override
     public T valueOf(final String str) {

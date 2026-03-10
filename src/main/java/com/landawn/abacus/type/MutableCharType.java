@@ -153,7 +153,7 @@ public class MutableCharType extends AbstractType<MutableChar> {
 
     /**
      * Sets a MutableChar parameter in a PreparedStatement at the specified position.
-     * The character is stored as an integer value. If the MutableChar is {@code null}, 0 is stored.
+     * The character is stored as an integer value. If the MutableChar is {@code null}, SQL NULL is set.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -165,7 +165,7 @@ public class MutableCharType extends AbstractType<MutableChar> {
      *
      * // For {@code null} value
      * type.set(stmt, 1, null);
-     * // This sets the parameter to 0 (character '\0')
+     * // This sets the parameter to SQL NULL
      * }</pre>
      *
      * @param stmt The PreparedStatement to set the parameter on
@@ -184,7 +184,7 @@ public class MutableCharType extends AbstractType<MutableChar> {
 
     /**
      * Sets a MutableChar parameter in a CallableStatement using the specified parameter name.
-     * The character is stored as an integer value. If the MutableChar is {@code null}, 0 is stored.
+     * The character is stored as an integer value. If the MutableChar is {@code null}, SQL NULL is set.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -196,7 +196,7 @@ public class MutableCharType extends AbstractType<MutableChar> {
      *
      * // For {@code null} value
      * type.set(stmt, "charParam", null);
-     * // This sets the parameter to 0 (character '\0')
+     * // This sets the parameter to SQL NULL
      * }</pre>
      *
      * @param stmt The CallableStatement to set the parameter on

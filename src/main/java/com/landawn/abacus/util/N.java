@@ -176,21 +176,21 @@ import com.landawn.abacus.util.stream.Stream;
  * int count = N.frequency(numbers, 3);     // Returns 2
  * boolean hasThree = N.contains(numbers, 3);   // Returns true
  * int index = N.indexOf(numbers, 3);           // Returns 2
-* int[] sorted = numbers.clone();
-* N.sort(sorted);                              // Sorts in place
-* int[] reversed = numbers.clone();
-* N.reverse(reversed);                         // Reverses in place
+ * int[] sorted = numbers.clone();
+ * N.sort(sorted);                              // Sorts in place
+ * int[] reversed = numbers.clone();
+ * N.reverse(reversed);                         // Reverses in place
  *
  * // Collection operations with null safety
  * List<String> list = Arrays.asList("apple", "banana", "apple", null);
  * Map<String, Integer> freq = N.frequencyMap(list);     // {apple=2, banana=1, null=1}
  * List<String> unique = N.distinct(list);                 // [apple, banana, null]
-* List<String> filtered = N.filter(list, Objects::nonNull);   // [apple, banana, apple]
+ * List<String> filtered = N.filter(list, Objects::nonNull);   // [apple, banana, apple]
  *
  * // Null-safe operations - no exceptions thrown
-* String result = Strings.trim((String) null);      // Returns null
-* List<String> empty = N.filter((Iterable<String>) null, x -> true);   // Returns empty list
-* boolean isEmpty = N.isEmpty((CharSequence) null); // Returns true
+ * String result = Strings.trim((String) null);      // Returns null
+ * List<String> empty = N.filter((Iterable<String>) null, x -> true);   // Returns empty list
+ * boolean isEmpty = N.isEmpty((CharSequence) null); // Returns true
  *
  * // Functional operations with exception handling
  * List<String> items = Arrays.asList("file1.txt", "file2.txt");
@@ -208,7 +208,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * // Type conversions and parsing
  * int parsed = Numbers.toInt("123");      // Parse integer (throws NumberFormatException if invalid)
-* IntList converted = IntList.of(numbers);          // Array to IntList conversion
+ * IntList converted = IntList.of(numbers);          // Array to IntList conversion
  *
  * // String operations
  * boolean isValid = N.notBlank("  text  ");      // String validation

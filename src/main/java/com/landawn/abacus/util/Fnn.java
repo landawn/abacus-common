@@ -481,43 +481,43 @@ public final class Fnn {
         return (Throwables.Function<T, T, E>) Fn.IDENTITY;
     }
 
-    /**
-     * Returns an identity function that invokes the specified {@code consumer} with each input
-     * before returning that same input unchanged.
-     *
-     * <p>This is useful for inserting side effects such as logging, tracing, validation, or
-     * metrics collection into a function pipeline while preserving the original value.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Throwables.Function<String, String, IOException> tracedIdentity =
-     *     Fnn.tap(value -> writer.write(value));
-     *
-     * String result = tracedIdentity.apply("abc"); // writer receives "abc", result is "abc"
-     * }</pre>
-     *
-     * @param <T> the type of the input and output of the function
-     * @param <E> the type of exception that may be thrown by the consumer
-     * @param consumer the consumer to invoke before returning the input value
-     * @return a function that first consumes and then returns its input argument unchanged
-     * @throws IllegalArgumentException if consumer is null
-     * @see #identity()
-     */
-    @Beta
-    @SuppressWarnings("unchecked")
-    public static <T, E extends Exception> Throwables.Function<T, T, E> tap(final Throwables.Consumer<? super T, E> consumer) throws IllegalArgumentException {
-        N.checkArgNotNull(consumer, cs.Consumer);
-
-        if (consumer == Fn.EMPTY_CONSUMER) {
-            return identity();
-        }
-
-        return t -> {
-            consumer.accept(t);
-
-            return t;
-        };
-    }
+    //    /**
+    //     * Returns an identity function that invokes the specified {@code consumer} with each input
+    //     * before returning that same input unchanged.
+    //     *
+    //     * <p>This is useful for inserting side effects such as logging, tracing, validation, or
+    //     * metrics collection into a function pipeline while preserving the original value.</p>
+    //     *
+    //     * <p><b>Usage Examples:</b></p>
+    //     * <pre>{@code
+    //     * Throwables.Function<String, String, IOException> tracedIdentity =
+    //     *     Fnn.tap(value -> writer.write(value));
+    //     *
+    //     * String result = tracedIdentity.apply("abc"); // writer receives "abc", result is "abc"
+    //     * }</pre>
+    //     *
+    //     * @param <T> the type of the input and output of the function
+    //     * @param <E> the type of exception that may be thrown by the consumer
+    //     * @param consumer the consumer to invoke before returning the input value
+    //     * @return a function that first consumes and then returns its input argument unchanged
+    //     * @throws IllegalArgumentException if consumer is null
+    //     * @see #identity()
+    //     */
+    //    @Beta
+    //    @SuppressWarnings("unchecked")
+    //    public static <T, E extends Exception> Throwables.Function<T, T, E> tap(final Throwables.Consumer<? super T, E> consumer) throws IllegalArgumentException {
+    //        N.checkArgNotNull(consumer, cs.Consumer);
+    //
+    //        if (consumer == Fn.EMPTY_CONSUMER) {
+    //            return identity();
+    //        }
+    //
+    //        return t -> {
+    //            consumer.accept(t);
+    //
+    //            return t;
+    //        };
+    //    }
 
     /**
      * Returns a Predicate that always evaluates to {@code true} regardless of the input.

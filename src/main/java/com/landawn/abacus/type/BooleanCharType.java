@@ -36,6 +36,10 @@ public final class BooleanCharType extends AbstractType<Boolean> {
     private static final String Y = "Y";
     private static final String N = "N";
 
+    /**
+     * Package-private constructor for BooleanCharType.
+     * This constructor is called by the TypeFactory to create BooleanChar type instances.
+     */
     BooleanCharType() {
         super(typeName);
     }
@@ -130,7 +134,7 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      *
      * @param rs the ResultSet containing the data, must not be {@code null}
      * @param columnIndex the column index (1-based) to retrieve the value from
-     * @return the Boolean value at the specified column, or {@code null} if the column value is SQL NULL
+     * @return Boolean.TRUE if the column value is "Y" (case-insensitive), Boolean.FALSE otherwise (including SQL NULL)
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
@@ -151,8 +155,8 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      *
      * @param rs the ResultSet containing the data, must not be {@code null}
      * @param columnName the label of the column to retrieve the value from, must not be {@code null}
-     * @return the Boolean value at the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the column index is invalid
+     * @return Boolean.TRUE if the column value is "Y" (case-insensitive), Boolean.FALSE otherwise (including SQL NULL)
+     * @throws SQLException if a database access error occurs or the columnName is invalid
      */
     @Override
     public Boolean get(final ResultSet rs, final String columnName) throws SQLException {

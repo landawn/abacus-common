@@ -104,7 +104,7 @@ public class MillisCalendarType extends CalendarType {
     /**
      * Sets a Calendar value at the specified parameter index in the PreparedStatement.
      * The method converts the Calendar to its millisecond representation and stores it
-     * as a long value in the database. If the Calendar is {@code null}, 0 is stored.
+     * as a long value in the database. If the Calendar is {@code null}, SQL NULL is set.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -117,12 +117,12 @@ public class MillisCalendarType extends CalendarType {
      * // Sets parameter to 1609459200000
      *
      * type.set(stmt, 2, null);
-     * // Sets parameter to 0
+     * // Sets parameter to SQL NULL
      * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the index of the parameter to set (1-based)
-     * @param x the Calendar value to set, or {@code null} to store 0
+     * @param x the Calendar value to set, or {@code null} to set SQL NULL
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
@@ -137,7 +137,7 @@ public class MillisCalendarType extends CalendarType {
     /**
      * Sets a Calendar value for the specified parameter name in the CallableStatement.
      * The method converts the Calendar to its millisecond representation and stores it
-     * as a long value in the database. If the Calendar is {@code null}, 0 is stored.
+     * as a long value in the database. If the Calendar is {@code null}, SQL NULL is set.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -150,12 +150,12 @@ public class MillisCalendarType extends CalendarType {
      * // Sets parameter to 1609459200000
      *
      * type.set(stmt, "p_cancelled_date", null);
-     * // Sets parameter to 0
+     * // Sets parameter to SQL NULL
      * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
-     * @param x the Calendar value to set, or {@code null} to store 0
+     * @param x the Calendar value to set, or {@code null} to set SQL NULL
      * @throws SQLException if a database access error occurs or the parameterName is not found
      */
     @Override

@@ -34,7 +34,6 @@ public final class CharacterType extends AbstractCharacterType {
      * Package-private constructor for CharacterType.
      * This constructor is called by the TypeFactory to create Character type instances.
      */
-
     CharacterType() {
         super(CHARACTER);
     }

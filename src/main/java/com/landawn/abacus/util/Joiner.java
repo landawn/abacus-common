@@ -2837,7 +2837,7 @@ public final class Joiner implements Closeable {
      * {@code prefix + suffix} or the {@code emptyValue} characters are returned.
      * 
      * The underlying {@code StringBuilder} will be recycled after this method is called 
-     * if {@code reuseStringBuilder} is set to {@code true}, and should not continue 
+     * if {@code reuseBuffer} is set to {@code true}, and should not continue
      * to be used with this instance.
      * 
      * <p><b>Usage Examples:</b></p>
@@ -2912,8 +2912,8 @@ public final class Joiner implements Closeable {
     /**
      * Applies the given mapping function to the joined string and returns the result.
      * The underlying {@code StringBuilder} will be recycled after this method is called 
-     * if {@code reuseStringBuilder} is set to {@code true}.
-     * 
+     * if {@code reuseBuffer} is set to {@code true}.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int length = Joiner.with(", ").append("a").append("b").map(String::length);   // Returns: 4
@@ -2932,13 +2932,13 @@ public final class Joiner implements Closeable {
      * Applies the given mapping function to the joined string only if at least one element has been appended.
      * Returns an empty Optional if no elements have been appended.
      * The underlying {@code StringBuilder} will be recycled after this method is called 
-     * if {@code reuseStringBuilder} is set to {@code true}.
-     * 
+     * if {@code reuseBuffer} is set to {@code true}.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Optional<Integer> result1 = Joiner.with(", ").mapIfNotEmpty(String::length);                   // Returns: Optional.empty()
-     * Optional<Integer> result1 = Joiner.with(", ", "[", "]").mapIfNotEmpty(String::length);         // Returns: Optional.empty()
-     * Optional<Integer> result2 = Joiner.with(", ").append("hello").mapIfNotEmpty(String::length);   // Returns: Optional.of(5)
+     * Optional<Integer> result2 = Joiner.with(", ", "[", "]").mapIfNotEmpty(String::length);         // Returns: Optional.empty()
+     * Optional<Integer> result3 = Joiner.with(", ").append("hello").mapIfNotEmpty(String::length);   // Returns: Optional.of(5)
      * }</pre>
      *
      * @param <T> the type of the result

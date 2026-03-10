@@ -411,7 +411,7 @@ public final class ClassUtil {
 
     private static final String CLASS_POSTFIX = ".class";
 
-    // ... it has to be big enough to make it's safety to add an element to
+    // ... it has to be big enough to make it safe to add an element to
     // ArrayBlockingQueue.
     @SuppressWarnings("deprecation")
     private static final int POOL_SIZE = InternalUtil.POOL_SIZE;

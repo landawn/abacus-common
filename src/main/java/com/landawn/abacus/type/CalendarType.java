@@ -29,12 +29,22 @@ import com.landawn.abacus.util.N;
  */
 public class CalendarType extends AbstractCalendarType<Calendar> {
 
+    /** The type name constant for Calendar type identification. */
     public static final String CALENDAR = Calendar.class.getSimpleName();
 
+    /**
+     * Package-private constructor for CalendarType.
+     * This constructor is called by the TypeFactory to create Calendar type instances.
+     */
     CalendarType() {
         super(CALENDAR);
     }
 
+    /**
+     * Package-private constructor for CalendarType with a custom type name.
+     *
+     * @param typeName the name of the type
+     */
     CalendarType(final String typeName) {
         super(typeName);
     }

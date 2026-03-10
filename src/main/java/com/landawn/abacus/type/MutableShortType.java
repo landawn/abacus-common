@@ -161,12 +161,12 @@ public class MutableShortType extends NumberType<MutableShort> {
      *
      * // For null value
      * type.set(stmt, 1, null);
-     * // This sets the parameter to 0
+     * // This sets the parameter to SQL NULL
      * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
-     * @param x the MutableShort value to set, or {@code null} (will be stored as 0)
+     * @param x the MutableShort value to set, or {@code null} (SQL NULL will be set)
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
@@ -191,12 +191,12 @@ public class MutableShortType extends NumberType<MutableShort> {
      *
      * // For null value
      * type.set(cstmt, "age", null);
-     * // This sets the parameter to 0
+     * // This sets the parameter to SQL NULL
      * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
-     * @param x the MutableShort value to set, or {@code null} (will be stored as 0)
+     * @param x the MutableShort value to set, or {@code null} (SQL NULL will be set)
      * @throws SQLException if a database access error occurs or the parameterName is invalid
      */
     @Override

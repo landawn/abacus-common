@@ -33,10 +33,19 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      */
     public static final String BYTE_BUFFER = "ByteBuffer";
 
+    /**
+     * Package-private constructor for ByteBufferType.
+     * This constructor is called by the TypeFactory to create ByteBuffer type instances.
+     */
     ByteBufferType() {
         super(BYTE_BUFFER);
     }
 
+    /**
+     * Package-private constructor for ByteBufferType with a specific subclass.
+     *
+     * @param cls the specific ByteBuffer subclass
+     */
     ByteBufferType(final Class<? extends ByteBuffer> cls) {
         super(ClassUtil.getSimpleClassName(cls));
     }

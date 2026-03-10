@@ -33,10 +33,10 @@ import com.landawn.abacus.util.cs;
 
 /**
  * A container for HTTP headers with a fluent API for setting and retrieving header values.
- *
- * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
  * This class provides convenient methods for working with common HTTP headers and supports
  * all standard HTTP header fields as defined in various RFCs.
+ *
+ * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
  *
  * <p>Headers can be set individually or in bulk, and the class provides type-safe conversion
  * for various value types including strings, dates, collections, and numbers.</p>
@@ -63,9 +63,9 @@ public final class HttpHeaders {
 
     /**
      * Standard HTTP header field names as defined in various RFCs.
+     * This class contains constants for all standard HTTP request and response headers.
      *
      * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
-     * This class contains constants for all standard HTTP request and response headers.
      * 
      * <p>The constants are organized into categories:</p>
      * <ul>
@@ -412,9 +412,9 @@ public final class HttpHeaders {
     }
 
     /**
-     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
-     * 
      * Common HTTP header values for Content-Type and other headers.
+     *
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
      */
     public static final class Values {
 
@@ -461,10 +461,10 @@ public final class HttpHeaders {
     }
 
     /**
-     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
-     *
      * Values for the <a href="https://www.w3.org/TR/referrer-policy/">{@code Referrer-Policy}</a>
      * header.
+     *
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
      */
     public static final class ReferrerPolicyValues {
 
@@ -1197,6 +1197,11 @@ public final class HttpHeaders {
         return new HttpHeaders(copyMap).setAll(map);
     }
 
+    /**
+     * Computes the hash code for this HttpHeaders based on the underlying header map.
+     *
+     * @return the hash code value for this object
+     */
     @Override
     public int hashCode() {
         return map.hashCode();
@@ -1205,15 +1210,20 @@ public final class HttpHeaders {
     /**
      * Checks if this HttpHeaders is equal to another object.
      * Two HttpHeaders instances are equal if they contain the same headers.
-     * 
+     *
      * @param obj The object to compare with
-     * @return {@code true} if the objects are equal
+     * @return {@code true} if the objects are equal, {@code false} otherwise
      */
     @Override
     public boolean equals(final Object obj) {
         return obj instanceof HttpHeaders && map.equals(((HttpHeaders) obj).map);
     }
 
+    /**
+     * Returns a string representation of this HttpHeaders.
+     *
+     * @return a string representation of the headers map
+     */
     @Override
     public String toString() {
         return map.toString();

@@ -142,11 +142,13 @@ public final class Holder<T> implements Mutable {
     }
 
     /**
-     * Atomically sets the value to the given updated value and returns the previous value.
+     * Sets the value to the given updated value and returns the previous value.
      *
      * <p>This method performs a swap operation: it sets the new value and returns what was
      * previously held. This is particularly useful in scenarios where you need to track state
      * changes or implement swap-based algorithms.
+     *
+     * <p><b>Note:</b> This operation is <b>not</b> atomic or thread-safe.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -185,12 +187,14 @@ public final class Holder<T> implements Mutable {
     }
 
     /**
-     * Atomically updates the current value with the results of applying the given function,
+     * Updates the current value with the results of applying the given function,
      * returning the previous value.
      *
      * <p>The function is applied to the current value to compute a new value, which then replaces
      * the current value. This method returns the original value before the update. This is useful
      * when you need to perform transformations while keeping track of the old state.
+     *
+     * <p><b>Note:</b> This operation is <b>not</b> atomic or thread-safe.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -210,7 +214,7 @@ public final class Holder<T> implements Mutable {
     }
 
     /**
-     * Atomically updates the current value with the results of applying the given function,
+     * Updates the current value with the results of applying the given function,
      * returning the updated value.
      *
      * <p>The function is applied to the current value to compute a new value, which then replaces
@@ -316,7 +320,7 @@ public final class Holder<T> implements Mutable {
     /**
      * Checks whether the value held by this Holder is not {@code null}.
      *
-     * <p>This is the inverted of {@link #isNull()}. It provides a convenient way to check
+     * <p>This is the inverse of {@link #isNull()}. It provides a convenient way to check
      * if the Holder contains a {@code non-null} value before performing operations on it.
      *
      * <p><b>Usage Examples:</b></p>

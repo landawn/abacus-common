@@ -619,7 +619,7 @@ public final class Triple<L, M, R> implements Mutable {
      * // original still contains ("left", 42, true)
      * }</pre>
      *
-     * @return a new Triple instance with type Triple&lt;R, M, L&gt; where the left and right.
+     * @return a new Triple instance with type Triple&lt;R, M, L&gt; where the left and right
      *         elements are swapped
      */
     @Beta
@@ -679,10 +679,10 @@ public final class Triple<L, M, R> implements Mutable {
      * }</pre>
      *
      * @param <A> the component type of the array.
-     * @param a the array into which the elements are to be stored, if it has length &gt;= 3;.
+     * @param a the array into which the elements are to be stored, if it has length &gt;= 3;
      *          otherwise, a new array of the same runtime type is allocated
      * @return an array containing the three elements of this Triple.
-     * @throws ArrayStoreException if the runtime type of the specified array is not a.
+     * @throws ArrayStoreException if the runtime type of the specified array is not a
      *         supertype of the runtime type of the elements in this Triple
      */
     public <A> A[] toArray(A[] a) {
@@ -713,7 +713,7 @@ public final class Triple<L, M, R> implements Mutable {
      * }</pre>
      *
      * @param <E> the type of exception that the consumer may throw.
-     * @param consumer the consumer function to apply to each element; must accept.
+     * @param consumer the consumer function to apply to each element; must accept
      *                 a common supertype of L, M, and R
      * @throws E if the consumer throws an exception.
      */
@@ -827,7 +827,7 @@ public final class Triple<L, M, R> implements Mutable {
      *
      * @param <E> the type of exception that the predicate may throw.
      * @param predicate the tri-predicate to test the three elements.
-     * @return an Optional containing this Triple if the predicate returns {@code true},.
+     * @return an Optional containing this Triple if the predicate returns {@code true},
      *         otherwise an empty Optional
      * @throws E if the predicate throws an exception.
      */
@@ -850,7 +850,7 @@ public final class Triple<L, M, R> implements Mutable {
      *
      * @param <E> the type of exception that the predicate may throw.
      * @param predicate the predicate to test this Triple.
-     * @return an Optional containing this Triple if the predicate returns {@code true},.
+     * @return an Optional containing this Triple if the predicate returns {@code true},
      *         otherwise an empty Optional
      * @throws E if the predicate throws an exception.
      */

@@ -60,7 +60,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  *   <li><b>Comprehensive Statistical Analysis:</b> Min, max, average, median, percentile, and distribution metrics</li>
  *   <li><b>Multiple Test Rounds:</b> Support for warm-up rounds and multiple test iterations for accuracy</li>
  *   <li><b>Flexible Execution Models:</b> Support for Runnable, Callable, and reflection-based method invocation</li>
- *   <li><b>Advanced Reporting:</b> Multiple output formats including console, file, HTML, and custom formatters</li>
+ *   <li><b>Advanced Reporting:</b> Multiple output formats including console, HTML, and XML</li>
  *   <li><b>Execution Control:</b> Profiler suspension, debugging hooks, and conditional execution</li>
  *   <li><b>Memory Management:</b> Optimized memory usage patterns for large-scale performance testing</li>
  *   <li><b>Integration Ready:</b> Seamless integration with testing frameworks and CI/CD pipelines</li>
@@ -78,11 +78,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  * <p><b>Statistical Metrics Provided:</b>
  * <ul>
  *   <li><b>Basic Metrics:</b> Minimum, maximum, average, and total execution times</li>
- *   <li><b>Distribution Analysis:</b> Standard deviation, variance, and coefficient of variation</li>
- *   <li><b>Percentile Analysis:</b> 50th, 90th, 95th, 99th percentile execution times</li>
- *   <li><b>Throughput Metrics:</b> Operations per second and transactions per minute</li>
- *   <li><b>Concurrency Analysis:</b> Thread efficiency and contention metrics</li>
- *   <li><b>Trend Analysis:</b> Performance trends across rounds and time periods</li>
+ *   <li><b>Percentile Analysis:</b> Execution time percentiles (0.01%, 0.1%, 1%, 10%, 20%, 50%, 80%, 90%, 99%, 99.9%, 99.99%)</li>
  * </ul>
  *
  * <p><b>Common Usage Patterns:</b>
@@ -144,10 +140,9 @@ import com.landawn.abacus.logging.LoggerFactory;
  * <p><b>Output and Reporting Options:</b>
  * <ul>
  *   <li><b>Console Output:</b> Formatted console output with tabular statistical summaries</li>
- *   <li><b>File Export:</b> Export results to text files, CSV, JSON, or XML formats</li>
- *   <li><b>HTML Reports:</b> Rich HTML reports with charts and interactive elements</li>
- *   <li><b>Custom Formatters:</b> Pluggable result formatters for specialized reporting needs</li>
- *   <li><b>Real-time Monitoring:</b> Stream results to monitoring dashboards and alerting systems</li>
+ *   <li><b>Plain Text:</b> Write results to any OutputStream or Writer</li>
+ *   <li><b>HTML Reports:</b> HTML-formatted results with structured tables</li>
+ *   <li><b>XML Export:</b> XML-formatted results for integration with automated systems</li>
  * </ul>
  *
  * <p><b>Best Practices and Recommendations:</b>
@@ -184,11 +179,9 @@ import com.landawn.abacus.logging.LoggerFactory;
  *
  * <p><b>Statistical Analysis Capabilities:</b>
  * <ul>
- *   <li><b>Central Tendency:</b> Mean, median, and mode calculation for execution times</li>
- *   <li><b>Variability:</b> Standard deviation, variance, and coefficient of variation</li>
- *   <li><b>Distribution:</b> Percentile analysis and execution time distribution</li>
- *   <li><b>Outlier Detection:</b> Identification and handling of performance outliers</li>
- *   <li><b>Trend Analysis:</b> Performance trends across multiple test rounds</li>
+ *   <li><b>Central Tendency:</b> Average execution time calculation</li>
+ *   <li><b>Range:</b> Minimum and maximum execution times</li>
+ *   <li><b>Distribution:</b> Percentile analysis across multiple thresholds</li>
  * </ul>
  *
  * <p><b>Thread Safety and Concurrent Usage:</b>

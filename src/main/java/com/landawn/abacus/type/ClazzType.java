@@ -26,10 +26,18 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings({ "rawtypes", "java:S2160" })
 public class ClazzType extends AbstractType<Class> {
 
+    /** The type name constant for Clazz type identification. */
     public static final String CLAZZ = "Clazz"; //NOSONAR
 
+    /** The specific Class this type handler represents. */
     private final Class clazz; //NOSONAR
 
+    /**
+     * Constructs a ClazzType with the specified type parameter name.
+     * The resulting type name will be "Clazz&lt;typeName&gt;".
+     *
+     * @param typeName the fully qualified class name of the type parameter
+     */
     protected ClazzType(final String typeName) {
         super("Clazz<" + typeName + ">");
 
@@ -37,10 +45,9 @@ public class ClazzType extends AbstractType<Class> {
     }
 
     /**
-     * Returns the Java class type handled by this type handler.
-     * This represents the specific Class type this handler manages.
+     * Returns the Class object representing the type parameter of this Clazz type.
      *
-     * @return The Class object loaded from the type name provided in constructor
+     * @return the Class object for the specific type parameter
      */
     @Override
     public Class<Class> javaType() {

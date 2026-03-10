@@ -155,7 +155,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
 
     /**
      * Sets a MutableDouble parameter in a PreparedStatement at the specified position.
-     * If the MutableDouble is {@code null}, 0.0 is stored. Otherwise, the wrapped double value is stored.
+     * If the MutableDouble is {@code null}, SQL NULL is set. Otherwise, the wrapped double value is stored.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -167,7 +167,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      *
      * // For {@code null} value
      * type.set(stmt, 1, null);
-     * // This sets the parameter to 0.0
+     * // This sets the parameter to SQL NULL
      * }</pre>
      *
      * @param stmt The PreparedStatement to set the parameter on
@@ -186,7 +186,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
 
     /**
      * Sets a MutableDouble parameter in a CallableStatement using the specified parameter name.
-     * If the MutableDouble is {@code null}, 0.0 is stored. Otherwise, the wrapped double value is stored.
+     * If the MutableDouble is {@code null}, SQL NULL is set. Otherwise, the wrapped double value is stored.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -198,7 +198,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      *
      * // For {@code null} value
      * type.set(stmt, "amount", null);
-     * // This sets the parameter to 0.0
+     * // This sets the parameter to SQL NULL
      * }</pre>
      *
      * @param stmt The CallableStatement to set the parameter on

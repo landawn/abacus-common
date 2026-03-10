@@ -33,8 +33,8 @@ import com.landawn.abacus.util.stream.Stream;
 
 /**
  * The TriIterator class is an abstract class that extends ImmutableIterator.
- * It represents an iterator over a triple of values of type A, B, and C.
- * This class provides a blueprint for classes that need to implement a tri-directional iterator.
+ * It represents an iterator over triples of values of type A, B, and C.
+ * This class provides a blueprint for classes that need to iterate over three related values simultaneously.
  *
  * @param <A> the first type of elements returned by this iterator
  * @param <B> the second type of elements returned by this iterator

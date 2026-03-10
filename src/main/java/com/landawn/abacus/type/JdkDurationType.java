@@ -123,7 +123,7 @@ public class JdkDurationType extends AbstractType<Duration> {
     /**
      * Sets a Duration parameter in a PreparedStatement.
      * The Duration is converted to milliseconds for database storage.
-     * If the Duration is {@code null}, 0 is stored.
+     * If the Duration is {@code null}, SQL NULL is set.
      *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the index of the parameter to set (1-based)
@@ -142,7 +142,7 @@ public class JdkDurationType extends AbstractType<Duration> {
     /**
      * Sets a Duration parameter in a CallableStatement using a parameter name.
      * The Duration is converted to milliseconds for database storage.
-     * If the Duration is {@code null}, 0 is stored.
+     * If the Duration is {@code null}, SQL NULL is set.
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set

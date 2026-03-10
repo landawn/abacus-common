@@ -172,7 +172,7 @@ public class MutableByteType extends NumberType<MutableByte> {
 
     /**
      * Sets a MutableByte parameter in a PreparedStatement at the specified position.
-     * If the MutableByte is {@code null}, 0 is stored. Otherwise, the wrapped byte value is stored.
+     * If the MutableByte is {@code null}, SQL NULL is set. Otherwise, the wrapped byte value is stored.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -184,7 +184,7 @@ public class MutableByteType extends NumberType<MutableByte> {
      * // Sets parameter to 1
      *
      * type.set(stmt, 2, null);
-     * // Sets parameter to 0
+     * // Sets parameter to SQL NULL
      * }</pre>
      *
      * @param stmt The PreparedStatement to set the parameter on
@@ -203,7 +203,7 @@ public class MutableByteType extends NumberType<MutableByte> {
 
     /**
      * Sets a MutableByte parameter in a CallableStatement using the specified parameter name.
-     * If the MutableByte is {@code null}, 0 is stored. Otherwise, the wrapped byte value is stored.
+     * If the MutableByte is {@code null}, SQL NULL is set. Otherwise, the wrapped byte value is stored.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -215,7 +215,7 @@ public class MutableByteType extends NumberType<MutableByte> {
      * // Sets parameter to 1
      *
      * type.set(stmt, "p_priority", null);
-     * // Sets parameter to 0
+     * // Sets parameter to SQL NULL
      * }</pre>
      *
      * @param stmt The CallableStatement to set the parameter on

@@ -861,7 +861,7 @@ public final class HttpUtil {
      * For example, ContentFormat.JSON_GZIP returns "gzip".
      *
      * @param contentFormat The content format
-     * @return The content encoding string,  or an empty string "" if contentFormat is {@code null} or has no encoding
+     * @return The content encoding string, or an empty string "" if contentFormat is {@code null} or has no encoding
      */
     public static String getContentEncoding(final ContentFormat contentFormat) {
         if (contentFormat == null || contentFormat == ContentFormat.NONE) {

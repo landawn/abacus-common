@@ -115,11 +115,11 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
     /**
      * Retrieves a character value from a ResultSet at the specified column index.
      * Gets the value as a string and returns the first character.
-     * Returns the {@code null} character (0) if the database value is NULL.
+     * Returns the default value if the database value is NULL or an empty string.
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based)
-     * @return the first character of the string value, or 0 if NULL
+     * @return the first character of the string value, or the default value if NULL or empty
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -136,11 +136,11 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
     /**
      * Retrieves a character value from a ResultSet using the specified column label.
      * Gets the value as a string and returns the first character.
-     * Returns the {@code null} character (0) if the database value is NULL.
+     * Returns the default value if the database value is NULL or an empty string.
      *
      * @param rs the ResultSet to read from
      * @param columnName the column label
-     * @return the first character of the string value, or 0 if NULL
+     * @return the first character of the string value, or the default value if NULL or empty
      * @throws SQLException if a database access error occurs
      */
     @Override

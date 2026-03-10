@@ -62,7 +62,7 @@ import com.landawn.abacus.util.stream.Stream;
  * in the Abacus library, offering null-safe, performance-optimized operations for all common string
  * processing needs.
  *
- * <p>The {@code Strings} class is designed as an abstract sealed class that provides a comprehensive
+ * <p>The {@code Strings} class is designed as a final utility class that provides a comprehensive
  * string manipulation API covering validation, transformation, searching, parsing, encoding, and
  * formatting operations. All methods are static and thread-safe, with a focus on null-safety and
  * performance optimization.</p>
@@ -143,7 +143,7 @@ import com.landawn.abacus.util.stream.Stream;
  * // Advanced string building and manipulation
  * String joined     = Strings.join(Arrays.asList("a", "b", "c"), ", ");   // Returns "a, b, c"
  * String[] split    = Strings.split("a,b,c", ",");   // Returns ["a", "b", "c"]
- * String normalized = Strings.normalize("café");     // Unicode normalization
+ * String normalized = Strings.normalizeSpace("  hello  world  ");     // Whitespace normalization
  * }</pre>
  *
  * <p><b>Performance Characteristics:</b>
@@ -167,14 +167,14 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li><b>Empty/Blank Checking:</b> {@code Strings.isEmpty()}, {@code Strings.isBlank()}, {@code Strings.isNotEmpty()}, {@code Strings.isNotBlank()}</li>
  *   <li><b>Format Validation:</b> {@code Strings.isValidEmailAddress()}, {@code Strings.isBase64()}</li>
- *   <li><b>Identifier Validation:</b> {@code Strings.isJavaIdentifier()}, {@code Strings.isValidIdentifier()}</li>
- *   <li><b>Pattern Matching:</b> {@code Strings.matches()}, {@code Strings.matchesIgnoreCase()}</li>
+ *   <li><b>Identifier Validation:</b> {@code Strings.isValidJavaIdentifier()}, {@code Strings.isKeyword()}</li>
+ *   <li><b>Pattern Matching:</b> {@code Strings.contains()}, {@code Strings.containsIgnoreCase()}</li>
  * </ul>
  *
  * <p><b>Case Operations:</b>
  * <ul>
  *   <li><b>Basic Case:</b> {@code Strings.upperCase()}, {@code Strings.lowerCase()}, {@code Strings.swapCase()}</li>
- *   <li><b>Word Case:</b> {@code Strings.capitalize()}, {@code Strings.uncapitalize()}, {@code Strings.capitalizeWords()}</li>
+ *   <li><b>Word Case:</b> {@code Strings.capitalize()}, {@code Strings.uncapitalize()}, {@code Strings.capitalizeFully()}</li>
  *   <li><b>Naming Conventions:</b> {@code Strings.toCamelCase()}, {@code Strings.toSnakeCase()}, {@code Strings.toUpperCamelCase()}</li>
  *   <li><b>Locale Support:</b> Locale-aware case conversion operations</li>
  * </ul>
@@ -183,7 +183,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li><b>Base64:</b> {@code Strings.base64Encode()}, {@code Strings.base64Decode()} with standard and URL-safe variants</li>
  *   <li><b>URL Encoding:</b> {@code Strings.urlEncode()}, {@code Strings.urlDecode()} with charset support</li>
- *   <li><b>Unicode:</b> {@code Strings.normalize()}, {@code Strings.toUnicode()}, {@code Strings.fromUnicode()}</li>
+ *   <li><b>Unicode:</b> {@code Strings.normalizeSpace()}, {@code Strings.unicodeEscaped()}</li>
  *   <li><b>Character Sets:</b> Support for various character encodings</li>
  * </ul>
  *
@@ -269,7 +269,7 @@ import com.landawn.abacus.util.stream.Stream;
  *         // Extract name from email
  *         String namePart = Strings.substringBefore(email, "@");
  *         String displayName = Strings.replace(namePart, ".", " ");
- *         displayName = Strings.capitalizeWords(displayName);
+ *         displayName = Strings.capitalizeFully(displayName);
  *         
  *         // Build formatted result
  *         String result = Strings.join(Arrays.asList(

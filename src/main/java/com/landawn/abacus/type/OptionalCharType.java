@@ -229,7 +229,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      *
      * OptionalChar opt = OptionalChar.of('A');
      * type.set(stmt, 2, opt);
-     * // Sets parameter to 'A' (stored as integer)
+     * // Sets parameter to 'A' (stored as VARCHAR string)
      *
      * opt = OptionalChar.empty();
      * type.set(stmt, 2, opt);
@@ -267,7 +267,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      *
      * OptionalChar opt = OptionalChar.of('B');
      * type.set(stmt, "p_grade", opt);
-     * // Sets parameter to 'B' (stored as integer)
+     * // Sets parameter to 'B' (stored as VARCHAR string)
      *
      * opt = OptionalChar.empty();
      * type.set(stmt, "p_middle_initial", opt);

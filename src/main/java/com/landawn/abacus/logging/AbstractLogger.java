@@ -231,6 +231,7 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param template the message template
      * @param args the arguments to be substituted in the template
+     * @deprecated Prefer {@link #trace(Supplier)} for lazy evaluation to avoid object creation
      */
     @Deprecated
     @Override
@@ -505,6 +506,7 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param template the message template
      * @param args the arguments to be substituted in the template
+     * @deprecated Prefer {@link #debug(Supplier)} for lazy evaluation to avoid object creation
      */
     @Deprecated
     @Override
@@ -757,6 +759,7 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param template the message template
      * @param args the arguments to be substituted in the template
+     * @deprecated Prefer {@link #info(Supplier)} for lazy evaluation to avoid object creation
      */
     @Deprecated
     @Override
@@ -1009,6 +1012,7 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param template the message template
      * @param args the arguments to be substituted in the template
+     * @deprecated Prefer {@link #warn(Supplier)} for lazy evaluation to avoid object creation
      */
     @Deprecated
     @Override
@@ -1261,6 +1265,7 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param template the message template
      * @param args the arguments to be substituted in the template
+     * @deprecated Prefer {@link #error(Supplier)} for lazy evaluation to avoid object creation
      */
     @Deprecated
     @Override

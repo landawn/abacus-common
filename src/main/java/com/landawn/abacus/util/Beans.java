@@ -6261,7 +6261,7 @@ public final class Beans {
      * @param propNamesToCompare the collection of property names to compare, which may be null
      * @return a negative integer, zero, or a positive integer as the first bean is less than, equal to, or greater than the second bean
      * @throws IllegalArgumentException if any of the arguments are null
-     * @deprecated call {@code getPropValue} by reflection APIs during comparing or sorting may have a huge impact on performance. Use {@link ComparisonBuilder} instead.
+     * @deprecated calling {@code getPropValue} by reflection APIs during comparison or sorting may have a huge impact on performance. Use {@link ComparisonBuilder} instead.
      * @see Builder#compare(Object, Object, Comparator)
      * @see ComparisonBuilder
      */

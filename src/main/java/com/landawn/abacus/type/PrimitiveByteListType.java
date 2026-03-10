@@ -85,7 +85,7 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * Type<ByteList> type = TypeFactory.getType(ByteList.class);
      * ByteList list = ByteList.of(1, 2, 3, 127, -128);
      * String result = type.stringOf(list);
-     * // result: Base64 encoded string of the byte values
+     * // result: "[1, 2, 3, 127, -128]"
      * }</pre>
      *
      * @param x the ByteList to convert
@@ -104,9 +104,8 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<ByteList> type = TypeFactory.getType(ByteList.class);
-     * String encoded = "AQIDAP8=";  // Base64 encoded bytes
-     * ByteList list = type.valueOf(encoded);
-     * // list: ByteList containing the decoded bytes
+     * ByteList list = type.valueOf("[1, 2, 3, 127, -128]");
+     * // list: ByteList containing the byte values 1, 2, 3, 127, -128
      * }</pre>
      *
      * @param str the string to parse

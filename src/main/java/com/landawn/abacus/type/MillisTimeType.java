@@ -104,7 +104,7 @@ public class MillisTimeType extends TimeType {
     /**
      * Sets a Time parameter in a PreparedStatement at the specified position.
      * The Time is stored as a long value representing milliseconds since epoch.
-     * If the Time is {@code null}, 0 is stored.
+     * If the Time is {@code null}, SQL NULL is set.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -116,12 +116,12 @@ public class MillisTimeType extends TimeType {
      * // Sets parameter to 3600000
      *
      * type.set(stmt, 2, null);
-     * // Sets parameter to 0
+     * // Sets parameter to SQL NULL
      * }</pre>
      *
      * @param stmt The PreparedStatement to set the parameter on
      * @param columnIndex The parameter index (1-based) to set
-     * @param x The Time value to set, or {@code null} to store 0
+     * @param x The Time value to set, or {@code null} to set SQL NULL
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
@@ -136,7 +136,7 @@ public class MillisTimeType extends TimeType {
     /**
      * Sets a Time parameter in a CallableStatement using the specified parameter name.
      * The Time is stored as a long value representing milliseconds since epoch.
-     * If the Time is {@code null}, 0 is stored.
+     * If the Time is {@code null}, SQL NULL is set.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -148,12 +148,12 @@ public class MillisTimeType extends TimeType {
      * // Sets parameter to 3600000
      *
      * type.set(stmt, "p_end_time", null);
-     * // Sets parameter to 0
+     * // Sets parameter to SQL NULL
      * }</pre>
      *
      * @param stmt The CallableStatement to set the parameter on
      * @param parameterName The name of the parameter to set
-     * @param x The Time value to set, or {@code null} to store 0
+     * @param x The Time value to set, or {@code null} to set SQL NULL
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override

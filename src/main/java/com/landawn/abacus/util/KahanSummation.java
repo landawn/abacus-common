@@ -57,7 +57,7 @@ public final class KahanSummation { // NOSONAR
     private double simpleSum;
 
     /**
-     * Creates a static KahanSummation instance initialized with the provided values.
+     * Creates a new KahanSummation instance initialized with the provided values.
      * 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

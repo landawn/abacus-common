@@ -161,7 +161,7 @@ public class MutableLongType extends NumberType<MutableLong> {
      *
      * // For null value
      * type.set(stmt, 1, null);
-     * // This sets the parameter to 0
+     * // This sets the parameter to SQL NULL
      * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
@@ -191,7 +191,7 @@ public class MutableLongType extends NumberType<MutableLong> {
      *
      * // For null value
      * type.set(cstmt, "user_id", null);
-     * // This sets the parameter to 0
+     * // This sets the parameter to SQL NULL
      * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on

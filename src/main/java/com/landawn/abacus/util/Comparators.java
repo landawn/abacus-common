@@ -2103,7 +2103,7 @@ public final class Comparators {
      * @param propNamesToCompare collection of property names to compare in order
      * @return a comparator that compares beans by the specified properties
      * @throws IllegalArgumentException if propNamesToCompare is {@code null} or contains invalid property names
-     * @deprecated call {@code getPropValue} by reflection apis during comparing or sorting may have huge impact to performance. Use {@link ComparisonBuilder} instead.
+     * @deprecated calling {@code getPropValue} by reflection APIs during comparison or sorting may have a huge impact on performance. Use {@link ComparisonBuilder} instead.
      * @see Builder#compare(Object, Object, Comparator)
      * @see ComparisonBuilder
      */

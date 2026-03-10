@@ -201,9 +201,9 @@ public final class Hex {
      *
      * <p>The conversion process:</p>
      * <ul>
-     *   <li>Characters <i>0'-'9</i> represent values 0-9</li>
-     *   <li>Characters <i>A'-'F</i> represent values 10-15</li>
-     *   <li>Characters <i>a'-'f</i> represent values 10-15</li>
+     *   <li>Characters {@code '0'}-{@code '9'} represent values 0-9</li>
+     *   <li>Characters {@code 'A'}-{@code 'F'} represent values 10-15</li>
+     *   <li>Characters {@code 'a'}-{@code 'f'} represent values 10-15</li>
      *   <li>Each pair of characters forms one byte: first char = high nibble, second char = low nibble</li>
      * </ul>
      *
@@ -246,7 +246,7 @@ public final class Hex {
      * Converts a hexadecimal character to its integer value (0-15).
      *
      * <p>This method validates that the character is a valid hexadecimal digit and converts it
-     * to its corresponding integer value. Valid characters are <i>0'-'9</i>, <i>A'-'F</i>, and 'a'-'f'.</p>
+     * to its corresponding integer value. Valid characters are {@code '0'}-{@code '9'}, {@code 'A'}-{@code 'F'}, and {@code 'a'}-{@code 'f'}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

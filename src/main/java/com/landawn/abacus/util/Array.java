@@ -1970,7 +1970,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param a the input boolean array to be repeated.
      * @param n the number of times to repeat the array (must be non-negative).
      * @return a new boolean array containing the input array repeated n times.
-     * @throws IllegalArgumentException if n is negative. or if the resulting length exceeds Integer.MAX_VALUE.
+     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE.
      * @see #repeat(boolean, int)
      */
     public static boolean[] repeat(final boolean[] a, final int n) {
@@ -2045,7 +2045,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param a the input char array to be repeated.
      * @param n the number of times to repeat the array (must be non-negative).
      * @return a new char array containing the input array repeated n times.
-     * @throws IllegalArgumentException if n is negative. or if the resulting length exceeds Integer.MAX_VALUE.
+     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE.
      */
     public static char[] repeat(final char[] a, final int n) {
         N.checkArgNotNegative(n, cs.n);
@@ -2596,9 +2596,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param element the value to be repeated in the array.
      * @param n the length of the array to be generated.
      * @return an array of type 'T' and length <i>n</i> with all elements set to <i>element</i>.
-     * @throws IllegalArgumentException <i>element</i> is {@code null} or {@code n} is negative.
-     * @deprecated prefer to {@link Array#repeatNonNull(Object, int)} or {@link Array#repeat(Object, int, Class)} 
-     *  because this method throws NullPointerException when element is {@code null}
+     * @throws IllegalArgumentException if <i>element</i> is {@code null} or {@code n} is negative.
+     * @deprecated prefer {@link Array#repeatNonNull(Object, int)} or {@link Array#repeat(Object, int, Class)}
+     *  because this method throws IllegalArgumentException when element is {@code null}
      * @see #repeat(Object, int, Class)
      * @see #repeatNonNull(Object, int)
      * @see N#repeat(Object, int)
@@ -2701,7 +2701,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>This method provides a clearer alternative to the deprecated {@link Array#repeat(Object, int)} method
      * by explicitly indicating in its name that {@code null} elements are not allowed. Unlike the deprecated method which
-     * may throw NullPointerException, this method consistently throws IllegalArgumentException for {@code null} elements.</p>
+     * may throw an exception, this method makes it explicit in its name that {@code null} elements are not allowed.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

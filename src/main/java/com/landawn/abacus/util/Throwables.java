@@ -1589,7 +1589,7 @@ public final class Throwables {
     /**
      * The Interface BiPredicate.
      *
-     * @param <T> the type of the input
+     * @param <T> the type of the first input
      * @param <U> the type of the second input
      * @param <E> the type of exception that may be thrown
      */
@@ -1712,7 +1712,7 @@ public final class Throwables {
     /**
      * The Interface BiFunction.
      *
-     * @param <T> the type of the input
+     * @param <T> the type of the first input
      * @param <U> the type of the second input
      * @param <R> the type of the result
      * @param <E> the type of exception that may be thrown
@@ -1836,7 +1836,7 @@ public final class Throwables {
     /**
      * The Interface BiConsumer.
      *
-     * @param <T> the type of the input
+     * @param <T> the type of the first input
      * @param <U> the type of the second input
      * @param <E> the type of exception that may be thrown
      */
@@ -2315,15 +2315,18 @@ public final class Throwables {
     /**
      * The Interface FloatToIntFunction.
      *
+     * <p><b>Note:</b> Despite the name, this method currently returns {@code double}.
+     * This may be a known design choice for consistency with other float conversion functions.</p>
+     *
      * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface FloatToIntFunction<E extends Throwable> {
         /**
-         * Applies this function to the given float argument and produces an int result.
+         * Applies this function to the given float argument.
          *
          * @param value the float function argument
-         * @return the int function result
+         * @return the function result as a double
          * @throws E if an exception occurs during function application
          */
         double applyAsInt(float value) throws E;
@@ -2332,15 +2335,18 @@ public final class Throwables {
     /**
      * The Interface FloatToLongFunction.
      *
+     * <p><b>Note:</b> Despite the name, this method currently returns {@code double}.
+     * This may be a known design choice for consistency with other float conversion functions.</p>
+     *
      * @param <E> the type of exception that may be thrown
      */
     @FunctionalInterface
     public interface FloatToLongFunction<E extends Throwable> {
         /**
-         * Applies this function to the given float argument and produces a long result.
+         * Applies this function to the given float argument.
          *
          * @param value the float function argument
-         * @return the long function result
+         * @return the function result as a double
          * @throws E if an exception occurs during function application
          */
         double applyAsLong(float value) throws E;

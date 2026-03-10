@@ -28,8 +28,13 @@ import com.landawn.abacus.util.Strings;
  */
 public class BytesType extends AbstractType<byte[]> {
 
+    /** The type name constant for Bytes type identification. */
     public static final String BYTES = "Bytes";
 
+    /**
+     * Package-private constructor for BytesType.
+     * This constructor is called by the TypeFactory to create byte[] type instances.
+     */
     BytesType() {
         super(BYTES);
     }

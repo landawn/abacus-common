@@ -33,12 +33,22 @@ public class BlobType extends AbstractType<Blob> {
      */
     public static final String BLOB = Blob.class.getSimpleName();
 
+    /** The specific Blob implementation class. */
     private final Class<Blob> clazz;
 
+    /**
+     * Package-private constructor for BlobType.
+     * This constructor is called by the TypeFactory to create Blob type instances.
+     */
     BlobType() {
         this(Blob.class);
     }
 
+    /**
+     * Package-private constructor for BlobType with a specific Blob implementation class.
+     *
+     * @param clazz the specific Blob implementation class
+     */
     BlobType(Class<? extends Blob> clazz) {
         super(BLOB);
         this.clazz = (Class<Blob>) clazz;

@@ -3133,11 +3133,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *     .collect(Collectors.collectingOrEmpty(Collectors.toList()));
      * // Result: Optional.empty()
      * 
-     * // Returns Optional with empty list for stream with no matching elements
+     * // Returns Optional.empty() when no elements reach the collector
      * Optional<List<String>> filtered = Stream.of("a", "b", "c")
      *     .filter(s -> s.length() > 5)
      *     .collect(Collectors.collectingOrEmpty(Collectors.toList()));
-     * // Result: Optional[[]] (Optional containing empty list)
+     * // Result: Optional.empty() (no elements were accumulated)
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -4260,10 +4260,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *     .collect(Collectors.minAll());
      * // Result: [1, 1, 1]
      *
-     * // Find all shortest strings
-     * List<String> shortest = Stream.of("apple", "pie", "cat", "dog")
+     * // Find all lexicographically smallest strings
+     * List<String> smallest = Stream.of("apple", "pie", "cat", "dog")
      *     .collect(Collectors.minAll());
-     * // Result: ["pie", "cat", "dog"]
+     * // Result: ["apple"] ("apple" is smallest in natural/lexicographic ordering)
      * }</pre>
      *
      * @param <T> the type of the input elements

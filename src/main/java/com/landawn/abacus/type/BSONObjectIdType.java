@@ -31,6 +31,10 @@ public class BSONObjectIdType extends AbstractType<ObjectId> {
      */
     public static final String BSON_OBJECT_ID = "BSONObjectId";
 
+    /**
+     * Package-private constructor for BSONObjectIdType.
+     * This constructor is called by the TypeFactory to create BSONObjectId type instances.
+     */
     BSONObjectIdType() {
         super(BSON_OBJECT_ID);
     }

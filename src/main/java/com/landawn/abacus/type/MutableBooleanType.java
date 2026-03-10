@@ -188,7 +188,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
 
     /**
      * Sets a MutableBoolean parameter in a PreparedStatement at the specified position.
-     * If the MutableBoolean is {@code null}, {@code false} is stored. Otherwise, the wrapped boolean value is stored.
+     * If the MutableBoolean is {@code null}, SQL NULL is set. Otherwise, the wrapped boolean value is stored.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -200,7 +200,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * // Sets parameter to true
      *
      * type.set(stmt, 2, null);
-     * // Sets parameter to false
+     * // Sets parameter to SQL NULL
      * }</pre>
      *
      * @param stmt The PreparedStatement to set the parameter on
@@ -219,7 +219,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
 
     /**
      * Sets a MutableBoolean parameter in a CallableStatement using the specified parameter name.
-     * If the MutableBoolean is {@code null}, {@code false} is stored. Otherwise, the wrapped boolean value is stored.
+     * If the MutableBoolean is {@code null}, SQL NULL is set. Otherwise, the wrapped boolean value is stored.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -231,7 +231,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * // Sets parameter to true
      *
      * type.set(stmt, "p_is_deleted", null);
-     * // Sets parameter to false
+     * // Sets parameter to SQL NULL
      * }</pre>
      *
      * @param stmt The CallableStatement to set the parameter on

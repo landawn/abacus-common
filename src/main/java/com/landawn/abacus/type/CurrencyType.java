@@ -25,8 +25,13 @@ import com.landawn.abacus.util.Strings;
  */
 public class CurrencyType extends AbstractType<Currency> {
 
+    /** The type name constant for Currency type identification. */
     public static final String CURRENCY = Currency.class.getSimpleName();
 
+    /**
+     * Package-private constructor for CurrencyType.
+     * This constructor is called by the TypeFactory to create Currency type instances.
+     */
     CurrencyType() {
         super(CURRENCY);
     }

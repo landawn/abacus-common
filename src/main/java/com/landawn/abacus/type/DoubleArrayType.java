@@ -29,6 +29,10 @@ import com.landawn.abacus.util.SK;
  */
 public final class DoubleArrayType extends ObjectArrayType<Double> {
 
+    /**
+     * Package-private constructor for DoubleArrayType.
+     * This constructor is called by the TypeFactory to create Double[] type instances.
+     */
     DoubleArrayType() {
         super(Double[].class);
     }

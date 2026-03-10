@@ -30,6 +30,10 @@ import com.landawn.abacus.util.SK;
  */
 public final class CharacterArrayType extends ObjectArrayType<Character> {
 
+    /**
+     * Package-private constructor for CharacterArrayType.
+     * This constructor is called by the TypeFactory to create Character[] type instances.
+     */
     CharacterArrayType() {
         super(Character[].class);
     }

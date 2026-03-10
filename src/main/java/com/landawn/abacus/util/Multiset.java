@@ -166,7 +166,7 @@ import com.landawn.abacus.util.stream.Stream;
  * open source projects under the Apache License 2.0. Methods from these libraries may have been
  * modified for consistency, performance optimization, and null-safety enhancement.
  *
- * @param <E> the type of elements maintained by this multiset .
+ * @param <E> the type of elements maintained by this multiset.
  */
 public final class Multiset<E> implements Collection<E> {
 

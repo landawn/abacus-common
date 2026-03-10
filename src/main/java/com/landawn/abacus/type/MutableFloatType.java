@@ -159,7 +159,7 @@ public class MutableFloatType extends NumberType<MutableFloat> {
     /**
      * Sets a MutableFloat value at the specified parameter index in the PreparedStatement.
      * Extracts the float value from the MutableFloat and sets it in the statement.
-     * If the MutableFloat is {@code null}, sets 0.0f as the value.
+     * If the MutableFloat is {@code null}, SQL NULL is set.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -171,7 +171,7 @@ public class MutableFloatType extends NumberType<MutableFloat> {
      *
      * // For null value
      * type.set(stmt, 1, null);
-     * // This sets the parameter to 0.0f
+     * // This sets the parameter to SQL NULL
      * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
@@ -191,7 +191,7 @@ public class MutableFloatType extends NumberType<MutableFloat> {
     /**
      * Sets a MutableFloat value for the specified parameter name in the CallableStatement.
      * Extracts the float value from the MutableFloat and sets it in the statement.
-     * If the MutableFloat is {@code null}, sets 0.0f as the value.
+     * If the MutableFloat is {@code null}, SQL NULL is set.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -203,7 +203,7 @@ public class MutableFloatType extends NumberType<MutableFloat> {
      *
      * // For null value
      * type.set(cstmt, "price", null);
-     * // This sets the parameter to 0.0f
+     * // This sets the parameter to SQL NULL
      * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on

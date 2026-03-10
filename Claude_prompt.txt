@@ -1,26 +1,24 @@
+
 -- ==========================================================
 
 Use multiple agents to fix all javadoc issues reported by running: mvn javadoc:javadoc.
 
 -- ==========================================================
 
-1, Use multiple agents to perform a line-by-line review of all classes under ./src/main/java/ to find bugs and fix them in original class source file.
+Review all public methods in the classes located under foler: ./src/main/java/ for naming convention consistency, and provide suggestions for design and method naming improvements. 
 
-2, Immediately after completing the review and fixes for a class, generate a detailed report for that class documenting:
+Perform a thorough deep line by line review for javadocs in all the classes under folder: ./src/main/java to improve/correct existing javadocs
 
-	1, Identified issues
-	2, Applied fixes
-	3, Any remaining risks or assumptions
-	
-3, Verify fixes compile correctly
+Perform a thorough deep line by line review for javadocs in all the classes in package com.landawn.abacus.type under folder: ./src/main/java to improve/correct existing javadocs
 
--- ==========================================================
+Perform a thorough deep line by line review for javadocs in Multiset.java to improve/correct existing javadocs
 
-Use multiple agents to review all classes under folder: ./src/main/java/ line by line carefully to find bugs and fix them.
 
-Use multiple agents to review logger and error messages in every class and interface under ./src/main/java/, and replace them with more accurate, concise, and consistent messages where better alternatives are identified.
+Perform a thorough deep line by line review for all the classes under folder: ./src/main/java to find bugs and fix them, and unit tests for the fixes
 
-Use multiple agents to review the names of all local variables, fields, and methods in every class and interface under ./src/main/java/, and replace them with more accurate, concise, and consistent names where better alternatives are identified.
+Perform a thorough deep line by line review for all the classes in package com.landawn.abacus.util under folder: ./src/main/java to find bugs and fix them, and unit tests for the fixes
+
+Are you sure you have identified and fixed all the bugs? Perform a thorough deep review again.
 
 
 -- ==========================================================

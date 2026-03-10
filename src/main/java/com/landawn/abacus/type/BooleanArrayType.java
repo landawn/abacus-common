@@ -29,6 +29,10 @@ import com.landawn.abacus.util.SK;
  */
 public final class BooleanArrayType extends ObjectArrayType<Boolean> {
 
+    /**
+     * Package-private constructor for BooleanArrayType.
+     * This constructor is called by the TypeFactory to create Boolean[] type instances.
+     */
     BooleanArrayType() {
         super(Boolean[].class);
     }

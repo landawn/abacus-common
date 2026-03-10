@@ -355,7 +355,7 @@ sealed class CommonUtil permits N {
      */
     static final Random RAND = new SecureRandom();
 
-    // ... it has to be big enough to make it's safety to add element to
+    // ... it has to be big enough to make it safe to add element to
     // ArrayBlockingQueue.
     @SuppressWarnings("deprecation")
     static final int POOL_SIZE = InternalUtil.POOL_SIZE;
@@ -7821,7 +7821,7 @@ sealed class CommonUtil permits N {
      *
      * @param value the value to check
      * @return {@code true}, if it's not {@code null} or default
-     * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
+     * @deprecated DO NOT call the methods defined in this class. It's for internal use only.
      */
     @Deprecated
     static boolean notNullOrDefault(final Object value) {

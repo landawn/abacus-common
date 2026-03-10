@@ -4545,6 +4545,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalArgumentException if the mapper is null
      */
     public <R> Seq<R, E> mapMulti(final Throwables.BiConsumer<? super T, ? super Consumer<R>, ? extends E> mapper) throws IllegalStateException {
+        assertNotClosed();
+        checkArgNotNull(mapper, cs.mapper);
+
         final Deque<R> queue = new ArrayDeque<>();
 
         final Consumer<R> consumer = queue::offer;
@@ -5662,7 +5665,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * The elements from the collection will appear before the existing elements in the sequence,
      * maintaining their order from the collection.
      *
-     * <p>This is an intermediate operation that does not consume the sequence.</p>
+     * <p>This is an intermediate operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5686,7 +5689,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * The elements from the specified sequence will appear before the existing elements,
      * maintaining their order from the source sequence.
      *
-     * <p>This is an intermediate operation that does not consume the sequence.</p>
+     * <p>This is an intermediate operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5712,7 +5715,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * If the Optional is empty, the sequence remains unchanged. If the Optional contains a value,
      * that value is prepended to the beginning of the sequence.
      *
-     * <p>This is an intermediate operation that does not consume the sequence.</p>
+     * <p>This is an intermediate operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5743,7 +5746,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Appends the specified elements to the end of this sequence.
      * The elements will be added in the order they appear in the array.
      *
-     * <p>This is an intermediate operation that does not consume the sequence.</p>
+     * <p>This is an intermediate operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5767,7 +5770,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * The elements from the collection will be added after the existing elements,
      * maintaining their order from the collection.
      *
-     * <p>This is an intermediate operation that does not consume the sequence.</p>
+     * <p>This is an intermediate operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5791,7 +5794,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * The elements from the specified sequence will be added after the existing elements,
      * maintaining their order from the source sequence.
      *
-     * <p>This is an intermediate operation that does not consume the sequence.</p>
+     * <p>This is an intermediate operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5817,7 +5820,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * If the Optional is empty, the sequence remains unchanged. If the Optional contains a value,
      * that value is appended to the end of the sequence.
      *
-     * <p>This is an intermediate operation that does not consume the sequence.</p>
+     * <p>This is an intermediate operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5848,7 +5851,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Appends the specified elements to the end of this sequence if this sequence is empty.
      * If the sequence already contains elements, it remains unchanged.
      *
-     * <p>This is an intermediate operation that does not consume the sequence.</p>
+     * <p>This is an intermediate operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5875,7 +5878,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Appends the elements from the specified collection to the end of this Seq if the Seq is empty.
      * If the sequence already contains elements, it remains unchanged.
      *
-     * <p>This is an intermediate operation that does not consume the sequence.</p>
+     * <p>This is an intermediate operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5961,7 +5964,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * If the sequence already contains elements, it remains unchanged. The supplier is only invoked if this
      * sequence is empty, providing lazy evaluation of the default elements.
      *
-     * <p>This is an intermediate operation that does not consume the sequence.</p>
+     * <p>This is an intermediate operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6046,7 +6049,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Returns a new Seq that contains the specified default value if this Seq is empty.
      * This is a convenience method equivalent to {@code appendIfEmpty(defaultValue)}.
      *
-     * <p>This is an intermediate operation that does not consume the sequence.</p>
+     * <p>This is an intermediate operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6074,7 +6077,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * This is a convenience method equivalent to {@code appendIfEmpty(supplier)}.
      * The supplier is only invoked if this sequence is empty, providing lazy evaluation.
      *
-     * <p>This is an intermediate operation that does not consume the sequence.</p>
+     * <p>This is an intermediate operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6102,7 +6105,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Throws a {@code NoSuchElementException} in executed terminal operation if this {@code Seq} is empty.
      * This provides a way to ensure that the sequence contains at least one element before processing.
      *
-     * <p>This is an intermediate operation that does not consume the sequence.</p>
+     * <p>This is an intermediate operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6124,7 +6127,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Throws a custom exception provided by the supplier in terminal operation if this {@code Seq} is empty.
      * This allows customization of the exception thrown when the sequence is empty.
      *
-     * <p>This is an intermediate operation that does not consume the sequence.</p>
+     * <p>This is an intermediate operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6153,7 +6156,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * The action is executed lazily when a terminal operation determines that the sequence is empty.
      * If the sequence contains elements, the action is not executed.
      *
-     * <p>This is an intermediate operation that does not consume the sequence.</p>
+     * <p>This is an intermediate operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6164,7 +6167,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param action the action to be executed if the sequence is empty
-     * @return the current stream
+     * @return a new {@code Seq} that executes the action if the sequence is empty
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if action is null
      */
@@ -6230,11 +6233,58 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
+     * Performs the given action on the elements pulled by sequence/terminal operation.
+     * The action is executed for each element as it is consumed by a terminal operation,
+     * allowing for side effects during sequence processing.
+     *
+     * <p>The action is executed lazily as elements flow through the sequence pipeline. It is only invoked
+     * for elements that are actually consumed by a terminal operation.
+     *
+     * <p>This is an intermediate operation.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
+     * List<Integer> sideEffect = new ArrayList<>();
+     * List<Integer> result = seq.onEach(sideEffect::add)
+     *                           .filter(n -> n % 2 == 0)
+     *                           .toList();
+     * // result contains: [2, 4]
+     * // sideEffect contains: [1, 2, 3, 4, 5] (all elements were processed)
+     * }</pre>
+     *
+     * @param action the action to be performed on the elements pulled by downstream/terminal operation
+     * @return a new {@code Seq} that performs the action on each element
+     * @throws IllegalStateException if the sequence is already closed
+     * @throws IllegalArgumentException if action is null
+     * @see #peek(Throwables.Consumer)
+     */
+    @IntermediateOp
+    public Seq<T, E> onEach(final Throwables.Consumer<? super T, ? extends E> action) throws IllegalStateException {
+        assertNotClosed();
+        checkArgNotNull(action, cs.action);
+
+        return create(new Throwables.Iterator<>() {
+            @Override
+            public boolean hasNext() throws E {
+                return elements.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                final T next = elements.next();
+                action.accept(next);
+                return next;
+            }
+        }, sorted, cmp, closeHandlers);
+    }
+
+    /**
      * Performs the given action for the first element of this {@code Seq}.
      * The action is executed only for the first element when it is consumed by a terminal operation.
      * Subsequent elements are not affected by this action.
      *
-     * <p>This is an intermediate operation that does not consume the sequence.</p>
+     * <p>This is an intermediate operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6249,13 +6299,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param action the action to be performed for the first element
-     * @return this {@code Seq} instance
+     * @return a new {@code Seq} that performs the action on the first element
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if action is null
      */
     @IntermediateOp
     public Seq<T, E> onFirst(final Throwables.Consumer<? super T, ? extends E> action) throws IllegalStateException {
         assertNotClosed();
+        checkArgNotNull(action, cs.action);
 
         return create(new Throwables.Iterator<>() {
             private boolean isFirst = true;
@@ -6284,7 +6335,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * The action is executed only when the last element is consumed by a terminal operation.
      * The last element is detected when there are no more elements after it.
      *
-     * <p>This is an intermediate operation that does not consume the sequence.</p>
+     * <p>This is an intermediate operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6299,13 +6350,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param action the action to be performed for the last element
-     * @return this {@code Seq} instance
+     * @return a new {@code Seq} that performs the action on the last element
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if action is null
      */
     @IntermediateOp
     public Seq<T, E> onLast(final Throwables.Consumer<? super T, ? extends E> action) throws IllegalStateException {
         assertNotClosed();
+        checkArgNotNull(action, cs.action);
 
         return create(new Throwables.Iterator<>() {
             private boolean hasNext = false;
@@ -6330,16 +6382,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Performs the given action on the elements pulled by downstream/terminal operation.
-     * The action is executed for each element as it is consumed by a terminal operation,
-     * allowing for side effects during sequence processing. Most of the time, it's used for debugging.
+     * Performs the given action on the elements pulled by downstream/terminal operation. Most of the time, it's used for debugging.
+     * This is an alias for {@link #onEach(Throwables.Consumer)}.
      *
-     * <p>This is an intermediate operation that does not consume the sequence.</p>
+     * <p>This is an intermediate operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Seq<Integer> seq = Seq.of(1, 2, 3, 4, 5);
-     * seq.peek(n -> System.out.println("Processing: " + n))
+     * Seq.of(1, 2, 3, 4, 5)
+     *    .peek(n -> System.out.println("Processing: " + n))
      *    .filter(n -> n % 2 == 0)
      *    .forEach(n -> System.out.println("Even number: " + n));
      * // Output:
@@ -6353,34 +6404,21 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param action the action to be performed on the elements pulled by downstream/terminal operation
-     * @return this {@code Seq} instance
+     * @return a new {@code Seq} that performs the action on each element
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if action is null
+     * @see #onEach(Throwables.Consumer)
      */
     @IntermediateOp
     public Seq<T, E> peek(final Throwables.Consumer<? super T, ? extends E> action) throws IllegalStateException {
-        assertNotClosed();
-
-        return create(new Throwables.Iterator<>() {
-            @Override
-            public boolean hasNext() throws E {
-                return elements.hasNext();
-            }
-
-            @Override
-            public T next() throws E {
-                final T next = elements.next();
-                action.accept(next);
-                return next;
-            }
-        }, sorted, cmp, closeHandlers);
+        return onEach(action);
     }
 
     /**
      * Performs the given action on the first element pulled by downstream/terminal operation. Most of the time, it's used for debugging.
      * This is an alias for {@link #onFirst(Throwables.Consumer)}.
      *
-     * <p>This is an intermediate operation that does not consume the sequence.</p>
+     * <p>This is an intermediate operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6396,7 +6434,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param action the action to be performed on the first element pulled by downstream/terminal operation
-     * @return this {@code Seq} instance
+     * @return a new {@code Seq} that performs the action on the first element
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if action is null
      * @see #onFirst(Throwables.Consumer)
@@ -6410,7 +6448,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Performs the given action on the last element pulled by downstream/terminal operation. Most of the time, it's used for debugging.
      * This is an alias for {@link #onLast(Throwables.Consumer)}.
      *
-     * <p>This is an intermediate operation that does not consume the sequence.</p>
+     * <p>This is an intermediate operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6426,7 +6464,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param action the action to be performed on the last element pulled by downstream/terminal operation
-     * @return this {@code Seq} instance
+     * @return a new {@code Seq} that performs the action on the last element
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if action is null
      * @see #onLast(Throwables.Consumer)
@@ -6440,7 +6478,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Performs the given action on the elements pulled by downstream/terminal operation which matches the given predicate. Most of the time, it's used for debugging.
      * Only elements that satisfy the predicate will have the action performed on them.
      *
-     * <p>This is an intermediate operation that does not consume the sequence.</p>
+     * <p>This is an intermediate operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6475,7 +6513,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Performs the given action on the elements pulled by downstream/terminal operation which matches the given predicate. Most of the time, it's used for debugging.
      * The predicate receives both the element and the count of iterated elements (starting from 1).
      *
-     * <p>This is an intermediate operation that does not consume the sequence.</p>
+     * <p>This is an intermediate operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6513,7 +6551,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Returns a sequence of Lists, where each List contains a chunk of elements from the original sequence.
      * The size of each chunk is specified by the chunkSize parameter. The final chunk may be smaller if there are not enough elements.
      *
-     * <p>This is an intermediate operation that does not consume the sequence.</p>
+     * <p>This is an intermediate operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6536,7 +6574,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Splits the elements of this sequence into subsequences of the specified size. The last subsequence may be smaller than the specified size.
      * Each subsequence is collected into a collection of the specified type.
      *
-     * <p>This is an intermediate operation that does not consume the sequence.</p>
+     * <p>This is an intermediate operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6858,7 +6896,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param position the position at which to split the sequence
      * @return a new Seq containing two subsequences split at the specified position
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the specified position less than 0
+     * @throws IllegalArgumentException if the specified position is less than 0
      */
     @IntermediateOp
     public Seq<Seq<T, E>, E> splitAt(final int position) throws IllegalStateException, IllegalArgumentException {
@@ -8732,7 +8770,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
         final Throwables.Consumer<T, E> action = it -> rateLimiter.acquire();
 
-        return peek(action);
+        return onEach(action);
     }
 
     /**
@@ -8768,7 +8806,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             }
         };
 
-        return peek(action);
+        return onEach(action);
     }
 
     /**
@@ -10482,8 +10520,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param a the elements to check for containment in this sequence
-     * @return {@code true} if this sequence contains all of the specified elements,
-     *         or if this sequence is empty, or if {@code a} is {@code null} or empty, otherwise {@code false}
+     * @return {@code true} if {@code a} is {@code null} or empty, or if this sequence contains all of the specified elements; {@code false} otherwise
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @throws E if an exception occurs during iteration
      * @see #containsAny(Object[])
@@ -10533,8 +10570,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param c the collection of elements to check for containment in this sequence
-     * @return {@code true} if this sequence contains all elements in the specified collection,
-     *         or if this sequence is empty, or if {@code c} is {@code null} or empty, otherwise {@code false}
+     * @return {@code true} if {@code c} is {@code null} or empty, or if this sequence contains all elements in the specified collection; {@code false} otherwise
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @throws E if an exception occurs during iteration
      * @see #containsAny(Collection)
@@ -10576,8 +10612,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param a the elements to check for containment in this sequence
-     * @return {@code true} if this sequence contains any of the specified elements,
-     *         or if this sequence is empty, or if {@code a} is {@code null} or empty, otherwise {@code false}
+     * @return {@code true} if this sequence contains any of the specified elements; {@code false} if {@code a} is {@code null} or empty, or if no match is found
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @throws E if an exception occurs during iteration
      * @see #containsAll(Object[])
@@ -10628,8 +10663,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param c the collection of elements to check for containment in this sequence
-     * @return {@code true} if this sequence contains any element from the specified collection,
-     *         or if this sequence is empty, or if {@code c} is {@code null} or empty, otherwise {@code false}
+     * @return {@code true} if this sequence contains any element from the specified collection; {@code false} if {@code c} is {@code null} or empty, or if no match is found
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @throws E if an exception occurs during iteration
      * @see #containsAll(Collection)
@@ -10669,8 +10703,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param a the elements to check for non-containment in this sequence
-     * @return {@code true} if this sequence doesn't contain any of the specified elements,
-     *         or if this sequence is empty, or if {@code a} is {@code null} or empty, otherwise {@code false}
+     * @return {@code true} if {@code a} is {@code null} or empty, or if this sequence doesn't contain any of the specified elements; {@code false} otherwise
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @throws E if an exception occurs during iteration
      * @see #containsAll(Object[])
@@ -10706,8 +10739,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param c the collection of elements to check for non-containment in this sequence
-     * @return {@code true} if this sequence doesn't contain any element from the specified collection,
-     *         or if this sequence is empty, or if {@code c} is {@code null} or empty, otherwise {@code false}
+     * @return {@code true} if {@code c} is {@code null} or empty, or if this sequence doesn't contain any element from the specified collection; {@code false} otherwise
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @throws E if an exception occurs during iteration
      * @see #containsAll(Collection)

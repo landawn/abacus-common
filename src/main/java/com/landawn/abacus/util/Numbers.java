@@ -336,7 +336,7 @@ public final class Numbers {
     public static final Integer INTEGER_ZERO = 0;
     /** Reusable Integer constant for one. */
     public static final Integer INTEGER_ONE = 1;
-    /** Reusable Integer constant for two */
+    /** Reusable Integer constant for two. */
     public static final Integer INTEGER_TWO = 2;
     /** Reusable Integer constant for minus one. */
     public static final Integer INTEGER_MINUS_ONE = -1;

@@ -190,11 +190,11 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * // Returns: ImmutableList containing [1, 2, 3]
      *
      * result = type.valueOf(null);
-     * // Returns: null (wrapped as ImmutableList)
+     * // Returns: null
      * }</pre>
      *
      * @param str the string to parse
-     * @return a new immutable list instance containing the parsed elements
+     * @return a new immutable list instance containing the parsed elements, or {@code null} if the input is null
      */
     @Override
     public ImmutableList<E> valueOf(final String str) {

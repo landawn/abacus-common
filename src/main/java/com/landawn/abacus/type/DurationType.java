@@ -38,6 +38,10 @@ public class DurationType extends AbstractType<Duration> {
     /** The type name constant for Duration type identification. */
     public static final String DURATION = Duration.class.getSimpleName();
 
+    /**
+     * Package-private constructor for DurationType.
+     * This constructor is called by the TypeFactory to create Duration type instances.
+     */
     DurationType() {
         super(DURATION);
     }

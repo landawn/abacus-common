@@ -190,11 +190,11 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * // Returns: ImmutableSet containing [1, 2, 3]
      *
      * result = type.valueOf(null);
-     * // Returns: null (wrapped as ImmutableSet)
+     * // Returns: null
      * }</pre>
      *
      * @param str the string to parse
-     * @return a new immutable set instance containing the parsed elements
+     * @return a new immutable set instance containing the parsed elements, or {@code null} if the input is null
      */
     @Override
     public ImmutableSet<E> valueOf(final String str) {

@@ -16,7 +16,7 @@ package com.landawn.abacus.util;
 
 /**
  * Represents gender as an enumeration with associated integer values.
- * This enum provides three states: BLANK (unknown/unspecified), FEMALE, MALE and X.
+ * This enum provides four states: BLANK (unknown/unspecified), FEMALE, MALE, and X.
  * 
  * <p>Each gender value has an associated integer representation that can be used 
  * for database storage or legacy system integration.</p>
