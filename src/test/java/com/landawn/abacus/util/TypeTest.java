@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -82,7 +83,7 @@ public class TypeTest extends AbstractTest {
         N.println(Type.of((java.lang.reflect.Type) Map.class).declaringName());
 
         N.println(Type.of((java.lang.reflect.Type) TypeTest.class).declaringName());
-
+        assertNotNull(type22);
     }
 
     @Test
@@ -95,6 +96,7 @@ public class TypeTest extends AbstractTest {
 
         Map.Entry<String, Integer> entry2 = type.valueOf(str);
         N.println(entry2);
+        assertNotNull(entry2);
     }
 
     @Test
@@ -102,6 +104,7 @@ public class TypeTest extends AbstractTest {
         Type type = TypeFactory.getType(char.class.getCanonicalName());
         N.println(type.valueOf(String.valueOf((char) 0)));
         N.println("ok");
+        assertNotNull(type);
     }
 
     @Test
@@ -120,5 +123,6 @@ public class TypeTest extends AbstractTest {
         Calendar c = Dates.currentCalendar();
         String st = type.stringOf(c);
         N.println(st);
+        assertNotNull(st);
     }
 }

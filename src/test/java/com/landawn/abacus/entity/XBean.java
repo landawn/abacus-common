@@ -210,35 +210,13 @@ public class XBean {
             return false;
         }
 
-        if (!Objects.equals(typeBoolean2, other.typeBoolean2)) {
+        if (!Objects.equals(typeBoolean2, other.typeBoolean2) || (typeByte != other.typeByte) || (typeChar != other.typeChar)
+                || !Objects.equals(typeDate, other.typeDate)) {
             return false;
         }
 
-        if (typeByte != other.typeByte) {
-            return false;
-        }
-
-        if (typeChar != other.typeChar) {
-            return false;
-        }
-
-        if (!Objects.equals(typeDate, other.typeDate)) {
-            return false;
-        }
-
-        if (Double.doubleToLongBits(typeDouble) != Double.doubleToLongBits(other.typeDouble)) {
-            return false;
-        }
-
-        if (Float.floatToIntBits(typeFloat) != Float.floatToIntBits(other.typeFloat)) {
-            return false;
-        }
-
-        if (typeInt != other.typeInt) {
-            return false;
-        }
-
-        if (typeLong != other.typeLong) {
+        if ((Double.doubleToLongBits(typeDouble) != Double.doubleToLongBits(other.typeDouble))
+                || (Float.floatToIntBits(typeFloat) != Float.floatToIntBits(other.typeFloat)) || (typeInt != other.typeInt) || (typeLong != other.typeLong)) {
             return false;
         }
 

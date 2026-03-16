@@ -19,7 +19,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.util.u.OptionalShort;
 import com.landawn.abacus.util.function.ShortPredicate;
 import com.landawn.abacus.util.function.ShortSupplier;
 import com.landawn.abacus.util.stream.ShortStream;
@@ -471,52 +470,6 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
                 return next;
             }
         };
-    }
-
-    /**
-     * Returns the first element as an OptionalShort, or empty if the iterator has no elements.
-     * This method consumes the first element if present.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * OptionalShort first = ShortIterator.of(new short[] {1, 2, 3}).first();   // OptionalShort.of(1)
-     * OptionalShort empty = ShortIterator.empty().first();                     // OptionalShort.empty()
-     * }</pre>
-     *
-     * @return an OptionalShort containing the first element, or empty if no elements
-     */
-    public OptionalShort first() {
-        if (hasNext()) {
-            return OptionalShort.of(nextShort());
-        } else {
-            return OptionalShort.empty();
-        }
-    }
-
-    /**
-     * Returns the last element as an OptionalShort, or empty if the iterator has no elements.
-     * This method consumes all remaining elements to find the last one.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * OptionalShort last = ShortIterator.of(new short[] {1, 2, 3}).last();   // OptionalShort.of(3)
-     * OptionalShort empty = ShortIterator.empty().last();                    // OptionalShort.empty()
-     * }</pre>
-     *
-     * @return an OptionalShort containing the last element, or empty if no elements
-     */
-    public OptionalShort last() {
-        if (hasNext()) {
-            short next = nextShort();
-
-            while (hasNext()) {
-                next = nextShort();
-            }
-
-            return OptionalShort.of(next);
-        } else {
-            return OptionalShort.empty();
-        }
     }
 
     /**

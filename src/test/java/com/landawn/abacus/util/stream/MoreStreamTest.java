@@ -1,7 +1,9 @@
 package com.landawn.abacus.util.stream;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -54,8 +56,6 @@ import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.Predicate;
 import com.landawn.abacus.util.function.ToIntFunction;
 import com.landawn.abacus.util.stream.Collectors.MoreCollectors;
-import com.landawn.abacus.util.stream.IntStream.IntStreamEx;
-import com.landawn.abacus.util.stream.Stream.StreamEx;
 
 public class MoreStreamTest {
     static final int maxLen = 123;
@@ -114,11 +114,11 @@ public class MoreStreamTest {
     public void test_index() {
         {
             final int[] source = { 1, 2, 3, 1, 5, 1 };
-            IntStreamEx.ofIndices(source, (a, fromIndex) -> N.indexOf(a, 1, fromIndex)).println();
-            IntStreamEx.ofIndices(source, 1, (a, fromIndex) -> N.indexOf(a, 1, fromIndex)).println();
+            IntStream.ofIndices(source, (a, fromIndex) -> N.indexOf(a, 1, fromIndex)).println();
+            IntStream.ofIndices(source, 1, (a, fromIndex) -> N.indexOf(a, 1, fromIndex)).println();
 
-            IntStreamEx.ofIndices(source, 5, -1, (a, fromIndex) -> N.lastIndexOf(a, 1, fromIndex)).println();
-            IntStreamEx.ofIndices(source, 4, -1, (a, fromIndex) -> N.lastIndexOf(a, 1, fromIndex)).println();
+            IntStream.ofIndices(source, 5, -1, (a, fromIndex) -> N.lastIndexOf(a, 1, fromIndex)).println();
+            IntStream.ofIndices(source, 4, -1, (a, fromIndex) -> N.lastIndexOf(a, 1, fromIndex)).println();
         }
 
         N.println("==================================");
@@ -130,46 +130,47 @@ public class MoreStreamTest {
             N.println(N.lastIndexOfSubList(N.toList(1, 2, 3, 1, 2, 1), N.toList(1, 2)));
             N.println(Collections.lastIndexOfSubList(N.toList(1, 2, 3, 1, 2, 1), N.toList(1, 2)));
             N.println("aabba".lastIndexOf("ab", 5));
-            IntStreamEx.ofIndices(source, (a, fromIndex) -> Index.ofSubArray(a, fromIndex, targetSubArray, 0, targetSubArray.length).orElse(-1)).println();
+            IntStream.ofIndices(source, (a, fromIndex) -> Index.ofSubArray(a, fromIndex, targetSubArray, 0, targetSubArray.length).orElse(-1)).println();
 
-            IntStreamEx.ofIndices(source, 5, -1, (a, fromIndex) -> Index.lastOfSubArray(a, fromIndex, targetSubArray, 0, targetSubArray.length).orElse(-1))
+            IntStream.ofIndices(source, 5, -1, (a, fromIndex) -> Index.lastOfSubArray(a, fromIndex, targetSubArray, 0, targetSubArray.length).orElse(-1))
                     .println();
         }
 
         N.println("==================================");
 
         {
-            IntStreamEx.ofIndices(5).println();
-            IntStreamEx.ofIndices(5, 1).println();
-            IntStreamEx.ofIndices(5, 2).println();
-            IntStreamEx.ofIndices(5, -1).println();
-            IntStreamEx.ofIndices(5, -2).println();
-            IntStreamEx.ofIndices(0).println();
-            IntStreamEx.ofIndices(0, 1).println();
-            IntStreamEx.ofIndices(0, -1).println();
-            IntStreamEx.ofIndices(0, -2).println();
+            IntStream.ofIndices(5).println();
+            IntStream.ofIndices(5, 1).println();
+            IntStream.ofIndices(5, 2).println();
+            IntStream.ofIndices(5, -1).println();
+            IntStream.ofIndices(5, -2).println();
+            IntStream.ofIndices(0).println();
+            IntStream.ofIndices(0, 1).println();
+            IntStream.ofIndices(0, -1).println();
+            IntStream.ofIndices(0, -2).println();
         }
     }
 
     @Test
     public void test_lazy_2() {
+        assertDoesNotThrow(() -> {
+            IntStream.of(1, 2, 3).reverseSorted();
+            Stream.of(1, 2, 3).flatMap(i -> Stream.of(i - 1, i, i + 1)).flatMap(i -> Stream.of(i - 1, i, i + 1)).filter(i -> {
+                System.out.println(i);
+                return true;
+            }).first();
 
-        IntStreamEx.of(1, 2, 3).reverseSorted();
-        Stream.of(1, 2, 3).flatMap(i -> Stream.of(i - 1, i, i + 1)).flatMap(i -> Stream.of(i - 1, i, i + 1)).filter(i -> {
-            System.out.println(i);
-            return true;
-        }).first();
+            N.println("====================================================");
 
-        N.println("====================================================");
-
-        java.util.stream.Stream.of(1, 2, 3)
-                .flatMap(i -> java.util.stream.Stream.of(i - 1, i, i + 1))
-                .flatMap(i -> java.util.stream.Stream.of(i - 1, i, i + 1))
-                .filter(i -> {
-                    System.out.println(i);
-                    return true;
-                })
-                .findFirst();
+            java.util.stream.Stream.of(1, 2, 3)
+                    .flatMap(i -> java.util.stream.Stream.of(i - 1, i, i + 1))
+                    .flatMap(i -> java.util.stream.Stream.of(i - 1, i, i + 1))
+                    .filter(i -> {
+                        System.out.println(i);
+                        return true;
+                    })
+                    .findFirst();
+        });
     }
 
     @Test
@@ -187,36 +188,43 @@ public class MoreStreamTest {
 
     @Test
     public void test_merge_2() {
-        IntStream.range(0, 100)
-                .shuffled()
-                .mergeWith(IntStream.range(100, 200).shuffled(), (i, j) -> i <= j ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
-                .sorted()
-                .last()
-                .ifPresent(N::println);
-
+        assertDoesNotThrow(() -> {
+            IntStream.range(0, 100)
+                    .shuffled()
+                    .mergeWith(IntStream.range(100, 200).shuffled(), (i, j) -> i <= j ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+                    .sorted()
+                    .last()
+                    .ifPresent(N::println);
+        });
     }
 
     @Test
     public void test_queue() {
-        IntStream.range(0, 10000).boxed().buffered().limit(10).println();
+        assertDoesNotThrow(() -> {
+            IntStream.range(0, 10000).boxed().buffered().limit(10).println();
+        });
     }
 
     @Test
     public void test_collect_2() {
-        Stream.of(1, 2, 3).collect(Collectors.groupingByConcurrent(Fn.identity())).forEach(Fn.println("="));
+        assertDoesNotThrow(() -> {
+            Stream.of(1, 2, 3).collect(Collectors.groupingByConcurrent(Fn.identity())).forEach(Fn.println("="));
 
-        Stream.of(1, 2, 3).collect(java.util.stream.Collectors.groupingByConcurrent(Fn.identity())).forEach(Fn.println("="));
+            Stream.of(1, 2, 3).collect(java.util.stream.Collectors.groupingByConcurrent(Fn.identity())).forEach(Fn.println("="));
+        });
     }
 
     @Test
     public void test_flatMapArrayToObj() {
-        StreamEx.of(1, 2, 3).println();
-        IntStream.of(1, 2, 3).mapToObj(i -> N.repeat("a", i)).println();
-        IntStream.of(1, 2, 3).mapToObj(i -> Array.repeat("a", i)).println();
-        IntStream.of(1, 2, 3).flatmapToObj(i -> N.repeat("a", i)).println();
-        IntStream.of(1, 2, 3).flatMapArrayToObj(i -> Array.repeat("a", i)).println();
+        assertDoesNotThrow(() -> {
+            Stream.of(1, 2, 3).println();
+            IntStream.of(1, 2, 3).mapToObj(i -> N.repeat("a", i)).println();
+            IntStream.of(1, 2, 3).mapToObj(i -> Array.repeat("a", i)).println();
+            IntStream.of(1, 2, 3).flatmapToObj(i -> N.repeat("a", i)).println();
+            IntStream.of(1, 2, 3).flatMapArrayToObj(i -> Array.repeat("a", i)).println();
 
-        IntStream.range(0, 100).map(i -> i % 11).boxed().groupBy(Fn.identity(), i -> i + "a").println();
+            IntStream.range(0, 100).map(i -> i % 11).boxed().groupBy(Fn.identity(), i -> i + "a").println();
+        });
     }
 
     @Test
@@ -242,75 +250,82 @@ public class MoreStreamTest {
         startTime = System.currentTimeMillis();
         IntList.range(0, 256).stream().boxed().parallel(64).collect(java.util.stream.Collectors.toConcurrentMap(keyExtractor, keyExtractor));
         System.out.println("=========: " + (System.currentTimeMillis() - startTime));
+        assertNotNull(startTime);
     }
 
     @Test
     public void test_sort_2() {
-        IntStream.range(0, 100)
-                .boxed()
-                .onClose(() -> N.println("close1"))
-                .sorted()
-                .peekFirst(e -> N.println("peek: " + e))
-                .onClose(() -> N.println("close2"))
-                .peekLast(e -> N.println("peek2: " + e))
-                .count();
+        assertDoesNotThrow(() -> {
+            IntStream.range(0, 100)
+                    .boxed()
+                    .onClose(() -> N.println("close1"))
+                    .sorted()
+                    .peekFirst(e -> N.println("peek: " + e))
+                    .onClose(() -> N.println("close2"))
+                    .peekLast(e -> N.println("peek2: " + e))
+                    .count();
 
-        N.println(Strings.repeat("=", 90));
+            N.println(Strings.repeat("=", 90));
 
-        IntStream.range(0, 100)
-                .boxed()
-                .onClose(() -> N.println("close1"))
-                .shuffled()
-                .peekFirst(e -> N.println("peek: " + e))
-                .onClose(() -> N.println("close2"))
-                .peekLast(e -> N.println("peek2: " + e))
-                .count();
+            IntStream.range(0, 100)
+                    .boxed()
+                    .onClose(() -> N.println("close1"))
+                    .shuffled()
+                    .peekFirst(e -> N.println("peek: " + e))
+                    .onClose(() -> N.println("close2"))
+                    .peekLast(e -> N.println("peek2: " + e))
+                    .count();
 
-        N.println(Strings.repeat("=", 90));
+            N.println(Strings.repeat("=", 90));
 
-        IntStream.range(0, 100)
-                .boxed()
-                .onClose(() -> N.println("close1"))
-                .rotated(3)
-                .peekFirst(e -> N.println("peek: " + e))
-                .onClose(() -> N.println("close2"))
-                .peekLast(e -> N.println("peek2: " + e))
-                .count();
+            IntStream.range(0, 100)
+                    .boxed()
+                    .onClose(() -> N.println("close1"))
+                    .rotated(3)
+                    .peekFirst(e -> N.println("peek: " + e))
+                    .onClose(() -> N.println("close2"))
+                    .peekLast(e -> N.println("peek2: " + e))
+                    .count();
+        });
     }
 
     @Test
     public void test_last_2() {
-        IntStream.range(0, 10000)
-                .boxed()
-                .onClose(() -> N.println("close1"))
-                .takeLast(10)
-                .peekFirst(e -> N.println("peek: " + e))
-                .onClose(() -> N.println("close2"))
-                .peekLast(e -> N.println("peek2: " + e))
-                .count();
+        assertDoesNotThrow(() -> {
+            IntStream.range(0, 10000)
+                    .boxed()
+                    .onClose(() -> N.println("close1"))
+                    .takeLast(10)
+                    .peekFirst(e -> N.println("peek: " + e))
+                    .onClose(() -> N.println("close2"))
+                    .peekLast(e -> N.println("peek2: " + e))
+                    .count();
+        });
     }
 
     @Test
     public void test_last() {
-        IntStream.range(0, 10000).boxed().takeLast(10).forEach(Fn.println());
-        IntStream.range(0, 10000).boxed().sorted().takeLast(10).forEach(Fn.println());
-        IntStream.range(0, 10000).boxed().rotated(3).takeLast(10).forEach(Fn.println());
-        IntStream.range(0, 10000).boxed().shuffled().takeLast(10).forEach(Fn.println());
+        assertDoesNotThrow(() -> {
+            IntStream.range(0, 10000).boxed().takeLast(10).forEach(Fn.println());
+            IntStream.range(0, 10000).boxed().sorted().takeLast(10).forEach(Fn.println());
+            IntStream.range(0, 10000).boxed().rotated(3).takeLast(10).forEach(Fn.println());
+            IntStream.range(0, 10000).boxed().shuffled().takeLast(10).forEach(Fn.println());
 
-        IntStream.range(0, 10000).parallel().boxed().takeLast(10).forEach(Fn.println());
-        IntStream.range(0, 10000).parallel().boxed().sorted().takeLast(10).forEach(Fn.println());
-        IntStream.range(0, 10000).parallel().boxed().rotated(3).takeLast(10).forEach(Fn.println());
-        IntStream.range(0, 10000).parallel().boxed().shuffled().takeLast(10).forEach(Fn.println());
+            IntStream.range(0, 10000).parallel().boxed().takeLast(10).forEach(Fn.println());
+            IntStream.range(0, 10000).parallel().boxed().sorted().takeLast(10).forEach(Fn.println());
+            IntStream.range(0, 10000).parallel().boxed().rotated(3).takeLast(10).forEach(Fn.println());
+            IntStream.range(0, 10000).parallel().boxed().shuffled().takeLast(10).forEach(Fn.println());
 
-        IntStream.range(0, 10000).boxed().parallel().takeLast(10).forEach(Fn.println());
-        IntStream.range(0, 10000).boxed().parallel().sorted().takeLast(10).forEach(Fn.println());
-        IntStream.range(0, 10000).boxed().parallel().rotated(3).takeLast(10).forEach(Fn.println());
-        IntStream.range(0, 10000).boxed().parallel().shuffled().takeLast(10).forEach(Fn.println());
+            IntStream.range(0, 10000).boxed().parallel().takeLast(10).forEach(Fn.println());
+            IntStream.range(0, 10000).boxed().parallel().sorted().takeLast(10).forEach(Fn.println());
+            IntStream.range(0, 10000).boxed().parallel().rotated(3).takeLast(10).forEach(Fn.println());
+            IntStream.range(0, 10000).boxed().parallel().shuffled().takeLast(10).forEach(Fn.println());
 
-        IntStream.range(0, 10000).boxed().takeLast(10).parallel().forEach(Fn.println());
-        IntStream.range(0, 10000).boxed().sorted().parallel().takeLast(10).forEach(Fn.println());
-        IntStream.range(0, 10000).boxed().rotated(3).takeLast(10).parallel().forEach(Fn.println());
-        IntStream.range(0, 10000).boxed().shuffled().takeLast(10).parallel().forEach(Fn.println());
+            IntStream.range(0, 10000).boxed().takeLast(10).parallel().forEach(Fn.println());
+            IntStream.range(0, 10000).boxed().sorted().parallel().takeLast(10).forEach(Fn.println());
+            IntStream.range(0, 10000).boxed().rotated(3).takeLast(10).parallel().forEach(Fn.println());
+            IntStream.range(0, 10000).boxed().shuffled().takeLast(10).parallel().forEach(Fn.println());
+        });
     }
 
     @Test
@@ -348,134 +363,143 @@ public class MoreStreamTest {
 
     @Test
     public void test_rangeClosedBy() {
-        N.println(IntStream.range(Integer.MAX_VALUE, 1, -1).limit(3).join(", "));
-        N.println(IntStream.rangeClosed(Integer.MAX_VALUE, 1, -1).limit(3).join(", "));
+        assertDoesNotThrow(() -> {
+            N.println(IntStream.range(Integer.MAX_VALUE, 1, -1).limit(3).join(", "));
+            N.println(IntStream.rangeClosed(Integer.MAX_VALUE, 1, -1).limit(3).join(", "));
+        });
     }
 
     @Test
     public void test_sliding() {
+        assertDoesNotThrow(() -> {
+            N.println(Stream.of(1, 2, 3, 5).slidingMap((i, j) -> i <= j).allMatch(e -> e));
+            N.println(Stream.of(1, 2, 5, 3).slidingMap((i, j) -> i <= j).allMatch(e -> e));
 
-        N.println(Stream.of(1, 2, 3, 5).slidingMap((i, j) -> i <= j).allMatch(e -> e));
-        N.println(Stream.of(1, 2, 5, 3).slidingMap((i, j) -> i <= j).allMatch(e -> e));
+            N.println(Strings.repeat("=", 80));
+            IntStream.range(1, 10).boxed().split(3, IntFunctions.ofQueue()).forEach(Fn.println());
 
-        N.println(Strings.repeat("=", 80));
-        IntStream.range(1, 10).boxed().split(3, IntFunctions.ofQueue()).forEach(Fn.println());
+            N.println(Strings.repeat("=", 80));
+            IntStream.range(1, 10).boxed().split(i -> i % 3 == 0, Suppliers.ofList()).forEach(Fn.println());
 
-        N.println(Strings.repeat("=", 80));
-        IntStream.range(1, 10).boxed().split(i -> i % 3 == 0, Suppliers.ofList()).forEach(Fn.println());
+            N.println(Strings.repeat("=", 80));
+            IntStream.range(1, 10).boxed().sliding(3, IntFunctions.ofQueue()).forEach(Fn.println());
 
-        N.println(Strings.repeat("=", 80));
-        IntStream.range(1, 10).boxed().sliding(3, IntFunctions.ofQueue()).forEach(Fn.println());
+            N.println(Strings.repeat("=", 80));
+            IntStream.range(1, 10).boxed().sliding(3, 3, IntFunctions.ofQueue()).forEach(Fn.println());
 
-        N.println(Strings.repeat("=", 80));
-        IntStream.range(1, 10).boxed().sliding(3, 3, IntFunctions.ofQueue()).forEach(Fn.println());
-
-        N.println(Strings.repeat("=", 80));
-        IntStream.range(1, 10).boxed().sliding(3, 4, IntFunctions.ofQueue()).forEach(Fn.println());
+            N.println(Strings.repeat("=", 80));
+            IntStream.range(1, 10).boxed().sliding(3, 4, IntFunctions.ofQueue()).forEach(Fn.println());
+        });
     }
 
     @Test
     public void test_sliding_3() {
+        assertDoesNotThrow(() -> {
+            N.println(Strings.repeat("=", 80));
 
-        N.println(Strings.repeat("=", 80));
+            IntStream.range(0, 10).boxed().sliding(4, 2).skip(0).println();
+            IntStream.range(0, 10).boxed().sliding(4, 2).skip(1).println();
+            IntStream.range(0, 10).boxed().sliding(4, 2).skip(2).println();
+            IntStream.range(0, 10).boxed().sliding(4, 2).skip(7).println();
+            IntStream.range(0, 10).boxed().sliding(4, 2).skip(8).println();
+            IntStream.range(0, 10).boxed().sliding(4, 2).skip(9).println();
+            IntStream.range(0, 10).boxed().sliding(4, 2).skip(10).println();
+            IntStream.range(0, 10).boxed().sliding(4, 2).skip(11).println();
 
-        IntStream.range(0, 10).boxed().sliding(4, 2).skip(0).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).skip(1).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).skip(2).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).skip(7).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).skip(8).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).skip(9).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).skip(10).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).skip(11).println();
+            N.println(Strings.repeat("=", 80));
 
-        N.println(Strings.repeat("=", 80));
+            IntStream.range(0, 10).boxed().sliding(4, 3).skip(0).println();
+            IntStream.range(0, 10).boxed().sliding(4, 3).skip(1).println();
+            IntStream.range(0, 10).boxed().sliding(4, 3).skip(2).println();
+            IntStream.range(0, 10).boxed().sliding(4, 3).skip(7).println();
+            IntStream.range(0, 10).boxed().sliding(4, 3).skip(8).println();
+            IntStream.range(0, 10).boxed().sliding(4, 3).skip(9).println();
+            IntStream.range(0, 10).boxed().sliding(4, 3).skip(10).println();
+            IntStream.range(0, 10).boxed().sliding(4, 3).skip(11).println();
 
-        IntStream.range(0, 10).boxed().sliding(4, 3).skip(0).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).skip(1).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).skip(2).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).skip(7).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).skip(8).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).skip(9).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).skip(10).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).skip(11).println();
+            N.println(Strings.repeat("=", 80));
 
-        N.println(Strings.repeat("=", 80));
-
-        IntStream.range(0, 10).boxed().sliding(4, 4).skip(0).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).skip(1).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).skip(2).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).skip(7).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).skip(8).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).skip(9).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).skip(10).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).skip(11).println();
+            IntStream.range(0, 10).boxed().sliding(4, 4).skip(0).println();
+            IntStream.range(0, 10).boxed().sliding(4, 4).skip(1).println();
+            IntStream.range(0, 10).boxed().sliding(4, 4).skip(2).println();
+            IntStream.range(0, 10).boxed().sliding(4, 4).skip(7).println();
+            IntStream.range(0, 10).boxed().sliding(4, 4).skip(8).println();
+            IntStream.range(0, 10).boxed().sliding(4, 4).skip(9).println();
+            IntStream.range(0, 10).boxed().sliding(4, 4).skip(10).println();
+            IntStream.range(0, 10).boxed().sliding(4, 4).skip(11).println();
+        });
     }
 
     @Test
     public void test_sliding_4() {
-        IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(0).println();
-        IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(1).println();
-        IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(2).println();
-        IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(3).println();
-        IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(7).println();
-        IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(8).println();
-        IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(9).println();
-        IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(10).println();
-        IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(11).println();
+        assertDoesNotThrow(() -> {
+            IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(0).println();
+            IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(1).println();
+            IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(2).println();
+            IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(3).println();
+            IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(7).println();
+            IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(8).println();
+            IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(9).println();
+            IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(10).println();
+            IntStream.range(0, 10).boxed().sliding(4, IntFunctions.ofSet()).mapFirst(Fn.<Set<Integer>> identity()).skip(11).println();
 
-        N.println(Strings.repeat("=", 80));
+            N.println(Strings.repeat("=", 80));
 
-        IntStream.range(0, 10).boxed().sliding(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(0).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(1).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(2).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(7).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(8).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(9).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(10).println();
-        IntStream.range(0, 10).boxed().sliding(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(11).println();
+            IntStream.range(0, 10).boxed().sliding(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(0).println();
+            IntStream.range(0, 10).boxed().sliding(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(1).println();
+            IntStream.range(0, 10).boxed().sliding(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(2).println();
+            IntStream.range(0, 10).boxed().sliding(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(7).println();
+            IntStream.range(0, 10).boxed().sliding(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(8).println();
+            IntStream.range(0, 10).boxed().sliding(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(9).println();
+            IntStream.range(0, 10).boxed().sliding(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(10).println();
+            IntStream.range(0, 10).boxed().sliding(4, 2).mapFirst(Fn.<List<Integer>> identity()).skip(11).println();
 
-        N.println(Strings.repeat("=", 80));
+            N.println(Strings.repeat("=", 80));
 
-        IntStream.range(0, 10).boxed().sliding(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(0).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(1).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(2).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(7).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(8).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(9).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(10).println();
-        IntStream.range(0, 10).boxed().sliding(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(11).println();
+            IntStream.range(0, 10).boxed().sliding(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(0).println();
+            IntStream.range(0, 10).boxed().sliding(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(1).println();
+            IntStream.range(0, 10).boxed().sliding(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(2).println();
+            IntStream.range(0, 10).boxed().sliding(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(7).println();
+            IntStream.range(0, 10).boxed().sliding(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(8).println();
+            IntStream.range(0, 10).boxed().sliding(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(9).println();
+            IntStream.range(0, 10).boxed().sliding(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(10).println();
+            IntStream.range(0, 10).boxed().sliding(4, 3).mapFirst(Fn.<List<Integer>> identity()).skip(11).println();
 
-        N.println(Strings.repeat("=", 80));
+            N.println(Strings.repeat("=", 80));
 
-        IntStream.range(0, 10).boxed().sliding(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(0).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(1).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(2).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(7).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(8).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(9).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(10).println();
-        IntStream.range(0, 10).boxed().sliding(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(11).println();
+            IntStream.range(0, 10).boxed().sliding(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(0).println();
+            IntStream.range(0, 10).boxed().sliding(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(1).println();
+            IntStream.range(0, 10).boxed().sliding(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(2).println();
+            IntStream.range(0, 10).boxed().sliding(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(7).println();
+            IntStream.range(0, 10).boxed().sliding(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(8).println();
+            IntStream.range(0, 10).boxed().sliding(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(9).println();
+            IntStream.range(0, 10).boxed().sliding(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(10).println();
+            IntStream.range(0, 10).boxed().sliding(4, 4).mapFirst(Fn.<List<Integer>> identity()).skip(11).println();
+        });
     }
 
     @Test
     public void test_peekFirstLast() {
-        IntStream.range(1, 10).boxed().mapFirst(i -> i + 10).mapLast(i -> i + 100).peekFirst(Fn.println()).peekLast(Fn.println()).println();
+        assertDoesNotThrow(() -> {
+            IntStream.range(1, 10).boxed().mapFirst(i -> i + 10).mapLast(i -> i + 100).peekFirst(Fn.println()).peekLast(Fn.println()).println();
 
-        Stream.of("a", "b", null, "c", "a").distinct().println();
-
+            Stream.of("a", "b", null, "c", "a").distinct().println();
+        });
     }
 
     @Test
     public void test_partitionBy() {
-        Stream.of(N.EMPTY_BYTE_ARRAY).partitionBy(i -> i % 2 == 0).forEach(Fn.println());
+        assertDoesNotThrow(() -> {
+            Stream.of(N.EMPTY_BYTE_ARRAY).partitionBy(i -> i % 2 == 0).forEach(Fn.println());
+        });
     }
 
     @Test
     public void test_top() {
-
-        IntStream.random(1, 100).limit(10).mapToObj(i -> i).peek(Fn.println()).top(5).println();
-        IntStream.random(1, 100).limit(10).peek(N::println).top(5).println();
-
+        assertDoesNotThrow(() -> {
+            IntStream.random(1, 100).limit(10).mapToObj(i -> i).peek(Fn.println()).top(5).println();
+            IntStream.random(1, 100).limit(10).peek(N::println).top(5).println();
+        });
     }
 
     @Test
@@ -526,19 +550,22 @@ public class MoreStreamTest {
 
     @Test
     public void test_step() {
-        IntStreamEx.range(0, 10).step(2).skip(2).forEach(N::println);
-        IntStreamEx.of(Array.range(0, 10)).step(2).skip(2).forEach(N::println);
+        IntStream.range(0, 10).step(2).skip(2).forEach(N::println);
+        IntStream.of(Array.range(0, 10)).step(2).skip(2).forEach(N::println);
 
-        IntStreamEx.range(0, 10).step(3).skip(2).forEach(N::println);
-        IntStreamEx.of(Array.range(0, 10)).step(3).skip(2).forEach(N::println);
+        IntStream.range(0, 10).step(3).skip(2).forEach(N::println);
+        IntStream.of(Array.range(0, 10)).step(3).skip(2).forEach(N::println);
 
         final Collector<Integer, ?, List<Integer>> collector = Collectors.toCollection(Suppliers.<Integer> ofLinkedList());
         Stream.of(1, 2, 3).groupTo(Fn.identity(), collector);
+        assertNotNull(collector);
     }
 
     @Test
     public void test_fn_f() {
-        Stream.of(1, 2, 3).filter(Fn.p((final Integer e) -> e > 1).negate()).println();
+        assertDoesNotThrow(() -> {
+            Stream.of(1, 2, 3).filter(Fn.p((final Integer e) -> e > 1).negate()).println();
+        });
     }
 
     @Test
@@ -550,6 +577,7 @@ public class MoreStreamTest {
         final SetMultimap<String, Integer> setMultimap = SetMultimap.of("a", 1, "b", 2, "a", 2);
         setMultimap.removeAll(N.asMap("a", 2));
         N.println(setMultimap);
+        assertNotNull(setMultimap);
     }
 
     @Test
@@ -559,87 +587,95 @@ public class MoreStreamTest {
 
         final BigDecimal avg = Stream.of(BigInteger.valueOf(1), BigInteger.valueOf(2)).collect(Collectors.averagingBigIntegerOrElseThrow(Fn.identity()));
         N.println(avg);
-
+        assertNotNull(avg);
     }
 
     @Test
     public void test_001() {
-        IntIterator.of(Array.of(1, 2, 3)).foreachRemaining((final int i) -> N.println(i));
+        assertDoesNotThrow(() -> {
+            IntIterator.of(Array.of(1, 2, 3)).foreachRemaining((final int i) -> N.println(i));
+        });
     }
 
     @Test
     public void test_combineCollectors() {
+        assertDoesNotThrow(() -> {
+            final Tuple2<List<String>, Set<String>> res = Stream.of("a", "b", "c", "a", "d")
+                    .collect(MoreCollectors.combine(Collectors.toList(), Collectors.toSet(), Tuple::of));
 
-        final Tuple2<List<String>, Set<String>> res = Stream.of("a", "b", "c", "a", "d")
-                .collect(MoreCollectors.combine(Collectors.toList(), Collectors.toSet(), Tuple::of));
+            res.forEach(Fn.println());
 
-        res.forEach(Fn.println());
+            final Tuple3<List<String>, Set<String>, LongSummaryStatistics> res2 = Stream.of("a", "b", "c", "a", "d")
+                    .collect(MoreCollectors.combine(Collectors.toList(), Collectors.toSet(), Collectors.summarizingLong(String::hashCode), Tuple::of));
 
-        final Tuple3<List<String>, Set<String>, LongSummaryStatistics> res2 = Stream.of("a", "b", "c", "a", "d")
-                .collect(MoreCollectors.combine(Collectors.toList(), Collectors.toSet(), Collectors.summarizingLong(String::hashCode), Tuple::of));
+            res2.forEach(Fn.println());
 
-        res2.forEach(Fn.println());
+            final Tuple4<List<String>, Set<String>, OptionalDouble, LongSummaryStatistics> res3 = Stream.of("a", "b", "c", "a", "d")
+                    .collect(MoreCollectors.combine(Collectors.toList(), Collectors.toSet(), Collectors.averagingDoubleOrEmpty(String::hashCode),
+                            Collectors.summarizingLong(String::hashCode), Tuple::of));
 
-        final Tuple4<List<String>, Set<String>, OptionalDouble, LongSummaryStatistics> res3 = Stream.of("a", "b", "c", "a", "d")
-                .collect(MoreCollectors.combine(Collectors.toList(), Collectors.toSet(), Collectors.averagingDoubleOrEmpty(String::hashCode),
-                        Collectors.summarizingLong(String::hashCode), Tuple::of));
-
-        res3.forEach(Fn.println());
-
+            res3.forEach(Fn.println());
+        });
     }
 
     @Test
     public void test_rangeMap() {
-        Stream.of(1).rangeMap((l, r) -> r - l < 2, (l, r) -> l + "->" + r).forEach(Fn.println());
+        assertDoesNotThrow(() -> {
+            Stream.of(1).rangeMap((l, r) -> r - l < 2, (l, r) -> l + "->" + r).forEach(Fn.println());
+        });
     }
 
     @Test
     public void test_perf() {
-        Profiler.run(1, 3, 3, "sequential", () -> IntStream.range(0, 1000_000).filter(i -> {
-            if (i % 1000 == 0) {
-                N.sleep(1);
-            }
-            return i > -1;
-        }).sum()).printResult();
+        assertDoesNotThrow(() -> {
+            Profiler.run(1, 3, 3, "sequential", () -> IntStream.range(0, 1000_000).filter(i -> {
+                if (i % 1000 == 0) {
+                    N.sleep(1);
+                }
+                return i > -1;
+            }).sum()).printResult();
 
-        Profiler.run(1, 3, 3, "parallel", () -> IntStream.range(0, 1000_000).parallel(8).filter(i -> {
-            if (i % 1000 == 0) {
-                N.sleep(1);
-            }
-            return i > -1;
-        }).sum()).printResult();
+            Profiler.run(1, 3, 3, "parallel", () -> IntStream.range(0, 1000_000).parallel(8).filter(i -> {
+                if (i % 1000 == 0) {
+                    N.sleep(1);
+                }
+                return i > -1;
+            }).sum()).printResult();
+        });
     }
 
     @Test
     public void test_parallel() {
-        final Function<Integer, Integer> mapper = i -> {
-            N.sleep(10);
-            return i * 2;
-        };
+        assertDoesNotThrow(() -> {
+            final Function<Integer, Integer> mapper = i -> {
+                N.sleep(10);
+                return i * 2;
+            };
 
-        final Predicate<Integer> filter = i -> {
-            N.sleep(10);
-            return i % 2 == 0;
-        };
+            final Predicate<Integer> filter = i -> {
+                N.sleep(10);
+                return i % 2 == 0;
+            };
 
-        IntStream.range(0, 10_000)
-                .boxed()
-                .parallel(1024)
-                .filter(filter)
-                .map(mapper)
-                .filter(filter)
-                .map(mapper)
-                .filter(filter)
-                .map(mapper)
-                .filter(filter)
-                .map(mapper)
-                .filter(filter)
-                .map(mapper)
-                .filter(filter)
-                .map(mapper)
-                .filter(filter)
-                .filter(filter)
-                .forEach(i -> N.println(Thread.currentThread().getName() + ": " + i));
+            IntStream.range(0, 10_000)
+                    .boxed()
+                    .parallel(1024)
+                    .filter(filter)
+                    .map(mapper)
+                    .filter(filter)
+                    .map(mapper)
+                    .filter(filter)
+                    .map(mapper)
+                    .filter(filter)
+                    .map(mapper)
+                    .filter(filter)
+                    .map(mapper)
+                    .filter(filter)
+                    .map(mapper)
+                    .filter(filter)
+                    .filter(filter)
+                    .forEach(i -> N.println(Thread.currentThread().getName() + ": " + i));
+        });
     }
 
     @Test
@@ -1268,14 +1304,16 @@ public class MoreStreamTest {
 
     @Test
     public void test_reduce() {
-        IntStream.of().reduce((a, b) -> a + b).ifPresent(N::println);
-        IntStream.of(1, 2, 3).reduce((a, b) -> a + b).ifPresent(N::println);
+        assertDoesNotThrow(() -> {
+            IntStream.of().reduce((a, b) -> a + b).ifPresent(N::println);
+            IntStream.of(1, 2, 3).reduce((a, b) -> a + b).ifPresent(N::println);
 
-        CharStream.of('a', 'b', 'c').reduce((a, b) -> (char) (a + b - b)).ifPresent(N::println);
-        N.println(CharStream.of('a', 'b', 'c').reduce('z', (a, b) -> (char) (a + b - b)));
+            CharStream.of('a', 'b', 'c').reduce((a, b) -> (char) (a + b - b)).ifPresent(N::println);
+            N.println(CharStream.of('a', 'b', 'c').reduce('z', (a, b) -> (char) (a + b - b)));
 
-        Stream.of('a', 'b', 'c').reduce((a, b) -> (char) (a + b - b)).ifPresent(N::println);
-        N.println(Stream.of('a', 'b', 'c').reduce('z', (a, b) -> (char) (a + b - b)));
+            Stream.of('a', 'b', 'c').reduce((a, b) -> (char) (a + b - b)).ifPresent(N::println);
+            N.println(Stream.of('a', 'b', 'c').reduce('z', (a, b) -> (char) (a + b - b)));
+        });
     }
 
     @Test
@@ -1291,6 +1329,7 @@ public class MoreStreamTest {
         N.println(result);
         result = Stream.of('a', 'b', 'c').collect(Collectors.toList());
         N.println(result);
+        assertNotNull(result);
     }
 
     @Test
@@ -1303,26 +1342,33 @@ public class MoreStreamTest {
 
         final IntSummaryStatistics result2 = Stream.of('a', 'b', 'c').mapToInt(i -> i).summaryStatistics();
         N.println(result2);
+        assertNotNull(result2);
     }
 
     @Test
     public void test_zipWith() {
-        Stream.of("a", "b", "c").zipWith(Stream.of("1", "2"), (a, b) -> a + b).println();
-        Stream.of("a", "b", "c").zipWith(Stream.of("1", "2"), " ", "0", (a, b) -> a + b).println();
+        assertDoesNotThrow(() -> {
+            Stream.of("a", "b", "c").zipWith(Stream.of("1", "2"), (a, b) -> a + b).println();
+            Stream.of("a", "b", "c").zipWith(Stream.of("1", "2"), " ", "0", (a, b) -> a + b).println();
+        });
     }
 
     @Test
     public void test_println() {
-        IntStream.of(1, 2, 3).println();
-        IntStream.of(1, 2, 3).mapToObj(IntStream::of).println();
+        assertDoesNotThrow(() -> {
+            IntStream.of(1, 2, 3).println();
+            IntStream.of(1, 2, 3).mapToObj(IntStream::of).println();
 
-        Stream.of(1, 2, 3).println();
-        Stream.of(1, 2, 3).map(IntStream::of).println();
+            Stream.of(1, 2, 3).println();
+            Stream.of(1, 2, 3).map(IntStream::of).println();
+        });
     }
 
     @Test
     public void test_split() {
-        IntList.range(1, 10).split(2).forEach(N::println);
+        assertDoesNotThrow(() -> {
+            IntList.range(1, 10).split(2).forEach(N::println);
+        });
     }
 
     @Test

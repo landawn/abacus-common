@@ -1,5 +1,8 @@
 package com.landawn.abacus.parser;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -20,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.landawn.abacus.AbstractTest;
-import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.entity.PersonType;
 import com.landawn.abacus.parser.entity.XBean;
 import com.landawn.abacus.types.WeekDay;
@@ -164,6 +166,10 @@ public abstract class AbstractParserTest extends AbstractTest {
         }
     }
 
+    // =====================================================================
+    // serialize(Object)
+    // =====================================================================
+
     @Test
     public void testSerialize_00() throws Exception {
         XBean xBean = createXBean();
@@ -173,7 +179,12 @@ public abstract class AbstractParserTest extends AbstractTest {
 
         N.println(xBean);
         N.println(xBean2);
+        assertNotNull(xBean2);
     }
+
+    // =====================================================================
+    // serialize(Object, File)
+    // =====================================================================
 
     @Test
     public void testSerialize_01() throws Exception {
@@ -191,7 +202,12 @@ public abstract class AbstractParserTest extends AbstractTest {
         N.println(xBean2);
 
         IOUtil.deleteRecursivelyIfExists(file);
+        assertNotNull(xBean2);
     }
+
+    // =====================================================================
+    // serialize(Object, OutputStream)
+    // =====================================================================
 
     @Test
     public void testSerialize_02() throws Exception {
@@ -209,7 +225,12 @@ public abstract class AbstractParserTest extends AbstractTest {
         IOUtil.close(is);
 
         IOUtil.deleteRecursivelyIfExists(file);
+        assertNotNull(is);
     }
+
+    // =====================================================================
+    // serialize(Object, Writer)
+    // =====================================================================
 
     @Test
     public void testSerialize_03() throws Exception {
@@ -228,7 +249,87 @@ public abstract class AbstractParserTest extends AbstractTest {
         IOUtil.close(reader);
 
         IOUtil.deleteRecursivelyIfExists(file);
+        assertNotNull(reader);
     }
+
+    // =====================================================================
+    // deserialize(String, Type)
+    // =====================================================================
+
+    @Test
+    public void testDeserialize_stringWithType() throws Exception {
+        XBean xBean = createXBean();
+        String str = parser.serialize(xBean);
+
+        XBean xBean2 = parser.deserialize(str, XBean.class);
+        assertNotNull(xBean2);
+    }
+
+    // =====================================================================
+    // deserialize(File, Class)
+    // =====================================================================
+
+    @Test
+    public void testDeserialize_fileWithClass() throws Exception {
+        XBean xBean = createXBean();
+        File file = getFile();
+        parser.serialize(xBean, file);
+
+        XBean xBean2 = parser.deserialize(file, XBean.class);
+        assertNotNull(xBean2);
+
+        IOUtil.deleteRecursivelyIfExists(file);
+    }
+
+    // =====================================================================
+    // deserialize(InputStream, Class)
+    // =====================================================================
+
+    @Test
+    public void testDeserialize_inputStreamWithClass() throws Exception {
+        XBean xBean = createXBean();
+        File file = getFile();
+        parser.serialize(xBean, file);
+
+        InputStream is = new FileInputStream(file);
+        XBean xBean2 = parser.deserialize(is, XBean.class);
+        IOUtil.close(is);
+        assertNotNull(xBean2);
+
+        IOUtil.deleteRecursivelyIfExists(file);
+    }
+
+    // =====================================================================
+    // deserialize(Reader, Class)
+    // =====================================================================
+
+    @Test
+    public void testDeserialize_readerWithClass() throws Exception {
+        XBean xBean = createXBean();
+        File file = getFile();
+        parser.serialize(xBean, file);
+
+        Reader reader = new FileReader(file);
+        XBean xBean2 = parser.deserialize(reader, XBean.class);
+        IOUtil.close(reader);
+        assertNotNull(xBean2);
+
+        IOUtil.deleteRecursivelyIfExists(file);
+    }
+
+    // =====================================================================
+    // serialize with null object
+    // =====================================================================
+
+    @Test
+    public void testSerialize_nullObject() throws Exception {
+        String str = parser.serialize(null);
+        assertEquals(Strings.EMPTY, str);
+    }
+
+    // =====================================================================
+    // Helpers
+    // =====================================================================
 
     protected File getFile() {
         return new File("./src/test/resources/json_" + Strings.uuid() + ".json");

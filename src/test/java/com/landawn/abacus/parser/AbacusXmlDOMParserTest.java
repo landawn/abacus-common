@@ -26,8 +26,6 @@ import org.xml.sax.SAXException;
 
 import com.landawn.abacus.entity.extendDirty.basic.Account;
 import com.landawn.abacus.exception.ParsingException;
-import com.landawn.abacus.parser.XmlDeserConfig;
-import com.landawn.abacus.parser.XmlSerConfig;
 import com.landawn.abacus.parser.entity.GenericEntity;
 import com.landawn.abacus.parser.entity.XBean;
 import com.landawn.abacus.type.Type;
@@ -96,7 +94,7 @@ public class AbacusXmlDOMParserTest extends AbstractXmlParserTest {
         Map<String, Object> props2 = abacusXMLDOMParser.deserialize(str, xdc, Map.class);
         N.println(props);
         N.println(props2);
-
+        assertNotNull(props2);
     }
 
     @Test
@@ -163,6 +161,7 @@ public class AbacusXmlDOMParserTest extends AbstractXmlParserTest {
         N.println(writer.toString());
 
         Objectory.recycle(bw);
+        assertNotNull(account);
     }
 
     @Test
@@ -317,6 +316,7 @@ public class AbacusXmlDOMParserTest extends AbstractXmlParserTest {
         N.println(str);
 
         N.println(abacusXMLDOMParser.deserialize(str, XBean.class));
+        assertNotNull(str);
     }
 
     @Test
@@ -438,6 +438,7 @@ public class AbacusXmlDOMParserTest extends AbstractXmlParserTest {
         N.println("========================================================================================================================");
         N.println(str);
         N.println("========================================================================================================================");
+        assertNotNull(str);
     }
 
     @Test
@@ -450,6 +451,7 @@ public class AbacusXmlDOMParserTest extends AbstractXmlParserTest {
         xml = "<unknown><id>1002759403</id><gui>8354b425f53d4c1893b848a35191bd89</gui><emailAddress>a267c0eb96d84088968ec4885110ddab@earth.com</emailAddress><firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName><birthDate>1414001208304</birthDate><lastUpdateTime>1414001208304</lastUpdateTime><createdTime>1414001208305</createdTime><contact><unknown><id>2801</id><accountId>1002759403</accountId><address>ca, US</address><city>sunnyvale</city><state>CA</state><country>U.S.</country></unknown></contact></unknown>";
         Account account2 = abacusXMLDOMParser.deserialize(xml, Account.class);
         N.println(account2);
+        assertNotNull(account2);
     }
 
     public void estSerialize_tagName2() throws Exception {
@@ -546,7 +548,6 @@ public class AbacusXmlDOMParserTest extends AbstractXmlParserTest {
 
             N.println(N.stringOf(a));
         }
-
     }
 
     @Test
@@ -655,6 +656,7 @@ public class AbacusXmlDOMParserTest extends AbstractXmlParserTest {
         map2 = abacusXMLDOMParser.deserialize(str, XmlDeserConfig.create().setMapKeyType(String.class).setMapValueType(String[].class), Map.class);
 
         N.println(map2);
+        assertNotNull(map2);
     }
 
     @Test
@@ -670,6 +672,7 @@ public class AbacusXmlDOMParserTest extends AbstractXmlParserTest {
 
         N.println(xBean);
         N.println(xBean2);
+        assertNotNull(xBean2);
     }
 
     @Test
@@ -749,6 +752,7 @@ public class AbacusXmlDOMParserTest extends AbstractXmlParserTest {
 
         N.println(account);
         N.println(account2);
+        assertNotNull(account2);
     }
 
     @Test
@@ -777,7 +781,7 @@ public class AbacusXmlDOMParserTest extends AbstractXmlParserTest {
 
         map2 = abacusXMLDOMParser.deserialize(str, Map.class);
         N.println(map2);
-
+        assertNotNull(map2);
     }
 
     @Test

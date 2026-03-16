@@ -5819,7 +5819,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Instantiates a new optional.
+         * Constructs a new {@code Optional} with the specified non-null value.
          *
          * @param value the value to be present, must not be {@code null}
          */

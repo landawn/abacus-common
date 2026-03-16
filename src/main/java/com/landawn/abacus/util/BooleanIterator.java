@@ -19,7 +19,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.util.u.OptionalBoolean;
 import com.landawn.abacus.util.function.BooleanPredicate;
 import com.landawn.abacus.util.stream.Stream;
 
@@ -475,55 +474,6 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
                 return next;
             }
         };
-    }
-
-    /**
-     * Returns the first element as an OptionalBoolean, or empty if no elements exist.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * BooleanIterator iter = BooleanIterator.of(true, false);
-     * OptionalBoolean first = iter.first();   // OptionalBoolean.of(true)
-     * 
-     * BooleanIterator empty = BooleanIterator.empty();
-     * OptionalBoolean none = empty.first();   // OptionalBoolean.empty()
-     * }</pre>
-     *
-     * @return an OptionalBoolean containing the first element, or empty
-     */
-    public OptionalBoolean first() {
-        if (hasNext()) {
-            return OptionalBoolean.of(nextBoolean());
-        } else {
-            return OptionalBoolean.empty();
-        }
-    }
-
-    /**
-     * Returns the last element as an OptionalBoolean, or empty if no elements exist.
-     * 
-     * <p>Note: This method consumes the entire iterator.</p>
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * BooleanIterator iter = BooleanIterator.of(true, false, true);
-     * OptionalBoolean last = iter.last();   // OptionalBoolean.of(true)
-     * }</pre>
-     *
-     * @return an OptionalBoolean containing the last element, or empty
-     */
-    public OptionalBoolean last() {
-        if (hasNext()) {
-            boolean next = nextBoolean();
-
-            while (hasNext()) {
-                next = nextBoolean();
-            }
-
-            return OptionalBoolean.of(next);
-        } else {
-            return OptionalBoolean.empty();
-        }
     }
 
     /**

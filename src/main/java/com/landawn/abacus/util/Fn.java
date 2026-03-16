@@ -226,7 +226,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Functional Interface Categories:</b>
  * <ul>
  *   <li><b>Predicates:</b> {@code isNull()}, {@code notNull()}, {@code equal()}, {@code in()}, {@code ge()}, {@code le()}</li>
- *   <li><b>Functions:</b> {@code identity()}, {@code tap()}, {@code constant()}, {@code toStr()}, {@code parseInt()}, {@code length()}</li>
+ *   <li><b>Functions:</b> {@code identity()}, {@code constant()}, {@code toStr()}, {@code parseInt()}, {@code length()}</li>
  *   <li><b>Consumers:</b> {@code doNothing()}, {@code acceptIfNotNull()}, {@code println()}</li>
  *   <li><b>Suppliers:</b> {@code supply()}, {@code random()}, {@code uuid()}</li>
  *   <li><b>Binary Operators:</b> {@code min()}, {@code max()}, {@code selectFirst()}, {@code selectSecond()}</li>
@@ -1387,46 +1387,11 @@ public final class Fn {
      * @param <T> the type of the input and output
      * @return an identity Function
      * @see Function#identity()
-     * @see #tap(Consumer)
      */
     @SuppressWarnings("unchecked")
     public static <T> Function<T, T> identity() {
         return (Function<T, T>) IDENTITY;
     }
-
-    //    /**
-    //     * Returns an identity function that invokes the specified {@code consumer} with each input
-    //     * before returning that same input unchanged.
-    //     *
-    //     * <p>This is useful when side effects such as logging, tracing, validation, or metrics
-    //     * collection need to be inserted into a function pipeline without altering the flowing value.</p>
-    //     *
-    //     * <p><b>Usage Examples:</b></p>
-    //     * <pre>{@code
-    //     * Function<String, String> tracedIdentity = Fn.tap(System.out::println);
-    //     *
-    //     * String result = tracedIdentity.apply("abc"); // prints "abc", returns "abc"
-    //     * }</pre>
-    //     *
-    //     * @param <T> the type of the input and output
-    //     * @param consumer the consumer to invoke before the input value is returned
-    //     * @return a function that first consumes and then returns its input argument unchanged
-    //     * @throws IllegalArgumentException if consumer is null
-    //     * @see #identity()
-    //     */
-    //    @Beta
-    //    public static <T> Function<T, T> tap(final Consumer<? super T> consumer) throws IllegalArgumentException {
-    //        N.checkArgNotNull(consumer, cs.Consumer);
-    //
-    //        if (consumer == EMPTY_CONSUMER) {
-    //            return identity();
-    //        }
-    //
-    //        return t -> {
-    //            consumer.accept(t);
-    //            return t;
-    //        };
-    //    }
 
     /**
      * Returns a Function that wraps an object with its key extracted by the keyExtractor.

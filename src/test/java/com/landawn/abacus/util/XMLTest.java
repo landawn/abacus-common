@@ -1,14 +1,19 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.io.StringWriter;
 
 import org.junit.jupiter.api.Test;
 
-import com.landawn.abacus.AbstractParserTest;
+import com.landawn.abacus.AbstractTest;
 import com.landawn.abacus.entity.extendDirty.basic.Account;
 import com.landawn.abacus.entity.extendDirty.basic.AccountContact;
+import com.landawn.abacus.parser.ParserFactory;
+import com.landawn.abacus.parser.XmlParser;
 
-public class XMLTest extends AbstractParserTest {
+public class XMLTest extends AbstractTest {
+    private static final XmlParser abacusXmlParser = ParserFactory.createAbacusXmlParser();
 
     @Test
     public void test_serialize() {
@@ -41,6 +46,6 @@ public class XMLTest extends AbstractParserTest {
 
         str = "<account><id>100</id><gui>737a45812bad4d5bafbb62428cefe66c</gui><unknownProperty1><list><e>11</e></list></unknownProperty1><emailAddress>fc3283c92282499ea2ba515e840e305a@earth.com</emailAddress><firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName><birthDate>1399944204713</birthDate><lastUpdateTime>1399944204713</lastUpdateTime><createdTime>1399944204713</createdTime><unknownProperty2>null</unknownProperty2></account>";
         println(abacusXmlParser.deserialize(str, Account.class));
-
+        assertNotNull(str);
     }
 }

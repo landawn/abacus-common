@@ -1,5 +1,7 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.parser.KryoParser;
@@ -10,7 +12,9 @@ public class KryoTest {
 
     @Test
     public void test_01() {
-        N.println(kryoParser.deepCopy(Pair.of("abc", 123)));
+        assertDoesNotThrow(() -> {
+            N.println(kryoParser.deepCopy(Pair.of("abc", 123)));
+        });
     }
 
 }

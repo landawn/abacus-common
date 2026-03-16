@@ -21,7 +21,6 @@ import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.stream.IntStream;
 
 /**
@@ -490,53 +489,6 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
                 return next;
             }
         };
-    }
-
-    /**
-     * Returns the first element as an OptionalInt, or empty if no elements exist.
-     *
-     * <p><b>Note:</b> This method consumes one element from the iterator if it exists.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * OptionalInt first = IntIterator.of(1, 2, 3).first();   // OptionalInt.of(1)
-     * OptionalInt empty = IntIterator.empty().first();       // OptionalInt.empty()
-     * }</pre>
-     *
-     * @return an OptionalInt containing the first element, or empty
-     */
-    public OptionalInt first() {
-        if (hasNext()) {
-            return OptionalInt.of(nextInt());
-        } else {
-            return OptionalInt.empty();
-        }
-    }
-
-    /**
-     * Returns the last element as an OptionalInt, or empty if no elements exist.
-     * This method consumes the entire iterator.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * OptionalInt last = IntIterator.of(1, 2, 3).last();   // OptionalInt.of(3)
-     * OptionalInt empty = IntIterator.empty().last();      // OptionalInt.empty()
-     * }</pre>
-     * 
-     * @return an OptionalInt containing the last element, or empty
-     */
-    public OptionalInt last() {
-        if (hasNext()) {
-            int next = nextInt();
-
-            while (hasNext()) {
-                next = nextInt();
-            }
-
-            return OptionalInt.of(next);
-        } else {
-            return OptionalInt.empty();
-        }
     }
 
     /**

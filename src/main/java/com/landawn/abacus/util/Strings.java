@@ -390,7 +390,7 @@ public final class Strings {
     public static final char CHAR_CR = CR.charAt(0);
 
     /**
-     * Field COMMA_SPACE (value is {@code ", "})
+     * A comma followed by a space ({@code ", "}).
      */
     public static final String COMMA_SPACE = SK.COMMA_SPACE;
 
@@ -15381,7 +15381,7 @@ public final class Strings {
         if (N.isEmpty(str)) {
             return replacement == null ? EMPTY : replacement;
         } else if (fromIndex == toIndex && N.isEmpty(replacement)) {
-            return str;
+            return str == null ? EMPTY : str;
         }
 
         if (N.isEmpty(replacement)) {
@@ -15483,7 +15483,6 @@ public final class Strings {
     @Beta
     public static String removeRange(final String str, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         final int len = N.len(str);
-
         N.checkFromToIndex(fromIndex, toIndex, len);
 
         if (N.isEmpty(str)) {

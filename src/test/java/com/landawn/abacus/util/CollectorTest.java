@@ -1,5 +1,7 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
@@ -37,6 +39,6 @@ public class CollectorTest extends AbstractTest {
                 .map(String::valueOf)
                 .collect(MoreCollectors.summingBigDecimal(it -> BigDecimal.valueOf(it.length()), it -> BigDecimal.valueOf(it.length() + 1)))
                 .forEach(Fn.println());
-
+        assertNotNull(result2);
     }
 }

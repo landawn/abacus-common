@@ -2241,17 +2241,25 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     private static boolean isPossibleLong(final CharSequence dateTime) {
-        if (dateTime.length() > 4) {
-            char ch = dateTime.charAt(2);
+        if (dateTime == null || dateTime.isEmpty()) {
+            return false;
+        }
 
-            if (ch >= '0' && ch <= '9') {
-                ch = dateTime.charAt(4);
+        final int fromIndex = dateTime.charAt(0) == '-' ? 1 : 0;
 
-                return ch >= '0' && ch <= '9';
+        if (fromIndex == dateTime.length()) {
+            return false;
+        }
+
+        for (int i = fromIndex, len = dateTime.length(); i < len; i++) {
+            final char ch = dateTime.charAt(i);
+
+            if (ch < '0' || ch > '9') {
+                return false;
             }
         }
 
-        return false;
+        return true;
     }
 
     private static long parse(final String dateTime, final String format, final TimeZone timezone) {
@@ -2506,6 +2514,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      */
     @MayReturnNull
     public static String format(final Calendar calendar, final String format, final TimeZone timeZone) {
+        if (calendar == null) {
+            return null;
+        }
+
         if ((format == null) && (timeZone == null)) {
             final StringBuilder sb = Objectory.createStringBuilder();
 
@@ -2586,6 +2598,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      */
     @MayReturnNull
     public static String format(final XMLGregorianCalendar calendar, final String format, final TimeZone timeZone) {
+        if (calendar == null) {
+            return null;
+        }
+
         if ((format == null) && (timeZone == null)) {
             final StringBuilder sb = Objectory.createStringBuilder();
 
@@ -2877,6 +2893,14 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     private static String formatDate(final Appendable appendable, final java.util.Date date, String format, TimeZone timeZone) {
+        if (date == null) {
+            if (appendable != null) {
+                formatToForNull(appendable);
+            }
+
+            return null;
+        }
+
         final boolean isTimestamp = date instanceof Timestamp;
 
         if ((format == null) && (timeZone == null)) {

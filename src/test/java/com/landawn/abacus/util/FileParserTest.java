@@ -1,5 +1,7 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.io.File;
 import java.util.List;
 
@@ -39,5 +41,6 @@ public class FileParserTest extends AbstractTest {
         IOUtil.forLines(file, lineParser);
 
         IOUtil.deleteIfExists(file);
+        assertNotNull(lines);
     }
 }

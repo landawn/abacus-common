@@ -201,7 +201,7 @@ public final class Reflection<T> {
     }
 
     /**
-     * Gets the value of the specified field from the target instance.
+     * Returns the value of the specified field from the target instance.
      * If ReflectASM is available, it will be used for better performance.
      *
      * <p><b>Usage Examples:</b></p>
@@ -324,11 +324,11 @@ public final class Reflection<T> {
     }
 
     /**
-     * Gets the field.
+     * Returns the field with the specified name.
      *
      * @param fieldName the name of the field to retrieve
      * @return the Field object corresponding to the field name
-     * @throws NoSuchFieldException the no such field exception
+     * @throws NoSuchFieldException if no field with the specified name is found
      */
     private Field getField(final String fieldName) throws NoSuchFieldException {
         Map<String, Field> fieldPool = clsFieldPool.computeIfAbsent(cls, k -> new ConcurrentHashMap<>());
@@ -344,12 +344,12 @@ public final class Reflection<T> {
     }
 
     /**
-     * Gets the declared constructor.
+     * Returns the declared constructor matching the specified parameter types.
      *
      * @param cls the class to search for the constructor
      * @param argTypes the array of parameter types for the constructor
      * @return the Constructor object matching the parameter types
-     * @throws SecurityException the security exception
+     * @throws SecurityException if a security manager denies access to the constructor
      */
     private Constructor<T> getDeclaredConstructor(final Class<T> cls, final Class<?>[] argTypes) throws SecurityException {
         Map<Wrapper<Class<?>[]>, Constructor<?>> constructorPool = clsConstructorPool.computeIfAbsent(cls, k -> new ConcurrentHashMap<>());
@@ -398,13 +398,13 @@ public final class Reflection<T> {
     }
 
     /**
-     * Gets the declared method.
+     * Returns the declared method matching the specified name and parameter types.
      *
      * @param cls the class to search for the method
      * @param methodName the name of the method to retrieve
      * @param argTypes the array of parameter types for the method
      * @return the Method object matching the name and parameter types
-     * @throws SecurityException the security exception
+     * @throws SecurityException if a security manager denies access to the method
      */
     private Method getDeclaredMethod(final Class<?> cls, final String methodName, final Class<?>[] argTypes) throws SecurityException {
         Map<String, Map<Wrapper<Class<?>[]>, Method>> methodPool = clsMethodPool.computeIfAbsent(cls, k -> new ConcurrentHashMap<>());

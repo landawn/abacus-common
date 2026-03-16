@@ -51,6 +51,10 @@ import com.landawn.abacus.util.stream.ByteStream;
 @SuppressWarnings({ "java:S6548" })
 public abstract class ByteIterator extends ImmutableIterator<Byte> {
 
+    private OptionalByte cachedFirst = null;
+
+    private OptionalByte cachedLast = null;
+
     /**
      * Constructs a new ByteIterator.
      */
@@ -520,13 +524,15 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * }</pre>
      *
      * @return an OptionalByte containing the first element if present, otherwise empty
+     * @deprecated inconsistent data is returned
      */
+    @Deprecated
     public OptionalByte first() {
-        if (hasNext()) {
-            return OptionalByte.of(nextByte());
-        } else {
-            return OptionalByte.empty();
+        if (cachedFirst == null) {
+            cachedFirst = hasNext() ? OptionalByte.of(nextByte()) : OptionalByte.empty();
         }
+
+        return cachedFirst;
     }
 
     /**
@@ -545,18 +551,23 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      *
      * @return an OptionalByte containing the last element if present, otherwise empty
      */
+    @Beta
     public OptionalByte last() {
-        if (hasNext()) {
-            byte next = nextByte();
+        if (cachedLast == null) {
+            if (hasNext()) {
+                byte next = nextByte();
 
-            while (hasNext()) {
-                next = nextByte();
+                while (hasNext()) {
+                    next = nextByte();
+                }
+
+                cachedLast = OptionalByte.of(next);
+            } else {
+                cachedLast = OptionalByte.empty();
             }
-
-            return OptionalByte.of(next);
-        } else {
-            return OptionalByte.empty();
         }
+
+        return cachedLast;
     }
 
     /**

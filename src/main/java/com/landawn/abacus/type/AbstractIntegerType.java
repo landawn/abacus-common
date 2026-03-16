@@ -256,8 +256,7 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
     /**
      * Writes an integer value to a CharacterWriter with optional configuration.
      * If the configuration specifies {@code writeNullNumberAsZero} and the value is {@code null},
-     * writes 0 instead of {@code null}. Uses {@link com.landawn.abacus.util.BufferedWriter#writeInt(int)}
-     * for efficient integer writing.
+     * writes 0 instead of {@code null}.
      *
      * @param writer the CharacterWriter to write to
      * @param x the Number value to write as integer

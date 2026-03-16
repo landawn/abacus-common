@@ -541,6 +541,8 @@ public final class Iterators {
      * @return the index of the first occurrence of the specified value in the iterator, or {@code -1} if the value is not found or {@code iter} is {@code null}.
      */
     public static long indexOf(final Iterator<?> iter, final Object valueToFind, final long fromIndex) {
+        N.checkArgument(fromIndex >= 0, "'fromIndex' cannot be negative: %s", fromIndex);
+
         if (iter == null) {
             return N.INDEX_NOT_FOUND;
         }
@@ -2964,6 +2966,8 @@ public final class Iterators {
     @Deprecated
     @Beta
     public static <T, A, B, C> TriIterator<A, B, C> unzip3(final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzip) {
+        N.checkArgNotNull(unzip, "unzip");
+
         return TriIterator.unzip(iter, unzip);
     }
 
@@ -2997,6 +3001,8 @@ public final class Iterators {
     @Deprecated
     @Beta
     public static <T, A, B, C> TriIterator<A, B, C> unzip3(final Iterable<? extends T> c, final BiConsumer<? super T, Triple<A, B, C>> unzip) {
+        N.checkArgNotNull(unzip, "unzip");
+
         return TriIterator.unzip(N.iterate(c), unzip);
     }
 

@@ -2,6 +2,7 @@ package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDateTime;
@@ -125,7 +126,7 @@ public class DateUtilTest extends AbstractTest {
         N.println(ZonedDateTime.parse(ZonedDateTime.now().toString()));
 
         N.println(Dates.format(Dates.parseTimestamp("Wed, 01 Jul 2024 23:53:48 PDT"), Dates.RFC_1123_DATE_TIME_FORMAT));
-
+        assertNotNull(str);
     }
 
     @Test

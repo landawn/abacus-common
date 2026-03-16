@@ -1194,24 +1194,28 @@ public final class OkHttpRequest {
 
                 final InputStream is = HttpUtil.wrapInputStream(respBody.byteStream(), respContentFormat);
 
-                if (resultClass.equals(String.class)) {
-                    return (T) IOUtil.readAllToString(is, respCharset);
-                } else if (byte[].class.equals(resultClass)) {
-                    return (T) IOUtil.readAllBytes(is);
-                } else {
-                    if (respContentFormat == ContentFormat.KRYO && KRYO_PARSER != null) {
-                        return KRYO_PARSER.deserialize(is, resultClass);
-                    } else if (respContentFormat == ContentFormat.FORM_URL_ENCODED) {
-                        return URLEncodedUtil.decode(IOUtil.readAllToString(is, respCharset), resultClass);
+                try {
+                    if (resultClass.equals(String.class)) {
+                        return (T) IOUtil.readAllToString(is, respCharset);
+                    } else if (byte[].class.equals(resultClass)) {
+                        return (T) IOUtil.readAllBytes(is);
                     } else {
-                        final BufferedReader br = Objectory.createBufferedReader(IOUtil.newInputStreamReader(is, respCharset));
+                        if (respContentFormat == ContentFormat.KRYO && KRYO_PARSER != null) {
+                            return KRYO_PARSER.deserialize(is, resultClass);
+                        } else if (respContentFormat == ContentFormat.FORM_URL_ENCODED) {
+                            return URLEncodedUtil.decode(IOUtil.readAllToString(is, respCharset), resultClass);
+                        } else {
+                            final BufferedReader br = Objectory.createBufferedReader(IOUtil.newInputStreamReader(is, respCharset));
 
-                        try {
-                            return HttpUtil.getParser(respContentFormat).deserialize(br, resultClass);
-                        } finally {
-                            Objectory.recycle(br);
+                            try {
+                                return HttpUtil.getParser(respContentFormat).deserialize(br, resultClass);
+                            } finally {
+                                Objectory.recycle(br);
+                            }
                         }
                     }
+                } finally {
+                    IOUtil.closeQuietly(is);
                 }
             } else {
                 throw new IOException(resp.code() + ": " + resp.message());

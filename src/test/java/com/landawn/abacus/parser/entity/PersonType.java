@@ -123,28 +123,12 @@ public class PersonType {
             return false;
         }
         PersonType other = (PersonType) obj;
-        if (active != other.active) {
+        if ((active != other.active) || !Objects.equals(address1, other.address1) || !Objects.equals(birthday, other.birthday)
+                || !Objects.equals(city, other.city)) {
             return false;
         }
-        if (!Objects.equals(address1, other.address1)) {
-            return false;
-        }
-        if (!Objects.equals(birthday, other.birthday)) {
-            return false;
-        }
-        if (!Objects.equals(city, other.city)) {
-            return false;
-        }
-        if (!Objects.equals(country, other.country)) {
-            return false;
-        }
-        if (!Objects.equals(firstName, other.firstName)) {
-            return false;
-        }
-        if (id != other.id) {
-            return false;
-        }
-        if (!Objects.equals(lastName, other.lastName)) {
+        if (!Objects.equals(country, other.country) || !Objects.equals(firstName, other.firstName) || (id != other.id)
+                || !Objects.equals(lastName, other.lastName)) {
             return false;
         }
         if (!Objects.equals(postCode, other.postCode)) {

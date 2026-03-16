@@ -29,7 +29,7 @@ import com.landawn.abacus.util.Profiler;
 import com.landawn.abacus.util.Strings;
 
 @Tag("old-test")
-public abstract class AbstractTest {
+public abstract class AbstractTest extends TestBase {
     protected static final Logger logger = LoggerFactory.getLogger(AbstractTest.class);
     protected static final String FIRST_NAME = "firstName";
     public static final String MIDDLE_NAME = "MN";

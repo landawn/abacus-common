@@ -3376,11 +3376,11 @@ public final class CsvUtil {
 
         /**
          * Loads the CSV data into a Dataset using the configured options.
-         * Either a source (file or reader) and a type configuration (columnTypeMap, beanClassForColumnTypeInference)
-         * must be set before calling this method.
+         * A source (file or reader) must be set before calling this method.
+         * Type configuration is optional and, when omitted, values are loaded as strings.
          *
          * @return a Dataset containing the loaded CSV data
-         * @throws IllegalArgumentException if source or type configuration is not set
+         * @throws IllegalArgumentException if source is not set
          * @throws UncheckedIOException if an I/O error occurs
          * @see #load(TriConsumer)
          */
@@ -3392,8 +3392,7 @@ public final class CsvUtil {
                     } else if (beanClassForColumnTypeInference != null) {
                         return CsvUtil.load(sourceFile, selectColumnNames, offset, count, rowFilter, beanClassForColumnTypeInference);
                     } else {
-                        throw new IllegalArgumentException(
-                                "Either 'columnTypeMap', 'beanClassForColumnTypeInference' or 'rowExtractor' must be set before calling load().");
+                        return CsvUtil.load(sourceFile, selectColumnNames, offset, count, rowFilter);
                     }
                 } else if (sourceReader != null) {
                     if (columnTypeMap != null) {
@@ -3401,8 +3400,7 @@ public final class CsvUtil {
                     } else if (beanClassForColumnTypeInference != null) {
                         return CsvUtil.load(sourceReader, selectColumnNames, offset, count, rowFilter, beanClassForColumnTypeInference);
                     } else {
-                        throw new IllegalArgumentException(
-                                "Either 'columnTypeMap', 'beanClassForColumnTypeInference' or 'rowExtractor' must be set before calling load().");
+                        return CsvUtil.load(sourceReader, selectColumnNames, offset, count, rowFilter);
                     }
                 } else {
                     throw new IllegalArgumentException("Either 'sourceFile' or 'sourceReader' must be set before calling load().");

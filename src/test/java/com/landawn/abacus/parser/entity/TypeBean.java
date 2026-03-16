@@ -304,28 +304,12 @@ public class TypeBean {
             return false;
         }
         TypeBean other = (TypeBean) obj;
-        if (!Arrays.equals(StringArrayType, other.StringArrayType)) {
+        if (!Arrays.equals(StringArrayType, other.StringArrayType) || !Objects.equals(StringListType, other.StringListType)
+                || !Objects.equals(StringType, other.StringType) || !Arrays.equals(boolArrayType, other.boolArrayType)) {
             return false;
         }
-        if (!Objects.equals(StringListType, other.StringListType)) {
-            return false;
-        }
-        if (!Objects.equals(StringType, other.StringType)) {
-            return false;
-        }
-        if (!Arrays.equals(boolArrayType, other.boolArrayType)) {
-            return false;
-        }
-        if (boolType != other.boolType) {
-            return false;
-        }
-        if (!Objects.equals(booleanListType, other.booleanListType)) {
-            return false;
-        }
-        if (!Arrays.equals(byteArrayType, other.byteArrayType)) {
-            return false;
-        }
-        if (!Objects.equals(byteListType, other.byteListType)) {
+        if ((boolType != other.boolType) || !Objects.equals(booleanListType, other.booleanListType) || !Arrays.equals(byteArrayType, other.byteArrayType)
+                || !Objects.equals(byteListType, other.byteListType)) {
             return false;
         }
         if (byteType != other.byteType) {

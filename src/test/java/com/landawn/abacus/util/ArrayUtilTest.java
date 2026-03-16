@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
@@ -69,6 +70,7 @@ public class ArrayUtilTest extends AbstractTest {
         final Integer[][] d = Array.transpose(c);
         N.println(Strings.repeat("=", 80));
         N.println(CommonUtil.deepToString(d));
+        assertNotNull(d);
     }
 
     @Test
@@ -86,6 +88,7 @@ public class ArrayUtilTest extends AbstractTest {
         a = N.removeAllOccurrences(a, 5);
 
         N.println(a);
+        assertNotNull(a);
     }
 
     @Test
@@ -122,6 +125,7 @@ public class ArrayUtilTest extends AbstractTest {
 
         final byte[] b = Array.repeat(Byte.MAX_VALUE, 10);
         N.println(b);
+        assertNotNull(b);
     }
 
 }

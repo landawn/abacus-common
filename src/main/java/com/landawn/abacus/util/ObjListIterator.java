@@ -18,11 +18,11 @@ package com.landawn.abacus.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
-import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
@@ -169,7 +169,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * @return an ObjListIterator containing exactly one element
      */
     public static <T> ObjListIterator<T> just(final T val) {
-        return of(List.of(val));
+        return of(Collections.singletonList(val));
     }
 
     /**
@@ -524,27 +524,6 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
     }
 
     /**
-     * Returns the first element of this iterator wrapped in a {@code Nullable}.
-     * If the iterator is empty, returns an empty {@code Nullable}.
-     * This operation consumes the first element if present.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("first", "second"));
-     * Nullable<String> first = iter.first();   // Nullable.of("first")
-     * }</pre>
-     *
-     * @return a {@code Nullable} containing the first element, or empty if no elements
-     */
-    public Nullable<T> first() {
-        if (hasNext()) {
-            return Nullable.of(next());
-        } else {
-            return Nullable.empty();
-        }
-    }
-
-    /**
      * Returns the first {@code non-null} element of this iterator wrapped in an Optional.
      * If no {@code non-null} element is found, returns an empty Optional.
      * This operation may consume multiple elements until a {@code non-null} element is found.
@@ -556,7 +535,9 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * }</pre>
      *
      * @return an Optional containing the first {@code non-null} element, or empty if none found
+     * @deprecated inconsistent data is returned
      */
+    @Deprecated
     public u.Optional<T> firstNonNull() {
         T next = null;
 
@@ -569,33 +550,6 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
         }
 
         return u.Optional.empty();
-    }
-
-    /**
-     * Returns the last element of this iterator wrapped in a {@code Nullable}.
-     * If the iterator is empty, returns an empty {@code Nullable}.
-     * This operation consumes all remaining elements.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ObjListIterator<Integer> iter = ObjListIterator.of(Arrays.asList(1, 2, 3, 4));
-     * Nullable<Integer> last = iter.last();   // Nullable.of(4)
-     * }</pre>
-     *
-     * @return a {@code Nullable} containing the last element, or empty if no elements
-     */
-    public Nullable<T> last() {
-        if (hasNext()) {
-            T next = next();
-
-            while (hasNext()) {
-                next = next();
-            }
-
-            return Nullable.of(next);
-        } else {
-            return Nullable.empty();
-        }
     }
 
     /**

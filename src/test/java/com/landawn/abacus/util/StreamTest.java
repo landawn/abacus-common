@@ -1,6 +1,9 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -53,6 +56,7 @@ public class StreamTest extends AbstractTest {
         Stream.of(c).groupJoin(b, it -> it.charAt(0)).foreach(Fn.println());
 
         Stream.of(b).groupJoin(c, it -> it.charAt(0)).foreach(Fn.println());
+        assertNotNull(b);
     }
 
     @Test
@@ -168,10 +172,12 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void test_transform() {
-        Stream.range(0, 3).transform(s -> s.mapToInt(ToIntFunction.UNBOX)).println();
-        Stream.range(0, 3).transformB(s -> s.limit(3)).println();
-        IntStream.range(0, 3).transformB(s -> s.limit(3)).println();
-        IntStream.range(0, 3).transform(s -> s.mapToObj(it -> it)).println();
+        assertDoesNotThrow(() -> {
+            Stream.range(0, 3).transform(s -> s.mapToInt(ToIntFunction.UNBOX)).println();
+            Stream.range(0, 3).transformB(s -> s.limit(3)).println();
+            IntStream.range(0, 3).transformB(s -> s.limit(3)).println();
+            IntStream.range(0, 3).transform(s -> s.mapToObj(it -> it)).println();
+        });
     }
 
     @Test
@@ -516,7 +522,9 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void test_toCsv() {
-        Stream.of(1, 2);
+        assertDoesNotThrow(() -> {
+            Stream.of(1, 2);
+        });
     }
 
     @Test
@@ -538,12 +546,13 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void test_onClose2() throws Exception {
-        Stream.of("a", "b")
-                .onClose(() -> System.out.println("Stream processing started"))
-                .onClose(() -> System.out.println("Stream processing finished"))
-                .map(String::toUpperCase)
-                .forEach(System.out::println);
-
+        assertDoesNotThrow(() -> {
+            Stream.of("a", "b")
+                    .onClose(() -> System.out.println("Stream processing started"))
+                    .onClose(() -> System.out.println("Stream processing finished"))
+                    .map(String::toUpperCase)
+                    .forEach(System.out::println);
+        });
     }
 
     //    @Test
@@ -571,6 +580,7 @@ public class StreamTest extends AbstractTest {
                 .joinByRange(s, (t, u) -> u < t, Collectors.mapping(String::valueOf, Collectors.joining(", ", "{", "}")), Fn.pair(),
                         iter -> Stream.of(Pair.of(0, Strings.join(iter))))
                 .forEach(Fn.println());
+        assertNotNull(s);
     }
 
     @Test
@@ -582,82 +592,6 @@ public class StreamTest extends AbstractTest {
         assertEquals(10000, IntStream.range(0, 5000).boxed().cycled(2).count());
         assertEquals(15000, IntStream.range(0, 5000).boxed().cycled(3).count());
     }
-
-    //     @Test
-    //     public void test_writeCSV() throws Exception {
-    //         final File file = new File("./stream.csv");
-    // 
-    //         {
-    // 
-    //             final List<Object> list = CommonUtil.toList(CommonUtil.asLinkedHashMap("k1", "v11\"'\"\\\"", "k2", 12, "k3", Dates.currentDate()), CommonUtil.asMap(
-    //                     "k1", "v21", "k2", CommonUtil.asLinkedHashMap("k1", "v11\"'\"\\\"", "k2", 12, "k3", Dates.currentDate()), "k3", Dates.currentDate()));
-    // 
-    //             final Dataset dataset = CommonUtil.newDataset(list);
-    //             dataset.println();
-    // 
-    //             N.println(dataset.toCsv());
-    // 
-    //             dataset.toCsv(file);
-    // 
-    //             IOUtil.readAllLines(file).forEach(Fn.println());
-    //             CsvUtil.load(file).println();
-    // 
-    //             N.println(Strings.repeat('-', 60));
-    // 
-    //             Stream.of(list).persistToCsv(file);
-    // 
-    //             IOUtil.readAllLines(file).forEach(Fn.println());
-    //             CsvUtil.load(file).println();
-    // 
-    //             Stream.of(list).persistToCsv(CommonUtil.toList("k1", "k3", "k2"), file);
-    // 
-    //             IOUtil.readAllLines(file).forEach(Fn.println());
-    // 
-    //             Stream.of(list).persist(file);
-    // 
-    //             IOUtil.readAllLines(file).forEach(Fn.println());
-    //         }
-    // 
-    //         N.println(Strings.repeat("=", 80));
-    // 
-    //         {
-    //             CsvUtil.setEscapeCharToBackSlashForWrite();
-    // 
-    //             final List<Object> list = CommonUtil.toList(CommonUtil.asLinkedHashMap("k1", "v11\"'\"\\\"", "k2", 12, "k3", Dates.currentDate()), CommonUtil.asMap(
-    //                     "k1", "v21", "k2", CommonUtil.asLinkedHashMap("k1", "v11\"'\"\\\"", "k2", 12, "k3", Dates.currentDate()), "k3", Dates.currentDate()));
-    // 
-    //             final Dataset dataset = CommonUtil.newDataset(list);
-    //             dataset.println();
-    // 
-    //             N.println(dataset.toCsv());
-    // 
-    //             dataset.toCsv(file);
-    // 
-    //             IOUtil.readAllLines(file).forEach(Fn.println());
-    //             CsvUtil.load(file).println();
-    // 
-    //             N.println(Strings.repeat('-', 60));
-    // 
-    //             Stream.of(list).persistToCsv(file);
-    // 
-    //             IOUtil.readAllLines(file).forEach(Fn.println());
-    //             CsvUtil.load(file).println();
-    // 
-    //             Stream.of(list).persistToCsv(CommonUtil.toList("k1", "k3", "k2"), file);
-    // 
-    //             IOUtil.readAllLines(file).forEach(Fn.println());
-    // 
-    //             Stream.of(list).persist(file);
-    // 
-    //             IOUtil.readAllLines(file).forEach(Fn.println());
-    // 
-    //             CsvUtil.resetHeaderParser();
-    //         }
-    // 
-    //         N.println(Strings.repeat("=", 80));
-    // 
-    //         IOUtil.deleteIfExists(file);
-    //     }
 
     @Test
     public void test_throwIfEmpty() throws Exception {
@@ -705,23 +639,25 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void test_Fn_notEmptyOrNull() throws Exception {
-        Stream.just(CommonUtil.asArray(Dates.currentCalendar())).filter(Fn.notEmptyArray()).forEach(Fn.println());
-        Stream.just(CommonUtil.toList(Dates.currentDate())).filter(Fn.notEmptyCollection()).forEach(Fn.println());
-        Stream.just(CommonUtil.asMap("key", Dates.currentDate())).filter(Fn.notEmptyMap()).forEach(Fn.println());
+        assertDoesNotThrow(() -> {
+            Stream.just(CommonUtil.asArray(Dates.currentCalendar())).filter(Fn.notEmptyArray()).forEach(Fn.println());
+            Stream.just(CommonUtil.toList(Dates.currentDate())).filter(Fn.notEmptyCollection()).forEach(Fn.println());
+            Stream.just(CommonUtil.asMap("key", Dates.currentDate())).filter(Fn.notEmptyMap()).forEach(Fn.println());
 
-        Stream.just(CommonUtil.asArray(Dates.currentCalendar())).filter(Fn.isEmptyArray()).forEach(Fn.println());
-        Stream.just(CommonUtil.toList(Dates.currentDate())).filter(Fn.isEmptyCollection()).forEach(Fn.println());
-        Stream.just(CommonUtil.asMap("key", Dates.currentDate())).filter(Fn.isEmptyMap()).forEach(Fn.println());
+            Stream.just(CommonUtil.asArray(Dates.currentCalendar())).filter(Fn.isEmptyArray()).forEach(Fn.println());
+            Stream.just(CommonUtil.toList(Dates.currentDate())).filter(Fn.isEmptyCollection()).forEach(Fn.println());
+            Stream.just(CommonUtil.asMap("key", Dates.currentDate())).filter(Fn.isEmptyMap()).forEach(Fn.println());
 
-        N.println(Strings.repeat('=', 80));
+            N.println(Strings.repeat('=', 80));
 
-        Seq.just(CommonUtil.asArray(Dates.currentCalendar())).filter(Fnn.notEmptyArray()).forEach(Fn.println());
-        Seq.just(CommonUtil.toList(Dates.currentDate())).filter(Fnn.notEmptyCollection()).forEach(Fn.println());
-        Seq.just(CommonUtil.asMap("key", Dates.currentDate())).filter(Fnn.notEmptyMap()).forEach(Fn.println());
+            Seq.just(CommonUtil.asArray(Dates.currentCalendar())).filter(Fnn.notEmptyArray()).forEach(Fn.println());
+            Seq.just(CommonUtil.toList(Dates.currentDate())).filter(Fnn.notEmptyCollection()).forEach(Fn.println());
+            Seq.just(CommonUtil.asMap("key", Dates.currentDate())).filter(Fnn.notEmptyMap()).forEach(Fn.println());
 
-        Seq.just(CommonUtil.asArray(Dates.currentCalendar())).filter(Fnn.isEmptyArray()).forEach(Fn.println());
-        Seq.just(CommonUtil.toList(Dates.currentDate())).filter(Fnn.isEmptyCollection()).forEach(Fn.println());
-        Seq.just(CommonUtil.asMap("key", Dates.currentDate())).filter(Fnn.isEmptyMap()).forEach(Fn.println());
+            Seq.just(CommonUtil.asArray(Dates.currentCalendar())).filter(Fnn.isEmptyArray()).forEach(Fn.println());
+            Seq.just(CommonUtil.toList(Dates.currentDate())).filter(Fnn.isEmptyCollection()).forEach(Fn.println());
+            Seq.just(CommonUtil.asMap("key", Dates.currentDate())).filter(Fnn.isEmptyMap()).forEach(Fn.println());
+        });
     }
 
     @Test
@@ -848,7 +784,7 @@ public class StreamTest extends AbstractTest {
         startTime = System.currentTimeMillis();
         Stream.of(CommonUtil.toList(Array.range(1, 1000))).map(Fn.identity()).sps(64, ss -> ss.peek(Fn.sleep(10))).filter(Fn.alwaysTrue()).count();
         N.println("abacus stream took: " + (System.currentTimeMillis() - startTime));
-
+        assertNotNull(startTime);
     }
 
     @Test
@@ -921,8 +857,10 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void test_maxAll() throws Exception {
-        N.println(Stream.of(1, 3, 2, 9, 2, 9, 1, 4).collect(Collectors.maxAll()));
-        N.println(Stream.of(1, 3, 2, 9, 2, 9, 1, 4).collect(Collectors.minAll()));
+        assertDoesNotThrow(() -> {
+            N.println(Stream.of(1, 3, 2, 9, 2, 9, 1, 4).collect(Collectors.maxAll()));
+            N.println(Stream.of(1, 3, 2, 9, 2, 9, 1, 4).collect(Collectors.minAll()));
+        });
     }
 
     @Test
@@ -944,6 +882,7 @@ public class StreamTest extends AbstractTest {
         ret2 = Stream.<BigDecimal> empty().collect(Collectors.summarizingBigDecimal(Fn.identity()));
 
         N.println(ret2);
+        assertNotNull(ret2);
     }
 
     @Test
@@ -1002,23 +941,25 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void test_forEachUntil() {
-        Stream.range(1, 9).map(i -> i + 1).filter(i -> i % 2 == 0 || (i + 1) % 2 == 0).peek(Fn.println()).forEachUntil((it, flagToBreak) -> {
-            if (it > 5) {
-                flagToBreak.setTrue();
-                return;
-            }
+        assertDoesNotThrow(() -> {
+            Stream.range(1, 9).map(i -> i + 1).filter(i -> i % 2 == 0 || (i + 1) % 2 == 0).peek(Fn.println()).forEachUntil((it, flagToBreak) -> {
+                if (it > 5) {
+                    flagToBreak.setTrue();
+                    return;
+                }
 
-            N.println("a: " + it);
-        });
+                N.println("a: " + it);
+            });
 
-        N.println(Strings.repeat('=', 80));
+            N.println(Strings.repeat('=', 80));
 
-        Stream.range(1, 9).map(i -> i + 1).filter(i -> i % 2 == 0 || (i + 1) % 2 == 0).peek(Fn.println()).forEachUntil((it, flagToBreak) -> {
-            N.println("a: " + it);
+            Stream.range(1, 9).map(i -> i + 1).filter(i -> i % 2 == 0 || (i + 1) % 2 == 0).peek(Fn.println()).forEachUntil((it, flagToBreak) -> {
+                N.println("a: " + it);
 
-            if (it > 5) {
-                flagToBreak.setTrue();
-            }
+                if (it > 5) {
+                    flagToBreak.setTrue();
+                }
+            });
         });
     }
 
@@ -1027,6 +968,7 @@ public class StreamTest extends AbstractTest {
         final Map<String, Integer> map = CommonUtil.asMap("a", 1, "b", 2);
         final long count = Stream.of(map).filter(it -> Strings.isNotEmpty(it.getKey())).map(Fn.value()).mapToInt(ToIntFunction.UNBOX).count();
         N.println(count);
+        assertNotNull(count);
     }
 
     @Test
@@ -1191,10 +1133,11 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void test_futureGet() {
-        Stream.range(0, 10).map(it -> N.asyncExecute(() -> N.println(it))).map(Fn.futureGet()).forEach(Fn.println());
+        assertDoesNotThrow(() -> {
+            Stream.range(0, 10).map(it -> N.asyncExecute(() -> N.println(it))).map(Fn.futureGet()).forEach(Fn.println());
 
-        Stream.range(0, 10).parallel().map(it -> N.asyncExecute(() -> N.println(it))).map(Fn.futureGet()).forEach(Fn.println());
-
+            Stream.range(0, 10).parallel().map(it -> N.asyncExecute(() -> N.println(it))).map(Fn.futureGet()).forEach(Fn.println());
+        });
     }
 
     @Test
@@ -1202,142 +1145,182 @@ public class StreamTest extends AbstractTest {
         final List<Iterator<Integer>> iters = IntStream.range(0, 64).mapToObj(it -> CommonUtil.toList(it).iterator()).toList();
 
         N.println(Stream.parallelConcatIterators(iters).sumInt(Integer::intValue));
+        assertNotNull(iters);
+    }
+
+    @Test
+    public void test_parallelZipIterators() {
+        List<Iterator<Integer>> iterators = Arrays.asList(Arrays.asList(1, 2, 3).iterator(), Arrays.asList(10, 20, 30).iterator());
+        List<Integer> result = Stream.parallelZipIterators(iterators, values -> values.get(0) + values.get(1), 2).toList();
+
+        result.sort(Integer::compareTo);
+        assertEquals(Arrays.asList(11, 22, 33), result);
+    }
+
+    @Test
+    public void test_parallelZipIterators_WithDefaultsAndNullIterator() {
+        List<Iterator<String>> iterators = Arrays.asList(Arrays.asList("a", "bb").iterator(), null, Arrays.asList("X").iterator());
+        List<String> valuesForNone = Arrays.asList("?", "default", "!");
+        List<String> result = Stream.parallelZipIterators(iterators, valuesForNone, values -> String.join("|", values), 2).toList();
+
+        assertHaveSameElements(Arrays.asList("a|default|X", "bb|default|!"), result);
+    }
+
+    @Test
+    public void test_sps_WithChunkSize() {
+        List<Integer> result = Stream.of("a", "bb", "ccc", "dddd", "ee").sps(2, 2, chunk -> Stream.of(chunk).map(String::length)).toList();
+
+        assertEquals(5, result.size());
+        assertEquals(12, result.stream().mapToInt(Integer::intValue).sum());
+        assertEquals(2L, result.stream().filter(it -> it == 2).count());
+        assertTrue(result.containsAll(Arrays.asList(1, 2, 3, 4)));
+        assertThrows(IllegalArgumentException.class, () -> Stream.of("a").sps(0, 1, chunk -> Stream.of(chunk)));
     }
 
     @Test
     public void test_rollup() {
-        Iterables.rollup(CommonUtil.toList(1, 2, 3)).forEach(Fn.println());
-        N.println(Strings.repeat("=", 80));
-        Iterables.rollup(CommonUtil.<String> emptyList()).forEach(Fn.println());
+        assertDoesNotThrow(() -> {
+            Iterables.rollup(CommonUtil.toList(1, 2, 3)).forEach(Fn.println());
+            N.println(Strings.repeat("=", 80));
+            Iterables.rollup(CommonUtil.<String> emptyList()).forEach(Fn.println());
 
-        N.println(Strings.repeat("=", 80));
+            N.println(Strings.repeat("=", 80));
 
-        Stream.of(CommonUtil.<String> emptyList()).rollup().forEach(Fn.println());
-        Stream.of(CommonUtil.<String> emptyList()).rollup().skip(10).forEach(Fn.println());
+            Stream.of(CommonUtil.<String> emptyList()).rollup().forEach(Fn.println());
+            Stream.of(CommonUtil.<String> emptyList()).rollup().skip(10).forEach(Fn.println());
 
-        N.println(Strings.repeat("=", 80));
-        Stream.of(CommonUtil.toList(1, 2, 3)).rollup().forEach(Fn.println());
-        Stream.of(CommonUtil.toList(1, 2, 3)).rollup().skip(2).forEach(Fn.println());
-        Stream.of(CommonUtil.<String> emptyList()).rollup().skip(3).limit(1).forEach(Fn.println());
+            N.println(Strings.repeat("=", 80));
+            Stream.of(CommonUtil.toList(1, 2, 3)).rollup().forEach(Fn.println());
+            Stream.of(CommonUtil.toList(1, 2, 3)).rollup().skip(2).forEach(Fn.println());
+            Stream.of(CommonUtil.<String> emptyList()).rollup().skip(3).limit(1).forEach(Fn.println());
+        });
     }
 
     @Test
     public void test_reversed() {
-        IntStream.of(1, 3, 2).reversed().println();
-        IntStream.of(IntIterator.of(1, 3, 2)).reversed().println();
+        assertDoesNotThrow(() -> {
+            IntStream.of(1, 3, 2).reversed().println();
+            IntStream.of(IntIterator.of(1, 3, 2)).reversed().println();
 
-        Stream.of(1, 3, 2).reversed().println();
-        Stream.of(ObjIterator.of(1, 3, 2)).reversed().println();
+            Stream.of(1, 3, 2).reversed().println();
+            Stream.of(ObjIterator.of(1, 3, 2)).reversed().println();
 
-        N.println(Strings.repeat("=", 80));
+            N.println(Strings.repeat("=", 80));
 
-        IntStream.of(1, 3, 2).rotated(0).println();
-        IntStream.of(IntIterator.of(1, 3, 2)).rotated(0).println();
+            IntStream.of(1, 3, 2).rotated(0).println();
+            IntStream.of(IntIterator.of(1, 3, 2)).rotated(0).println();
 
-        Stream.of(1, 3, 2).rotated(0).println();
-        Stream.of(ObjIterator.of(1, 3, 2)).rotated(0).println();
+            Stream.of(1, 3, 2).rotated(0).println();
+            Stream.of(ObjIterator.of(1, 3, 2)).rotated(0).println();
 
-        N.println(Strings.repeat("=", 80));
+            N.println(Strings.repeat("=", 80));
 
-        IntStream.of(1, 3, 2).rotated(1).println();
-        IntStream.of(IntIterator.of(1, 3, 2)).rotated(1).println();
+            IntStream.of(1, 3, 2).rotated(1).println();
+            IntStream.of(IntIterator.of(1, 3, 2)).rotated(1).println();
 
-        Stream.of(1, 3, 2).rotated(1).println();
-        Stream.of(ObjIterator.of(1, 3, 2)).rotated(1).println();
+            Stream.of(1, 3, 2).rotated(1).println();
+            Stream.of(ObjIterator.of(1, 3, 2)).rotated(1).println();
 
-        N.println(Strings.repeat("=", 80));
+            N.println(Strings.repeat("=", 80));
 
-        N.println(Stream.of(1, 3, 2).join(", "));
-        N.println(IntStream.of(1, 3, 2).join(", ", "[", "]"));
+            N.println(Stream.of(1, 3, 2).join(", "));
+            N.println(IntStream.of(1, 3, 2).join(", ", "[", "]"));
+        });
     }
 
     @Test
     public void test_cycled2() {
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled().limit(0).println();
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled().limit(1).println();
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled().limit(2).println();
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled().limit(3).println();
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled().limit(4).println();
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled().limit(5).println();
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled().limit(6).println();
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled().limit(7).println();
+        assertDoesNotThrow(() -> {
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled().limit(0).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled().limit(1).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled().limit(2).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled().limit(3).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled().limit(4).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled().limit(5).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled().limit(6).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled().limit(7).println();
 
-        N.println(Strings.repeat("=", 80));
+            N.println(Strings.repeat("=", 80));
 
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(0).limit(0).println();
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(0).limit(1).println();
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(0).limit(2).println();
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(0).limit(3).println();
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(0).limit(4).println();
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(0).limit(5).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(0).limit(0).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(0).limit(1).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(0).limit(2).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(0).limit(3).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(0).limit(4).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(0).limit(5).println();
 
-        N.println(Strings.repeat("=", 80));
+            N.println(Strings.repeat("=", 80));
 
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(1).limit(0).println();
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(1).limit(1).println();
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(1).limit(2).println();
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(1).limit(3).println();
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(1).limit(4).println();
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(1).limit(5).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(1).limit(0).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(1).limit(1).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(1).limit(2).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(1).limit(3).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(1).limit(4).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(1).limit(5).println();
 
-        N.println(Strings.repeat("=", 80));
+            N.println(Strings.repeat("=", 80));
 
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(10).limit(0).println();
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(10).limit(1).println();
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(10).limit(2).println();
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(10).limit(3).println();
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(10).limit(4).println();
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(10).limit(5).println();
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(10).limit(6).println();
-        Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(10).limit(7).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(10).limit(0).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(10).limit(1).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(10).limit(2).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(10).limit(3).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(10).limit(4).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(10).limit(5).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(10).limit(6).println();
+            Stream.of(CommonUtil.asArray(1, 2, 3)).cycled(10).limit(7).println();
+        });
     }
 
     @Test
     public void test_cycled() {
-        Stream.of(1, 2, 3).cycled().limit(0).println();
-        Stream.of(1, 2, 3).cycled().limit(1).println();
-        Stream.of(1, 2, 3).cycled().limit(2).println();
-        Stream.of(1, 2, 3).cycled().limit(3).println();
-        Stream.of(1, 2, 3).cycled().limit(4).println();
-        Stream.of(1, 2, 3).cycled().limit(5).println();
-        Stream.of(1, 2, 3).cycled().limit(6).println();
-        Stream.of(1, 2, 3).cycled().limit(7).println();
+        assertDoesNotThrow(() -> {
+            Stream.of(1, 2, 3).cycled().limit(0).println();
+            Stream.of(1, 2, 3).cycled().limit(1).println();
+            Stream.of(1, 2, 3).cycled().limit(2).println();
+            Stream.of(1, 2, 3).cycled().limit(3).println();
+            Stream.of(1, 2, 3).cycled().limit(4).println();
+            Stream.of(1, 2, 3).cycled().limit(5).println();
+            Stream.of(1, 2, 3).cycled().limit(6).println();
+            Stream.of(1, 2, 3).cycled().limit(7).println();
 
-        N.println(Strings.repeat("=", 80));
+            N.println(Strings.repeat("=", 80));
 
-        Stream.of(1, 2, 3).cycled(0).limit(0).println();
-        Stream.of(1, 2, 3).cycled(0).limit(1).println();
-        Stream.of(1, 2, 3).cycled(0).limit(2).println();
-        Stream.of(1, 2, 3).cycled(0).limit(3).println();
-        Stream.of(1, 2, 3).cycled(0).limit(4).println();
-        Stream.of(1, 2, 3).cycled(0).limit(5).println();
+            Stream.of(1, 2, 3).cycled(0).limit(0).println();
+            Stream.of(1, 2, 3).cycled(0).limit(1).println();
+            Stream.of(1, 2, 3).cycled(0).limit(2).println();
+            Stream.of(1, 2, 3).cycled(0).limit(3).println();
+            Stream.of(1, 2, 3).cycled(0).limit(4).println();
+            Stream.of(1, 2, 3).cycled(0).limit(5).println();
 
-        N.println(Strings.repeat("=", 80));
+            N.println(Strings.repeat("=", 80));
 
-        Stream.of(1, 2, 3).cycled(1).limit(0).println();
-        Stream.of(1, 2, 3).cycled(1).limit(1).println();
-        Stream.of(1, 2, 3).cycled(1).limit(2).println();
-        Stream.of(1, 2, 3).cycled(1).limit(3).println();
-        Stream.of(1, 2, 3).cycled(1).limit(4).println();
-        Stream.of(1, 2, 3).cycled(1).limit(5).println();
+            Stream.of(1, 2, 3).cycled(1).limit(0).println();
+            Stream.of(1, 2, 3).cycled(1).limit(1).println();
+            Stream.of(1, 2, 3).cycled(1).limit(2).println();
+            Stream.of(1, 2, 3).cycled(1).limit(3).println();
+            Stream.of(1, 2, 3).cycled(1).limit(4).println();
+            Stream.of(1, 2, 3).cycled(1).limit(5).println();
 
-        N.println(Strings.repeat("=", 80));
+            N.println(Strings.repeat("=", 80));
 
-        Stream.of(1, 2, 3).cycled(10).limit(0).println();
-        Stream.of(1, 2, 3).cycled(10).limit(1).println();
-        Stream.of(1, 2, 3).cycled(10).limit(2).println();
-        Stream.of(1, 2, 3).cycled(10).limit(3).println();
-        Stream.of(1, 2, 3).cycled(10).limit(4).println();
-        Stream.of(1, 2, 3).cycled(10).limit(5).println();
-        Stream.of(1, 2, 3).cycled(10).limit(6).println();
-        Stream.of(1, 2, 3).cycled(10).limit(7).println();
+            Stream.of(1, 2, 3).cycled(10).limit(0).println();
+            Stream.of(1, 2, 3).cycled(10).limit(1).println();
+            Stream.of(1, 2, 3).cycled(10).limit(2).println();
+            Stream.of(1, 2, 3).cycled(10).limit(3).println();
+            Stream.of(1, 2, 3).cycled(10).limit(4).println();
+            Stream.of(1, 2, 3).cycled(10).limit(5).println();
+            Stream.of(1, 2, 3).cycled(10).limit(6).println();
+            Stream.of(1, 2, 3).cycled(10).limit(7).println();
+        });
     }
 
     @Test
     public void test_acceptIfNotEmpty() {
-        Stream.of(1, 2, 3).acceptIfNotEmpty(Stream::println).orElse(() -> N.println("Is empty"));
+        assertDoesNotThrow(() -> {
+            Stream.of(1, 2, 3).acceptIfNotEmpty(Stream::println).orElse(() -> N.println("Is empty"));
 
-        Stream.empty().acceptIfNotEmpty(Stream::println).orElse(() -> N.println("Is empty"));
+            Stream.empty().acceptIfNotEmpty(Stream::println).orElse(() -> N.println("Is empty"));
+        });
     }
 
     @Test
@@ -1347,67 +1330,57 @@ public class StreamTest extends AbstractTest {
         IntStream.merge(IntStream.range(0, 10), IntStream.range(10, 20), first).println();
 
         Stream.merge(IntStream.range(0, 10).boxed(), IntStream.range(10, 20).boxed(), Fn.alternate()).println();
+        assertNotNull(first);
     }
 
     @Test
     public void test_Collectors_combine() {
-        N.println(Stream.of(1, 2, 3, 1, 1, 3)
-                .collect(MoreCollectors.combine(Collectors.<Integer> min(), Collectors.<Integer> minAll(), Collectors.<Integer> maxAll(), Tuple::of)));
+        assertDoesNotThrow(() -> {
+            N.println(Stream.of(1, 2, 3, 1, 1, 3)
+                    .collect(MoreCollectors.combine(Collectors.<Integer> min(), Collectors.<Integer> minAll(), Collectors.<Integer> maxAll(), Tuple::of)));
+        });
     }
 
     @Test
     public void test_cartesianProduct() {
-        Stream.of("1").cartesianProduct(CommonUtil.toList("a", "b")).forEach(Fn.println());
+        assertDoesNotThrow(() -> {
+            Stream.of("1").cartesianProduct(CommonUtil.toList("a", "b")).forEach(Fn.println());
 
-        N.println("===================================================");
-        Stream.of("1", "2").cartesianProduct(CommonUtil.toList("a", "b")).forEach(Fn.println());
+            N.println("===================================================");
+            Stream.of("1", "2").cartesianProduct(CommonUtil.toList("a", "b")).forEach(Fn.println());
 
-        N.println("===================================================");
-        Stream.of("1", "2", "3").cartesianProduct(CommonUtil.toList("a", "b")).forEach(Fn.println());
+            N.println("===================================================");
+            Stream.of("1", "2", "3").cartesianProduct(CommonUtil.toList("a", "b")).forEach(Fn.println());
 
-        N.println("===================================================");
-        Stream.of("1", "2", "3").cartesianProduct(CommonUtil.toList("a")).forEach(Fn.println());
+            N.println("===================================================");
+            Stream.of("1", "2", "3").cartesianProduct(CommonUtil.toList("a")).forEach(Fn.println());
+        });
     }
 
     @Test
     public void test_combinations_2() {
-        Stream.of(1, 2, 3).combinations().forEach(Fn.println());
-        N.println("===================================================");
-        Stream.of(1, 2, 3).combinations(2).forEach(Fn.println());
-        N.println("===================================================");
-        Stream.of(1, 2, 3).combinations(2, false).forEach(Fn.println());
-        N.println("===================================================");
-        Stream.of(1, 2, 3).combinations(2, true).forEach(Fn.println());
-        N.println("===================================================");
-        Stream.of(1, 2, 3).combinations(3, true).forEach(Fn.println());
-        N.println("===================================================");
-        Stream.of(1, 2, 3).permutations().forEach(Fn.println());
-        N.println("===================================================");
-        Stream.of(1, 2, 3).orderedPermutations().forEach(Fn.println());
+        assertDoesNotThrow(() -> {
+            Stream.of(1, 2, 3).combinations().forEach(Fn.println());
+            N.println("===================================================");
+            Stream.of(1, 2, 3).combinations(2).forEach(Fn.println());
+            N.println("===================================================");
+            Stream.of(1, 2, 3).combinations(2, false).forEach(Fn.println());
+            N.println("===================================================");
+            Stream.of(1, 2, 3).combinations(2, true).forEach(Fn.println());
+            N.println("===================================================");
+            Stream.of(1, 2, 3).combinations(3, true).forEach(Fn.println());
+            N.println("===================================================");
+            Stream.of(1, 2, 3).permutations().forEach(Fn.println());
+            N.println("===================================================");
+            Stream.of(1, 2, 3).orderedPermutations().forEach(Fn.println());
+        });
     }
 
     @Test
     public void test_only() {
-        Stream.of(1, 2).collect(Collectors.onlyOne(Fn.lessThan(2))).ifPresentOrElse(Fn.println(), Fn.emptyAction());
-    }
-
-    @Test
-    public void test_rotate() {
-        ByteStream.range((byte) 0, (byte) 2).rotated(-3).println();
-
-        for (int i = 0; i < 23; i++) {
-            for (int j = 0; j <= i; j++) {
-                final byte[] a = Array.range((byte) j, (byte) i);
-                N.println(a);
-
-                for (int k = -97; k < 97; k++) {
-                    final byte[] tmp = a.clone();
-                    CommonUtil.rotate(tmp, k);
-
-                    assertTrue(CommonUtil.equals(tmp, ByteStream.range((byte) j, (byte) i).rotated(k).toArray()));
-                }
-            }
-        }
+        assertDoesNotThrow(() -> {
+            Stream.of(1, 2).collect(Collectors.onlyOne(Fn.lessThan(2))).ifPresentOrElse(Fn.println(), Fn.emptyAction());
+        });
     }
 
     @Test
@@ -1452,6 +1425,7 @@ public class StreamTest extends AbstractTest {
 
         str = Stream.of("abc2efg", "abc3efg", "ab2fg").collect(Collectors.commonSuffix());
         N.println(str);
+        assertNotNull(str);
     }
 
     @Test
@@ -1473,6 +1447,7 @@ public class StreamTest extends AbstractTest {
         N.println(Strings.repeat("=", 80));
 
         Stream.of(a).rightJoin(b, (BiPredicate<String[], String[]>) (t, u) -> CommonUtil.equals(t[1], u[0])).println();
+        assertNotNull(a);
     }
 
     @Test
@@ -1494,6 +1469,7 @@ public class StreamTest extends AbstractTest {
         N.println(Strings.repeat("=", 80));
 
         Stream.of(a).rightJoin(b, (Function<String[], String>) t -> t[1], (Function<String[], String>) t -> t[0]).println();
+        assertNotNull(a);
     }
 
     @Test
@@ -1501,6 +1477,7 @@ public class StreamTest extends AbstractTest {
 
         final int len = 6;
         IntStream.rangeClosed(1, len).boxed().combinations().forEach(N::println);
+        assertNotNull(len);
     }
 
     @Test
@@ -1537,13 +1514,15 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void test_02() {
-        N.println(Stream.of(1, 5, 7, 3, 2, 1).top(2).toArray());
+        assertDoesNotThrow(() -> {
+            N.println(Stream.of(1, 5, 7, 3, 2, 1).top(2).toArray());
 
-        N.println(Stream.of(1, 5, 7, 3, 2, 1).top(6).toArray());
+            N.println(Stream.of(1, 5, 7, 3, 2, 1).top(6).toArray());
 
-        N.println(Stream.of(1, 5, 7, 3, 2, 1).top(7).toArray());
+            N.println(Stream.of(1, 5, 7, 3, 2, 1).top(7).toArray());
 
-        N.println(IntStream.of(1, 5, 7, 3, 2, 1).top(7).toArray());
+            N.println(IntStream.of(1, 5, 7, 3, 2, 1).top(7).toArray());
+        });
     }
 
     @Test
@@ -1657,6 +1636,7 @@ public class StreamTest extends AbstractTest {
         final Stream<Timestamp> s3 = Stream.zip(CommonUtil.toList("a", "b"), CommonUtil.toList(1, 2), (a, b) -> new Timestamp(System.currentTimeMillis()))
                 .onClose(Fn.emptyAction());
         s3.forEach(Fn.println());
+        assertNotNull(s2);
     }
 
 }

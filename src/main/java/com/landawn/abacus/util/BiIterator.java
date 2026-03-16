@@ -27,7 +27,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.function.IntObjConsumer;
 import com.landawn.abacus.util.stream.EntryStream;
 import com.landawn.abacus.util.stream.Stream;
@@ -1249,59 +1248,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @throws IllegalArgumentException if mapper is {@code null}
      */
     public abstract <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper);
-
-    /**
-     * Returns an {@code Optional} containing the first pair of elements, or empty if this iterator has no elements.
-     * This method consumes the first pair from the iterator.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * BiIterator<String, Integer> iter = BiIterator.of(Map.of("a", 1, "b", 2));
-     * Optional<Pair<String, Integer>> first = iter.first();
-     * if (first.isPresent()) {
-     *     System.out.println("First pair: " + first.get().left() + "=" + first.get().right());
-     * }
-     * }</pre>
-     *
-     * @return an Optional containing the first pair if available, otherwise empty
-     */
-    public Optional<Pair<A, B>> first() {
-        if (hasNext()) {
-            return Optional.of(next());
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    /**
-     * Returns an {@code Optional} containing the last pair of elements, or empty if this iterator has no elements.
-     * This method consumes all remaining pairs in the iterator to find the last one.
-     *
-     * <p><strong>Note:</strong> This operation is expensive for large iterators as it must iterate through all elements.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * BiIterator<String, Integer> iter = BiIterator.of(Map.of("a", 1, "b", 2, "c", 3));
-     * Optional<Pair<String, Integer>> last = iter.last();
-     * if (last.isPresent()) {
-     *     System.out.println("Last pair: " + last.get().left() + "=" + last.get().right());
-     * }
-     * }</pre>
-     *
-     * @return an Optional containing the last pair if the iterator is non-empty, otherwise empty
-     */
-    public Optional<Pair<A, B>> last() {
-        if (hasNext()) {
-            final Pair<A, B> next = new Pair<>();
-            final BiConsumer<A, B> setNext = next::set;
-
-            forEachRemaining(setNext);
-
-            return Optional.of(next);
-        } else {
-            return Optional.empty();
-        }
-    }
 
     /**
      * Converts this {@code BiIterator} into an {@code EntryStream} for further stream processing.

@@ -1,0 +1,206 @@
+package com.landawn.abacus.type;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+
+import java.nio.ByteBuffer;
+import java.sql.CallableStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
+import com.landawn.abacus.TestBase;
+
+@Tag("2025")
+public class ByteBufferTypeTest extends TestBase {
+
+    private final ByteBufferType type = new ByteBufferType();
+
+    @Test
+    public void test_get_ResultSet_byLabel() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+        // Basic get test - actual implementation will vary by type
+        assertDoesNotThrow(() -> type.get(rs, "col"));
+    }
+
+    @Test
+    public void test_set_CallableStatement() throws SQLException {
+        CallableStatement stmt = mock(CallableStatement.class);
+        // Basic set test - actual implementation will vary by type
+        assertDoesNotThrow(() -> type.set(stmt, "param", null));
+    }
+
+    @Test
+    public void testClazz() {
+        Class<ByteBuffer> result = type.javaType();
+        assertEquals(ByteBuffer.class, result);
+    }
+
+    @Test
+    public void testIsByteBuffer() {
+        boolean result = type.isByteBuffer();
+        Assertions.assertTrue(result);
+    }
+
+    @Test
+    public void testStringOf_EmptyBuffer() {
+        ByteBuffer buffer = ByteBuffer.allocate(0);
+        String result = type.stringOf(buffer);
+        Assertions.assertNotNull(result);
+        assertEquals("", result);
+    }
+
+    @Test
+    public void testStringOf_BufferWithData() {
+        ByteBuffer buffer = ByteBuffer.allocate(3);
+        buffer.put((byte) 1);
+        buffer.put((byte) 2);
+        buffer.put((byte) 3);
+
+        String result = type.stringOf(buffer);
+        Assertions.assertNotNull(result);
+        assertEquals("AQID", result);
+    }
+
+    @Test
+    public void testValueOf_Null() {
+        ByteBuffer result = type.valueOf((String) null);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testValueOf_EmptyString() {
+        ByteBuffer result = type.valueOf("");
+        Assertions.assertNotNull(result);
+        assertEquals(0, result.position());
+        assertEquals(0, result.limit());
+        assertEquals(0, result.capacity());
+    }
+
+    @Test
+    public void testValueOf_ValidBase64() {
+        String base64 = "AQID";
+        ByteBuffer result = type.valueOf(base64);
+
+        Assertions.assertNotNull(result);
+        assertEquals(3, result.position());
+        assertEquals(3, result.limit());
+        assertEquals(3, result.capacity());
+
+        result.position(0);
+        assertEquals((byte) 1, result.get());
+        assertEquals((byte) 2, result.get());
+        assertEquals((byte) 3, result.get());
+    }
+
+    @Test
+    public void testByteArrayOf() {
+        ByteBuffer buffer = ByteBuffer.allocate(4);
+        buffer.put((byte) 10);
+        buffer.put((byte) 20);
+        buffer.put((byte) 30);
+        buffer.put((byte) 40);
+
+        byte[] result = ByteBufferType.byteArrayOf(buffer);
+
+        Assertions.assertNotNull(result);
+        assertEquals(4, result.length);
+        assertEquals((byte) 10, result[0]);
+        assertEquals((byte) 20, result[1]);
+        assertEquals((byte) 30, result[2]);
+        assertEquals((byte) 40, result[3]);
+
+        assertEquals(4, buffer.position());
+    }
+
+    @Test
+    public void testByteArrayOf_PartialBuffer() {
+        ByteBuffer buffer = ByteBuffer.allocate(5);
+        buffer.put((byte) 1);
+        buffer.put((byte) 2);
+        buffer.put((byte) 3);
+
+        byte[] result = ByteBufferType.byteArrayOf(buffer);
+
+        Assertions.assertNotNull(result);
+        assertEquals(3, result.length);
+        assertEquals((byte) 1, result[0]);
+        assertEquals((byte) 2, result[1]);
+        assertEquals((byte) 3, result[2]);
+
+        assertEquals(3, buffer.position());
+    }
+
+    @Test
+    public void testValueOf_ByteArray() {
+        byte[] bytes = new byte[] { (byte) -1, (byte) 0, (byte) 127 };
+        ByteBuffer result = ByteBufferType.valueOf(bytes);
+
+        Assertions.assertNotNull(result);
+        assertEquals(3, result.position());
+        assertEquals(3, result.limit());
+        assertEquals(3, result.capacity());
+
+        result.position(0);
+        assertEquals((byte) -1, result.get());
+        assertEquals((byte) 0, result.get());
+        assertEquals((byte) 127, result.get());
+    }
+
+    @Test
+    public void testValueOf_EmptyByteArray() {
+        byte[] bytes = new byte[0];
+        ByteBuffer result = ByteBufferType.valueOf(bytes);
+
+        Assertions.assertNotNull(result);
+        assertEquals(0, result.position());
+        assertEquals(0, result.limit());
+        assertEquals(0, result.capacity());
+    }
+
+    @Test
+    public void testRoundTrip() {
+        ByteBuffer original = ByteBuffer.allocate(4);
+        original.put((byte) 10);
+        original.put((byte) 20);
+        original.put((byte) 30);
+        original.put((byte) 40);
+
+        String base64 = type.stringOf(original);
+        Assertions.assertNotNull(base64);
+
+        ByteBuffer restored = type.valueOf(base64);
+        Assertions.assertNotNull(restored);
+
+        assertEquals(original.position(), restored.position());
+        assertEquals(original.limit(), restored.limit());
+
+        original.position(0);
+        restored.position(0);
+        while (original.hasRemaining()) {
+            assertEquals(original.get(), restored.get());
+        }
+    }
+
+    @Test
+    public void testComplexData() {
+        ByteBuffer buffer = ByteBuffer.allocate(256);
+        for (int i = 0; i < 256; i++) {
+            buffer.put((byte) i);
+        }
+
+        String base64 = type.stringOf(buffer);
+        ByteBuffer restored = type.valueOf(base64);
+
+        assertEquals(256, restored.position());
+        restored.position(0);
+        for (int i = 0; i < 256; i++) {
+            assertEquals((byte) i, restored.get());
+        }
+    }
+
+}

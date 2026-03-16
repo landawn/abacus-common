@@ -1,5 +1,7 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -25,5 +27,6 @@ public class LogMessageTest extends AbstractTest {
         logger.error("Hi {}.", "123", "abc");
         Object obj = CommonUtil.asArray("123", "abc");
         logger.error("Hi {}.", obj);
+        assertNotNull(obj);
     }
 }

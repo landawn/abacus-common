@@ -1,5 +1,7 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.util.Map;
 import java.util.function.BiPredicate;
 
@@ -20,7 +22,7 @@ public class IteratorTest {
         BiIterator.of(map).filter(predicate_1).foreachRemaining((a, b) -> N.println(a + "=" + b));
         N.println(Strings.repeat("=", 80));
         BiIterator.of(map).filter(predicate_1).map((a, b) -> a + "=" + b).forEachRemaining(Fn.println());
-
+        assertNotNull(predicate_1);
     }
 
     @Test
@@ -44,7 +46,7 @@ public class IteratorTest {
         BiIterator.of(map).limit(map.size()).map((a, b) -> a + "=" + b).forEachRemaining(Fn.println());
         N.println(Strings.repeat("=", 80));
         BiIterator.of(map).limit(Long.MAX_VALUE).map((a, b) -> a + "=" + b).forEachRemaining(Fn.println());
-
+        assertNotNull(map);
     }
 
     @Test
@@ -68,7 +70,7 @@ public class IteratorTest {
         BiIterator.of(map).skip(map.size()).map((a, b) -> a + "=" + b).forEachRemaining(Fn.println());
         N.println(Strings.repeat("=", 80));
         BiIterator.of(map).skip(Long.MAX_VALUE).map((a, b) -> a + "=" + b).forEachRemaining(Fn.println());
-
+        assertNotNull(map);
     }
 
     @Test
@@ -81,6 +83,7 @@ public class IteratorTest {
 
         Pair<Integer, String>[] a = BiIterator.of(map).toArray();
         N.forEach(a, Fn.println());
+        assertNotNull(a);
     }
 
     @Test
@@ -90,6 +93,7 @@ public class IteratorTest {
 
         iter = ObjIterator.of(1, 2, 3, 4, 5);
         N.forEach(Iterators.skipAndLimit(iter, 1, 3), Fn.println());
+        assertNotNull(iter);
     }
 
 }

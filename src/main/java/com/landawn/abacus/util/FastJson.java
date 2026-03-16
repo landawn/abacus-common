@@ -13,8 +13,6 @@
  */
 package com.landawn.abacus.util;
 
-import com.landawn.abacus.annotation.MayReturnNull;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -27,6 +25,7 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.TypeReference;
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.MayReturnNull;
 
 /**
  * A utility class that provides convenient wrapper methods for JSON serialization and deserialization

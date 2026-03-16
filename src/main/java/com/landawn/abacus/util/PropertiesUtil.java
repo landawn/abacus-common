@@ -1887,7 +1887,7 @@ public final class PropertiesUtil {
         private Timestamp createdTime;
 
         /**
-         * Gets the id.
+         * Returns the id.
          *
          * @return the id value
          */
@@ -1898,14 +1898,14 @@ public final class PropertiesUtil {
         /**
          * Sets the id.
          *
-         * @param id the new id
+         * @param id the id value to set
          */
         public void setId(final long id) {
             this.id = id;
         }
 
         /**
-         * Gets the name.
+         * Returns the name.
          *
          * @return the name, or {@code null} if not set
          */
@@ -1916,14 +1916,14 @@ public final class PropertiesUtil {
         /**
          * Sets the name.
          *
-         * @param name the new name
+         * @param name the name to set
          */
         public void setName(final String name) {
             this.name = name;
         }
 
         /**
-         * Gets the content.
+         * Returns the content.
          *
          * @return the content, or {@code null} if not set
          */
@@ -1934,14 +1934,14 @@ public final class PropertiesUtil {
         /**
          * Sets the content.
          *
-         * @param content the new content
+         * @param content the content to set
          */
         public void setContent(final String content) {
             this.content = content;
         }
 
         /**
-         * Gets the included servers.
+         * Returns the included servers.
          *
          * @return the list of included servers, or {@code null} if not set
          */
@@ -1952,14 +1952,14 @@ public final class PropertiesUtil {
         /**
          * Sets the included servers.
          *
-         * @param includedServers the new included servers
+         * @param includedServers the list of included servers to set
          */
         public void setIncludedServers(final List<String> includedServers) {
             this.includedServers = includedServers;
         }
 
         /**
-         * Gets the excluded servers.
+         * Returns the excluded servers.
          *
          * @return the list of excluded servers, or {@code null} if not set
          */
@@ -1970,14 +1970,14 @@ public final class PropertiesUtil {
         /**
          * Sets the excluded servers.
          *
-         * @param excludedServers the new excluded servers
+         * @param excludedServers the list of excluded servers to set
          */
         public void setExcludedServers(final List<String> excludedServers) {
             this.excludedServers = excludedServers;
         }
 
         /**
-         * Gets the status.
+         * Returns the status.
          *
          * @return the status, or {@code null} if not set
          */
@@ -1988,14 +1988,14 @@ public final class PropertiesUtil {
         /**
          * Sets the status.
          *
-         * @param unifiedStatus the new status
+         * @param unifiedStatus the status to set
          */
         public void setStatus(final UnifiedStatus unifiedStatus) {
             this.unifiedStatus = unifiedStatus;
         }
 
         /**
-         * Gets the description.
+         * Returns the description.
          *
          * @return the description, or {@code null} if not set
          */
@@ -2006,14 +2006,14 @@ public final class PropertiesUtil {
         /**
          * Sets the description.
          *
-         * @param description the new description
+         * @param description the description to set
          */
         public void setDescription(final String description) {
             this.description = description;
         }
 
         /**
-         * Gets the last update time.
+         * Returns the last update time.
          *
          * @return the last update time, or {@code null} if not set
          */
@@ -2024,14 +2024,14 @@ public final class PropertiesUtil {
         /**
          * Sets the last update time.
          *
-         * @param lastUpdateTime the new last update time
+         * @param lastUpdateTime the last update time to set
          */
         public void setLastUpdateTime(final Timestamp lastUpdateTime) {
             this.lastUpdateTime = lastUpdateTime;
         }
 
         /**
-         * Gets the creates the time.
+         * Returns the created time.
          *
          * @return the created time, or {@code null} if not set
          */
@@ -2040,9 +2040,9 @@ public final class PropertiesUtil {
         }
 
         /**
-         * Sets the creation the time.
+         * Sets the created time.
          *
-         * @param createdTime the new creates the time
+         * @param createdTime the created time to set
          */
         public void setCreatedTime(final Timestamp createdTime) {
             this.createdTime = createdTime;
@@ -2105,7 +2105,7 @@ public final class PropertiesUtil {
         private final ResourceType resourceType;
 
         /**
-         * Instantiates a new resource.
+         * Constructs a new {@code Resource}.
          *
          * @param cls the target class for the resource
          * @param file the file representing the resource
@@ -2119,7 +2119,7 @@ public final class PropertiesUtil {
         }
 
         /**
-         * Gets the last load time.
+         * Returns the last load time.
          *
          * @return the last load time in milliseconds since epoch
          */
@@ -2130,14 +2130,14 @@ public final class PropertiesUtil {
         /**
          * Sets the last load time.
          *
-         * @param lastLoadTime the new last load time
+         * @param lastLoadTime the last load time to set
          */
         public void setLastLoadTime(final long lastLoadTime) {
             this.lastLoadTime = lastLoadTime;
         }
 
         /**
-         * Gets the file.
+         * Returns the file.
          *
          * @return the File object associated with this resource
          */
@@ -2146,7 +2146,7 @@ public final class PropertiesUtil {
         }
 
         /**
-         * Gets the type.
+         * Returns the type.
          *
          * @return the ResourceType (PROPERTIES or XML)
          */

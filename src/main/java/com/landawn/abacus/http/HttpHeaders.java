@@ -655,7 +655,9 @@ public final class HttpHeaders {
      * @return the string representation of the header value
      */
     public static String valueOf(final Object headerValue) {
-        if (headerValue instanceof String) {
+        if (headerValue == null) {
+            return Strings.EMPTY;
+        } else if (headerValue instanceof String) {
             return (String) headerValue;
         } else if (headerValue instanceof Collection) {
             return Strings.join((Collection<?>) headerValue, "; ");

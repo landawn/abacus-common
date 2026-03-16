@@ -31,7 +31,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
@@ -47,7 +46,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li>Lazy evaluation of operations like map, filter, skip, and limit</li>
  *   <li>Convenient factory methods for creating iterators from various sources</li>
- *   <li>Additional utility methods like first(), last(), toList(), etc.</li>
+ *   <li>Additional utility methods like toList(), toSet(), etc.</li>
  *   <li>Support for indexed iteration</li>
  * </ul>
  * 
@@ -745,30 +744,6 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * Returns the first element of this iterator wrapped in a {@code Nullable}.
-     * If the iterator is empty, returns an empty {@code Nullable}.
-     * This operation consumes the first element if present.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ObjIterator<String> iter = ObjIterator.of("first", "second");
-     * Nullable<String> first = iter.first();   // Nullable.of("first")
-     * 
-     * ObjIterator<String> empty = ObjIterator.empty();
-     * Nullable<String> none = empty.first();   // Nullable.empty()
-     * }</pre>
-     *
-     * @return a {@code Nullable} containing the first element, or empty if no elements
-     */
-    public Nullable<T> first() {
-        if (hasNext()) {
-            return Nullable.of(next());
-        } else {
-            return Nullable.empty();
-        }
-    }
-
-    /**
      * Returns the first {@code non-null} element of this iterator wrapped in an Optional.
      * If no {@code non-null} element is found, returns an empty Optional.
      * This operation may consume multiple elements until a {@code non-null} element is found.
@@ -780,7 +755,9 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * }</pre>
      *
      * @return an Optional containing the first {@code non-null} element, or empty if none found
+     * @deprecated inconsistent data is returned
      */
+    @Deprecated
     public u.Optional<T> firstNonNull() {
         T next = null;
 
@@ -793,33 +770,6 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         }
 
         return u.Optional.empty();
-    }
-
-    /**
-     * Returns the last element of this iterator wrapped in a {@code Nullable}.
-     * If the iterator is empty, returns an empty {@code Nullable}.
-     * This operation consumes all remaining elements.
-     * 
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ObjIterator<Integer> iter = ObjIterator.of(1, 2, 3, 4);
-     * Nullable<Integer> last = iter.last();   // Nullable.of(4)
-     * }</pre>
-     *
-     * @return a {@code Nullable} containing the last element, or empty if no elements
-     */
-    public Nullable<T> last() {
-        if (hasNext()) {
-            T next = next();
-
-            while (hasNext()) {
-                next = next();
-            }
-
-            return Nullable.of(next);
-        } else {
-            return Nullable.empty();
-        }
     }
 
     /**

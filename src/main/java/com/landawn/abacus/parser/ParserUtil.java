@@ -1780,23 +1780,62 @@ public final class ParserUtil {
                 propInfo = hashPropInfoMap.get(ParserUtil.hashCode(cbuf, fromIndex, toIndex));
             }
 
-            if (propInfo != null) {
-                final char[] tmp = propInfo.jsonNameTags[defaultNameIndex].name;
+            if (propInfo != null && !matchesPropName(propInfo, cbuf, fromIndex, len)) {
+                propInfo = null;
+            }
 
-                if (tmp.length == len) {
-                    for (int i = 0; i < len; i++) {
-                        if (cbuf[i + fromIndex] == tmp[i]) {
-                            // continue;
-                        } else {
-                            return null;
-                        }
-                    }
-                } else {
-                    return null;
-                }
+            if (propInfo == null) {
+                final Optional<PropInfo> propInfoOpt = propInfoMap.get(new String(cbuf, fromIndex, len));
+                propInfo = propInfoOpt == null ? null : propInfoOpt.orElse(null);
             }
 
             return propInfo;
+        }
+
+        private boolean matchesPropName(final PropInfo propInfo, final char[] cbuf, final int fromIndex, final int len) {
+            if (matches(cbuf, fromIndex, len, propInfo.name)) {
+                return true;
+            }
+
+            for (final JsonNameTag nameTag : propInfo.jsonNameTags) {
+                if (matches(cbuf, fromIndex, len, nameTag.name)) {
+                    return true;
+                }
+            }
+
+            if (propInfo.columnName.isPresent()) {
+                return matches(cbuf, fromIndex, len, propInfo.columnName.get());
+            }
+
+            return false;
+        }
+
+        private boolean matches(final char[] cbuf, final int fromIndex, final int len, final String propName) {
+            if (propName == null || propName.length() != len) {
+                return false;
+            }
+
+            for (int i = 0; i < len; i++) {
+                if (cbuf[fromIndex + i] != propName.charAt(i)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private boolean matches(final char[] cbuf, final int fromIndex, final int len, final char[] propName) {
+            if (propName == null || propName.length != len) {
+                return false;
+            }
+
+            for (int i = 0; i < len; i++) {
+                if (cbuf[fromIndex + i] != propName[i]) {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /**

@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -43,6 +44,7 @@ public class ComparatorTest extends AbstractTest {
         N.println(maps);
 
         map1.entrySet().stream().sorted(Comparators.<String, Integer> comparingByKey().reversed()).forEach(Fn.println());
+        assertNotNull(maps);
     }
 
     @Test

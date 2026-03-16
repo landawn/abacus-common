@@ -24,7 +24,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.function.IntObjConsumer;
 import com.landawn.abacus.util.function.TriConsumer;
 import com.landawn.abacus.util.function.TriFunction;
@@ -1217,65 +1216,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @return an ObjIterator containing the elements produced by the mapper function
      */
     public abstract <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper);
-
-    /**
-     * Returns an Optional containing the first triple of elements in the iterator.
-     * If the iterator is empty, returns an empty Optional.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * String[] names = {"Alice", "Bob", "Charlie"};
-     * Integer[] ages = {25, 30, 35};
-     * String[] cities = {"NYC", "LA", "Chicago"};
-     * TriIterator<String, Integer, String> iter = TriIterator.zip(names, ages, cities);
-     * Optional<Triple<String, Integer, String>> firstTriple = iter.first();
-     * firstTriple.ifPresent(triple ->
-     *     System.out.println(triple.left() + " is " + triple.middle() + " from " + triple.right()));
-     * // Output: Alice is 25 from NYC
-     * }</pre>
-     *
-     * @return an Optional containing the first triple of elements, or an empty Optional if the iterator is empty
-     */
-    public Optional<Triple<A, B, C>> first() {
-        if (hasNext()) {
-            return Optional.of(next());
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    /**
-     * Returns an Optional containing the last triple of elements in the iterator.
-     * If the iterator is empty, returns an empty Optional.
-     *
-     * <p><strong>Note:</strong> This method consumes all elements in the iterator.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * String[] names = {"Alice", "Bob", "Charlie"};
-     * Integer[] ages = {25, 30, 35};
-     * String[] cities = {"NYC", "LA", "Chicago"};
-     * TriIterator<String, Integer, String> iter = TriIterator.zip(names, ages, cities);
-     * Optional<Triple<String, Integer, String>> lastTriple = iter.last();
-     * lastTriple.ifPresent(triple ->
-     *     System.out.println(triple.left() + " is " + triple.middle() + " from " + triple.right()));
-     * // Output: Charlie is 35 from Chicago
-     * }</pre>
-     *
-     * @return an Optional containing the last triple of elements, or an empty Optional if the iterator is empty
-     */
-    public Optional<Triple<A, B, C>> last() {
-        if (hasNext()) {
-            final Triple<A, B, C> next = new Triple<>();
-            final Throwables.TriConsumer<A, B, C, RuntimeException> setNext = next::set;
-
-            foreachRemaining(setNext);
-
-            return Optional.of(next);
-        } else {
-            return Optional.empty();
-        }
-    }
 
     /**
      * Returns a Stream of elements produced by applying the given mapper function to each triple of elements in this TriIterator.

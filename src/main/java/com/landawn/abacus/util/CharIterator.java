@@ -19,7 +19,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.util.u.OptionalChar;
 import com.landawn.abacus.util.function.CharPredicate;
 import com.landawn.abacus.util.function.CharSupplier;
 import com.landawn.abacus.util.stream.CharStream;
@@ -481,63 +480,6 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
                 return next;
             }
         };
-    }
-
-    /**
-     * Returns the first element wrapped in an {@code OptionalChar}, or an empty {@code OptionalChar}
-     * if no elements are available.
-     *
-     * <p>This method consumes the first element from the iterator if present. After calling this method,
-     * the iterator will be positioned at the second element (if it exists).</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * CharIterator iter = CharIterator.of('a', 'b', 'c');
-     * OptionalChar first = iter.first();   // OptionalChar.of('a')
-     * // Iterator now points to 'b'
-     * }</pre>
-     *
-     * @return an {@code OptionalChar} containing the first element, or {@code OptionalChar.empty()} if the iterator is empty
-     */
-    public OptionalChar first() {
-        if (hasNext()) {
-            return OptionalChar.of(nextChar());
-        } else {
-            return OptionalChar.empty();
-        }
-    }
-
-    /**
-     * Returns the last element wrapped in an {@code OptionalChar}, or an empty {@code OptionalChar}
-     * if no elements are available.
-     *
-     * <p>This method consumes all remaining elements from the iterator. After calling this method,
-     * the iterator will be exhausted ({@code hasNext()} will return {@code false}).</p>
-     *
-     * <p><strong>Warning:</strong> For infinite iterators, this method will never return and will
-     * eventually cause an {@code OutOfMemoryError} or run indefinitely.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * CharIterator iter = CharIterator.of('a', 'b', 'c');
-     * OptionalChar last = iter.last();   // OptionalChar.of('c')
-     * // Iterator is now exhausted
-     * }</pre>
-     *
-     * @return an {@code OptionalChar} containing the last element, or {@code OptionalChar.empty()} if the iterator is empty
-     */
-    public OptionalChar last() {
-        if (hasNext()) {
-            char next = nextChar();
-
-            while (hasNext()) {
-                next = nextChar();
-            }
-
-            return OptionalChar.of(next);
-        } else {
-            return OptionalChar.empty();
-        }
     }
 
     /**

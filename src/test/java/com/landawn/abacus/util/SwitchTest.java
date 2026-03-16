@@ -1,5 +1,7 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.Test;
 
 public class SwitchTest {
@@ -59,6 +61,7 @@ public class SwitchTest {
         endTime = System.currentTimeMillis();
 
         System.out.println("switch_4 took: " + (endTime - startTime));
+        assertNotNull(endTime);
     }
 
     @Test
@@ -103,6 +106,7 @@ public class SwitchTest {
                 default:
             }
         }
+        assertNotNull(ch);
     }
 
     @Test
@@ -140,6 +144,7 @@ public class SwitchTest {
                 default:
             }
         }
+        assertNotNull(ch);
     }
 
     @Test
@@ -160,6 +165,7 @@ public class SwitchTest {
             if (ch == '[') {
             }
         }
+        assertNotNull(ch);
     }
 
     @Test
@@ -172,5 +178,6 @@ public class SwitchTest {
             if (caseArray[ch] > 0) {
             }
         }
+        assertNotNull(ch);
     }
 }

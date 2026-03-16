@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class PackageUtilTest extends AbstractTest {
                 N.println("classes.add(" + cls.getCanonicalName() + ".class);");
             }
         }
+        assertNotNull(classes);
     }
 
     @Test

@@ -123,7 +123,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Method Categories:</b>
  * <ul>
  *   <li><b>Memoization:</b> {@code memoize()}, {@code memoizeWithExpiration()}, {@code memoizeByKey()}</li>
- *   <li><b>Standard Functional:</b> {@code identity()}, {@code tap()}, {@code alwaysTrue()}, {@code alwaysFalse()}</li>
+ *   <li><b>Standard Functional:</b> {@code identity()}, {@code alwaysTrue()}, {@code alwaysFalse()}</li>
  *   <li><b>Interface Conversion:</b> {@code pp()}, {@code cc()}, {@code ff()} for Predicate/Consumer/Function</li>
  *   <li><b>Synchronization:</b> {@code sp()}, {@code sc()}, {@code sf()} for synchronized variants</li>
  *   <li><b>Type Conversion:</b> {@code c2f()}, {@code f2c()}, {@code r2c()}, {@code c2r()}</li>
@@ -474,50 +474,11 @@ public final class Fnn {
      * @param <E> the type of exception that may be thrown
      * @return a function that always returns its input argument unchanged
      * @see java.util.function.Function#identity()
-     * @see #tap(Throwables.Consumer)
      */
     @SuppressWarnings("unchecked")
     public static <T, E extends Exception> Throwables.Function<T, T, E> identity() {
         return (Throwables.Function<T, T, E>) Fn.IDENTITY;
     }
-
-    //    /**
-    //     * Returns an identity function that invokes the specified {@code consumer} with each input
-    //     * before returning that same input unchanged.
-    //     *
-    //     * <p>This is useful for inserting side effects such as logging, tracing, validation, or
-    //     * metrics collection into a function pipeline while preserving the original value.</p>
-    //     *
-    //     * <p><b>Usage Examples:</b></p>
-    //     * <pre>{@code
-    //     * Throwables.Function<String, String, IOException> tracedIdentity =
-    //     *     Fnn.tap(value -> writer.write(value));
-    //     *
-    //     * String result = tracedIdentity.apply("abc"); // writer receives "abc", result is "abc"
-    //     * }</pre>
-    //     *
-    //     * @param <T> the type of the input and output of the function
-    //     * @param <E> the type of exception that may be thrown by the consumer
-    //     * @param consumer the consumer to invoke before returning the input value
-    //     * @return a function that first consumes and then returns its input argument unchanged
-    //     * @throws IllegalArgumentException if consumer is null
-    //     * @see #identity()
-    //     */
-    //    @Beta
-    //    @SuppressWarnings("unchecked")
-    //    public static <T, E extends Exception> Throwables.Function<T, T, E> tap(final Throwables.Consumer<? super T, E> consumer) throws IllegalArgumentException {
-    //        N.checkArgNotNull(consumer, cs.Consumer);
-    //
-    //        if (consumer == Fn.EMPTY_CONSUMER) {
-    //            return identity();
-    //        }
-    //
-    //        return t -> {
-    //            consumer.accept(t);
-    //
-    //            return t;
-    //        };
-    //    }
 
     /**
      * Returns a Predicate that always evaluates to {@code true} regardless of the input.
@@ -1160,7 +1121,6 @@ public final class Fnn {
      * @return a Predicate that returns {@code true} if the CharSequence is {@code null} or has length 0
      * @see #isBlank()
      * @see #isNull()
-     * @see #isNotEmpty()
      */
     public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> isEmpty() {
         return (Throwables.Predicate<T, E>) Fn.IS_EMPTY;

@@ -285,6 +285,11 @@ public final class CodeGenerationUtil {
             }
 
             final File file = new File(packageDir + IOUtil.DIR_SEPARATOR + ClassUtil.getSimpleClassName(entityClass) + ".java");
+
+            if (!file.exists()) {
+                return ret;
+            }
+
             final List<String> lines = IOUtil.readAllLines(file);
 
             for (int i = 0, size = lines.size(); i < size; i++) {

@@ -1,8 +1,10 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -180,11 +182,13 @@ public class NStringTest extends AbstractParserTest {
 
     @Test
     public void test_joiner() {
-        N.println(Joiner.withDefault().repeat(2, 10).toString());
-        N.println(Joiner.withDefault().append(1).repeat(2, 10).toString());
+        assertDoesNotThrow(() -> {
+            N.println(Joiner.withDefault().repeat(2, 10).toString());
+            N.println(Joiner.withDefault().append(1).repeat(2, 10).toString());
 
-        N.println(Joiner.withDefault().repeat(null, 10).toString());
-        N.println(Joiner.withDefault().append(1).repeat(null, 10).toString());
+            N.println(Joiner.withDefault().repeat(null, 10).toString());
+            N.println(Joiner.withDefault().append(1).repeat(null, 10).toString());
+        });
     }
 
     @Test
@@ -863,6 +867,7 @@ public class NStringTest extends AbstractParserTest {
         percentiles.forEach(Fn.println("="));
 
         percentiles.forEach((k, v) -> N.println("     *                            " + k + "=" + v));
+        assertNotNull(percentiles);
     }
 
     @Test
@@ -4291,17 +4296,19 @@ public class NStringTest extends AbstractParserTest {
 
     @Test
     public void test_newMultimap() throws Exception {
-        N.println(new BiMap<>());
-        N.println(new BiMap<>(12));
+        assertDoesNotThrow(() -> {
+            N.println(new BiMap<>());
+            N.println(new BiMap<>(12));
 
-        N.println(new Multiset<>(10));
+            N.println(new Multiset<>(10));
 
-        N.println(CommonUtil.newListMultimap(12));
-        N.println(CommonUtil.newLinkedListMultimap(12));
-        N.println(CommonUtil.newSortedListMultimap());
-        N.println(CommonUtil.newSetMultimap(12));
-        N.println(CommonUtil.newLinkedSetMultimap(12));
-        N.println(CommonUtil.newSortedSetMultimap());
+            N.println(CommonUtil.newListMultimap(12));
+            N.println(CommonUtil.newLinkedListMultimap(12));
+            N.println(CommonUtil.newSortedListMultimap());
+            N.println(CommonUtil.newSetMultimap(12));
+            N.println(CommonUtil.newLinkedSetMultimap(12));
+            N.println(CommonUtil.newSortedSetMultimap());
+        });
     }
 
     @Test

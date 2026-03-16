@@ -7846,6 +7846,10 @@ public final class IOUtil {
      * @return {@code true} if the renaming succeeded, {@code false} otherwise.
      */
     public static boolean renameTo(final File srcFile, final String newFileName) {
+        if (srcFile == null) {
+            return false;
+        }
+
         final String parent = srcFile.getParent();
         final File newFile = parent == null ? new File(newFileName) : new File(parent + IOUtil.DIR_SEPARATOR + newFileName);
         return srcFile.renameTo(newFile);
@@ -9301,7 +9305,7 @@ public final class IOUtil {
                 cnt++;
             }
 
-            return cnt == 0 ? 0 : (file.length() / (bytes / cnt == 0 ? 1 : bytes / cnt));
+            return cnt < byReadingLineNum ? cnt : (file.length() / (bytes / cnt == 0 ? 1 : bytes / cnt));
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -9518,7 +9522,7 @@ public final class IOUtil {
 
         final List<File> files = new ArrayList<>();
 
-        if (!parentPath.exists()) {
+        if (parentPath == null || !parentPath.exists()) {
             return files;
         }
 
@@ -9726,7 +9730,6 @@ public final class IOUtil {
      * @return a non-{@code null} array of Files matching the input, with a {@code null} item.
      * if there was a {@code null} at that index in the input array
      * @throws UncheckedIOException     if an I/O error occurs.
-     * @throws IllegalArgumentException if any file is incorrectly encoded.
      */
     public static File[] toFiles(final URL[] urls) throws UncheckedIOException {
         if (N.isEmpty(urls)) {
@@ -9750,6 +9753,8 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs during the conversion.
      */
     public static List<File> toFiles(final Collection<URL> urls) throws UncheckedIOException {
+        Objects.requireNonNull(urls, "urls");
+
         if (N.isEmpty(urls)) {
             return new ArrayList<>();
         }
@@ -9802,6 +9807,8 @@ public final class IOUtil {
      * @see URI#toURL()
      */
     public static URL[] toUrls(final File[] files) throws UncheckedIOException {
+        Objects.requireNonNull(files, "files");
+
         if (N.isEmpty(files)) {
             return new URL[0];
         }
@@ -9835,6 +9842,8 @@ public final class IOUtil {
      * @see URI#toURL()
      */
     public static List<URL> toUrls(final Collection<File> files) throws UncheckedIOException {
+        Objects.requireNonNull(files, "files");
+
         if (N.isEmpty(files)) {
             return new ArrayList<>();
         }
@@ -9865,6 +9874,10 @@ public final class IOUtil {
      * @return {@code true} if the file exists and last modified time is updated successfully, {@code false} otherwise.
      */
     public static boolean touch(final File source) {
+        if (source == null) {
+            return false;
+        }
+
         return source.exists() && source.setLastModified(System.currentTimeMillis());
     }
 

@@ -74,22 +74,11 @@ public class Song {
             return false;
         }
         Song other = (Song) obj;
-        if (!Objects.equals(album, other.album)) {
+        if (!Objects.equals(album, other.album) || !Objects.equals(artist, other.artist) || !Objects.equals(data, other.data)
+                || !Objects.equals(id, other.id)) {
             return false;
         }
-        if (!Objects.equals(artist, other.artist)) {
-            return false;
-        }
-        if (!Objects.equals(data, other.data)) {
-            return false;
-        }
-        if (!Objects.equals(id, other.id)) {
-            return false;
-        }
-        if (!Objects.equals(tags, other.tags)) {
-            return false;
-        }
-        if (!Objects.equals(title, other.title)) {
+        if (!Objects.equals(tags, other.tags) || !Objects.equals(title, other.title)) {
             return false;
         }
         return true;

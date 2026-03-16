@@ -434,6 +434,7 @@ public final class ExcelUtil {
         case BOOLEAN -> cell.getBooleanCellValue();
         case FORMULA -> cell.getCellFormula();
         case BLANK -> "";
+        case ERROR -> "";
         default -> throw new RuntimeException("Unsupported cell type: " + cell.getCellType());
     };
 
@@ -465,6 +466,7 @@ public final class ExcelUtil {
         case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
         case FORMULA -> cell.getCellFormula();
         case BLANK -> "";
+        case ERROR -> "";
         default -> throw new RuntimeException("Unsupported cell type: " + cell.getCellType());
     };
 

@@ -13354,15 +13354,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new String with the specified range of chars removed
+     * Returns a new String with the specified range of chars removed.
      * <br />
      * The original String remains unchanged.
      *
-     * @param str the input string from which a range of characters are to be deleted
-     * @param fromIndex the initial index of the range to be deleted, inclusive
-     * @param toIndex the final index of the range to be deleted, exclusive
-     * @return a new string with the specified range of characters deleted. An empty String is returned if the specified String is {@code null} or empty.
-     * @throws IndexOutOfBoundsException if the range is out of the string bounds
+     * @param str the input string from which a range of characters are to be removed
+     * @param fromIndex the initial index of the range to be removed, inclusive
+     * @param toIndex the final index of the range to be removed, exclusive
+     * @return a new string with the specified range of characters removed. An empty String is returned if the specified String is {@code null} or empty.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code fromIndex > toIndex} or {@code toIndex > str.length()} (where {@code null} is treated as length 0)
      * @see Strings#removeRange(String, int, int)
      */
     public static String removeRange(final String str, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {

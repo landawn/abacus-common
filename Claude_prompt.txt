@@ -211,5 +211,288 @@ Requirements:
 
 
 
+
 -- ==========================================================
+
+1, Scan all test classes under ./src/test/java and remove duplicate unit tests. 
+   You may find and reuse the scripts generated before in folder: ./tools. Improve it if needed.
+
+	A duplicate is defined as any test method that:
+	- Tests the same method with identical or equivalent inputs and assertions as another test method, 
+	  whether in the same class or across different test classes
+	- Has a different name but identical or functionally equivalent body
+	- Is an exact copy-paste of another test method
+
+	Rules:
+	- When duplicates are found, keep the most complete/descriptive version and remove the rest
+	- If duplicates are split across multiple files, consolidate into the canonical test class 
+	  (e.g. tests for Foo.java belong in FooTest.java) before removing the duplicate
+	- Do not remove tests that cover the same method but with meaningfully different inputs, 
+	  edge cases, or assertions — those are distinct tests and must be preserved
+	- After removal, confirm the remaining test suite still compiles and all retained tests are valid
+	- don't modify classes directly under package: com.landawn.abacus. Only modify test classes in its sub-packages.
+	- Once the task is completed. save the scripts used in this tasks. Don't delete them. I may run the same tasks again later. so the scripts could be reused.
+
+2, Consolidate all unit tests under ./src/test/java so that every source class has exactly one corresponding test class.
+   You may find and reuse the scripts generated before in folder: ./tools. Improve it if needed.
+
+	Rules:
+	- For each source class Foo.java, all test methods covering its methods must live in FooTest.java
+	- If test methods for Foo.java are currently scattered across multiple test classes 
+	  (e.g. FooTest.java, FooUtilTest.java, MiscTest.java), move them all into FooTest.java
+	- Preserve the original test method names and bodies when moving; do not alter test logic
+	- After moving, delete any test class that has become empty
+	- Resolve any import or package declaration issues introduced by the moves
+	- Do not merge unrelated test classes — only consolidate by source-class ownership
+	- If ownership of a test method is ambiguous (it tests behavior spanning multiple classes), 
+	  use your best judgment and add a comment explaining the placement
+	- don't modify classes directly under package: com.landawn.abacus. Only modify test classes in its sub-packages.
+	- Once the task is completed. save the scripts used in this tasks. Don't delete them. I may run the same tasks again later. so the scripts could be reused.
+
+3, Review every test method under ./src/test/java and ensure each one contains at least one meaningful assertion.
+   You may find and reuse the scripts generated before in folder: ./tools. Improve it if needed.
+
+	Rules:
+	- Any test method with no assertions (i.e. it only invokes code but never verifies output) 
+	  must be updated to assert the expected outcome
+	- Use org.junit.jupiter.api.Assertions (JUnit 6) — e.g. assertEquals, assertNotNull, 
+	  assertTrue, assertThrows, assertDoesNotThrow
+	- Assertions must verify meaningful behavior: return values, state changes, thrown exceptions, 
+	  or side effects — not trivially assert (true) or (obj != null) without reason
+	- For void methods, assert observable side effects (e.g. collection size changed, 
+	  field was mutated, expected exception was thrown)
+	- For methods expected to throw, replace try/catch blocks with assertThrows(...)
+	- Do not remove or weaken any assertion that already exists
+	- Add a brief inline comment if the intent of a new assertion is not self-evident from context
+	- don't modify classes directly under package: com.landawn.abacus. Only modify test classes in its sub-packages.
+	- Once the task is completed. save the scripts used in this tasks. Don't delete them. I may run the same tasks again later. so the scripts could be reused.
+	
+	
+
+
+================================================================================
+TASK: Generate Missing Unit Tests, Sort, Run, and Fix
+================================================================================
+
+For every source class under ./src/main/java/ in packages under com.landawn.abacus,
+locate its corresponding test class under ./src/test/java/
+(e.g., Foo.java -> FooTest.java).
+
+Perform Steps 1-4 below for each source/test pair COMPLETELY before moving to the
+next pair.
+
+
+--------------------------------------------------------------------------------
+STEP 1 -- Identify Untested Public Methods
+--------------------------------------------------------------------------------
+
+1. Parse the source class and collect EVERY public method signature, including:
+   - Static methods
+   - Overloaded variants
+   - Public methods that override inherited ones
+   Exclude:
+   - Constructors
+   - Getters/setters of simple fields
+   - toString/hashCode/equals unless they contain non-trivial logic
+
+2. Parse the test class and determine which source methods already have at least
+   one corresponding test. Match by method name referenced in test method names
+   or test method bodies.
+
+3. Produce a GAP LIST: every public source method with zero test coverage.
+
+
+--------------------------------------------------------------------------------
+STEP 2 -- Add Missing Unit Tests
+--------------------------------------------------------------------------------
+
+For each method on the gap list, add one or more @Test methods covering:
+
+  * HAPPY PATH
+    Typical valid inputs -> expected return value or side effect.
+
+  * BOUNDARY / EDGE CASES
+    Empty collections, null, zero, MIN_VALUE/MAX_VALUE, single-element inputs,
+    empty strings.
+
+  * ERROR PATHS
+    Invalid arguments, expected exceptions (use assertThrows).
+
+  * OVERLOADED VARIANTS
+    Test each overload independently when behavior or defaults differ.
+
+
+CODING CONVENTIONS:
+
+  - Extend TestBase if the existing test class already does.
+
+  - Use ONLY org.junit.jupiter.api.Assertions:
+    assertEquals, assertNotNull, assertTrue, assertThrows, assertDoesNotThrow, etc.
+
+  - Every test method: public void, annotated with @Test, contains at least one
+    meaningful assertion.
+
+  - Naming pattern:
+      testMethodName()            -- primary / happy-path case
+      testMethodName_EdgeCase()   -- named edge case
+        Examples: testMethodName_EmptyInput
+                  testMethodName_NullKey
+                  testMethodName_Overflow
+
+  - Add a one-line comment above each new test group if the intent is not obvious
+    from the method name.
+
+  - Before adding a test method, check whether a method with the same name already
+    exists in the test class. If so, append a disambiguating suffix to avoid
+    duplicate method names.
+
+  - If no test class exists yet, CREATE one in the same package under
+    ./src/test/java/, named {SourceClassName}Test.java, extending TestBase.
+
+  - If a public method is abstract, part of a generated API, or genuinely
+    untestable in isolation, SKIP it and leave a // TODO: comment in the test
+    class explaining why.
+
+
+--------------------------------------------------------------------------------
+STEP 3 -- Sort All Test Methods by Source Method Order
+--------------------------------------------------------------------------------
+
+After all missing tests have been added to a test class, REORDER every @Test method
+(pre-existing and new) so their order mirrors the declaration order of the
+corresponding source methods:
+
+  - Multiple tests for the same source method stay grouped together in order:
+    happy path -> edge cases -> error/exception paths.
+
+  - Setup/teardown (@BeforeAll, @BeforeEach, @AfterEach, @AfterAll) and test
+    helper methods go AT THE TOP of the class, before all @Test methods.
+
+  - DO NOT ALTER the logic, assertions, or body of any pre-existing test method
+    -- only move it.
+
+
+--------------------------------------------------------------------------------
+STEP 4 -- Run Tests and Fix Failures
+--------------------------------------------------------------------------------
+
+After completing Steps 1-3 for a test class, run ONLY the newly added test
+methods and iterate until all pass:
+
+1. COMPILE the test class. If compilation fails, fix all errors (missing imports,
+   wrong types, unresolved symbols) and recompile before proceeding.
+
+2. RUN the test class using Maven/Gradle (e.g., mvn test -pl <module> -Dtest=FooTest).
+   Alternatively, run only the new tests if the test framework supports filtering.
+
+3. For each failing test, diagnose the root cause and apply the appropriate fix:
+
+   WRONG EXPECTED VALUE
+     Re-read the source method's logic, correct the assertion to match actual
+     behavior. Never change the source -- fix the test.
+
+   UNEXPECTED EXCEPTION
+     Add required setup (initialize objects, mock dependencies), or adjust input
+     to valid values. If the method is supposed to throw, switch to assertThrows.
+
+   MISSING SETUP / STATE
+     Add @BeforeEach initialization or inline setup within the test method.
+     Reuse existing test helpers from TestBase where available.
+
+   NULL / EMPTY RETURN
+     Verify the source method's contract -- if null is the correct return,
+     assert assertNull instead of assertNotNull.
+
+   FLAKY / TIMING-DEPENDENT
+     Add tolerances for floating-point comparisons
+     (assertEquals(expected, actual, delta)), use assertTimeout for async
+     operations, or remove non-deterministic assertions.
+
+   ENVIRONMENT-DEPENDENT
+     If the test requires external resources (files, network, DB), gate it with
+     @DisabledIf or Assumptions.assumeTrue(...) and add a comment explaining
+     the dependency.
+
+4. RE-RUN after each round of fixes. Repeat until all newly added tests pass.
+
+5. VERIFY NO REGRESSIONS: confirm that all pre-existing tests in the test class
+   still pass. If a pre-existing test breaks due to reordering or import changes,
+   fix the root cause without altering the test's original assertions.
+
+
+HARD RULES FOR STEP 4:
+
+  - NEVER modify the source class to make a test pass.
+
+  - NEVER delete or weaken a failing test to make the suite green -- fix the test
+    so it correctly validates the source method's actual behavior.
+
+  - MAXIMUM 3 fix-and-rerun cycles per test method. If a test still fails after
+    3 attempts, mark it with @Disabled("TODO: fix -- <brief reason>") and move on.
+
+  - After all tests pass (or are explicitly @Disabled), run the FULL test class
+    one final time to confirm a clean result.
+
+
+--------------------------------------------------------------------------------
+CONSTRAINTS
+--------------------------------------------------------------------------------
+
+  - Do NOT modify any file under ./src/main/java/.
+
+  - Do NOT remove or weaken any existing assertion or test method.
+
+  - Resolve all imports -- the test class must COMPILE CLEANLY after every change.
+
+  - Process one source/test pair fully (Steps 1-4) before moving to the next.
+
+  - Reuse any helper scripts previously saved in ./tools/. Improve them if needed.
+
+  - Once the task is complete, SAVE all scripts used to ./tools/ with meaningful,
+    unique names for future reuse.
+
+================================================================================
+
+
+
+
+Read the Eclipse-generated HTML coverage reports located in ./report/coverage/260315/ batch by batch.
+Each batch contains 20 HTML files, ordered by highest "Missed Instructions" first (start with the classes that have the most uncovered instructions). For each class report in the batch:
+
+  - Identify the lines that are not covered by existing tests.
+  - Add unit tests that execute those uncovered lines.
+
+The newly added unit tests must follow the requirements below:
+
+  - Use ONLY org.junit.jupiter.api.Assertions:
+    assertEquals, assertNotNull, assertTrue, assertThrows, assertDoesNotThrow, etc.
+
+  - Every test method: public void, annotated with @Test, contains at least one
+    meaningful assertion.
+
+  - Naming pattern:
+      testMethodName()            -- primary / happy-path case
+      testMethodName_EdgeCase()   -- named edge case
+        Examples: testMethodName_EmptyInput
+                  testMethodName_NullKey
+                  testMethodName_Overflow
+
+  - Add a one-line comment above each new test group if the intent is not obvious
+    from the method name.
+
+  - Before adding a test method, check whether a method with the same name already
+    exists in the test class. If so, append a disambiguating suffix to avoid
+    duplicate method names.
+
+  - If no test class exists yet, CREATE one in the same package under
+    ./src/test/java/, named {SourceClassName}Test.java, extending TestBase.
+
+  - If a public method is abstract, part of a generated API, or genuinely
+    untestable in isolation, SKIP it and leave a // TODO: comment in the test
+    class explaining why.
+
+
+After completing each batch, run only the newly added test methods and fix any failing tests.
+Do not modify the source code in order to make the unit tests pass.
+
 

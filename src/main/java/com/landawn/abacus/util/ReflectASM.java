@@ -443,11 +443,11 @@ final class ReflectASM<T> {
     }
 
     /**
-     * Gets the constructor access.
+     * Returns the constructor access for the specified class.
      *
      * @param cls the class for which to get the constructor access
      * @return the cached or newly created ConstructorAccess instance for the specified class
-     * @throws SecurityException the security exception
+     * @throws SecurityException if a security manager denies access
      */
     private ConstructorAccess<T> getConstructorAccess(final Class<T> cls) throws SecurityException {
         ConstructorAccess<?> constructorAccess = clsConstructorPool.get(cls);

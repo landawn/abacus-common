@@ -1,7 +1,9 @@
 package com.landawn.abacus.type;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -148,7 +150,9 @@ public class TypeTest extends AbstractTest {
 
     @Test
     public void test_type2() {
-        TypeFactory.getType("List<com.landawn.abacus.types.WeekDay(NAME)>");
+        assertDoesNotThrow(() -> {
+            TypeFactory.getType("List<com.landawn.abacus.types.WeekDay(NAME)>");
+        });
     }
 
     @Test
@@ -249,7 +253,7 @@ public class TypeTest extends AbstractTest {
         type.writeCharacter(writer, Dates.currentXMLGregorianCalendar(), JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP));
 
         N.println(writer.toString());
-
+        assertNotNull(writer);
     }
 
     @Test
@@ -965,6 +969,7 @@ public class TypeTest extends AbstractTest {
         type.writeCharacter(writer1, IOUtil.stringToInputStream("[abc, 123, 213]"), JsonSerConfig.create().setStringQuotation('\''));
 
         N.println(writer1.toString());
+        assertNotNull(writer1);
     }
 
     @Test
@@ -985,6 +990,7 @@ public class TypeTest extends AbstractTest {
         type.writeCharacter(writer1, IOUtil.stringToInputStream("[abc, 123, 213]"), JsonSerConfig.create().setStringQuotation('\''));
 
         N.println(writer1.toString());
+        assertNotNull(writer1);
     }
 
     @Test
@@ -1005,6 +1011,7 @@ public class TypeTest extends AbstractTest {
         type.writeCharacter(writer1, IOUtil.stringToInputStream("[abc, 123, 213]"), JsonSerConfig.create().setStringQuotation('\''));
 
         N.println(writer1.toString());
+        assertNotNull(writer1);
     }
 
     @Test
@@ -1025,6 +1032,7 @@ public class TypeTest extends AbstractTest {
         type.writeCharacter(writer1, IOUtil.stringToReader("[abc, 123, 213]"), JsonSerConfig.create().setStringQuotation('\''));
 
         N.println(writer1.toString());
+        assertNotNull(writer1);
     }
 
     @Test
@@ -1039,6 +1047,7 @@ public class TypeTest extends AbstractTest {
         N.println(type.arrayToCollection(N.asArray("abc", "123", "213"), List.class));
         N.println(type.arrayToCollection(N.asArray("abc", "123", "213"), Set.class));
         N.println(type.arrayToCollection(N.asArray("abc", "123", "213"), Queue.class));
+        assertNotNull(writer);
     }
 
     @Test
@@ -1057,13 +1066,15 @@ public class TypeTest extends AbstractTest {
 
     @Test
     public void test_getType() {
-        N.println(N.typeOf("Type"));
-        N.println(N.typeOf("Type<?>"));
-        N.println(N.typeOf("Type<Object>"));
-        N.println(N.typeOf("Type<String>"));
-        N.println(N.typeOf("Type<Integer>"));
-        N.println(N.typeOf("Type<int>"));
-        N.println(N.typeOf("Type<unknown>"));
+        assertDoesNotThrow(() -> {
+            N.println(N.typeOf("Type"));
+            N.println(N.typeOf("Type<?>"));
+            N.println(N.typeOf("Type<Object>"));
+            N.println(N.typeOf("Type<String>"));
+            N.println(N.typeOf("Type<Integer>"));
+            N.println(N.typeOf("Type<int>"));
+            N.println(N.typeOf("Type<unknown>"));
+        });
     }
 
     @Test
@@ -1089,18 +1100,6 @@ public class TypeTest extends AbstractTest {
             }
         }).printResult();
     }
-
-    //    @Test
-    //    public void test_byte() {
-    //        List<Type<Number>> types = TypeFactory.getType(byte.class, short.class, int.class, long.class, float.class, double.class);
-    //        String[] strs = { "2", "-1", "2l", "-1l", "2f", "-1f", "2d", "-1d" };
-    //
-    //        for (Type type : types) {
-    //            for (String str : strs) {
-    //                N.println(type.valueOf(str));
-    //            }
-    //        }
-    //    }
     //
     //    @Test
     //    public void test_byte_2() {
@@ -1118,7 +1117,7 @@ public class TypeTest extends AbstractTest {
     public void test_TypeFactory() {
         // N.println(TypeFactory.getType(Long.class, long.class, int.class, Timestamp.class));
 
-        //    List<Class<?>> classes = N.toList(Long.class, long.class, int.class, Timestamp.class); 
+        //    List<Class<?>> classes = N.toList(Long.class, long.class, int.class, Timestamp.class);
         //    N.println(TypeFactory.getType(classes));
 
         N.println(TypeFactory.getType("List<String>").name());

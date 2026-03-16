@@ -14,11 +14,11 @@
 
 package com.landawn.abacus.util;
 
-import com.landawn.abacus.annotation.MayReturnNull;
-
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+
+import com.landawn.abacus.annotation.MayReturnNull;
 
 /**
  * Represents a unique identifier for an entity, consisting of property names and their values.

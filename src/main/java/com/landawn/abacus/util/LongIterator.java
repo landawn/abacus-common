@@ -21,7 +21,6 @@ import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.stream.LongStream;
 
 /**
@@ -471,52 +470,6 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
                 return next;
             }
         };
-    }
-
-    /**
-     * Returns an OptionalLong containing the first element, or an empty OptionalLong if
-     * this iterator is empty. This method consumes the first element if present.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * OptionalLong first = LongIterator.of(1L, 2L, 3L).first();
-     * // first.get() returns 1L
-     * }</pre>
-     *
-     * @return an OptionalLong containing the first element, or empty if no elements exist
-     */
-    public OptionalLong first() {
-        if (hasNext()) {
-            return OptionalLong.of(nextLong());
-        } else {
-            return OptionalLong.empty();
-        }
-    }
-
-    /**
-     * Returns an OptionalLong containing the last element, or an empty OptionalLong if
-     * this iterator is empty. This method consumes all elements in the iterator.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * OptionalLong last = LongIterator.of(1L, 2L, 3L).last();
-     * // last.get() returns 3L
-     * }</pre>
-     *
-     * @return an OptionalLong containing the last element, or empty if no elements exist
-     */
-    public OptionalLong last() {
-        if (hasNext()) {
-            long next = nextLong();
-
-            while (hasNext()) {
-                next = nextLong();
-            }
-
-            return OptionalLong.of(next);
-        } else {
-            return OptionalLong.empty();
-        }
     }
 
     /**

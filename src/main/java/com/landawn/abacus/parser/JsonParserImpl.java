@@ -491,7 +491,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      *
      * @param obj the object to serialize; may be {@code null}
      * @param config the serialization configuration to use; may be {@code null} to use default configuration
-     * @return the JSON string representation of the object, or {@code null} if the object is {@code null}
+     * @return the JSON string representation; returns empty string if {@code obj} is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during serialization
      */
     @Override
@@ -499,7 +499,7 @@ final class JsonParserImpl extends AbstractJsonParser {
         final JsonSerConfig configToUse = check(config);
 
         if (obj == null) {
-            return null;
+            return Strings.EMPTY;
         }
 
         final Class<?> cls = obj.getClass();
@@ -555,6 +555,7 @@ final class JsonParserImpl extends AbstractJsonParser {
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
+
             return;
         }
 

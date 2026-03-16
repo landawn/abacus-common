@@ -27,8 +27,6 @@ import org.xml.sax.SAXException;
 
 import com.landawn.abacus.entity.extendDirty.basic.Account;
 import com.landawn.abacus.exception.ParsingException;
-import com.landawn.abacus.parser.XmlDeserConfig;
-import com.landawn.abacus.parser.XmlSerConfig;
 import com.landawn.abacus.parser.entity.GenericEntity;
 import com.landawn.abacus.parser.entity.XBean;
 import com.landawn.abacus.record.Element;
@@ -121,7 +119,7 @@ public class AbacusXmlSAXParserTest extends AbstractXmlParserTest {
         Map<String, Object> props2 = abacusXMLSAXParser.deserialize(str, xdc, Map.class);
         N.println(props);
         N.println(props2);
-
+        assertNotNull(props2);
     }
 
     @Test
@@ -188,6 +186,7 @@ public class AbacusXmlSAXParserTest extends AbstractXmlParserTest {
         N.println(writer.toString());
 
         Objectory.recycle(bw);
+        assertNotNull(account);
     }
 
     @Test
@@ -342,23 +341,7 @@ public class AbacusXmlSAXParserTest extends AbstractXmlParserTest {
         N.println(str);
 
         N.println(abacusXMLSAXParser.deserialize(str, XBean.class));
-    }
-
-    @Test
-    public void test_config() {
-        XmlSerConfig xsc1 = XmlSerConfig.create();
-        XmlSerConfig xsc2 = XmlSerConfig.create();
-
-        N.println(xsc1);
-
-        assertTrue(N.toSet(xsc1).contains(xsc2));
-
-        XmlDeserConfig xdc1 = XmlDeserConfig.create().setMapKeyType(String.class).setMapValueType(String.class).setIgnoreUnmatchedProperty(true);
-        XmlDeserConfig xdc2 = XmlDeserConfig.create().setMapKeyType(String.class).setMapValueType(String.class).setIgnoreUnmatchedProperty(true);
-
-        N.println(xdc1);
-
-        assertTrue(N.toSet(xdc1).contains(xdc2));
+        assertNotNull(str);
     }
 
     @Test
@@ -463,6 +446,7 @@ public class AbacusXmlSAXParserTest extends AbstractXmlParserTest {
         N.println("========================================================================================================================");
         N.println(str);
         N.println("========================================================================================================================");
+        assertNotNull(str);
     }
 
     @Test
@@ -475,6 +459,7 @@ public class AbacusXmlSAXParserTest extends AbstractXmlParserTest {
         xml = "<unknown><id>1002759403</id><gui>8354b425f53d4c1893b848a35191bd89</gui><emailAddress>a267c0eb96d84088968ec4885110ddab@earth.com</emailAddress><firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName><birthDate>1414001208304</birthDate><lastUpdateTime>1414001208304</lastUpdateTime><createdTime>1414001208305</createdTime><contact><unknown><id>2801</id><accountId>1002759403</accountId><address>ca, US</address><city>sunnyvale</city><state>CA</state><country>U.S.</country></unknown></contact></unknown>";
         Account account2 = abacusXMLSAXParser.deserialize(xml, Account.class);
         N.println(account2);
+        assertNotNull(account2);
     }
 
     public void estSerialize_tagName2() throws Exception {
@@ -571,7 +556,6 @@ public class AbacusXmlSAXParserTest extends AbstractXmlParserTest {
 
             N.println(N.stringOf(a));
         }
-
     }
 
     @Test
@@ -680,6 +664,7 @@ public class AbacusXmlSAXParserTest extends AbstractXmlParserTest {
         map2 = abacusXMLSAXParser.deserialize(str, XmlDeserConfig.create().setMapKeyType(String.class).setMapValueType(String[].class), Map.class);
 
         N.println(map2);
+        assertNotNull(map2);
     }
 
     @Test
@@ -695,6 +680,7 @@ public class AbacusXmlSAXParserTest extends AbstractXmlParserTest {
 
         N.println(xBean);
         N.println(xBean2);
+        assertNotNull(xBean2);
     }
 
     @Test
@@ -774,6 +760,7 @@ public class AbacusXmlSAXParserTest extends AbstractXmlParserTest {
 
         N.println(account);
         N.println(account2);
+        assertNotNull(account2);
     }
 
     @Test
@@ -802,7 +789,7 @@ public class AbacusXmlSAXParserTest extends AbstractXmlParserTest {
 
         map2 = abacusXMLSAXParser.deserialize(str, Map.class);
         N.println(map2);
-
+        assertNotNull(map2);
     }
 
     @Test

@@ -38,7 +38,7 @@ import com.landawn.abacus.util.u.Optional;
  */
 public final class Holder<T> implements Mutable {
 
-    private T value;
+    private volatile T value;
 
     /**
      * Constructs a new Holder with a {@code null} value.

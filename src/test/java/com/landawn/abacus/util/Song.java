@@ -78,10 +78,7 @@ public class Song {
                 || !Objects.equals(id, other.id)) {
             return false;
         }
-        if (!Objects.equals(tags, other.tags)) {
-            return false;
-        }
-        if (!Objects.equals(title, other.title)) {
+        if (!Objects.equals(tags, other.tags) || !Objects.equals(title, other.title)) {
             return false;
         }
         return true;

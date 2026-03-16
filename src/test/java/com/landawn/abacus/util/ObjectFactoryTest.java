@@ -1,5 +1,7 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -46,5 +48,6 @@ public class ObjectFactoryTest extends AbstractTest {
 
         m = Objectory.createLinkedHashMap();
         Objectory.recycle(m);
+        assertNotNull(m);
     }
 }

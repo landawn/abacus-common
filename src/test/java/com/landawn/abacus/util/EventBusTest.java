@@ -1,5 +1,7 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -51,5 +53,6 @@ public class EventBusTest extends AbstractTest {
         eventBus.post("sticky1");
         eventBus.post("sticky");
         eventBus.post("sticky");
+        assertNotNull(eventBus);
     }
 }

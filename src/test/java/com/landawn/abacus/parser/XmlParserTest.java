@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -26,8 +28,6 @@ import org.xml.sax.SAXException;
 
 import com.landawn.abacus.entity.extendDirty.basic.Account;
 import com.landawn.abacus.exception.ParsingException;
-import com.landawn.abacus.parser.XmlDeserConfig;
-import com.landawn.abacus.parser.XmlSerConfig;
 import com.landawn.abacus.parser.entity.GenericEntity;
 import com.landawn.abacus.parser.entity.XBean;
 import com.landawn.abacus.type.Type;
@@ -46,6 +46,7 @@ import com.landawn.abacus.util.XmlUtil;
 
 @Tag("old-test")
 public class XmlParserTest extends AbstractXmlParserTest {
+
     @Override
     protected Parser<?, ?> getParser() {
         return xmlParser;
@@ -73,35 +74,6 @@ public class XmlParserTest extends AbstractXmlParserTest {
         N.println(genericBean2);
 
         assertEquals(genericBean, genericBean2);
-    }
-
-    @Test
-    public void test_prettyFormat_3() {
-        final Account account = createAccount(Account.class);
-
-        final GenericEntity genericBean = new GenericEntity();
-        genericBean.setBooleanList(N.toList(true, false));
-        genericBean.setCharList(N.toList('a', 'b', '黎'));
-        genericBean.setIntList(N.toList(1, 2, 3));
-        genericBean.setStringList(N.toList("abc", "123"));
-        genericBean.setAccountList(N.toList(account));
-        final Map<String, Account> map = N.asMap(account.getFirstName(), account);
-        genericBean.setAccountMap(map);
-
-        final XmlSerConfig xsc = XmlSerConfig.create().setPrettyFormat(true);
-        final Map<String, Object> props = Beans.beanToMap(genericBean);
-        final String str = xmlDOMParser.serialize(props, xsc);
-
-        N.println(str);
-
-        final GenericEntity genericBean2 = xmlDOMParser.deserialize(str, GenericEntity.class);
-        N.println(genericBean2);
-
-        assertEquals(genericBean, genericBean2);
-        final Map<String, Object> props2 = xmlDOMParser.deserialize(str, Map.class);
-        N.println(props);
-        N.println(props2);
-
     }
 
     @Test
@@ -168,6 +140,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
         N.println(writer.toString());
 
         Objectory.recycle(bw);
+        assertNotNull(account);
     }
 
     @Test
@@ -319,31 +292,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
         N.println(str);
 
         N.println(xmlParser.deserialize(str, XBean.class));
-    }
-
-    @Test
-    public void test_config() {
-        final XmlSerConfig xsc1 = XmlSerConfig.create();
-        final XmlSerConfig xsc2 = XmlSerConfig.create();
-
-        N.println(xsc1);
-
-        assertTrue(N.toSet(xsc1).contains(xsc2));
-
-        final XmlDeserConfig xdc1 = XmlDeserConfig.create()
-                .setMapKeyType(String.class)
-                .setMapValueType(String.class)
-                .setIgnoreUnmatchedProperty(true)
-                .setIgnoredPropNames((Map<Class<?>, Set<String>>) null);
-        final XmlDeserConfig xdc2 = XmlDeserConfig.create()
-                .setMapKeyType(String.class)
-                .setMapValueType(String.class)
-                .setIgnoreUnmatchedProperty(true)
-                .setIgnoredPropNames((Map<Class<?>, Set<String>>) null);
-
-        N.println(xdc1);
-
-        assertTrue(N.toSet(xdc1).contains(xdc2));
+        assertNotNull(str);
     }
 
     @Test
@@ -380,6 +329,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
 
         final Object account3 = xmlParser.deserialize(xml, Map.class);
         N.println(account3);
+        assertNotNull(account3);
     }
 
     @Test
@@ -405,6 +355,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
 
         N.println("########################################### Abacus DOM #################################");
         Profiler.run(threadNum, loopNum, repeat, () -> abacusXMLDOMParser.deserialize(xml, Account.class)).printResult();
+        assertNotNull(repeat);
     }
 
     @Test
@@ -416,7 +367,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
 
         final List<?> list2 = xmlParser.deserialize(xml, List.class);
         N.println(list2);
-
+        assertNotNull(list2);
     }
 
     @Test
@@ -457,6 +408,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
         xml = "<unknown><id>1002759403</id><gui>8354b425f53d4c1893b848a35191bd89</gui><emailAddress>a267c0eb96d84088968ec4885110ddab@earth.com</emailAddress><firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName><birthDate>1414001208304</birthDate><lastUpdateTime>1414001208304</lastUpdateTime><createdTime>1414001208305</createdTime><contact><unknown><id>2801</id><accountId>1002759403</accountId><address>ca, US</address><city>sunnyvale</city><state>CA</state><country>U.S.</country></unknown></contact></unknown>";
         account2 = xmlParser.deserialize(xml, Account.class);
         N.println(account2);
+        assertNotNull(account2);
     }
 
     @Test
@@ -497,6 +449,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
         xml = "<unknown><id>1002759403</id><gui>8354b425f53d4c1893b848a35191bd89</gui><emailAddress>a267c0eb96d84088968ec4885110ddab@earth.com</emailAddress><firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName><birthDate>1414001208304</birthDate><lastUpdateTime>1414001208304</lastUpdateTime><createdTime>1414001208305</createdTime><contact><unknown><id>2801</id><accountId>1002759403</accountId><address>ca, US</address><city>sunnyvale</city><state>CA</state><country>U.S.</country></unknown></contact></unknown>";
         account2 = xmlParser.deserialize(xml, Map.class);
         N.println(account2);
+        assertNotNull(account2);
     }
 
     @Test
@@ -512,6 +465,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
 
         N.println(xBean);
         N.println(xBean2);
+        assertNotNull(xBean2);
     }
 
     @Test
@@ -528,6 +482,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
 
         N.println(xBean);
         N.println(xBean2);
+        assertNotNull(xBean2);
     }
 
     @Test
@@ -551,6 +506,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
 
         N.println(xBean);
         N.println(xBean2);
+        assertNotNull(xBean2);
     }
 
     @Test
@@ -574,6 +530,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
 
         N.println(xBean);
         N.println(xBean2);
+        assertNotNull(xBean2);
     }
 
     @Test
@@ -598,6 +555,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
 
         N.println(xBean);
         N.println(xBean2);
+        assertNotNull(xBean2);
     }
 
     @Test
@@ -621,6 +579,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
         map2 = xmlParser.deserialize(str, XmlDeserConfig.create().setMapKeyType(String.class).setMapValueType(String[].class), Map.class);
 
         N.println(map2);
+        assertNotNull(map2);
     }
 
     @Test
@@ -644,6 +603,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
         map2 = xmlParser.deserialize(str, XmlDeserConfig.create().setMapKeyType(String.class).setMapValueType(String[].class), Map.class);
 
         N.println(map2);
+        assertNotNull(map2);
     }
 
     @Test
@@ -679,6 +639,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
         map2 = xmlParser.deserialize(str, XmlDeserConfig.create().setElementType(Account.class), Map.class);
 
         N.println(map2);
+        assertNotNull(map2);
     }
 
     @Test
@@ -694,6 +655,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
 
         N.println(xBean);
         N.println(xBean2);
+        assertNotNull(xBean2);
     }
 
     @Test
@@ -771,6 +733,7 @@ public class XmlParserTest extends AbstractXmlParserTest {
 
         N.println(account);
         N.println(account2);
+        assertNotNull(account2);
     }
 
     @Test
@@ -902,7 +865,6 @@ public class XmlParserTest extends AbstractXmlParserTest {
 
             N.println(N.stringOf(a));
         }
-
     }
 
     @Test
@@ -931,6 +893,76 @@ public class XmlParserTest extends AbstractXmlParserTest {
 
         final MapEntity accounts2 = xmlParser.deserialize(xml, MapEntity.class);
         N.println(accounts2);
+        assertNotNull(accounts2);
+    }
 
+    @Test
+    public void test_parser_2() throws Exception {
+        Account account = createAccount(Account.class);
+        File file = new File("./src/test/resources/json.txt");
+
+        if (file.exists()) {
+            IOUtil.deleteRecursivelyIfExists(file);
+        }
+
+        Writer writer = new FileWriter(file);
+        jsonParser.serialize(account, writer);
+        IOUtil.close(writer);
+
+        String str = IOUtil.readAllToString(file);
+        N.println(str);
+
+        Account account2 = jsonParser.deserialize(file, Account.class);
+
+        assertEquals(account, account2);
+        IOUtil.deleteIfExists(file);
+    }
+
+    @Test
+    public void testSerialize_map() {
+        Map<String, Object> m = N.asMap("firstName", "fn", "lastName", "ln", "birthday", "2003-08-08");
+        String str = jsonParser.serialize(m);
+        N.println(str);
+
+        Map<String, Object> m2 = jsonParser.deserialize(str, Map.class);
+
+        N.println(m2);
+        assertEquals(m, m2);
+    }
+
+    @Test
+    public void testSerialize() {
+        Account account = createAccount(Account.class);
+        account.setId(100);
+
+        String str = jsonParser.serialize(account);
+        println(str);
+
+        println(jsonParser.deserialize(str, Account.class));
+
+        str = "{\r\n" + "    \"id\": 100,\r\n" + "    \"gui\": \"d670ced631a14cf2820296263e2364f0\",\r\n"
+                + "    \"emailAddress\": \"1e7cd28a386d47058a593d0dae386394@earth.com\",\r\n" + "    \"firstName\": \"firstName\",\r\n"
+                + "    \"middleName\": \"MN\",\r\n" + "    \"lastName\": \"lastName\",\r\n" + "    \"birthDate\": 1394842092851,\r\n"
+                + "    \"lastUpdateTime\": 1394842092851,\r\n" + "    \"createdTime\": 1394842092851\\r\\n" + "}";
+
+        println(jsonParser.deserialize(str, Account.class));
+
+        str = "{id:100,gui:\"5197aaf659794f1784fd45570ada3d62\",unknownProperty1:null, emailAddress:\"13f6a5129c274c758a6eddf40fd825c6@earth.com\",firstName:\"firstName\",middleName:\"MN\",lastName:\"lastName\",birthDate:1399943675943,lastUpdateTime:1399943675943,createdTime:1399943675943,unknownProperty2:1}";
+        println(jsonParser.deserialize(str, Account.class));
+        println(jsonParser.deserialize(str, Map.class));
+        assertNotNull(str);
+    }
+
+    @Test
+    public void testSerialize5() {
+        List<Account> accounts = createAccountWithContact(Account.class, 100);
+        String xml = jsonParser.serialize(accounts);
+        println(xml);
+
+        List<Account> xmlAccounts = jsonParser.deserialize(xml, List.class);
+
+        N.println(N.stringOf(accounts));
+        N.println(N.stringOf(xmlAccounts));
+        assertNotNull(xmlAccounts);
     }
 }

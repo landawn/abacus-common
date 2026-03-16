@@ -168,8 +168,8 @@ public final class HttpRequest {
      * @return a new HttpRequest instance
      */
     public static HttpRequest url(final String url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
-        return new HttpRequest(url, null, null, HttpClient.newBuilder().connectTimeout(Duration.ofMillis(connectTimeoutInMillis)),
-                java.net.http.HttpRequest.newBuilder().timeout(Duration.ofMillis(readTimeoutInMillis))).closeHttpClientAfterExecution(true);
+        return new HttpRequest(url, null, null, withConnectTimeout(HttpClient.newBuilder(), connectTimeoutInMillis),
+                withReadTimeout(java.net.http.HttpRequest.newBuilder(), readTimeoutInMillis)).closeHttpClientAfterExecution(true);
     }
 
     /**
@@ -193,8 +193,8 @@ public final class HttpRequest {
      * @return a new HttpRequest instance
      */
     public static HttpRequest url(final URL url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
-        return new HttpRequest(url.toString(), null, null, HttpClient.newBuilder().connectTimeout(Duration.ofMillis(connectTimeoutInMillis)),
-                java.net.http.HttpRequest.newBuilder().timeout(Duration.ofMillis(readTimeoutInMillis))).closeHttpClientAfterExecution(true);
+        return new HttpRequest(url.toString(), null, null, withConnectTimeout(HttpClient.newBuilder(), connectTimeoutInMillis),
+                withReadTimeout(java.net.http.HttpRequest.newBuilder(), readTimeoutInMillis)).closeHttpClientAfterExecution(true);
     }
 
     /**
@@ -218,8 +218,8 @@ public final class HttpRequest {
      * @return a new HttpRequest instance
      */
     public static HttpRequest url(final URI uri, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
-        return new HttpRequest(null, uri, null, HttpClient.newBuilder().connectTimeout(Duration.ofMillis(connectTimeoutInMillis)),
-                java.net.http.HttpRequest.newBuilder().timeout(Duration.ofMillis(readTimeoutInMillis))).closeHttpClientAfterExecution(true);
+        return new HttpRequest(null, uri, null, withConnectTimeout(HttpClient.newBuilder(), connectTimeoutInMillis),
+                withReadTimeout(java.net.http.HttpRequest.newBuilder(), readTimeoutInMillis)).closeHttpClientAfterExecution(true);
     }
 
     HttpRequest closeHttpClientAfterExecution(final boolean shouldClose) {
@@ -247,7 +247,9 @@ public final class HttpRequest {
     public HttpRequest connectTimeout(final Duration connectTimeout) {
         initClientBuilder();
 
-        clientBuilder.connectTimeout(connectTimeout);
+        if (connectTimeout != null && !connectTimeout.isZero()) {
+            clientBuilder.connectTimeout(connectTimeout);
+        }
 
         return this;
     }
@@ -299,9 +301,27 @@ public final class HttpRequest {
      * @return this HttpRequest instance for method chaining
      */
     public HttpRequest readTimeout(final Duration readTimeout) {
-        requestBuilder.timeout(readTimeout);
+        if (readTimeout != null && !readTimeout.isZero()) {
+            requestBuilder.timeout(readTimeout);
+        }
 
         return this;
+    }
+
+    private static HttpClient.Builder withConnectTimeout(final HttpClient.Builder builder, final long connectTimeoutInMillis) {
+        if (connectTimeoutInMillis > 0) {
+            builder.connectTimeout(Duration.ofMillis(connectTimeoutInMillis));
+        }
+
+        return builder;
+    }
+
+    private static java.net.http.HttpRequest.Builder withReadTimeout(final java.net.http.HttpRequest.Builder builder, final long readTimeoutInMillis) {
+        if (readTimeoutInMillis > 0) {
+            builder.timeout(Duration.ofMillis(readTimeoutInMillis));
+        }
+
+        return builder;
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.Date;
 
@@ -25,6 +26,7 @@ public class DateTimeTest extends AbstractTest {
         N.println(Dates.format(date, pattern));
         Profiler.run(1, 100, 1, "Commons Lang", () -> fdf.format(date)).printResult();
         Profiler.run(1, 100, 1, "abacus-common", () -> Dates.format(date, pattern)).printResult();
+        assertNotNull(fdf);
     }
 
     @Test

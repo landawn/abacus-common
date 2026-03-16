@@ -1242,8 +1242,13 @@ public final class Maps {
             }
 
             if (key.charAt(key.length() - 1) == ']') {
-                final int[] indexes = Strings.substringsBetween(key, "[", "]").stream().mapToInt(Numbers::toInt).toArray();
                 final int idx = key.indexOf('[');
+
+                if (idx < 0) {
+                    return defaultValue;
+                }
+
+                final int[] indexes = Strings.substringsBetween(key, "[", "]").stream().mapToInt(Numbers::toInt).toArray();
                 intermediateColl = (Collection) intermediateMap.get(key.substring(0, idx));
 
                 for (int j = 0, idxLen = indexes.length; j < idxLen; j++) {

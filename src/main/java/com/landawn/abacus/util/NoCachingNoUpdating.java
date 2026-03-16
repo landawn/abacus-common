@@ -2788,8 +2788,8 @@ public interface NoCachingNoUpdating {
          * Updates the value and timestamp of this instance.
          * This method is protected to prevent external modification.
          *
-         * @param value the new value
-         * @param timeInMillis the new timestamp in milliseconds
+         * @param value the value to set
+         * @param timeInMillis the timestamp in milliseconds to set
          */
         protected void set(final T value, final long timeInMillis) {
             this.value = value;

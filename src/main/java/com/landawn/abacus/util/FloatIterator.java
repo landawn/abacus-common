@@ -19,7 +19,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.util.u.OptionalFloat;
 import com.landawn.abacus.util.function.FloatPredicate;
 import com.landawn.abacus.util.function.FloatSupplier;
 import com.landawn.abacus.util.stream.FloatStream;
@@ -498,55 +497,6 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
                 return next;
             }
         };
-    }
-
-    /**
-     * Returns the first element wrapped in an OptionalFloat, or empty if no elements exist.
-     * This consumes the first element from the iterator if present.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * FloatIterator iter = FloatIterator.of(1.5f, 2.5f, 3.5f);
-     * OptionalFloat first = iter.first();   // OptionalFloat.of(1.5f)
-     *
-     * FloatIterator empty = FloatIterator.empty();
-     * OptionalFloat none = empty.first();   // OptionalFloat.empty()
-     * }</pre>
-     *
-     * @return OptionalFloat containing the first element, or empty if iterator is empty
-     */
-    public OptionalFloat first() {
-        if (hasNext()) {
-            return OptionalFloat.of(nextFloat());
-        } else {
-            return OptionalFloat.empty();
-        }
-    }
-
-    /**
-     * Returns the last element wrapped in an OptionalFloat, or empty if no elements exist.
-     * This consumes all elements from the iterator.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * FloatIterator iter = FloatIterator.of(1.5f, 2.5f, 3.5f);
-     * OptionalFloat last = iter.last();   // OptionalFloat.of(3.5f)
-     * }</pre>
-     *
-     * @return OptionalFloat containing the last element, or empty if iterator is empty
-     */
-    public OptionalFloat last() {
-        if (hasNext()) {
-            float next = nextFloat();
-
-            while (hasNext()) {
-                next = nextFloat();
-            }
-
-            return OptionalFloat.of(next);
-        } else {
-            return OptionalFloat.empty();
-        }
     }
 
     /**

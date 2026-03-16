@@ -606,6 +606,8 @@ public final class Profiler {
     static MultiLoopsStatistics run(final Object instance, final String methodName, final Method method, final List<?> args, final Method setUpForMethod,
             final Method tearDownForMethod, final Method setUpForLoop, final Method tearDownForLoop, final int threadNum, final long threadDelay,
             final int loopNum, final long loopDelay, final int roundNum) {
+        final int actualRoundNum = roundNum <= 0 ? 1 : roundNum;
+
         if ((threadNum <= 0) || (loopNum <= 0) || (threadDelay < 0) || (loopDelay < 0)) {
             throw new IllegalArgumentException("threadNum=" + threadNum + ", loopNum=" + loopNum + ", threadDelay=" + threadDelay + ", loopDelay=" + loopDelay); //NOSONAR
         }
@@ -625,13 +627,13 @@ public final class Profiler {
             }
         }
 
-        if (roundNum == 1) {
+        if (actualRoundNum == 1) {
             return run(instance, methodName, method, args, setUpForMethod, tearDownForMethod, setUpForLoop, tearDownForLoop, threadNum, threadDelay, loopNum,
                     loopDelay);
         } else {
             MultiLoopsStatistics result = null;
 
-            for (int i = 0; i < (suspended ? 1 : roundNum); i++) {
+            for (int i = 0; i < (suspended ? 1 : actualRoundNum); i++) {
                 if (result != null) {
                     result.printResult();
                     result = null; //NOSONAR
@@ -936,7 +938,7 @@ public final class Profiler {
         /**
          * Sets the result of the execution.
          *
-         * @param result the new result
+         * @param result the result value to set
          */
         void setResult(Object result);
 
@@ -1316,13 +1318,13 @@ public final class Profiler {
         private List<MethodStatistics> methodStatisticsList;
 
         /**
-         * Instantiates a new single loop statistics.
+         * Constructs a new {@code SingleLoopStatistics}.
          */
         public SingleLoopStatistics() {
         }
 
         /**
-         * Instantiates a new single loop statistics.
+         * Constructs a new {@code SingleLoopStatistics}.
          *
          * @param startTimeInMillis the start time in milliseconds since epoch
          * @param endTimeInMillis the end time in milliseconds since epoch
@@ -1334,7 +1336,7 @@ public final class Profiler {
         }
 
         /**
-         * Instantiates a new single loop statistics.
+         * Constructs a new {@code SingleLoopStatistics}.
          *
          * @param startTimeInMillis the start time in milliseconds since epoch
          * @param endTimeInMillis the end time in milliseconds since epoch

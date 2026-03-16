@@ -21,7 +21,6 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.stream.DoubleStream;
 
 /**
@@ -499,54 +498,6 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
                 return next;
             }
         };
-    }
-
-    /**
-     * Returns the first element in this iterator wrapped in an OptionalDouble.
-     *
-     * <p><b>Note:</b> This method consumes one element from the iterator. After calling this method,
-     * the iterator will be positioned at the second element (if it exists).</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * OptionalDouble first = DoubleIterator.of(1.5, 2.5, 3.5).first();
-     * // first.get() returns 1.5
-     * }</pre>
-     *
-     * @return an OptionalDouble containing the first element, or empty if no elements
-     */
-    public OptionalDouble first() {
-        if (hasNext()) {
-            return OptionalDouble.of(nextDouble());
-        } else {
-            return OptionalDouble.empty();
-        }
-    }
-
-    /**
-     * Returns the last element in this iterator wrapped in an OptionalDouble.
-     * This method consumes the entire iterator.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * OptionalDouble last = DoubleIterator.of(1.5, 2.5, 3.5).last();
-     * // last.get() returns 3.5
-     * }</pre>
-     *
-     * @return an OptionalDouble containing the last element, or empty if no elements
-     */
-    public OptionalDouble last() {
-        if (hasNext()) {
-            double next = nextDouble();
-
-            while (hasNext()) {
-                next = nextDouble();
-            }
-
-            return OptionalDouble.of(next);
-        } else {
-            return OptionalDouble.empty();
-        }
     }
 
     /**

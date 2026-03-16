@@ -243,35 +243,13 @@ public class XBean {
 
         XBean other = (XBean) obj;
 
-        if (!Arrays.equals(array, other.array)) {
+        if (!Arrays.equals(array, other.array) || !Objects.equals(firstName, other.firstName) || !Objects.equals(lastName, other.lastName)
+                || !Objects.equals(middleName, other.middleName)) {
             return false;
         }
 
-        if (!Objects.equals(firstName, other.firstName)) {
-            return false;
-        }
-
-        if (!Objects.equals(lastName, other.lastName)) {
-            return false;
-        }
-
-        if (!Objects.equals(middleName, other.middleName)) {
-            return false;
-        }
-
-        if (!Objects.equals(persons, other.persons)) {
-            return false;
-        }
-
-        if (typeBoolean != other.typeBoolean) {
-            return false;
-        }
-
-        if (!Objects.equals(typeBoolean2, other.typeBoolean2)) {
-            return false;
-        }
-
-        if (typeByte != other.typeByte) {
+        if (!Objects.equals(persons, other.persons) || (typeBoolean != other.typeBoolean) || !Objects.equals(typeBoolean2, other.typeBoolean2)
+                || (typeByte != other.typeByte)) {
             return false;
         }
 

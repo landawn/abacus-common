@@ -59,9 +59,10 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     private static final long serialVersionUID = -4830728138360036487L;
 
     /**
-     * The mutable boolean value.
+     * The mutable boolean value. Volatile to ensure cross-thread visibility
+     * when used as a shared flag in parallel stream operations (e.g., takeWhile/dropWhile).
      */
-    private boolean value;
+    private volatile boolean value;
 
     /**
      * Constructs a new MutableBoolean with the default value of {@code false}.

@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.File;
 import java.sql.Date;
@@ -43,6 +44,7 @@ public class KryoParserTest extends AbstractParserTest {
         Object obj = kryoParser.deserialize(str, HashMap.class);
 
         N.println(obj);
+        assertNotNull(obj);
     }
 
     @Test
@@ -67,6 +69,7 @@ public class KryoParserTest extends AbstractParserTest {
 
         Object obj = kryoParser.deserialize(kryoParser.serialize(new Object[] { account }), Account[].class);
         println(obj);
+        assertNotNull(obj);
     }
 
     @Test
@@ -176,7 +179,7 @@ public class KryoParserTest extends AbstractParserTest {
         String jsonStr = kryoParser.serialize(xBean);
         println(jsonStr);
         println(kryoParser.serialize(kryoParser.deserialize(jsonStr, XBean.class)));
-
+        assertNotNull(jsonStr);
     }
 
     @Test
@@ -189,6 +192,7 @@ public class KryoParserTest extends AbstractParserTest {
         Profiler.run(this, "executeBigBean", 1, 3, 1).printResult();
 
         file.delete();
+        assertNotNull(file);
     }
 
     void executeBigBean() {
@@ -346,7 +350,7 @@ public class KryoParserTest extends AbstractParserTest {
         println(st);
 
         kryoParser.deserialize(xml, XBean.class);
-
+        assertNotNull(st);
     }
 
     @Test
@@ -359,7 +363,7 @@ public class KryoParserTest extends AbstractParserTest {
 
         N.println(CommonUtil.stringOf(accounts));
         N.println(CommonUtil.stringOf(xmlAccounts));
-
+        assertNotNull(xmlAccounts);
     }
 
     @Test
@@ -881,35 +885,13 @@ public class KryoParserTest extends AbstractParserTest {
                 return false;
             }
 
-            if (typeChar != other.typeChar) {
+            if ((typeChar != other.typeChar) || !Objects.equals(typeChar2, other.typeChar2) || !Objects.equals(typeDate, other.typeDate)
+                    || (Double.doubleToLongBits(typeDouble) != Double.doubleToLongBits(other.typeDouble))) {
                 return false;
             }
 
-            if (!Objects.equals(typeChar2, other.typeChar2)) {
-                return false;
-            }
-
-            if (!Objects.equals(typeDate, other.typeDate)) {
-                return false;
-            }
-
-            if (Double.doubleToLongBits(typeDouble) != Double.doubleToLongBits(other.typeDouble)) {
-                return false;
-            }
-
-            if (Float.floatToIntBits(typeFloat) != Float.floatToIntBits(other.typeFloat)) {
-                return false;
-            }
-
-            if (!Objects.equals(typeGenericList, other.typeGenericList)) {
-                return false;
-            }
-
-            if (!Objects.equals(typeGenericMap, other.typeGenericMap)) {
-                return false;
-            }
-
-            if (!Objects.equals(typeGenericMap2, other.typeGenericMap2)) {
+            if ((Float.floatToIntBits(typeFloat) != Float.floatToIntBits(other.typeFloat)) || !Objects.equals(typeGenericList, other.typeGenericList)
+                    || !Objects.equals(typeGenericMap, other.typeGenericMap) || !Objects.equals(typeGenericMap2, other.typeGenericMap2)) {
                 return false;
             }
 

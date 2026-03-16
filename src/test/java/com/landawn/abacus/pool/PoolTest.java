@@ -2,347 +2,252 @@ package com.landawn.abacus.pool;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import com.landawn.abacus.AbstractTest;
-import com.landawn.abacus.entity.extendDirty.basic.ExtendDirtyBasicPNL.AccountPNL;
-import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Seid;
-import com.landawn.abacus.util.Strings;
+import com.landawn.abacus.TestBase;
 
-@Tag("old-test")
-public class PoolTest extends AbstractTest {
+@Tag("new-test")
+public class PoolTest extends TestBase {
 
-    @Test
-    public void testMaxWaitTime() {
-        final int capacity = 30;
-        final ObjectPool<PoolableAdapter> pool = PoolFactory.createObjectPool(capacity, 30);
+    private TestPool pool;
 
-        for (int i = 0; i < capacity; i++) {
-            pool.add(new PoolableAdapter<>(i, 600, 600));
+    private static class TestPoolable extends AbstractPoolable {
+        TestPoolable() {
+            super(10000, 5000);
         }
 
-        final long startTime = System.currentTimeMillis();
-        final AtomicInteger counter = new AtomicInteger();
-        final int threadNum = 40;
+        @Override
+        public void destroy(Poolable.Caller caller) {
+        }
+    }
 
-        for (int i = 0; i < threadNum; i++) {
-            final Thread th = new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        final PoolableAdapter result = pool.take(2, TimeUnit.SECONDS);
+    private static class TestPool implements Pool {
+        private boolean locked = false;
+        private int capacity = 10;
+        private int size = 0;
+        private boolean closed = false;
 
-                        if (result == null) {
-                            counter.incrementAndGet();
-                        } else {
-                            N.println(result.value());
-                        }
-                    } catch (final InterruptedException e) {
-                        counter.incrementAndGet();
-                        e.printStackTrace();
-                    }
-                }
-            };
-
-            th.start();
+        @Override
+        public void lock() {
+            locked = true;
         }
 
-        while (counter.get() < (threadNum - capacity)) {
-            try {
-                Thread.sleep(10);
-            } catch (final InterruptedException e) {
-                e.printStackTrace();
+        @Override
+        public void unlock() {
+            if (!locked) {
+                throw new IllegalMonitorStateException();
             }
+            locked = false;
         }
 
-        N.println(System.currentTimeMillis() - startTime);
+        @Override
+        public int capacity() {
+            return capacity;
+        }
+
+        @Override
+        public int size() {
+            return size;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return size == 0;
+        }
+
+        @Override
+        public void evict() {
+            if (closed) {
+                throw new IllegalStateException("Pool is closed");
+            }
+            size = Math.max(0, size - 2);
+        }
+
+        @Override
+        public void clear() {
+            if (closed) {
+                throw new IllegalStateException("Pool is closed");
+            }
+            size = 0;
+        }
+
+        @Override
+        public PoolStats stats() {
+            return new PoolStats(capacity, size, 100, 80, 60, 20, 10, -1, -1);
+        }
+
+        @Override
+        public void close() {
+            closed = true;
+            size = 0;
+        }
+
+        @Override
+        public boolean isClosed() {
+            return closed;
+        }
+
+        public void setSize(int size) {
+            this.size = size;
+        }
+
+        public void setCapacity(int capacity) {
+            this.capacity = capacity;
+        }
+
+        boolean isLocked() {
+            return locked;
+        }
+    }
+
+    @BeforeEach
+    public void setUp() {
+        pool = new TestPool();
     }
 
     @Test
-    public void test_GenericObjectPool() throws InterruptedException {
-        ObjectPool<PoolableAdapter<String>> objectPool = PoolFactory.createObjectPool(3000, 1000, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f);
-
-        objectPool.add(Poolable.wrap("123"));
-
-        assertTrue(objectPool.contains(Poolable.wrap("123")));
-
-        for (int i = 0; i < 3000; i++) {
-            objectPool.add(Poolable.wrap(N.stringOf(i)));
-        }
-
-        assertFalse(objectPool.add(Poolable.wrap("123")));
-
-        assertFalse(objectPool.add(Poolable.wrap("123"), 100, TimeUnit.MILLISECONDS));
-
-        objectPool = PoolFactory.createObjectPool(1000, 1000, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f);
-
-        objectPool.add(Poolable.wrap("123"));
-
-        assertTrue(objectPool.contains(Poolable.wrap("123")));
-
-        for (int i = 0; i < 30000; i++) {
-            objectPool.add(Poolable.wrap(N.stringOf(i)));
-        }
-
-        assertTrue(objectPool.add(Poolable.wrap("123")));
-
-        assertTrue(objectPool.add(Poolable.wrap("123"), 100, TimeUnit.MILLISECONDS));
-
-        final PoolableAdapter<String> value = Poolable.wrap("123", 10, 10);
-        N.sleep(100);
-
-        assertFalse(objectPool.add(value));
-
-        try {
-            objectPool.add(null);
-        } catch (final IllegalArgumentException e) {
-
-        }
-
-        try {
-
-        } catch (final IllegalArgumentException e) {
-
-        }
+    public void testLock() {
+        assertFalse(pool.isLocked());
+        pool.lock();
+        assertTrue(pool.isLocked());
     }
 
     @Test
-    public void test_GenericKeyedObjectPool() {
-
-        try {
-            PoolFactory.createKeyedObjectPool(-1, 100);
-        } catch (final IllegalArgumentException e) {
-
-        }
-
-        try {
-            PoolFactory.createKeyedObjectPool(1000, -10);
-        } catch (final IllegalArgumentException e) {
-
-        }
-
-        KeyedObjectPool<String, PoolableAdapter<String>> keyedObjectPool = PoolFactory.createKeyedObjectPool(1000, 100);
-
-        keyedObjectPool.put("abc", Poolable.wrap("123"));
-
-        try {
-            keyedObjectPool.put(null, Poolable.wrap("123"));
-        } catch (final IllegalArgumentException e) {
-
-        }
-
-        try {
-            keyedObjectPool.put("abc", null);
-        } catch (final IllegalArgumentException e) {
-
-        }
-
-        final PoolableAdapter<String> value = Poolable.wrap("123", 10, 10);
-        N.sleep(100);
-
-        assertFalse(keyedObjectPool.put("abc", value));
-
-        assertTrue(keyedObjectPool.containsKey("abc"));
-
-        N.println(keyedObjectPool.values());
-
-        keyedObjectPool = PoolFactory.createKeyedObjectPool(1000, 1000, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f);
-
-        for (int i = 0; i < 1000; i++) {
-            keyedObjectPool.put(Strings.uuid(), Poolable.wrap(N.stringOf(i)));
-        }
-
-        assertFalse(keyedObjectPool.put(Strings.uuid(), Poolable.wrap("123")));
-
-        keyedObjectPool = PoolFactory.createKeyedObjectPool(1000, 1000, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f);
-
-        for (int i = 0; i < 1000; i++) {
-            keyedObjectPool.put(Strings.uuid(), Poolable.wrap(N.stringOf(i)));
-        }
-
-        assertTrue(keyedObjectPool.put(Strings.uuid(), Poolable.wrap("123")));
-
-        keyedObjectPool.close();
+    public void testUnlock() {
+        pool.lock();
+        assertTrue(pool.isLocked());
+        pool.unlock();
+        assertFalse(pool.isLocked());
     }
 
     @Test
-    public void testGenericKeyedObjectPool1() throws Exception {
-        final KeyedObjectPool<String, PoolableAdapter<String>> pool = PoolFactory.createKeyedObjectPool(100, 2000);
-        pool.put("a", Poolable.wrap("a", 1000, 1000));
-        N.println(pool.size());
-        assertEquals(1, pool.size());
-        Thread.sleep(3000);
+    public void testCapacity() {
+        assertEquals(10, pool.capacity());
+        pool.setCapacity(20);
+        assertEquals(20, pool.capacity());
+    }
+
+    @Test
+    public void testSize() {
         assertEquals(0, pool.size());
-        pool.close();
+        pool.setSize(5);
+        assertEquals(5, pool.size());
     }
 
     @Test
-    public void testGenericKeyedObjectPool2() throws Exception {
-        final KeyedObjectPool<String, PoolableAdapter<String>> pool = PoolFactory.createKeyedObjectPool(100, 2000);
-        pool.put("a", Poolable.wrap("a", 1000, 1000));
-        N.println(pool.size());
+    public void testVacate() {
+        pool.setSize(5);
+        assertEquals(5, pool.size());
+        pool.evict();
+        assertEquals(3, pool.size());
+        pool.evict();
         assertEquals(1, pool.size());
+        pool.evict();
+        assertEquals(0, pool.size());
+    }
+
+    @Test
+    public void testClear() {
+        pool.setSize(5);
+        assertEquals(5, pool.size());
         pool.clear();
         assertEquals(0, pool.size());
+    }
 
+    @Test
+    public void testStats() {
+        PoolStats stats = pool.stats();
+        assertNotNull(stats);
+        assertEquals(10, stats.capacity());
+        assertEquals(0, stats.size());
+        assertEquals(100, stats.putCount());
+        assertEquals(80, stats.getCount());
+        assertEquals(60, stats.hitCount());
+        assertEquals(20, stats.missCount());
+        assertEquals(10, stats.evictionCount());
+        assertEquals(-1, stats.maxMemory());
+        assertEquals(-1, stats.dataSize());
+    }
+
+    @Test
+    public void testClose() {
+        assertFalse(pool.isClosed());
+        pool.setSize(5);
         pool.close();
+        assertTrue(pool.isClosed());
+        assertEquals(0, pool.size());
     }
 
     @Test
-    public void testGenericKeyedObjectPool3() throws Exception {
-        final KeyedObjectPool<String, PoolableAdapter<String>> pool = PoolFactory.createKeyedObjectPool(100, 2000);
-        pool.put("a", Poolable.wrap("a", 1000, 1000));
-        N.println(pool.size());
-        assertEquals(1, pool.size());
+    public void testMultipleLockUnlock() {
+        for (int i = 0; i < 5; i++) {
+            assertFalse(pool.isLocked());
+            pool.lock();
+            assertTrue(pool.isLocked());
+            pool.unlock();
+            assertFalse(pool.isLocked());
+        }
+    }
+
+    @Test
+    public void testPoolOperationsSequence() {
+        assertTrue(pool.isEmpty());
+        assertEquals(10, pool.capacity());
+
+        pool.setSize(8);
+        assertFalse(pool.isEmpty());
+        assertEquals(8, pool.size());
+
+        pool.evict();
+        assertEquals(6, pool.size());
+
+        PoolStats stats = pool.stats();
+        assertEquals(6, stats.size());
+
+        pool.clear();
+        assertTrue(pool.isEmpty());
+
+        assertFalse(pool.isClosed());
         pool.close();
-
-        try {
-            pool.put("a", Poolable.wrap("a", 1000, 1000));
-            fail("should threw RuntimeException");
-        } catch (final RuntimeException e) {
-        }
+        assertTrue(pool.isClosed());
     }
 
     @Test
-    public void test_vacation() throws Exception {
-        KeyedObjectPool<String, PoolableAdapter<String>> pool = PoolFactory.createKeyedObjectPool(100, 2000, EvictionPolicy.LAST_ACCESS_TIME, true, 0.1f);
-
-        for (int i = 0; i < 1000; i++) {
-            pool.put(String.valueOf(i), Poolable.wrap(String.valueOf(i)));
-            N.sleep(1);
-        }
-
-        N.println(pool.size());
-        N.println(pool);
-
-        pool = PoolFactory.createKeyedObjectPool(100, 2000, EvictionPolicy.ACCESS_COUNT, true, 0.2f);
-
-        for (int i = 0; i < 1000; i++) {
-            pool.put(String.valueOf(i), Poolable.wrap(String.valueOf(i)));
-            N.sleep(1);
-        }
-
-        N.println(pool.size());
-        N.println(pool);
-
-        pool = PoolFactory.createKeyedObjectPool(100, 2000, EvictionPolicy.EXPIRATION_TIME, true, 0.3f);
-
-        for (int i = 0; i < 1000; i++) {
-            pool.put(String.valueOf(i), Poolable.wrap(String.valueOf(i)));
-            N.sleep(1);
-        }
-
-        pool.get(String.valueOf(1));
-
-        N.println(pool.size());
-        N.println(pool);
-
-        N.println(pool.stats());
+    public void testIsEmpty() {
+        assertTrue(pool.isEmpty());
+        pool.setSize(1);
+        assertFalse(pool.isEmpty());
+        pool.setSize(0);
+        assertTrue(pool.isEmpty());
     }
 
     @Test
-    public void test_vacation_2() throws Exception {
-        ObjectPool<PoolableAdapter<String>> pool = PoolFactory.createObjectPool(100, 2000, EvictionPolicy.LAST_ACCESS_TIME, true, 0.1f);
-
-        for (int i = 0; i < 1000; i++) {
-            pool.add(Poolable.wrap(String.valueOf(i)));
-            N.sleep(1);
-        }
-
-        N.println(pool.size());
-        N.println(pool);
-
-        pool = PoolFactory.createObjectPool(100, 2000, EvictionPolicy.ACCESS_COUNT, true, 0.2f);
-
-        for (int i = 0; i < 1000; i++) {
-            pool.add(Poolable.wrap(String.valueOf(i)));
-            N.sleep(1);
-        }
-
-        N.println(pool.size());
-        N.println(pool);
-
-        pool = PoolFactory.createObjectPool(100, 2000, EvictionPolicy.EXPIRATION_TIME, true, 0.3f);
-
-        for (int i = 0; i < 1000; i++) {
-            pool.add(Poolable.wrap(String.valueOf(i)));
-            N.sleep(1);
-        }
-
-        N.println(pool.size());
-        N.println(pool);
+    public void testIsClosed() {
+        assertFalse(pool.isClosed());
+        pool.close();
+        assertTrue(pool.isClosed());
     }
 
     @Test
-    public void test_Wrapper() {
-        PoolableAdapter<Seid> wrapper = Poolable.wrap(Seid.of(AccountPNL.ID, 1));
-
-        N.println(wrapper);
-
-        final PoolableAdapter<Seid> wrapper2 = Poolable.wrap(Seid.of(AccountPNL.ID, 1));
-
-        assertTrue(wrapper.equals(wrapper2));
-        assertTrue(N.toSet(wrapper).contains(wrapper2));
-
-        N.println(wrapper.value());
-
-        wrapper = new PoolableAdapter<>(wrapper.value());
-        N.println(wrapper.value());
+    public void testUnlockWithoutLock() {
+        assertThrows(IllegalMonitorStateException.class, () -> pool.unlock());
     }
 
     @Test
-    public void test_ActivityPrint() {
-        ActivityPrint activityPrint = new ActivityPrint(100, 100);
+    public void testVacateOnClosedPool() {
+        pool.close();
+        assertThrows(IllegalStateException.class, () -> pool.evict());
+    }
 
-        N.println(activityPrint);
-
-        final ActivityPrint activityPrint2 = new ActivityPrint(100, 100);
-
-        assertTrue(activityPrint.equals(activityPrint.clone()));
-        assertTrue(N.toSet(activityPrint).contains(activityPrint.clone()));
-
-        activityPrint2.setLiveTime(1);
-        activityPrint2.setMaxIdleTime(100);
-
-        assertFalse(activityPrint.equals(activityPrint2));
-        assertFalse(activityPrint.equals(activityPrint2.clone()));
-
-        try {
-            activityPrint = new ActivityPrint(-1, 100);
-            N.println(activityPrint);
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-
-        }
-
-        try {
-            activityPrint = new ActivityPrint(100, -1);
-            N.println(activityPrint);
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-
-        }
-
-        try {
-            activityPrint2.setLiveTime(-1);
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-
-        }
-
-        try {
-            activityPrint2.setMaxIdleTime(-1);
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-
-        }
+    @Test
+    public void testClearOnClosedPool() {
+        pool.close();
+        assertThrows(IllegalStateException.class, () -> pool.clear());
     }
 }

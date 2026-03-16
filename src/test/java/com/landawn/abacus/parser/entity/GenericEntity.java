@@ -113,28 +113,12 @@ public class GenericEntity {
             return false;
         }
         GenericEntity other = (GenericEntity) obj;
-        if (!Objects.equals(accountList, other.accountList)) {
+        if (!Objects.equals(accountList, other.accountList) || !Objects.equals(accountMap, other.accountMap) || !Objects.equals(booleanList, other.booleanList)
+                || !Objects.equals(booleanMap, other.booleanMap)) {
             return false;
         }
-        if (!Objects.equals(accountMap, other.accountMap)) {
-            return false;
-        }
-        if (!Objects.equals(booleanList, other.booleanList)) {
-            return false;
-        }
-        if (!Objects.equals(booleanMap, other.booleanMap)) {
-            return false;
-        }
-        if (!Objects.equals(charList, other.charList)) {
-            return false;
-        }
-        if (!Objects.equals(charMap, other.charMap)) {
-            return false;
-        }
-        if (!Objects.equals(intList, other.intList)) {
-            return false;
-        }
-        if (!Objects.equals(intMap, other.intMap)) {
+        if (!Objects.equals(charList, other.charList) || !Objects.equals(charMap, other.charMap) || !Objects.equals(intList, other.intList)
+                || !Objects.equals(intMap, other.intMap)) {
             return false;
         }
         if (!Objects.equals(stringList, other.stringList)) {
