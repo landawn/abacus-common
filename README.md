@@ -279,7 +279,7 @@ To fully leverage abacus-common, familiarity with Java 8+ lambdas and the Stream
 
 
 
-## Also See: [abacus-jdbc](https://github.com/landawn/abacus-jdbc), [abacus-query](https://github.com/landawn/abacus-query), [abacus-extra](https://github.com/landawn/abacus-extra), [abacus-cache](https://github.com/landawn/abacus-cache) and [abacus-android](https://github.com/landawn/abacus-android)
+## Also See: [abacus-jdbc](https://github.com/landawn/abacus-jdbc), [abacus-query](https://github.com/landawn/abacus-query), [abacus-extra](https://github.com/landawn/abacus-extra), [abacus-matrix](https://github.com/landawn/abacus-matrix), [abacus-cache](https://github.com/landawn/abacus-cache) and [abacus-android](https://github.com/landawn/abacus-android)
 
 
 ## Recommended Java programming libraries/frameworks:
