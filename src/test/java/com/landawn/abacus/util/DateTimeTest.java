@@ -8,13 +8,11 @@ import java.util.Date;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.joda.time.DateTime;
 import org.joda.time.MutableDateTime;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 import com.landawn.abacus.type.Type;
 
-@Tag("old-test")
 public class DateTimeTest extends AbstractTest {
 
     @Test

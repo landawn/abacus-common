@@ -13,14 +13,123 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 @SuppressWarnings("deprecation")
 public class SeidTest extends TestBase {
+
+    public static class SimpleUser {
+        private int id;
+        private String name;
+
+        public SimpleUser(int id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
+
+    public static class AnnotatedUser {
+        @com.landawn.abacus.annotation.Id
+        private int id;
+        private String name;
+
+        public AnnotatedUser(int id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
+
+    // ==================== constructor(String propName, Object propValue) ====================
+
+    @Test
+    public void testConstructor_propNameAndValue() {
+        Seid seid = new Seid("Order.orderId", 456);
+        assertEquals("Order", seid.entityName());
+        assertEquals(456, (int) seid.get("orderId"));
+    }
+
+    // ==================== constructor(Map) ====================
+
+    @Test
+    public void testConstructor_map() {
+        Map<String, Object> props = new LinkedHashMap<>();
+        props.put("Order.orderId", 100);
+        Seid seid = new Seid(props);
+        assertEquals("Order", seid.entityName());
+        assertEquals(100, (int) seid.get("orderId"));
+    }
+
+    // ==================== Seid(String entityName) constructor ====================
+
+    @Test
+    public void testConstructor_entityName() {
+        Seid seid = new Seid("MyEntity");
+        assertEquals("MyEntity", seid.entityName());
+        assertTrue(seid.isEmpty());
+    }
+
+    @Test
+    public void testConstructor_entityName_null() {
+        Seid seid = new Seid((String) null);
+        assertEquals("", seid.entityName());
+    }
+
+    // ==================== of(propName1, propValue1, propName2, propValue2) ====================
+
+    @Test
+    public void testOf_twoProps() {
+        Seid seid = Seid.of("User.id", 123, "User.name", "John");
+        assertEquals("User", seid.entityName());
+        assertEquals(123, (int) seid.get("id"));
+        assertEquals("John", seid.get("name"));
+        assertEquals(2, seid.size());
+    }
+
+    // ==================== of(propName1-3, propValue1-3) ====================
+
+    @Test
+    public void testOf_threeProps() {
+        Seid seid = Seid.of("User.id", 1, "User.name", "John", "User.age", 30);
+        assertEquals("User", seid.entityName());
+        assertEquals(1, (int) seid.get("id"));
+        assertEquals("John", seid.get("name"));
+        assertEquals(30, (int) seid.get("age"));
+        assertEquals(3, seid.size());
+    }
 
     // ==================== of(String entityName) ====================
 
@@ -73,29 +182,6 @@ public class SeidTest extends TestBase {
         assertEquals(1, seid.size());
     }
 
-    // ==================== of(propName1, propValue1, propName2, propValue2) ====================
-
-    @Test
-    public void testOf_twoProps() {
-        Seid seid = Seid.of("User.id", 123, "User.name", "John");
-        assertEquals("User", seid.entityName());
-        assertEquals(123, (int) seid.get("id"));
-        assertEquals("John", seid.get("name"));
-        assertEquals(2, seid.size());
-    }
-
-    // ==================== of(propName1-3, propValue1-3) ====================
-
-    @Test
-    public void testOf_threeProps() {
-        Seid seid = Seid.of("User.id", 1, "User.name", "John", "User.age", 30);
-        assertEquals("User", seid.entityName());
-        assertEquals(1, (int) seid.get("id"));
-        assertEquals("John", seid.get("name"));
-        assertEquals(30, (int) seid.get("age"));
-        assertEquals(3, seid.size());
-    }
-
     // ==================== create(Map) ====================
 
     @Test
@@ -112,28 +198,31 @@ public class SeidTest extends TestBase {
     }
 
     @Test
+    public void testCreate_entity_withIdPropNames() {
+        SimpleUser user = new SimpleUser(42, "Alice");
+        Seid seid = Seid.create(user, java.util.Arrays.asList("id"));
+        assertNotNull(seid);
+        assertEquals("SimpleUser", seid.entityName());
+        assertEquals(Integer.valueOf(42), seid.get("id"));
+    }
+
+    @Test
+    public void testCreate_entity_withAnnotation() {
+        AnnotatedUser user = new AnnotatedUser(99, "Charlie");
+        Seid seid = Seid.create(user);
+        assertNotNull(seid);
+        assertEquals(Integer.valueOf(99), seid.get("id"));
+    }
+
+    @Test
     public void testCreate_map_empty() {
         assertThrows(IllegalArgumentException.class, () -> Seid.create(new HashMap<>()));
     }
 
-    // ==================== constructor(String propName, Object propValue) ====================
-
     @Test
-    public void testConstructor_propNameAndValue() {
-        Seid seid = new Seid("Order.orderId", 456);
-        assertEquals("Order", seid.entityName());
-        assertEquals(456, (int) seid.get("orderId"));
-    }
-
-    // ==================== constructor(Map) ====================
-
-    @Test
-    public void testConstructor_map() {
-        Map<String, Object> props = new LinkedHashMap<>();
-        props.put("Order.orderId", 100);
-        Seid seid = new Seid(props);
-        assertEquals("Order", seid.entityName());
-        assertEquals(100, (int) seid.get("orderId"));
+    public void testCreate_entity_withIdPropNames_empty() {
+        SimpleUser user = new SimpleUser(1, "Bob");
+        assertThrows(IllegalArgumentException.class, () -> Seid.create(user, java.util.Collections.emptyList()));
     }
 
     // ==================== entityName() ====================
@@ -164,10 +253,33 @@ public class SeidTest extends TestBase {
         assertEquals(123, (int) seid.get("User.id"));
     }
 
+    // ==================== get(String propName, Class targetType) ====================
+
+    @Test
+    public void testGet_withTargetType() {
+        Seid seid = Seid.of("User.active", "true");
+        Boolean active = seid.get("active", Boolean.class);
+        assertEquals(Boolean.TRUE, active);
+    }
+
+    @Test
+    public void testGet_withTargetType_intToLong() {
+        Seid seid = Seid.of("User.id", 123);
+        Long val = seid.get("id", Long.class);
+        assertEquals(123L, val);
+    }
+
     @Test
     public void testGet_nonexistent() {
         Seid seid = Seid.of("User.id", 123);
         assertNull(seid.get("nonexistent"));
+    }
+
+    @Test
+    public void testGet_withTargetType_nullValue() {
+        Seid seid = Seid.of("User.id", null);
+        int val = seid.get("id", int.class);
+        assertEquals(0, val);
     }
 
     // ==================== getInt(String propName) ====================
@@ -204,29 +316,6 @@ public class SeidTest extends TestBase {
         assertEquals(42L, seid.getLong("id"));
     }
 
-    // ==================== get(String propName, Class targetType) ====================
-
-    @Test
-    public void testGet_withTargetType() {
-        Seid seid = Seid.of("User.active", "true");
-        Boolean active = seid.get("active", Boolean.class);
-        assertEquals(Boolean.TRUE, active);
-    }
-
-    @Test
-    public void testGet_withTargetType_intToLong() {
-        Seid seid = Seid.of("User.id", 123);
-        Long val = seid.get("id", Long.class);
-        assertEquals(123L, val);
-    }
-
-    @Test
-    public void testGet_withTargetType_nullValue() {
-        Seid seid = Seid.of("User.id", null);
-        int val = seid.get("id", int.class);
-        assertEquals(0, val);
-    }
-
     // ==================== set(String propName, Object propValue) ====================
 
     @Test
@@ -243,6 +332,19 @@ public class SeidTest extends TestBase {
         seid.set("id", 200);
         assertEquals(200, (int) seid.get("id"));
         assertEquals(1, seid.size());
+    }
+
+    // ==================== set(Map) ====================
+
+    @Test
+    public void testSet_map() {
+        Seid seid = Seid.of("User");
+        Map<String, Object> props = new LinkedHashMap<>();
+        props.put("id", 1);
+        props.put("name", "Alice");
+        seid.set(props);
+        assertEquals(1, (int) seid.get("id"));
+        assertEquals("Alice", seid.get("name"));
     }
 
     @Test
@@ -262,19 +364,6 @@ public class SeidTest extends TestBase {
         Seid result = seid.set("id", 100);
         assertNotNull(result);
         assertEquals(seid, result);
-    }
-
-    // ==================== set(Map) ====================
-
-    @Test
-    public void testSet_map() {
-        Seid seid = Seid.of("User");
-        Map<String, Object> props = new LinkedHashMap<>();
-        props.put("id", 1);
-        props.put("name", "Alice");
-        seid.set(props);
-        assertEquals(1, (int) seid.get("id"));
-        assertEquals("Alice", seid.get("name"));
     }
 
     @Test
@@ -411,14 +500,6 @@ public class SeidTest extends TestBase {
         assertEquals(999, (int) copy.get("id"));
     }
 
-    // ==================== equals(Object obj) ====================
-
-    @Test
-    public void testEquals_same() {
-        Seid seid = Seid.of("User.id", 123);
-        assertTrue(seid.equals(seid));
-    }
-
     @Test
     public void testEquals_equal() {
         Seid seid1 = Seid.of("User.id", 123);
@@ -442,15 +523,23 @@ public class SeidTest extends TestBase {
     }
 
     @Test
-    public void testEquals_null() {
-        Seid seid = Seid.of("User.id", 123);
-        assertFalse(seid.equals(null));
-    }
-
-    @Test
     public void testEquals_differentType() {
         Seid seid = Seid.of("User.id", 123);
         assertFalse(seid.equals("not a seid"));
+    }
+
+    // ==================== equals(Object obj) ====================
+
+    @Test
+    public void testEquals_same() {
+        Seid seid = Seid.of("User.id", 123);
+        assertTrue(seid.equals(seid));
+    }
+
+    @Test
+    public void testEquals_null() {
+        Seid seid = Seid.of("User.id", 123);
+        assertFalse(seid.equals(null));
     }
 
     // ==================== hashCode() ====================
@@ -475,20 +564,6 @@ public class SeidTest extends TestBase {
         assertNotEquals(seid1.hashCode(), seid2.hashCode());
     }
 
-    // ==================== toString() ====================
-
-    @Test
-    public void testToString_empty() {
-        Seid seid = Seid.of("User");
-        assertEquals("User: {}", seid.toString());
-    }
-
-    @Test
-    public void testToString_singleProp() {
-        Seid seid = Seid.of("User.id", 123);
-        assertEquals("User: {id=123}", seid.toString());
-    }
-
     @Test
     public void testToString_twoProps() {
         Seid seid = Seid.of("User.id", 123, "User.name", "John");
@@ -510,6 +585,20 @@ public class SeidTest extends TestBase {
         assertTrue(str.endsWith("}"));
     }
 
+    // ==================== toString() ====================
+
+    @Test
+    public void testToString_empty() {
+        Seid seid = Seid.of("User");
+        assertEquals("User: {}", seid.toString());
+    }
+
+    @Test
+    public void testToString_singleProp() {
+        Seid seid = Seid.of("User.id", 123);
+        assertEquals("User: {id=123}", seid.toString());
+    }
+
     @Test
     public void testToString_cached() {
         Seid seid = Seid.of("User.id", 123);
@@ -517,20 +606,5 @@ public class SeidTest extends TestBase {
         String str2 = seid.toString();
         // toString() is cached, so should return same string
         assertEquals(str1, str2);
-    }
-
-    // ==================== Seid(String entityName) constructor ====================
-
-    @Test
-    public void testConstructor_entityName() {
-        Seid seid = new Seid("MyEntity");
-        assertEquals("MyEntity", seid.entityName());
-        assertTrue(seid.isEmpty());
-    }
-
-    @Test
-    public void testConstructor_entityName_null() {
-        Seid seid = new Seid((String) null);
-        assertEquals("", seid.entityName());
     }
 }

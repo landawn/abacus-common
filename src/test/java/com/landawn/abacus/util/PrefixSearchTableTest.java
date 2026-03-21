@@ -11,12 +11,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class PrefixSearchTableTest extends TestBase {
 
     // ===== get(List) =====
@@ -71,12 +69,6 @@ public class PrefixSearchTableTest extends TestBase {
     }
 
     @Test
-    public void testGetAll_emptyKeyThrows() {
-        PrefixSearchTable<Integer, String> table = PrefixSearchTable.<Integer, String> builder().build();
-        assertThrows(IllegalArgumentException.class, () -> table.getAll(Arrays.asList()));
-    }
-
-    @Test
     public void testGetAll_singleKeyMatched() {
         PrefixSearchTable<Integer, String> table = PrefixSearchTable.<Integer, String> builder().add(Arrays.asList(1), "foo").build();
         Map<List<Integer>, String> map = table.getAll(Arrays.asList(1)).toMap();
@@ -120,6 +112,12 @@ public class PrefixSearchTableTest extends TestBase {
         assertTrue(table.getAll(Arrays.asList(1, 2)).toMap().isEmpty());
     }
 
+    @Test
+    public void testGetAll_emptyKeyThrows() {
+        PrefixSearchTable<Integer, String> table = PrefixSearchTable.<Integer, String> builder().build();
+        assertThrows(IllegalArgumentException.class, () -> table.getAll(Arrays.asList()));
+    }
+
     // ===== toBuilder() =====
 
     @Test
@@ -156,14 +154,6 @@ public class PrefixSearchTableTest extends TestBase {
         assertEquals("{}", str);
     }
 
-    // ===== builder() =====
-
-    @Test
-    public void testBuilder() {
-        PrefixSearchTable.Builder<Integer, String> builder = PrefixSearchTable.builder();
-        assertNotNull(builder);
-    }
-
     // ===== Builder.add(List, V) =====
 
     @Test
@@ -172,25 +162,6 @@ public class PrefixSearchTableTest extends TestBase {
         builder.add(Arrays.asList(1, 2, 3), "foo");
         PrefixSearchTable<Integer, String> table = builder.build();
         assertEquals("foo", table.get(Arrays.asList(1, 2, 3)).get());
-    }
-
-    @Test
-    public void testAdd_emptyKeyThrows() {
-        PrefixSearchTable.Builder<Integer, String> builder = PrefixSearchTable.builder();
-        assertThrows(IllegalArgumentException.class, () -> builder.add(Arrays.asList(), "foo"));
-    }
-
-    @Test
-    public void testAdd_nullKeyElementThrows() {
-        PrefixSearchTable.Builder<Integer, String> builder = PrefixSearchTable.builder();
-        assertThrows(NullPointerException.class, () -> builder.add(Arrays.asList(1, null), "foo"));
-    }
-
-    @Test
-    public void testAdd_conflictingMappingDisallowed() {
-        PrefixSearchTable.Builder<Integer, String> builder = PrefixSearchTable.builder();
-        builder.add(Arrays.asList(1, 2, 3), "foo");
-        assertThrows(IllegalArgumentException.class, () -> builder.add(Arrays.asList(1, 2, 3), "bar"));
     }
 
     @Test
@@ -220,6 +191,14 @@ public class PrefixSearchTableTest extends TestBase {
         assertEquals("baz", table.get(Arrays.asList(3, 4)).get());
     }
 
+    // ===== builder() =====
+
+    @Test
+    public void testBuilder() {
+        PrefixSearchTable.Builder<Integer, String> builder = PrefixSearchTable.builder();
+        assertNotNull(builder);
+    }
+
     @Test
     public void testAddAll_emptyMap() {
         Map<List<Integer>, String> mappings = new HashMap<>();
@@ -244,5 +223,24 @@ public class PrefixSearchTableTest extends TestBase {
         PrefixSearchTable<Integer, String> table = PrefixSearchTable.<Integer, String> builder().build();
         assertNotNull(table);
         assertTrue(table.get(Arrays.asList(1)).isEmpty());
+    }
+
+    @Test
+    public void testAdd_emptyKeyThrows() {
+        PrefixSearchTable.Builder<Integer, String> builder = PrefixSearchTable.builder();
+        assertThrows(IllegalArgumentException.class, () -> builder.add(Arrays.asList(), "foo"));
+    }
+
+    @Test
+    public void testAdd_nullKeyElementThrows() {
+        PrefixSearchTable.Builder<Integer, String> builder = PrefixSearchTable.builder();
+        assertThrows(NullPointerException.class, () -> builder.add(Arrays.asList(1, null), "foo"));
+    }
+
+    @Test
+    public void testAdd_conflictingMappingDisallowed() {
+        PrefixSearchTable.Builder<Integer, String> builder = PrefixSearchTable.builder();
+        builder.add(Arrays.asList(1, 2, 3), "foo");
+        assertThrows(IllegalArgumentException.class, () -> builder.add(Arrays.asList(1, 2, 3), "bar"));
     }
 }

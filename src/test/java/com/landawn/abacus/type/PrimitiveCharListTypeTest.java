@@ -15,7 +15,6 @@ import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -23,38 +22,9 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharList;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("2025")
 public class PrimitiveCharListTypeTest extends TestBase {
 
     private final PrimitiveCharListType type = new PrimitiveCharListType();
-
-    @Test
-    public void test_name() {
-        assertNotNull(type.name());
-        assertFalse(type.name().isEmpty());
-    }
-
-    @Test
-    public void test_valueOf_String() {
-        // Test with null
-        Object result = type.valueOf((String) null);
-        // Result may be null or default value depending on type
-        assertNull(result);
-    }
-
-    @Test
-    public void test_get_ResultSet_byLabel() throws SQLException {
-        ResultSet rs = mock(ResultSet.class);
-        // Basic get test - actual implementation will vary by type
-        assertDoesNotThrow(() -> type.get(rs, "col"));
-    }
-
-    @Test
-    public void test_set_CallableStatement() throws SQLException {
-        CallableStatement stmt = mock(CallableStatement.class);
-        // Basic set test - actual implementation will vary by type
-        assertDoesNotThrow(() -> type.set(stmt, "param", null));
-    }
 
     @Test
     public void testClazz() {
@@ -71,6 +41,14 @@ public class PrimitiveCharListTypeTest extends TestBase {
     public void testStringOfNonEmptyList() {
         CharList list = CharList.of(new char[] { 'a', 'b', 'c' });
         assertEquals("['a', 'b', 'c']", type.stringOf(list));
+    }
+
+    @Test
+    public void test_valueOf_String() {
+        // Test with null
+        Object result = type.valueOf((String) null);
+        // Result may be null or default value depending on type
+        assertNull(result);
     }
 
     @Test
@@ -148,6 +126,26 @@ public class PrimitiveCharListTypeTest extends TestBase {
         verify(writer, times(2)).write('\'');
         verify(writer).writeCharacter('a');
         verify(writer).write(']');
+    }
+
+    @Test
+    public void test_name() {
+        assertNotNull(type.name());
+        assertFalse(type.name().isEmpty());
+    }
+
+    @Test
+    public void test_get_ResultSet_byLabel() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+        // Basic get test - actual implementation will vary by type
+        assertDoesNotThrow(() -> type.get(rs, "col"));
+    }
+
+    @Test
+    public void test_set_CallableStatement() throws SQLException {
+        CallableStatement stmt = mock(CallableStatement.class);
+        // Basic set test - actual implementation will vary by type
+        assertDoesNotThrow(() -> type.set(stmt, "param", null));
     }
 
 }

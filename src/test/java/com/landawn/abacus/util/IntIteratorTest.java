@@ -15,15 +15,18 @@ import java.util.function.IntPredicate;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.stream.IntStream;
 
-@Tag("2025")
 public class IntIteratorTest extends TestBase {
+
+    @Test
+    public void testEmpty_SameSingleton() {
+        assertSame(IntIterator.EMPTY, IntIterator.empty());
+    }
 
     // =================================================
     // empty()
@@ -48,8 +51,73 @@ public class IntIteratorTest extends TestBase {
     }
 
     @Test
-    public void testEmpty_SameSingleton() {
-        assertSame(IntIterator.EMPTY, IntIterator.empty());
+    public void test_of_array_range_toArray() {
+        int[] array = { 1, 2, 3, 4, 5 };
+        IntIterator iter = IntIterator.of(array, 1, 4);
+        int[] result = iter.toArray();
+        assertArrayEquals(new int[] { 2, 3, 4 }, result);
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void test_of_array_range_toList() {
+        int[] array = { 1, 2, 3, 4, 5 };
+        IntIterator iter = IntIterator.of(array, 1, 4);
+        IntList result = iter.toList();
+        assertEquals(3, result.size());
+        assertEquals(2, result.get(0));
+        assertEquals(3, result.get(1));
+        assertEquals(4, result.get(2));
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testOf_WithRange() {
+        int[] array = { 1, 2, 3, 4, 5 };
+        IntIterator iter = IntIterator.of(array, 1, 4);
+
+        assertTrue(iter.hasNext());
+        assertEquals(2, iter.nextInt());
+        assertEquals(3, iter.nextInt());
+        assertEquals(4, iter.nextInt());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testOf_WithRange_FullArray() {
+        int[] array = { 1, 2, 3 };
+        IntIterator iter = IntIterator.of(array, 0, array.length);
+
+        assertEquals(1, iter.nextInt());
+        assertEquals(2, iter.nextInt());
+        assertEquals(3, iter.nextInt());
+        assertFalse(iter.hasNext());
+    }
+
+    // =================================================
+    // Integration / combined tests
+    // =================================================
+
+    @Test
+    public void test_combined_operations() {
+        int sum = IntIterator.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).skip(2).limit(6).filter(x -> x % 2 == 0).stream().sum();
+        assertEquals(18, sum);
+    }
+
+    @Test
+    public void test_iterator_consumption() {
+        IntIterator iter = IntIterator.of(1, 2, 3);
+        iter.toArray();
+        assertFalse(iter.hasNext());
+
+        IntIterator iter2 = IntIterator.of(1, 2, 3);
+        iter2.toList();
+        assertFalse(iter2.hasNext());
+
+        IntIterator iter3 = IntIterator.of(1, 2, 3);
+        iter3.foreachRemaining(x -> {
+        });
+        assertFalse(iter3.hasNext());
     }
 
     // =================================================
@@ -72,33 +140,6 @@ public class IntIteratorTest extends TestBase {
 
         IntIterator nullIter = IntIterator.of((int[]) null);
         assertFalse(nullIter.hasNext());
-    }
-
-    @Test
-    public void testOf_EmptyArray() {
-        IntIterator iter = IntIterator.of();
-
-        assertFalse(iter.hasNext());
-        assertThrows(NoSuchElementException.class, () -> iter.nextInt());
-    }
-
-    @Test
-    public void testOf_NullArray() {
-        IntIterator iter = IntIterator.of((int[]) null);
-
-        assertFalse(iter.hasNext());
-        assertThrows(NoSuchElementException.class, () -> iter.nextInt());
-    }
-
-    @Test
-    public void testOf_SingleElement() {
-        int[] array = { 42 };
-        IntIterator iter = IntIterator.of(array);
-
-        assertTrue(iter.hasNext());
-        assertEquals(42, iter.nextInt());
-        assertFalse(iter.hasNext());
-        assertThrows(NoSuchElementException.class, () -> iter.nextInt());
     }
 
     @Test
@@ -154,47 +195,6 @@ public class IntIteratorTest extends TestBase {
     }
 
     @Test
-    public void test_of_array_range_exceptions() {
-        int[] array = { 1, 2, 3 };
-        assertThrows(IndexOutOfBoundsException.class, () -> IntIterator.of(array, -1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> IntIterator.of(array, 0, 5));
-        assertThrows(IndexOutOfBoundsException.class, () -> IntIterator.of(array, 2, 1));
-    }
-
-    @Test
-    public void test_of_array_range_toArray() {
-        int[] array = { 1, 2, 3, 4, 5 };
-        IntIterator iter = IntIterator.of(array, 1, 4);
-        int[] result = iter.toArray();
-        assertArrayEquals(new int[] { 2, 3, 4 }, result);
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void test_of_array_range_toList() {
-        int[] array = { 1, 2, 3, 4, 5 };
-        IntIterator iter = IntIterator.of(array, 1, 4);
-        IntList result = iter.toList();
-        assertEquals(3, result.size());
-        assertEquals(2, result.get(0));
-        assertEquals(3, result.get(1));
-        assertEquals(4, result.get(2));
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOf_WithRange() {
-        int[] array = { 1, 2, 3, 4, 5 };
-        IntIterator iter = IntIterator.of(array, 1, 4);
-
-        assertTrue(iter.hasNext());
-        assertEquals(2, iter.nextInt());
-        assertEquals(3, iter.nextInt());
-        assertEquals(4, iter.nextInt());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
     public void testOf_WithRange_EmptyRange() {
         int[] array = { 1, 2, 3 };
         IntIterator iter = IntIterator.of(array, 1, 1);
@@ -203,14 +203,53 @@ public class IntIteratorTest extends TestBase {
     }
 
     @Test
-    public void testOf_WithRange_FullArray() {
-        int[] array = { 1, 2, 3 };
-        IntIterator iter = IntIterator.of(array, 0, array.length);
+    public void testMultipleHasNextCalls() {
+        IntIterator iter = IntIterator.of(1, 2);
 
+        assertTrue(iter.hasNext());
+        assertTrue(iter.hasNext());
+        assertTrue(iter.hasNext());
         assertEquals(1, iter.nextInt());
+        assertTrue(iter.hasNext());
+        assertTrue(iter.hasNext());
         assertEquals(2, iter.nextInt());
-        assertEquals(3, iter.nextInt());
         assertFalse(iter.hasNext());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testOf_EmptyArray() {
+        IntIterator iter = IntIterator.of();
+
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, () -> iter.nextInt());
+    }
+
+    @Test
+    public void testOf_NullArray() {
+        IntIterator iter = IntIterator.of((int[]) null);
+
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, () -> iter.nextInt());
+    }
+
+    @Test
+    public void testOf_SingleElement() {
+        int[] array = { 42 };
+        IntIterator iter = IntIterator.of(array);
+
+        assertTrue(iter.hasNext());
+        assertEquals(42, iter.nextInt());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, () -> iter.nextInt());
+    }
+
+    @Test
+    public void test_of_array_range_exceptions() {
+        int[] array = { 1, 2, 3 };
+        assertThrows(IndexOutOfBoundsException.class, () -> IntIterator.of(array, -1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> IntIterator.of(array, 0, 5));
+        assertThrows(IndexOutOfBoundsException.class, () -> IntIterator.of(array, 2, 1));
     }
 
     @Test
@@ -247,11 +286,6 @@ public class IntIteratorTest extends TestBase {
         assertEquals(2, iter.nextInt());
         assertEquals(3, iter.nextInt());
         assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void test_defer_null_supplier() {
-        assertThrows(IllegalArgumentException.class, () -> IntIterator.defer(null));
     }
 
     @Test
@@ -305,6 +339,11 @@ public class IntIteratorTest extends TestBase {
         assertEquals(1, callCount[0], "Supplier should only be called once");
     }
 
+    @Test
+    public void test_defer_null_supplier() {
+        assertThrows(IllegalArgumentException.class, () -> IntIterator.defer(null));
+    }
+
     // =================================================
     // generate(IntSupplier)
     // =================================================
@@ -322,11 +361,6 @@ public class IntIteratorTest extends TestBase {
     }
 
     @Test
-    public void test_generate_null_supplier() {
-        assertThrows(IllegalArgumentException.class, () -> IntIterator.generate((java.util.function.IntSupplier) null));
-    }
-
-    @Test
     public void testGenerate_Infinite() {
         AtomicInteger counter = new AtomicInteger(0);
         IntSupplier supplier = counter::getAndIncrement;
@@ -340,6 +374,11 @@ public class IntIteratorTest extends TestBase {
         assertTrue(iter.hasNext());
         assertEquals(2, iter.nextInt());
         assertTrue(iter.hasNext());
+    }
+
+    @Test
+    public void test_generate_null_supplier() {
+        assertThrows(IllegalArgumentException.class, () -> IntIterator.generate((java.util.function.IntSupplier) null));
     }
 
     // =================================================
@@ -450,24 +489,10 @@ public class IntIteratorTest extends TestBase {
     }
 
     @Test
-    public void test_skip_zero() {
-        IntIterator iter = IntIterator.of(1, 2, 3);
-        IntIterator skipped = iter.skip(0);
-        assertSame(iter, skipped);
-        assertEquals(1, skipped.nextInt());
-    }
-
-    @Test
     public void test_skip_more_than_available() {
         IntIterator iter = IntIterator.of(1, 2);
         IntIterator skipped = iter.skip(10);
         assertFalse(skipped.hasNext());
-    }
-
-    @Test
-    public void test_skip_negative() {
-        IntIterator iter = IntIterator.of(1, 2, 3);
-        assertThrows(IllegalArgumentException.class, () -> iter.skip(-1));
     }
 
     @Test
@@ -483,6 +508,22 @@ public class IntIteratorTest extends TestBase {
     }
 
     @Test
+    public void testSkip_MoreThanAvailable() {
+        IntIterator iter = IntIterator.of(1, 2, 3);
+        IntIterator skipped = iter.skip(5);
+
+        assertFalse(skipped.hasNext());
+    }
+
+    @Test
+    public void test_skip_zero() {
+        IntIterator iter = IntIterator.of(1, 2, 3);
+        IntIterator skipped = iter.skip(0);
+        assertSame(iter, skipped);
+        assertEquals(1, skipped.nextInt());
+    }
+
+    @Test
     public void testSkip_Zero() {
         IntIterator iter = IntIterator.of(1, 2, 3);
         IntIterator skipped = iter.skip(0);
@@ -491,11 +532,9 @@ public class IntIteratorTest extends TestBase {
     }
 
     @Test
-    public void testSkip_MoreThanAvailable() {
+    public void test_skip_negative() {
         IntIterator iter = IntIterator.of(1, 2, 3);
-        IntIterator skipped = iter.skip(5);
-
-        assertFalse(skipped.hasNext());
+        assertThrows(IllegalArgumentException.class, () -> iter.skip(-1));
     }
 
     @Test
@@ -520,18 +559,29 @@ public class IntIteratorTest extends TestBase {
     }
 
     @Test
-    public void test_limit_zero() {
-        IntIterator iter = IntIterator.of(1, 2, 3);
-        IntIterator limited = iter.limit(0);
-        assertFalse(limited.hasNext());
-    }
-
-    @Test
     public void test_limit_more_than_available() {
         IntIterator iter = IntIterator.of(1, 2);
         IntIterator limited = iter.limit(10);
         assertEquals(1, limited.nextInt());
         assertEquals(2, limited.nextInt());
+        assertFalse(limited.hasNext());
+    }
+
+    @Test
+    public void testLimit_MoreThanAvailable() {
+        IntIterator iter = IntIterator.of(1, 2, 3);
+        IntIterator limited = iter.limit(5);
+
+        assertEquals(1, limited.nextInt());
+        assertEquals(2, limited.nextInt());
+        assertEquals(3, limited.nextInt());
+        assertFalse(limited.hasNext());
+    }
+
+    @Test
+    public void test_limit_zero() {
+        IntIterator iter = IntIterator.of(1, 2, 3);
+        IntIterator limited = iter.limit(0);
         assertFalse(limited.hasNext());
     }
 
@@ -552,17 +602,6 @@ public class IntIteratorTest extends TestBase {
         assertEquals(3, limited.nextInt());
         assertFalse(limited.hasNext());
         assertThrows(NoSuchElementException.class, () -> limited.nextInt());
-    }
-
-    @Test
-    public void testLimit_MoreThanAvailable() {
-        IntIterator iter = IntIterator.of(1, 2, 3);
-        IntIterator limited = iter.limit(5);
-
-        assertEquals(1, limited.nextInt());
-        assertEquals(2, limited.nextInt());
-        assertEquals(3, limited.nextInt());
-        assertFalse(limited.hasNext());
     }
 
     @Test
@@ -588,13 +627,6 @@ public class IntIteratorTest extends TestBase {
     }
 
     @Test
-    public void test_filter_none_match() {
-        IntIterator iter = IntIterator.of(1, 3, 5);
-        IntIterator filtered = iter.filter(x -> x % 2 == 0);
-        assertFalse(filtered.hasNext());
-    }
-
-    @Test
     public void test_filter_all_match() {
         IntIterator iter = IntIterator.of(2, 4, 6);
         IntIterator filtered = iter.filter(x -> x % 2 == 0);
@@ -602,12 +634,6 @@ public class IntIteratorTest extends TestBase {
         assertEquals(4, filtered.nextInt());
         assertEquals(6, filtered.nextInt());
         assertFalse(filtered.hasNext());
-    }
-
-    @Test
-    public void test_filter_null_predicate() {
-        IntIterator iter = IntIterator.of(1, 2, 3);
-        assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
     }
 
     @Test
@@ -624,16 +650,6 @@ public class IntIteratorTest extends TestBase {
     }
 
     @Test
-    public void testFilter_NoneMatch() {
-        IntIterator iter = IntIterator.of(1, 3, 5);
-        IntPredicate evenPredicate = x -> x % 2 == 0;
-        IntIterator filtered = iter.filter(evenPredicate);
-
-        assertFalse(filtered.hasNext());
-        assertThrows(NoSuchElementException.class, () -> filtered.nextInt());
-    }
-
-    @Test
     public void testFilter_AllMatch() {
         IntIterator iter = IntIterator.of(2, 4, 6);
         IntPredicate evenPredicate = x -> x % 2 == 0;
@@ -646,10 +662,51 @@ public class IntIteratorTest extends TestBase {
     }
 
     @Test
+    public void test_filter_none_match() {
+        IntIterator iter = IntIterator.of(1, 3, 5);
+        IntIterator filtered = iter.filter(x -> x % 2 == 0);
+        assertFalse(filtered.hasNext());
+    }
+
+    @Test
+    public void test_filter_null_predicate() {
+        IntIterator iter = IntIterator.of(1, 2, 3);
+        assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
+    }
+
+    @Test
+    public void testFilter_NoneMatch() {
+        IntIterator iter = IntIterator.of(1, 3, 5);
+        IntPredicate evenPredicate = x -> x % 2 == 0;
+        IntIterator filtered = iter.filter(evenPredicate);
+
+        assertFalse(filtered.hasNext());
+        assertThrows(NoSuchElementException.class, () -> filtered.nextInt());
+    }
+
+    @Test
     public void testFilter_NoSuchElementWhenNoneMatch() {
         IntIterator iter = IntIterator.of(1, 3, 5).filter(x -> x % 2 == 0);
         assertFalse(iter.hasNext());
         assertThrows(NoSuchElementException.class, () -> iter.nextInt());
+    }
+
+    @Test
+    public void testToArray() {
+        IntIterator iter = IntIterator.of(1, 2, 3);
+        int[] array = iter.toArray();
+
+        assertArrayEquals(new int[] { 1, 2, 3 }, array);
+    }
+
+    @Test
+    public void testToArray_PartiallyConsumed() {
+        IntIterator iter = IntIterator.of(1, 2, 3, 4, 5);
+        iter.nextInt();
+        iter.nextInt();
+
+        int[] array = iter.toArray();
+        assertArrayEquals(new int[] { 3, 4, 5 }, array);
     }
 
     // =================================================
@@ -666,14 +723,6 @@ public class IntIteratorTest extends TestBase {
     }
 
     @Test
-    public void testToArray() {
-        IntIterator iter = IntIterator.of(1, 2, 3);
-        int[] array = iter.toArray();
-
-        assertArrayEquals(new int[] { 1, 2, 3 }, array);
-    }
-
-    @Test
     public void testToArray_Empty() {
         IntIterator iter = IntIterator.empty();
         int[] array = iter.toArray();
@@ -682,13 +731,14 @@ public class IntIteratorTest extends TestBase {
     }
 
     @Test
-    public void testToArray_PartiallyConsumed() {
-        IntIterator iter = IntIterator.of(1, 2, 3, 4, 5);
-        iter.nextInt();
-        iter.nextInt();
+    public void testToList() {
+        IntIterator iter = IntIterator.of(1, 2, 3);
+        IntList list = iter.toList();
 
-        int[] array = iter.toArray();
-        assertArrayEquals(new int[] { 3, 4, 5 }, array);
+        assertEquals(3, list.size());
+        assertEquals(1, list.get(0));
+        assertEquals(2, list.get(1));
+        assertEquals(3, list.get(2));
     }
 
     // =================================================
@@ -705,17 +755,6 @@ public class IntIteratorTest extends TestBase {
 
         IntList emptyList = IntIterator.empty().toList();
         assertEquals(0, emptyList.size());
-    }
-
-    @Test
-    public void testToList() {
-        IntIterator iter = IntIterator.of(1, 2, 3);
-        IntList list = iter.toList();
-
-        assertEquals(3, list.size());
-        assertEquals(1, list.get(0));
-        assertEquals(2, list.get(1));
-        assertEquals(3, list.get(2));
     }
 
     @Test
@@ -802,12 +841,6 @@ public class IntIteratorTest extends TestBase {
         assertFalse(indexed.hasNext());
     }
 
-    @Test
-    public void testIndexed_Empty() {
-        ObjIterator<IndexedInt> indexed = IntIterator.empty().indexed();
-        assertFalse(indexed.hasNext());
-    }
-
     // =================================================
     // indexed(long)
     // =================================================
@@ -832,12 +865,6 @@ public class IntIteratorTest extends TestBase {
     }
 
     @Test
-    public void test_indexed_negative_start() {
-        IntIterator iter = IntIterator.of(1, 2, 3);
-        assertThrows(IllegalArgumentException.class, () -> iter.indexed(-1));
-    }
-
-    @Test
     public void testIndexed_WithStartIndex() {
         IntIterator iter = IntIterator.of(10, 20, 30);
         ObjIterator<IndexedInt> indexed = iter.indexed(100);
@@ -856,6 +883,12 @@ public class IntIteratorTest extends TestBase {
     }
 
     @Test
+    public void testIndexed_Empty() {
+        ObjIterator<IndexedInt> indexed = IntIterator.empty().indexed();
+        assertFalse(indexed.hasNext());
+    }
+
+    @Test
     public void testIndexed_WithStartIndex_Zero() {
         IntIterator iter = IntIterator.of(10, 20);
         ObjIterator<IndexedInt> indexed = iter.indexed(0);
@@ -863,6 +896,12 @@ public class IntIteratorTest extends TestBase {
         IndexedInt first = indexed.next();
         assertEquals(0, first.index());
         assertEquals(10, first.value());
+    }
+
+    @Test
+    public void test_indexed_negative_start() {
+        IntIterator iter = IntIterator.of(1, 2, 3);
+        assertThrows(IllegalArgumentException.class, () -> iter.indexed(-1));
     }
 
     // =================================================
@@ -891,14 +930,6 @@ public class IntIteratorTest extends TestBase {
         assertEquals(6, sum.get());
     }
 
-    @Test
-    public void testForEachRemaining_Empty() {
-        IntIterator iter = IntIterator.empty();
-        AtomicInteger count = new AtomicInteger(0);
-        iter.forEachRemaining((Integer i) -> count.incrementAndGet());
-        assertEquals(0, count.get());
-    }
-
     // =================================================
     // foreachRemaining()
     // =================================================
@@ -915,20 +946,6 @@ public class IntIteratorTest extends TestBase {
         assertEquals(3, result.get(2));
         assertEquals(4, result.get(3));
         assertEquals(5, result.get(4));
-    }
-
-    @Test
-    public void test_foreachRemaining_empty() {
-        IntIterator iter = IntIterator.empty();
-        final int[] count = { 0 };
-        iter.foreachRemaining(x -> count[0]++);
-        assertEquals(0, count[0]);
-    }
-
-    @Test
-    public void test_foreachRemaining_null_action() {
-        IntIterator iter = IntIterator.of(1, 2, 3);
-        assertThrows(IllegalArgumentException.class, () -> iter.foreachRemaining(null));
     }
 
     @Test
@@ -954,6 +971,22 @@ public class IntIteratorTest extends TestBase {
     }
 
     @Test
+    public void testForEachRemaining_Empty() {
+        IntIterator iter = IntIterator.empty();
+        AtomicInteger count = new AtomicInteger(0);
+        iter.forEachRemaining((Integer i) -> count.incrementAndGet());
+        assertEquals(0, count.get());
+    }
+
+    @Test
+    public void test_foreachRemaining_empty() {
+        IntIterator iter = IntIterator.empty();
+        final int[] count = { 0 };
+        iter.foreachRemaining(x -> count[0]++);
+        assertEquals(0, count[0]);
+    }
+
+    @Test
     public void testForeachRemaining_Empty() {
         IntIterator iter = IntIterator.empty();
         AtomicInteger count = new AtomicInteger(0);
@@ -961,6 +994,12 @@ public class IntIteratorTest extends TestBase {
         iter.foreachRemaining(i -> count.incrementAndGet());
 
         assertEquals(0, count.get());
+    }
+
+    @Test
+    public void test_foreachRemaining_null_action() {
+        IntIterator iter = IntIterator.of(1, 2, 3);
+        assertThrows(IllegalArgumentException.class, () -> iter.foreachRemaining(null));
     }
 
     // =================================================
@@ -990,20 +1029,6 @@ public class IntIteratorTest extends TestBase {
     }
 
     @Test
-    public void test_foreachIndexed_empty() {
-        IntIterator iter = IntIterator.empty();
-        final int[] count = { 0 };
-        iter.foreachIndexed((i, v) -> count[0]++);
-        assertEquals(0, count[0]);
-    }
-
-    @Test
-    public void test_foreachIndexed_null_action() {
-        IntIterator iter = IntIterator.of(1, 2, 3);
-        assertThrows(IllegalArgumentException.class, () -> iter.foreachIndexed(null));
-    }
-
-    @Test
     public void testForeachIndexed() {
         IntIterator iter = IntIterator.of(10, 20, 30);
         AtomicInteger indexSum = new AtomicInteger(0);
@@ -1016,16 +1041,6 @@ public class IntIteratorTest extends TestBase {
 
         assertEquals(3, indexSum.get());
         assertEquals(60, valueSum.get());
-    }
-
-    @Test
-    public void testForeachIndexed_Empty() {
-        IntIterator iter = IntIterator.empty();
-        AtomicInteger count = new AtomicInteger(0);
-
-        iter.foreachIndexed((index, value) -> count.incrementAndGet());
-
-        assertEquals(0, count.get());
     }
 
     @Test
@@ -1043,45 +1058,28 @@ public class IntIteratorTest extends TestBase {
         assertEquals(0, firstIndex[0], "Index should start from 0 even if iterator partially consumed");
     }
 
-    // =================================================
-    // Integration / combined tests
-    // =================================================
-
     @Test
-    public void test_combined_operations() {
-        int sum = IntIterator.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).skip(2).limit(6).filter(x -> x % 2 == 0).stream().sum();
-        assertEquals(18, sum);
+    public void test_foreachIndexed_empty() {
+        IntIterator iter = IntIterator.empty();
+        final int[] count = { 0 };
+        iter.foreachIndexed((i, v) -> count[0]++);
+        assertEquals(0, count[0]);
     }
 
     @Test
-    public void test_iterator_consumption() {
+    public void testForeachIndexed_Empty() {
+        IntIterator iter = IntIterator.empty();
+        AtomicInteger count = new AtomicInteger(0);
+
+        iter.foreachIndexed((index, value) -> count.incrementAndGet());
+
+        assertEquals(0, count.get());
+    }
+
+    @Test
+    public void test_foreachIndexed_null_action() {
         IntIterator iter = IntIterator.of(1, 2, 3);
-        iter.toArray();
-        assertFalse(iter.hasNext());
-
-        IntIterator iter2 = IntIterator.of(1, 2, 3);
-        iter2.toList();
-        assertFalse(iter2.hasNext());
-
-        IntIterator iter3 = IntIterator.of(1, 2, 3);
-        iter3.foreachRemaining(x -> {
-        });
-        assertFalse(iter3.hasNext());
-    }
-
-    @Test
-    public void testMultipleHasNextCalls() {
-        IntIterator iter = IntIterator.of(1, 2);
-
-        assertTrue(iter.hasNext());
-        assertTrue(iter.hasNext());
-        assertTrue(iter.hasNext());
-        assertEquals(1, iter.nextInt());
-        assertTrue(iter.hasNext());
-        assertTrue(iter.hasNext());
-        assertEquals(2, iter.nextInt());
-        assertFalse(iter.hasNext());
-        assertFalse(iter.hasNext());
+        assertThrows(IllegalArgumentException.class, () -> iter.foreachIndexed(null));
     }
 
 }

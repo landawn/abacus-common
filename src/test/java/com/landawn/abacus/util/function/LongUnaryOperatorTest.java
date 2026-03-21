@@ -3,13 +3,15 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class LongUnaryOperatorTest extends TestBase {
+
+    private long doubleValue(final long value) {
+        return value * 2;
+    }
 
     @Test
     public void testApplyAsLong() {
@@ -34,60 +36,6 @@ public class LongUnaryOperatorTest extends TestBase {
         };
 
         assertEquals(30L, operator.applyAsLong(10L));
-    }
-
-    @Test
-    public void testCompose() {
-        final LongUnaryOperator multiplyBy3 = val -> val * 3;
-        final LongUnaryOperator add10 = val -> val + 10;
-
-        final LongUnaryOperator composed = multiplyBy3.compose(add10);
-        final long result = composed.applyAsLong(5L);
-
-        assertEquals(45L, result); // (5 + 10) * 3
-    }
-
-    @Test
-    public void testAndThen() {
-        final LongUnaryOperator multiplyBy2 = val -> val * 2;
-        final LongUnaryOperator subtract5 = val -> val - 5;
-
-        final LongUnaryOperator composed = multiplyBy2.andThen(subtract5);
-        final long result = composed.applyAsLong(10L);
-
-        assertEquals(15L, result); // (10 * 2) - 5
-    }
-
-    @Test
-    public void testCompose_multipleChains() {
-        final LongUnaryOperator add5 = val -> val + 5;
-        final LongUnaryOperator multiplyBy2 = val -> val * 2;
-        final LongUnaryOperator subtract3 = val -> val - 3;
-
-        final LongUnaryOperator composed = subtract3.compose(multiplyBy2).compose(add5);
-        final long result = composed.applyAsLong(10L);
-
-        assertEquals(27L, result); // ((10 + 5) * 2) - 3 = 27
-    }
-
-    @Test
-    public void testAndThen_multipleChains() {
-        final LongUnaryOperator add5 = val -> val + 5;
-        final LongUnaryOperator multiplyBy2 = val -> val * 2;
-        final LongUnaryOperator subtract3 = val -> val - 3;
-
-        final LongUnaryOperator composed = add5.andThen(multiplyBy2).andThen(subtract3);
-        final long result = composed.applyAsLong(10L);
-
-        assertEquals(27L, result); // ((10 + 5) * 2) - 3 = 27
-    }
-
-    @Test
-    public void testIdentity() {
-        final LongUnaryOperator identity = LongUnaryOperator.identity();
-        assertEquals(42L, identity.applyAsLong(42L));
-        assertEquals(0L, identity.applyAsLong(0L));
-        assertEquals(-10L, identity.applyAsLong(-10L));
     }
 
     @Test
@@ -142,6 +90,20 @@ public class LongUnaryOperatorTest extends TestBase {
     }
 
     @Test
+    public void testMethodReference() {
+        final LongUnaryOperator operator = this::doubleValue;
+        assertEquals(20L, operator.applyAsLong(10L));
+    }
+
+    @Test
+    public void testCompatibilityWithJavaUtilFunction() {
+        final java.util.function.LongUnaryOperator javaOperator = val -> val * 2;
+        final LongUnaryOperator abacusOperator = javaOperator::applyAsLong;
+
+        assertEquals(20L, abacusOperator.applyAsLong(10L));
+    }
+
+    @Test
     public void testApplyAsLong_withZero() {
         final LongUnaryOperator operator = val -> val * 2;
         assertEquals(0L, operator.applyAsLong(0L));
@@ -166,10 +128,51 @@ public class LongUnaryOperatorTest extends TestBase {
     }
 
     @Test
+    public void testFunctionalInterfaceContract() {
+        final LongUnaryOperator operator = val -> val + 1;
+        assertNotNull(operator);
+        assertEquals(2L, operator.applyAsLong(1L));
+    }
+
+    @Test
+    public void testCompose() {
+        final LongUnaryOperator multiplyBy3 = val -> val * 3;
+        final LongUnaryOperator add10 = val -> val + 10;
+
+        final LongUnaryOperator composed = multiplyBy3.compose(add10);
+        final long result = composed.applyAsLong(5L);
+
+        assertEquals(45L, result); // (5 + 10) * 3
+    }
+
+    @Test
     public void testCompose_withIdentity() {
         final LongUnaryOperator operator = val -> val * 2;
         final LongUnaryOperator composed = operator.compose(LongUnaryOperator.identity());
         assertEquals(20L, composed.applyAsLong(10L));
+    }
+
+    @Test
+    public void testCompose_multipleChains() {
+        final LongUnaryOperator add5 = val -> val + 5;
+        final LongUnaryOperator multiplyBy2 = val -> val * 2;
+        final LongUnaryOperator subtract3 = val -> val - 3;
+
+        final LongUnaryOperator composed = subtract3.compose(multiplyBy2).compose(add5);
+        final long result = composed.applyAsLong(10L);
+
+        assertEquals(27L, result); // ((10 + 5) * 2) - 3 = 27
+    }
+
+    @Test
+    public void testAndThen() {
+        final LongUnaryOperator multiplyBy2 = val -> val * 2;
+        final LongUnaryOperator subtract5 = val -> val - 5;
+
+        final LongUnaryOperator composed = multiplyBy2.andThen(subtract5);
+        final long result = composed.applyAsLong(10L);
+
+        assertEquals(15L, result); // (10 * 2) - 5
     }
 
     @Test
@@ -180,27 +183,22 @@ public class LongUnaryOperatorTest extends TestBase {
     }
 
     @Test
-    public void testFunctionalInterfaceContract() {
-        final LongUnaryOperator operator = val -> val + 1;
-        assertNotNull(operator);
-        assertEquals(2L, operator.applyAsLong(1L));
+    public void testAndThen_multipleChains() {
+        final LongUnaryOperator add5 = val -> val + 5;
+        final LongUnaryOperator multiplyBy2 = val -> val * 2;
+        final LongUnaryOperator subtract3 = val -> val - 3;
+
+        final LongUnaryOperator composed = add5.andThen(multiplyBy2).andThen(subtract3);
+        final long result = composed.applyAsLong(10L);
+
+        assertEquals(27L, result); // ((10 + 5) * 2) - 3 = 27
     }
 
     @Test
-    public void testMethodReference() {
-        final LongUnaryOperator operator = this::doubleValue;
-        assertEquals(20L, operator.applyAsLong(10L));
-    }
-
-    private long doubleValue(final long value) {
-        return value * 2;
-    }
-
-    @Test
-    public void testCompatibilityWithJavaUtilFunction() {
-        final java.util.function.LongUnaryOperator javaOperator = val -> val * 2;
-        final LongUnaryOperator abacusOperator = javaOperator::applyAsLong;
-
-        assertEquals(20L, abacusOperator.applyAsLong(10L));
+    public void testIdentity() {
+        final LongUnaryOperator identity = LongUnaryOperator.identity();
+        assertEquals(42L, identity.applyAsLong(42L));
+        assertEquals(0L, identity.applyAsLong(0L));
+        assertEquals(-10L, identity.applyAsLong(-10L));
     }
 }

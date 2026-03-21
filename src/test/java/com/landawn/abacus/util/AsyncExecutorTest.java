@@ -18,12 +18,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class AsyncExecutorTest extends TestBase {
 
     @Test
@@ -41,6 +39,32 @@ public class AsyncExecutorTest extends TestBase {
         String str = executor.toString();
         Assertions.assertTrue(str.contains("coreThreadPoolSize: 4"));
         Assertions.assertTrue(str.contains("maxThreadPoolSize: 8"));
+        executor.shutdown();
+    }
+
+    @Test
+    public void testParameterizedConstructorMaxLessThanCore() {
+        AsyncExecutor executor = new AsyncExecutor(8, 4, 60L, TimeUnit.SECONDS);
+        Assertions.assertNotNull(executor);
+        String str = executor.toString();
+        Assertions.assertTrue(str.contains("maxThreadPoolSize: 8"));
+        executor.shutdown();
+    }
+
+    @Test
+    public void testConstructorWithThreadPoolExecutor() {
+        ThreadPoolExecutor javaExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(3);
+        AsyncExecutor executor = new AsyncExecutor(javaExecutor);
+        Assertions.assertNotNull(executor);
+        Assertions.assertSame(javaExecutor, executor.getExecutor());
+        executor.shutdown();
+    }
+
+    @Test
+    public void testConstructorWithExecutor() {
+        Executor javaExecutor = Executors.newFixedThreadPool(2);
+        AsyncExecutor executor = new AsyncExecutor(javaExecutor);
+        Assertions.assertNotNull(executor);
         executor.shutdown();
     }
 
@@ -73,20 +97,27 @@ public class AsyncExecutorTest extends TestBase {
     }
 
     @Test
-    public void testParameterizedConstructorMaxLessThanCore() {
-        AsyncExecutor executor = new AsyncExecutor(8, 4, 60L, TimeUnit.SECONDS);
-        Assertions.assertNotNull(executor);
-        String str = executor.toString();
-        Assertions.assertTrue(str.contains("maxThreadPoolSize: 8"));
-        executor.shutdown();
-    }
+    public void testConcurrentExecution() throws Exception {
+        AsyncExecutor executor = new AsyncExecutor(4, 8, 60L, TimeUnit.SECONDS);
+        AtomicInteger counter = new AtomicInteger(0);
+        int taskCount = 10;
+        CountDownLatch latch = new CountDownLatch(taskCount);
 
-    @Test
-    public void testConstructorWithThreadPoolExecutor() {
-        ThreadPoolExecutor javaExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(3);
-        AsyncExecutor executor = new AsyncExecutor(javaExecutor);
-        Assertions.assertNotNull(executor);
-        Assertions.assertSame(javaExecutor, executor.getExecutor());
+        List<ContinuableFuture<Void>> futures = new ArrayList<>();
+        for (int i = 0; i < taskCount; i++) {
+            futures.add(executor.execute((Throwables.Runnable<Exception>) () -> {
+                counter.incrementAndGet();
+                latch.countDown();
+            }));
+        }
+
+        latch.await(5, TimeUnit.SECONDS);
+        Assertions.assertEquals(taskCount, counter.get());
+
+        for (ContinuableFuture<Void> future : futures) {
+            future.get();
+        }
+
         executor.shutdown();
     }
 
@@ -100,6 +131,23 @@ public class AsyncExecutorTest extends TestBase {
         };
         AsyncExecutor executor = new AsyncExecutor(javaExecutor);
         Assertions.assertNotNull(executor);
+        executor.shutdown();
+    }
+
+    @Test
+    public void testExecuteCallableCollectionEmpty() {
+        AsyncExecutor executor = new AsyncExecutor();
+        List<Callable<Integer>> tasks = new ArrayList<>();
+        List<ContinuableFuture<Integer>> futures = executor.execute(tasks);
+        Assertions.assertTrue(futures.isEmpty());
+        executor.shutdown();
+    }
+
+    @Test
+    public void testExecuteCallableCollectionNull() {
+        AsyncExecutor executor = new AsyncExecutor();
+        List<ContinuableFuture<Integer>> futures = executor.execute((Collection<Callable<Integer>>) null);
+        Assertions.assertTrue(futures.isEmpty());
         executor.shutdown();
     }
 
@@ -260,23 +308,6 @@ public class AsyncExecutorTest extends TestBase {
     }
 
     @Test
-    public void testExecuteCallableCollectionEmpty() {
-        AsyncExecutor executor = new AsyncExecutor();
-        List<Callable<Integer>> tasks = new ArrayList<>();
-        List<ContinuableFuture<Integer>> futures = executor.execute(tasks);
-        Assertions.assertTrue(futures.isEmpty());
-        executor.shutdown();
-    }
-
-    @Test
-    public void testExecuteCallableCollectionNull() {
-        AsyncExecutor executor = new AsyncExecutor();
-        List<ContinuableFuture<Integer>> futures = executor.execute((Collection<Callable<Integer>>) null);
-        Assertions.assertTrue(futures.isEmpty());
-        executor.shutdown();
-    }
-
-    @Test
     public void testExecuteCallableCollection() throws Exception {
         AsyncExecutor executor = new AsyncExecutor();
 
@@ -422,6 +453,48 @@ public class AsyncExecutorTest extends TestBase {
     }
 
     @Test
+    public void testExecuteComplexTask() throws Exception {
+        AsyncExecutor executor = new AsyncExecutor();
+
+        ContinuableFuture<Integer> future = executor.execute(() -> {
+            int sum = 0;
+            for (int i = 1; i <= 100; i++) {
+                sum += i;
+            }
+            return sum;
+        });
+
+        Integer result = future.get();
+        Assertions.assertEquals(5050, result);
+        executor.shutdown();
+    }
+
+    @Test
+    public void testExecuteWithChaining() throws Exception {
+        AsyncExecutor executor = new AsyncExecutor();
+
+        ContinuableFuture<Integer> future = executor.execute(() -> 10).thenCallAsync(x -> x * 2).thenCallAsync(x -> x + 5);
+
+        Integer result = future.get();
+        Assertions.assertEquals(25, result);
+        executor.shutdown();
+    }
+
+    @Test
+    public void testExecuteRunnableWithFinal() throws Exception {
+        AsyncExecutor executor = new AsyncExecutor();
+        AtomicInteger counter = new AtomicInteger(0);
+        AtomicInteger finalCounter = new AtomicInteger(0);
+
+        ContinuableFuture<Void> future = executor.execute(Fnn.r(() -> counter.incrementAndGet()), () -> finalCounter.incrementAndGet());
+
+        future.get();
+        Assertions.assertEquals(1, counter.get());
+        Assertions.assertEquals(1, finalCounter.get());
+        executor.shutdown();
+    }
+
+    @Test
     public void testGetExecutor() {
         AsyncExecutor executor = new AsyncExecutor();
         Executor executor1 = executor.getExecutor();
@@ -441,6 +514,46 @@ public class AsyncExecutorTest extends TestBase {
     }
 
     @Test
+    public void testGetExecutorThreadSafety() throws Exception {
+        AsyncExecutor executor = new AsyncExecutor();
+        AtomicReference<Executor> executor1 = new AtomicReference<>();
+        AtomicReference<Executor> executor2 = new AtomicReference<>();
+        CountDownLatch latch = new CountDownLatch(2);
+
+        Thread t1 = new Thread(() -> {
+            executor1.set(executor.getExecutor());
+            latch.countDown();
+        });
+
+        Thread t2 = new Thread(() -> {
+            executor2.set(executor.getExecutor());
+            latch.countDown();
+        });
+
+        t1.start();
+        t2.start();
+        latch.await(2, TimeUnit.SECONDS);
+
+        Assertions.assertSame(executor1.get(), executor2.get());
+        executor.shutdown();
+    }
+
+    @Test
+    public void testGetExecutor_afterShutdownThrowsException() {
+        AsyncExecutor executor = new AsyncExecutor();
+        executor.getExecutor(); // initialize it
+        executor.shutdown();
+        Assertions.assertThrows(IllegalStateException.class, () -> executor.getExecutor());
+    }
+
+    @Test
+    public void testShutdownUninitializedExecutor() {
+        AsyncExecutor executor = new AsyncExecutor();
+        executor.shutdown();
+        assertNotNull(executor);
+    }
+
+    @Test
     public void testShutdown() throws Exception {
         AsyncExecutor executor = new AsyncExecutor();
         CountDownLatch latch = new CountDownLatch(1);
@@ -452,13 +565,6 @@ public class AsyncExecutorTest extends TestBase {
         latch.await(1, TimeUnit.SECONDS);
         executor.shutdown();
         assertNotNull(latch);
-    }
-
-    @Test
-    public void testShutdownUninitializedExecutor() {
-        AsyncExecutor executor = new AsyncExecutor();
-        executor.shutdown();
-        assertNotNull(executor);
     }
 
     @Test
@@ -499,6 +605,46 @@ public class AsyncExecutorTest extends TestBase {
     }
 
     @Test
+    public void testShutdown_noArgAfterInit() throws Exception {
+        AsyncExecutor executor = new AsyncExecutor();
+        AtomicInteger counter = new AtomicInteger(0);
+
+        ContinuableFuture<Void> future = executor.execute((Throwables.Runnable<Exception>) () -> counter.incrementAndGet());
+        future.get();
+
+        executor.shutdown();
+        Assertions.assertTrue(executor.isTerminated());
+        Assertions.assertEquals(1, counter.get());
+    }
+
+    @Test
+    public void testIsTerminatedUninitialized() {
+        AsyncExecutor executor = new AsyncExecutor();
+        Assertions.assertTrue(executor.isTerminated());
+    }
+
+    @Test
+    public void testIsTerminatedOnNonExecutorService() {
+        Executor plainExecutor = new Executor() {
+            @Override
+            public void execute(java.lang.Runnable command) {
+                command.run();
+            }
+        };
+        AsyncExecutor executor = new AsyncExecutor(plainExecutor);
+        Assertions.assertTrue(executor.isTerminated());
+    }
+
+    @Test
+    public void testIsTerminated() {
+        AsyncExecutor executor = new AsyncExecutor();
+        executor.execute(() -> System.out.println("Running task"));
+        Assertions.assertFalse(executor.isTerminated());
+        executor.shutdown();
+        Assertions.assertTrue(executor.isTerminated());
+    }
+
+    @Test
     public void testIsTerminatedBeforeShutdown() {
         AsyncExecutor executor = new AsyncExecutor();
         executor.execute((Throwables.Runnable<Exception>) () -> {
@@ -523,21 +669,21 @@ public class AsyncExecutorTest extends TestBase {
     }
 
     @Test
-    public void testIsTerminatedUninitialized() {
-        AsyncExecutor executor = new AsyncExecutor();
-        Assertions.assertTrue(executor.isTerminated());
+    public void testToStringBeforeInitialization() {
+        AsyncExecutor executor = new AsyncExecutor(3, 6, 45L, TimeUnit.SECONDS);
+        String str = executor.toString();
+        Assertions.assertTrue(str.contains("coreThreadPoolSize: 3"));
+        executor.shutdown();
     }
 
     @Test
-    public void testIsTerminatedOnNonExecutorService() {
-        Executor plainExecutor = new Executor() {
-            @Override
-            public void execute(java.lang.Runnable command) {
-                command.run();
-            }
-        };
-        AsyncExecutor executor = new AsyncExecutor(plainExecutor);
-        Assertions.assertTrue(executor.isTerminated());
+    public void testToStringAfterInitialization() {
+        AsyncExecutor executor = new AsyncExecutor(3, 6, 45L, TimeUnit.SECONDS);
+        executor.getExecutor();
+        String str = executor.toString();
+        Assertions.assertTrue(str.contains("coreThreadPoolSize: 3"));
+        Assertions.assertTrue(str.contains("activeCount"));
+        executor.shutdown();
     }
 
     @Test
@@ -559,154 +705,6 @@ public class AsyncExecutorTest extends TestBase {
         Assertions.assertTrue(str.contains("maxThreadPoolSize: 10"));
         Assertions.assertTrue(str.contains("keepAliveTime: 90000ms"));
         executor.shutdown();
-    }
-
-    @Test
-    public void testToStringBeforeInitialization() {
-        AsyncExecutor executor = new AsyncExecutor(3, 6, 45L, TimeUnit.SECONDS);
-        String str = executor.toString();
-        Assertions.assertTrue(str.contains("coreThreadPoolSize: 3"));
-        executor.shutdown();
-    }
-
-    @Test
-    public void testToStringAfterInitialization() {
-        AsyncExecutor executor = new AsyncExecutor(3, 6, 45L, TimeUnit.SECONDS);
-        executor.getExecutor();
-        String str = executor.toString();
-        Assertions.assertTrue(str.contains("coreThreadPoolSize: 3"));
-        Assertions.assertTrue(str.contains("activeCount"));
-        executor.shutdown();
-    }
-
-    @Test
-    public void testConcurrentExecution() throws Exception {
-        AsyncExecutor executor = new AsyncExecutor(4, 8, 60L, TimeUnit.SECONDS);
-        AtomicInteger counter = new AtomicInteger(0);
-        int taskCount = 10;
-        CountDownLatch latch = new CountDownLatch(taskCount);
-
-        List<ContinuableFuture<Void>> futures = new ArrayList<>();
-        for (int i = 0; i < taskCount; i++) {
-            futures.add(executor.execute((Throwables.Runnable<Exception>) () -> {
-                counter.incrementAndGet();
-                latch.countDown();
-            }));
-        }
-
-        latch.await(5, TimeUnit.SECONDS);
-        Assertions.assertEquals(taskCount, counter.get());
-
-        for (ContinuableFuture<Void> future : futures) {
-            future.get();
-        }
-
-        executor.shutdown();
-    }
-
-    @Test
-    public void testGetExecutorThreadSafety() throws Exception {
-        AsyncExecutor executor = new AsyncExecutor();
-        AtomicReference<Executor> executor1 = new AtomicReference<>();
-        AtomicReference<Executor> executor2 = new AtomicReference<>();
-        CountDownLatch latch = new CountDownLatch(2);
-
-        Thread t1 = new Thread(() -> {
-            executor1.set(executor.getExecutor());
-            latch.countDown();
-        });
-
-        Thread t2 = new Thread(() -> {
-            executor2.set(executor.getExecutor());
-            latch.countDown();
-        });
-
-        t1.start();
-        t2.start();
-        latch.await(2, TimeUnit.SECONDS);
-
-        Assertions.assertSame(executor1.get(), executor2.get());
-        executor.shutdown();
-    }
-
-    @Test
-    public void testExecuteComplexTask() throws Exception {
-        AsyncExecutor executor = new AsyncExecutor();
-
-        ContinuableFuture<Integer> future = executor.execute(() -> {
-            int sum = 0;
-            for (int i = 1; i <= 100; i++) {
-                sum += i;
-            }
-            return sum;
-        });
-
-        Integer result = future.get();
-        Assertions.assertEquals(5050, result);
-        executor.shutdown();
-    }
-
-    @Test
-    public void testExecuteWithChaining() throws Exception {
-        AsyncExecutor executor = new AsyncExecutor();
-
-        ContinuableFuture<Integer> future = executor.execute(() -> 10).thenCallAsync(x -> x * 2).thenCallAsync(x -> x + 5);
-
-        Integer result = future.get();
-        Assertions.assertEquals(25, result);
-        executor.shutdown();
-    }
-
-    @Test
-    public void testGetExecutor_afterShutdownThrowsException() {
-        AsyncExecutor executor = new AsyncExecutor();
-        executor.getExecutor(); // initialize it
-        executor.shutdown();
-        Assertions.assertThrows(IllegalStateException.class, () -> executor.getExecutor());
-    }
-
-    @Test
-    public void testShutdown_noArgAfterInit() throws Exception {
-        AsyncExecutor executor = new AsyncExecutor();
-        AtomicInteger counter = new AtomicInteger(0);
-
-        ContinuableFuture<Void> future = executor.execute((Throwables.Runnable<Exception>) () -> counter.incrementAndGet());
-        future.get();
-
-        executor.shutdown();
-        Assertions.assertTrue(executor.isTerminated());
-        Assertions.assertEquals(1, counter.get());
-    }
-
-    @Test
-    public void testConstructorWithExecutor() {
-        Executor javaExecutor = Executors.newFixedThreadPool(2);
-        AsyncExecutor executor = new AsyncExecutor(javaExecutor);
-        Assertions.assertNotNull(executor);
-        executor.shutdown();
-    }
-
-    @Test
-    public void testExecuteRunnableWithFinal() throws Exception {
-        AsyncExecutor executor = new AsyncExecutor();
-        AtomicInteger counter = new AtomicInteger(0);
-        AtomicInteger finalCounter = new AtomicInteger(0);
-
-        ContinuableFuture<Void> future = executor.execute(Fnn.r(() -> counter.incrementAndGet()), () -> finalCounter.incrementAndGet());
-
-        future.get();
-        Assertions.assertEquals(1, counter.get());
-        Assertions.assertEquals(1, finalCounter.get());
-        executor.shutdown();
-    }
-
-    @Test
-    public void testIsTerminated() {
-        AsyncExecutor executor = new AsyncExecutor();
-        executor.execute(() -> System.out.println("Running task"));
-        Assertions.assertFalse(executor.isTerminated());
-        executor.shutdown();
-        Assertions.assertTrue(executor.isTerminated());
     }
 
     @Test

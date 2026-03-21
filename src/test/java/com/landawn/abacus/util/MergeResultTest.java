@@ -7,13 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.Comparator;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.function.BiFunction;
 
-@Tag("2025")
 public class MergeResultTest extends TestBase {
 
     @Test
@@ -75,6 +73,78 @@ public class MergeResultTest extends TestBase {
     }
 
     @Test
+    public void testMinFirst_biFunction() {
+        BiFunction<Integer, Integer, MergeResult> minMerger = MergeResult.minFirst();
+        assertNotNull(minMerger);
+
+        MergeResult result = minMerger.apply(3, 7);
+        assertEquals(MergeResult.TAKE_FIRST, result);
+
+        result = minMerger.apply(7, 3);
+        assertEquals(MergeResult.TAKE_SECOND, result);
+    }
+
+    @Test
+    public void testMinFirst_biFunction_equal() {
+        BiFunction<Integer, Integer, MergeResult> minMerger = MergeResult.minFirst();
+        MergeResult result = minMerger.apply(5, 5);
+        assertEquals(MergeResult.TAKE_FIRST, result);
+    }
+
+    @Test
+    public void testMinFirst_biFunction_withComparator() {
+        Comparator<String> lengthComparator = Comparator.comparing(String::length);
+        BiFunction<String, String, MergeResult> minMerger = MergeResult.minFirst(lengthComparator);
+        assertNotNull(minMerger);
+
+        MergeResult result = minMerger.apply("hi", "hello");
+        assertEquals(MergeResult.TAKE_FIRST, result);
+
+        result = minMerger.apply("hello", "hi");
+        assertEquals(MergeResult.TAKE_SECOND, result);
+    }
+
+    @Test
+    public void testMinFirstComparable() {
+        MergeResult result = MergeResult.minFirst(5, 10);
+        Assertions.assertEquals(MergeResult.TAKE_FIRST, result);
+
+        result = MergeResult.minFirst(10, 5);
+        Assertions.assertEquals(MergeResult.TAKE_SECOND, result);
+
+        result = MergeResult.minFirst(5, 5);
+        Assertions.assertEquals(MergeResult.TAKE_FIRST, result);
+    }
+
+    @Test
+    public void testMinFirstFunction() {
+        BiFunction<Integer, Integer, MergeResult> minFunc = MergeResult.minFirst();
+
+        MergeResult result = minFunc.apply(5, 10);
+        Assertions.assertEquals(MergeResult.TAKE_FIRST, result);
+
+        result = minFunc.apply(10, 5);
+        Assertions.assertEquals(MergeResult.TAKE_SECOND, result);
+    }
+
+    @Test
+    public void testMinFirstFunctionWithComparator() {
+        Comparator<String> comparator = String::compareToIgnoreCase;
+        BiFunction<String, String, MergeResult> minFunc = MergeResult.minFirst(comparator);
+
+        MergeResult result = minFunc.apply("a", "B");
+        Assertions.assertEquals(MergeResult.TAKE_FIRST, result);
+
+        result = minFunc.apply("B", "a");
+        Assertions.assertEquals(MergeResult.TAKE_SECOND, result);
+    }
+
+    @Test
+    public void testMinFirst_biFunction_withComparator_nullThrows() {
+        assertThrows(IllegalArgumentException.class, () -> MergeResult.minFirst(null));
+    }
+
+    @Test
     public void testMaxFirst_comparable_firstLarger() {
         MergeResult result = MergeResult.maxFirst(10, 5);
         assertEquals(MergeResult.TAKE_FIRST, result);
@@ -133,43 +203,6 @@ public class MergeResultTest extends TestBase {
     }
 
     @Test
-    public void testMinFirst_biFunction() {
-        BiFunction<Integer, Integer, MergeResult> minMerger = MergeResult.minFirst();
-        assertNotNull(minMerger);
-
-        MergeResult result = minMerger.apply(3, 7);
-        assertEquals(MergeResult.TAKE_FIRST, result);
-
-        result = minMerger.apply(7, 3);
-        assertEquals(MergeResult.TAKE_SECOND, result);
-    }
-
-    @Test
-    public void testMinFirst_biFunction_equal() {
-        BiFunction<Integer, Integer, MergeResult> minMerger = MergeResult.minFirst();
-        MergeResult result = minMerger.apply(5, 5);
-        assertEquals(MergeResult.TAKE_FIRST, result);
-    }
-
-    @Test
-    public void testMinFirst_biFunction_withComparator() {
-        Comparator<String> lengthComparator = Comparator.comparing(String::length);
-        BiFunction<String, String, MergeResult> minMerger = MergeResult.minFirst(lengthComparator);
-        assertNotNull(minMerger);
-
-        MergeResult result = minMerger.apply("hi", "hello");
-        assertEquals(MergeResult.TAKE_FIRST, result);
-
-        result = minMerger.apply("hello", "hi");
-        assertEquals(MergeResult.TAKE_SECOND, result);
-    }
-
-    @Test
-    public void testMinFirst_biFunction_withComparator_nullThrows() {
-        assertThrows(IllegalArgumentException.class, () -> MergeResult.minFirst(null));
-    }
-
-    @Test
     public void testMaxFirst_biFunction() {
         BiFunction<Integer, Integer, MergeResult> maxMerger = MergeResult.maxFirst();
         assertNotNull(maxMerger);
@@ -202,6 +235,41 @@ public class MergeResultTest extends TestBase {
     }
 
     @Test
+    public void testMaxFirstComparable() {
+        MergeResult result = MergeResult.maxFirst(5, 10);
+        Assertions.assertEquals(MergeResult.TAKE_SECOND, result);
+
+        result = MergeResult.maxFirst(10, 5);
+        Assertions.assertEquals(MergeResult.TAKE_FIRST, result);
+
+        result = MergeResult.maxFirst(5, 5);
+        Assertions.assertEquals(MergeResult.TAKE_FIRST, result);
+    }
+
+    @Test
+    public void testMaxFirstFunction() {
+        BiFunction<Integer, Integer, MergeResult> maxFunc = MergeResult.maxFirst();
+
+        MergeResult result = maxFunc.apply(5, 10);
+        Assertions.assertEquals(MergeResult.TAKE_SECOND, result);
+
+        result = maxFunc.apply(10, 5);
+        Assertions.assertEquals(MergeResult.TAKE_FIRST, result);
+    }
+
+    @Test
+    public void testMaxFirstFunctionWithComparator() {
+        Comparator<String> comparator = String::compareToIgnoreCase;
+        BiFunction<String, String, MergeResult> maxFunc = MergeResult.maxFirst(comparator);
+
+        MergeResult result = maxFunc.apply("B", "a");
+        Assertions.assertEquals(MergeResult.TAKE_FIRST, result);
+
+        result = maxFunc.apply("a", "B");
+        Assertions.assertEquals(MergeResult.TAKE_SECOND, result);
+    }
+
+    @Test
     public void testMaxFirst_biFunction_withComparator_nullThrows() {
         assertThrows(IllegalArgumentException.class, () -> MergeResult.maxFirst(null));
     }
@@ -222,21 +290,6 @@ public class MergeResultTest extends TestBase {
     }
 
     @Test
-    public void testValues() {
-        MergeResult[] values = MergeResult.values();
-        assertNotNull(values);
-        assertEquals(2, values.length);
-        assertEquals(MergeResult.TAKE_FIRST, values[0]);
-        assertEquals(MergeResult.TAKE_SECOND, values[1]);
-    }
-
-    @Test
-    public void testValueOf_byName() {
-        assertEquals(MergeResult.TAKE_FIRST, MergeResult.valueOf("TAKE_FIRST"));
-        assertEquals(MergeResult.TAKE_SECOND, MergeResult.valueOf("TAKE_SECOND"));
-    }
-
-    @Test
     public void testIntegration_minFirst_multipleValues() {
         Integer[] values = { 5, 2, 8, 1, 9, 3 };
         Integer min = values[0];
@@ -247,19 +300,6 @@ public class MergeResultTest extends TestBase {
             }
         }
         assertEquals(Integer.valueOf(1), min);
-    }
-
-    @Test
-    public void testIntegration_maxFirst_multipleValues() {
-        Integer[] values = { 5, 2, 8, 1, 9, 3 };
-        Integer max = values[0];
-        for (int i = 1; i < values.length; i++) {
-            MergeResult result = MergeResult.maxFirst(max, values[i]);
-            if (result == MergeResult.TAKE_SECOND) {
-                max = values[i];
-            }
-        }
-        assertEquals(Integer.valueOf(9), max);
     }
 
     @Test
@@ -287,79 +327,37 @@ public class MergeResultTest extends TestBase {
     }
 
     @Test
+    public void testIntegration_maxFirst_multipleValues() {
+        Integer[] values = { 5, 2, 8, 1, 9, 3 };
+        Integer max = values[0];
+        for (int i = 1; i < values.length; i++) {
+            MergeResult result = MergeResult.maxFirst(max, values[i]);
+            if (result == MergeResult.TAKE_SECOND) {
+                max = values[i];
+            }
+        }
+        assertEquals(Integer.valueOf(9), max);
+    }
+
+    @Test
+    public void testValues() {
+        MergeResult[] values = MergeResult.values();
+        assertNotNull(values);
+        assertEquals(2, values.length);
+        assertEquals(MergeResult.TAKE_FIRST, values[0]);
+        assertEquals(MergeResult.TAKE_SECOND, values[1]);
+    }
+
+    @Test
+    public void testValueOf_byName() {
+        assertEquals(MergeResult.TAKE_FIRST, MergeResult.valueOf("TAKE_FIRST"));
+        assertEquals(MergeResult.TAKE_SECOND, MergeResult.valueOf("TAKE_SECOND"));
+    }
+
+    @Test
     public void testEnumValues() {
         Assertions.assertNotNull(MergeResult.TAKE_FIRST);
         Assertions.assertNotNull(MergeResult.TAKE_SECOND);
-    }
-
-    @Test
-    public void testMinFirstComparable() {
-        MergeResult result = MergeResult.minFirst(5, 10);
-        Assertions.assertEquals(MergeResult.TAKE_FIRST, result);
-
-        result = MergeResult.minFirst(10, 5);
-        Assertions.assertEquals(MergeResult.TAKE_SECOND, result);
-
-        result = MergeResult.minFirst(5, 5);
-        Assertions.assertEquals(MergeResult.TAKE_FIRST, result);
-    }
-
-    @Test
-    public void testMaxFirstComparable() {
-        MergeResult result = MergeResult.maxFirst(5, 10);
-        Assertions.assertEquals(MergeResult.TAKE_SECOND, result);
-
-        result = MergeResult.maxFirst(10, 5);
-        Assertions.assertEquals(MergeResult.TAKE_FIRST, result);
-
-        result = MergeResult.maxFirst(5, 5);
-        Assertions.assertEquals(MergeResult.TAKE_FIRST, result);
-    }
-
-    @Test
-    public void testMinFirstFunction() {
-        BiFunction<Integer, Integer, MergeResult> minFunc = MergeResult.minFirst();
-
-        MergeResult result = minFunc.apply(5, 10);
-        Assertions.assertEquals(MergeResult.TAKE_FIRST, result);
-
-        result = minFunc.apply(10, 5);
-        Assertions.assertEquals(MergeResult.TAKE_SECOND, result);
-    }
-
-    @Test
-    public void testMinFirstFunctionWithComparator() {
-        Comparator<String> comparator = String::compareToIgnoreCase;
-        BiFunction<String, String, MergeResult> minFunc = MergeResult.minFirst(comparator);
-
-        MergeResult result = minFunc.apply("a", "B");
-        Assertions.assertEquals(MergeResult.TAKE_FIRST, result);
-
-        result = minFunc.apply("B", "a");
-        Assertions.assertEquals(MergeResult.TAKE_SECOND, result);
-    }
-
-    @Test
-    public void testMaxFirstFunction() {
-        BiFunction<Integer, Integer, MergeResult> maxFunc = MergeResult.maxFirst();
-
-        MergeResult result = maxFunc.apply(5, 10);
-        Assertions.assertEquals(MergeResult.TAKE_SECOND, result);
-
-        result = maxFunc.apply(10, 5);
-        Assertions.assertEquals(MergeResult.TAKE_FIRST, result);
-    }
-
-    @Test
-    public void testMaxFirstFunctionWithComparator() {
-        Comparator<String> comparator = String::compareToIgnoreCase;
-        BiFunction<String, String, MergeResult> maxFunc = MergeResult.maxFirst(comparator);
-
-        MergeResult result = maxFunc.apply("B", "a");
-        Assertions.assertEquals(MergeResult.TAKE_FIRST, result);
-
-        result = maxFunc.apply("a", "B");
-        Assertions.assertEquals(MergeResult.TAKE_SECOND, result);
     }
 
 }

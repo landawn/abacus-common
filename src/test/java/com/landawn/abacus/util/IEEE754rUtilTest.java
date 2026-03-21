@@ -5,12 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 
-@Tag("old-test")
 public class IEEE754rUtilTest extends AbstractTest {
 
     @Test
@@ -37,58 +35,6 @@ public class IEEE754rUtilTest extends AbstractTest {
         final float[] bF = { Float.NaN, 1.2f, Float.NaN, 3.7f, 27.0f, 42.0f, Float.NaN };
         assertEquals(1.2f, IEEE754rUtil.min(bF), 0.01);
         assertEquals(42.0f, IEEE754rUtil.max(bF), 0.01);
-    }
-
-    @Test
-    public void testEnforceExceptions() {
-        try {
-            IEEE754rUtil.min((float[]) null);
-            fail("IllegalArgumentException expected for null input");
-        } catch (final IllegalArgumentException iae) {
-        }
-
-        try {
-            IEEE754rUtil.min();
-            fail("IllegalArgumentException expected for empty input");
-        } catch (final IllegalArgumentException iae) {
-        }
-
-        try {
-            IEEE754rUtil.max((float[]) null);
-            fail("IllegalArgumentException expected for null input");
-        } catch (final IllegalArgumentException iae) {
-        }
-
-        try {
-            IEEE754rUtil.max();
-            fail("IllegalArgumentException expected for empty input");
-        } catch (final IllegalArgumentException iae) {
-        }
-
-        try {
-            IEEE754rUtil.min((double[]) null);
-            fail("IllegalArgumentException expected for null input");
-        } catch (final IllegalArgumentException iae) {
-        }
-
-        try {
-            IEEE754rUtil.min();
-            fail("IllegalArgumentException expected for empty input");
-        } catch (final IllegalArgumentException iae) {
-        }
-
-        try {
-            IEEE754rUtil.max((double[]) null);
-            fail("IllegalArgumentException expected for null input");
-        } catch (final IllegalArgumentException iae) {
-        }
-
-        try {
-            IEEE754rUtil.max();
-            fail("IllegalArgumentException expected for empty input");
-        } catch (final IllegalArgumentException iae) {
-        }
-
     }
 
     // ===== min(float, float) =====
@@ -185,16 +131,6 @@ public class IEEE754rUtilTest extends AbstractTest {
         assertEquals(1.0f, IEEE754rUtil.min(new float[] { 3.0f, Float.NaN, 1.0f, 5.0f }));
         assertEquals(1.0f, IEEE754rUtil.min(new float[] { Float.NaN, Float.NaN, 1.0f }));
         assertTrue(Float.isNaN(IEEE754rUtil.min(new float[] { Float.NaN, Float.NaN, Float.NaN })));
-    }
-
-    @Test
-    public void test_min_float_array_nullArray() {
-        assertThrows(IllegalArgumentException.class, () -> IEEE754rUtil.min((float[]) null));
-    }
-
-    @Test
-    public void test_min_float_array_emptyArray() {
-        assertThrows(IllegalArgumentException.class, () -> IEEE754rUtil.min(new float[] {}));
     }
 
     @Test
@@ -315,16 +251,6 @@ public class IEEE754rUtilTest extends AbstractTest {
     }
 
     @Test
-    public void test_min_double_array_nullArray() {
-        assertThrows(IllegalArgumentException.class, () -> IEEE754rUtil.min((double[]) null));
-    }
-
-    @Test
-    public void test_min_double_array_emptyArray() {
-        assertThrows(IllegalArgumentException.class, () -> IEEE754rUtil.min(new double[] {}));
-    }
-
-    @Test
     public void test_min_double_array_withInfinity() {
         assertEquals(Double.NEGATIVE_INFINITY, IEEE754rUtil.min(new double[] { 3.0, Double.NEGATIVE_INFINITY, 5.0 }));
         assertEquals(1.0, IEEE754rUtil.min(new double[] { 3.0, Double.POSITIVE_INFINITY, 1.0, 5.0 }));
@@ -333,6 +259,100 @@ public class IEEE754rUtilTest extends AbstractTest {
     @Test
     public void test_min_double_array_allSameValues() {
         assertEquals(5.0, IEEE754rUtil.min(new double[] { 5.0, 5.0, 5.0, 5.0 }));
+    }
+
+    // ===== Cross-method tests =====
+
+    @Test
+    public void test_min_max_symmetry_float() {
+        float[] values = { 3.0f, 5.0f, 1.0f, 7.0f };
+        float min = IEEE754rUtil.min(values);
+        float max = IEEE754rUtil.max(values);
+        assertEquals(1.0f, min);
+        assertEquals(7.0f, max);
+        assertTrue(min < max);
+    }
+
+    @Test
+    public void test_min_max_symmetry_double() {
+        double[] values = { 3.0, 5.0, 1.0, 7.0 };
+        double min = IEEE754rUtil.min(values);
+        double max = IEEE754rUtil.max(values);
+        assertEquals(1.0, min);
+        assertEquals(7.0, max);
+        assertTrue(min < max);
+    }
+
+    @Test
+    public void testEnforceExceptions() {
+        try {
+            IEEE754rUtil.min((float[]) null);
+            fail("IllegalArgumentException expected for null input");
+        } catch (final IllegalArgumentException iae) {
+        }
+
+        try {
+            IEEE754rUtil.min();
+            fail("IllegalArgumentException expected for empty input");
+        } catch (final IllegalArgumentException iae) {
+        }
+
+        try {
+            IEEE754rUtil.max((float[]) null);
+            fail("IllegalArgumentException expected for null input");
+        } catch (final IllegalArgumentException iae) {
+        }
+
+        try {
+            IEEE754rUtil.max();
+            fail("IllegalArgumentException expected for empty input");
+        } catch (final IllegalArgumentException iae) {
+        }
+
+        try {
+            IEEE754rUtil.min((double[]) null);
+            fail("IllegalArgumentException expected for null input");
+        } catch (final IllegalArgumentException iae) {
+        }
+
+        try {
+            IEEE754rUtil.min();
+            fail("IllegalArgumentException expected for empty input");
+        } catch (final IllegalArgumentException iae) {
+        }
+
+        try {
+            IEEE754rUtil.max((double[]) null);
+            fail("IllegalArgumentException expected for null input");
+        } catch (final IllegalArgumentException iae) {
+        }
+
+        try {
+            IEEE754rUtil.max();
+            fail("IllegalArgumentException expected for empty input");
+        } catch (final IllegalArgumentException iae) {
+        }
+
+    }
+
+    @Test
+    public void test_min_float_array_nullArray() {
+        assertThrows(IllegalArgumentException.class, () -> IEEE754rUtil.min((float[]) null));
+    }
+
+    @Test
+    public void test_min_float_array_emptyArray() {
+        assertThrows(IllegalArgumentException.class, () -> IEEE754rUtil.min(new float[] {}));
+    }
+
+    @Test
+    public void test_min_double_array_nullArray() {
+        assertThrows(IllegalArgumentException.class, () -> IEEE754rUtil.min((double[]) null));
+    }
+
+    @Test
+    public void test_min_double_array_emptyArray() {
+        assertThrows(IllegalArgumentException.class, () -> IEEE754rUtil.min(new double[] {}));
     }
 
     // ===== max(float, float) =====
@@ -429,16 +449,6 @@ public class IEEE754rUtilTest extends AbstractTest {
         assertEquals(5.0f, IEEE754rUtil.max(new float[] { 3.0f, Float.NaN, 1.0f, 5.0f }));
         assertEquals(1.0f, IEEE754rUtil.max(new float[] { Float.NaN, Float.NaN, 1.0f }));
         assertTrue(Float.isNaN(IEEE754rUtil.max(new float[] { Float.NaN, Float.NaN, Float.NaN })));
-    }
-
-    @Test
-    public void test_max_float_array_nullArray() {
-        assertThrows(IllegalArgumentException.class, () -> IEEE754rUtil.max((float[]) null));
-    }
-
-    @Test
-    public void test_max_float_array_emptyArray() {
-        assertThrows(IllegalArgumentException.class, () -> IEEE754rUtil.max(new float[] {}));
     }
 
     @Test
@@ -549,16 +559,6 @@ public class IEEE754rUtilTest extends AbstractTest {
     }
 
     @Test
-    public void test_max_double_array_nullArray() {
-        assertThrows(IllegalArgumentException.class, () -> IEEE754rUtil.max((double[]) null));
-    }
-
-    @Test
-    public void test_max_double_array_emptyArray() {
-        assertThrows(IllegalArgumentException.class, () -> IEEE754rUtil.max(new double[] {}));
-    }
-
-    @Test
     public void test_max_double_array_withInfinity() {
         assertEquals(5.0, IEEE754rUtil.max(new double[] { 3.0, Double.NEGATIVE_INFINITY, 5.0 }));
         assertEquals(Double.POSITIVE_INFINITY, IEEE754rUtil.max(new double[] { 3.0, Double.POSITIVE_INFINITY, 1.0, 5.0 }));
@@ -579,26 +579,24 @@ public class IEEE754rUtilTest extends AbstractTest {
         assertEquals(9999.0, IEEE754rUtil.max(largeArray));
     }
 
-    // ===== Cross-method tests =====
-
     @Test
-    public void test_min_max_symmetry_float() {
-        float[] values = { 3.0f, 5.0f, 1.0f, 7.0f };
-        float min = IEEE754rUtil.min(values);
-        float max = IEEE754rUtil.max(values);
-        assertEquals(1.0f, min);
-        assertEquals(7.0f, max);
-        assertTrue(min < max);
+    public void test_max_float_array_nullArray() {
+        assertThrows(IllegalArgumentException.class, () -> IEEE754rUtil.max((float[]) null));
     }
 
     @Test
-    public void test_min_max_symmetry_double() {
-        double[] values = { 3.0, 5.0, 1.0, 7.0 };
-        double min = IEEE754rUtil.min(values);
-        double max = IEEE754rUtil.max(values);
-        assertEquals(1.0, min);
-        assertEquals(7.0, max);
-        assertTrue(min < max);
+    public void test_max_float_array_emptyArray() {
+        assertThrows(IllegalArgumentException.class, () -> IEEE754rUtil.max(new float[] {}));
+    }
+
+    @Test
+    public void test_max_double_array_nullArray() {
+        assertThrows(IllegalArgumentException.class, () -> IEEE754rUtil.max((double[]) null));
+    }
+
+    @Test
+    public void test_max_double_array_emptyArray() {
+        assertThrows(IllegalArgumentException.class, () -> IEEE754rUtil.max(new double[] {}));
     }
 
 }

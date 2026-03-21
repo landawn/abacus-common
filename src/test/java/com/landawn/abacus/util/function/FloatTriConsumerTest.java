@@ -7,12 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class FloatTriConsumerTest extends TestBase {
 
     @Test
@@ -23,6 +21,15 @@ public class FloatTriConsumerTest extends TestBase {
         consumer.accept(10.5f, 20.3f, 30.2f);
 
         assertEquals(61.0f, sum.get(), 0.001f);
+    }
+
+    @Test
+    public void testFunctionalInterfaceContract() {
+        assertDoesNotThrow(() -> {
+            final FloatTriConsumer consumer = (a, b, c) -> {
+            };
+            consumer.accept(1.0f, 2.0f, 3.0f);
+        });
     }
 
     @Test
@@ -37,14 +44,5 @@ public class FloatTriConsumerTest extends TestBase {
         assertEquals(2, results.size());
         assertEquals(9.0f, results.get(0), 0.001f); // 2+3+4
         assertEquals(24.0f, results.get(1), 0.001f); // 2*3*4
-    }
-
-    @Test
-    public void testFunctionalInterfaceContract() {
-        assertDoesNotThrow(() -> {
-            final FloatTriConsumer consumer = (a, b, c) -> {
-            };
-            consumer.accept(1.0f, 2.0f, 3.0f);
-        });
     }
 }

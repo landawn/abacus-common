@@ -17,38 +17,11 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ShortSupplierTest extends TestBase {
-
-    @Test
-    public void test_ZERO() {
-        assertEquals(0, ShortSupplier.ZERO.getAsShort());
-        assertEquals(0, ShortSupplier.ZERO.getAsShort());
-        assertEquals(0, ShortSupplier.ZERO.getAsShort());
-    }
-
-    @Test
-    public void test_RANDOM() {
-        // RANDOM should return short values
-        short value1 = ShortSupplier.RANDOM.getAsShort();
-        short value2 = ShortSupplier.RANDOM.getAsShort();
-        short value3 = ShortSupplier.RANDOM.getAsShort();
-
-        // Verify they are valid short values
-        assertTrue(value1 >= Short.MIN_VALUE && value1 <= Short.MAX_VALUE);
-        assertTrue(value2 >= Short.MIN_VALUE && value2 <= Short.MAX_VALUE);
-        assertTrue(value3 >= Short.MIN_VALUE && value3 <= Short.MAX_VALUE);
-
-        // Very unlikely all three random values are the same
-        // (though technically possible, probability is extremely low)
-        boolean allDifferent = (value1 != value2 || value2 != value3 || value1 != value3);
-        assertTrue(allDifferent || value1 == value2); // Just verify it doesn't throw
-    }
 
     @Test
     public void test_getAsShort_lambda() {
@@ -83,6 +56,26 @@ public class ShortSupplierTest extends TestBase {
     }
 
     @Test
+    public void test_getAsShort_varyingValues() {
+        final short[] values = { 10, 20, 30 };
+        final int[] index = { 0 };
+
+        ShortSupplier supplier = () -> values[index[0]++ % values.length];
+
+        assertEquals(10, supplier.getAsShort());
+        assertEquals(20, supplier.getAsShort());
+        assertEquals(30, supplier.getAsShort());
+        assertEquals(10, supplier.getAsShort()); // Wraps around
+    }
+
+    @Test
+    public void test_ZERO() {
+        assertEquals(0, ShortSupplier.ZERO.getAsShort());
+        assertEquals(0, ShortSupplier.ZERO.getAsShort());
+        assertEquals(0, ShortSupplier.ZERO.getAsShort());
+    }
+
+    @Test
     public void test_getAsShort_negativeValue() {
         ShortSupplier supplier = () -> (short) -500;
 
@@ -104,15 +97,20 @@ public class ShortSupplierTest extends TestBase {
     }
 
     @Test
-    public void test_getAsShort_varyingValues() {
-        final short[] values = { 10, 20, 30 };
-        final int[] index = { 0 };
+    public void test_RANDOM() {
+        // RANDOM should return short values
+        short value1 = ShortSupplier.RANDOM.getAsShort();
+        short value2 = ShortSupplier.RANDOM.getAsShort();
+        short value3 = ShortSupplier.RANDOM.getAsShort();
 
-        ShortSupplier supplier = () -> values[index[0]++ % values.length];
+        // Verify they are valid short values
+        assertTrue(value1 >= Short.MIN_VALUE && value1 <= Short.MAX_VALUE);
+        assertTrue(value2 >= Short.MIN_VALUE && value2 <= Short.MAX_VALUE);
+        assertTrue(value3 >= Short.MIN_VALUE && value3 <= Short.MAX_VALUE);
 
-        assertEquals(10, supplier.getAsShort());
-        assertEquals(20, supplier.getAsShort());
-        assertEquals(30, supplier.getAsShort());
-        assertEquals(10, supplier.getAsShort()); // Wraps around
+        // Very unlikely all three random values are the same
+        // (though technically possible, probability is extremely low)
+        boolean allDifferent = (value1 != value2 || value2 != value3 || value1 != value3);
+        assertTrue(allDifferent || value1 == value2); // Just verify it doesn't throw
     }
 }

@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -33,7 +32,6 @@ import com.landawn.abacus.util.Suppliers;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalInt;
 
-@Tag("new-test")
 public class AbstractIntStreamTest extends TestBase {
 
     private IntStream stream;
@@ -113,15 +111,15 @@ public class AbstractIntStreamTest extends TestBase {
     }
 
     @Test
-    public void testFlatmapToObj() {
-        Stream<String> result = stream.flatmapToObj(x -> Arrays.asList(String.valueOf(x), String.valueOf(x * 2)));
+    public void testFlattMapToObj() {
+        Stream<String> result = stream.flatMapArrayToObj(x -> new String[] { String.valueOf(x), String.valueOf(x * 2) });
         String[] array = result.toArray(String[]::new);
         Assertions.assertArrayEquals(new String[] { "1", "2", "2", "4", "3", "6", "4", "8", "5", "10" }, array);
     }
 
     @Test
-    public void testFlattMapToObj() {
-        Stream<String> result = stream.flatMapArrayToObj(x -> new String[] { String.valueOf(x), String.valueOf(x * 2) });
+    public void testFlatmapToObj() {
+        Stream<String> result = stream.flatmapToObj(x -> Arrays.asList(String.valueOf(x), String.valueOf(x * 2)));
         String[] array = result.toArray(String[]::new);
         Assertions.assertArrayEquals(new String[] { "1", "2", "2", "4", "3", "6", "4", "8", "5", "10" }, array);
     }
@@ -358,6 +356,13 @@ public class AbstractIntStreamTest extends TestBase {
     }
 
     @Test
+    public void testCycled_long() {
+        stream = IntStream.of(1, 2);
+        List<Integer> result = stream.cycled(3).collect(ArrayList::new, (list, value) -> list.add(value));
+        assertEquals(Arrays.asList(1, 2, 1, 2, 1, 2), result);
+    }
+
+    @Test
     public void testCycledWithZeroRounds() {
         IntStream result = stream.cycled(0);
         int[] array = result.toArray();
@@ -380,6 +385,12 @@ public class AbstractIntStreamTest extends TestBase {
         Stream<Integer> result = stream.boxed();
         Integer[] array = result.toArray(Integer[]::new);
         Assertions.assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, array);
+    }
+
+    @Test
+    public void testPrependAppend_Stream_Parallel() {
+        int[] result = createIntStream(3, 4).parallel().prepend(IntStream.of(1, 2)).append(IntStream.of(5)).toArray();
+        Assertions.assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, result);
     }
 
     @Test
@@ -553,6 +564,21 @@ public class AbstractIntStreamTest extends TestBase {
     }
 
     @Test
+    public void testFirstEmpty() {
+        IntStream emptyStream = createIntStream(new int[] {});
+        OptionalInt result = emptyStream.first();
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testFirst_MultipleElements() {
+        stream = IntStream.of(1, 2, 3);
+        OptionalInt result = stream.first();
+        assertTrue(result.isPresent());
+        assertEquals(1, result.getAsInt());
+    }
+
+    @Test
     public void testFirst() {
         OptionalInt result = stream.first();
         Assertions.assertTrue(result.isPresent());
@@ -560,9 +586,9 @@ public class AbstractIntStreamTest extends TestBase {
     }
 
     @Test
-    public void testFirstEmpty() {
+    public void testLastEmpty() {
         IntStream emptyStream = createIntStream(new int[] {});
-        OptionalInt result = emptyStream.first();
+        OptionalInt result = emptyStream.last();
         Assertions.assertFalse(result.isPresent());
     }
 
@@ -574,9 +600,9 @@ public class AbstractIntStreamTest extends TestBase {
     }
 
     @Test
-    public void testLastEmpty() {
+    public void testOnlyOneEmpty() {
         IntStream emptyStream = createIntStream(new int[] {});
-        OptionalInt result = emptyStream.last();
+        OptionalInt result = emptyStream.onlyOne();
         Assertions.assertFalse(result.isPresent());
     }
 
@@ -586,13 +612,6 @@ public class AbstractIntStreamTest extends TestBase {
         OptionalInt result = singleStream.onlyOne();
         Assertions.assertTrue(result.isPresent());
         assertEquals(42, result.orElseThrow());
-    }
-
-    @Test
-    public void testOnlyOneEmpty() {
-        IntStream emptyStream = createIntStream(new int[] {});
-        OptionalInt result = emptyStream.onlyOne();
-        Assertions.assertFalse(result.isPresent());
     }
 
     @Test
@@ -667,21 +686,6 @@ public class AbstractIntStreamTest extends TestBase {
             result.add(iter.nextInt());
         }
         assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
-    }
-
-    @Test
-    public void testCycled_long() {
-        stream = IntStream.of(1, 2);
-        List<Integer> result = stream.cycled(3).collect(ArrayList::new, (list, value) -> list.add(value));
-        assertEquals(Arrays.asList(1, 2, 1, 2, 1, 2), result);
-    }
-
-    @Test
-    public void testFirst_MultipleElements() {
-        stream = IntStream.of(1, 2, 3);
-        OptionalInt result = stream.first();
-        assertTrue(result.isPresent());
-        assertEquals(1, result.getAsInt());
     }
 
 }

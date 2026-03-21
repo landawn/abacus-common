@@ -16,12 +16,10 @@ package com.landawn.abacus.util.function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ShortBinaryOperatorTest extends TestBase {
 
     @Test
@@ -58,26 +56,6 @@ public class ShortBinaryOperatorTest extends TestBase {
         assertEquals(5, divide.applyAsShort((short) 50, (short) 10));
         assertEquals(3, divide.applyAsShort((short) 10, (short) 3));
         assertEquals(-5, divide.applyAsShort((short) 50, (short) -10));
-    }
-
-    @Test
-    public void test_applyAsShort_max() {
-        ShortBinaryOperator max = (left, right) -> (short) Math.max(left, right);
-
-        assertEquals(10, max.applyAsShort((short) 5, (short) 10));
-        assertEquals(10, max.applyAsShort((short) 10, (short) 5));
-        assertEquals(5, max.applyAsShort((short) 5, (short) -10));
-        assertEquals(0, max.applyAsShort((short) 0, (short) 0));
-    }
-
-    @Test
-    public void test_applyAsShort_min() {
-        ShortBinaryOperator min = (left, right) -> (short) Math.min(left, right);
-
-        assertEquals(5, min.applyAsShort((short) 5, (short) 10));
-        assertEquals(5, min.applyAsShort((short) 10, (short) 5));
-        assertEquals(-10, min.applyAsShort((short) 5, (short) -10));
-        assertEquals(0, min.applyAsShort((short) 0, (short) 0));
     }
 
     @Test
@@ -128,6 +106,26 @@ public class ShortBinaryOperatorTest extends TestBase {
         assertEquals(1, modulo.applyAsShort((short) 10, (short) 3));
         assertEquals(0, modulo.applyAsShort((short) 10, (short) 5));
         assertEquals(2, modulo.applyAsShort((short) 17, (short) 5));
+    }
+
+    @Test
+    public void test_applyAsShort_max() {
+        ShortBinaryOperator max = (left, right) -> (short) Math.max(left, right);
+
+        assertEquals(10, max.applyAsShort((short) 5, (short) 10));
+        assertEquals(10, max.applyAsShort((short) 10, (short) 5));
+        assertEquals(5, max.applyAsShort((short) 5, (short) -10));
+        assertEquals(0, max.applyAsShort((short) 0, (short) 0));
+    }
+
+    @Test
+    public void test_applyAsShort_min() {
+        ShortBinaryOperator min = (left, right) -> (short) Math.min(left, right);
+
+        assertEquals(5, min.applyAsShort((short) 5, (short) 10));
+        assertEquals(5, min.applyAsShort((short) 10, (short) 5));
+        assertEquals(-10, min.applyAsShort((short) 5, (short) -10));
+        assertEquals(0, min.applyAsShort((short) 0, (short) 0));
     }
 
     @Test

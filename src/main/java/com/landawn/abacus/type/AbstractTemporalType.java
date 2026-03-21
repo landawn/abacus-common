@@ -21,17 +21,21 @@ import java.time.temporal.Temporal;
 import com.landawn.abacus.util.Dates;
 
 /**
- * Abstract base class for temporal type handling in the type system.
- * This class provides the foundation for date/time types that implement the Temporal interface,
+ * The Abstract base class for temporal type handling in the type system.
+ * <p>
+ * This class provides the foundation for date/time types that implement the {@link Temporal} interface,
  * including shared formatters and configuration for temporal serialization/deserialization.
+ * </p>
  *
- * @param <T> the specific temporal type that extends java.time.temporal.Temporal
+ * @param <T> the specific temporal type that extends {@link java.time.temporal.Temporal}
  */
 public abstract class AbstractTemporalType<T extends Temporal> extends AbstractType<T> {
 
     /**
      * The default time zone ID used for temporal operations.
-     * This is initialized from the Dates utility class default zone.
+     * <p>
+     * This is initialized from the {@code Dates} utility class default zone.
+     * </p>
      */
     protected static final ZoneId DEFAULT_ZONE_ID = Dates.DEFAULT_ZONE_ID;
 
@@ -41,12 +45,15 @@ public abstract class AbstractTemporalType<T extends Temporal> extends AbstractT
      * This formatter adheres to the ISO-8601 standard for representing date and time with
      * an offset from UTC (e.g., "2023-04-15T14:30:45+01:00"). It's used for consistent
      * formatting and parsing of temporal values throughout the type system.
+     * </p>
      * <p>
      * The formatter uses the standard {@link DateTimeFormatter#ISO_OFFSET_DATE_TIME} which
      * formats or parses a date-time with an offset, such as <i>2011-12-03T10:15:30+01:00</i>.
+     * </p>
      * <p>
      * This field is protected and shared across subclasses to ensure consistent handling
      * of temporal data in ISO format.
+     * </p>
      *
      * @see DateTimeFormatter#ISO_OFFSET_DATE_TIME
      * @see #iso8601TimestampDTF
@@ -61,6 +68,7 @@ public abstract class AbstractTemporalType<T extends Temporal> extends AbstractT
      * {@link #iso8601DateTimeDTF} which is used for general date-time formatting.
      * Both currently use {@link DateTimeFormatter#ISO_OFFSET_DATE_TIME}, but are kept
      * separate to allow independent customization for different use cases.
+     * </p>
      *
      * @see DateTimeFormatter#ISO_OFFSET_DATE_TIME
      * @see #iso8601DateTimeDTF
@@ -69,7 +77,7 @@ public abstract class AbstractTemporalType<T extends Temporal> extends AbstractT
     protected static final DateTimeFormatter iso8601TimestampDTF = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
     /**
-     * Constructs an AbstractTemporalType with the specified type name.
+     * Constructs an {@code AbstractTemporalType} with the specified type name.
      *
      * @param typeName the name of the temporal type (e.g., "LocalDate", "LocalDateTime", "Instant")
      */
@@ -79,7 +87,9 @@ public abstract class AbstractTemporalType<T extends Temporal> extends AbstractT
 
     /**
      * Indicates whether values of this type require quoting in CSV format.
+     * <p>
      * Temporal types represent structured date/time values that do not contain CSV delimiters.
+     * </p>
      *
      * @return {@code false}, as temporal values do not require quoting in CSV format
      */

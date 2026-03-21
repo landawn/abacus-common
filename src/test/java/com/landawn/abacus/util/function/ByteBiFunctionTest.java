@@ -3,13 +3,21 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ByteBiFunctionTest extends TestBase {
+
+    private static class TestObject {
+        final byte first;
+        final byte second;
+
+        TestObject(byte first, byte second) {
+            this.first = first;
+            this.second = second;
+        }
+    }
 
     @Test
     public void testApply() {
@@ -41,6 +49,23 @@ public class ByteBiFunctionTest extends TestBase {
     }
 
     @Test
+    public void testReturningComplexObject() {
+        ByteBiFunction<TestObject> createObject = (t, u) -> new TestObject(t, u);
+
+        TestObject obj = createObject.apply((byte) 5, (byte) 10);
+        assertEquals(5, obj.first);
+        assertEquals(10, obj.second);
+    }
+
+    @Test
+    public void testWithBoundaryValues() {
+        ByteBiFunction<String> toString = (t, u) -> t + "," + u;
+
+        String result = toString.apply(Byte.MIN_VALUE, Byte.MAX_VALUE);
+        assertEquals(Byte.MIN_VALUE + "," + Byte.MAX_VALUE, result);
+    }
+
+    @Test
     public void testAndThen() {
         ByteBiFunction<Integer> sum = (t, u) -> (int) (t + u);
         java.util.function.Function<Integer, String> intToString = i -> "Sum: " + i;
@@ -63,34 +88,7 @@ public class ByteBiFunctionTest extends TestBase {
     }
 
     @Test
-    public void testReturningComplexObject() {
-        ByteBiFunction<TestObject> createObject = (t, u) -> new TestObject(t, u);
-
-        TestObject obj = createObject.apply((byte) 5, (byte) 10);
-        assertEquals(5, obj.first);
-        assertEquals(10, obj.second);
-    }
-
-    @Test
-    public void testWithBoundaryValues() {
-        ByteBiFunction<String> toString = (t, u) -> t + "," + u;
-
-        String result = toString.apply(Byte.MIN_VALUE, Byte.MAX_VALUE);
-        assertEquals(Byte.MIN_VALUE + "," + Byte.MAX_VALUE, result);
-    }
-
-    @Test
     public void testFunctionalInterface() {
         assertNotNull(ByteBiFunction.class.getAnnotation(FunctionalInterface.class));
-    }
-
-    private static class TestObject {
-        final byte first;
-        final byte second;
-
-        TestObject(byte first, byte second) {
-            this.first = first;
-            this.second = second;
-        }
     }
 }

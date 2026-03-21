@@ -16,12 +16,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class MoreExecutorsTest extends TestBase {
 
     @Test
@@ -53,6 +51,52 @@ public class MoreExecutorsTest extends TestBase {
 
         exitingService.shutdown();
         Assertions.assertTrue(exitingService.awaitTermination(1, TimeUnit.SECONDS));
+    }
+
+    @Test
+    public void testDaemonThreads() throws Exception {
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+
+        ExecutorService exitingService = MoreExecutors.getExitingExecutorService(executor);
+
+        AtomicBoolean isDaemon = new AtomicBoolean(false);
+        exitingService.submit(() -> {
+            isDaemon.set(Thread.currentThread().isDaemon());
+        }).get();
+
+        Assertions.assertTrue(isDaemon.get());
+
+        exitingService.shutdown();
+        Assertions.assertTrue(exitingService.awaitTermination(1, TimeUnit.SECONDS));
+    }
+
+    @Test
+    public void testExecutorServiceMethods() throws Exception {
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(2, 4, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+
+        ExecutorService exitingService = MoreExecutors.getExitingExecutorService(executor);
+
+        Assertions.assertFalse(exitingService.isShutdown());
+
+        Assertions.assertFalse(exitingService.isTerminated());
+
+        CountDownLatch latch = new CountDownLatch(1);
+        exitingService.execute(latch::countDown);
+        Assertions.assertTrue(latch.await(1, TimeUnit.SECONDS));
+
+        Future<?> runnableFuture = exitingService.submit(() -> {
+        });
+        runnableFuture.get(1, TimeUnit.SECONDS);
+        Assertions.assertTrue(runnableFuture.isDone());
+
+        Future<Integer> callableFuture = exitingService.submit(() -> 42);
+        Assertions.assertEquals(42, callableFuture.get());
+
+        exitingService.shutdown();
+        Assertions.assertTrue(exitingService.isShutdown());
+
+        Assertions.assertTrue(exitingService.awaitTermination(1, TimeUnit.SECONDS));
+        Assertions.assertTrue(exitingService.isTerminated());
     }
 
     @Test
@@ -92,6 +136,30 @@ public class MoreExecutorsTest extends TestBase {
     }
 
     @Test
+    public void testScheduledExecutorServiceMethods() throws Exception {
+        ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(2);
+        ScheduledExecutorService exitingScheduler = MoreExecutors.getExitingScheduledExecutorService(scheduler);
+
+        AtomicBoolean ran1 = new AtomicBoolean(false);
+        ScheduledFuture<?> future1 = exitingScheduler.schedule(() -> ran1.set(true), 50, TimeUnit.MILLISECONDS);
+        future1.get();
+        Assertions.assertTrue(ran1.get());
+
+        ScheduledFuture<String> future2 = exitingScheduler.schedule(() -> "scheduled result", 50, TimeUnit.MILLISECONDS);
+        Assertions.assertEquals("scheduled result", future2.get());
+
+        AtomicInteger counter = new AtomicInteger(0);
+        ScheduledFuture<?> future3 = exitingScheduler.scheduleWithFixedDelay(counter::incrementAndGet, 0, 50, TimeUnit.MILLISECONDS);
+
+        Thread.sleep(150);
+        future3.cancel(true);
+        Assertions.assertTrue(counter.get() >= 2);
+
+        exitingScheduler.shutdown();
+        Assertions.assertTrue(exitingScheduler.awaitTermination(1, TimeUnit.SECONDS));
+    }
+
+    @Test
     public void testAddDelayedShutdownHook() throws Exception {
         ExecutorService executor = Executors.newFixedThreadPool(2);
 
@@ -119,20 +187,17 @@ public class MoreExecutorsTest extends TestBase {
     }
 
     @Test
-    public void testDaemonThreads() throws Exception {
-        ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+    public void testAddShutdownHook() {
+        AtomicBoolean hookCalled = new AtomicBoolean(false);
+        Thread hook = new Thread(() -> hookCalled.set(true));
 
-        ExecutorService exitingService = MoreExecutors.getExitingExecutorService(executor);
+        MoreExecutors.addShutdownHook(hook);
 
-        AtomicBoolean isDaemon = new AtomicBoolean(false);
-        exitingService.submit(() -> {
-            isDaemon.set(Thread.currentThread().isDaemon());
-        }).get();
-
-        Assertions.assertTrue(isDaemon.get());
-
-        exitingService.shutdown();
-        Assertions.assertTrue(exitingService.awaitTermination(1, TimeUnit.SECONDS));
+        try {
+            Runtime.getRuntime().removeShutdownHook(hook);
+        } catch (IllegalStateException e) {
+        }
+        assertNotNull(hook);
     }
 
     @Test
@@ -165,72 +230,5 @@ public class MoreExecutorsTest extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             MoreExecutors.newThread("test", null);
         });
-    }
-
-    @Test
-    public void testAddShutdownHook() {
-        AtomicBoolean hookCalled = new AtomicBoolean(false);
-        Thread hook = new Thread(() -> hookCalled.set(true));
-
-        MoreExecutors.addShutdownHook(hook);
-
-        try {
-            Runtime.getRuntime().removeShutdownHook(hook);
-        } catch (IllegalStateException e) {
-        }
-        assertNotNull(hook);
-    }
-
-    @Test
-    public void testExecutorServiceMethods() throws Exception {
-        ThreadPoolExecutor executor = new ThreadPoolExecutor(2, 4, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
-
-        ExecutorService exitingService = MoreExecutors.getExitingExecutorService(executor);
-
-        Assertions.assertFalse(exitingService.isShutdown());
-
-        Assertions.assertFalse(exitingService.isTerminated());
-
-        CountDownLatch latch = new CountDownLatch(1);
-        exitingService.execute(latch::countDown);
-        Assertions.assertTrue(latch.await(1, TimeUnit.SECONDS));
-
-        Future<?> runnableFuture = exitingService.submit(() -> {
-        });
-        runnableFuture.get(1, TimeUnit.SECONDS);
-        Assertions.assertTrue(runnableFuture.isDone());
-
-        Future<Integer> callableFuture = exitingService.submit(() -> 42);
-        Assertions.assertEquals(42, callableFuture.get());
-
-        exitingService.shutdown();
-        Assertions.assertTrue(exitingService.isShutdown());
-
-        Assertions.assertTrue(exitingService.awaitTermination(1, TimeUnit.SECONDS));
-        Assertions.assertTrue(exitingService.isTerminated());
-    }
-
-    @Test
-    public void testScheduledExecutorServiceMethods() throws Exception {
-        ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(2);
-        ScheduledExecutorService exitingScheduler = MoreExecutors.getExitingScheduledExecutorService(scheduler);
-
-        AtomicBoolean ran1 = new AtomicBoolean(false);
-        ScheduledFuture<?> future1 = exitingScheduler.schedule(() -> ran1.set(true), 50, TimeUnit.MILLISECONDS);
-        future1.get();
-        Assertions.assertTrue(ran1.get());
-
-        ScheduledFuture<String> future2 = exitingScheduler.schedule(() -> "scheduled result", 50, TimeUnit.MILLISECONDS);
-        Assertions.assertEquals("scheduled result", future2.get());
-
-        AtomicInteger counter = new AtomicInteger(0);
-        ScheduledFuture<?> future3 = exitingScheduler.scheduleWithFixedDelay(counter::incrementAndGet, 0, 50, TimeUnit.MILLISECONDS);
-
-        Thread.sleep(150);
-        future3.cancel(true);
-        Assertions.assertTrue(counter.get() >= 2);
-
-        exitingScheduler.shutdown();
-        Assertions.assertTrue(exitingScheduler.awaitTermination(1, TimeUnit.SECONDS));
     }
 }

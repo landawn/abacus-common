@@ -15,7 +15,6 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -33,7 +32,6 @@ import com.landawn.abacus.util.Suppliers;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 
-@Tag("new-test")
 public class AbstractDoubleStreamTest extends TestBase {
 
     private DoubleStream stream;
@@ -109,19 +107,19 @@ public class AbstractDoubleStreamTest extends TestBase {
     }
 
     @Test
-    public void testFlatmapToObj() {
+    public void testFlattMapToObj() {
         stream = createDoubleStream(new double[] { 1.0, 2.0 });
 
-        List<String> result = stream.flatmapToObj(d -> Arrays.asList(String.valueOf(d), String.valueOf(d * 2))).toList();
+        List<String> result = stream.flatMapArrayToObj(d -> new String[] { String.valueOf(d), String.valueOf(d * 2) }).toList();
 
         assertEquals(Arrays.asList("1.0", "2.0", "2.0", "4.0"), result);
     }
 
     @Test
-    public void testFlattMapToObj() {
+    public void testFlatmapToObj() {
         stream = createDoubleStream(new double[] { 1.0, 2.0 });
 
-        List<String> result = stream.flatMapArrayToObj(d -> new String[] { String.valueOf(d), String.valueOf(d * 2) }).toList();
+        List<String> result = stream.flatmapToObj(d -> Arrays.asList(String.valueOf(d), String.valueOf(d * 2))).toList();
 
         assertEquals(Arrays.asList("1.0", "2.0", "2.0", "4.0"), result);
     }
@@ -389,6 +387,13 @@ public class AbstractDoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testCycled_long() {
+        DoubleStream stream = DoubleStream.of(1.0, 2.0);
+        List<Double> result = stream.cycled(3).collect(ArrayList::new, (list, value) -> list.add(value));
+        assertEquals(Arrays.asList(1.0, 2.0, 1.0, 2.0, 1.0, 2.0), result);
+    }
+
+    @Test
     public void testCycledWithZeroRounds() {
         stream = createDoubleStream(new double[] { 1.0, 2.0, 3.0 });
 
@@ -419,6 +424,12 @@ public class AbstractDoubleStreamTest extends TestBase {
         List<Double> result = stream.boxed().toList();
 
         assertEquals(Arrays.asList(1.0, 2.0, 3.0), result);
+    }
+
+    @Test
+    public void testPrependAppend_Stream_Parallel() {
+        double[] result = createDoubleStream(3.0, 4.0).parallel().prepend(DoubleStream.of(1.0, 2.0)).append(DoubleStream.of(5.0)).toArray();
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, result, 0.001);
     }
 
     @Test
@@ -678,6 +689,14 @@ public class AbstractDoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testFirst_MultipleElements() {
+        DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0);
+        OptionalDouble result = stream.first();
+        assertTrue(result.isPresent());
+        assertEquals(1.0, result.getAsDouble(), 0.001);
+    }
+
+    @Test
     public void testLast() {
         stream = createDoubleStream(new double[] { 1.0, 2.0, 3.0 });
 
@@ -820,21 +839,6 @@ public class AbstractDoubleStreamTest extends TestBase {
         assertTrue(iter.hasNext());
         assertEquals(3.0, iter.nextDouble(), 0.001);
         assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testCycled_long() {
-        DoubleStream stream = DoubleStream.of(1.0, 2.0);
-        List<Double> result = stream.cycled(3).collect(ArrayList::new, (list, value) -> list.add(value));
-        assertEquals(Arrays.asList(1.0, 2.0, 1.0, 2.0, 1.0, 2.0), result);
-    }
-
-    @Test
-    public void testFirst_MultipleElements() {
-        DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0);
-        OptionalDouble result = stream.first();
-        assertTrue(result.isPresent());
-        assertEquals(1.0, result.getAsDouble(), 0.001);
     }
 
 }

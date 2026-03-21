@@ -8,12 +8,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class CharacterStreamTypeTest extends TestBase {
 
     private final CharacterStreamType type = new CharacterStreamType();

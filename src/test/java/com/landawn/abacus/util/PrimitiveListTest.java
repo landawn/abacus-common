@@ -23,13 +23,10 @@ import java.util.function.IntPredicate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 
-@Tag("old-test")
-@Tag("2025")
 public class PrimitiveListTest extends AbstractTest {
 
     private IntList list;
@@ -37,6 +34,169 @@ public class PrimitiveListTest extends AbstractTest {
     @BeforeEach
     public void setUp() {
         list = IntList.of(1, 2, 3, 4, 5);
+    }
+
+    // ===================== Additional tests for untested PrimitiveList methods =====================
+
+    @Test
+    @DisplayName("Test addAll(int index, A values) inserts array at index")
+    public void testAddAllArrayAtIndex() {
+        int[] toAdd = { 10, 11 };
+        boolean result = list.addAll(2, toAdd);
+
+        assertTrue(result);
+        assertEquals(7, list.size());
+        assertEquals(10, list.get(2));
+        assertEquals(11, list.get(3));
+        assertEquals(3, list.get(4));
+    }
+
+    @Test
+    @DisplayName("Test internalArray() returns backing array")
+    public void testInternalArray() {
+        IntList l = IntList.of(1, 2, 3);
+        int[] internal = l.internalArray();
+        assertNotNull(internal);
+        assertTrue(internal.length >= 3);
+        assertEquals(1, internal[0]);
+        assertEquals(2, internal[1]);
+        assertEquals(3, internal[2]);
+    }
+
+    @Test
+    public void testAddAll() {
+        IntList list = IntList.of(1, 2);
+        IntList toAdd = IntList.of(3, 4);
+        list.addAll(toAdd);
+        assertArrayEquals(new int[] { 1, 2, 3, 4 }, list.toArray());
+    }
+
+    @Test
+    public void testAddAllArray() {
+        IntList list = IntList.of(1, 2);
+        int[] toAdd = { 3, 4 };
+        list.addAll(toAdd);
+        assertArrayEquals(new int[] { 1, 2, 3, 4 }, list.toArray());
+    }
+
+    @Test
+    @DisplayName("Test addAll(L c) method")
+    public void testAddAllList() {
+        IntList other = IntList.of(6, 7, 8);
+        boolean result = list.addAll(other);
+
+        assertTrue(result);
+        assertEquals(8, list.size());
+        assertEquals(6, list.get(5));
+        assertEquals(7, list.get(6));
+        assertEquals(8, list.get(7));
+    }
+
+    @Test
+    @DisplayName("Test addAll(int index, L c) method")
+    public void testAddAllListAtIndex() {
+        IntList other = IntList.of(10, 11);
+        boolean result = list.addAll(2, other);
+
+        assertTrue(result);
+        assertEquals(7, list.size());
+        assertEquals(10, list.get(2));
+        assertEquals(11, list.get(3));
+        assertEquals(3, list.get(4));
+    }
+
+    @Test
+    @DisplayName("Test addAll(int index, A values) at start and end")
+    public void testAddAllArrayAtIndex_StartAndEnd() {
+        IntList l = IntList.of(2, 3);
+        l.addAll(0, new int[] { 1 });
+        l.addAll(l.size(), new int[] { 4 });
+        assertArrayEquals(new int[] { 1, 2, 3, 4 }, l.toArray());
+    }
+
+    @Test
+    @DisplayName("Test addAll(int index, A values) with empty array")
+    public void testAddAllArrayAtIndex_EmptyArray() {
+        int[] toAdd = {};
+        boolean result = list.addAll(0, toAdd);
+
+        assertFalse(result);
+        assertEquals(5, list.size());
+    }
+
+    @Test
+    @DisplayName("Test addAll(L) with null list does not modify")
+    public void testAddAllList_Null() {
+        int sizeBefore = list.size();
+        boolean result = list.addAll((IntList) null);
+        assertFalse(result);
+        assertEquals(sizeBefore, list.size());
+    }
+
+    @Test
+    @DisplayName("Test addAll(L) with empty list does not modify")
+    public void testAddAllList_Empty() {
+        int sizeBefore = list.size();
+        boolean result = list.addAll(IntList.of());
+        assertFalse(result);
+        assertEquals(sizeBefore, list.size());
+    }
+
+    @Test
+    @DisplayName("Test addAll(int index, A values) with invalid index")
+    public void testAddAllArrayAtIndex_InvalidIndex() {
+        assertThrows(IndexOutOfBoundsException.class, () -> list.addAll(-1, new int[] { 10 }));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.addAll(list.size() + 1, new int[] { 10 }));
+    }
+
+    @Test
+    public void testRemoveAllIntList() {
+        IntList list = IntList.of(1, 2, 3, 4, 5, 2);
+        IntList toRemove = IntList.of(2, 4);
+        assertTrue(list.removeAll(toRemove));
+        assertArrayEquals(new int[] { 1, 3, 5 }, list.toArray());
+    }
+
+    @Test
+    @DisplayName("Test removeAll(L c) method")
+    public void testRemoveAllList() {
+        IntList toRemove = IntList.of(2, 4);
+        boolean result = list.removeAll(toRemove);
+
+        assertTrue(result);
+        assertEquals(3, list.size());
+        assertEquals(1, list.get(0));
+        assertEquals(3, list.get(1));
+        assertEquals(5, list.get(2));
+    }
+
+    @Test
+    @DisplayName("Test removeAll(A values) removes matching elements")
+    public void testRemoveAllArray() {
+        IntList l = IntList.of(1, 2, 3, 4, 5, 2);
+        boolean result = l.removeAll(new int[] { 2, 4 });
+
+        assertTrue(result);
+        assertArrayEquals(new int[] { 1, 3, 5 }, l.toArray());
+    }
+
+    @Test
+    @DisplayName("Test removeAll(A values) with no match")
+    public void testRemoveAllArray_NoMatch() {
+        IntList l = IntList.of(1, 2, 3);
+        boolean result = l.removeAll(new int[] { 4, 5 });
+
+        assertFalse(result);
+        assertEquals(3, l.size());
+    }
+
+    @Test
+    @DisplayName("Test removeAll(A values) with null/empty array")
+    public void testRemoveAllArray_NullOrEmpty() {
+        IntList l = IntList.of(1, 2, 3);
+        assertFalse(l.removeAll((int[]) null));
+        assertFalse(l.removeAll(new int[] {}));
+        assertEquals(3, l.size());
     }
 
     @Test
@@ -91,6 +251,100 @@ public class PrimitiveListTest extends AbstractTest {
     }
 
     @Test
+    @DisplayName("Test removeDuplicates on list without duplicates")
+    public void testRemoveDuplicates_NoDuplicates() {
+        IntList l = IntList.of(1, 2, 3, 4);
+        assertFalse(l.removeDuplicates());
+        assertEquals(4, l.size());
+    }
+
+    @Test
+    @DisplayName("Test removeDuplicates on empty list")
+    public void testRemoveDuplicates_Empty() {
+        IntList l = IntList.of();
+        assertFalse(l.removeDuplicates());
+        assertEquals(0, l.size());
+    }
+
+    @Test
+    public void testRetainAll() {
+        IntList list = IntList.of(1, 2, 3, 2, 4);
+        IntList toRetain = IntList.of(2, 4, 5);
+        assertTrue(list.retainAll(toRetain));
+        assertArrayEquals(new int[] { 2, 2, 4 }, list.toArray());
+    }
+
+    @Test
+    @DisplayName("Test retainAll(L c) method")
+    public void testRetainAllList() {
+        IntList toRetain = IntList.of(2, 3, 6);
+        boolean result = list.retainAll(toRetain);
+
+        assertTrue(result);
+        assertEquals(2, list.size());
+        assertEquals(2, list.get(0));
+        assertEquals(3, list.get(1));
+    }
+
+    @Test
+    @DisplayName("Test retainAll(A values) retains only matching elements")
+    public void testRetainAllArray() {
+        IntList l = IntList.of(1, 2, 3, 2, 4);
+        boolean result = l.retainAll(new int[] { 2, 4, 5 });
+
+        assertTrue(result);
+        assertArrayEquals(new int[] { 2, 2, 4 }, l.toArray());
+    }
+
+    @Test
+    @DisplayName("Test retainAll(A values) with no match clears list")
+    public void testRetainAllArray_NoMatch() {
+        IntList l = IntList.of(1, 2, 3);
+        boolean result = l.retainAll(new int[] { 4, 5 });
+
+        assertTrue(result);
+        assertEquals(0, l.size());
+    }
+
+    @Test
+    @DisplayName("Test retainAll(A values) with null/empty array")
+    public void testRetainAllArray_NullOrEmpty() {
+        IntList l = IntList.of(1, 2, 3);
+        assertTrue(l.retainAll((int[]) null));
+        assertEquals(0, l.size());
+    }
+
+    @Test
+    public void test_removeAt() {
+        final LongList list = LongList.of(1, 2, 3, 4, 5, 6);
+
+        list.removeAt(1, 3, 5);
+
+        assertEquals(3, list.size());
+
+        list.removeIf(value -> value % 2 == 1);
+
+        assertEquals(0, list.size());
+    }
+
+    @Test
+    @DisplayName("Test removeAt(int...) with multiple indices")
+    public void testRemoveAtMultipleIndices() {
+        IntList l = IntList.of(10, 20, 30, 40, 50);
+        l.removeAt(new int[] { 1, 3 });
+        assertEquals(3, l.size());
+    }
+
+    @Test
+    public void testDelete() {
+        IntList list = IntList.of(1, 2, 3);
+        int deleted = list.removeAt(1);
+        assertEquals(2, deleted);
+        assertArrayEquals(new int[] { 1, 3 }, list.toArray());
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeAt(2));
+    }
+
+    @Test
     public void test_removeRange() {
         {
             final ByteList byteList = ByteList.range((byte) 0, (byte) 10);
@@ -110,6 +364,44 @@ public class PrimitiveListTest extends AbstractTest {
     }
 
     @Test
+    public void testDeleteRange() {
+        IntList list = IntList.of(0, 1, 2, 3, 4, 5);
+        list.removeRange(1, 4);
+        assertArrayEquals(new int[] { 0, 4, 5 }, list.toArray());
+    }
+
+    @Test
+    public void test_delete() {
+        IntList list = IntList.range(1, 10);
+        list.removeRange(0, 9);
+        list = IntList.range(1, 10);
+        list.removeRange(0, 8);
+        list = IntList.range(1, 10);
+        list.removeRange(1, 8);
+        list = IntList.range(1, 10);
+        list.removeRange(1, 9);
+        assertNotNull(list);
+    }
+
+    @Test
+    @DisplayName("Test removeRange with equal fromIndex and toIndex")
+    public void testRemoveRange_SameIndex() {
+        IntList l = IntList.of(1, 2, 3, 4, 5);
+        l.removeRange(2, 2);
+        assertEquals(5, l.size());
+        assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, l.toArray());
+    }
+
+    @Test
+    @DisplayName("Test removeRange with invalid range")
+    public void testRemoveRange_InvalidRange() {
+        IntList l = IntList.of(1, 2, 3);
+        assertThrows(IndexOutOfBoundsException.class, () -> l.removeRange(-1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> l.removeRange(0, 4));
+        assertThrows(IndexOutOfBoundsException.class, () -> l.removeRange(2, 1));
+    }
+
+    @Test
     public void test_moveRange() {
         {
             final ByteList byteList = ByteList.range((byte) 0, (byte) 10);
@@ -125,6 +417,15 @@ public class PrimitiveListTest extends AbstractTest {
 
             N.println(byteList.internalArray());
         }
+    }
+
+    @Test
+    @DisplayName("Test moveRange moves elements correctly")
+    public void testMoveRange_Forward() {
+        IntList l = IntList.of(0, 1, 2, 3, 4, 5);
+        l.moveRange(1, 3, 3);
+        // Elements [1, 2] moved to position 3
+        assertEquals(6, l.size());
     }
 
     @Test
@@ -160,16 +461,730 @@ public class PrimitiveListTest extends AbstractTest {
     }
 
     @Test
-    public void test_removeAt() {
-        final LongList list = LongList.of(1, 2, 3, 4, 5, 6);
+    public void testReplaceRange() {
+        IntList list = IntList.of(0, 1, 2, 3, 4, 5);
+        IntList replacement = IntList.of(9, 8, 7);
+        list.replaceRange(1, 4, replacement);
+        assertArrayEquals(new int[] { 0, 9, 8, 7, 4, 5 }, list.toArray());
+    }
 
-        list.removeAt(1, 3, 5);
+    @Test
+    @DisplayName("Test replaceRange(int, int, A) replaces range with array")
+    public void testReplaceRangeArray() {
+        IntList l = IntList.of(0, 1, 2, 3, 4, 5);
+        l.replaceRange(1, 4, new int[] { 9, 8, 7 });
 
+        assertArrayEquals(new int[] { 0, 9, 8, 7, 4, 5 }, l.toArray());
+    }
+
+    @Test
+    @DisplayName("Test replaceRange(int, int, A) with larger replacement")
+    public void testReplaceRangeArray_LargerReplacement() {
+        IntList l = IntList.of(1, 2, 3);
+        l.replaceRange(1, 2, new int[] { 10, 11, 12 });
+
+        assertArrayEquals(new int[] { 1, 10, 11, 12, 3 }, l.toArray());
+    }
+
+    @Test
+    @DisplayName("Test replaceRange(int fromIndex, int toIndex, L replacement) method")
+    public void testReplaceRangeList() {
+        IntList replacement = IntList.of(10, 11);
+        list.replaceRange(1, 3, replacement);
+
+        assertEquals(5, list.size());
+        assertEquals(1, list.get(0));
+        assertEquals(10, list.get(1));
+        assertEquals(11, list.get(2));
+        assertEquals(4, list.get(3));
+        assertEquals(5, list.get(4));
+    }
+
+    @Test
+    @DisplayName("Test replaceRange(int, int, A) with empty replacement deletes range")
+    public void testReplaceRangeArray_EmptyReplacement() {
+        IntList l = IntList.of(1, 2, 3, 4, 5);
+        l.replaceRange(1, 4, new int[] {});
+
+        assertArrayEquals(new int[] { 1, 5 }, l.toArray());
+    }
+
+    @Test
+    @DisplayName("Test replaceRange(int, int, A) with null replacement deletes range")
+    public void testReplaceRangeArray_NullReplacement() {
+        IntList l = IntList.of(1, 2, 3, 4, 5);
+        l.replaceRange(1, 4, (int[]) null);
+
+        assertArrayEquals(new int[] { 1, 5 }, l.toArray());
+    }
+
+    @Test
+    @DisplayName("Test replaceRange(int, int, A) with invalid range")
+    public void testReplaceRangeArray_InvalidRange() {
+        IntList l = IntList.of(1, 2, 3);
+        assertThrows(IndexOutOfBoundsException.class, () -> l.replaceRange(-1, 2, new int[] { 10 }));
+        assertThrows(IndexOutOfBoundsException.class, () -> l.replaceRange(0, 4, new int[] { 10 }));
+    }
+
+    @Test
+    public void testContainsAny() {
+        IntList list = IntList.of(1, 2, 3);
+        IntList any1 = IntList.of(4, 5, 2);
+        assertTrue(list.containsAny(any1));
+        IntList any2 = IntList.of(4, 5, 6);
+        assertFalse(list.containsAny(any2));
+    }
+
+    @Test
+    @DisplayName("Test containsAny(L l) method")
+    public void testContainsAnyList() {
+        IntList other1 = IntList.of(6, 7, 3);
+        IntList other2 = IntList.of(6, 7, 8);
+
+        assertTrue(list.containsAny(other1));
+        assertFalse(list.containsAny(other2));
+    }
+
+    @Test
+    @DisplayName("Test containsAny(A a) method")
+    public void testContainsAnyArray() {
+        int[] array1 = { 6, 7, 3 };
+        int[] array2 = { 6, 7, 8 };
+
+        assertTrue(list.containsAny(array1));
+        assertFalse(list.containsAny(array2));
+    }
+
+    @Test
+    @DisplayName("Test containsAny with empty other list")
+    public void testContainsAny_EmptyOther() {
+        assertFalse(list.containsAny(IntList.of()));
+        assertFalse(list.containsAny(new int[] {}));
+    }
+
+    @Test
+    @DisplayName("Test containsAll(L l) method")
+    public void testContainsAllList() {
+        IntList subset = IntList.of(2, 3);
+        IntList notSubset = IntList.of(2, 6);
+
+        assertTrue(list.containsAll(subset));
+        assertFalse(list.containsAll(notSubset));
+    }
+
+    @Test
+    @DisplayName("Test containsAll(A a) method")
+    public void testContainsAllArray() {
+        int[] subset = { 2, 3 };
+        int[] notSubset = { 2, 6 };
+
+        assertTrue(list.containsAll(subset));
+        assertFalse(list.containsAll(notSubset));
+    }
+
+    @Test
+    @DisplayName("Test containsAll with empty other list")
+    public void testContainsAll_EmptyOther() {
+        assertTrue(list.containsAll(IntList.of()));
+        assertTrue(list.containsAll(new int[] {}));
+    }
+
+    @Test
+    public void testDisjoint() {
+        IntList list1 = IntList.of(1, 2, 3);
+        IntList list2 = IntList.of(4, 5, 6);
+        assertTrue(list1.disjoint(list2));
+        IntList list3 = IntList.of(3, 4, 5);
+        assertFalse(list1.disjoint(list3));
+    }
+
+    @Test
+    @DisplayName("Test disjoint(L l) method")
+    public void testDisjointList() {
+        IntList disjoint = IntList.of(6, 7, 8);
+        IntList notDisjoint = IntList.of(3, 6, 7);
+
+        assertTrue(list.disjoint(disjoint));
+        assertFalse(list.disjoint(notDisjoint));
+    }
+
+    @Test
+    @DisplayName("Test disjoint(A a) method")
+    public void testDisjointArray() {
+        int[] disjoint = { 6, 7, 8 };
+        int[] notDisjoint = { 3, 6, 7 };
+
+        assertTrue(list.disjoint(disjoint));
+        assertFalse(list.disjoint(notDisjoint));
+    }
+
+    @Test
+    @DisplayName("Test disjoint with empty other list")
+    public void testDisjoint_EmptyOther() {
+        assertTrue(list.disjoint(IntList.of()));
+        assertTrue(list.disjoint(new int[] {}));
+    }
+
+    @Test
+    @DisplayName("Test intersection(L b) method")
+    public void testIntersectionList() {
+        IntList other = IntList.of(3, 4, 5, 6, 7);
+        IntList result = list.intersection(other);
+
+        assertEquals(3, result.size());
+        assertEquals(IntList.of(3, 4, 5), result);
+    }
+
+    @Test
+    @DisplayName("Test intersection(A b) method")
+    public void testIntersectionArray() {
+        int[] other = { 3, 4, 5, 6, 7 };
+        IntList result = list.intersection(other);
+
+        assertEquals(3, result.size());
+        assertEquals(IntList.of(3, 4, 5), result);
+    }
+
+    @Test
+    @DisplayName("Test intersection with empty other list")
+    public void testIntersection_EmptyOther() {
+        IntList result = list.intersection(IntList.of());
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testDifference() {
+        IntList list1 = IntList.of(1, 2, 2, 3, 4);
+        IntList list2 = IntList.of(2, 3, 5);
+        IntList difference = list1.difference(list2);
+        assertArrayEquals(new int[] { 1, 2, 4 }, difference.toArray());
+    }
+
+    @Test
+    @DisplayName("Test difference(L b) method")
+    public void testDifferenceList() {
+        IntList other = IntList.of(3, 4, 6);
+        IntList result = list.difference(other);
+
+        assertEquals(3, result.size());
+        assertEquals(IntList.of(1, 2, 5), result);
+    }
+
+    @Test
+    @DisplayName("Test difference(A a) method")
+    public void testDifferenceArray() {
+        int[] other = { 3, 4, 6 };
+        IntList result = list.difference(other);
+
+        assertEquals(3, result.size());
+        assertEquals(IntList.of(1, 2, 5), result);
+    }
+
+    @Test
+    @DisplayName("Test difference with empty other list")
+    public void testDifference_EmptyOther() {
+        IntList result = list.difference(IntList.of());
+        assertEquals(list.size(), result.size());
+    }
+
+    @Test
+    @DisplayName("Test symmetricDifference(L b) method")
+    public void testSymmetricDifferenceList() {
+        IntList other = IntList.of(4, 5, 6, 7);
+        IntList result = list.symmetricDifference(other);
+
+        assertEquals(5, result.size());
+        assertTrue(result.containsAll(IntList.of(1, 2, 3, 6, 7)));
+    }
+
+    @Test
+    @DisplayName("Test symmetricDifference(A b) method")
+    public void testSymmetricDifferenceArray() {
+        int[] other = { 4, 5, 6, 7 };
+        IntList result = list.symmetricDifference(other);
+
+        assertEquals(5, result.size());
+        assertTrue(result.contains(1));
+        assertTrue(result.contains(2));
+        assertTrue(result.contains(3));
+        assertTrue(result.contains(6));
+        assertTrue(result.contains(7));
+    }
+
+    @Test
+    @DisplayName("Test symmetricDifference with empty other list")
+    public void testSymmetricDifference_EmptyOther() {
+        IntList result = list.symmetricDifference(IntList.of());
+        assertEquals(list.size(), result.size());
+    }
+
+    @Test
+    public void testHasDuplicates() {
+        IntList listWithDuplicates = IntList.of(1, 2, 1, 3);
+        assertTrue(listWithDuplicates.containsDuplicates());
+        IntList listWithoutDuplicates = IntList.of(1, 2, 3, 4);
+        assertFalse(listWithoutDuplicates.containsDuplicates());
+    }
+
+    @Test
+    @DisplayName("Test containsDuplicates on empty list")
+    public void testContainsDuplicates_Empty() {
+        IntList emptyList = IntList.of();
+        assertFalse(emptyList.containsDuplicates());
+    }
+
+    @Test
+    @DisplayName("Test containsDuplicates on single element")
+    public void testContainsDuplicates_Single() {
+        IntList single = IntList.of(1);
+        assertFalse(single.containsDuplicates());
+    }
+
+    @Test
+    @DisplayName("Test distinct() returns list with unique elements")
+    public void testDistinct() {
+        IntList withDups = IntList.of(1, 2, 2, 3, 1, 4, 3);
+        IntList result = withDups.distinct();
+
+        assertEquals(4, result.size());
+        assertEquals(IntList.of(1, 2, 3, 4), result);
+    }
+
+    @Test
+    @DisplayName("Test distinct() on list without duplicates")
+    public void testDistinct_NoDuplicates() {
+        IntList l = IntList.of(1, 2, 3, 4);
+        IntList result = l.distinct();
+
+        assertEquals(4, result.size());
+        assertArrayEquals(new int[] { 1, 2, 3, 4 }, result.toArray());
+    }
+
+    @Test
+    @DisplayName("Test distinct(int fromIndex, int toIndex) method")
+    public void testDistinctRange() {
+        IntList withDups = IntList.of(1, 2, 2, 3, 3, 3, 4);
+        IntList result = withDups.distinct(1, 6);
+
+        assertEquals(2, result.size());
+        assertEquals(IntList.of(2, 3), result);
+    }
+
+    @Test
+    @DisplayName("Test distinct() on empty list")
+    public void testDistinct_Empty() {
+        IntList emptyList = IntList.of();
+        IntList result = emptyList.distinct();
+
+        assertEquals(0, result.size());
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Test isSorted() on sorted list")
+    public void testIsSorted() {
+        IntList sorted = IntList.of(1, 2, 3, 4, 5);
+        assertTrue(sorted.isSorted());
+    }
+
+    @Test
+    @DisplayName("Test isSorted() on unsorted list")
+    public void testIsSorted_Unsorted() {
+        IntList unsorted = IntList.of(1, 3, 2, 4);
+        assertFalse(unsorted.isSorted());
+    }
+
+    @Test
+    @DisplayName("Test isSorted() with equal consecutive elements")
+    public void testIsSorted_WithEquals() {
+        IntList l = IntList.of(1, 2, 2, 3, 3, 5);
+        assertTrue(l.isSorted());
+    }
+
+    @Test
+    @DisplayName("Test isSorted() on empty and single element list")
+    public void testIsSorted_EmptyAndSingle() {
+        assertTrue(IntList.of().isSorted());
+        assertTrue(IntList.of(42).isSorted());
+    }
+
+    @Test
+    public void testSort() {
+        IntList list = IntList.of(3, 1, 4, 1, 5, 9);
+        list.sort();
+        assertArrayEquals(new int[] { 1, 1, 3, 4, 5, 9 }, list.toArray());
+    }
+
+    @Test
+    @DisplayName("Test sort on empty list")
+    public void testSort_Empty() {
+        IntList l = IntList.of();
+        l.sort();
+        assertTrue(l.isEmpty());
+    }
+
+    @Test
+    public void testReverseSort() {
+        IntList list = IntList.of(3, 1, 4, 1, 5, 9);
+        list.reverseSort();
+        assertArrayEquals(new int[] { 9, 5, 4, 3, 1, 1 }, list.toArray());
+    }
+
+    @Test
+    @DisplayName("Test reverseSort on empty list")
+    public void testReverseSort_Empty() {
+        IntList l = IntList.of();
+        l.reverseSort();
+        assertTrue(l.isEmpty());
+    }
+
+    @Test
+    public void testReverse() {
+        IntList list = IntList.of(1, 2, 3, 4, 5);
+        list.reverse();
+        assertArrayEquals(new int[] { 5, 4, 3, 2, 1 }, list.toArray());
+    }
+
+    @Test
+    @DisplayName("Test reverse(int fromIndex, int toIndex) method")
+    public void testReverseRange() {
+        list.reverse(1, 4);
+
+        assertEquals(5, list.size());
+        assertEquals(1, list.get(0));
+        assertEquals(4, list.get(1));
+        assertEquals(3, list.get(2));
+        assertEquals(2, list.get(3));
+        assertEquals(5, list.get(4));
+    }
+
+    @Test
+    @DisplayName("Test reverse on empty list")
+    public void testReverse_Empty() {
+        IntList l = IntList.of();
+        l.reverse();
+        assertTrue(l.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Test reverse on single element")
+    public void testReverse_Single() {
+        IntList l = IntList.of(42);
+        l.reverse();
+        assertArrayEquals(new int[] { 42 }, l.toArray());
+    }
+
+    @Test
+    @DisplayName("Test rotate(int distance) rotates elements right")
+    public void testRotate() {
+        IntList l = IntList.of(1, 2, 3, 4, 5);
+        l.rotate(2);
+        assertArrayEquals(new int[] { 4, 5, 1, 2, 3 }, l.toArray());
+    }
+
+    @Test
+    @DisplayName("Test rotate(int distance) with distance equal to size")
+    public void testRotate_FullRotation() {
+        IntList l = IntList.of(1, 2, 3);
+        l.rotate(3);
+        assertArrayEquals(new int[] { 1, 2, 3 }, l.toArray());
+    }
+
+    @Test
+    @DisplayName("Test rotate(int distance) with negative distance rotates left")
+    public void testRotate_Negative() {
+        IntList l = IntList.of(1, 2, 3, 4, 5);
+        l.rotate(-2);
+        assertArrayEquals(new int[] { 3, 4, 5, 1, 2 }, l.toArray());
+    }
+
+    @Test
+    @DisplayName("Test rotate(int distance) with zero distance")
+    public void testRotate_Zero() {
+        IntList l = IntList.of(1, 2, 3);
+        l.rotate(0);
+        assertArrayEquals(new int[] { 1, 2, 3 }, l.toArray());
+    }
+
+    @Test
+    @DisplayName("Test rotate(int distance) on empty list")
+    public void testRotate_Empty() {
+        IntList l = IntList.of();
+        l.rotate(5);
+        assertTrue(l.isEmpty());
+    }
+
+    @Test
+    public void testShuffle() {
+        IntList list1 = IntList.of(1, 2, 3, 4, 5);
+        IntList list2 = list1.copy();
+        list1.shuffle();
+        assertFalse(Arrays.equals(list1.toArray(), list2.toArray()) && list1.size() > 1);
+    }
+
+    @Test
+    @DisplayName("Test shuffle(Random rnd) with seeded random")
+    public void testShuffleWithRandom() {
+        IntList l1 = IntList.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        IntList l2 = l1.copy();
+        Random rnd = new Random(42);
+        l1.shuffle(rnd);
+        // After shuffle with a specific seed, the order should change
+        assertEquals(l2.size(), l1.size());
+        // Ensure same elements
+        l1.sort();
+        l2.sort();
+        assertArrayEquals(l1.toArray(), l2.toArray());
+    }
+
+    @Test
+    @DisplayName("Test shuffle(Random rnd) produces deterministic result with same seed")
+    public void testShuffleWithRandom_Deterministic() {
+        IntList l1 = IntList.of(1, 2, 3, 4, 5);
+        IntList l2 = IntList.of(1, 2, 3, 4, 5);
+        l1.shuffle(new Random(123));
+        l2.shuffle(new Random(123));
+        assertArrayEquals(l1.toArray(), l2.toArray());
+    }
+
+    @Test
+    public void testSwap() {
+        IntList list = IntList.of(1, 2, 3, 4);
+        list.swap(1, 3);
+        assertArrayEquals(new int[] { 1, 4, 3, 2 }, list.toArray());
+    }
+
+    @Test
+    @DisplayName("Test swap with same indices")
+    public void testSwap_SameIndex() {
+        IntList l = IntList.of(1, 2, 3);
+        l.swap(1, 1);
+        assertArrayEquals(new int[] { 1, 2, 3 }, l.toArray());
+    }
+
+    @Test
+    @DisplayName("Test swap with invalid indices")
+    public void testSwap_InvalidIndex() {
+        IntList l = IntList.of(1, 2, 3);
+        assertThrows(IndexOutOfBoundsException.class, () -> l.swap(-1, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> l.swap(0, 3));
+    }
+
+    @Test
+    public void testCopyOfRange() {
+        int[] a = { 1, 2, 3, 4, 5 };
+        IntList list = IntList.copyOf(a, 1, 4);
         assertEquals(3, list.size());
+        assertArrayEquals(new int[] { 2, 3, 4 }, list.toArray());
+    }
 
-        list.removeIf(value -> value % 2 == 1);
+    @Test
+    @DisplayName("Test copy(int, int, int) with reverse step")
+    public void testCopyRangeWithStep_Reverse() {
+        IntList l = IntList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+        IntList result = l.copy(8, 2, -2);
+        assertArrayEquals(new int[] { 8, 6, 4 }, result.toArray());
+    }
 
+    @Test
+    @DisplayName("Test copy(int fromIndex, int toIndex) method")
+    public void testCopyRange() {
+        IntList copy = list.copy(1, 4);
+
+        assertEquals(3, copy.size());
+        assertEquals(IntList.of(2, 3, 4), copy);
+    }
+
+    @Test
+    @DisplayName("Test copy(int fromIndex, int toIndex, int step) method")
+    public void testCopyRangeWithStep() {
+        IntList copy = list.copy(0, 5, 2);
+
+        assertEquals(3, copy.size());
+        assertEquals(IntList.of(1, 3, 5), copy);
+    }
+
+    @Test
+    @DisplayName("Test copy() returns independent copy of all elements")
+    public void testCopy() {
+        IntList original = IntList.of(1, 2, 3);
+        IntList copy = original.copy();
+
+        assertEquals(original.size(), copy.size());
+        assertArrayEquals(original.toArray(), copy.toArray());
+        assertNotSame(original, copy);
+
+        // Modifications to copy should not affect original
+        copy.add(4);
+        assertEquals(3, original.size());
+        assertEquals(4, copy.size());
+    }
+
+    @Test
+    @DisplayName("Test copy() on empty list")
+    public void testCopy_Empty() {
+        IntList empty = IntList.of();
+        IntList copy = empty.copy();
+        assertTrue(copy.isEmpty());
+        assertNotSame(empty, copy);
+    }
+
+    @Test
+    public void testSplit() {
+        IntList list = IntList.of(1, 2, 3, 4, 5, 6, 7);
+        List<IntList> chunks = list.split(3);
+        assertEquals(3, chunks.size());
+        assertArrayEquals(new int[] { 1, 2, 3 }, chunks.get(0).toArray());
+        assertArrayEquals(new int[] { 4, 5, 6 }, chunks.get(1).toArray());
+        assertArrayEquals(new int[] { 7 }, chunks.get(2).toArray());
+    }
+
+    @Test
+    @DisplayName("Test split with chunkSize larger than list size")
+    public void testSplit_ChunkSizeLargerThanList() {
+        IntList l = IntList.of(1, 2, 3);
+        List<IntList> chunks = l.split(10);
+        assertEquals(1, chunks.size());
+        assertArrayEquals(new int[] { 1, 2, 3 }, chunks.get(0).toArray());
+    }
+
+    @Test
+    @DisplayName("Test split with chunkSize equal to list size")
+    public void testSplit_ChunkSizeEqualsListSize() {
+        IntList l = IntList.of(1, 2, 3);
+        List<IntList> chunks = l.split(3);
+        assertEquals(1, chunks.size());
+        assertArrayEquals(new int[] { 1, 2, 3 }, chunks.get(0).toArray());
+    }
+
+    @Test
+    @DisplayName("Test split(int fromIndex, int toIndex, int chunkSize) method")
+    public void testSplitRange() {
+        List<IntList> chunks = list.split(1, 5, 2);
+
+        assertEquals(2, chunks.size());
+        assertEquals(IntList.of(2, 3), chunks.get(0));
+        assertEquals(IntList.of(4, 5), chunks.get(1));
+    }
+
+    @Test
+    @DisplayName("Test split on empty list")
+    public void testSplit_EmptyList() {
+        IntList l = IntList.of();
+        List<IntList> chunks = l.split(3);
+        assertEquals(0, chunks.size());
+    }
+
+    @Test
+    @DisplayName("Test trimToSize() reduces capacity to size")
+    public void testTrimToSize() {
+        IntList l = new IntList(100);
+        l.add(1);
+        l.add(2);
+        l.add(3);
+        assertEquals(3, l.size());
+        assertTrue(l.internalArray().length >= 100);
+
+        l.trimToSize();
+        assertEquals(3, l.size());
+        assertEquals(3, l.internalArray().length);
+        assertArrayEquals(new int[] { 1, 2, 3 }, l.toArray());
+    }
+
+    @Test
+    @DisplayName("Test trimToSize() on empty list")
+    public void testTrimToSize_Empty() {
+        IntList l = new IntList(100);
+        l.trimToSize();
+        assertEquals(0, l.size());
+    }
+
+    @Test
+    @DisplayName("Test trimToSize() returns same list for chaining")
+    public void testTrimToSize_Chaining() {
+        IntList l = IntList.of(1, 2, 3);
+        IntList result = l.trimToSize();
+        assertTrue(result == l);
+    }
+
+    @Test
+    public void testClear() {
+        IntList list = IntList.of(1, 2, 3);
+        list.clear();
         assertEquals(0, list.size());
+        assertTrue(list.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Test clear on already empty list")
+    public void testClear_AlreadyEmpty() {
+        IntList l = IntList.of();
+        l.clear();
+        assertTrue(l.isEmpty());
+        assertEquals(0, l.size());
+    }
+
+    @Test
+    public void testLast() {
+        IntList list = IntList.of(1, 2, 3);
+        assertEquals(3, list.last().getAsInt());
+        assertTrue(new IntList().last().isEmpty());
+    }
+
+    @Test
+    @DisplayName("Test isEmpty() method")
+    public void testIsEmpty() {
+        assertFalse(list.isEmpty());
+
+        list.clear();
+        assertTrue(list.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Test edge cases and exceptions")
+    public void testEdgeCases() {
+        IntList emptyList = IntList.of();
+
+        assertTrue(emptyList.isEmpty());
+        assertEquals(0, emptyList.size());
+        assertFalse(emptyList.containsDuplicates());
+        assertTrue(emptyList.isSorted());
+
+        assertThrows(IndexOutOfBoundsException.class, () -> list.copy(-1, 3));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.copy(1, 10));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.copy(3, 1));
+
+        list.addAll((IntList) null);
+        list.removeAll((IntList) null);
+    }
+
+    @Test
+    public void testAdd() {
+        IntList list = new IntList();
+        list.add(10);
+        list.add(20);
+        assertEquals(2, list.size());
+        assertArrayEquals(new int[] { 10, 20 }, list.toArray());
+    }
+
+    @Test
+    @DisplayName("Test size() method")
+    public void testSize() {
+        assertEquals(5, list.size());
+
+        list.add(6);
+        assertEquals(6, list.size());
+
+        list.clear();
+        assertEquals(0, list.size());
+    }
+
+    @Test
+    public void testConstructorWithInitialCapacity() {
+        IntList list = new IntList(10);
+        assertEquals(0, list.size());
+        assertTrue(list.isEmpty());
+        assertEquals(10, list.internalArray().length);
     }
 
     @Test
@@ -604,195 +1619,6 @@ public class PrimitiveListTest extends AbstractTest {
         arrayList.remove((short) 1);
 
         assertEquals((short) 2, CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size())[0]);
-    }
-
-    @Test
-    public void test_delete() {
-        IntList list = IntList.range(1, 10);
-        list.removeRange(0, 9);
-        list = IntList.range(1, 10);
-        list.removeRange(0, 8);
-        list = IntList.range(1, 10);
-        list.removeRange(1, 8);
-        list = IntList.range(1, 10);
-        list.removeRange(1, 9);
-        assertNotNull(list);
-    }
-
-    @Test
-    public void test_IntList() {
-        N.println(IntList.of(CommonUtil.toIntArray(CommonUtil.toList(1, null, 3))));
-        N.println(LongList.of(CommonUtil.toLongArray(CommonUtil.toList(1L, null, 3L))));
-        N.println(FloatList.of(CommonUtil.toFloatArray(CommonUtil.toList(1f, null, 3f))));
-        N.println(DoubleList.of(CommonUtil.toDoubleArray(CommonUtil.toList(1d, null, 3d))));
-
-        IntList a = IntList.of(1, 2, 3);
-        IntList b = IntList.of(1, 2, 3);
-
-        assertTrue(a.equals(b));
-        assertTrue(b.equals(a));
-
-        a = IntList.of(1, 2, 3);
-        b = IntList.of(1, 2, 3, 4);
-
-        assertFalse(a.equals(b));
-        assertFalse(b.equals(a));
-
-        float f = Long.MAX_VALUE;
-        N.println(f);
-        N.println((long) f == Long.MAX_VALUE);
-        f = Long.MIN_VALUE;
-        N.println(f);
-        N.println((long) f == Long.MIN_VALUE);
-
-        long l = (long) Float.MIN_VALUE;
-        N.println(l);
-        N.println(l == Long.MIN_VALUE);
-        l = (long) Float.MAX_VALUE;
-        N.println(l == Long.MAX_VALUE);
-
-        l = (long) -1000000.03958390f;
-        N.println(l);
-
-        IntList arrayList = new IntList();
-
-        assertEquals(0, arrayList.size());
-        assertTrue(CommonUtil.equals(CommonUtil.EMPTY_INT_ARRAY, CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size())));
-
-        arrayList = new IntList(10);
-        assertEquals(0, arrayList.size());
-        assertTrue(CommonUtil.equals(CommonUtil.EMPTY_INT_ARRAY, CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size())));
-
-        arrayList = IntList.of(CommonUtil.EMPTY_INT_ARRAY);
-        assertEquals(0, arrayList.size());
-        assertTrue(CommonUtil.equals(CommonUtil.EMPTY_INT_ARRAY, CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size())));
-
-        arrayList = IntList.of(Array.of(1, 2, 3), 2);
-        assertEquals(2, arrayList.size());
-        assertTrue(CommonUtil.equals(Array.of(1, 2, 3), arrayList.internalArray()));
-        assertTrue(CommonUtil.equals(Array.of(1, 2), CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size())));
-
-        assertEquals(1, arrayList.get(0));
-
-        arrayList.set(1, 4);
-        assertEquals(4, arrayList.get(1));
-
-        arrayList.add(5);
-        assertEquals(5, arrayList.get(2));
-
-        arrayList.add(1, 6);
-        N.println(arrayList);
-        assertTrue(CommonUtil.equals(Array.of(1, 6, 4, 5), CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size())));
-
-        arrayList.addAll(arrayList);
-
-        N.println(CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size()));
-
-        arrayList.addAll(2, arrayList);
-        N.println(CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size()));
-
-        arrayList.remove(1);
-        N.println(CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size()));
-
-        arrayList.removeAllOccurrences(5);
-        N.println(CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size()));
-
-        arrayList.removeAll(IntList.of(Array.of(1, 4, 6)));
-        N.println(CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size()));
-
-        arrayList.addAll(IntList.of(Array.of(1, 2, 3)));
-
-        arrayList.retainAll(IntList.of(Array.of(1, 4)));
-        N.println(CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size()));
-        assertTrue(CommonUtil.equals(Array.of(1), CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size())));
-
-        arrayList.removeAt(0);
-        assertFalse(arrayList.contains(1));
-
-        arrayList.addAll(IntList.of(Array.of(1, 2, 3)));
-        assertTrue(arrayList.contains(1));
-        assertTrue(arrayList.containsAll(IntList.of(Array.of(1, 3))));
-        assertFalse(arrayList.contains(4));
-        assertFalse(arrayList.containsAll(IntList.of(Array.of(1, 4))));
-
-        final IntList subList = arrayList.copy(1, 3);
-        assertEquals(subList, IntList.of(Array.of(2, 3)));
-
-        assertEquals(1, arrayList.indexOf(2));
-        assertEquals(1, arrayList.lastIndexOf(2));
-
-        assertEquals(-1, arrayList.indexOf(4));
-        assertEquals(-1, arrayList.lastIndexOf(4));
-
-        arrayList.add(0, 4);
-
-        arrayList.sort();
-        assertTrue(CommonUtil.equals(Array.of(1, 2, 3, 4), CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size())));
-
-        arrayList.remove(3);
-        N.println(CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size()));
-
-        arrayList = arrayList.trimToSize();
-        assertTrue(CommonUtil.equals(Array.of(1, 2, 4), arrayList.internalArray()));
-
-        assertTrue(CommonUtil.equals(CommonUtil.toList(1, 2, 4), arrayList.toList()));
-
-        assertTrue(CommonUtil.toSet(arrayList).contains(arrayList.copy(0, arrayList.size())));
-
-        arrayList.clear();
-
-        assertTrue(arrayList.isEmpty());
-
-        N.println(arrayList);
-
-        arrayList.add(1);
-        arrayList.add(2);
-
-        try {
-            IntList.of(Array.of(1, 2, 3), 5);
-            fail("Should throw IndexOutOfBoundsException");
-        } catch (final IndexOutOfBoundsException e) {
-
-        }
-
-        try {
-            arrayList.get(2);
-            fail("Should throw IndexOutOfBoundsException");
-        } catch (final IndexOutOfBoundsException e) {
-
-        }
-
-        try {
-            arrayList.add(3, 3);
-            fail("Should throw IndexOutOfBoundsException");
-        } catch (final IndexOutOfBoundsException e) {
-
-        }
-
-        try {
-            arrayList.copy(-1, 0);
-            fail("Should throw IndexOutOfBoundsException");
-        } catch (final IndexOutOfBoundsException e) {
-
-        }
-
-        try {
-            arrayList.copy(0, 3);
-            fail("Should throw IndexOutOfBoundsException");
-        } catch (final IndexOutOfBoundsException e) {
-
-        }
-
-        try {
-            arrayList.copy(3, 2);
-            fail("Should throw IndexOutOfBoundsException");
-        } catch (final IndexOutOfBoundsException e) {
-
-        }
-
-        arrayList.remove(1);
-
-        assertEquals(2, CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size())[0]);
     }
 
     @Test
@@ -1363,14 +2189,6 @@ public class PrimitiveListTest extends AbstractTest {
     }
 
     @Test
-    public void testConstructorWithInitialCapacity() {
-        IntList list = new IntList(10);
-        assertEquals(0, list.size());
-        assertTrue(list.isEmpty());
-        assertEquals(10, list.internalArray().length);
-    }
-
-    @Test
     public void testConstructorWithArrayAndSize() {
         int[] a = { 1, 2, 3, 4, 5 };
         IntList list = new IntList(a, 3);
@@ -1389,11 +2207,13 @@ public class PrimitiveListTest extends AbstractTest {
     }
 
     @Test
-    public void testCopyOfRange() {
-        int[] a = { 1, 2, 3, 4, 5 };
-        IntList list = IntList.copyOf(a, 1, 4);
-        assertEquals(3, list.size());
-        assertArrayEquals(new int[] { 2, 3, 4 }, list.toArray());
+    public void testRandomWithRange() {
+        IntList list = IntList.random(1, 10, 5);
+        assertEquals(5, list.size());
+        for (int i = 0; i < list.size(); i++) {
+            assertTrue(list.get(i) >= 1 && list.get(i) < 10);
+        }
+        assertThrows(IllegalArgumentException.class, () -> IntList.random(10, 1, 5));
     }
 
     @Test
@@ -1409,50 +2229,6 @@ public class PrimitiveListTest extends AbstractTest {
     }
 
     @Test
-    public void testRandomWithRange() {
-        IntList list = IntList.random(1, 10, 5);
-        assertEquals(5, list.size());
-        for (int i = 0; i < list.size(); i++) {
-            assertTrue(list.get(i) >= 1 && list.get(i) < 10);
-        }
-        assertThrows(IllegalArgumentException.class, () -> IntList.random(10, 1, 5));
-    }
-
-    @Test
-    public void testGet() {
-        IntList list = IntList.of(1, 2, 3);
-        assertEquals(1, list.get(0));
-        assertEquals(2, list.get(1));
-        assertEquals(3, list.get(2));
-        assertThrows(IndexOutOfBoundsException.class, () -> list.get(3));
-    }
-
-    @Test
-    public void testAdd() {
-        IntList list = new IntList();
-        list.add(10);
-        list.add(20);
-        assertEquals(2, list.size());
-        assertArrayEquals(new int[] { 10, 20 }, list.toArray());
-    }
-
-    @Test
-    public void testAddAll() {
-        IntList list = IntList.of(1, 2);
-        IntList toAdd = IntList.of(3, 4);
-        list.addAll(toAdd);
-        assertArrayEquals(new int[] { 1, 2, 3, 4 }, list.toArray());
-    }
-
-    @Test
-    public void testAddAllArray() {
-        IntList list = IntList.of(1, 2);
-        int[] toAdd = { 3, 4 };
-        list.addAll(toAdd);
-        assertArrayEquals(new int[] { 1, 2, 3, 4 }, list.toArray());
-    }
-
-    @Test
     public void testRemove() {
         IntList list = IntList.of(1, 2, 3, 2);
         assertTrue(list.remove(2));
@@ -1461,51 +2237,11 @@ public class PrimitiveListTest extends AbstractTest {
     }
 
     @Test
-    public void testRemoveAllIntList() {
-        IntList list = IntList.of(1, 2, 3, 4, 5, 2);
-        IntList toRemove = IntList.of(2, 4);
-        assertTrue(list.removeAll(toRemove));
-        assertArrayEquals(new int[] { 1, 3, 5 }, list.toArray());
-    }
-
-    @Test
     public void testRemoveIf() {
         IntList list = IntList.of(1, 2, 3, 4, 5);
         IntPredicate predicate = (n) -> n % 2 == 0;
         assertTrue(list.removeIf(predicate));
         assertArrayEquals(new int[] { 1, 3, 5 }, list.toArray());
-    }
-
-    @Test
-    public void testRetainAll() {
-        IntList list = IntList.of(1, 2, 3, 2, 4);
-        IntList toRetain = IntList.of(2, 4, 5);
-        assertTrue(list.retainAll(toRetain));
-        assertArrayEquals(new int[] { 2, 2, 4 }, list.toArray());
-    }
-
-    @Test
-    public void testDelete() {
-        IntList list = IntList.of(1, 2, 3);
-        int deleted = list.removeAt(1);
-        assertEquals(2, deleted);
-        assertArrayEquals(new int[] { 1, 3 }, list.toArray());
-        assertThrows(IndexOutOfBoundsException.class, () -> list.removeAt(2));
-    }
-
-    @Test
-    public void testDeleteRange() {
-        IntList list = IntList.of(0, 1, 2, 3, 4, 5);
-        list.removeRange(1, 4);
-        assertArrayEquals(new int[] { 0, 4, 5 }, list.toArray());
-    }
-
-    @Test
-    public void testReplaceRange() {
-        IntList list = IntList.of(0, 1, 2, 3, 4, 5);
-        IntList replacement = IntList.of(9, 8, 7);
-        list.replaceRange(1, 4, replacement);
-        assertArrayEquals(new int[] { 0, 9, 8, 7, 4, 5 }, list.toArray());
     }
 
     @Test
@@ -1532,144 +2268,6 @@ public class PrimitiveListTest extends AbstractTest {
     }
 
     @Test
-    public void testContainsAny() {
-        IntList list = IntList.of(1, 2, 3);
-        IntList any1 = IntList.of(4, 5, 2);
-        assertTrue(list.containsAny(any1));
-        IntList any2 = IntList.of(4, 5, 6);
-        assertFalse(list.containsAny(any2));
-    }
-
-    @Test
-    public void testDisjoint() {
-        IntList list1 = IntList.of(1, 2, 3);
-        IntList list2 = IntList.of(4, 5, 6);
-        assertTrue(list1.disjoint(list2));
-        IntList list3 = IntList.of(3, 4, 5);
-        assertFalse(list1.disjoint(list3));
-    }
-
-    @Test
-    public void testDifference() {
-        IntList list1 = IntList.of(1, 2, 2, 3, 4);
-        IntList list2 = IntList.of(2, 3, 5);
-        IntList difference = list1.difference(list2);
-        assertArrayEquals(new int[] { 1, 2, 4 }, difference.toArray());
-    }
-
-    @Test
-    public void testOccurrencesOf() {
-        IntList list = IntList.of(1, 2, 1, 3, 1, 2);
-        assertEquals(3, list.frequency(1));
-        assertEquals(2, list.frequency(2));
-        assertEquals(0, list.frequency(4));
-    }
-
-    @Test
-    public void testIndexOfFromIndex() {
-        IntList list = IntList.of(1, 2, 3, 2, 1);
-        assertEquals(3, list.indexOf(2, 2));
-    }
-
-    @Test
-    public void testLastIndexOfFromIndex() {
-        IntList list = IntList.of(1, 2, 3, 2, 1);
-        assertEquals(1, list.lastIndexOf(2, 2));
-    }
-
-    @Test
-    public void testMax() {
-        IntList list = IntList.of(3, 1, 4, 1, 5, 9);
-        assertEquals(9, list.max().getAsInt());
-    }
-
-    @Test
-    public void testForEach() {
-        IntList list = IntList.of(1, 2, 3);
-        final int[] sum = { 0 };
-        IntConsumer consumer = (n) -> sum[0] += n;
-        list.forEach(consumer);
-        assertEquals(6, sum[0]);
-    }
-
-    @Test
-    public void testLast() {
-        IntList list = IntList.of(1, 2, 3);
-        assertEquals(3, list.last().getAsInt());
-        assertTrue(new IntList().last().isEmpty());
-    }
-
-    @Test
-    public void testHasDuplicates() {
-        IntList listWithDuplicates = IntList.of(1, 2, 1, 3);
-        assertTrue(listWithDuplicates.containsDuplicates());
-        IntList listWithoutDuplicates = IntList.of(1, 2, 3, 4);
-        assertFalse(listWithoutDuplicates.containsDuplicates());
-    }
-
-    @Test
-    public void testSort() {
-        IntList list = IntList.of(3, 1, 4, 1, 5, 9);
-        list.sort();
-        assertArrayEquals(new int[] { 1, 1, 3, 4, 5, 9 }, list.toArray());
-    }
-
-    @Test
-    public void testReverseSort() {
-        IntList list = IntList.of(3, 1, 4, 1, 5, 9);
-        list.reverseSort();
-        assertArrayEquals(new int[] { 9, 5, 4, 3, 1, 1 }, list.toArray());
-    }
-
-    @Test
-    public void testReverse() {
-        IntList list = IntList.of(1, 2, 3, 4, 5);
-        list.reverse();
-        assertArrayEquals(new int[] { 5, 4, 3, 2, 1 }, list.toArray());
-    }
-
-    @Test
-    public void testShuffle() {
-        IntList list1 = IntList.of(1, 2, 3, 4, 5);
-        IntList list2 = list1.copy();
-        list1.shuffle();
-        assertFalse(Arrays.equals(list1.toArray(), list2.toArray()) && list1.size() > 1);
-    }
-
-    @Test
-    public void testSwap() {
-        IntList list = IntList.of(1, 2, 3, 4);
-        list.swap(1, 3);
-        assertArrayEquals(new int[] { 1, 4, 3, 2 }, list.toArray());
-    }
-
-    @Test
-    public void testSplit() {
-        IntList list = IntList.of(1, 2, 3, 4, 5, 6, 7);
-        List<IntList> chunks = list.split(3);
-        assertEquals(3, chunks.size());
-        assertArrayEquals(new int[] { 1, 2, 3 }, chunks.get(0).toArray());
-        assertArrayEquals(new int[] { 4, 5, 6 }, chunks.get(1).toArray());
-        assertArrayEquals(new int[] { 7 }, chunks.get(2).toArray());
-    }
-
-    @Test
-    public void testClear() {
-        IntList list = IntList.of(1, 2, 3);
-        list.clear();
-        assertEquals(0, list.size());
-        assertTrue(list.isEmpty());
-    }
-
-    @Test
-    public void testToArray() {
-        int[] a = { 1, 2, 3 };
-        IntList list = IntList.of(a);
-        assertArrayEquals(a, list.toArray());
-        assertNotSame(a, list.toArray());
-    }
-
-    @Test
     public void testAddFirstAndLast() {
         IntList list = IntList.of(2, 3);
         list.addFirst(1);
@@ -1678,733 +2276,11 @@ public class PrimitiveListTest extends AbstractTest {
     }
 
     @Test
-    public void testHashCode() {
-        IntList list1 = IntList.of(1, 2, 3);
-        IntList list2 = IntList.of(1, 2, 3);
-        assertEquals(list1.hashCode(), list2.hashCode());
-        IntList list3 = IntList.of(1, 2, 4);
-        assertNotEquals(list1.hashCode(), list3.hashCode());
-    }
-
-    @Test
-    public void testToString() {
-        IntList list = IntList.of(1, 2, 3);
-        assertEquals("[1, 2, 3]", list.toString());
-        IntList emptyList = new IntList();
-        assertEquals("[]", emptyList.toString());
-    }
-
-    @Test
-    @DisplayName("Test addAll(L c) method")
-    public void testAddAllList() {
-        IntList other = IntList.of(6, 7, 8);
-        boolean result = list.addAll(other);
-
-        assertTrue(result);
-        assertEquals(8, list.size());
-        assertEquals(6, list.get(5));
-        assertEquals(7, list.get(6));
-        assertEquals(8, list.get(7));
-    }
-
-    @Test
-    @DisplayName("Test addAll(int index, L c) method")
-    public void testAddAllListAtIndex() {
-        IntList other = IntList.of(10, 11);
-        boolean result = list.addAll(2, other);
-
-        assertTrue(result);
-        assertEquals(7, list.size());
-        assertEquals(10, list.get(2));
-        assertEquals(11, list.get(3));
-        assertEquals(3, list.get(4));
-    }
-
-    @Test
-    @DisplayName("Test removeAll(L c) method")
-    public void testRemoveAllList() {
-        IntList toRemove = IntList.of(2, 4);
-        boolean result = list.removeAll(toRemove);
-
-        assertTrue(result);
-        assertEquals(3, list.size());
-        assertEquals(1, list.get(0));
-        assertEquals(3, list.get(1));
-        assertEquals(5, list.get(2));
-    }
-
-    @Test
-    @DisplayName("Test retainAll(L c) method")
-    public void testRetainAllList() {
-        IntList toRetain = IntList.of(2, 3, 6);
-        boolean result = list.retainAll(toRetain);
-
-        assertTrue(result);
-        assertEquals(2, list.size());
-        assertEquals(2, list.get(0));
-        assertEquals(3, list.get(1));
-    }
-
-    @Test
-    @DisplayName("Test replaceRange(int fromIndex, int toIndex, L replacement) method")
-    public void testReplaceRangeList() {
-        IntList replacement = IntList.of(10, 11);
-        list.replaceRange(1, 3, replacement);
-
-        assertEquals(5, list.size());
-        assertEquals(1, list.get(0));
-        assertEquals(10, list.get(1));
-        assertEquals(11, list.get(2));
-        assertEquals(4, list.get(3));
-        assertEquals(5, list.get(4));
-    }
-
-    @Test
-    @DisplayName("Test containsAny(L l) method")
-    public void testContainsAnyList() {
-        IntList other1 = IntList.of(6, 7, 3);
-        IntList other2 = IntList.of(6, 7, 8);
-
-        assertTrue(list.containsAny(other1));
-        assertFalse(list.containsAny(other2));
-    }
-
-    @Test
-    @DisplayName("Test containsAny(A a) method")
-    public void testContainsAnyArray() {
-        int[] array1 = { 6, 7, 3 };
-        int[] array2 = { 6, 7, 8 };
-
-        assertTrue(list.containsAny(array1));
-        assertFalse(list.containsAny(array2));
-    }
-
-    @Test
-    @DisplayName("Test containsAll(L l) method")
-    public void testContainsAllList() {
-        IntList subset = IntList.of(2, 3);
-        IntList notSubset = IntList.of(2, 6);
-
-        assertTrue(list.containsAll(subset));
-        assertFalse(list.containsAll(notSubset));
-    }
-
-    @Test
-    @DisplayName("Test containsAll(A a) method")
-    public void testContainsAllArray() {
-        int[] subset = { 2, 3 };
-        int[] notSubset = { 2, 6 };
-
-        assertTrue(list.containsAll(subset));
-        assertFalse(list.containsAll(notSubset));
-    }
-
-    @Test
-    @DisplayName("Test disjoint(L l) method")
-    public void testDisjointList() {
-        IntList disjoint = IntList.of(6, 7, 8);
-        IntList notDisjoint = IntList.of(3, 6, 7);
-
-        assertTrue(list.disjoint(disjoint));
-        assertFalse(list.disjoint(notDisjoint));
-    }
-
-    @Test
-    @DisplayName("Test disjoint(A a) method")
-    public void testDisjointArray() {
-        int[] disjoint = { 6, 7, 8 };
-        int[] notDisjoint = { 3, 6, 7 };
-
-        assertTrue(list.disjoint(disjoint));
-        assertFalse(list.disjoint(notDisjoint));
-    }
-
-    @Test
-    @DisplayName("Test intersection(L b) method")
-    public void testIntersectionList() {
-        IntList other = IntList.of(3, 4, 5, 6, 7);
-        IntList result = list.intersection(other);
-
-        assertEquals(3, result.size());
-        assertEquals(IntList.of(3, 4, 5), result);
-    }
-
-    @Test
-    @DisplayName("Test intersection(A b) method")
-    public void testIntersectionArray() {
-        int[] other = { 3, 4, 5, 6, 7 };
-        IntList result = list.intersection(other);
-
-        assertEquals(3, result.size());
-        assertEquals(IntList.of(3, 4, 5), result);
-    }
-
-    @Test
-    @DisplayName("Test difference(L b) method")
-    public void testDifferenceList() {
-        IntList other = IntList.of(3, 4, 6);
-        IntList result = list.difference(other);
-
-        assertEquals(3, result.size());
-        assertEquals(IntList.of(1, 2, 5), result);
-    }
-
-    @Test
-    @DisplayName("Test difference(A a) method")
-    public void testDifferenceArray() {
-        int[] other = { 3, 4, 6 };
-        IntList result = list.difference(other);
-
-        assertEquals(3, result.size());
-        assertEquals(IntList.of(1, 2, 5), result);
-    }
-
-    @Test
-    @DisplayName("Test symmetricDifference(L b) method")
-    public void testSymmetricDifferenceList() {
-        IntList other = IntList.of(4, 5, 6, 7);
-        IntList result = list.symmetricDifference(other);
-
-        assertEquals(5, result.size());
-        assertTrue(result.containsAll(IntList.of(1, 2, 3, 6, 7)));
-    }
-
-    @Test
-    @DisplayName("Test symmetricDifference(A b) method")
-    public void testSymmetricDifferenceArray() {
-        int[] other = { 4, 5, 6, 7 };
-        IntList result = list.symmetricDifference(other);
-
-        assertEquals(5, result.size());
-        assertTrue(result.contains(1));
-        assertTrue(result.contains(2));
-        assertTrue(result.contains(3));
-        assertTrue(result.contains(6));
-        assertTrue(result.contains(7));
-    }
-
-    @Test
-    @DisplayName("Test distinct(int fromIndex, int toIndex) method")
-    public void testDistinctRange() {
-        IntList withDups = IntList.of(1, 2, 2, 3, 3, 3, 4);
-        IntList result = withDups.distinct(1, 6);
-
-        assertEquals(2, result.size());
-        assertEquals(IntList.of(2, 3), result);
-    }
-
-    @Test
-    @DisplayName("Test reverse(int fromIndex, int toIndex) method")
-    public void testReverseRange() {
-        list.reverse(1, 4);
-
-        assertEquals(5, list.size());
-        assertEquals(1, list.get(0));
-        assertEquals(4, list.get(1));
-        assertEquals(3, list.get(2));
-        assertEquals(2, list.get(3));
-        assertEquals(5, list.get(4));
-    }
-
-    @Test
-    @DisplayName("Test copy(int fromIndex, int toIndex) method")
-    public void testCopyRange() {
-        IntList copy = list.copy(1, 4);
-
-        assertEquals(3, copy.size());
-        assertEquals(IntList.of(2, 3, 4), copy);
-    }
-
-    @Test
-    @DisplayName("Test copy(int fromIndex, int toIndex, int step) method")
-    public void testCopyRangeWithStep() {
-        IntList copy = list.copy(0, 5, 2);
-
-        assertEquals(3, copy.size());
-        assertEquals(IntList.of(1, 3, 5), copy);
-    }
-
-    @Test
-    @DisplayName("Test split(int fromIndex, int toIndex, int chunkSize) method")
-    public void testSplitRange() {
-        List<IntList> chunks = list.split(1, 5, 2);
-
-        assertEquals(2, chunks.size());
-        assertEquals(IntList.of(2, 3), chunks.get(0));
-        assertEquals(IntList.of(4, 5), chunks.get(1));
-    }
-
-    @Test
-    @DisplayName("Test isEmpty() method")
-    public void testIsEmpty() {
-        assertFalse(list.isEmpty());
-
-        list.clear();
-        assertTrue(list.isEmpty());
-    }
-
-    @Test
-    @DisplayName("Test size() method")
-    public void testSize() {
-        assertEquals(5, list.size());
-
-        list.add(6);
-        assertEquals(6, list.size());
-
-        list.clear();
-        assertEquals(0, list.size());
-    }
-
-    @Test
-    @DisplayName("Test boxed(int fromIndex, int toIndex) method")
-    public void testBoxedRange() {
-        List<Integer> boxed = list.boxed(1, 4);
-
-        assertEquals(3, boxed.size());
-        assertEquals(Integer.valueOf(2), boxed.get(0));
-        assertEquals(Integer.valueOf(4), boxed.get(2));
-    }
-
-    @Test
-    @DisplayName("Test toSet() method")
-    public void testToSet() {
-        IntList withDups = IntList.of(1, 2, 2, 3, 3);
-        Set<Integer> set = withDups.toSet();
-
-        assertEquals(3, set.size());
-        assertTrue(set.contains(1));
-        assertTrue(set.contains(2));
-        assertTrue(set.contains(3));
-    }
-
-    @Test
-    @DisplayName("Test toSet(int fromIndex, int toIndex) method")
-    public void testToSetRange() {
-        Set<Integer> set = list.toSet(1, 4);
-
-        assertEquals(3, set.size());
-        assertTrue(set.contains(2));
-        assertTrue(set.contains(3));
-        assertTrue(set.contains(4));
-    }
-
-    @Test
-    @DisplayName("Test toCollection(IntFunction<C> supplier) method")
-    public void testToCollection() {
-        LinkedList<Integer> collection = list.toCollection(size -> new LinkedList<>());
-
-        assertEquals(5, collection.size());
-        assertEquals(Integer.valueOf(1), collection.getFirst());
-        assertEquals(Integer.valueOf(5), collection.getLast());
-    }
-
-    @Test
-    @DisplayName("Test toCollection(int fromIndex, int toIndex, IntFunction<C> supplier) method")
-    public void testToCollectionRange() {
-        ArrayList<Integer> collection = list.toCollection(1, 4, ArrayList::new);
-
-        assertEquals(3, collection.size());
-        assertEquals(Integer.valueOf(2), collection.get(0));
-        assertEquals(Integer.valueOf(4), collection.get(2));
-    }
-
-    @Test
-    @DisplayName("Test toMultiset() method")
-    public void testToMultiset() {
-        IntList withDups = IntList.of(1, 2, 2, 3, 3, 3);
-        Multiset<Integer> multiset = withDups.toMultiset();
-
-        assertEquals(1, multiset.getCount(1));
-        assertEquals(2, multiset.getCount(2));
-        assertEquals(3, multiset.getCount(3));
-    }
-
-    @Test
-    @DisplayName("Test toMultiset(int fromIndex, int toIndex) method")
-    public void testToMultisetRange() {
-        IntList withDups = IntList.of(1, 2, 2, 3, 3, 3);
-        Multiset<Integer> multiset = withDups.toMultiset(1, 5);
-
-        assertEquals(2, multiset.getCount(2));
-        assertEquals(2, multiset.getCount(3));
-        assertEquals(0, multiset.getCount(1));
-    }
-
-    @Test
-    @DisplayName("Test toMultiset(IntFunction<Multiset<B>> supplier) method")
-    public void testToMultisetWithSupplier() {
-        Multiset<Integer> multiset = list.toMultiset(size -> new Multiset<>());
-
-        assertEquals(1, multiset.getCount(1));
-        assertEquals(1, multiset.getCount(5));
-    }
-
-    @Test
-    @DisplayName("Test toMultiset(int fromIndex, int toIndex, IntFunction<Multiset<B>> supplier) method")
-    public void testToMultisetRangeWithSupplier() {
-        Multiset<Integer> multiset = list.toMultiset(1, 4, size -> new Multiset<>());
-
-        assertEquals(1, multiset.getCount(2));
-        assertEquals(1, multiset.getCount(3));
-        assertEquals(1, multiset.getCount(4));
-        assertEquals(0, multiset.getCount(1));
-    }
-
-    @Test
-    @DisplayName("Test iterator() method")
-    public void testIterator() {
-        Iterator<Integer> iterator = list.iterator();
-
-        assertTrue(iterator.hasNext());
-        assertEquals(Integer.valueOf(1), iterator.next());
-        assertEquals(Integer.valueOf(2), iterator.next());
-
-        int count = 2;
-        while (iterator.hasNext()) {
-            iterator.next();
-            count++;
-        }
-        assertEquals(5, count);
-    }
-
-    @Test
-    @DisplayName("Test edge cases and exceptions")
-    public void testEdgeCases() {
-        IntList emptyList = IntList.of();
-
-        assertTrue(emptyList.isEmpty());
-        assertEquals(0, emptyList.size());
-        assertFalse(emptyList.containsDuplicates());
-        assertTrue(emptyList.isSorted());
-
-        assertThrows(IndexOutOfBoundsException.class, () -> list.copy(-1, 3));
-        assertThrows(IndexOutOfBoundsException.class, () -> list.copy(1, 10));
-        assertThrows(IndexOutOfBoundsException.class, () -> list.copy(3, 1));
-
-        list.addAll((IntList) null);
-        list.removeAll((IntList) null);
-    }
-
-    // ===================== Additional tests for untested PrimitiveList methods =====================
-
-    @Test
-    @DisplayName("Test addAll(int index, A values) inserts array at index")
-    public void testAddAllArrayAtIndex() {
-        int[] toAdd = { 10, 11 };
-        boolean result = list.addAll(2, toAdd);
-
-        assertTrue(result);
-        assertEquals(7, list.size());
-        assertEquals(10, list.get(2));
-        assertEquals(11, list.get(3));
-        assertEquals(3, list.get(4));
-    }
-
-    @Test
-    @DisplayName("Test addAll(int index, A values) with empty array")
-    public void testAddAllArrayAtIndex_EmptyArray() {
-        int[] toAdd = {};
-        boolean result = list.addAll(0, toAdd);
-
-        assertFalse(result);
-        assertEquals(5, list.size());
-    }
-
-    @Test
-    @DisplayName("Test addAll(int index, A values) at start and end")
-    public void testAddAllArrayAtIndex_StartAndEnd() {
-        IntList l = IntList.of(2, 3);
-        l.addAll(0, new int[] { 1 });
-        l.addAll(l.size(), new int[] { 4 });
-        assertArrayEquals(new int[] { 1, 2, 3, 4 }, l.toArray());
-    }
-
-    @Test
-    @DisplayName("Test addAll(int index, A values) with invalid index")
-    public void testAddAllArrayAtIndex_InvalidIndex() {
-        assertThrows(IndexOutOfBoundsException.class, () -> list.addAll(-1, new int[] { 10 }));
-        assertThrows(IndexOutOfBoundsException.class, () -> list.addAll(list.size() + 1, new int[] { 10 }));
-    }
-
-    @Test
-    @DisplayName("Test removeAll(A values) removes matching elements")
-    public void testRemoveAllArray() {
-        IntList l = IntList.of(1, 2, 3, 4, 5, 2);
-        boolean result = l.removeAll(new int[] { 2, 4 });
-
-        assertTrue(result);
-        assertArrayEquals(new int[] { 1, 3, 5 }, l.toArray());
-    }
-
-    @Test
-    @DisplayName("Test removeAll(A values) with no match")
-    public void testRemoveAllArray_NoMatch() {
-        IntList l = IntList.of(1, 2, 3);
-        boolean result = l.removeAll(new int[] { 4, 5 });
-
-        assertFalse(result);
-        assertEquals(3, l.size());
-    }
-
-    @Test
-    @DisplayName("Test removeAll(A values) with null/empty array")
-    public void testRemoveAllArray_NullOrEmpty() {
-        IntList l = IntList.of(1, 2, 3);
-        assertFalse(l.removeAll((int[]) null));
-        assertFalse(l.removeAll(new int[] {}));
-        assertEquals(3, l.size());
-    }
-
-    @Test
-    @DisplayName("Test retainAll(A values) retains only matching elements")
-    public void testRetainAllArray() {
-        IntList l = IntList.of(1, 2, 3, 2, 4);
-        boolean result = l.retainAll(new int[] { 2, 4, 5 });
-
-        assertTrue(result);
-        assertArrayEquals(new int[] { 2, 2, 4 }, l.toArray());
-    }
-
-    @Test
-    @DisplayName("Test retainAll(A values) with no match clears list")
-    public void testRetainAllArray_NoMatch() {
-        IntList l = IntList.of(1, 2, 3);
-        boolean result = l.retainAll(new int[] { 4, 5 });
-
-        assertTrue(result);
-        assertEquals(0, l.size());
-    }
-
-    @Test
-    @DisplayName("Test retainAll(A values) with null/empty array")
-    public void testRetainAllArray_NullOrEmpty() {
-        IntList l = IntList.of(1, 2, 3);
-        assertTrue(l.retainAll((int[]) null));
-        assertEquals(0, l.size());
-    }
-
-    @Test
-    @DisplayName("Test replaceRange(int, int, A) replaces range with array")
-    public void testReplaceRangeArray() {
-        IntList l = IntList.of(0, 1, 2, 3, 4, 5);
-        l.replaceRange(1, 4, new int[] { 9, 8, 7 });
-
-        assertArrayEquals(new int[] { 0, 9, 8, 7, 4, 5 }, l.toArray());
-    }
-
-    @Test
-    @DisplayName("Test replaceRange(int, int, A) with larger replacement")
-    public void testReplaceRangeArray_LargerReplacement() {
-        IntList l = IntList.of(1, 2, 3);
-        l.replaceRange(1, 2, new int[] { 10, 11, 12 });
-
-        assertArrayEquals(new int[] { 1, 10, 11, 12, 3 }, l.toArray());
-    }
-
-    @Test
-    @DisplayName("Test replaceRange(int, int, A) with empty replacement deletes range")
-    public void testReplaceRangeArray_EmptyReplacement() {
-        IntList l = IntList.of(1, 2, 3, 4, 5);
-        l.replaceRange(1, 4, new int[] {});
-
-        assertArrayEquals(new int[] { 1, 5 }, l.toArray());
-    }
-
-    @Test
-    @DisplayName("Test replaceRange(int, int, A) with null replacement deletes range")
-    public void testReplaceRangeArray_NullReplacement() {
-        IntList l = IntList.of(1, 2, 3, 4, 5);
-        l.replaceRange(1, 4, (int[]) null);
-
-        assertArrayEquals(new int[] { 1, 5 }, l.toArray());
-    }
-
-    @Test
-    @DisplayName("Test replaceRange(int, int, A) with invalid range")
-    public void testReplaceRangeArray_InvalidRange() {
-        IntList l = IntList.of(1, 2, 3);
-        assertThrows(IndexOutOfBoundsException.class, () -> l.replaceRange(-1, 2, new int[] { 10 }));
-        assertThrows(IndexOutOfBoundsException.class, () -> l.replaceRange(0, 4, new int[] { 10 }));
-    }
-
-    @Test
-    @DisplayName("Test distinct() returns list with unique elements")
-    public void testDistinct() {
-        IntList withDups = IntList.of(1, 2, 2, 3, 1, 4, 3);
-        IntList result = withDups.distinct();
-
-        assertEquals(4, result.size());
-        assertEquals(IntList.of(1, 2, 3, 4), result);
-    }
-
-    @Test
-    @DisplayName("Test distinct() on empty list")
-    public void testDistinct_Empty() {
-        IntList emptyList = IntList.of();
-        IntList result = emptyList.distinct();
-
-        assertEquals(0, result.size());
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    @DisplayName("Test distinct() on list without duplicates")
-    public void testDistinct_NoDuplicates() {
-        IntList l = IntList.of(1, 2, 3, 4);
-        IntList result = l.distinct();
-
-        assertEquals(4, result.size());
-        assertArrayEquals(new int[] { 1, 2, 3, 4 }, result.toArray());
-    }
-
-    @Test
-    @DisplayName("Test isSorted() on sorted list")
-    public void testIsSorted() {
-        IntList sorted = IntList.of(1, 2, 3, 4, 5);
-        assertTrue(sorted.isSorted());
-    }
-
-    @Test
-    @DisplayName("Test isSorted() on unsorted list")
-    public void testIsSorted_Unsorted() {
-        IntList unsorted = IntList.of(1, 3, 2, 4);
-        assertFalse(unsorted.isSorted());
-    }
-
-    @Test
-    @DisplayName("Test isSorted() on empty and single element list")
-    public void testIsSorted_EmptyAndSingle() {
-        assertTrue(IntList.of().isSorted());
-        assertTrue(IntList.of(42).isSorted());
-    }
-
-    @Test
-    @DisplayName("Test isSorted() with equal consecutive elements")
-    public void testIsSorted_WithEquals() {
-        IntList l = IntList.of(1, 2, 2, 3, 3, 5);
-        assertTrue(l.isSorted());
-    }
-
-    @Test
-    @DisplayName("Test rotate(int distance) rotates elements right")
-    public void testRotate() {
-        IntList l = IntList.of(1, 2, 3, 4, 5);
-        l.rotate(2);
-        assertArrayEquals(new int[] { 4, 5, 1, 2, 3 }, l.toArray());
-    }
-
-    @Test
-    @DisplayName("Test rotate(int distance) with negative distance rotates left")
-    public void testRotate_Negative() {
-        IntList l = IntList.of(1, 2, 3, 4, 5);
-        l.rotate(-2);
-        assertArrayEquals(new int[] { 3, 4, 5, 1, 2 }, l.toArray());
-    }
-
-    @Test
-    @DisplayName("Test rotate(int distance) with zero distance")
-    public void testRotate_Zero() {
-        IntList l = IntList.of(1, 2, 3);
-        l.rotate(0);
-        assertArrayEquals(new int[] { 1, 2, 3 }, l.toArray());
-    }
-
-    @Test
-    @DisplayName("Test rotate(int distance) with distance equal to size")
-    public void testRotate_FullRotation() {
-        IntList l = IntList.of(1, 2, 3);
-        l.rotate(3);
-        assertArrayEquals(new int[] { 1, 2, 3 }, l.toArray());
-    }
-
-    @Test
-    @DisplayName("Test rotate(int distance) on empty list")
-    public void testRotate_Empty() {
-        IntList l = IntList.of();
-        l.rotate(5);
-        assertTrue(l.isEmpty());
-    }
-
-    @Test
-    @DisplayName("Test shuffle(Random rnd) with seeded random")
-    public void testShuffleWithRandom() {
-        IntList l1 = IntList.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-        IntList l2 = l1.copy();
-        Random rnd = new Random(42);
-        l1.shuffle(rnd);
-        // After shuffle with a specific seed, the order should change
-        assertEquals(l2.size(), l1.size());
-        // Ensure same elements
-        l1.sort();
-        l2.sort();
-        assertArrayEquals(l1.toArray(), l2.toArray());
-    }
-
-    @Test
-    @DisplayName("Test shuffle(Random rnd) produces deterministic result with same seed")
-    public void testShuffleWithRandom_Deterministic() {
-        IntList l1 = IntList.of(1, 2, 3, 4, 5);
-        IntList l2 = IntList.of(1, 2, 3, 4, 5);
-        l1.shuffle(new Random(123));
-        l2.shuffle(new Random(123));
-        assertArrayEquals(l1.toArray(), l2.toArray());
-    }
-
-    @Test
-    @DisplayName("Test copy() returns independent copy of all elements")
-    public void testCopy() {
-        IntList original = IntList.of(1, 2, 3);
-        IntList copy = original.copy();
-
-        assertEquals(original.size(), copy.size());
-        assertArrayEquals(original.toArray(), copy.toArray());
-        assertNotSame(original, copy);
-
-        // Modifications to copy should not affect original
-        copy.add(4);
-        assertEquals(3, original.size());
-        assertEquals(4, copy.size());
-    }
-
-    @Test
-    @DisplayName("Test copy() on empty list")
-    public void testCopy_Empty() {
-        IntList empty = IntList.of();
-        IntList copy = empty.copy();
-        assertTrue(copy.isEmpty());
-        assertNotSame(empty, copy);
-    }
-
-    @Test
-    @DisplayName("Test trimToSize() reduces capacity to size")
-    public void testTrimToSize() {
-        IntList l = new IntList(100);
-        l.add(1);
-        l.add(2);
-        l.add(3);
-        assertEquals(3, l.size());
-        assertTrue(l.internalArray().length >= 100);
-
-        l.trimToSize();
-        assertEquals(3, l.size());
-        assertEquals(3, l.internalArray().length);
-        assertArrayEquals(new int[] { 1, 2, 3 }, l.toArray());
-    }
-
-    @Test
-    @DisplayName("Test trimToSize() on empty list")
-    public void testTrimToSize_Empty() {
-        IntList l = new IntList(100);
-        l.trimToSize();
-        assertEquals(0, l.size());
-    }
-
-    @Test
-    @DisplayName("Test trimToSize() returns same list for chaining")
-    public void testTrimToSize_Chaining() {
-        IntList l = IntList.of(1, 2, 3);
-        IntList result = l.trimToSize();
-        assertTrue(result == l);
+    public void testToArray() {
+        int[] a = { 1, 2, 3 };
+        IntList list = IntList.of(a);
+        assertArrayEquals(a, list.toArray());
+        assertNotSame(a, list.toArray());
     }
 
     @Test
@@ -2417,6 +2293,16 @@ public class PrimitiveListTest extends AbstractTest {
         assertEquals(Integer.valueOf(1), boxed.get(0));
         assertEquals(Integer.valueOf(2), boxed.get(1));
         assertEquals(Integer.valueOf(3), boxed.get(2));
+    }
+
+    @Test
+    @DisplayName("Test boxed(int fromIndex, int toIndex) method")
+    public void testBoxedRange() {
+        List<Integer> boxed = list.boxed(1, 4);
+
+        assertEquals(3, boxed.size());
+        assertEquals(Integer.valueOf(2), boxed.get(0));
+        assertEquals(Integer.valueOf(4), boxed.get(2));
     }
 
     @Test
@@ -2461,15 +2347,313 @@ public class PrimitiveListTest extends AbstractTest {
     }
 
     @Test
-    @DisplayName("Test internalArray() returns backing array")
-    public void testInternalArray() {
-        IntList l = IntList.of(1, 2, 3);
-        int[] internal = l.internalArray();
-        assertNotNull(internal);
-        assertTrue(internal.length >= 3);
-        assertEquals(1, internal[0]);
-        assertEquals(2, internal[1]);
-        assertEquals(3, internal[2]);
+    public void test_IntList() {
+        N.println(IntList.of(CommonUtil.toIntArray(CommonUtil.toList(1, null, 3))));
+        N.println(LongList.of(CommonUtil.toLongArray(CommonUtil.toList(1L, null, 3L))));
+        N.println(FloatList.of(CommonUtil.toFloatArray(CommonUtil.toList(1f, null, 3f))));
+        N.println(DoubleList.of(CommonUtil.toDoubleArray(CommonUtil.toList(1d, null, 3d))));
+
+        IntList a = IntList.of(1, 2, 3);
+        IntList b = IntList.of(1, 2, 3);
+
+        assertTrue(a.equals(b));
+        assertTrue(b.equals(a));
+
+        a = IntList.of(1, 2, 3);
+        b = IntList.of(1, 2, 3, 4);
+
+        assertFalse(a.equals(b));
+        assertFalse(b.equals(a));
+
+        float f = Long.MAX_VALUE;
+        N.println(f);
+        N.println((long) f == Long.MAX_VALUE);
+        f = Long.MIN_VALUE;
+        N.println(f);
+        N.println((long) f == Long.MIN_VALUE);
+
+        long l = (long) Float.MIN_VALUE;
+        N.println(l);
+        N.println(l == Long.MIN_VALUE);
+        l = (long) Float.MAX_VALUE;
+        N.println(l == Long.MAX_VALUE);
+
+        l = (long) -1000000.03958390f;
+        N.println(l);
+
+        IntList arrayList = new IntList();
+
+        assertEquals(0, arrayList.size());
+        assertTrue(CommonUtil.equals(CommonUtil.EMPTY_INT_ARRAY, CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size())));
+
+        arrayList = new IntList(10);
+        assertEquals(0, arrayList.size());
+        assertTrue(CommonUtil.equals(CommonUtil.EMPTY_INT_ARRAY, CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size())));
+
+        arrayList = IntList.of(CommonUtil.EMPTY_INT_ARRAY);
+        assertEquals(0, arrayList.size());
+        assertTrue(CommonUtil.equals(CommonUtil.EMPTY_INT_ARRAY, CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size())));
+
+        arrayList = IntList.of(Array.of(1, 2, 3), 2);
+        assertEquals(2, arrayList.size());
+        assertTrue(CommonUtil.equals(Array.of(1, 2, 3), arrayList.internalArray()));
+        assertTrue(CommonUtil.equals(Array.of(1, 2), CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size())));
+
+        assertEquals(1, arrayList.get(0));
+
+        arrayList.set(1, 4);
+        assertEquals(4, arrayList.get(1));
+
+        arrayList.add(5);
+        assertEquals(5, arrayList.get(2));
+
+        arrayList.add(1, 6);
+        N.println(arrayList);
+        assertTrue(CommonUtil.equals(Array.of(1, 6, 4, 5), CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size())));
+
+        arrayList.addAll(arrayList);
+
+        N.println(CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size()));
+
+        arrayList.addAll(2, arrayList);
+        N.println(CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size()));
+
+        arrayList.remove(1);
+        N.println(CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size()));
+
+        arrayList.removeAllOccurrences(5);
+        N.println(CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size()));
+
+        arrayList.removeAll(IntList.of(Array.of(1, 4, 6)));
+        N.println(CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size()));
+
+        arrayList.addAll(IntList.of(Array.of(1, 2, 3)));
+
+        arrayList.retainAll(IntList.of(Array.of(1, 4)));
+        N.println(CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size()));
+        assertTrue(CommonUtil.equals(Array.of(1), CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size())));
+
+        arrayList.removeAt(0);
+        assertFalse(arrayList.contains(1));
+
+        arrayList.addAll(IntList.of(Array.of(1, 2, 3)));
+        assertTrue(arrayList.contains(1));
+        assertTrue(arrayList.containsAll(IntList.of(Array.of(1, 3))));
+        assertFalse(arrayList.contains(4));
+        assertFalse(arrayList.containsAll(IntList.of(Array.of(1, 4))));
+
+        final IntList subList = arrayList.copy(1, 3);
+        assertEquals(subList, IntList.of(Array.of(2, 3)));
+
+        assertEquals(1, arrayList.indexOf(2));
+        assertEquals(1, arrayList.lastIndexOf(2));
+
+        assertEquals(-1, arrayList.indexOf(4));
+        assertEquals(-1, arrayList.lastIndexOf(4));
+
+        arrayList.add(0, 4);
+
+        arrayList.sort();
+        assertTrue(CommonUtil.equals(Array.of(1, 2, 3, 4), CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size())));
+
+        arrayList.remove(3);
+        N.println(CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size()));
+
+        arrayList = arrayList.trimToSize();
+        assertTrue(CommonUtil.equals(Array.of(1, 2, 4), arrayList.internalArray()));
+
+        assertTrue(CommonUtil.equals(CommonUtil.toList(1, 2, 4), arrayList.toList()));
+
+        assertTrue(CommonUtil.toSet(arrayList).contains(arrayList.copy(0, arrayList.size())));
+
+        arrayList.clear();
+
+        assertTrue(arrayList.isEmpty());
+
+        N.println(arrayList);
+
+        arrayList.add(1);
+        arrayList.add(2);
+
+        try {
+            IntList.of(Array.of(1, 2, 3), 5);
+            fail("Should throw IndexOutOfBoundsException");
+        } catch (final IndexOutOfBoundsException e) {
+
+        }
+
+        try {
+            arrayList.get(2);
+            fail("Should throw IndexOutOfBoundsException");
+        } catch (final IndexOutOfBoundsException e) {
+
+        }
+
+        try {
+            arrayList.add(3, 3);
+            fail("Should throw IndexOutOfBoundsException");
+        } catch (final IndexOutOfBoundsException e) {
+
+        }
+
+        try {
+            arrayList.copy(-1, 0);
+            fail("Should throw IndexOutOfBoundsException");
+        } catch (final IndexOutOfBoundsException e) {
+
+        }
+
+        try {
+            arrayList.copy(0, 3);
+            fail("Should throw IndexOutOfBoundsException");
+        } catch (final IndexOutOfBoundsException e) {
+
+        }
+
+        try {
+            arrayList.copy(3, 2);
+            fail("Should throw IndexOutOfBoundsException");
+        } catch (final IndexOutOfBoundsException e) {
+
+        }
+
+        arrayList.remove(1);
+
+        assertEquals(2, CommonUtil.copyOfRange(arrayList.internalArray(), 0, arrayList.size())[0]);
+    }
+
+    @Test
+    @DisplayName("Test toSet() method")
+    public void testToSet() {
+        IntList withDups = IntList.of(1, 2, 2, 3, 3);
+        Set<Integer> set = withDups.toSet();
+
+        assertEquals(3, set.size());
+        assertTrue(set.contains(1));
+        assertTrue(set.contains(2));
+        assertTrue(set.contains(3));
+    }
+
+    @Test
+    @DisplayName("Test toSet(int fromIndex, int toIndex) method")
+    public void testToSetRange() {
+        Set<Integer> set = list.toSet(1, 4);
+
+        assertEquals(3, set.size());
+        assertTrue(set.contains(2));
+        assertTrue(set.contains(3));
+        assertTrue(set.contains(4));
+    }
+
+    @Test
+    @DisplayName("Test toSet on empty list")
+    public void testToSet_Empty() {
+        IntList l = IntList.of();
+        Set<Integer> set = l.toSet();
+        assertTrue(set.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Test toCollection(IntFunction<C> supplier) method")
+    public void testToCollection() {
+        LinkedList<Integer> collection = list.toCollection(size -> new LinkedList<>());
+
+        assertEquals(5, collection.size());
+        assertEquals(Integer.valueOf(1), collection.getFirst());
+        assertEquals(Integer.valueOf(5), collection.getLast());
+    }
+
+    @Test
+    @DisplayName("Test toCollection(int fromIndex, int toIndex, IntFunction<C> supplier) method")
+    public void testToCollectionRange() {
+        ArrayList<Integer> collection = list.toCollection(1, 4, ArrayList::new);
+
+        assertEquals(3, collection.size());
+        assertEquals(Integer.valueOf(2), collection.get(0));
+        assertEquals(Integer.valueOf(4), collection.get(2));
+    }
+
+    @Test
+    @DisplayName("Test toCollection on empty list")
+    public void testToCollection_Empty() {
+        IntList l = IntList.of();
+        ArrayList<Integer> collection = l.toCollection(ArrayList::new);
+        assertTrue(collection.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Test toMultiset() method")
+    public void testToMultiset() {
+        IntList withDups = IntList.of(1, 2, 2, 3, 3, 3);
+        Multiset<Integer> multiset = withDups.toMultiset();
+
+        assertEquals(1, multiset.getCount(1));
+        assertEquals(2, multiset.getCount(2));
+        assertEquals(3, multiset.getCount(3));
+    }
+
+    @Test
+    @DisplayName("Test toMultiset(IntFunction<Multiset<B>> supplier) method")
+    public void testToMultisetWithSupplier() {
+        Multiset<Integer> multiset = list.toMultiset(size -> new Multiset<>());
+
+        assertEquals(1, multiset.getCount(1));
+        assertEquals(1, multiset.getCount(5));
+    }
+
+    @Test
+    @DisplayName("Test toMultiset(int fromIndex, int toIndex) method")
+    public void testToMultisetRange() {
+        IntList withDups = IntList.of(1, 2, 2, 3, 3, 3);
+        Multiset<Integer> multiset = withDups.toMultiset(1, 5);
+
+        assertEquals(2, multiset.getCount(2));
+        assertEquals(2, multiset.getCount(3));
+        assertEquals(0, multiset.getCount(1));
+    }
+
+    @Test
+    @DisplayName("Test toMultiset(int fromIndex, int toIndex, IntFunction<Multiset<B>> supplier) method")
+    public void testToMultisetRangeWithSupplier() {
+        Multiset<Integer> multiset = list.toMultiset(1, 4, size -> new Multiset<>());
+
+        assertEquals(1, multiset.getCount(2));
+        assertEquals(1, multiset.getCount(3));
+        assertEquals(1, multiset.getCount(4));
+        assertEquals(0, multiset.getCount(1));
+    }
+
+    @Test
+    @DisplayName("Test toMultiset on empty list")
+    public void testToMultiset_Empty() {
+        IntList l = IntList.of();
+        Multiset<Integer> multiset = l.toMultiset();
+        assertEquals(0, multiset.size());
+    }
+
+    @Test
+    @DisplayName("Test iterator() method")
+    public void testIterator() {
+        Iterator<Integer> iterator = list.iterator();
+
+        assertTrue(iterator.hasNext());
+        assertEquals(Integer.valueOf(1), iterator.next());
+        assertEquals(Integer.valueOf(2), iterator.next());
+
+        int count = 2;
+        while (iterator.hasNext()) {
+            iterator.next();
+            count++;
+        }
+        assertEquals(5, count);
+    }
+
+    @Test
+    @DisplayName("Test iterator on empty list")
+    public void testIterator_Empty() {
+        IntList l = IntList.of();
+        Iterator<Integer> iter = l.iterator();
+        assertFalse(iter.hasNext());
     }
 
     @Test
@@ -2490,251 +2674,64 @@ public class PrimitiveListTest extends AbstractTest {
     }
 
     @Test
-    @DisplayName("Test swap with same indices")
-    public void testSwap_SameIndex() {
-        IntList l = IntList.of(1, 2, 3);
-        l.swap(1, 1);
-        assertArrayEquals(new int[] { 1, 2, 3 }, l.toArray());
+    public void testGet() {
+        IntList list = IntList.of(1, 2, 3);
+        assertEquals(1, list.get(0));
+        assertEquals(2, list.get(1));
+        assertEquals(3, list.get(2));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.get(3));
     }
 
     @Test
-    @DisplayName("Test swap with invalid indices")
-    public void testSwap_InvalidIndex() {
-        IntList l = IntList.of(1, 2, 3);
-        assertThrows(IndexOutOfBoundsException.class, () -> l.swap(-1, 1));
-        assertThrows(IndexOutOfBoundsException.class, () -> l.swap(0, 3));
+    public void testOccurrencesOf() {
+        IntList list = IntList.of(1, 2, 1, 3, 1, 2);
+        assertEquals(3, list.frequency(1));
+        assertEquals(2, list.frequency(2));
+        assertEquals(0, list.frequency(4));
     }
 
     @Test
-    @DisplayName("Test moveRange moves elements correctly")
-    public void testMoveRange_Forward() {
-        IntList l = IntList.of(0, 1, 2, 3, 4, 5);
-        l.moveRange(1, 3, 3);
-        // Elements [1, 2] moved to position 3
-        assertEquals(6, l.size());
+    public void testIndexOfFromIndex() {
+        IntList list = IntList.of(1, 2, 3, 2, 1);
+        assertEquals(3, list.indexOf(2, 2));
     }
 
     @Test
-    @DisplayName("Test removeRange with equal fromIndex and toIndex")
-    public void testRemoveRange_SameIndex() {
-        IntList l = IntList.of(1, 2, 3, 4, 5);
-        l.removeRange(2, 2);
-        assertEquals(5, l.size());
-        assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, l.toArray());
+    public void testLastIndexOfFromIndex() {
+        IntList list = IntList.of(1, 2, 3, 2, 1);
+        assertEquals(1, list.lastIndexOf(2, 2));
     }
 
     @Test
-    @DisplayName("Test removeRange with invalid range")
-    public void testRemoveRange_InvalidRange() {
-        IntList l = IntList.of(1, 2, 3);
-        assertThrows(IndexOutOfBoundsException.class, () -> l.removeRange(-1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> l.removeRange(0, 4));
-        assertThrows(IndexOutOfBoundsException.class, () -> l.removeRange(2, 1));
+    public void testMax() {
+        IntList list = IntList.of(3, 1, 4, 1, 5, 9);
+        assertEquals(9, list.max().getAsInt());
     }
 
     @Test
-    @DisplayName("Test containsDuplicates on empty list")
-    public void testContainsDuplicates_Empty() {
-        IntList emptyList = IntList.of();
-        assertFalse(emptyList.containsDuplicates());
+    public void testForEach() {
+        IntList list = IntList.of(1, 2, 3);
+        final int[] sum = { 0 };
+        IntConsumer consumer = (n) -> sum[0] += n;
+        list.forEach(consumer);
+        assertEquals(6, sum[0]);
     }
 
     @Test
-    @DisplayName("Test containsDuplicates on single element")
-    public void testContainsDuplicates_Single() {
-        IntList single = IntList.of(1);
-        assertFalse(single.containsDuplicates());
+    public void testHashCode() {
+        IntList list1 = IntList.of(1, 2, 3);
+        IntList list2 = IntList.of(1, 2, 3);
+        assertEquals(list1.hashCode(), list2.hashCode());
+        IntList list3 = IntList.of(1, 2, 4);
+        assertNotEquals(list1.hashCode(), list3.hashCode());
     }
 
     @Test
-    @DisplayName("Test split with chunkSize larger than list size")
-    public void testSplit_ChunkSizeLargerThanList() {
-        IntList l = IntList.of(1, 2, 3);
-        List<IntList> chunks = l.split(10);
-        assertEquals(1, chunks.size());
-        assertArrayEquals(new int[] { 1, 2, 3 }, chunks.get(0).toArray());
-    }
-
-    @Test
-    @DisplayName("Test split with chunkSize equal to list size")
-    public void testSplit_ChunkSizeEqualsListSize() {
-        IntList l = IntList.of(1, 2, 3);
-        List<IntList> chunks = l.split(3);
-        assertEquals(1, chunks.size());
-        assertArrayEquals(new int[] { 1, 2, 3 }, chunks.get(0).toArray());
-    }
-
-    @Test
-    @DisplayName("Test split on empty list")
-    public void testSplit_EmptyList() {
-        IntList l = IntList.of();
-        List<IntList> chunks = l.split(3);
-        assertEquals(0, chunks.size());
-    }
-
-    @Test
-    @DisplayName("Test copy(int, int, int) with reverse step")
-    public void testCopyRangeWithStep_Reverse() {
-        IntList l = IntList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-        IntList result = l.copy(8, 2, -2);
-        assertArrayEquals(new int[] { 8, 6, 4 }, result.toArray());
-    }
-
-    @Test
-    @DisplayName("Test removeDuplicates on list without duplicates")
-    public void testRemoveDuplicates_NoDuplicates() {
-        IntList l = IntList.of(1, 2, 3, 4);
-        assertFalse(l.removeDuplicates());
-        assertEquals(4, l.size());
-    }
-
-    @Test
-    @DisplayName("Test removeDuplicates on empty list")
-    public void testRemoveDuplicates_Empty() {
-        IntList l = IntList.of();
-        assertFalse(l.removeDuplicates());
-        assertEquals(0, l.size());
-    }
-
-    @Test
-    @DisplayName("Test addAll(L) with null list does not modify")
-    public void testAddAllList_Null() {
-        int sizeBefore = list.size();
-        boolean result = list.addAll((IntList) null);
-        assertFalse(result);
-        assertEquals(sizeBefore, list.size());
-    }
-
-    @Test
-    @DisplayName("Test addAll(L) with empty list does not modify")
-    public void testAddAllList_Empty() {
-        int sizeBefore = list.size();
-        boolean result = list.addAll(IntList.of());
-        assertFalse(result);
-        assertEquals(sizeBefore, list.size());
-    }
-
-    @Test
-    @DisplayName("Test reverse on empty list")
-    public void testReverse_Empty() {
-        IntList l = IntList.of();
-        l.reverse();
-        assertTrue(l.isEmpty());
-    }
-
-    @Test
-    @DisplayName("Test reverse on single element")
-    public void testReverse_Single() {
-        IntList l = IntList.of(42);
-        l.reverse();
-        assertArrayEquals(new int[] { 42 }, l.toArray());
-    }
-
-    @Test
-    @DisplayName("Test sort on empty list")
-    public void testSort_Empty() {
-        IntList l = IntList.of();
-        l.sort();
-        assertTrue(l.isEmpty());
-    }
-
-    @Test
-    @DisplayName("Test reverseSort on empty list")
-    public void testReverseSort_Empty() {
-        IntList l = IntList.of();
-        l.reverseSort();
-        assertTrue(l.isEmpty());
-    }
-
-    @Test
-    @DisplayName("Test clear on already empty list")
-    public void testClear_AlreadyEmpty() {
-        IntList l = IntList.of();
-        l.clear();
-        assertTrue(l.isEmpty());
-        assertEquals(0, l.size());
-    }
-
-    @Test
-    @DisplayName("Test removeAt(int...) with multiple indices")
-    public void testRemoveAtMultipleIndices() {
-        IntList l = IntList.of(10, 20, 30, 40, 50);
-        l.removeAt(new int[] { 1, 3 });
-        assertEquals(3, l.size());
-    }
-
-    @Test
-    @DisplayName("Test toSet on empty list")
-    public void testToSet_Empty() {
-        IntList l = IntList.of();
-        Set<Integer> set = l.toSet();
-        assertTrue(set.isEmpty());
-    }
-
-    @Test
-    @DisplayName("Test toCollection on empty list")
-    public void testToCollection_Empty() {
-        IntList l = IntList.of();
-        ArrayList<Integer> collection = l.toCollection(ArrayList::new);
-        assertTrue(collection.isEmpty());
-    }
-
-    @Test
-    @DisplayName("Test toMultiset on empty list")
-    public void testToMultiset_Empty() {
-        IntList l = IntList.of();
-        Multiset<Integer> multiset = l.toMultiset();
-        assertEquals(0, multiset.size());
-    }
-
-    @Test
-    @DisplayName("Test iterator on empty list")
-    public void testIterator_Empty() {
-        IntList l = IntList.of();
-        Iterator<Integer> iter = l.iterator();
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    @DisplayName("Test containsAny with empty other list")
-    public void testContainsAny_EmptyOther() {
-        assertFalse(list.containsAny(IntList.of()));
-        assertFalse(list.containsAny(new int[] {}));
-    }
-
-    @Test
-    @DisplayName("Test containsAll with empty other list")
-    public void testContainsAll_EmptyOther() {
-        assertTrue(list.containsAll(IntList.of()));
-        assertTrue(list.containsAll(new int[] {}));
-    }
-
-    @Test
-    @DisplayName("Test disjoint with empty other list")
-    public void testDisjoint_EmptyOther() {
-        assertTrue(list.disjoint(IntList.of()));
-        assertTrue(list.disjoint(new int[] {}));
-    }
-
-    @Test
-    @DisplayName("Test intersection with empty other list")
-    public void testIntersection_EmptyOther() {
-        IntList result = list.intersection(IntList.of());
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    @DisplayName("Test difference with empty other list")
-    public void testDifference_EmptyOther() {
-        IntList result = list.difference(IntList.of());
-        assertEquals(list.size(), result.size());
-    }
-
-    @Test
-    @DisplayName("Test symmetricDifference with empty other list")
-    public void testSymmetricDifference_EmptyOther() {
-        IntList result = list.symmetricDifference(IntList.of());
-        assertEquals(list.size(), result.size());
+    public void testToString() {
+        IntList list = IntList.of(1, 2, 3);
+        assertEquals("[1, 2, 3]", list.toString());
+        IntList emptyList = new IntList();
+        assertEquals("[]", emptyList.toString());
     }
 
 }

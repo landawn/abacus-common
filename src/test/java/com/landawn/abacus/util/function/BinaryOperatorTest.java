@@ -4,13 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Throwables;
 
-@Tag("2025")
 public class BinaryOperatorTest extends TestBase {
 
     @Test
@@ -35,20 +33,6 @@ public class BinaryOperatorTest extends TestBase {
     }
 
     @Test
-    public void testApplyWithMax() {
-        BinaryOperator<Integer> operator = Integer::max;
-        Integer result = operator.apply(10, 20);
-        assertEquals(20, result);
-    }
-
-    @Test
-    public void testApplyWithMin() {
-        BinaryOperator<Integer> operator = Integer::min;
-        Integer result = operator.apply(10, 20);
-        assertEquals(10, result);
-    }
-
-    @Test
     public void testAndThen() {
         BinaryOperator<Integer> operator = (a, b) -> a + b;
         java.util.function.Function<Integer, String> afterFunction = Object::toString;
@@ -57,44 +41,6 @@ public class BinaryOperatorTest extends TestBase {
         String result = chainedFunction.apply(10, 20);
 
         assertEquals("30", result);
-    }
-
-    @Test
-    public void testAndThenMultipleChains() {
-        BinaryOperator<Integer> operator = (a, b) -> a * b;
-        java.util.function.Function<Integer, Integer> addTen = x -> x + 10;
-        java.util.function.Function<Integer, Integer> doubleIt = x -> x * 2;
-
-        BiFunction<Integer, Integer, Integer> chainedFunction = operator.andThen(addTen).andThen(doubleIt);
-        Integer result = chainedFunction.apply(5, 3);
-
-        assertEquals(50, result); // (5 * 3 + 10) * 2 = 50
-    }
-
-    @Test
-    public void testApplyWithException() {
-        BinaryOperator<Integer> operator = (a, b) -> {
-            throw new RuntimeException("Test exception");
-        };
-
-        assertThrows(RuntimeException.class, () -> operator.apply(10, 20));
-    }
-
-    @Test
-    public void testToThrowable() {
-        BinaryOperator<Integer> operator = (a, b) -> a + b;
-        Throwables.BinaryOperator<Integer, ?> throwableOperator = operator.toThrowable();
-
-        assertNotNull(throwableOperator);
-    }
-
-    @Test
-    public void testToThrowableWithExecution() throws Throwable {
-        BinaryOperator<Integer> operator = (a, b) -> a - b;
-        Throwables.BinaryOperator<Integer, ?> throwableOperator = operator.toThrowable();
-
-        Integer result = throwableOperator.apply(50, 8);
-        assertEquals(42, result);
     }
 
     @Test
@@ -125,6 +71,41 @@ public class BinaryOperatorTest extends TestBase {
     }
 
     @Test
+    public void testAsBiFunction() {
+        BinaryOperator<Integer> operator = (a, b) -> a + b;
+        BiFunction<Integer, Integer, Integer> biFunction = operator;
+
+        Integer result = biFunction.apply(10, 20);
+        assertEquals(30, result);
+    }
+
+    @Test
+    public void testApplyWithMax() {
+        BinaryOperator<Integer> operator = Integer::max;
+        Integer result = operator.apply(10, 20);
+        assertEquals(20, result);
+    }
+
+    @Test
+    public void testApplyWithMin() {
+        BinaryOperator<Integer> operator = Integer::min;
+        Integer result = operator.apply(10, 20);
+        assertEquals(10, result);
+    }
+
+    @Test
+    public void testAndThenMultipleChains() {
+        BinaryOperator<Integer> operator = (a, b) -> a * b;
+        java.util.function.Function<Integer, Integer> addTen = x -> x + 10;
+        java.util.function.Function<Integer, Integer> doubleIt = x -> x * 2;
+
+        BiFunction<Integer, Integer, Integer> chainedFunction = operator.andThen(addTen).andThen(doubleIt);
+        Integer result = chainedFunction.apply(5, 3);
+
+        assertEquals(50, result); // (5 * 3 + 10) * 2 = 50
+    }
+
+    @Test
     public void testWithNullValues() {
         BinaryOperator<String> operator = (s1, s2) -> {
             if (s1 == null && s2 == null)
@@ -143,11 +124,28 @@ public class BinaryOperatorTest extends TestBase {
     }
 
     @Test
-    public void testAsBiFunction() {
-        BinaryOperator<Integer> operator = (a, b) -> a + b;
-        BiFunction<Integer, Integer, Integer> biFunction = operator;
+    public void testApplyWithException() {
+        BinaryOperator<Integer> operator = (a, b) -> {
+            throw new RuntimeException("Test exception");
+        };
 
-        Integer result = biFunction.apply(10, 20);
-        assertEquals(30, result);
+        assertThrows(RuntimeException.class, () -> operator.apply(10, 20));
+    }
+
+    @Test
+    public void testToThrowable() {
+        BinaryOperator<Integer> operator = (a, b) -> a + b;
+        Throwables.BinaryOperator<Integer, ?> throwableOperator = operator.toThrowable();
+
+        assertNotNull(throwableOperator);
+    }
+
+    @Test
+    public void testToThrowableWithExecution() throws Throwable {
+        BinaryOperator<Integer> operator = (a, b) -> a - b;
+        Throwables.BinaryOperator<Integer, ?> throwableOperator = operator.toThrowable();
+
+        Integer result = throwableOperator.apply(50, 8);
+        assertEquals(42, result);
     }
 }

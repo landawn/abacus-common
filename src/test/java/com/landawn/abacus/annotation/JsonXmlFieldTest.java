@@ -13,14 +13,12 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.annotation.JsonXmlField.Direction;
 import com.landawn.abacus.util.EnumType;
 
-@Tag("2025")
 public class JsonXmlFieldTest extends TestBase {
     static class TestClass {
         @JsonXmlField
@@ -29,12 +27,6 @@ public class JsonXmlFieldTest extends TestBase {
         @JsonXmlField(name = "custom_name", aliases = { "alt1",
                 "alt2" }, type = "String", enumerated = EnumType.ORDINAL, dateFormat = "yyyy-MM-dd", timeZone = "UTC", numberFormat = "#.##", ignore = true, isJsonRawValue = true, direction = Direction.SERIALIZE_ONLY)
         private String field2;
-    }
-
-    @Test
-    public void testFieldAnnotation() throws NoSuchFieldException {
-        Field field = TestClass.class.getDeclaredField("field1");
-        assertTrue(field.isAnnotationPresent(JsonXmlField.class));
     }
 
     @Test
@@ -69,6 +61,12 @@ public class JsonXmlFieldTest extends TestBase {
         assertTrue(annotation.ignore());
         assertTrue(annotation.isJsonRawValue());
         assertEquals(Direction.SERIALIZE_ONLY, annotation.direction());
+    }
+
+    @Test
+    public void testFieldAnnotation() throws NoSuchFieldException {
+        Field field = TestClass.class.getDeclaredField("field1");
+        assertTrue(field.isAnnotationPresent(JsonXmlField.class));
     }
 
     @Test

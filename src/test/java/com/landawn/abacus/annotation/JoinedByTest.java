@@ -15,12 +15,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class JoinedByTest extends TestBase {
 
     static class TestEntity {
@@ -38,9 +36,18 @@ public class JoinedByTest extends TestBase {
     }
 
     @Test
-    public void testFieldAnnotation() throws NoSuchFieldException {
-        Field field = TestEntity.class.getDeclaredField("field1");
-        assertTrue(field.isAnnotationPresent(JoinedBy.class));
+    public void testRetentionPolicy() {
+        Retention retention = JoinedBy.class.getAnnotation(Retention.class);
+        assertNotNull(retention);
+        assertEquals(RetentionPolicy.RUNTIME, retention.value());
+    }
+
+    @Test
+    public void testTargetElements() {
+        Target target = JoinedBy.class.getAnnotation(Target.class);
+        assertNotNull(target);
+        ElementType[] expectedTargets = { ElementType.FIELD };
+        assertArrayEquals(expectedTargets, target.value());
     }
 
     @Test
@@ -76,18 +83,16 @@ public class JoinedByTest extends TestBase {
     }
 
     @Test
-    public void testRetentionPolicy() {
-        Retention retention = JoinedBy.class.getAnnotation(Retention.class);
-        assertNotNull(retention);
-        assertEquals(RetentionPolicy.RUNTIME, retention.value());
+    public void testValueMethodExists() throws NoSuchMethodException {
+        Method valueMethod = JoinedBy.class.getDeclaredMethod("value");
+        assertNotNull(valueMethod);
+        assertEquals(String[].class, valueMethod.getReturnType());
     }
 
     @Test
-    public void testTargetElements() {
-        Target target = JoinedBy.class.getAnnotation(Target.class);
-        assertNotNull(target);
-        ElementType[] expectedTargets = { ElementType.FIELD };
-        assertArrayEquals(expectedTargets, target.value());
+    public void testFieldAnnotation() throws NoSuchFieldException {
+        Field field = TestEntity.class.getDeclaredField("field1");
+        assertTrue(field.isAnnotationPresent(JoinedBy.class));
     }
 
     @Test
@@ -106,13 +111,6 @@ public class JoinedByTest extends TestBase {
         JoinedBy annotation = field.getAnnotation(JoinedBy.class);
         assertNotNull(annotation);
         assertEquals(JoinedBy.class, annotation.annotationType());
-    }
-
-    @Test
-    public void testValueMethodExists() throws NoSuchMethodException {
-        Method valueMethod = JoinedBy.class.getDeclaredMethod("value");
-        assertNotNull(valueMethod);
-        assertEquals(String[].class, valueMethod.getReturnType());
     }
 
     @Test

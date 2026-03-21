@@ -22,7 +22,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -30,7 +29,6 @@ import com.landawn.abacus.util.Throwables.Iterator;
 import com.landawn.abacus.util.Throwables.LazyInitializer;
 import com.landawn.abacus.util.u.Nullable;
 
-@Tag("2025")
 public class ThrowablesTest extends TestBase {
 
     public static class TestException extends Exception {
@@ -109,6 +107,79 @@ public class ThrowablesTest extends TestBase {
     public void testRun_WithErrorHandler_NullErrorHandler() {
         assertThrows(IllegalArgumentException.class, () -> Throwables.run(() -> {
         }, null));
+    }
+
+    @Test
+    public void testRun_withoutException() {
+        final AtomicBoolean executed = new AtomicBoolean(false);
+        Throwables.run(() -> executed.set(true));
+        assertTrue(executed.get(), "Runnable should have been executed.");
+    }
+
+    @Test
+    public void testRun_withCheckedException() {
+        assertThrows(RuntimeException.class, () -> {
+            Throwables.run(() -> {
+                throw new IOException("Test Exception");
+            });
+        }, "A checked exception should be wrapped in a RuntimeException.");
+    }
+
+    @Test
+    public void testRun_withRuntimeException() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Throwables.run(() -> {
+                throw new IllegalArgumentException("Test Runtime Exception");
+            });
+        }, "A RuntimeException should be rethrown as is.");
+    }
+
+    @Test
+    public void testRun_withActionOnError_noException() {
+        final AtomicBoolean cmdExecuted = new AtomicBoolean(false);
+        final AtomicBoolean errorActionExecuted = new AtomicBoolean(false);
+
+        Throwables.run(() -> cmdExecuted.set(true), e -> errorActionExecuted.set(true));
+
+        assertTrue(cmdExecuted.get(), "Command should have been executed.");
+        assertFalse(errorActionExecuted.get(), "Error action should not have been executed.");
+    }
+
+    @Test
+    public void testRun_withActionOnError_withException() {
+        final AtomicBoolean errorActionExecuted = new AtomicBoolean(false);
+        final Exception testException = new IOException("Test");
+
+        Throwables.run(() -> {
+            throw testException;
+        }, e -> {
+            errorActionExecuted.set(true);
+            assertSame(testException, e, "The correct exception should be passed to the error action.");
+        });
+
+        assertTrue(errorActionExecuted.get(), "Error action should have been executed.");
+    }
+
+    @Test
+    public void testExceptionWrapping() {
+        try {
+            Throwables.run(() -> {
+                throw new IllegalArgumentException("Should not be wrapped");
+            });
+            fail("Should have thrown exception");
+        } catch (IllegalArgumentException e) {
+            assertEquals("Should not be wrapped", e.getMessage());
+        }
+
+        try {
+            Throwables.run(() -> {
+                throw new IOException("Should be wrapped");
+            });
+            fail("Should have thrown exception");
+        } catch (RuntimeException e) {
+            assertTrue(e.getCause() instanceof IOException);
+            assertEquals("Should be wrapped", e.getCause().getMessage());
+        }
     }
 
     @Test
@@ -275,6 +346,232 @@ public class ThrowablesTest extends TestBase {
     @Test
     public void testCall_WithPredicateAndDefaultValue_NullPredicate() {
         assertThrows(IllegalArgumentException.class, () -> Throwables.call(() -> 42, null, 0));
+    }
+
+    @Test
+    public void testCallable_Unchecked_Success() {
+        Throwables.Callable<String, Exception> throwableCallable = () -> "result";
+
+        com.landawn.abacus.util.function.Callable<String> unchecked = throwableCallable.unchecked();
+        String result = unchecked.call();
+
+        assertEquals("result", result);
+    }
+
+    @Test
+    public void testCall_withoutException() {
+        String result = Throwables.call(() -> "success");
+        assertEquals("success", result, "The result of the callable should be returned.");
+    }
+
+    @Test
+    public void testCall_withCheckedException() {
+        assertThrows(RuntimeException.class, () -> {
+            Throwables.call(() -> {
+                if (true)
+                    throw new IOException("Test Exception");
+                return "failure";
+            });
+        }, "A checked exception should be wrapped in a RuntimeException.");
+    }
+
+    @Test
+    public void testCall_withActionOnError() {
+        String result = Throwables.call(() -> {
+            throw new IOException("Test");
+        }, Fn.s(() -> "handled"));
+        assertEquals("handled", result, "The actionOnError function should provide the return value.");
+    }
+
+    @Test
+    public void testCall_withSupplier() {
+        String result = Throwables.call(() -> {
+            throw new Exception("Test");
+        }, Fn.s(() -> "supplied"));
+        assertEquals("supplied", result, "The supplier should provide the return value on error.");
+    }
+
+    @Test
+    public void testCall_withDefaultValue() {
+        String result = Throwables.call(() -> {
+            throw new Exception("Test");
+        }, "default");
+        assertEquals("default", result, "The default value should be returned on error.");
+    }
+
+    @Test
+    public void testCall_withPredicateAndSupplier_predicateTrue() {
+        String result = Throwables.call(() -> {
+            throw new IOException("IO Test");
+        }, e -> e instanceof IOException, Fn.s(() -> "supplied_on_io"));
+        assertEquals("supplied_on_io", result, "Supplier should be used when predicate is true.");
+    }
+
+    @Test
+    public void testCall_withPredicateAndSupplier_predicateFalse() {
+        assertThrows(RuntimeException.class, () -> {
+            Throwables.call(() -> {
+                throw new IllegalArgumentException("Arg Test");
+            }, e -> e instanceof IOException, Fn.s(() -> "supplied_on_io"));
+        }, "Exception should be rethrown when predicate is false.");
+    }
+
+    @Test
+    public void testCall_withPredicateAndDefaultValue_predicateTrue() {
+        String result = Throwables.call(() -> {
+            throw new IOException("IO Test");
+        }, e -> e instanceof IOException, "default_on_io");
+        assertEquals("default_on_io", result, "Default value should be used when predicate is true.");
+    }
+
+    @Test
+    public void testCall_withPredicateAndDefaultValue_predicateFalse() {
+        assertThrows(RuntimeException.class, () -> {
+            Throwables.call(() -> {
+                throw new IllegalArgumentException("Arg Test");
+            }, e -> e instanceof IOException, "default_on_io");
+        }, "Exception should be rethrown when predicate is false.");
+    }
+
+    @Test
+    public void testCall_ReturnsNull() {
+        String result = Throwables.call(() -> null);
+        assertNull(result);
+    }
+
+    @Test
+    public void testCall_WithSupplier_ReturnsSupplierValueOnError() {
+        String result = Throwables.call(() -> {
+            throw new TestException("Error");
+        }, Fn.s(() -> "Default value"));
+
+        assertEquals("Default value", result);
+    }
+
+    @Test
+    public void testCall_WithDefaultValue_ReturnsDefaultOnError() {
+        String result = Throwables.call(() -> {
+            throw new TestException("Error");
+        }, "Default value");
+
+        assertEquals("Default value", result);
+    }
+
+    @Test
+    public void testCall_WithNullDefaultValue_ReturnsNullOnError() {
+        String result = Throwables.call(() -> {
+            throw new TestException("Error");
+        }, (String) null);
+
+        assertNull(result);
+    }
+
+    @Test
+    public void testCall_WithPredicateSupplier_Success() {
+        String result = Throwables.call(() -> "Success", e -> e instanceof TestException, Fn.s(() -> "Handled"));
+        assertEquals("Success", result);
+    }
+
+    @Test
+    public void testCall_WithPredicateSupplier_PredicateTrue() {
+        String result = Throwables.call(() -> {
+            throw new TestException("Error");
+        }, e -> e instanceof TestException, Fn.s(() -> "Handled by predicate"));
+        assertEquals("Handled by predicate", result);
+    }
+
+    @Test
+    public void testCall_WithPredicateSupplier_PredicateFalse() {
+        assertThrows(RuntimeException.class, () -> Throwables.call(() -> {
+            throw new TestException("Error");
+        }, e -> e instanceof IOException, Fn.s(() -> "Should not reach here")));
+    }
+
+    @Test
+    public void testCall_WithPredicateDefault_Success() {
+        String result = Throwables.call(() -> "Success", e -> e instanceof TestException, "Default");
+        assertEquals("Success", result);
+    }
+
+    @Test
+    public void testCall_WithPredicateDefault_PredicateTrue() {
+        String result = Throwables.call(() -> {
+            throw new TestException("Error");
+        }, e -> e instanceof TestException, "Default value");
+        assertEquals("Default value", result);
+    }
+
+    @Test
+    public void testCall_WithPredicateDefault_PredicateFalse() {
+        assertThrows(RuntimeException.class, () -> Throwables.call(() -> {
+            throw new TestException("Error");
+        }, e -> e instanceof IOException, "Should not reach here"));
+    }
+
+    @Test
+    public void testCallable_Unchecked_Exception() {
+        Throwables.Callable<String, TestException> throwingCallable = () -> {
+            throw new TestException("Test");
+        };
+
+        com.landawn.abacus.util.function.Callable<String> unchecked = throwingCallable.unchecked();
+        assertThrows(RuntimeException.class, () -> unchecked.call());
+    }
+
+    @Test
+    public void testEEFunctionalInterfaces() throws Exception {
+        AtomicBoolean executed = new AtomicBoolean(false);
+        Throwables.EE.Runnable<TestException, IOException> eeRunnable = () -> executed.set(true);
+        eeRunnable.run();
+        assertTrue(executed.get());
+
+        Throwables.EE.Callable<String, TestException, IOException> eeCallable = () -> "EE Result";
+        assertEquals("EE Result", eeCallable.call());
+
+        Throwables.EE.Supplier<Integer, TestException, IOException> eeSupplier = () -> 42;
+        assertEquals(Integer.valueOf(42), eeSupplier.get());
+
+        Throwables.EE.Function<String, Integer, TestException, IOException> eeFunction = String::length;
+        assertEquals(Integer.valueOf(5), eeFunction.apply("Hello"));
+
+        Throwables.EE.BiFunction<String, String, String, TestException, IOException> eeBiFunction = (a, b) -> a + b;
+        assertEquals("AB", eeBiFunction.apply("A", "B"));
+
+        AtomicReference<String> result = new AtomicReference<>();
+        Throwables.EE.Consumer<String, TestException, IOException> eeConsumer = result::set;
+        eeConsumer.accept("Test");
+        assertEquals("Test", result.get());
+
+        Throwables.EE.Predicate<Integer, TestException, IOException> eePredicate = n -> n > 0;
+        assertTrue(eePredicate.test(5));
+        assertFalse(eePredicate.test(-1));
+    }
+
+    @Test
+    public void testEEEFunctionalInterfaces() throws Exception {
+        AtomicBoolean executed = new AtomicBoolean(false);
+        Throwables.EEE.Runnable<TestException, IOException, RuntimeException> eeeRunnable = () -> executed.set(true);
+        eeeRunnable.run();
+        assertTrue(executed.get());
+
+        Throwables.EEE.Callable<String, TestException, IOException, RuntimeException> eeeCallable = () -> "EEE Result";
+        assertEquals("EEE Result", eeeCallable.call());
+
+        Throwables.EEE.Function<String, Integer, TestException, IOException, RuntimeException> eeeFunction = s -> s.length();
+        assertEquals(Integer.valueOf(7), eeeFunction.apply("Testing"));
+
+        Throwables.EEE.TriFunction<String, String, String, String, TestException, IOException, RuntimeException> eeeTriFunction = (a, b, c) -> a + b + c;
+        assertEquals("ABC", eeeTriFunction.apply("A", "B", "C"));
+
+        List<String> results = new ArrayList<>();
+        Throwables.EEE.Consumer<String, TestException, IOException, RuntimeException> eeeConsumer = results::add;
+        eeeConsumer.accept("Item1");
+        assertEquals(1, results.size());
+        assertEquals("Item1", results.get(0));
+
+        Throwables.EEE.BiPredicate<String, Integer, TestException, IOException, RuntimeException> eeeBiPredicate = (s, i) -> s.length() == i;
+        assertTrue(eeeBiPredicate.test("Hello", 5));
+        assertFalse(eeeBiPredicate.test("Hi", 5));
     }
 
     @Test
@@ -1249,16 +1546,6 @@ public class ThrowablesTest extends TestBase {
     }
 
     @Test
-    public void testCallable_Unchecked_Success() {
-        Throwables.Callable<String, Exception> throwableCallable = () -> "result";
-
-        com.landawn.abacus.util.function.Callable<String> unchecked = throwableCallable.unchecked();
-        String result = unchecked.call();
-
-        assertEquals("result", result);
-    }
-
-    @Test
     public void testCallable_Unchecked_ThrowsRuntimeException() {
         Throwables.Callable<String, Exception> throwableCallable = () -> {
             throw new TestException("Test exception");
@@ -1614,132 +1901,6 @@ public class ThrowablesTest extends TestBase {
     }
 
     @Test
-    public void testRun_withoutException() {
-        final AtomicBoolean executed = new AtomicBoolean(false);
-        Throwables.run(() -> executed.set(true));
-        assertTrue(executed.get(), "Runnable should have been executed.");
-    }
-
-    @Test
-    public void testRun_withCheckedException() {
-        assertThrows(RuntimeException.class, () -> {
-            Throwables.run(() -> {
-                throw new IOException("Test Exception");
-            });
-        }, "A checked exception should be wrapped in a RuntimeException.");
-    }
-
-    @Test
-    public void testRun_withRuntimeException() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            Throwables.run(() -> {
-                throw new IllegalArgumentException("Test Runtime Exception");
-            });
-        }, "A RuntimeException should be rethrown as is.");
-    }
-
-    @Test
-    public void testRun_withActionOnError_noException() {
-        final AtomicBoolean cmdExecuted = new AtomicBoolean(false);
-        final AtomicBoolean errorActionExecuted = new AtomicBoolean(false);
-
-        Throwables.run(() -> cmdExecuted.set(true), e -> errorActionExecuted.set(true));
-
-        assertTrue(cmdExecuted.get(), "Command should have been executed.");
-        assertFalse(errorActionExecuted.get(), "Error action should not have been executed.");
-    }
-
-    @Test
-    public void testRun_withActionOnError_withException() {
-        final AtomicBoolean errorActionExecuted = new AtomicBoolean(false);
-        final Exception testException = new IOException("Test");
-
-        Throwables.run(() -> {
-            throw testException;
-        }, e -> {
-            errorActionExecuted.set(true);
-            assertSame(testException, e, "The correct exception should be passed to the error action.");
-        });
-
-        assertTrue(errorActionExecuted.get(), "Error action should have been executed.");
-    }
-
-    @Test
-    public void testCall_withoutException() {
-        String result = Throwables.call(() -> "success");
-        assertEquals("success", result, "The result of the callable should be returned.");
-    }
-
-    @Test
-    public void testCall_withCheckedException() {
-        assertThrows(RuntimeException.class, () -> {
-            Throwables.call(() -> {
-                if (true)
-                    throw new IOException("Test Exception");
-                return "failure";
-            });
-        }, "A checked exception should be wrapped in a RuntimeException.");
-    }
-
-    @Test
-    public void testCall_withActionOnError() {
-        String result = Throwables.call(() -> {
-            throw new IOException("Test");
-        }, Fn.s(() -> "handled"));
-        assertEquals("handled", result, "The actionOnError function should provide the return value.");
-    }
-
-    @Test
-    public void testCall_withSupplier() {
-        String result = Throwables.call(() -> {
-            throw new Exception("Test");
-        }, Fn.s(() -> "supplied"));
-        assertEquals("supplied", result, "The supplier should provide the return value on error.");
-    }
-
-    @Test
-    public void testCall_withDefaultValue() {
-        String result = Throwables.call(() -> {
-            throw new Exception("Test");
-        }, "default");
-        assertEquals("default", result, "The default value should be returned on error.");
-    }
-
-    @Test
-    public void testCall_withPredicateAndSupplier_predicateTrue() {
-        String result = Throwables.call(() -> {
-            throw new IOException("IO Test");
-        }, e -> e instanceof IOException, Fn.s(() -> "supplied_on_io"));
-        assertEquals("supplied_on_io", result, "Supplier should be used when predicate is true.");
-    }
-
-    @Test
-    public void testCall_withPredicateAndSupplier_predicateFalse() {
-        assertThrows(RuntimeException.class, () -> {
-            Throwables.call(() -> {
-                throw new IllegalArgumentException("Arg Test");
-            }, e -> e instanceof IOException, Fn.s(() -> "supplied_on_io"));
-        }, "Exception should be rethrown when predicate is false.");
-    }
-
-    @Test
-    public void testCall_withPredicateAndDefaultValue_predicateTrue() {
-        String result = Throwables.call(() -> {
-            throw new IOException("IO Test");
-        }, e -> e instanceof IOException, "default_on_io");
-        assertEquals("default_on_io", result, "Default value should be used when predicate is true.");
-    }
-
-    @Test
-    public void testCall_withPredicateAndDefaultValue_predicateFalse() {
-        assertThrows(RuntimeException.class, () -> {
-            Throwables.call(() -> {
-                throw new IllegalArgumentException("Arg Test");
-            }, e -> e instanceof IOException, "default_on_io");
-        }, "Exception should be rethrown when predicate is false.");
-    }
-
-    @Test
     public void testIterator_empty() throws Throwable {
         Throwables.Iterator<Object, ?> emptyIterator = Throwables.Iterator.empty();
         assertFalse(emptyIterator.hasNext(), "empty iterator should not have next.");
@@ -2056,81 +2217,6 @@ public class ThrowablesTest extends TestBase {
         }
 
         assertEquals(1, supplierCalls.get(), "Supplier must be called exactly once in a multi-threaded environment.");
-    }
-
-    @Test
-    public void testCall_ReturnsNull() {
-        String result = Throwables.call(() -> null);
-        assertNull(result);
-    }
-
-    @Test
-    public void testCall_WithSupplier_ReturnsSupplierValueOnError() {
-        String result = Throwables.call(() -> {
-            throw new TestException("Error");
-        }, Fn.s(() -> "Default value"));
-
-        assertEquals("Default value", result);
-    }
-
-    @Test
-    public void testCall_WithDefaultValue_ReturnsDefaultOnError() {
-        String result = Throwables.call(() -> {
-            throw new TestException("Error");
-        }, "Default value");
-
-        assertEquals("Default value", result);
-    }
-
-    @Test
-    public void testCall_WithNullDefaultValue_ReturnsNullOnError() {
-        String result = Throwables.call(() -> {
-            throw new TestException("Error");
-        }, (String) null);
-
-        assertNull(result);
-    }
-
-    @Test
-    public void testCall_WithPredicateSupplier_Success() {
-        String result = Throwables.call(() -> "Success", e -> e instanceof TestException, Fn.s(() -> "Handled"));
-        assertEquals("Success", result);
-    }
-
-    @Test
-    public void testCall_WithPredicateSupplier_PredicateTrue() {
-        String result = Throwables.call(() -> {
-            throw new TestException("Error");
-        }, e -> e instanceof TestException, Fn.s(() -> "Handled by predicate"));
-        assertEquals("Handled by predicate", result);
-    }
-
-    @Test
-    public void testCall_WithPredicateSupplier_PredicateFalse() {
-        assertThrows(RuntimeException.class, () -> Throwables.call(() -> {
-            throw new TestException("Error");
-        }, e -> e instanceof IOException, Fn.s(() -> "Should not reach here")));
-    }
-
-    @Test
-    public void testCall_WithPredicateDefault_Success() {
-        String result = Throwables.call(() -> "Success", e -> e instanceof TestException, "Default");
-        assertEquals("Success", result);
-    }
-
-    @Test
-    public void testCall_WithPredicateDefault_PredicateTrue() {
-        String result = Throwables.call(() -> {
-            throw new TestException("Error");
-        }, e -> e instanceof TestException, "Default value");
-        assertEquals("Default value", result);
-    }
-
-    @Test
-    public void testCall_WithPredicateDefault_PredicateFalse() {
-        assertThrows(RuntimeException.class, () -> Throwables.call(() -> {
-            throw new TestException("Error");
-        }, e -> e instanceof IOException, "Should not reach here"));
     }
 
     @Test
@@ -2629,16 +2715,6 @@ public class ThrowablesTest extends TestBase {
     }
 
     @Test
-    public void testCallable_Unchecked_Exception() {
-        Throwables.Callable<String, TestException> throwingCallable = () -> {
-            throw new TestException("Test");
-        };
-
-        com.landawn.abacus.util.function.Callable<String> unchecked = throwingCallable.unchecked();
-        assertThrows(RuntimeException.class, () -> unchecked.call());
-    }
-
-    @Test
     public void testPredicate_Negate() throws TestException {
         Throwables.Predicate<Integer, TestException> predicate = n -> n > 5;
         Throwables.Predicate<Integer, TestException> negated = predicate.negate();
@@ -2905,62 +2981,6 @@ public class ThrowablesTest extends TestBase {
         Throwables.IntDoubleConsumer<Exception> intDoubleConsumer = (idx, d) -> results.add(String.format("%d: %.2f", idx, d));
         intDoubleConsumer.accept(0, 3.14159);
         assertEquals("0: 3.14", results.get(0));
-    }
-
-    @Test
-    public void testEEFunctionalInterfaces() throws Exception {
-        AtomicBoolean executed = new AtomicBoolean(false);
-        Throwables.EE.Runnable<TestException, IOException> eeRunnable = () -> executed.set(true);
-        eeRunnable.run();
-        assertTrue(executed.get());
-
-        Throwables.EE.Callable<String, TestException, IOException> eeCallable = () -> "EE Result";
-        assertEquals("EE Result", eeCallable.call());
-
-        Throwables.EE.Supplier<Integer, TestException, IOException> eeSupplier = () -> 42;
-        assertEquals(Integer.valueOf(42), eeSupplier.get());
-
-        Throwables.EE.Function<String, Integer, TestException, IOException> eeFunction = String::length;
-        assertEquals(Integer.valueOf(5), eeFunction.apply("Hello"));
-
-        Throwables.EE.BiFunction<String, String, String, TestException, IOException> eeBiFunction = (a, b) -> a + b;
-        assertEquals("AB", eeBiFunction.apply("A", "B"));
-
-        AtomicReference<String> result = new AtomicReference<>();
-        Throwables.EE.Consumer<String, TestException, IOException> eeConsumer = result::set;
-        eeConsumer.accept("Test");
-        assertEquals("Test", result.get());
-
-        Throwables.EE.Predicate<Integer, TestException, IOException> eePredicate = n -> n > 0;
-        assertTrue(eePredicate.test(5));
-        assertFalse(eePredicate.test(-1));
-    }
-
-    @Test
-    public void testEEEFunctionalInterfaces() throws Exception {
-        AtomicBoolean executed = new AtomicBoolean(false);
-        Throwables.EEE.Runnable<TestException, IOException, RuntimeException> eeeRunnable = () -> executed.set(true);
-        eeeRunnable.run();
-        assertTrue(executed.get());
-
-        Throwables.EEE.Callable<String, TestException, IOException, RuntimeException> eeeCallable = () -> "EEE Result";
-        assertEquals("EEE Result", eeeCallable.call());
-
-        Throwables.EEE.Function<String, Integer, TestException, IOException, RuntimeException> eeeFunction = s -> s.length();
-        assertEquals(Integer.valueOf(7), eeeFunction.apply("Testing"));
-
-        Throwables.EEE.TriFunction<String, String, String, String, TestException, IOException, RuntimeException> eeeTriFunction = (a, b, c) -> a + b + c;
-        assertEquals("ABC", eeeTriFunction.apply("A", "B", "C"));
-
-        List<String> results = new ArrayList<>();
-        Throwables.EEE.Consumer<String, TestException, IOException, RuntimeException> eeeConsumer = results::add;
-        eeeConsumer.accept("Item1");
-        assertEquals(1, results.size());
-        assertEquals("Item1", results.get(0));
-
-        Throwables.EEE.BiPredicate<String, Integer, TestException, IOException, RuntimeException> eeeBiPredicate = (s, i) -> s.length() == i;
-        assertTrue(eeeBiPredicate.test("Hello", 5));
-        assertFalse(eeeBiPredicate.test("Hi", 5));
     }
 
     @Test
@@ -3302,28 +3322,6 @@ public class ThrowablesTest extends TestBase {
         assertEquals(1, intObjOp.applyAsInt(10, list));
         assertEquals(2, intObjOp.applyAsInt(20, list));
         assertEquals(Arrays.asList(10, 20), list);
-    }
-
-    @Test
-    public void testExceptionWrapping() {
-        try {
-            Throwables.run(() -> {
-                throw new IllegalArgumentException("Should not be wrapped");
-            });
-            fail("Should have thrown exception");
-        } catch (IllegalArgumentException e) {
-            assertEquals("Should not be wrapped", e.getMessage());
-        }
-
-        try {
-            Throwables.run(() -> {
-                throw new IOException("Should be wrapped");
-            });
-            fail("Should have thrown exception");
-        } catch (RuntimeException e) {
-            assertTrue(e.getCause() instanceof IOException);
-            assertEquals("Should be wrapped", e.getCause().getMessage());
-        }
     }
 
     @Test

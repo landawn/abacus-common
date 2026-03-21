@@ -14,7 +14,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -23,7 +22,6 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("new-test")
 public class AbstractBooleanTypeTest extends TestBase {
     private Type<Boolean> type;
     private CharacterWriter characterWriter;
@@ -48,11 +46,6 @@ public class AbstractBooleanTypeTest extends TestBase {
     }
 
     @Test
-    public void testStringOf_Null() {
-        assertEquals(null, type.stringOf(null));
-    }
-
-    @Test
     public void testStringOf_True() {
         assertEquals("true", type.stringOf(Boolean.TRUE));
     }
@@ -63,35 +56,14 @@ public class AbstractBooleanTypeTest extends TestBase {
     }
 
     @Test
-    public void testValueOf_NullObject() {
-        Boolean result = type.valueOf((Object) null);
-        assertNull(result);
+    public void testStringOf_Null() {
+        assertEquals(null, type.stringOf(null));
     }
 
     @Test
     public void testValueOf_BooleanObject() {
         assertEquals(Boolean.TRUE, type.valueOf(Boolean.TRUE));
         assertEquals(Boolean.FALSE, type.valueOf(Boolean.FALSE));
-    }
-
-    @Test
-    public void testValueOf_PositiveNumber() {
-        assertEquals(Boolean.TRUE, type.valueOf(1));
-        assertEquals(Boolean.TRUE, type.valueOf(100L));
-        assertEquals(Boolean.FALSE, type.valueOf(0.1));
-    }
-
-    @Test
-    public void testValueOf_ZeroNumber() {
-        assertEquals(Boolean.FALSE, type.valueOf(0));
-        assertEquals(Boolean.FALSE, type.valueOf(0L));
-        assertEquals(Boolean.FALSE, type.valueOf(0.0));
-    }
-
-    @Test
-    public void testValueOf_NegativeNumber() {
-        assertEquals(Boolean.FALSE, type.valueOf(-1));
-        assertEquals(Boolean.FALSE, type.valueOf(-100L));
     }
 
     @Test
@@ -125,45 +97,11 @@ public class AbstractBooleanTypeTest extends TestBase {
     }
 
     @Test
-    public void testValueOf_String_Null() {
-        Boolean result = type.valueOf((String) null);
-        assertNull(result);
-    }
-
-    @Test
-    public void testValueOf_String_Empty() {
-        Boolean result = type.valueOf("");
-        assertNull(result);
-    }
-
-    @Test
-    public void testValueOf_String_SingleChar() {
-        assertEquals(Boolean.TRUE, type.valueOf("Y"));
-        assertEquals(Boolean.TRUE, type.valueOf("y"));
-        assertEquals(Boolean.TRUE, type.valueOf("1"));
-        assertEquals(Boolean.FALSE, type.valueOf("N"));
-        assertEquals(Boolean.FALSE, type.valueOf("0"));
-    }
-
-    @Test
     public void testValueOf_String_Boolean() {
         assertEquals(Boolean.TRUE, type.valueOf("true"));
         assertEquals(Boolean.TRUE, type.valueOf("TRUE"));
         assertEquals(Boolean.FALSE, type.valueOf("false"));
         assertEquals(Boolean.FALSE, type.valueOf("FALSE"));
-    }
-
-    @Test
-    public void testValueOf_CharArray_Null() {
-        Boolean result = type.valueOf(null, 0, 0);
-        assertNull(result);
-    }
-
-    @Test
-    public void testValueOf_CharArray_Empty() {
-        char[] cbuf = new char[0];
-        Boolean result = type.valueOf(cbuf, 0, 0);
-        assertNull(result);
     }
 
     @Test
@@ -191,6 +129,66 @@ public class AbstractBooleanTypeTest extends TestBase {
     public void testValueOf_CharArray_Offset() {
         char[] cbuf = "xxtrueyy".toCharArray();
         assertEquals(Boolean.TRUE, type.valueOf(cbuf, 2, 4));
+    }
+
+    @Test
+    public void testValueOf_NullObject() {
+        Boolean result = type.valueOf((Object) null);
+        assertNull(result);
+    }
+
+    @Test
+    public void testValueOf_PositiveNumber() {
+        assertEquals(Boolean.TRUE, type.valueOf(1));
+        assertEquals(Boolean.TRUE, type.valueOf(100L));
+        assertEquals(Boolean.FALSE, type.valueOf(0.1));
+    }
+
+    @Test
+    public void testValueOf_ZeroNumber() {
+        assertEquals(Boolean.FALSE, type.valueOf(0));
+        assertEquals(Boolean.FALSE, type.valueOf(0L));
+        assertEquals(Boolean.FALSE, type.valueOf(0.0));
+    }
+
+    @Test
+    public void testValueOf_NegativeNumber() {
+        assertEquals(Boolean.FALSE, type.valueOf(-1));
+        assertEquals(Boolean.FALSE, type.valueOf(-100L));
+    }
+
+    @Test
+    public void testValueOf_String_Null() {
+        Boolean result = type.valueOf((String) null);
+        assertNull(result);
+    }
+
+    @Test
+    public void testValueOf_String_Empty() {
+        Boolean result = type.valueOf("");
+        assertNull(result);
+    }
+
+    @Test
+    public void testValueOf_String_SingleChar() {
+        assertEquals(Boolean.TRUE, type.valueOf("Y"));
+        assertEquals(Boolean.TRUE, type.valueOf("y"));
+        assertEquals(Boolean.TRUE, type.valueOf("1"));
+        assertEquals(Boolean.FALSE, type.valueOf("N"));
+        assertEquals(Boolean.FALSE, type.valueOf("0"));
+    }
+
+    @Test
+    public void testValueOf_CharArray_Null() {
+        Boolean result = type.valueOf(null, 0, 0);
+        assertNull(result);
+    }
+
+    @Test
+    public void testValueOf_CharArray_Empty() {
+        char[] cbuf = new char[0];
+        Boolean result = type.valueOf(cbuf, 0, 0);
+        assertNull(result);
     }
 
     @Test

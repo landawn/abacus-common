@@ -20,7 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * A runtime exception that wraps {@link ReflectiveOperationException} and its subclasses,
  * allowing reflection exceptions to be thrown without being declared in method signatures.
- * 
+ *
  * <p>This exception wraps all reflection-related checked exceptions including:</p>
  * <ul>
  *   <li>{@link ClassNotFoundException} - When a class cannot be found</li>
@@ -30,7 +30,7 @@ import java.lang.reflect.InvocationTargetException;
  *   <li>{@link NoSuchFieldException} - When a field cannot be found</li>
  *   <li>{@link InvocationTargetException} - When an invoked method throws an exception</li>
  * </ul>
- * 
+ *
  * <p>This exception is particularly useful in contexts where reflection exceptions cannot be declared:</p>
  * <ul>
  *   <li>Lambda expressions and functional interfaces</li>
@@ -38,7 +38,7 @@ import java.lang.reflect.InvocationTargetException;
  *   <li>Framework code that uses reflection internally</li>
  *   <li>Dynamic proxy implementations</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Creating instances dynamically
@@ -50,7 +50,7 @@ import java.lang.reflect.InvocationTargetException;
  *             "Failed to create instance of " + clazz.getName(), e);
  *     }
  * }
- * 
+ *
  * // In a stream operation
  * List<Object> instances = classNames.stream()
  *     .map(className -> {
@@ -61,7 +61,7 @@ import java.lang.reflect.InvocationTargetException;
  *         }
  *     })
  *     .collect(Collectors.toList());
- * 
+ *
  * // Accessing private fields
  * public Object getFieldValue(Object obj, String fieldName) {
  *     try {
@@ -74,7 +74,7 @@ import java.lang.reflect.InvocationTargetException;
  *     }
  * }
  * }</pre>
- * 
+ *
  * @see UncheckedException
  * @see ReflectiveOperationException
  * @see ClassNotFoundException
@@ -104,8 +104,8 @@ public class UncheckedReflectiveOperationException extends UncheckedException {
      * }</pre>
      *
      * @param cause the {@link ReflectiveOperationException} to wrap. Must not be {@code null}.
-     *              This can be any subclass of ReflectiveOperationException including
-     *              ClassNotFoundException, NoSuchMethodException, IllegalAccessException, etc.
+     *              This can be any subclass of {@code ReflectiveOperationException} including
+     *              {@code ClassNotFoundException}, {@code NoSuchMethodException}, {@code IllegalAccessException}, etc.
      * @throws IllegalArgumentException if {@code cause} is {@code null}
      */
     public UncheckedReflectiveOperationException(final ReflectiveOperationException cause) {
@@ -135,7 +135,7 @@ public class UncheckedReflectiveOperationException extends UncheckedException {
      * @param message the detail message. The detail message is saved for later retrieval
      *                by the {@link #getMessage()} method.
      * @param cause the {@link ReflectiveOperationException} to wrap. Must not be {@code null}.
-     *              This can be any subclass of ReflectiveOperationException.
+     *              This can be any subclass of {@code ReflectiveOperationException}.
      * @throws IllegalArgumentException if {@code cause} is {@code null}
      */
     public UncheckedReflectiveOperationException(final String message, final ReflectiveOperationException cause) {

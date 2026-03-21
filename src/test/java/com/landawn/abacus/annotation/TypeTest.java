@@ -14,14 +14,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.annotation.Type.Scope;
 import com.landawn.abacus.util.EnumType;
 
-@Tag("2025")
 public class TypeTest extends TestBase {
     static class TestClass {
         @Type
@@ -41,15 +39,25 @@ public class TypeTest extends TestBase {
     }
 
     @Test
-    public void testFieldAnnotation() throws NoSuchFieldException {
-        Field field = TestClass.class.getDeclaredField("field1");
-        assertTrue(field.isAnnotationPresent(Type.class));
+    public void testRetentionPolicy() {
+        Retention retention = Type.class.getAnnotation(Retention.class);
+        assertNotNull(retention);
+        assertEquals(RetentionPolicy.RUNTIME, retention.value());
     }
 
     @Test
-    public void testMethodAnnotation() throws NoSuchMethodException {
-        Method method = TestClass.class.getDeclaredMethod("getField");
-        assertTrue(method.isAnnotationPresent(Type.class));
+    public void testTargetElements() {
+        Target target = Type.class.getAnnotation(Target.class);
+        assertNotNull(target);
+        assertArrayEquals(new ElementType[] { ElementType.FIELD, ElementType.METHOD }, target.value());
+    }
+
+    @Test
+    public void testDeprecatedValue() throws NoSuchFieldException {
+        Field field = TestClass.class.getDeclaredField("field3");
+        Type annotation = field.getAnnotation(Type.class);
+        assertNotNull(annotation);
+        assertEquals("legacy", annotation.value());
     }
 
     @Test
@@ -75,25 +83,23 @@ public class TypeTest extends TestBase {
     }
 
     @Test
-    public void testDeprecatedValue() throws NoSuchFieldException {
-        Field field = TestClass.class.getDeclaredField("field3");
-        Type annotation = field.getAnnotation(Type.class);
-        assertNotNull(annotation);
-        assertEquals("legacy", annotation.value());
+    public void testScopeEnum() {
+        assertEquals(3, Scope.values().length);
+        assertTrue(Arrays.asList(Scope.values()).contains(Scope.SERIALIZATION));
+        assertTrue(Arrays.asList(Scope.values()).contains(Scope.PERSISTENCE));
+        assertTrue(Arrays.asList(Scope.values()).contains(Scope.ALL));
     }
 
     @Test
-    public void testRetentionPolicy() {
-        Retention retention = Type.class.getAnnotation(Retention.class);
-        assertNotNull(retention);
-        assertEquals(RetentionPolicy.RUNTIME, retention.value());
+    public void testFieldAnnotation() throws NoSuchFieldException {
+        Field field = TestClass.class.getDeclaredField("field1");
+        assertTrue(field.isAnnotationPresent(Type.class));
     }
 
     @Test
-    public void testTargetElements() {
-        Target target = Type.class.getAnnotation(Target.class);
-        assertNotNull(target);
-        assertArrayEquals(new ElementType[] { ElementType.FIELD, ElementType.METHOD }, target.value());
+    public void testMethodAnnotation() throws NoSuchMethodException {
+        Method method = TestClass.class.getDeclaredMethod("getField");
+        assertTrue(method.isAnnotationPresent(Type.class));
     }
 
     @Test
@@ -112,13 +118,5 @@ public class TypeTest extends TestBase {
         assertTrue(Arrays.asList(EnumType.values()).contains(EnumType.NAME));
         assertTrue(Arrays.asList(EnumType.values()).contains(EnumType.ORDINAL));
         assertTrue(Arrays.asList(EnumType.values()).contains(EnumType.CODE));
-    }
-
-    @Test
-    public void testScopeEnum() {
-        assertEquals(3, Scope.values().length);
-        assertTrue(Arrays.asList(Scope.values()).contains(Scope.SERIALIZATION));
-        assertTrue(Arrays.asList(Scope.values()).contains(Scope.PERSISTENCE));
-        assertTrue(Arrays.asList(Scope.values()).contains(Scope.ALL));
     }
 }

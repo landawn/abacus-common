@@ -24,8 +24,8 @@ import java.lang.annotation.Target;
  * Marks a class as a persistent entity that maps to a database table.
  * This annotation is the primary marker for ORM (Object-Relational Mapping) frameworks
  * to identify classes that represent database entities and should be managed by the persistence layer.
- * 
- * <p>An entity class typically represents a table in a relational database, where:
+ *
+ * <p>An entity class typically represents a table in a relational database, where:</p>
  * <ul>
  *   <li>Each instance of the entity corresponds to a row in the table</li>
  *   <li>Each field (marked with {@link Column}) corresponds to a column in the table</li>
@@ -39,27 +39,27 @@ import java.lang.annotation.Target;
  *   <li>Override equals() and hashCode() based on the entity's identity</li>
  *   <li>Be serializable if they need to be passed across network boundaries</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * @Entity(name = "users")
  * public class User {
  *     @Id
  *     private Long id;
- *     
+ *
  *     @Column(name = "user_name")
  *     private String username;
- *     
+ *
  *     @Column
  *     private String email;
- *     
+ *
  *     // Constructors, getters, setters, etc.
  * }
  * }</pre>
- * 
+ *
  * <p><strong>Note:</strong> This annotation is marked as {@link Beta}, indicating it may
  * undergo changes in future versions.</p>
- * 
+ *
  * @see Table
  * @see Column
  * @see Id
@@ -82,23 +82,23 @@ public @interface Entity {
     /**
      * The name of the entity, which typically maps to the database table name.
      * If not specified (empty string), the simple class name is used as the entity name.
-     * 
+     *
      * <p>The entity name is used in:</p>
      * <ul>
      *   <li>SQL generation for table references</li>
      *   <li>Query generation to reference the entity</li>
      *   <li>Cache keys and other framework internals</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @Entity(name = "app_users")  // Maps to 'app_users' table
      * public class User { }
-     * 
+     *
      * @Entity  // Maps to 'Customer' table (class name)
      * public class Customer { }
      * }</pre>
-     * 
+     *
      * @return the entity name, or empty string to use the simple class name as default
      */
     String name() default "";

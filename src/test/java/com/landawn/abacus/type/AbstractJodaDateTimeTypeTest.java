@@ -18,7 +18,6 @@ import java.io.StringWriter;
 
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -26,7 +25,6 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 
-@Tag("new-test")
 public class AbstractJodaDateTimeTypeTest extends TestBase {
 
     private JodaDateTimeType jodaDateTimeType;

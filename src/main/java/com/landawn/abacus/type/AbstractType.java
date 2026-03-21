@@ -33,13 +33,15 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.TypeAttrParser;
 
 /**
- * Abstract base class for all types in the type system.
- * This class provides default implementations for most Type interface methods
+ * The Abstract base class for all types in the type system.
+ * <p>
+ * This class provides default implementations for most {@code Type} interface methods
  * and defines common constants and utility methods used across all type implementations.
  * Concrete type classes should extend this class and override methods as needed
  * for their specific type handling.
+ * </p>
  *
- * @param <T> the Java type that this Type represents
+ * @param <T> the Java type that this {@code Type} represents
  */
 public abstract class AbstractType<T> implements Type<T> {
 
@@ -61,25 +63,25 @@ public abstract class AbstractType<T> implements Type<T> {
     /** Special string constant for system time */
     static final String SYS_TIME = "sysTime";
 
-    /** String representation of null value */
+    /** String representation of {@code null} value */
     static final String NULL_STRING = "null";
 
     /** String representation of empty array */
     static final String STR_FOR_EMPTY_ARRAY = "[]";
 
-    /** Character array representation of null for efficient writing */
+    /** Character array representation of {@code null} for efficient writing */
     static final char[] NULL_CHAR_ARRAY = NULL_STRING.toCharArray();
 
-    /** String representation of boolean true */
+    /** String representation of boolean {@code true} */
     static final String TRUE_STRING = Boolean.TRUE.toString().intern();
 
-    /** Character array representation of boolean true for efficient writing */
+    /** Character array representation of boolean {@code true} for efficient writing */
     static final char[] TRUE_CHAR_ARRAY = TRUE_STRING.toCharArray();
 
-    /** String representation of boolean false */
+    /** String representation of boolean {@code false} */
     static final String FALSE_STRING = Boolean.FALSE.toString().intern();
 
-    /** Character array representation of boolean false for efficient writing */
+    /** Character array representation of boolean {@code false} for efficient writing */
     static final char[] FALSE_CHAR_ARRAY = FALSE_STRING.toCharArray();
 
     /** Empty type array constant */
@@ -108,9 +110,11 @@ public abstract class AbstractType<T> implements Type<T> {
     private final String xmlName;
 
     /**
-     * Constructs an AbstractType with the specified type name.
+     * Constructs an {@code AbstractType} with the specified type name.
+     * <p>
      * The constructor normalizes the type name by extracting the simple class name
-     * for common Java packages (java.lang, java.util, java.time, com.landawn.abacus).
+     * for common Java packages ({@code java.lang}, {@code java.util}, {@code java.time}, {@code com.landawn.abacus}).
+     * </p>
      *
      * @param typeName the fully qualified or simple type name
      */
@@ -146,9 +150,11 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Extracts type parameters from a generic type name.
-     * For example, "Map&lt;String, Integer&gt;" returns ["String", "Integer"].
+     * <p>
+     * For example, {@code "Map<String, Integer>"} returns {@code ["String", "Integer"]}.
+     * </p>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * // Extract type parameters from Map
      * String[] params1 = getTypeParameters("Map<String, Integer>");
@@ -172,9 +178,11 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Extracts all parameters from a type name.
+     * <p>
      * This includes both type parameters and other attributes.
+     * </p>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * // Extract all parameters from a type name
      * String[] params = getParameters("Map<String, Integer>");
@@ -194,7 +202,9 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Returns the name of this type.
+     * <p>
      * This is the simplified name without package qualifiers for common types.
+     * </p>
      *
      * @return the type name
      */
@@ -215,7 +225,9 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Returns the declaring name of this type.
+     * <p>
      * For most types, this is the same as {@link #name()}.
+     * </p>
      *
      * @return the declaring name
      */
@@ -227,7 +239,9 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Returns the XML-safe name of this type.
+     * <p>
      * This escapes angle brackets to make the name safe for use in XML.
+     * </p>
      *
      * @return the XML-safe type name with escaped angle brackets
      */
@@ -238,8 +252,10 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Checks if this is a primitive type.
+     * <p>
      * Default implementation returns {@code false}.
      * Subclasses for primitive types should override this method.
+     * </p>
      *
      * @return {@code true} if this is a primitive type, {@code false} otherwise
      */
@@ -250,8 +266,10 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Checks if this is a primitive wrapper type.
+     * <p>
      * Default implementation returns {@code false}.
      * Subclasses for primitive wrapper types should override this method.
+     * </p>
      *
      * @return {@code true} if this is a primitive wrapper type, {@code false} otherwise
      */
@@ -262,7 +280,9 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Checks if this is a primitive list type.
+     * <p>
      * Default implementation returns {@code false}.
+     * </p>
      *
      * @return {@code true} if this is a primitive list type, {@code false} otherwise
      */
@@ -273,7 +293,9 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Checks if this is a boolean type.
+     * <p>
      * Default implementation returns {@code false}.
+     * </p>
      *
      * @return {@code true} if this is a boolean type, {@code false} otherwise
      */
@@ -284,7 +306,9 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Checks if this is a number type.
+     * <p>
      * Default implementation returns {@code false}.
+     * </p>
      *
      * @return {@code true} if this is a number type, {@code false} otherwise
      */
@@ -295,7 +319,9 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Checks if this is a string type.
+     * <p>
      * Default implementation returns {@code false}.
+     * </p>
      *
      * @return {@code true} if this is a string type, {@code false} otherwise
      */
@@ -305,10 +331,12 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if this is a CharSequence type.
+     * Checks if this is a {@code CharSequence} type.
+     * <p>
      * Default implementation returns {@code false}.
+     * </p>
      *
-     * @return {@code true} if this is a CharSequence type, {@code false} otherwise
+     * @return {@code true} if this is a {@code CharSequence} type, {@code false} otherwise
      */
     @Override
     public boolean isCharSequence() {
@@ -316,10 +344,12 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if this type represents a Date.
+     * Checks if this type represents a {@code Date}.
+     * <p>
      * Default implementation returns {@code false}.
+     * </p>
      *
-     * @return {@code true} if this is a Date type, {@code false} otherwise
+     * @return {@code true} if this is a {@code Date} type, {@code false} otherwise
      */
     @Override
     public boolean isDate() {
@@ -327,10 +357,12 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if this type represents a Calendar.
+     * Checks if this type represents a {@code Calendar}.
+     * <p>
      * Default implementation returns {@code false}.
+     * </p>
      *
-     * @return {@code true} if this is a Calendar type, {@code false} otherwise
+     * @return {@code true} if this is a {@code Calendar} type, {@code false} otherwise
      */
     @Override
     public boolean isCalendar() {
@@ -338,10 +370,12 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if this type represents a Joda DateTime.
+     * Checks if this type represents a Joda {@code DateTime}.
+     * <p>
      * Default implementation returns {@code false}.
+     * </p>
      *
-     * @return {@code true} if this is a Joda DateTime type, {@code false} otherwise
+     * @return {@code true} if this is a Joda {@code DateTime} type, {@code false} otherwise
      */
     @Override
     public boolean isJodaDateTime() {
@@ -350,7 +384,9 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Checks if this type represents a primitive array.
+     * <p>
      * Default implementation returns {@code false}.
+     * </p>
      *
      * @return {@code true} if this is a primitive array type, {@code false} otherwise
      */
@@ -361,7 +397,9 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Checks if this type represents a byte array.
+     * <p>
      * Default implementation returns {@code false}.
+     * </p>
      *
      * @return {@code true} if this is a byte array type, {@code false} otherwise
      */
@@ -372,7 +410,9 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Checks if this type represents an object array.
+     * <p>
      * Default implementation returns {@code false}.
+     * </p>
      *
      * @return {@code true} if this is an object array type, {@code false} otherwise
      */
@@ -383,7 +423,9 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Checks if this type represents any kind of array.
+     * <p>
      * Default implementation returns {@code false}.
+     * </p>
      *
      * @return {@code true} if this is an array type, {@code false} otherwise
      */
@@ -393,10 +435,12 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if this type represents a List.
+     * Checks if this type represents a {@code List}.
+     * <p>
      * Default implementation returns {@code false}.
+     * </p>
      *
-     * @return {@code true} if this is a List type, {@code false} otherwise
+     * @return {@code true} if this is a {@code List} type, {@code false} otherwise
      */
     @Override
     public boolean isList() {
@@ -404,10 +448,12 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if this type represents a Set.
+     * Checks if this type represents a {@code Set}.
+     * <p>
      * Default implementation returns {@code false}.
+     * </p>
      *
-     * @return {@code true} if this is a Set type, {@code false} otherwise
+     * @return {@code true} if this is a {@code Set} type, {@code false} otherwise
      */
     @Override
     public boolean isSet() {
@@ -415,10 +461,12 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if this type represents a Collection.
+     * Checks if this type represents a {@code Collection}.
+     * <p>
      * Default implementation returns {@code false}.
+     * </p>
      *
-     * @return {@code true} if this is a Collection type, {@code false} otherwise
+     * @return {@code true} if this is a {@code Collection} type, {@code false} otherwise
      */
     @Override
     public boolean isCollection() {
@@ -426,10 +474,12 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if this type represents a Map.
+     * Checks if this type represents a {@code Map}.
+     * <p>
      * Default implementation returns {@code false}.
+     * </p>
      *
-     * @return {@code true} if this is a Map type, {@code false} otherwise
+     * @return {@code true} if this is a {@code Map} type, {@code false} otherwise
      */
     @Override
     public boolean isMap() {
@@ -438,7 +488,9 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Checks if this type represents a Bean.
+     * <p>
      * Default implementation returns {@code false}.
+     * </p>
      *
      * @return {@code true} if this is a Bean type, {@code false} otherwise
      */
@@ -448,10 +500,12 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if this type represents a MapEntity.
+     * Checks if this type represents a {@code MapEntity}.
+     * <p>
      * Default implementation returns {@code false}.
+     * </p>
      *
-     * @return {@code true} if this is a MapEntity type, {@code false} otherwise
+     * @return {@code true} if this is a {@code MapEntity} type, {@code false} otherwise
      */
     @Override
     public boolean isMapEntity() {
@@ -459,10 +513,12 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if this type represents an EntityId.
+     * Checks if this type represents an {@code EntityId}.
+     * <p>
      * Default implementation returns {@code false}.
+     * </p>
      *
-     * @return {@code true} if this is an EntityId type, {@code false} otherwise
+     * @return {@code true} if this is an {@code EntityId} type, {@code false} otherwise
      */
     @Override
     public boolean isEntityId() {
@@ -470,10 +526,12 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if this type represents a Dataset.
+     * Checks if this type represents a {@code Dataset}.
+     * <p>
      * Default implementation returns {@code false}.
+     * </p>
      *
-     * @return {@code true} if this is a Dataset type, {@code false} otherwise
+     * @return {@code true} if this is a {@code Dataset} type, {@code false} otherwise
      */
     @Override
     public boolean isDataset() {
@@ -481,10 +539,12 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if this type represents an InputStream.
+     * Checks if this type represents an {@code InputStream}.
+     * <p>
      * Default implementation returns {@code false}.
+     * </p>
      *
-     * @return {@code true} if this is an InputStream type, {@code false} otherwise
+     * @return {@code true} if this is an {@code InputStream} type, {@code false} otherwise
      */
     @Override
     public boolean isInputStream() {
@@ -492,10 +552,12 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if this type represents a Reader.
+     * Checks if this type represents a {@code Reader}.
+     * <p>
      * Default implementation returns {@code false}.
+     * </p>
      *
-     * @return {@code true} if this is a Reader type, {@code false} otherwise
+     * @return {@code true} if this is a {@code Reader} type, {@code false} otherwise
      */
     @Override
     public boolean isReader() {
@@ -503,10 +565,12 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if this type represents a ByteBuffer.
+     * Checks if this type represents a {@code ByteBuffer}.
+     * <p>
      * Default implementation returns {@code false}.
+     * </p>
      *
-     * @return {@code true} if this is a ByteBuffer type, {@code false} otherwise
+     * @return {@code true} if this is a {@code ByteBuffer} type, {@code false} otherwise
      */
     @Override
     public boolean isByteBuffer() {

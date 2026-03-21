@@ -9,13 +9,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.ParsingException;
 
-@Tag("new-test")
 public class CsvParserTest extends TestBase {
 
     @Test
@@ -90,6 +88,79 @@ public class CsvParserTest extends TestBase {
     @Test
     public void testConstructorWithNullSeparator() {
         assertThrows(UnsupportedOperationException.class, () -> new CsvParser(CsvParser.NULL_CHARACTER, '"', '\\'));
+    }
+
+    @Test
+    public void testDoubleQuoteEscaping() throws ParsingException {
+        CsvParser parser = new CsvParser();
+        List<String> result = parser.parseLine("\"John \"\"Johnny\"\" Doe\",42");
+        assertEquals(2, result.size());
+        assertEquals("John \"Johnny\" Doe", result.get(0));
+        assertEquals("42", result.get(1));
+    }
+
+    @Test
+    public void testEscapeInsideQuotes() throws ParsingException {
+        CsvParser parser = new CsvParser();
+        List<String> result = parser.parseLine("\"a\\\"b\",c");
+        assertEquals(2, result.size());
+        assertEquals("a\"b", result.get(0));
+        assertEquals("c", result.get(1));
+    }
+
+    @Test
+    public void testEscapeOutsideQuotes() throws ParsingException {
+        CsvParser parser = new CsvParser();
+        List<String> result = parser.parseLine("a\\b,c");
+        assertEquals(2, result.size());
+        // Outside quotes, escape not followed by quote/escape is kept as-is
+        assertEquals("a\\b", result.get(0));
+        assertEquals("c", result.get(1));
+    }
+
+    @Test
+    public void testTabSeparator() throws ParsingException {
+        CsvParser parser = new CsvParser('\t');
+        List<String> result = parser.parseLine("a\tb\tc");
+        assertEquals(3, result.size());
+        assertEquals("a", result.get(0));
+        assertEquals("b", result.get(1));
+        assertEquals("c", result.get(2));
+    }
+
+    @Test
+    public void testSingleQuoteChar() throws ParsingException {
+        CsvParser parser = new CsvParser(',', '\'', '\\');
+        List<String> result = parser.parseLine("'hello,world',test");
+        assertEquals(2, result.size());
+        assertEquals("hello,world", result.get(0));
+        assertEquals("test", result.get(1));
+    }
+
+    @Test
+    public void testNullQuoteCharAndNullEscape() throws ParsingException {
+        CsvParser parser = new CsvParser(',', CsvParser.NULL_CHARACTER, CsvParser.NULL_CHARACTER);
+        List<String> result = parser.parseLine("a,b,c");
+        assertEquals(3, result.size());
+        assertEquals("a", result.get(0));
+    }
+
+    @Test
+    public void testIgnoreQuotationsWithEmbeddedSeparator() throws ParsingException {
+        CsvParser parser = new CsvParser(',', '"', '\\', false, true, true);
+        List<String> result = parser.parseLine("a,\"b\",c");
+        assertEquals(3, result.size());
+        // Quotes are treated as regular chars when ignoreQuotations=true
+        assertEquals("a", result.get(0));
+    }
+
+    @Test
+    public void testStrictQuotesIgnoresUnquoted() throws ParsingException {
+        CsvParser parser = new CsvParser(',', '"', '\\', true);
+        List<String> result = parser.parseLine("unquoted,\"quoted\"");
+        assertEquals(2, result.size());
+        assertEquals("", result.get(0)); // strict quotes ignores unquoted text
+        assertEquals("quoted", result.get(1));
     }
 
     @Test
@@ -233,58 +304,6 @@ public class CsvParserTest extends TestBase {
     }
 
     @Test
-    public void testParseLineToArray() throws ParsingException {
-        CsvParser parser = new CsvParser();
-        String[] result = parser.parseLineToArray("a,b,c");
-        assertEquals(3, result.length);
-        assertEquals("a", result[0]);
-        assertEquals("b", result[1]);
-        assertEquals("c", result[2]);
-    }
-
-    @Test
-    public void testParseLineToArrayNull() throws ParsingException {
-        CsvParser parser = new CsvParser();
-        String[] result = parser.parseLineToArray(null);
-        assertEquals(0, result.length);
-    }
-
-    @Test
-    public void testParseLineToArray_NotNull() throws ParsingException {
-        CsvParser parser = new CsvParser();
-        String[] result = parser.parseLineToArray("x");
-        assertNotNull(result);
-        assertEquals(1, result.length);
-        assertEquals("x", result[0]);
-    }
-
-    @Test
-    public void testParseLineToArrayWithOutput() throws ParsingException {
-        CsvParser parser = new CsvParser();
-        String[] output = new String[3];
-        parser.parseLineToArray("a,b,c", output);
-        assertEquals("a", output[0]);
-        assertEquals("b", output[1]);
-        assertEquals("c", output[2]);
-    }
-
-    @Test
-    public void testParseLineToArrayWithOutputNull() {
-        CsvParser parser = new CsvParser();
-        assertThrows(IllegalArgumentException.class, () -> parser.parseLineToArray("a,b,c", null));
-    }
-
-    @Test
-    public void testParseLineToArrayWithOutput_QuotedFields() throws ParsingException {
-        CsvParser parser = new CsvParser();
-        String[] output = new String[3];
-        parser.parseLineToArray("a,\"b,c\",d", output);
-        assertEquals("a", output[0]);
-        assertEquals("b,c", output[1]);
-        assertEquals("d", output[2]);
-    }
-
-    @Test
     public void testParseLineWithUnterminatedQuote() {
         CsvParser parser = new CsvParser();
         assertThrows(ParsingException.class, () -> parser.parseLine("a,\"b,c"));
@@ -392,6 +411,84 @@ public class CsvParserTest extends TestBase {
     }
 
     @Test
+    public void testParseLineWithWhitespaceOnlyField() throws ParsingException {
+        CsvParser parser = new CsvParser();
+        List<String> result = parser.parseLine("a,   ,c");
+        assertEquals(3, result.size());
+        assertEquals("a", result.get(0));
+        assertEquals("", result.get(1)); // leading whitespace trimmed
+        assertEquals("c", result.get(2));
+    }
+
+    @Test
+    public void testParseLineSingleField() throws ParsingException {
+        CsvParser parser = new CsvParser();
+        List<String> result = parser.parseLine("hello");
+        assertEquals(1, result.size());
+        assertEquals("hello", result.get(0));
+    }
+
+    @Test
+    public void testParseLineSingleQuotedField() throws ParsingException {
+        CsvParser parser = new CsvParser();
+        List<String> result = parser.parseLine("\"hello\"");
+        assertEquals(1, result.size());
+        assertEquals("hello", result.get(0));
+    }
+
+    @Test
+    public void testParseLineToArray() throws ParsingException {
+        CsvParser parser = new CsvParser();
+        String[] result = parser.parseLineToArray("a,b,c");
+        assertEquals(3, result.length);
+        assertEquals("a", result[0]);
+        assertEquals("b", result[1]);
+        assertEquals("c", result[2]);
+    }
+
+    @Test
+    public void testParseLineToArrayNull() throws ParsingException {
+        CsvParser parser = new CsvParser();
+        String[] result = parser.parseLineToArray(null);
+        assertEquals(0, result.length);
+    }
+
+    @Test
+    public void testParseLineToArray_NotNull() throws ParsingException {
+        CsvParser parser = new CsvParser();
+        String[] result = parser.parseLineToArray("x");
+        assertNotNull(result);
+        assertEquals(1, result.length);
+        assertEquals("x", result[0]);
+    }
+
+    @Test
+    public void testParseLineToArrayWithOutput() throws ParsingException {
+        CsvParser parser = new CsvParser();
+        String[] output = new String[3];
+        parser.parseLineToArray("a,b,c", output);
+        assertEquals("a", output[0]);
+        assertEquals("b", output[1]);
+        assertEquals("c", output[2]);
+    }
+
+    @Test
+    public void testParseLineToArrayWithOutputNull() {
+        CsvParser parser = new CsvParser();
+        assertThrows(IllegalArgumentException.class, () -> parser.parseLineToArray("a,b,c", null));
+    }
+
+    @Test
+    public void testParseLineToArrayWithOutput_QuotedFields() throws ParsingException {
+        CsvParser parser = new CsvParser();
+        String[] output = new String[3];
+        parser.parseLineToArray("a,\"b,c\",d", output);
+        assertEquals("a", output[0]);
+        assertEquals("b,c", output[1]);
+        assertEquals("d", output[2]);
+    }
+
+    @Test
     public void testParseLineToArrayWithFewerFieldsThanOutput() throws ParsingException {
         CsvParser parser = new CsvParser();
         String[] output = new String[5];
@@ -432,104 +529,5 @@ public class CsvParserTest extends TestBase {
         assertEquals('\0', CsvParser.NULL_CHARACTER);
         assertEquals(1024, CsvParser.INITIAL_READ_SIZE);
         assertEquals(128, CsvParser.READ_BUFFER_SIZE);
-    }
-
-    @Test
-    public void testDoubleQuoteEscaping() throws ParsingException {
-        CsvParser parser = new CsvParser();
-        List<String> result = parser.parseLine("\"John \"\"Johnny\"\" Doe\",42");
-        assertEquals(2, result.size());
-        assertEquals("John \"Johnny\" Doe", result.get(0));
-        assertEquals("42", result.get(1));
-    }
-
-    @Test
-    public void testEscapeInsideQuotes() throws ParsingException {
-        CsvParser parser = new CsvParser();
-        List<String> result = parser.parseLine("\"a\\\"b\",c");
-        assertEquals(2, result.size());
-        assertEquals("a\"b", result.get(0));
-        assertEquals("c", result.get(1));
-    }
-
-    @Test
-    public void testEscapeOutsideQuotes() throws ParsingException {
-        CsvParser parser = new CsvParser();
-        List<String> result = parser.parseLine("a\\b,c");
-        assertEquals(2, result.size());
-        // Outside quotes, escape not followed by quote/escape is kept as-is
-        assertEquals("a\\b", result.get(0));
-        assertEquals("c", result.get(1));
-    }
-
-    @Test
-    public void testTabSeparator() throws ParsingException {
-        CsvParser parser = new CsvParser('\t');
-        List<String> result = parser.parseLine("a\tb\tc");
-        assertEquals(3, result.size());
-        assertEquals("a", result.get(0));
-        assertEquals("b", result.get(1));
-        assertEquals("c", result.get(2));
-    }
-
-    @Test
-    public void testSingleQuoteChar() throws ParsingException {
-        CsvParser parser = new CsvParser(',', '\'', '\\');
-        List<String> result = parser.parseLine("'hello,world',test");
-        assertEquals(2, result.size());
-        assertEquals("hello,world", result.get(0));
-        assertEquals("test", result.get(1));
-    }
-
-    @Test
-    public void testNullQuoteCharAndNullEscape() throws ParsingException {
-        CsvParser parser = new CsvParser(',', CsvParser.NULL_CHARACTER, CsvParser.NULL_CHARACTER);
-        List<String> result = parser.parseLine("a,b,c");
-        assertEquals(3, result.size());
-        assertEquals("a", result.get(0));
-    }
-
-    @Test
-    public void testIgnoreQuotationsWithEmbeddedSeparator() throws ParsingException {
-        CsvParser parser = new CsvParser(',', '"', '\\', false, true, true);
-        List<String> result = parser.parseLine("a,\"b\",c");
-        assertEquals(3, result.size());
-        // Quotes are treated as regular chars when ignoreQuotations=true
-        assertEquals("a", result.get(0));
-    }
-
-    @Test
-    public void testStrictQuotesIgnoresUnquoted() throws ParsingException {
-        CsvParser parser = new CsvParser(',', '"', '\\', true);
-        List<String> result = parser.parseLine("unquoted,\"quoted\"");
-        assertEquals(2, result.size());
-        assertEquals("", result.get(0)); // strict quotes ignores unquoted text
-        assertEquals("quoted", result.get(1));
-    }
-
-    @Test
-    public void testParseLineWithWhitespaceOnlyField() throws ParsingException {
-        CsvParser parser = new CsvParser();
-        List<String> result = parser.parseLine("a,   ,c");
-        assertEquals(3, result.size());
-        assertEquals("a", result.get(0));
-        assertEquals("", result.get(1)); // leading whitespace trimmed
-        assertEquals("c", result.get(2));
-    }
-
-    @Test
-    public void testParseLineSingleField() throws ParsingException {
-        CsvParser parser = new CsvParser();
-        List<String> result = parser.parseLine("hello");
-        assertEquals(1, result.size());
-        assertEquals("hello", result.get(0));
-    }
-
-    @Test
-    public void testParseLineSingleQuotedField() throws ParsingException {
-        CsvParser parser = new CsvParser();
-        List<String> result = parser.parseLine("\"hello\"");
-        assertEquals(1, result.size());
-        assertEquals("hello", result.get(0));
     }
 }

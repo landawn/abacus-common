@@ -4,12 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ByteBiPredicateTest extends TestBase {
 
     @Test
@@ -40,65 +38,6 @@ public class ByteBiPredicateTest extends TestBase {
 
         assertTrue(predicate.test((byte) 5, (byte) 5));
         assertFalse(predicate.test((byte) 5, (byte) 6));
-    }
-
-    @Test
-    public void testNegate() {
-        ByteBiPredicate equal = (t, u) -> t == u;
-        ByteBiPredicate notEqual = equal.negate();
-
-        assertFalse(notEqual.test((byte) 5, (byte) 5));
-        assertTrue(notEqual.test((byte) 5, (byte) 6));
-    }
-
-    @Test
-    public void testAnd() {
-        ByteBiPredicate firstGreater = (t, u) -> t > u;
-        ByteBiPredicate sumLessThan20 = (t, u) -> (t + u) < 20;
-        ByteBiPredicate combined = firstGreater.and(sumLessThan20);
-
-        assertTrue(combined.test((byte) 10, (byte) 5));
-        assertFalse(combined.test((byte) 5, (byte) 10));
-        assertFalse(combined.test((byte) 15, (byte) 10));
-    }
-
-    @Test
-    public void testAndShortCircuit() {
-        final boolean[] secondCalled = { false };
-        ByteBiPredicate alwaysFalse = (t, u) -> false;
-        ByteBiPredicate checkCalled = (t, u) -> {
-            secondCalled[0] = true;
-            return true;
-        };
-
-        ByteBiPredicate combined = alwaysFalse.and(checkCalled);
-        assertFalse(combined.test((byte) 5, (byte) 3));
-        assertFalse(secondCalled[0]);
-    }
-
-    @Test
-    public void testOr() {
-        ByteBiPredicate equal = (t, u) -> t == u;
-        ByteBiPredicate sumGreaterThan10 = (t, u) -> (t + u) > 10;
-        ByteBiPredicate combined = equal.or(sumGreaterThan10);
-
-        assertTrue(combined.test((byte) 5, (byte) 5));
-        assertTrue(combined.test((byte) 6, (byte) 5));
-        assertFalse(combined.test((byte) 3, (byte) 4));
-    }
-
-    @Test
-    public void testOrShortCircuit() {
-        final boolean[] secondCalled = { false };
-        ByteBiPredicate alwaysTrue = (t, u) -> true;
-        ByteBiPredicate checkCalled = (t, u) -> {
-            secondCalled[0] = true;
-            return false;
-        };
-
-        ByteBiPredicate combined = alwaysTrue.or(checkCalled);
-        assertTrue(combined.test((byte) 5, (byte) 3));
-        assertFalse(secondCalled[0]);
     }
 
     @Test
@@ -162,6 +101,65 @@ public class ByteBiPredicateTest extends TestBase {
         assertTrue(ByteBiPredicate.EQUAL.test(Byte.MAX_VALUE, Byte.MAX_VALUE));
         assertTrue(ByteBiPredicate.EQUAL.test(Byte.MIN_VALUE, Byte.MIN_VALUE));
         assertTrue(ByteBiPredicate.LESS_THAN.test(Byte.MIN_VALUE, Byte.MAX_VALUE));
+    }
+
+    @Test
+    public void testNegate() {
+        ByteBiPredicate equal = (t, u) -> t == u;
+        ByteBiPredicate notEqual = equal.negate();
+
+        assertFalse(notEqual.test((byte) 5, (byte) 5));
+        assertTrue(notEqual.test((byte) 5, (byte) 6));
+    }
+
+    @Test
+    public void testAnd() {
+        ByteBiPredicate firstGreater = (t, u) -> t > u;
+        ByteBiPredicate sumLessThan20 = (t, u) -> (t + u) < 20;
+        ByteBiPredicate combined = firstGreater.and(sumLessThan20);
+
+        assertTrue(combined.test((byte) 10, (byte) 5));
+        assertFalse(combined.test((byte) 5, (byte) 10));
+        assertFalse(combined.test((byte) 15, (byte) 10));
+    }
+
+    @Test
+    public void testAndShortCircuit() {
+        final boolean[] secondCalled = { false };
+        ByteBiPredicate alwaysFalse = (t, u) -> false;
+        ByteBiPredicate checkCalled = (t, u) -> {
+            secondCalled[0] = true;
+            return true;
+        };
+
+        ByteBiPredicate combined = alwaysFalse.and(checkCalled);
+        assertFalse(combined.test((byte) 5, (byte) 3));
+        assertFalse(secondCalled[0]);
+    }
+
+    @Test
+    public void testOr() {
+        ByteBiPredicate equal = (t, u) -> t == u;
+        ByteBiPredicate sumGreaterThan10 = (t, u) -> (t + u) > 10;
+        ByteBiPredicate combined = equal.or(sumGreaterThan10);
+
+        assertTrue(combined.test((byte) 5, (byte) 5));
+        assertTrue(combined.test((byte) 6, (byte) 5));
+        assertFalse(combined.test((byte) 3, (byte) 4));
+    }
+
+    @Test
+    public void testOrShortCircuit() {
+        final boolean[] secondCalled = { false };
+        ByteBiPredicate alwaysTrue = (t, u) -> true;
+        ByteBiPredicate checkCalled = (t, u) -> {
+            secondCalled[0] = true;
+            return false;
+        };
+
+        ByteBiPredicate combined = alwaysTrue.or(checkCalled);
+        assertTrue(combined.test((byte) 5, (byte) 3));
+        assertFalse(secondCalled[0]);
     }
 
     @Test

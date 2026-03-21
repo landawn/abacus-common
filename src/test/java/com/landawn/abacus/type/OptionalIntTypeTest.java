@@ -18,7 +18,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -26,7 +25,6 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.u.OptionalInt;
 
-@Tag("new-test")
 public class OptionalIntTypeTest extends TestBase {
 
     private OptionalIntType optionalIntType;
@@ -46,6 +44,12 @@ public class OptionalIntTypeTest extends TestBase {
     }
 
     @Test
+    public void testStringOfWithValue() {
+        OptionalInt opt = OptionalInt.of(12345);
+        assertEquals("12345", optionalIntType.stringOf(opt));
+    }
+
+    @Test
     public void testStringOfWithNull() {
         assertNull(optionalIntType.stringOf(null));
     }
@@ -54,12 +58,6 @@ public class OptionalIntTypeTest extends TestBase {
     public void testStringOfWithEmpty() {
         OptionalInt empty = OptionalInt.empty();
         assertNull(optionalIntType.stringOf(empty));
-    }
-
-    @Test
-    public void testStringOfWithValue() {
-        OptionalInt opt = OptionalInt.of(12345);
-        assertEquals("12345", optionalIntType.stringOf(opt));
     }
 
     @Test

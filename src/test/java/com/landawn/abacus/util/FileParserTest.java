@@ -5,14 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.io.File;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 import com.landawn.abacus.util.function.Consumer;
 import com.landawn.abacus.util.stream.Stream;
 
-@Tag("old-test")
 public class FileParserTest extends AbstractTest {
 
     @Test

@@ -6,12 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class FloatSupplierTest extends TestBase {
 
     @Test
@@ -28,6 +26,19 @@ public class FloatSupplierTest extends TestBase {
     }
 
     @Test
+    public void testGetAsFloat_stateful() {
+        final AtomicReference<Float> counter = new AtomicReference<>(0f);
+        final FloatSupplier supplier = () -> {
+            counter.set(counter.get() + 1.0f);
+            return counter.get();
+        };
+
+        assertEquals(1.0f, supplier.getAsFloat(), 0.001f);
+        assertEquals(2.0f, supplier.getAsFloat(), 0.001f);
+        assertEquals(3.0f, supplier.getAsFloat(), 0.001f);
+    }
+
+    @Test
     public void testGetAsFloat_returnsNegative() {
         final FloatSupplier supplier = () -> -42.5f;
         assertEquals(-42.5f, supplier.getAsFloat(), 0.001f);
@@ -40,16 +51,10 @@ public class FloatSupplierTest extends TestBase {
     }
 
     @Test
-    public void testGetAsFloat_stateful() {
-        final AtomicReference<Float> counter = new AtomicReference<>(0f);
-        final FloatSupplier supplier = () -> {
-            counter.set(counter.get() + 1.0f);
-            return counter.get();
-        };
-
+    public void testFunctionalInterfaceContract() {
+        final FloatSupplier supplier = () -> 1.0f;
+        assertNotNull(supplier);
         assertEquals(1.0f, supplier.getAsFloat(), 0.001f);
-        assertEquals(2.0f, supplier.getAsFloat(), 0.001f);
-        assertEquals(3.0f, supplier.getAsFloat(), 0.001f);
     }
 
     @Test
@@ -67,12 +72,5 @@ public class FloatSupplierTest extends TestBase {
         assertNotNull(value2);
         assertTrue(value1 >= 0 && value1 < 1.0f);
         assertTrue(value2 >= 0 && value2 < 1.0f);
-    }
-
-    @Test
-    public void testFunctionalInterfaceContract() {
-        final FloatSupplier supplier = () -> 1.0f;
-        assertNotNull(supplier);
-        assertEquals(1.0f, supplier.getAsFloat(), 0.001f);
     }
 }

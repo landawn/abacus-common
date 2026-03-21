@@ -16,12 +16,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class KeyedObjectPoolTest extends TestBase {
 
     private TestKeyedObjectPool pool;
@@ -205,11 +203,9 @@ public class KeyedObjectPoolTest extends TestBase {
             }
         }
 
-        @Override
         public void lock() {
         }
 
-        @Override
         public void unlock() {
         }
 
@@ -293,21 +289,6 @@ public class KeyedObjectPoolTest extends TestBase {
     }
 
     @Test
-    public void testPutNullKey() {
-        assertThrows(IllegalArgumentException.class, () -> pool.put(null, new TestPoolable("value")));
-    }
-
-    @Test
-    public void testPutExpired() {
-        TestPoolable expired = new TestPoolable("expired", 1, 1);
-        try {
-            Thread.sleep(10);
-        } catch (InterruptedException e) {
-        }
-        assertFalse(pool.put("key", expired));
-    }
-
-    @Test
     public void testPutToFullPool() {
         for (int i = 0; i < 5; i++) {
             assertTrue(pool.put("key" + i, new TestPoolable("value" + i)));
@@ -337,6 +318,32 @@ public class KeyedObjectPoolTest extends TestBase {
     }
 
     @Test
+    public void testPutWithAutoDestroyFalse() {
+        for (int i = 0; i < 5; i++) {
+            assertTrue(pool.put("key" + i, new TestPoolable("value" + i)));
+        }
+
+        TestPoolable extra = new TestPoolable("extra");
+        assertFalse(pool.put("key5", extra, false));
+        assertFalse(extra.isDestroyed());
+    }
+
+    @Test
+    public void testPutNullKey() {
+        assertThrows(IllegalArgumentException.class, () -> pool.put(null, new TestPoolable("value")));
+    }
+
+    @Test
+    public void testPutExpired() {
+        TestPoolable expired = new TestPoolable("expired", 1, 1);
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
+        }
+        assertFalse(pool.put("key", expired));
+    }
+
+    @Test
     public void testPutToClosedPool() {
         pool.close();
         assertThrows(IllegalStateException.class, () -> pool.put("key", new TestPoolable("value")));
@@ -354,9 +361,27 @@ public class KeyedObjectPoolTest extends TestBase {
         assertEquals(Poolable.Caller.PUT_ADD_FAILURE, extra.getDestroyedByCaller());
     }
 
+    // --- Additional tests for missing coverage ---
+
+    @Test
+    public void testPutNullValue() {
+        assertThrows(IllegalArgumentException.class, () -> pool.put("key", null));
+    }
+
     @Test
     public void testGetNonExistent() {
         assertNull(pool.get("nonexistent"));
+    }
+
+    @Test
+    public void testGet() {
+        TestPoolable poolable = new TestPoolable("value1");
+        pool.put("key1", poolable);
+
+        TestPoolable retrieved = pool.get("key1");
+        assertNotNull(retrieved);
+        assertEquals("value1", retrieved.getValue());
+        assertEquals(1, retrieved.activityPrint().getAccessCount());
     }
 
     @Test
@@ -380,14 +405,77 @@ public class KeyedObjectPoolTest extends TestBase {
     }
 
     @Test
+    public void testMemoryMeasure() {
+        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (key, value) -> key.length() + 100;
+
+        TestKeyedObjectPool memPool = new TestKeyedObjectPool(5, measure);
+
+        memPool.put("k1", new TestPoolable("value1"));
+        assertEquals(102, memPool.getTotalMemorySize());
+
+        memPool.put("key2", new TestPoolable("value2"));
+        assertEquals(206, memPool.getTotalMemorySize());
+
+        memPool.put("k1", new TestPoolable("value3"));
+        assertEquals(206, memPool.getTotalMemorySize());
+
+        memPool.remove("key2");
+        assertEquals(102, memPool.getTotalMemorySize());
+
+        memPool.clear();
+        assertEquals(0, memPool.getTotalMemorySize());
+    }
+
+    @Test
     public void testRemoveNonExistent() {
         assertNull(pool.remove("nonexistent"));
+    }
+
+    @Test
+    public void testIsEmpty() {
+        assertTrue(pool.isEmpty());
+        pool.put("key1", new TestPoolable("value1"));
+        assertFalse(pool.isEmpty());
+        pool.remove("key1");
+        assertTrue(pool.isEmpty());
+    }
+
+    @Test
+    public void testRemove() {
+        TestPoolable poolable = new TestPoolable("value1");
+        pool.put("key1", poolable);
+
+        TestPoolable removed = pool.remove("key1");
+        assertNotNull(removed);
+        assertEquals("value1", removed.getValue());
+        assertEquals(0, pool.size());
+        assertFalse(pool.containsKey("key1"));
+        assertEquals(1, removed.activityPrint().getAccessCount());
     }
 
     @Test
     public void testRemoveFromClosedPool() {
         pool.close();
         assertThrows(IllegalStateException.class, () -> pool.remove("key"));
+    }
+
+    @Test
+    public void testPeek() {
+        TestPoolable poolable = new TestPoolable("value1");
+        pool.put("key1", poolable);
+
+        TestPoolable peeked = pool.peek("key1");
+        assertNotNull(peeked);
+        assertEquals(poolable, peeked);
+        // Peek should not update access count
+        assertEquals(0, peeked.activityPrint().getAccessCount());
+        // Element should still be in the pool
+        assertEquals(1, pool.size());
+    }
+
+    @Test
+    public void testPeekNonExistent() {
+        assertNull(pool.peek("nonexistent"));
     }
 
     @Test
@@ -407,6 +495,23 @@ public class KeyedObjectPoolTest extends TestBase {
     public void testPeekFromClosedPool() {
         pool.close();
         assertThrows(IllegalStateException.class, () -> pool.peek("key"));
+    }
+
+    @Test
+    public void testKeySet() {
+        pool.put("key1", new TestPoolable("value1"));
+        pool.put("key2", new TestPoolable("value2"));
+        pool.put("key3", new TestPoolable("value3"));
+
+        Set<String> keys = pool.keySet();
+        assertEquals(3, keys.size());
+        assertTrue(keys.contains("key1"));
+        assertTrue(keys.contains("key2"));
+        assertTrue(keys.contains("key3"));
+
+        // Returned set should be a snapshot
+        keys.clear();
+        assertEquals(3, pool.size());
     }
 
     @Test
@@ -439,31 +544,19 @@ public class KeyedObjectPoolTest extends TestBase {
     }
 
     @Test
-    public void testContainsKeyFromClosedPool() {
-        pool.close();
-        assertThrows(IllegalStateException.class, () -> pool.containsKey("key"));
+    public void testContainsKey() {
+        pool.put("key1", new TestPoolable("value1"));
+        pool.put("key2", new TestPoolable("value2"));
+
+        assertTrue(pool.containsKey("key1"));
+        assertTrue(pool.containsKey("key2"));
+        assertFalse(pool.containsKey("key3"));
     }
 
     @Test
-    public void testMemoryMeasure() {
-        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (key, value) -> key.length() + 100;
-
-        TestKeyedObjectPool memPool = new TestKeyedObjectPool(5, measure);
-
-        memPool.put("k1", new TestPoolable("value1"));
-        assertEquals(102, memPool.getTotalMemorySize());
-
-        memPool.put("key2", new TestPoolable("value2"));
-        assertEquals(206, memPool.getTotalMemorySize());
-
-        memPool.put("k1", new TestPoolable("value3"));
-        assertEquals(206, memPool.getTotalMemorySize());
-
-        memPool.remove("key2");
-        assertEquals(102, memPool.getTotalMemorySize());
-
-        memPool.clear();
-        assertEquals(0, memPool.getTotalMemorySize());
+    public void testContainsKeyFromClosedPool() {
+        pool.close();
+        assertThrows(IllegalStateException.class, () -> pool.containsKey("key"));
     }
 
     @Test
@@ -523,22 +616,6 @@ public class KeyedObjectPoolTest extends TestBase {
         assertEquals(Poolable.Caller.CLOSE, poolable2.getDestroyedByCaller());
     }
 
-    // --- Additional tests for missing coverage ---
-
-    @Test
-    public void testPutNullValue() {
-        assertThrows(IllegalArgumentException.class, () -> pool.put("key", null));
-    }
-
-    @Test
-    public void testIsEmpty() {
-        assertTrue(pool.isEmpty());
-        pool.put("key1", new TestPoolable("value1"));
-        assertFalse(pool.isEmpty());
-        pool.remove("key1");
-        assertTrue(pool.isEmpty());
-    }
-
     @Test
     public void testCapacity() {
         assertEquals(5, pool.capacity());
@@ -552,91 +629,10 @@ public class KeyedObjectPoolTest extends TestBase {
     }
 
     @Test
-    public void testGet() {
-        TestPoolable poolable = new TestPoolable("value1");
-        pool.put("key1", poolable);
-
-        TestPoolable retrieved = pool.get("key1");
-        assertNotNull(retrieved);
-        assertEquals("value1", retrieved.getValue());
-        assertEquals(1, retrieved.activityPrint().getAccessCount());
-    }
-
-    @Test
-    public void testRemove() {
-        TestPoolable poolable = new TestPoolable("value1");
-        pool.put("key1", poolable);
-
-        TestPoolable removed = pool.remove("key1");
-        assertNotNull(removed);
-        assertEquals("value1", removed.getValue());
-        assertEquals(0, pool.size());
-        assertFalse(pool.containsKey("key1"));
-        assertEquals(1, removed.activityPrint().getAccessCount());
-    }
-
-    @Test
-    public void testPeek() {
-        TestPoolable poolable = new TestPoolable("value1");
-        pool.put("key1", poolable);
-
-        TestPoolable peeked = pool.peek("key1");
-        assertNotNull(peeked);
-        assertEquals(poolable, peeked);
-        // Peek should not update access count
-        assertEquals(0, peeked.activityPrint().getAccessCount());
-        // Element should still be in the pool
-        assertEquals(1, pool.size());
-    }
-
-    @Test
-    public void testPeekNonExistent() {
-        assertNull(pool.peek("nonexistent"));
-    }
-
-    @Test
-    public void testKeySet() {
-        pool.put("key1", new TestPoolable("value1"));
-        pool.put("key2", new TestPoolable("value2"));
-        pool.put("key3", new TestPoolable("value3"));
-
-        Set<String> keys = pool.keySet();
-        assertEquals(3, keys.size());
-        assertTrue(keys.contains("key1"));
-        assertTrue(keys.contains("key2"));
-        assertTrue(keys.contains("key3"));
-
-        // Returned set should be a snapshot
-        keys.clear();
-        assertEquals(3, pool.size());
-    }
-
-    @Test
-    public void testContainsKey() {
-        pool.put("key1", new TestPoolable("value1"));
-        pool.put("key2", new TestPoolable("value2"));
-
-        assertTrue(pool.containsKey("key1"));
-        assertTrue(pool.containsKey("key2"));
-        assertFalse(pool.containsKey("key3"));
-    }
-
-    @Test
     public void testLockAndUnlock() {
         // Should not throw
         pool.lock();
         pool.unlock();
-    }
-
-    @Test
-    public void testPutWithAutoDestroyFalse() {
-        for (int i = 0; i < 5; i++) {
-            assertTrue(pool.put("key" + i, new TestPoolable("value" + i)));
-        }
-
-        TestPoolable extra = new TestPoolable("extra");
-        assertFalse(pool.put("key5", extra, false));
-        assertFalse(extra.isDestroyed());
     }
 
     @Test

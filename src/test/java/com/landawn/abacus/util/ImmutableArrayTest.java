@@ -8,20 +8,11 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class ImmutableArrayTest extends TestBase {
-
-    @Test
-    public void testOf_SingleElement() {
-        ImmutableArray<String> array = ImmutableArray.of("single");
-        Assertions.assertEquals(1, array.length());
-        Assertions.assertEquals("single", array.get(0));
-    }
 
     @Test
     public void testOf_TwoElements() {
@@ -90,6 +81,19 @@ public class ImmutableArrayTest extends TestBase {
     }
 
     @Test
+    public void testImplementsImmutable() {
+        ImmutableArray<String> array = ImmutableArray.of("a");
+        Assertions.assertTrue(array instanceof Immutable);
+    }
+
+    @Test
+    public void testOf_SingleElement() {
+        ImmutableArray<String> array = ImmutableArray.of("single");
+        Assertions.assertEquals(1, array.length());
+        Assertions.assertEquals("single", array.get(0));
+    }
+
+    @Test
     public void testCopyOf() {
         String[] original = { "a", "b", "c" };
         ImmutableArray<String> array = ImmutableArray.copyOf(original);
@@ -133,6 +137,18 @@ public class ImmutableArrayTest extends TestBase {
         ImmutableArray<String> array = ImmutableArray.wrap(null);
         Assertions.assertEquals(0, array.length());
         Assertions.assertTrue(array.isEmpty());
+    }
+
+    @Test
+    public void testWithNullElements() {
+        String[] original = { "a", null, "c" };
+        ImmutableArray<String> array = ImmutableArray.wrap(original);
+
+        Assertions.assertEquals(3, array.length());
+        Assertions.assertEquals("a", array.get(0));
+        Assertions.assertNull(array.get(1));
+        Assertions.assertEquals("c", array.get(2));
+        Assertions.assertTrue(array.contains(null));
     }
 
     @Test
@@ -233,6 +249,14 @@ public class ImmutableArrayTest extends TestBase {
     }
 
     @Test
+    public void testAsList_Empty() {
+        ImmutableArray<String> array = ImmutableArray.copyOf(new String[0]);
+        ImmutableList<String> list = array.asList();
+        Assertions.assertEquals(0, list.size());
+        Assertions.assertTrue(list.isEmpty());
+    }
+
+    @Test
     public void testAsList() {
         ImmutableArray<String> array = ImmutableArray.of("a", "b", "c");
         ImmutableList<String> list = array.asList();
@@ -258,11 +282,25 @@ public class ImmutableArrayTest extends TestBase {
     }
 
     @Test
+    public void testIterator_Empty() {
+        ImmutableArray<String> array = ImmutableArray.copyOf(new String[0]);
+        ObjIterator<String> iter = array.iterator();
+        Assertions.assertFalse(iter.hasNext());
+    }
+
+    @Test
     public void testStream() {
         ImmutableArray<Integer> array = ImmutableArray.of(1, 2, 3, 4, 5);
         List<Integer> collected = array.stream().toList();
 
         Assertions.assertEquals(Arrays.asList(1, 2, 3, 4, 5), collected);
+    }
+
+    @Test
+    public void testStream_Empty() {
+        ImmutableArray<String> array = ImmutableArray.copyOf(new String[0]);
+        List<String> collected = array.stream().toList();
+        Assertions.assertTrue(collected.isEmpty());
     }
 
     @Test
@@ -273,6 +311,14 @@ public class ImmutableArrayTest extends TestBase {
         array.forEach(collected::add);
 
         Assertions.assertEquals(Arrays.asList("a", "b", "c"), collected);
+    }
+
+    @Test
+    public void testForEach_EmptyArray() {
+        ImmutableArray<String> array = ImmutableArray.copyOf(new String[0]);
+        List<String> collected = new ArrayList<>();
+        array.forEach(collected::add);
+        Assertions.assertTrue(collected.isEmpty());
     }
 
     @Test
@@ -321,6 +367,14 @@ public class ImmutableArrayTest extends TestBase {
     }
 
     @Test
+    public void testForeachIndexed_EmptyArray() throws Exception {
+        ImmutableArray<String> array = ImmutableArray.copyOf(new String[0]);
+        Map<Integer, String> collected = new HashMap<>();
+        array.foreachIndexed((index, value) -> collected.put(index, value));
+        Assertions.assertTrue(collected.isEmpty());
+    }
+
+    @Test
     public void testHashCode() {
         ImmutableArray<String> array1 = ImmutableArray.of("a", "b", "c");
         ImmutableArray<String> array2 = ImmutableArray.of("a", "b", "c");
@@ -345,6 +399,12 @@ public class ImmutableArrayTest extends TestBase {
     }
 
     @Test
+    public void testEquals_SameInstance() {
+        ImmutableArray<String> array = ImmutableArray.of("a", "b");
+        Assertions.assertEquals(array, array);
+    }
+
+    @Test
     public void testToString() {
         ImmutableArray<String> array = ImmutableArray.of("a", "b", "c");
         String str = array.toString();
@@ -352,68 +412,6 @@ public class ImmutableArrayTest extends TestBase {
         Assertions.assertTrue(str.contains("a"));
         Assertions.assertTrue(str.contains("b"));
         Assertions.assertTrue(str.contains("c"));
-    }
-
-    @Test
-    public void testWithNullElements() {
-        String[] original = { "a", null, "c" };
-        ImmutableArray<String> array = ImmutableArray.wrap(original);
-
-        Assertions.assertEquals(3, array.length());
-        Assertions.assertEquals("a", array.get(0));
-        Assertions.assertNull(array.get(1));
-        Assertions.assertEquals("c", array.get(2));
-        Assertions.assertTrue(array.contains(null));
-    }
-
-    @Test
-    public void testImplementsImmutable() {
-        ImmutableArray<String> array = ImmutableArray.of("a");
-        Assertions.assertTrue(array instanceof Immutable);
-    }
-
-    @Test
-    public void testStream_Empty() {
-        ImmutableArray<String> array = ImmutableArray.copyOf(new String[0]);
-        List<String> collected = array.stream().toList();
-        Assertions.assertTrue(collected.isEmpty());
-    }
-
-    @Test
-    public void testForEach_EmptyArray() {
-        ImmutableArray<String> array = ImmutableArray.copyOf(new String[0]);
-        List<String> collected = new ArrayList<>();
-        array.forEach(collected::add);
-        Assertions.assertTrue(collected.isEmpty());
-    }
-
-    @Test
-    public void testForeachIndexed_EmptyArray() throws Exception {
-        ImmutableArray<String> array = ImmutableArray.copyOf(new String[0]);
-        Map<Integer, String> collected = new HashMap<>();
-        array.foreachIndexed((index, value) -> collected.put(index, value));
-        Assertions.assertTrue(collected.isEmpty());
-    }
-
-    @Test
-    public void testAsList_Empty() {
-        ImmutableArray<String> array = ImmutableArray.copyOf(new String[0]);
-        ImmutableList<String> list = array.asList();
-        Assertions.assertEquals(0, list.size());
-        Assertions.assertTrue(list.isEmpty());
-    }
-
-    @Test
-    public void testIterator_Empty() {
-        ImmutableArray<String> array = ImmutableArray.copyOf(new String[0]);
-        ObjIterator<String> iter = array.iterator();
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testEquals_SameInstance() {
-        ImmutableArray<String> array = ImmutableArray.of("a", "b");
-        Assertions.assertEquals(array, array);
     }
 
     @Test

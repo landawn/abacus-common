@@ -7,12 +7,10 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class ImmutableNavigableMapTest extends TestBase {
 
     @Test
@@ -22,15 +20,6 @@ public class ImmutableNavigableMapTest extends TestBase {
         Assertions.assertEquals(0, emptyMap.size());
         Assertions.assertNull(emptyMap.lowerEntry("any"));
         Assertions.assertNull(emptyMap.higherEntry("any"));
-    }
-
-    @Test
-    public void testOf_SingleEntry() {
-        ImmutableNavigableMap<String, Integer> map = ImmutableNavigableMap.of("one", 1);
-        Assertions.assertEquals(1, map.size());
-        Assertions.assertEquals(1, map.get("one"));
-        Assertions.assertEquals("one", map.firstKey());
-        Assertions.assertEquals("one", map.lastKey());
     }
 
     @Test
@@ -101,6 +90,39 @@ public class ImmutableNavigableMapTest extends TestBase {
     }
 
     @Test
+    public void testOf_SingleEntry() {
+        ImmutableNavigableMap<String, Integer> map = ImmutableNavigableMap.of("one", 1);
+        Assertions.assertEquals(1, map.size());
+        Assertions.assertEquals(1, map.get("one"));
+        Assertions.assertEquals("one", map.firstKey());
+        Assertions.assertEquals("one", map.lastKey());
+    }
+
+    @Test
+    public void testNavigationWithStrings() {
+        ImmutableNavigableMap<String, Integer> map = ImmutableNavigableMap.of("apple", 1, "banana", 2, "cherry", 3, "date", 4);
+
+        Assertions.assertEquals("banana", map.higherKey("apple"));
+        Assertions.assertEquals("cherry", map.ceilingKey("cherry"));
+        Assertions.assertEquals("banana", map.floorKey("banana"));
+        Assertions.assertEquals("apple", map.lowerKey("banana"));
+
+        Assertions.assertNull(map.lowerKey("apple"));
+        Assertions.assertNull(map.higherKey("date"));
+    }
+
+    @Test
+    public void testMutationMethods_ThrowUnsupported() {
+        ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(1, "one", 2, "two");
+
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> map.put(3, "three"));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> map.remove(1));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> map.clear());
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> map.pollFirstEntry());
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> map.pollLastEntry());
+    }
+
+    @Test
     public void testCopyOf() {
         SortedMap<String, Integer> source = new TreeMap<>();
         source.put("c", 3);
@@ -111,6 +133,23 @@ public class ImmutableNavigableMapTest extends TestBase {
         Assertions.assertEquals(3, map.size());
         Assertions.assertEquals("a", map.firstKey());
         Assertions.assertEquals("c", map.lastKey());
+    }
+
+    @Test
+    public void testWithCustomComparator() {
+        NavigableMap<String, Integer> source = new TreeMap<>(Comparator.reverseOrder());
+        source.put("a", 1);
+        source.put("b", 2);
+        source.put("c", 3);
+
+        ImmutableNavigableMap<String, Integer> map = ImmutableNavigableMap.copyOf(source);
+        Assertions.assertEquals("c", map.firstKey());
+        Assertions.assertEquals("a", map.lastKey());
+
+        Iterator<String> keys = map.keySet().iterator();
+        Assertions.assertEquals("c", keys.next());
+        Assertions.assertEquals("b", keys.next());
+        Assertions.assertEquals("a", keys.next());
     }
 
     @Test
@@ -432,36 +471,6 @@ public class ImmutableNavigableMapTest extends TestBase {
     }
 
     @Test
-    public void testNavigationWithStrings() {
-        ImmutableNavigableMap<String, Integer> map = ImmutableNavigableMap.of("apple", 1, "banana", 2, "cherry", 3, "date", 4);
-
-        Assertions.assertEquals("banana", map.higherKey("apple"));
-        Assertions.assertEquals("cherry", map.ceilingKey("cherry"));
-        Assertions.assertEquals("banana", map.floorKey("banana"));
-        Assertions.assertEquals("apple", map.lowerKey("banana"));
-
-        Assertions.assertNull(map.lowerKey("apple"));
-        Assertions.assertNull(map.higherKey("date"));
-    }
-
-    @Test
-    public void testWithCustomComparator() {
-        NavigableMap<String, Integer> source = new TreeMap<>(Comparator.reverseOrder());
-        source.put("a", 1);
-        source.put("b", 2);
-        source.put("c", 3);
-
-        ImmutableNavigableMap<String, Integer> map = ImmutableNavigableMap.copyOf(source);
-        Assertions.assertEquals("c", map.firstKey());
-        Assertions.assertEquals("a", map.lastKey());
-
-        Iterator<String> keys = map.keySet().iterator();
-        Assertions.assertEquals("c", keys.next());
-        Assertions.assertEquals("b", keys.next());
-        Assertions.assertEquals("a", keys.next());
-    }
-
-    @Test
     public void testEquals() {
         ImmutableNavigableMap<Integer, String> map1 = ImmutableNavigableMap.of(1, "one", 2, "two", 3, "three");
         ImmutableNavigableMap<Integer, String> map2 = ImmutableNavigableMap.of(1, "one", 2, "two", 3, "three");
@@ -490,16 +499,5 @@ public class ImmutableNavigableMapTest extends TestBase {
         treeMap.put(1, "one");
         treeMap.put(2, "two");
         Assertions.assertEquals(map1.hashCode(), treeMap.hashCode());
-    }
-
-    @Test
-    public void testMutationMethods_ThrowUnsupported() {
-        ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(1, "one", 2, "two");
-
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> map.put(3, "three"));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> map.remove(1));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> map.clear());
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> map.pollFirstEntry());
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> map.pollLastEntry());
     }
 }

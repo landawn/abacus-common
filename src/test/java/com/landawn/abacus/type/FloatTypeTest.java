@@ -13,14 +13,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("2025")
 public class FloatTypeTest extends TestBase {
 
     private final FloatType type = new FloatType();
@@ -31,13 +29,51 @@ public class FloatTypeTest extends TestBase {
     }
 
     @Test
-    public void test_name() {
-        assertEquals("Float", type.name());
+    public void test_isPrimitiveWrapper() {
+        assertTrue(type.isPrimitiveWrapper());
     }
 
     @Test
-    public void test_isPrimitiveWrapper() {
-        assertTrue(type.isPrimitiveWrapper());
+    public void test_get_ResultSet_byIndex() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+
+        // Test with null
+        when(rs.getObject(1)).thenReturn(null);
+        assertNull(type.get(rs, 1));
+
+        // Test with Float
+        when(rs.getObject(2)).thenReturn(42.5f);
+        assertEquals(42.5f, type.get(rs, 2));
+
+        // Test with Number (Double)
+        when(rs.getObject(3)).thenReturn(100.75);
+        assertEquals(100.75f, type.get(rs, 3));
+
+        // Test with String
+        when(rs.getObject(4)).thenReturn("50.25");
+        assertEquals(50.25f, type.get(rs, 4));
+    }
+
+    @Test
+    public void test_get_ResultSet_byLabel() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+
+        // Test with null
+        when(rs.getObject("nullCol")).thenReturn(null);
+        assertNull(type.get(rs, "nullCol"));
+
+        // Test with Float
+        when(rs.getObject("floatCol")).thenReturn(75.5f);
+        assertEquals(75.5f, type.get(rs, "floatCol"));
+
+        // Test with Number
+        when(rs.getObject("doubleCol")).thenReturn(999.99);
+        assertEquals(999.99f, type.get(rs, "doubleCol"));
+    }
+
+    @Test
+    public void test_name() {
+        assertEquals("Float", type.name());
     }
 
     @Test
@@ -89,44 +125,6 @@ public class FloatTypeTest extends TestBase {
         assertEquals(-99.99f, type.valueOf(negChars, 0, 6));
 
         assertNull(type.valueOf((char[]) null, 0, 0));
-    }
-
-    @Test
-    public void test_get_ResultSet_byIndex() throws SQLException {
-        ResultSet rs = mock(ResultSet.class);
-
-        // Test with null
-        when(rs.getObject(1)).thenReturn(null);
-        assertNull(type.get(rs, 1));
-
-        // Test with Float
-        when(rs.getObject(2)).thenReturn(42.5f);
-        assertEquals(42.5f, type.get(rs, 2));
-
-        // Test with Number (Double)
-        when(rs.getObject(3)).thenReturn(100.75);
-        assertEquals(100.75f, type.get(rs, 3));
-
-        // Test with String
-        when(rs.getObject(4)).thenReturn("50.25");
-        assertEquals(50.25f, type.get(rs, 4));
-    }
-
-    @Test
-    public void test_get_ResultSet_byLabel() throws SQLException {
-        ResultSet rs = mock(ResultSet.class);
-
-        // Test with null
-        when(rs.getObject("nullCol")).thenReturn(null);
-        assertNull(type.get(rs, "nullCol"));
-
-        // Test with Float
-        when(rs.getObject("floatCol")).thenReturn(75.5f);
-        assertEquals(75.5f, type.get(rs, "floatCol"));
-
-        // Test with Number
-        when(rs.getObject("doubleCol")).thenReturn(999.99);
-        assertEquals(999.99f, type.get(rs, "doubleCol"));
     }
 
     @Test

@@ -4,12 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BooleanBiPredicateTest extends TestBase {
 
     @Test
@@ -81,6 +79,63 @@ public class BooleanBiPredicateTest extends TestBase {
     }
 
     @Test
+    public void testComplexCombination() {
+        BooleanBiPredicate bothTrue = BooleanBiPredicate.BOTH_TRUE;
+        BooleanBiPredicate bothFalse = BooleanBiPredicate.BOTH_FALSE;
+
+        BooleanBiPredicate complex = bothTrue.or(bothFalse);
+
+        assertTrue(complex.test(true, true));
+        assertFalse(complex.test(true, false));
+        assertFalse(complex.test(false, true));
+        assertTrue(complex.test(false, false));
+    }
+
+    @Test
+    public void testAnonymousClass() {
+        BooleanBiPredicate predicate = new BooleanBiPredicate() {
+            @Override
+            public boolean test(boolean t, boolean u) {
+                return t != u; // XOR
+            }
+        };
+
+        assertFalse(predicate.test(true, true));
+        assertTrue(predicate.test(true, false));
+        assertTrue(predicate.test(false, true));
+        assertFalse(predicate.test(false, false));
+    }
+
+    @Test
+    public void testXorLogic() {
+        BooleanBiPredicate xor = (t, u) -> t != u;
+
+        assertFalse(xor.test(true, true));
+        assertTrue(xor.test(true, false));
+        assertTrue(xor.test(false, true));
+        assertFalse(xor.test(false, false));
+    }
+
+    @Test
+    public void testImpliesLogic() {
+        BooleanBiPredicate implies = (t, u) -> !t || u;
+
+        assertTrue(implies.test(true, true));
+        assertFalse(implies.test(true, false));
+        assertTrue(implies.test(false, true));
+        assertTrue(implies.test(false, false));
+    }
+
+    @Test
+    public void testTestWithException() {
+        BooleanBiPredicate predicate = (t, u) -> {
+            throw new RuntimeException("Test exception");
+        };
+
+        assertThrows(RuntimeException.class, () -> predicate.test(true, false));
+    }
+
+    @Test
     public void testNegate() {
         BooleanBiPredicate predicate = (t, u) -> t && u;
         BooleanBiPredicate negated = predicate.negate();
@@ -89,6 +144,17 @@ public class BooleanBiPredicateTest extends TestBase {
         assertTrue(negated.test(true, false));
         assertTrue(negated.test(false, true));
         assertTrue(negated.test(false, false));
+    }
+
+    @Test
+    public void testNegateAfterAnd() {
+        BooleanBiPredicate predicate1 = (t, u) -> t;
+        BooleanBiPredicate predicate2 = (t, u) -> u;
+
+        BooleanBiPredicate combined = predicate1.and(predicate2).negate();
+
+        assertFalse(combined.test(true, true));
+        assertTrue(combined.test(true, false));
     }
 
     @Test
@@ -139,73 +205,5 @@ public class BooleanBiPredicateTest extends TestBase {
         BooleanBiPredicate combined = firstTrue.or(shouldNotExecute);
 
         assertTrue(combined.test(true, true)); // Should not throw exception
-    }
-
-    @Test
-    public void testComplexCombination() {
-        BooleanBiPredicate bothTrue = BooleanBiPredicate.BOTH_TRUE;
-        BooleanBiPredicate bothFalse = BooleanBiPredicate.BOTH_FALSE;
-
-        BooleanBiPredicate complex = bothTrue.or(bothFalse);
-
-        assertTrue(complex.test(true, true));
-        assertFalse(complex.test(true, false));
-        assertFalse(complex.test(false, true));
-        assertTrue(complex.test(false, false));
-    }
-
-    @Test
-    public void testNegateAfterAnd() {
-        BooleanBiPredicate predicate1 = (t, u) -> t;
-        BooleanBiPredicate predicate2 = (t, u) -> u;
-
-        BooleanBiPredicate combined = predicate1.and(predicate2).negate();
-
-        assertFalse(combined.test(true, true));
-        assertTrue(combined.test(true, false));
-    }
-
-    @Test
-    public void testTestWithException() {
-        BooleanBiPredicate predicate = (t, u) -> {
-            throw new RuntimeException("Test exception");
-        };
-
-        assertThrows(RuntimeException.class, () -> predicate.test(true, false));
-    }
-
-    @Test
-    public void testAnonymousClass() {
-        BooleanBiPredicate predicate = new BooleanBiPredicate() {
-            @Override
-            public boolean test(boolean t, boolean u) {
-                return t != u; // XOR
-            }
-        };
-
-        assertFalse(predicate.test(true, true));
-        assertTrue(predicate.test(true, false));
-        assertTrue(predicate.test(false, true));
-        assertFalse(predicate.test(false, false));
-    }
-
-    @Test
-    public void testXorLogic() {
-        BooleanBiPredicate xor = (t, u) -> t != u;
-
-        assertFalse(xor.test(true, true));
-        assertTrue(xor.test(true, false));
-        assertTrue(xor.test(false, true));
-        assertFalse(xor.test(false, false));
-    }
-
-    @Test
-    public void testImpliesLogic() {
-        BooleanBiPredicate implies = (t, u) -> !t || u;
-
-        assertTrue(implies.test(true, true));
-        assertFalse(implies.test(true, false));
-        assertTrue(implies.test(false, true));
-        assertTrue(implies.test(false, false));
     }
 }

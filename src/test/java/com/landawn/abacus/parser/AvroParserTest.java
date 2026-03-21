@@ -29,13 +29,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.entity.User;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-public class AvroParserTest {
+public class AvroParserTest extends TestBase {
 
     static final AvroParser avroParser = ParserFactory.createAvroParser();
 
@@ -161,6 +162,99 @@ public class AvroParserTest {
     }
 
     @Test
+    public void testSerializeCollection() {
+        List<Map<String, Object>> list = new ArrayList<>();
+        Map<String, Object> item1 = new HashMap<>();
+        item1.put("name", "Item1");
+        item1.put("age", 10);
+        Map<String, Object> item2 = new HashMap<>();
+        item2.put("name", "Item2");
+        item2.put("age", 20);
+        list.add(item1);
+        list.add(item2);
+
+        AvroSerConfig config = AvroSerConfig.create().setSchema(testSchema);
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+        parser.serialize(list, config, os);
+
+        byte[] bytes = os.toByteArray();
+        Assertions.assertTrue(bytes.length > 0);
+    }
+
+    @Test
+    public void testSerializeMapWithSchema() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("name", "MapUser");
+        map.put("age", 40);
+
+        AvroSerConfig config = new AvroSerConfig();
+        config.setSchema(testSchema);
+
+        String result = parser.serialize(map, config);
+        assertNotNull(result);
+        assertTrue(result.length() > 0);
+    }
+
+    @Test
+    public void testSerializeCollectionWithSchema() {
+        List<String> list = Arrays.asList("one", "two", "three");
+
+        AvroSerConfig config = new AvroSerConfig();
+        config.setSchema(arraySchema);
+
+        String result = parser.serialize(list, config);
+        assertNotNull(result);
+        assertTrue(result.length() > 0);
+    }
+
+    @Test
+    public void testSerializePrimitiveArray() {
+        int[] array = { 1, 2, 3, 4, 5 };
+
+        Schema intArraySchema = new Schema.Parser().parse("{\"type\":\"array\",\"items\":\"int\"}");
+
+        AvroSerConfig config = new AvroSerConfig();
+        config.setSchema(intArraySchema);
+
+        String result = parser.serialize(N.toList(array), config);
+        assertNotNull(result);
+        assertTrue(result.length() > 0);
+    }
+
+    @Test
+    public void testSerializeBean() {
+        TestBean bean = new TestBean();
+        bean.setName("BeanUser");
+        bean.setAge(40);
+
+        AvroSerConfig config = new AvroSerConfig();
+        config.setSchema(testSchema);
+
+        String result = parser.serialize(bean, config);
+        assertNotNull(result);
+        assertTrue(result.length() > 0);
+    }
+
+    @Test
+    public void testSerializeEmptyCollection() {
+        List<Object> emptyList = new ArrayList<>();
+
+        AvroSerConfig config = new AvroSerConfig();
+        config.setSchema(arraySchema);
+
+        String result = parser.serialize(emptyList, config);
+
+        N.println("Testing serialization of empty collection: " + result);
+
+        AvroDeserConfig adc = AvroDeserConfig.create().setSchema(arraySchema).setElementType(String.class);
+
+        List<String> newList = parser.deserialize(result, adc, List.class);
+        N.println("Deserialized empty collection: " + newList);
+        assertNotNull(newList);
+    }
+
+    @Test
     public void testSerialize_0() throws Exception {
         User user1 = new User();
         user1.setName("Alyssa");
@@ -219,6 +313,7 @@ public class AvroParserTest {
         users = avroParser.deserialize(file, ds, List.class);
         N.println(users);
         assertNotNull(users);
+        IOUtil.deleteIfExists(file);
     }
 
     @Test
@@ -322,46 +417,6 @@ public class AvroParserTest {
     }
 
     @Test
-    public void testSerializeMapWithSchema() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("name", "MapUser");
-        map.put("age", 40);
-
-        AvroSerConfig config = new AvroSerConfig();
-        config.setSchema(testSchema);
-
-        String result = parser.serialize(map, config);
-        assertNotNull(result);
-        assertTrue(result.length() > 0);
-    }
-
-    @Test
-    public void testSerializeCollectionWithSchema() {
-        List<String> list = Arrays.asList("one", "two", "three");
-
-        AvroSerConfig config = new AvroSerConfig();
-        config.setSchema(arraySchema);
-
-        String result = parser.serialize(list, config);
-        assertNotNull(result);
-        assertTrue(result.length() > 0);
-    }
-
-    @Test
-    public void testSerializePrimitiveArray() {
-        int[] array = { 1, 2, 3, 4, 5 };
-
-        Schema intArraySchema = new Schema.Parser().parse("{\"type\":\"array\",\"items\":\"int\"}");
-
-        AvroSerConfig config = new AvroSerConfig();
-        config.setSchema(intArraySchema);
-
-        String result = parser.serialize(N.toList(array), config);
-        assertNotNull(result);
-        assertTrue(result.length() > 0);
-    }
-
-    @Test
     public void testSerializeUnsupportedType() {
         StringBuilder sb = new StringBuilder("test");
 
@@ -369,6 +424,131 @@ public class AvroParserTest {
         config.setSchema(testSchema);
 
         assertThrows(IllegalArgumentException.class, () -> parser.serialize(sb, config));
+    }
+
+    @Test
+    public void testSerializeCollectionOfMaps() throws IOException {
+        List<Map<String, Object>> list = new ArrayList<>();
+        Map<String, Object> map1 = new HashMap<>();
+        map1.put("name", "User1");
+        map1.put("age", 20);
+        list.add(map1);
+
+        Map<String, Object> map2 = new HashMap<>();
+        map2.put("name", "User2");
+        map2.put("age", 25);
+        list.add(map2);
+
+        AvroSerConfig config = new AvroSerConfig();
+        config.setSchema(testSchema);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        parser.serialize(list, config, baos);
+
+        assertTrue(baos.toByteArray().length > 0);
+    }
+
+    @Test
+    public void testIOExceptionHandlingInSerializeToFile() {
+        GenericRecord record = new GenericData.Record(testSchema);
+        record.put("name", "Test");
+        record.put("age", 30);
+
+        AvroSerConfig config = new AvroSerConfig();
+        config.setSchema(testSchema);
+
+        File invalidFile = tempDir;
+
+        assertThrows(UncheckedIOException.class, () -> parser.serialize(record, config, invalidFile));
+    }
+
+    @Test
+    public void testSerializeSpecificRecord() throws IOException {
+        MockSpecificRecord record = new MockSpecificRecord("test-id-123");
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        parser.serialize(record, null, baos);
+
+        assertTrue(baos.toByteArray().length > 0);
+    }
+
+    @Test
+    public void testSerializeCollectionOfSpecificRecords() throws IOException {
+        List<MockSpecificRecord> records = Arrays.asList(new MockSpecificRecord("id1"), new MockSpecificRecord("id2"), new MockSpecificRecord("id3"));
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        parser.serialize(records, null, baos);
+
+        assertTrue(baos.toByteArray().length > 0);
+    }
+
+    @Test
+    public void testSerializeCollectionOfGenericRecords() throws IOException {
+        List<GenericRecord> records = new ArrayList<>();
+
+        GenericRecord record1 = new GenericData.Record(testSchema);
+        record1.put("name", "Generic1");
+        record1.put("age", 10);
+        records.add(record1);
+
+        GenericRecord record2 = new GenericData.Record(testSchema);
+        record2.put("name", "Generic2");
+        record2.put("age", 20);
+        records.add(record2);
+
+        AvroSerConfig config = new AvroSerConfig();
+        config.setSchema(testSchema);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        parser.serialize(records, config, baos);
+
+        assertTrue(baos.toByteArray().length > 0);
+    }
+
+    @Test
+    public void testSerializeToStringWithNull() {
+        // assertThrows(NullPointerException.class, () -> parser.serialize(null, (AvroSerConfig) null));
+        Assertions.assertEquals("", parser.serialize(null, (AvroSerConfig) null));
+    }
+
+    @Test
+    public void testSerializeToOutputStreamDoesNotCloseCallerStream() throws IOException {
+        Map<String, Object> data = new HashMap<>();
+        data.put("name", "NoClose");
+        data.put("age", 26);
+
+        AvroSerConfig config = AvroSerConfig.create().setSchema(testSchema);
+        CloseTrackingOutputStream os = new CloseTrackingOutputStream();
+
+        parser.serialize(data, config, os);
+
+        Assertions.assertFalse(os.isClosed());
+        os.write(1);
+    }
+
+    @Test
+    public void testSerializeToOutputStreamWithoutSchema() {
+        Map<String, Object> data = new HashMap<>();
+        data.put("test", "value");
+
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            parser.serialize(data, null, os);
+        });
+    }
+
+    // Exercise private Avro record conversion helpers that are otherwise hard to reach through the public API.
+    @Test
+    public void testToGenericRecord_CollectionFieldsByPosition() throws Exception {
+        Method method = AvroParser.class.getDeclaredMethod("toGenericRecord", Object.class, Schema.class);
+        method.setAccessible(true);
+
+        GenericRecord result = (GenericRecord) method.invoke(parser, Arrays.asList("ListUser", 29), testSchema);
+
+        assertNotNull(result);
+        assertEquals("ListUser", result.get("name").toString());
+        assertEquals(29, result.get("age"));
     }
 
     @Test
@@ -389,6 +569,73 @@ public class AvroParserTest {
         assertNotNull(result);
         assertEquals("TestUser", result.get("name").toString());
         assertEquals(50, result.get("age"));
+    }
+
+    @Test
+    public void testDeserializeFromInputStreamDoesNotCloseCallerStream() {
+        Map<String, Object> data = new HashMap<>();
+        data.put("name", "InputNoClose");
+        data.put("age", 41);
+
+        AvroSerConfig serConfig = AvroSerConfig.create().setSchema(testSchema);
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        parser.serialize(data, serConfig, os);
+
+        CloseTrackingInputStream is = new CloseTrackingInputStream(os.toByteArray());
+        AvroDeserConfig desConfig = AvroDeserConfig.create().setSchema(testSchema);
+        GenericRecord result = parser.deserialize(is, desConfig, GenericRecord.class);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("InputNoClose", result.get("name").toString());
+        Assertions.assertFalse(is.isClosed());
+    }
+
+    @Test
+    @DisplayName("Deserialize to GenericRecord should return GenericRecord directly")
+    public void test_deserialize_toGenericRecord() {
+        // Create a GenericRecord and serialize it
+        GenericRecord record = new GenericData.Record(testSchema);
+        record.put("name", "Alice");
+        record.put("age", 30);
+
+        AvroSerConfig serConfig = AvroSerConfig.create().setSchema(testSchema);
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        parser.serialize(record, serConfig, os);
+
+        byte[] serialized = os.toByteArray();
+        assertTrue(serialized.length > 0, "Serialized data should not be empty");
+
+        // Deserialize back to GenericRecord — this is the bugfix path
+        AvroDeserConfig deserConfig = AvroDeserConfig.create().setSchema(testSchema);
+        ByteArrayInputStream is = new ByteArrayInputStream(serialized);
+        GenericRecord result = parser.deserialize(is, deserConfig, GenericRecord.class);
+
+        assertNotNull(result, "Deserialized GenericRecord should not be null");
+        assertEquals("Alice", result.get("name").toString());
+        assertEquals(30, result.get("age"));
+    }
+
+    @Test
+    @DisplayName("Deserialize to Map should still work correctly")
+    public void test_deserialize_toMap() {
+        GenericRecord record = new GenericData.Record(testSchema);
+        record.put("name", "Bob");
+        record.put("age", 25);
+
+        AvroSerConfig serConfig = AvroSerConfig.create().setSchema(testSchema);
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        parser.serialize(record, serConfig, os);
+
+        byte[] serialized = os.toByteArray();
+
+        AvroDeserConfig deserConfig = AvroDeserConfig.create().setSchema(testSchema);
+        ByteArrayInputStream is = new ByteArrayInputStream(serialized);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> result = parser.deserialize(is, deserConfig, Map.class);
+
+        assertNotNull(result, "Deserialized Map should not be null");
+        assertEquals("Bob", result.get("name").toString());
+        assertEquals(25, result.get("age"));
     }
 
     @Test
@@ -494,42 +741,6 @@ public class AvroParserTest {
     }
 
     @Test
-    public void testSerializeCollectionOfMaps() throws IOException {
-        List<Map<String, Object>> list = new ArrayList<>();
-        Map<String, Object> map1 = new HashMap<>();
-        map1.put("name", "User1");
-        map1.put("age", 20);
-        list.add(map1);
-
-        Map<String, Object> map2 = new HashMap<>();
-        map2.put("name", "User2");
-        map2.put("age", 25);
-        list.add(map2);
-
-        AvroSerConfig config = new AvroSerConfig();
-        config.setSchema(testSchema);
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        parser.serialize(list, config, baos);
-
-        assertTrue(baos.toByteArray().length > 0);
-    }
-
-    @Test
-    public void testSerializeBean() {
-        TestBean bean = new TestBean();
-        bean.setName("BeanUser");
-        bean.setAge(40);
-
-        AvroSerConfig config = new AvroSerConfig();
-        config.setSchema(testSchema);
-
-        String result = parser.serialize(bean, config);
-        assertNotNull(result);
-        assertTrue(result.length() > 0);
-    }
-
-    @Test
     public void testDeserializeToBean() throws IOException {
         GenericRecord record = new GenericData.Record(testSchema);
         record.put("name", "BeanDeserializeUser");
@@ -552,38 +763,6 @@ public class AvroParserTest {
     }
 
     @Test
-    public void testSerializeEmptyCollection() {
-        List<Object> emptyList = new ArrayList<>();
-
-        AvroSerConfig config = new AvroSerConfig();
-        config.setSchema(arraySchema);
-
-        String result = parser.serialize(emptyList, config);
-
-        N.println("Testing serialization of empty collection: " + result);
-
-        AvroDeserConfig adc = AvroDeserConfig.create().setSchema(arraySchema).setElementType(String.class);
-
-        List<String> newList = parser.deserialize(result, adc, List.class);
-        N.println("Deserialized empty collection: " + newList);
-        assertNotNull(newList);
-    }
-
-    @Test
-    public void testIOExceptionHandlingInSerializeToFile() {
-        GenericRecord record = new GenericData.Record(testSchema);
-        record.put("name", "Test");
-        record.put("age", 30);
-
-        AvroSerConfig config = new AvroSerConfig();
-        config.setSchema(testSchema);
-
-        File invalidFile = tempDir;
-
-        assertThrows(UncheckedIOException.class, () -> parser.serialize(record, config, invalidFile));
-    }
-
-    @Test
     public void testDeserializeUnsupportedType() {
         AvroDeserConfig config = new AvroDeserConfig();
         config.setSchema(testSchema);
@@ -591,26 +770,6 @@ public class AvroParserTest {
         ByteArrayInputStream bais = new ByteArrayInputStream(new byte[0]);
 
         assertThrows(UncheckedIOException.class, () -> parser.deserialize(bais, config, StringBuilder.class));
-    }
-
-    @Test
-    public void testSerializeSpecificRecord() throws IOException {
-        MockSpecificRecord record = new MockSpecificRecord("test-id-123");
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        parser.serialize(record, null, baos);
-
-        assertTrue(baos.toByteArray().length > 0);
-    }
-
-    @Test
-    public void testSerializeCollectionOfSpecificRecords() throws IOException {
-        List<MockSpecificRecord> records = Arrays.asList(new MockSpecificRecord("id1"), new MockSpecificRecord("id2"), new MockSpecificRecord("id3"));
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        parser.serialize(records, null, baos);
-
-        assertTrue(baos.toByteArray().length > 0);
     }
 
     @Test
@@ -651,29 +810,6 @@ public class AvroParserTest {
     }
 
     @Test
-    public void testSerializeCollectionOfGenericRecords() throws IOException {
-        List<GenericRecord> records = new ArrayList<>();
-
-        GenericRecord record1 = new GenericData.Record(testSchema);
-        record1.put("name", "Generic1");
-        record1.put("age", 10);
-        records.add(record1);
-
-        GenericRecord record2 = new GenericData.Record(testSchema);
-        record2.put("name", "Generic2");
-        record2.put("age", 20);
-        records.add(record2);
-
-        AvroSerConfig config = new AvroSerConfig();
-        config.setSchema(testSchema);
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        parser.serialize(records, config, baos);
-
-        assertTrue(baos.toByteArray().length > 0);
-    }
-
-    @Test
     public void testDeserializeCollectionWithElementType() throws IOException {
         List<Map<String, Object>> original = new ArrayList<>();
         Map<String, Object> map1 = new HashMap<>();
@@ -706,146 +842,12 @@ public class AvroParserTest {
     }
 
     @Test
-    public void testSerializeToStringWithNull() {
-        // assertThrows(NullPointerException.class, () -> parser.serialize(null, (AvroSerConfig) null));
-        Assertions.assertEquals("", parser.serialize(null, (AvroSerConfig) null));
-    }
-
-    @Test
-    public void testSerializeToOutputStreamDoesNotCloseCallerStream() throws IOException {
-        Map<String, Object> data = new HashMap<>();
-        data.put("name", "NoClose");
-        data.put("age", 26);
-
-        AvroSerConfig config = AvroSerConfig.create().setSchema(schema);
-        CloseTrackingOutputStream os = new CloseTrackingOutputStream();
-
-        parser.serialize(data, config, os);
-
-        Assertions.assertFalse(os.isClosed());
-        os.write(1);
-    }
-
-    @Test
-    public void testSerializeToOutputStreamWithoutSchema() {
-        Map<String, Object> data = new HashMap<>();
-        data.put("test", "value");
-
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            parser.serialize(data, null, os);
-        });
-    }
-
-    @Test
-    public void testDeserializeFromInputStreamDoesNotCloseCallerStream() {
-        Map<String, Object> data = new HashMap<>();
-        data.put("name", "InputNoClose");
-        data.put("age", 41);
-
-        AvroSerConfig serConfig = AvroSerConfig.create().setSchema(schema);
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        parser.serialize(data, serConfig, os);
-
-        CloseTrackingInputStream is = new CloseTrackingInputStream(os.toByteArray());
-        AvroDeserConfig desConfig = AvroDeserConfig.create().setSchema(schema);
-        GenericRecord result = parser.deserialize(is, desConfig, GenericRecord.class);
-
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals("InputNoClose", result.get("name").toString());
-        Assertions.assertFalse(is.isClosed());
-    }
-
-    @Test
     public void testDeserializeFromInputStreamWithoutSchema() {
         ByteArrayInputStream is = new ByteArrayInputStream(new byte[0]);
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             parser.deserialize(is, null, Map.class);
         });
-    }
-
-    @Test
-    public void testSerializeCollection() {
-        List<Map<String, Object>> list = new ArrayList<>();
-        Map<String, Object> item1 = new HashMap<>();
-        item1.put("name", "Item1");
-        item1.put("age", 10);
-        Map<String, Object> item2 = new HashMap<>();
-        item2.put("name", "Item2");
-        item2.put("age", 20);
-        list.add(item1);
-        list.add(item2);
-
-        AvroSerConfig config = AvroSerConfig.create().setSchema(schema);
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-
-        parser.serialize(list, config, os);
-
-        byte[] bytes = os.toByteArray();
-        Assertions.assertTrue(bytes.length > 0);
-    }
-
-    @Test
-    @DisplayName("Deserialize to GenericRecord should return GenericRecord directly")
-    public void test_deserialize_toGenericRecord() {
-        // Create a GenericRecord and serialize it
-        GenericRecord record = new GenericData.Record(schema);
-        record.put("name", "Alice");
-        record.put("age", 30);
-
-        AvroSerConfig serConfig = AvroSerConfig.create().setSchema(schema);
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        parser.serialize(record, serConfig, os);
-
-        byte[] serialized = os.toByteArray();
-        assertTrue(serialized.length > 0, "Serialized data should not be empty");
-
-        // Deserialize back to GenericRecord — this is the bugfix path
-        AvroDeserConfig deserConfig = AvroDeserConfig.create().setSchema(schema);
-        ByteArrayInputStream is = new ByteArrayInputStream(serialized);
-        GenericRecord result = parser.deserialize(is, deserConfig, GenericRecord.class);
-
-        assertNotNull(result, "Deserialized GenericRecord should not be null");
-        assertEquals("Alice", result.get("name").toString());
-        assertEquals(30, result.get("age"));
-    }
-
-    @Test
-    @DisplayName("Deserialize to Map should still work correctly")
-    public void test_deserialize_toMap() {
-        GenericRecord record = new GenericData.Record(schema);
-        record.put("name", "Bob");
-        record.put("age", 25);
-
-        AvroSerConfig serConfig = AvroSerConfig.create().setSchema(schema);
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        parser.serialize(record, serConfig, os);
-
-        byte[] serialized = os.toByteArray();
-
-        AvroDeserConfig deserConfig = AvroDeserConfig.create().setSchema(schema);
-        ByteArrayInputStream is = new ByteArrayInputStream(serialized);
-        @SuppressWarnings("unchecked")
-        Map<String, Object> result = parser.deserialize(is, deserConfig, Map.class);
-
-        assertNotNull(result, "Deserialized Map should not be null");
-        assertEquals("Bob", result.get("name").toString());
-        assertEquals(25, result.get("age"));
-    }
-
-    // Exercise private Avro record conversion helpers that are otherwise hard to reach through the public API.
-    @Test
-    public void testToGenericRecord_CollectionFieldsByPosition() throws Exception {
-        Method method = AvroParser.class.getDeclaredMethod("toGenericRecord", Object.class, Schema.class);
-        method.setAccessible(true);
-
-        GenericRecord result = (GenericRecord) method.invoke(parser, Arrays.asList("ListUser", 29), testSchema);
-
-        assertNotNull(result);
-        assertEquals("ListUser", result.get("name").toString());
-        assertEquals(29, result.get("age"));
     }
 
     @Test
@@ -863,4 +865,6 @@ public class AvroParserTest {
         assertNotNull(result);
         assertEquals(Arrays.asList("ListUser", 29), result);
     }
+
+    // TODO: Remaining AvroParser gaps are concentrated in schema-specific private conversion branches that need dedicated fixture schemas/records beyond the current lightweight unit setup.
 }

@@ -5,13 +5,35 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class RetryTest extends TestBase {
+
+    @Test
+    public void testRetryOf_WithRetryCondition() {
+        Retry<Void> retry = Retry.withFixedDelay(2, 100, e -> e instanceof RuntimeException);
+        Assertions.assertNotNull(retry);
+    }
+
+    @Test
+    public void testRetryOf_WithBiPredicate() {
+        Retry<String> retry = Retry.withFixedDelay(2, 100, (result, exception) -> exception != null || "retry".equals(result));
+        Assertions.assertNotNull(retry);
+    }
+
+    @Test
+    public void testOf_WithBiPredicate_ZeroRetryTimes() {
+        Retry<String> retry = Retry.withFixedDelay(0, 1000, (result, ex) -> result == null);
+        Assertions.assertNotNull(retry);
+    }
+
+    @Test
+    public void testOf_WithBiPredicate_ZeroRetryInterval() {
+        Retry<String> retry = Retry.withFixedDelay(3, 0, (result, ex) -> result == null);
+        Assertions.assertNotNull(retry);
+    }
 
     @Test
     public void testOf_WithPredicate_ValidParameters() {
@@ -59,18 +81,6 @@ public class RetryTest extends TestBase {
     }
 
     @Test
-    public void testOf_WithBiPredicate_ZeroRetryTimes() {
-        Retry<String> retry = Retry.withFixedDelay(0, 1000, (result, ex) -> result == null);
-        Assertions.assertNotNull(retry);
-    }
-
-    @Test
-    public void testOf_WithBiPredicate_ZeroRetryInterval() {
-        Retry<String> retry = Retry.withFixedDelay(3, 0, (result, ex) -> result == null);
-        Assertions.assertNotNull(retry);
-    }
-
-    @Test
     public void testOf_WithBiPredicate_NegativeRetryTimes() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Retry.withFixedDelay(-1, 1000, (result, ex) -> result == null);
@@ -88,6 +98,57 @@ public class RetryTest extends TestBase {
     public void testOf_WithBiPredicate_NullRetryCondition() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Retry.withFixedDelay(3, 1000, (java.util.function.BiPredicate<String, Exception>) null);
+        });
+    }
+
+    // withFixedDelay(Predicate) creates working Retry
+    @Test
+    public void testWithFixedDelay() throws Exception {
+        Retry<Void> retry = Retry.withFixedDelay(2, 50, e -> e instanceof IOException);
+        Assertions.assertNotNull(retry);
+        AtomicInteger counter = new AtomicInteger(0);
+        retry.run(() -> {
+            if (counter.incrementAndGet() < 2) {
+                throw new IOException("fail");
+            }
+        });
+        Assertions.assertEquals(2, counter.get());
+    }
+
+    // withFixedDelay(BiPredicate) creates working Retry for call
+    @Test
+    public void testWithFixedDelay_BiPredicate() throws Exception {
+        Retry<String> retry = Retry.withFixedDelay(2, 50, (result, ex) -> "bad".equals(result) || ex instanceof IOException);
+        Assertions.assertNotNull(retry);
+        AtomicInteger counter = new AtomicInteger(0);
+        String result = retry.call(() -> {
+            if (counter.incrementAndGet() < 2) {
+                return "bad";
+            }
+            return "good";
+        });
+        Assertions.assertEquals("good", result);
+        Assertions.assertEquals(2, counter.get());
+    }
+
+    @Test
+    public void testNegativeRetryTimes() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Retry.withFixedDelay(-1, 100, e -> true);
+        });
+    }
+
+    @Test
+    public void testNegativeRetryInterval() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Retry.withFixedDelay(2, -1, e -> true);
+        });
+    }
+
+    @Test
+    public void testNullRetryCondition() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Retry.withFixedDelay(2, 100, (Predicate<? super Exception>) null);
         });
     }
 
@@ -219,6 +280,107 @@ public class RetryTest extends TestBase {
 
         Assertions.assertEquals(2, counter.get());
         Assertions.assertTrue(endTime - startTime < 500);
+    }
+
+    @Test
+    public void testRun_MultipleExceptionTypes() throws Exception {
+        Retry<Void> retry = Retry.withFixedDelay(3, 50, e -> e instanceof IOException || e instanceof IllegalArgumentException);
+        AtomicInteger counter = new AtomicInteger(0);
+
+        retry.run(() -> {
+            int count = counter.incrementAndGet();
+            if (count == 1) {
+                throw new IOException("First attempt");
+            }
+            if (count == 2) {
+                throw new IllegalArgumentException("Second attempt");
+            }
+        });
+
+        Assertions.assertEquals(3, counter.get());
+    }
+
+    @Test
+    public void testRun_SuccessOnFirstTry() throws Exception {
+        AtomicInteger counter = new AtomicInteger(0);
+        Retry<Void> retry = Retry.withFixedDelay(3, 50, e -> true);
+
+        retry.run(() -> {
+            counter.incrementAndGet();
+        });
+
+        Assertions.assertEquals(1, counter.get());
+    }
+
+    @Test
+    public void testRun_SuccessAfterRetry() throws Exception {
+        AtomicInteger counter = new AtomicInteger(0);
+        Retry<Void> retry = Retry.withFixedDelay(3, 50, e -> e instanceof RuntimeException);
+
+        retry.run(() -> {
+            if (counter.incrementAndGet() < 3) {
+                throw new RuntimeException("Fail");
+            }
+        });
+
+        Assertions.assertEquals(3, counter.get());
+    }
+
+    @Test
+    public void testRun_FailureAfterAllRetries() {
+        AtomicInteger counter = new AtomicInteger(0);
+        Retry<Void> retry = Retry.withFixedDelay(2, 50, e -> e instanceof RuntimeException);
+
+        Assertions.assertThrows(RuntimeException.class, () -> {
+            retry.run(() -> {
+                counter.incrementAndGet();
+                throw new RuntimeException("Always fail");
+            });
+        });
+
+        Assertions.assertEquals(3, counter.get());
+    }
+
+    @Test
+    public void testRun_WithZeroRetries() throws Exception {
+        AtomicInteger counter = new AtomicInteger(0);
+        Retry<Void> retry = Retry.withFixedDelay(0, 0, e -> true);
+
+        retry.run(() -> {
+            counter.incrementAndGet();
+        });
+
+        Assertions.assertEquals(1, counter.get());
+    }
+
+    @Test
+    public void testRun_BiPredicate_FailAfterAllRetries() {
+        Retry<Void> retry = Retry.withFixedDelay(2, 0, (result, ex) -> ex instanceof IOException);
+        AtomicInteger counter = new AtomicInteger(0);
+
+        Assertions.assertThrows(IOException.class, () -> {
+            retry.run(() -> {
+                counter.incrementAndGet();
+                throw new IOException("always");
+            });
+        });
+
+        Assertions.assertEquals(3, counter.get());
+    }
+
+    @Test
+    public void testRun_BiPredicate_NoRetryOnNonMatchingException() {
+        Retry<Void> retry = Retry.withFixedDelay(3, 0, (result, ex) -> ex instanceof IOException);
+        AtomicInteger counter = new AtomicInteger(0);
+
+        Assertions.assertThrows(RuntimeException.class, () -> {
+            retry.run(() -> {
+                counter.incrementAndGet();
+                throw new RuntimeException("not retryable");
+            });
+        });
+
+        Assertions.assertEquals(1, counter.get());
     }
 
     @Test
@@ -489,24 +651,6 @@ public class RetryTest extends TestBase {
     }
 
     @Test
-    public void testRun_MultipleExceptionTypes() throws Exception {
-        Retry<Void> retry = Retry.withFixedDelay(3, 50, e -> e instanceof IOException || e instanceof IllegalArgumentException);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        retry.run(() -> {
-            int count = counter.incrementAndGet();
-            if (count == 1) {
-                throw new IOException("First attempt");
-            }
-            if (count == 2) {
-                throw new IllegalArgumentException("Second attempt");
-            }
-        });
-
-        Assertions.assertEquals(3, counter.get());
-    }
-
-    @Test
     public void testCall_AllRetriesThrowDifferentExceptions() {
         Retry<String> retry = Retry.withFixedDelay(2, 50, (result, ex) -> ex instanceof Exception);
         AtomicInteger counter = new AtomicInteger(0);
@@ -525,59 +669,6 @@ public class RetryTest extends TestBase {
         });
 
         Assertions.assertEquals("Third", exception.getMessage());
-        Assertions.assertEquals(3, counter.get());
-    }
-
-    @Test
-    public void testRetryOf_WithRetryCondition() {
-        Retry<Void> retry = Retry.withFixedDelay(2, 100, e -> e instanceof RuntimeException);
-        Assertions.assertNotNull(retry);
-    }
-
-    @Test
-    public void testRetryOf_WithBiPredicate() {
-        Retry<String> retry = Retry.withFixedDelay(2, 100, (result, exception) -> exception != null || "retry".equals(result));
-        Assertions.assertNotNull(retry);
-    }
-
-    @Test
-    public void testRun_SuccessOnFirstTry() throws Exception {
-        AtomicInteger counter = new AtomicInteger(0);
-        Retry<Void> retry = Retry.withFixedDelay(3, 50, e -> true);
-
-        retry.run(() -> {
-            counter.incrementAndGet();
-        });
-
-        Assertions.assertEquals(1, counter.get());
-    }
-
-    @Test
-    public void testRun_SuccessAfterRetry() throws Exception {
-        AtomicInteger counter = new AtomicInteger(0);
-        Retry<Void> retry = Retry.withFixedDelay(3, 50, e -> e instanceof RuntimeException);
-
-        retry.run(() -> {
-            if (counter.incrementAndGet() < 3) {
-                throw new RuntimeException("Fail");
-            }
-        });
-
-        Assertions.assertEquals(3, counter.get());
-    }
-
-    @Test
-    public void testRun_FailureAfterAllRetries() {
-        AtomicInteger counter = new AtomicInteger(0);
-        Retry<Void> retry = Retry.withFixedDelay(2, 50, e -> e instanceof RuntimeException);
-
-        Assertions.assertThrows(RuntimeException.class, () -> {
-            retry.run(() -> {
-                counter.incrementAndGet();
-                throw new RuntimeException("Always fail");
-            });
-        });
-
         Assertions.assertEquals(3, counter.get());
     }
 
@@ -630,99 +721,6 @@ public class RetryTest extends TestBase {
         String result = retry.call(() -> "success");
 
         Assertions.assertEquals("success", result);
-    }
-
-    @Test
-    public void testRun_WithZeroRetries() throws Exception {
-        AtomicInteger counter = new AtomicInteger(0);
-        Retry<Void> retry = Retry.withFixedDelay(0, 0, e -> true);
-
-        retry.run(() -> {
-            counter.incrementAndGet();
-        });
-
-        Assertions.assertEquals(1, counter.get());
-    }
-
-    // withFixedDelay(Predicate) creates working Retry
-    @Test
-    public void testWithFixedDelay() throws Exception {
-        Retry<Void> retry = Retry.withFixedDelay(2, 50, e -> e instanceof IOException);
-        Assertions.assertNotNull(retry);
-        AtomicInteger counter = new AtomicInteger(0);
-        retry.run(() -> {
-            if (counter.incrementAndGet() < 2) {
-                throw new IOException("fail");
-            }
-        });
-        Assertions.assertEquals(2, counter.get());
-    }
-
-    // withFixedDelay(BiPredicate) creates working Retry for call
-    @Test
-    public void testWithFixedDelay_BiPredicate() throws Exception {
-        Retry<String> retry = Retry.withFixedDelay(2, 50, (result, ex) -> "bad".equals(result) || ex instanceof IOException);
-        Assertions.assertNotNull(retry);
-        AtomicInteger counter = new AtomicInteger(0);
-        String result = retry.call(() -> {
-            if (counter.incrementAndGet() < 2) {
-                return "bad";
-            }
-            return "good";
-        });
-        Assertions.assertEquals("good", result);
-        Assertions.assertEquals(2, counter.get());
-    }
-
-    @Test
-    public void testNegativeRetryTimes() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Retry.withFixedDelay(-1, 100, e -> true);
-        });
-    }
-
-    @Test
-    public void testNegativeRetryInterval() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Retry.withFixedDelay(2, -1, e -> true);
-        });
-    }
-
-    @Test
-    public void testNullRetryCondition() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Retry.withFixedDelay(2, 100, (Predicate<? super Exception>) null);
-        });
-    }
-
-    @Test
-    public void testRun_BiPredicate_FailAfterAllRetries() {
-        Retry<Void> retry = Retry.withFixedDelay(2, 0, (result, ex) -> ex instanceof IOException);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        Assertions.assertThrows(IOException.class, () -> {
-            retry.run(() -> {
-                counter.incrementAndGet();
-                throw new IOException("always");
-            });
-        });
-
-        Assertions.assertEquals(3, counter.get());
-    }
-
-    @Test
-    public void testRun_BiPredicate_NoRetryOnNonMatchingException() {
-        Retry<Void> retry = Retry.withFixedDelay(3, 0, (result, ex) -> ex instanceof IOException);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        Assertions.assertThrows(RuntimeException.class, () -> {
-            retry.run(() -> {
-                counter.incrementAndGet();
-                throw new RuntimeException("not retryable");
-            });
-        });
-
-        Assertions.assertEquals(1, counter.get());
     }
 
 }

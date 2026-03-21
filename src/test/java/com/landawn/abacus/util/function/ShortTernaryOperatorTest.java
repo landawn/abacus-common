@@ -16,12 +16,10 @@ package com.landawn.abacus.util.function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ShortTernaryOperatorTest extends TestBase {
 
     @Test
@@ -49,6 +47,14 @@ public class ShortTernaryOperatorTest extends TestBase {
         assertEquals(5, average.applyAsShort((short) 3, (short) 5, (short) 7));
         assertEquals(0, average.applyAsShort((short) 0, (short) 0, (short) 0));
         assertEquals(10, average.applyAsShort((short) 10, (short) 10, (short) 10));
+    }
+
+    @Test
+    public void test_applyAsShort_bitwiseOperations() {
+        ShortTernaryOperator bitwiseOr = (a, b, c) -> (short) (a | b | c);
+
+        assertEquals(0x0F, bitwiseOr.applyAsShort((short) 0x01, (short) 0x02, (short) 0x0C));
+        assertEquals(0xFF, bitwiseOr.applyAsShort((short) 0xF0, (short) 0x0F, (short) 0x00));
     }
 
     @Test
@@ -117,13 +123,5 @@ public class ShortTernaryOperatorTest extends TestBase {
         assertEquals(0, product.applyAsShort((short) 0, (short) 5, (short) 10));
         assertEquals(0, product.applyAsShort((short) 5, (short) 0, (short) 10));
         assertEquals(0, product.applyAsShort((short) 5, (short) 10, (short) 0));
-    }
-
-    @Test
-    public void test_applyAsShort_bitwiseOperations() {
-        ShortTernaryOperator bitwiseOr = (a, b, c) -> (short) (a | b | c);
-
-        assertEquals(0x0F, bitwiseOr.applyAsShort((short) 0x01, (short) 0x02, (short) 0x0C));
-        assertEquals(0xFF, bitwiseOr.applyAsShort((short) 0xF0, (short) 0x0F, (short) 0x00));
     }
 }

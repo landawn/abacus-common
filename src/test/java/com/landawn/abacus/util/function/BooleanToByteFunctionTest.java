@@ -3,12 +3,10 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BooleanToByteFunctionTest extends TestBase {
 
     @Test
@@ -28,6 +26,19 @@ public class BooleanToByteFunctionTest extends TestBase {
     }
 
     @Test
+    public void testAnonymousClass() {
+        BooleanToByteFunction function = new BooleanToByteFunction() {
+            @Override
+            public byte applyAsByte(boolean value) {
+                return value ? (byte) 42 : (byte) 0;
+            }
+        };
+
+        assertEquals((byte) 42, function.applyAsByte(true));
+        assertEquals((byte) 0, function.applyAsByte(false));
+    }
+
+    @Test
     public void testApplyAsByteWithMaxValues() {
         BooleanToByteFunction function = value -> value ? Byte.MAX_VALUE : Byte.MIN_VALUE;
 
@@ -42,19 +53,6 @@ public class BooleanToByteFunctionTest extends TestBase {
         };
 
         assertThrows(RuntimeException.class, () -> function.applyAsByte(true));
-    }
-
-    @Test
-    public void testAnonymousClass() {
-        BooleanToByteFunction function = new BooleanToByteFunction() {
-            @Override
-            public byte applyAsByte(boolean value) {
-                return value ? (byte) 42 : (byte) 0;
-            }
-        };
-
-        assertEquals((byte) 42, function.applyAsByte(true));
-        assertEquals((byte) 0, function.applyAsByte(false));
     }
 
     @Test

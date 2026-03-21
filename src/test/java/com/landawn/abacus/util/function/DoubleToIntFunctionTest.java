@@ -5,12 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class DoubleToIntFunctionTest extends TestBase {
 
     @Test
@@ -71,6 +69,13 @@ public class DoubleToIntFunctionTest extends TestBase {
     }
 
     @Test
+    public void testJavaUtilFunctionCompatibility() {
+        DoubleToIntFunction function = value -> (int) value;
+        java.util.function.DoubleToIntFunction javaFunction = function;
+        assertEquals(5, javaFunction.applyAsInt(5.7));
+    }
+
+    @Test
     public void testApplyAsInt_WithZero() {
         DoubleToIntFunction function = DoubleToIntFunction.DEFAULT;
         assertEquals(0, function.applyAsInt(0.0));
@@ -85,10 +90,10 @@ public class DoubleToIntFunctionTest extends TestBase {
     }
 
     @Test
-    public void testJavaUtilFunctionCompatibility() {
-        DoubleToIntFunction function = value -> (int) value;
-        java.util.function.DoubleToIntFunction javaFunction = function;
-        assertEquals(5, javaFunction.applyAsInt(5.7));
+    public void testFunctionalInterfaceContract() {
+        DoubleToIntFunction lambda = value -> (int) value;
+        assertNotNull(lambda);
+        assertDoesNotThrow(() -> lambda.applyAsInt(1.0));
     }
 
     @Test
@@ -96,12 +101,5 @@ public class DoubleToIntFunctionTest extends TestBase {
         DoubleToIntFunction default1 = DoubleToIntFunction.DEFAULT;
         DoubleToIntFunction default2 = DoubleToIntFunction.DEFAULT;
         assertSame(default1, default2);
-    }
-
-    @Test
-    public void testFunctionalInterfaceContract() {
-        DoubleToIntFunction lambda = value -> (int) value;
-        assertNotNull(lambda);
-        assertDoesNotThrow(() -> lambda.applyAsInt(1.0));
     }
 }

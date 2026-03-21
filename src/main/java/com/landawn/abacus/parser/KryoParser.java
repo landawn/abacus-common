@@ -153,8 +153,8 @@ import com.landawn.abacus.util.u.OptionalShort;
 
 /**
  * High-performance binary serialization parser using the Kryo framework.
- * 
- * <p>This parser provides fast and efficient object graph serialization with support for:
+ *
+ * <p>This parser provides fast and efficient object graph serialization with support for:</p>
  * <ul>
  *   <li>Automatic deep and shallow copying of objects</li>
  *   <li>Binary serialization with optional Base64 encoding</li>
@@ -162,19 +162,19 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li>Custom serializers for specific types</li>
  *   <li>Object pooling for better performance</li>
  * </ul>
- * 
- * <p><b>Encoding behavior:</b>
+ *
+ * <p><b>Encoding behavior:</b></p>
  * <ul>
  *   <li>String/Writer output: Content is Base64 encoded</li>
  *   <li>File/OutputStream output: Content is NOT Base64 encoded (raw binary)</li>
  *   <li>String/Reader input: Content must be Base64 encoded</li>
  *   <li>File/InputStream input: Content must NOT be Base64 encoded (raw binary)</li>
  * </ul>
- * 
+ *
  * <p>The parser automatically registers many common Java types for optimal performance.
  * Additional types can be registered using the {@link #register} methods or globally
- * via {@link ParserFactory#registerKryo}.
- * 
+ * via {@link ParserFactory#registerKryo}.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * KryoParser parser = new KryoParser();
@@ -199,7 +199,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * // Shallow copy
  * MyObject shallowCopy = parser.shallowCopy(obj);
  * }</pre>
- * 
+ *
  * @see ParserFactory#createKryoParser()
  * @see KryoSerConfig
  * @see KryoDeserConfig
@@ -228,8 +228,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * Serializes an object to a Base64 encoded string representation.
      *
      * <p>This method converts the object to binary format using Kryo serialization,
-     * then encodes the result as a Base64 string suitable for text-based transmission.
-     * The output is Base64 encoded to make it suitable for text-based storage and transmission.</p>
+     * then encodes the result as a Base64 string suitable for text-based transmission.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -238,7 +237,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * // encoded contains Base64 representation
      * }</pre>
      *
-     * @param obj the object to serialize (may be {@code null} depending on implementation)
+     * @param obj the object to serialize (may be {@code null})
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @return the Base64 encoded string representation of the serialized object
      */
@@ -270,7 +269,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * // File contains raw binary data
      * }</pre>
      *
-     * @param obj the object to serialize (may be {@code null} depending on implementation)
+     * @param obj the object to serialize (may be {@code null})
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the output file to write to (must not be {@code null})
      * @throws UncheckedIOException if an I/O error occurs during file writing
@@ -308,7 +307,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * }
      * }</pre>
      *
-     * @param obj the object to serialize (may be {@code null} depending on implementation)
+     * @param obj the object to serialize (may be {@code null})
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the output stream to write to (must not be {@code null})
      * @throws UncheckedIOException if an I/O error occurs during stream writing
@@ -332,7 +331,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * String base64 = sw.toString();
      * }</pre>
      *
-     * @param obj the object to serialize (may be {@code null} depending on implementation)
+     * @param obj the object to serialize (may be {@code null})
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the writer to write to (must not be {@code null})
      * @throws UncheckedIOException if an I/O error occurs during writing
@@ -357,7 +356,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
     /**
      * Writes an object to an output stream using Kryo serialization.
      * This is the core serialization method that handles binary output.
-     * The method creates and manages a Kryo Output instance from the pool.
+     * The method creates and manages a Kryo {@code Output} instance from the pool.
      *
      * <p><b>Note:</b> This is a protected method intended for internal use and subclass extension.
      * External callers should use the public {@link #serialize} methods instead.</p>
@@ -369,7 +368,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * byte[] serialized = baos.toByteArray();
      * }</pre>
      *
-     * @param obj the object to write (may be null)
+     * @param obj the object to write (may be {@code null})
      * @param config the serialization configuration (may be {@code null} for defaults)
      * @param output the output stream to write to
      */
@@ -400,9 +399,9 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * write(myObject, config, out);
      * }</pre>
      *
-     * @param obj the object to write (may be null)
-     * @param config the serialization configuration (may be {@code null} for defaults). If config.isWriteClass()
-     *               returns {@code true}, both class and object are written; otherwise only the object is written
+     * @param obj the object to write (may be {@code null})
+     * @param config the serialization configuration (may be {@code null} for defaults). If {@code config.isWriteClass()}
+     *               returns {@code true}, both class and object are written; otherwise only the object is written.
      * @param output the Kryo output to write to
      */
     protected void write(final Object obj, final KryoSerConfig config, final Output output) {
@@ -636,7 +635,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
     /**
      * Reads an object from an input stream using Kryo deserialization.
      * This is the core deserialization method that handles binary input.
-     * The method creates and manages a Kryo Input instance from the pool.
+     * The method creates and manages a Kryo {@code Input} instance from the pool.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -664,7 +663,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
 
     /**
      * Reads an object using Kryo input.
-     * This method performs the actual Kryo deserialization. If targetClass is {@code null},
+     * This method performs the actual Kryo deserialization. If {@code targetClass} is {@code null},
      * it reads both class and object information from the stream; otherwise it reads
      * just the object data and instantiates the specified class.
      *
@@ -704,7 +703,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * config = parser.check(config);   // Validates and returns config
      * }</pre>
      *
-     * @param config the configuration to check (may be null)
+     * @param config the configuration to check (may be {@code null})
      * @return the validated configuration (same as input)
      */
     @SuppressWarnings("UnusedReturnValue")
@@ -729,7 +728,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * config = parser.check(config);   // Validates and returns config
      * }</pre>
      *
-     * @param config the configuration to check (may be null)
+     * @param config the configuration to check (may be {@code null})
      * @return the validated configuration (same as input)
      */
     @SuppressWarnings("UnusedReturnValue")
@@ -752,7 +751,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * MyObject original = new MyObject();
      * original.setName("Test");
      * original.setList(Arrays.asList("a", "b"));
-     * 
+     *
      * MyObject copy = parser.shallowCopy(original);
      * // copy.getName() equals "Test"
      * // copy.getList() == original.getList() (same reference)
@@ -781,7 +780,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * MyObject original = new MyObject();
      * original.setName("Test");
      * original.setList(Arrays.asList("a", "b"));
-     * 
+     *
      * MyObject copy = parser.deepCopy(original);
      * // copy.getName() equals "Test"
      * // copy.getList() != original.getList() (different reference)
@@ -876,7 +875,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * }</pre>
      *
      * @param type the class to register
-     * @throws IllegalArgumentException if type is null
+     * @throws IllegalArgumentException if type is {@code null}
      */
     public void register(final Class<?> type) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -902,7 +901,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      *
      * @param type the class to register
      * @param id the unique ID for this class
-     * @throws IllegalArgumentException if type is null
+     * @throws IllegalArgumentException if type is {@code null}
      */
     public void register(final Class<?> type, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -927,7 +926,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      *
      * @param type the class to register
      * @param serializer the custom serializer for this class
-     * @throws IllegalArgumentException if type or serializer is null
+     * @throws IllegalArgumentException if type or serializer is {@code null}
      */
     public void register(final Class<?> type, final Serializer<?> serializer) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -954,7 +953,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param type the class to register
      * @param serializer the custom serializer for this class
      * @param id the unique ID for this class
-     * @throws IllegalArgumentException if type or serializer is null
+     * @throws IllegalArgumentException if type or serializer is {@code null}
      */
     public void register(final Class<?> type, final Serializer<?> serializer, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -1167,7 +1166,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      *
      * @return a configured Kryo instance ready for use
      *
-     * <p>The Kryo instance includes registrations from (in order):
+     * <p>The Kryo instance includes registrations from (in order):</p>
      * <ul>
      *   <li>Built-in types (primitives, collections, common Java types, etc.)</li>
      *   <li>Globally registered types via {@link ParserFactory}</li>
@@ -1257,11 +1256,11 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * }
      * }</pre>
      *
-     * @param kryo the Kryo instance to recycle (may be null)
+     * @param kryo the Kryo instance to recycle (may be {@code null})
      *
-     * <p>The Kryo instance will not be recycled if:
+     * <p>The Kryo instance will not be recycled if:</p>
      * <ul>
-     *   <li>The kryo instance is null</li>
+     *   <li>The kryo instance is {@code null}</li>
      *   <li>The kryo instance was not created by this parser (not in xPool)</li>
      *   <li>The pool is already at maximum capacity</li>
      * </ul>
@@ -1279,9 +1278,9 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
     }
 
     /**
-     * Creates a new Output instance from the pool or creates a new one if the pool is empty.
+     * Creates a new {@code Output} instance from the pool or creates a new one if the pool is empty.
      * This method uses object pooling to reduce allocation overhead and improve performance.
-     * The returned Output instance is configured with the default buffer size.
+     * The returned {@code Output} instance is configured with the default buffer size.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1294,7 +1293,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * }
      * }</pre>
      *
-     * @return a Kryo Output instance ready for use
+     * @return a Kryo {@code Output} instance ready for use
      */
     static Output createOutput() {
         synchronized (outputPool) {
@@ -1306,9 +1305,9 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
     }
 
     /**
-     * Recycles an Output instance back to the pool for reuse.
-     * This method returns the Output to the object pool if it meets size constraints,
-     * allowing it to be reused by future operations. The output's stream is set to null
+     * Recycles an {@code Output} instance back to the pool for reuse.
+     * This method returns the {@code Output} to the object pool if it meets size constraints,
+     * allowing it to be reused by future operations. The output's stream is set to {@code null}
      * before pooling to prevent resource leaks.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1321,11 +1320,11 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * }
      * }</pre>
      *
-     * @param output the Output instance to recycle (may be null)
+     * @param output the {@code Output} instance to recycle (may be {@code null})
      *
-     * <p>The output will not be recycled if:
+     * <p>The output will not be recycled if:</p>
      * <ul>
-     *   <li>The output is null</li>
+     *   <li>The output is {@code null}</li>
      *   <li>The output's buffer exceeds the default buffer size</li>
      *   <li>The pool is already at maximum capacity</li>
      * </ul>
@@ -1344,9 +1343,9 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
     }
 
     /**
-     * Creates a new Input instance from the pool or creates a new one if the pool is empty.
+     * Creates a new {@code Input} instance from the pool or creates a new one if the pool is empty.
      * This method uses object pooling to reduce allocation overhead and improve performance.
-     * The returned Input instance is configured with the default buffer size.
+     * The returned {@code Input} instance is configured with the default buffer size.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1359,7 +1358,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * }
      * }</pre>
      *
-     * @return a Kryo Input instance ready for use
+     * @return a Kryo {@code Input} instance ready for use
      */
     static Input createInput() {
         synchronized (inputPool) {
@@ -1371,9 +1370,9 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
     }
 
     /**
-     * Recycles an Input instance back to the pool for reuse.
-     * This method returns the Input to the object pool if it meets size constraints,
-     * allowing it to be reused by future operations. The input's stream is set to null
+     * Recycles an {@code Input} instance back to the pool for reuse.
+     * This method returns the {@code Input} to the object pool if it meets size constraints,
+     * allowing it to be reused by future operations. The input's stream is set to {@code null}
      * before pooling to prevent resource leaks.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1386,11 +1385,11 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * }
      * }</pre>
      *
-     * @param input the Input instance to recycle (may be null)
+     * @param input the {@code Input} instance to recycle (may be {@code null})
      *
-     * <p>The input will not be recycled if:
+     * <p>The input will not be recycled if:</p>
      * <ul>
-     *   <li>The input is null</li>
+     *   <li>The input is {@code null}</li>
      *   <li>The input's buffer exceeds the default buffer size</li>
      *   <li>The pool is already at maximum capacity</li>
      * </ul>

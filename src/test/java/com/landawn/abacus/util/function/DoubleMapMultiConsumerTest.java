@@ -7,12 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.DoubleConsumer;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class DoubleMapMultiConsumerTest extends TestBase {
 
     @Test
@@ -28,23 +26,6 @@ public class DoubleMapMultiConsumerTest extends TestBase {
         assertEquals(2, result.size());
         assertEquals(5.0, result.get(0));
         assertEquals(10.0, result.get(1));
-    }
-
-    @Test
-    public void testAcceptWithMultipleValues() {
-        final List<Double> result = new ArrayList<>();
-        DoubleMapMultiConsumer consumer = (value, ic) -> {
-            ic.accept(value);
-            ic.accept(value + 1);
-            ic.accept(value + 2);
-        };
-
-        consumer.accept(10.5, result::add);
-
-        assertEquals(3, result.size());
-        assertEquals(10.5, result.get(0));
-        assertEquals(11.5, result.get(1));
-        assertEquals(12.5, result.get(2));
     }
 
     @Test
@@ -96,6 +77,40 @@ public class DoubleMapMultiConsumerTest extends TestBase {
     }
 
     @Test
+    public void testAcceptFlatMapScenario() {
+        final List<Double> result = new ArrayList<>();
+        DoubleMapMultiConsumer consumer = (value, ic) -> {
+            for (int i = 0; i < 3; i++) {
+                ic.accept(value + i);
+            }
+        };
+
+        consumer.accept(1.0, result::add);
+
+        assertEquals(3, result.size());
+        assertEquals(1.0, result.get(0));
+        assertEquals(2.0, result.get(1));
+        assertEquals(3.0, result.get(2));
+    }
+
+    @Test
+    public void testAcceptWithMultipleValues() {
+        final List<Double> result = new ArrayList<>();
+        DoubleMapMultiConsumer consumer = (value, ic) -> {
+            ic.accept(value);
+            ic.accept(value + 1);
+            ic.accept(value + 2);
+        };
+
+        consumer.accept(10.5, result::add);
+
+        assertEquals(3, result.size());
+        assertEquals(10.5, result.get(0));
+        assertEquals(11.5, result.get(1));
+        assertEquals(12.5, result.get(2));
+    }
+
+    @Test
     public void testAcceptWithNegativeValues() {
         final List<Double> result = new ArrayList<>();
         DoubleMapMultiConsumer consumer = (value, ic) -> {
@@ -144,23 +159,6 @@ public class DoubleMapMultiConsumerTest extends TestBase {
         assertEquals(Double.NaN, result.get(0));
         assertEquals(Double.POSITIVE_INFINITY, result.get(1));
         assertEquals(Double.NEGATIVE_INFINITY, result.get(2));
-    }
-
-    @Test
-    public void testAcceptFlatMapScenario() {
-        final List<Double> result = new ArrayList<>();
-        DoubleMapMultiConsumer consumer = (value, ic) -> {
-            for (int i = 0; i < 3; i++) {
-                ic.accept(value + i);
-            }
-        };
-
-        consumer.accept(1.0, result::add);
-
-        assertEquals(3, result.size());
-        assertEquals(1.0, result.get(0));
-        assertEquals(2.0, result.get(1));
-        assertEquals(3.0, result.get(2));
     }
 
     @Test

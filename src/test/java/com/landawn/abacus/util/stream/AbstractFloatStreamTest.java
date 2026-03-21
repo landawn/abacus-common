@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Random;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -36,7 +35,6 @@ import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalFloat;
 
-@Tag("new-test")
 public class AbstractFloatStreamTest extends TestBase {
 
     private FloatStream stream;
@@ -285,6 +283,13 @@ public class AbstractFloatStreamTest extends TestBase {
     }
 
     @Test
+    public void testCycled_long() {
+        stream = FloatStream.of(1.0f, 2.0f);
+        List<Float> result = stream.cycled(3).collect(ArrayList::new, (list, value) -> list.add(value));
+        assertEquals(Arrays.asList(1.0f, 2.0f, 1.0f, 2.0f, 1.0f, 2.0f), result);
+    }
+
+    @Test
     public void testCycled_ZeroRounds() {
         FloatStream result = stream.cycled(0);
         assertArrayEquals(new float[] {}, result.toArray());
@@ -305,6 +310,12 @@ public class AbstractFloatStreamTest extends TestBase {
     public void testBoxed() {
         Stream<Float> result = stream.boxed();
         assertEquals(Arrays.asList(1.0f, 2.0f, 3.0f, 4.0f, 5.0f), result.toList());
+    }
+
+    @Test
+    public void testPrependAppend_Stream_Parallel() {
+        float[] result = createFloatStream(3.0f, 4.0f).parallel().prepend(FloatStream.of(1.0f, 2.0f)).append(FloatStream.of(5.0f)).toArray();
+        assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f }, result);
     }
 
     @Test
@@ -479,6 +490,14 @@ public class AbstractFloatStreamTest extends TestBase {
     }
 
     @Test
+    public void testFirst_MultipleElements() {
+        stream = FloatStream.of(1.0f, 2.0f, 3.0f);
+        OptionalFloat result = stream.first();
+        assertTrue(result.isPresent());
+        assertEquals(1.0f, result.getAsFloat());
+    }
+
+    @Test
     public void testLast() {
         OptionalFloat result = stream.last();
         assertTrue(result.isPresent());
@@ -580,21 +599,6 @@ public class AbstractFloatStreamTest extends TestBase {
         assertEquals(1.0f, iter.nextFloat());
         assertTrue(iter.hasNext());
         assertEquals(2.0f, iter.nextFloat());
-    }
-
-    @Test
-    public void testCycled_long() {
-        stream = FloatStream.of(1.0f, 2.0f);
-        List<Float> result = stream.cycled(3).collect(ArrayList::new, (list, value) -> list.add(value));
-        assertEquals(Arrays.asList(1.0f, 2.0f, 1.0f, 2.0f, 1.0f, 2.0f), result);
-    }
-
-    @Test
-    public void testFirst_MultipleElements() {
-        stream = FloatStream.of(1.0f, 2.0f, 3.0f);
-        OptionalFloat result = stream.first();
-        assertTrue(result.isPresent());
-        assertEquals(1.0f, result.getAsFloat());
     }
 
 }

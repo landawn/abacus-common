@@ -17,71 +17,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.Optional;
 
-@Tag("2025")
 public class OptionalTypeTest extends TestBase {
 
     private final OptionalType optionalStringType = new OptionalType("String");
     private final OptionalType optionalIntType = new OptionalType("int");
-
-    @Test
-    public void test_clazz() {
-        assertNotNull(optionalStringType.javaType());
-    }
-
-    @Test
-    public void test_name() {
-        assertNotNull(optionalStringType.name());
-        assertFalse(optionalStringType.name().isEmpty());
-    }
-
-    @Test
-    public void test_valueOf_String() {
-        // Test with null
-        Object result = optionalStringType.valueOf((String) null);
-        // Result may be null or default value depending on type
-        assertNotNull(result);
-    }
-
-    @Test
-    public void test_appendTo() throws IOException {
-        StringWriter sw = new StringWriter();
-        optionalStringType.appendTo(sw, null);
-        assertNotNull(sw.toString());
-    }
-
-    @Test
-    public void test_get_ResultSet_byIndex() throws SQLException {
-        ResultSet rs = mock(ResultSet.class);
-        // Basic get test - actual implementation will vary by type
-        assertDoesNotThrow(() -> optionalStringType.get(rs, 1));
-    }
-
-    @Test
-    public void test_get_ResultSet_byLabel() throws SQLException {
-        ResultSet rs = mock(ResultSet.class);
-        // Basic get test - actual implementation will vary by type
-        assertDoesNotThrow(() -> optionalStringType.get(rs, "col"));
-    }
-
-    @Test
-    public void test_set_PreparedStatement() throws SQLException {
-        PreparedStatement stmt = mock(PreparedStatement.class);
-        // Basic set test - actual implementation will vary by type
-        assertDoesNotThrow(() -> optionalStringType.set(stmt, 1, null));
-    }
-
-    @Test
-    public void test_set_CallableStatement() throws SQLException {
-        CallableStatement stmt = mock(CallableStatement.class);
-        // Basic set test - actual implementation will vary by type
-        assertDoesNotThrow(() -> optionalStringType.set(stmt, "param", null));
-    }
 
     @Test
     public void testDeclaringName() {
@@ -97,11 +41,8 @@ public class OptionalTypeTest extends TestBase {
     }
 
     @Test
-    public void testGetParameterTypes() {
-        Type<?>[] paramTypes = optionalStringType.parameterTypes();
-        assertNotNull(paramTypes);
-        assertEquals(1, paramTypes.length);
-        assertEquals("String", paramTypes[0].name());
+    public void test_clazz() {
+        assertNotNull(optionalStringType.javaType());
     }
 
     @Test
@@ -111,15 +52,23 @@ public class OptionalTypeTest extends TestBase {
     }
 
     @Test
+    public void testStringOfWithValue() {
+        Optional<String> optional = Optional.of("test");
+        assertEquals("test", optionalStringType.stringOf(optional));
+    }
+
+    @Test
     public void testStringOfWithEmpty() {
         Optional<String> empty = Optional.empty();
         assertNull(optionalStringType.stringOf(empty));
     }
 
     @Test
-    public void testStringOfWithValue() {
-        Optional<String> optional = Optional.of("test");
-        assertEquals("test", optionalStringType.stringOf(optional));
+    public void test_valueOf_String() {
+        // Test with null
+        Object result = optionalStringType.valueOf((String) null);
+        // Result may be null or default value depending on type
+        assertNotNull(result);
     }
 
     @Test
@@ -150,6 +99,28 @@ public class OptionalTypeTest extends TestBase {
         OptionalType<Object> optionalObjectType = (OptionalType<Object>) createType("Optional<Object>");
         Optional<Object> result = optionalObjectType.valueOf("null");
         assertNotNull(result);
+    }
+
+    @Test
+    public void testGetParameterTypes() {
+        Type<?>[] paramTypes = optionalStringType.parameterTypes();
+        assertNotNull(paramTypes);
+        assertEquals(1, paramTypes.length);
+        assertEquals("String", paramTypes[0].name());
+    }
+
+    @Test
+    public void test_get_ResultSet_byIndex() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+        // Basic get test - actual implementation will vary by type
+        assertDoesNotThrow(() -> optionalStringType.get(rs, 1));
+    }
+
+    @Test
+    public void test_get_ResultSet_byLabel() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+        // Basic get test - actual implementation will vary by type
+        assertDoesNotThrow(() -> optionalStringType.get(rs, "col"));
     }
 
     @Test
@@ -192,6 +163,20 @@ public class OptionalTypeTest extends TestBase {
         Optional<String> result = optionalStringType.get(rs, "column");
         assertNotNull(result);
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void test_set_PreparedStatement() throws SQLException {
+        PreparedStatement stmt = mock(PreparedStatement.class);
+        // Basic set test - actual implementation will vary by type
+        assertDoesNotThrow(() -> optionalStringType.set(stmt, 1, null));
+    }
+
+    @Test
+    public void test_set_CallableStatement() throws SQLException {
+        CallableStatement stmt = mock(CallableStatement.class);
+        // Basic set test - actual implementation will vary by type
+        assertDoesNotThrow(() -> optionalStringType.set(stmt, "param", null));
     }
 
     @Test
@@ -241,6 +226,13 @@ public class OptionalTypeTest extends TestBase {
     }
 
     @Test
+    public void test_appendTo() throws IOException {
+        StringWriter sw = new StringWriter();
+        optionalStringType.appendTo(sw, null);
+        assertNotNull(sw.toString());
+    }
+
+    @Test
     public void testAppendToWithNull() throws IOException {
         StringBuilder sb = new StringBuilder();
         optionalStringType.appendTo(sb, null);
@@ -261,6 +253,12 @@ public class OptionalTypeTest extends TestBase {
         Optional<String> optional = Optional.of("test");
         optionalStringType.appendTo(sb, optional);
         assertEquals("test", sb.toString());
+    }
+
+    @Test
+    public void test_name() {
+        assertNotNull(optionalStringType.name());
+        assertFalse(optionalStringType.name().isEmpty());
     }
 
 }

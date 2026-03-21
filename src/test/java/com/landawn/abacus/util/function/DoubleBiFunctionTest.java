@@ -4,13 +4,28 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class DoubleBiFunctionTest extends TestBase {
+
+    @Test
+    public void testApply_ReturningComplexObject() {
+        DoubleBiFunction<java.util.Map<String, Double>> function = (t, u) -> {
+            java.util.Map<String, Double> map = new java.util.HashMap<>();
+            map.put("t", t);
+            map.put("u", u);
+            map.put("sum", t + u);
+            return map;
+        };
+
+        java.util.Map<String, Double> result = function.apply(10.0, 20.0);
+        assertEquals(10.0, result.get("t"), 0.0001);
+        assertEquals(20.0, result.get("u"), 0.0001);
+        assertEquals(30.0, result.get("sum"), 0.0001);
+    }
+
     @Test
     public void testApply_WithNegativeValues() {
         DoubleBiFunction<Double> function = (t, u) -> t * u;
@@ -42,19 +57,10 @@ public class DoubleBiFunctionTest extends TestBase {
     }
 
     @Test
-    public void testApply_ReturningComplexObject() {
-        DoubleBiFunction<java.util.Map<String, Double>> function = (t, u) -> {
-            java.util.Map<String, Double> map = new java.util.HashMap<>();
-            map.put("t", t);
-            map.put("u", u);
-            map.put("sum", t + u);
-            return map;
-        };
-
-        java.util.Map<String, Double> result = function.apply(10.0, 20.0);
-        assertEquals(10.0, result.get("t"), 0.0001);
-        assertEquals(20.0, result.get("u"), 0.0001);
-        assertEquals(30.0, result.get("sum"), 0.0001);
+    public void testFunctionalInterfaceContract() {
+        DoubleBiFunction<String> lambda = (t, u) -> "test";
+        assertNotNull(lambda);
+        assertDoesNotThrow(() -> lambda.apply(1.0, 2.0));
     }
 
     @Test
@@ -64,12 +70,5 @@ public class DoubleBiFunctionTest extends TestBase {
 
         String result = composed.apply(1.0, 2.0);
         assertEquals("result=3.0", result);
-    }
-
-    @Test
-    public void testFunctionalInterfaceContract() {
-        DoubleBiFunction<String> lambda = (t, u) -> "test";
-        assertNotNull(lambda);
-        assertDoesNotThrow(() -> lambda.apply(1.0, 2.0));
     }
 }

@@ -7,12 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class PoolableTest extends TestBase {
 
     private static class TestPoolable implements Poolable {
@@ -41,6 +39,55 @@ public class PoolableTest extends TestBase {
 
         Poolable.Caller getDestroyedByCaller() {
             return destroyedByCaller;
+        }
+    }
+
+    @Test
+    public void testPoolableImplementation() {
+        TestPoolable poolable = new TestPoolable(10000, 5000);
+
+        assertNotNull(poolable.activityPrint());
+        assertEquals(10000, poolable.activityPrint().getLiveTime());
+        assertEquals(5000, poolable.activityPrint().getMaxIdleTime());
+
+        assertFalse(poolable.isDestroyed());
+        assertNull(poolable.getDestroyedByCaller());
+
+        poolable.destroy(Poolable.Caller.EVICT);
+        assertTrue(poolable.isDestroyed());
+        assertEquals(Poolable.Caller.EVICT, poolable.getDestroyedByCaller());
+    }
+
+    @Test
+    public void testActivityPrintIsUpdated() {
+        TestPoolable poolable = new TestPoolable(10000, 5000);
+        ActivityPrint print = poolable.activityPrint();
+
+        long initialAccessTime = print.getLastAccessTime();
+        int initialAccessCount = print.getAccessCount();
+
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
+            // ignore
+        }
+
+        print.updateLastAccessTime();
+        print.updateAccessCount();
+
+        assertTrue(print.getLastAccessTime() >= initialAccessTime);
+        assertEquals(initialAccessCount + 1, print.getAccessCount());
+    }
+
+    @Test
+    public void testPoolableDestroyWithDifferentCallers() {
+        for (Poolable.Caller caller : Poolable.Caller.values()) {
+            TestPoolable poolable = new TestPoolable(10000, 5000);
+
+            poolable.destroy(caller);
+
+            assertTrue(poolable.isDestroyed());
+            assertEquals(caller, poolable.getDestroyedByCaller());
         }
     }
 
@@ -190,55 +237,6 @@ public class PoolableTest extends TestBase {
         assertNotNull(caller);
         assertEquals("OTHER_EXTERNAL", caller.name());
         assertEquals(5, caller.value());
-    }
-
-    @Test
-    public void testPoolableImplementation() {
-        TestPoolable poolable = new TestPoolable(10000, 5000);
-
-        assertNotNull(poolable.activityPrint());
-        assertEquals(10000, poolable.activityPrint().getLiveTime());
-        assertEquals(5000, poolable.activityPrint().getMaxIdleTime());
-
-        assertFalse(poolable.isDestroyed());
-        assertNull(poolable.getDestroyedByCaller());
-
-        poolable.destroy(Poolable.Caller.EVICT);
-        assertTrue(poolable.isDestroyed());
-        assertEquals(Poolable.Caller.EVICT, poolable.getDestroyedByCaller());
-    }
-
-    @Test
-    public void testPoolableDestroyWithDifferentCallers() {
-        for (Poolable.Caller caller : Poolable.Caller.values()) {
-            TestPoolable poolable = new TestPoolable(10000, 5000);
-
-            poolable.destroy(caller);
-
-            assertTrue(poolable.isDestroyed());
-            assertEquals(caller, poolable.getDestroyedByCaller());
-        }
-    }
-
-    @Test
-    public void testActivityPrintIsUpdated() {
-        TestPoolable poolable = new TestPoolable(10000, 5000);
-        ActivityPrint print = poolable.activityPrint();
-
-        long initialAccessTime = print.getLastAccessTime();
-        int initialAccessCount = print.getAccessCount();
-
-        try {
-            Thread.sleep(10);
-        } catch (InterruptedException e) {
-            // ignore
-        }
-
-        print.updateLastAccessTime();
-        print.updateAccessCount();
-
-        assertTrue(print.getLastAccessTime() >= initialAccessTime);
-        assertEquals(initialAccessCount + 1, print.getAccessCount());
     }
 
     @Test

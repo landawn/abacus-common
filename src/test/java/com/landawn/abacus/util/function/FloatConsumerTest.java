@@ -7,12 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class FloatConsumerTest extends TestBase {
 
     @Test
@@ -34,20 +32,6 @@ public class FloatConsumerTest extends TestBase {
 
         assertEquals(1, results.size());
         assertEquals(10.5f, results.get(0), 0.001f);
-    }
-
-    @Test
-    public void testAndThen() {
-        final List<Float> results = new ArrayList<>();
-        final FloatConsumer first = results::add;
-        final FloatConsumer second = val -> results.add(val * 2);
-
-        final FloatConsumer chained = first.andThen(second);
-        chained.accept(10.5f);
-
-        assertEquals(2, results.size());
-        assertEquals(10.5f, results.get(0), 0.001f);
-        assertEquals(21.0f, results.get(1), 0.001f);
     }
 
     @Test
@@ -77,5 +61,19 @@ public class FloatConsumerTest extends TestBase {
             };
             consumer.accept(1.0f);
         });
+    }
+
+    @Test
+    public void testAndThen() {
+        final List<Float> results = new ArrayList<>();
+        final FloatConsumer first = results::add;
+        final FloatConsumer second = val -> results.add(val * 2);
+
+        final FloatConsumer chained = first.andThen(second);
+        chained.accept(10.5f);
+
+        assertEquals(2, results.size());
+        assertEquals(10.5f, results.get(0), 0.001f);
+        assertEquals(21.0f, results.get(1), 0.001f);
     }
 }

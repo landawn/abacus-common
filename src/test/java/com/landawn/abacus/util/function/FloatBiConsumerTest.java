@@ -7,12 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class FloatBiConsumerTest extends TestBase {
 
     @Test
@@ -53,34 +51,6 @@ public class FloatBiConsumerTest extends TestBase {
     }
 
     @Test
-    public void testAndThen() {
-        final List<Float> results = new ArrayList<>();
-        final FloatBiConsumer first = (t, u) -> results.add(t + u);
-        final FloatBiConsumer second = (t, u) -> results.add(t - u);
-
-        final FloatBiConsumer chained = first.andThen(second);
-        chained.accept(20.5f, 5.3f);
-
-        assertEquals(2, results.size());
-        assertEquals(25.8f, results.get(0), 0.001f);
-        assertEquals(15.2f, results.get(1), 0.001f);
-    }
-
-    @Test
-    public void testAndThen_orderOfExecution() {
-        final List<String> executionOrder = new ArrayList<>();
-        final FloatBiConsumer first = (t, u) -> executionOrder.add("first");
-        final FloatBiConsumer second = (t, u) -> executionOrder.add("second");
-
-        final FloatBiConsumer chained = first.andThen(second);
-        chained.accept(1.0f, 2.0f);
-
-        assertEquals(2, executionOrder.size());
-        assertEquals("first", executionOrder.get(0));
-        assertEquals("second", executionOrder.get(1));
-    }
-
-    @Test
     public void testAccept_withNegativeValues() {
         final AtomicReference<Float> result = new AtomicReference<>(0f);
         final FloatBiConsumer consumer = (t, u) -> result.set(t + u);
@@ -107,5 +77,33 @@ public class FloatBiConsumerTest extends TestBase {
             };
             consumer.accept(1.0f, 2.0f);
         });
+    }
+
+    @Test
+    public void testAndThen() {
+        final List<Float> results = new ArrayList<>();
+        final FloatBiConsumer first = (t, u) -> results.add(t + u);
+        final FloatBiConsumer second = (t, u) -> results.add(t - u);
+
+        final FloatBiConsumer chained = first.andThen(second);
+        chained.accept(20.5f, 5.3f);
+
+        assertEquals(2, results.size());
+        assertEquals(25.8f, results.get(0), 0.001f);
+        assertEquals(15.2f, results.get(1), 0.001f);
+    }
+
+    @Test
+    public void testAndThen_orderOfExecution() {
+        final List<String> executionOrder = new ArrayList<>();
+        final FloatBiConsumer first = (t, u) -> executionOrder.add("first");
+        final FloatBiConsumer second = (t, u) -> executionOrder.add("second");
+
+        final FloatBiConsumer chained = first.andThen(second);
+        chained.accept(1.0f, 2.0f);
+
+        assertEquals(2, executionOrder.size());
+        assertEquals("first", executionOrder.get(0));
+        assertEquals("second", executionOrder.get(1));
     }
 }

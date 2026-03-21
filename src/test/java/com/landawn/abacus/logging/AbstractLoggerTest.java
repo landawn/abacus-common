@@ -10,12 +10,10 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class AbstractLoggerTest extends TestBase {
 
     private TestLogger logger;
@@ -217,24 +215,6 @@ public class AbstractLoggerTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test trace with Throwable and message")
-    public void testTraceWithThrowableAndMessage() {
-        Exception ex = new Exception("Test exception");
-        logger.trace(ex, "Error occurred");
-        assertEquals("Error occurred", logger.logs.get(0).message);
-        assertSame(ex, logger.logs.get(0).throwable);
-    }
-
-    @Test
-    @DisplayName("Test trace with Throwable and template")
-    public void testTraceWithThrowableAndTemplate() {
-        Exception ex = new Exception("Test");
-        logger.trace(ex, "Error in module {}", "core");
-        assertEquals("Error in module core", logger.logs.get(0).message);
-        assertSame(ex, logger.logs.get(0).throwable);
-    }
-
-    @Test
     @DisplayName("Test trace with Supplier")
     public void testTraceWithSupplier() {
         Supplier<String> supplier = () -> "Expensive message";
@@ -250,6 +230,39 @@ public class AbstractLoggerTest extends TestBase {
         });
         assertFalse(called[0]);
         assertEquals(0, logger.logs.size());
+    }
+
+    @Test
+    @DisplayName("Test trace disabled skips templated logging")
+    public void testTraceDisabledSkipsTemplatedLogging() {
+        logger.traceEnabled = false;
+        logger.trace("Template {}", "arg1");
+        logger.trace("Template {} {}", "a", "b");
+        logger.trace("Template {} {} {}", "a", "b", "c");
+        logger.trace("Template {} {} {} {}", "a", "b", "c", "d");
+        logger.trace("Template {} {} {} {} {}", 1, 2, 3, 4, 5);
+        logger.trace("Template {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6);
+        logger.trace("Template {} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7);
+        logger.trace("Template", "a", "b", "c", "d", "e", "f", "g", "h");
+        assertEquals(0, logger.logs.size());
+    }
+
+    @Test
+    @DisplayName("Test trace with Throwable and message")
+    public void testTraceWithThrowableAndMessage() {
+        Exception ex = new Exception("Test exception");
+        logger.trace(ex, "Error occurred");
+        assertEquals("Error occurred", logger.logs.get(0).message);
+        assertSame(ex, logger.logs.get(0).throwable);
+    }
+
+    @Test
+    @DisplayName("Test trace with Throwable and template")
+    public void testTraceWithThrowableAndTemplate() {
+        Exception ex = new Exception("Test");
+        logger.trace(ex, "Error in module {}", "core");
+        assertEquals("Error in module core", logger.logs.get(0).message);
+        assertSame(ex, logger.logs.get(0).throwable);
     }
 
     @Test
@@ -272,6 +285,76 @@ public class AbstractLoggerTest extends TestBase {
     }
 
     @Test
+    @DisplayName("Test throwable+template disabled skips logging")
+    public void testThrowableTemplateDisabledSkipsLogging() {
+        Exception ex = new Exception("Test");
+
+        logger.traceEnabled = false;
+        logger.trace(ex, "msg");
+        logger.trace(ex, "T {}", "a");
+        logger.trace(ex, "T {} {}", "a", "b");
+        logger.trace(ex, "T {} {} {}", "a", "b", "c");
+
+        logger.debugEnabled = false;
+        logger.debug(ex, "msg");
+        logger.debug(ex, "T {}", "a");
+        logger.debug(ex, "T {} {}", "a", "b");
+        logger.debug(ex, "T {} {} {}", "a", "b", "c");
+
+        logger.infoEnabled = false;
+        logger.info(ex, "msg");
+        logger.info(ex, "T {}", "a");
+        logger.info(ex, "T {} {}", "a", "b");
+        logger.info(ex, "T {} {} {}", "a", "b", "c");
+
+        logger.warnEnabled = false;
+        logger.warn(ex, "msg");
+        logger.warn(ex, "T {}", "a");
+        logger.warn(ex, "T {} {}", "a", "b");
+        logger.warn(ex, "T {} {} {}", "a", "b", "c");
+
+        logger.errorEnabled = false;
+        logger.error(ex, "msg");
+        logger.error(ex, "T {}", "a");
+        logger.error(ex, "T {} {}", "a", "b");
+        logger.error(ex, "T {} {} {}", "a", "b", "c");
+
+        assertEquals(0, logger.logs.size());
+    }
+
+    @Test
+    @DisplayName("Test logging when levels are disabled")
+    public void testLoggingWhenDisabled() {
+        logger.traceEnabled = false;
+        logger.debugEnabled = false;
+        logger.infoEnabled = false;
+        logger.warnEnabled = false;
+        logger.errorEnabled = false;
+
+        logger.trace("trace");
+        logger.debug("debug");
+        logger.info("info");
+        logger.warn("warn");
+        logger.error("error");
+
+        assertEquals(0, logger.logs.size());
+
+        boolean[] called = { false };
+        Supplier<String> supplier = () -> {
+            called[0] = true;
+            return "message";
+        };
+
+        logger.trace(supplier);
+        logger.debug(supplier);
+        logger.info(supplier);
+        logger.warn(supplier);
+        logger.error(supplier);
+
+        assertFalse(called[0]);
+    }
+
+    @Test
     @DisplayName("Test debug with template and arguments")
     public void testDebugWithArguments() {
         logger.debug("Debug: {}", "test");
@@ -289,84 +372,6 @@ public class AbstractLoggerTest extends TestBase {
         logger.debugEnabled = false;
         logger.debug("Should not log {}", "this");
         assertEquals(0, logger.logs.size());
-    }
-
-    @Test
-    @DisplayName("Test info with various argument counts")
-    public void testInfoWithArguments() {
-        logger.info("Info message");
-        assertEquals("INFO", logger.logs.get(0).level);
-
-        logger.logs.clear();
-        logger.info("User: {}", "admin");
-        assertEquals("User: admin", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.info("{} {} {} {} {}", "a", "b", "c", "d", "e");
-        assertEquals("a b c d e", logger.logs.get(0).message);
-    }
-
-    @Test
-    @DisplayName("Test warn with exception")
-    public void testWarnWithException() {
-        Exception ex = new Exception("Warning");
-        logger.warn("Warning occurred", ex);
-        assertEquals("WARN", logger.logs.get(0).level);
-        assertEquals("Warning occurred", logger.logs.get(0).message);
-        assertSame(ex, logger.logs.get(0).throwable);
-    }
-
-    @Test
-    @DisplayName("Test error with all argument variations")
-    public void testErrorWithAllVariations() {
-        logger.error("Error!");
-        assertEquals("ERROR", logger.logs.get(0).level);
-
-        logger.logs.clear();
-        logger.error("Error code: {}", 500);
-        assertEquals("Error code: 500", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.error(() -> "Error from supplier");
-        assertEquals("Error from supplier", logger.logs.get(0).message);
-    }
-
-    @Test
-    @DisplayName("Test format method with various scenarios")
-    public void testFormatMethod() {
-        assertEquals("Hello World", AbstractLogger.format("Hello {}", "World"));
-        assertEquals("a b c", AbstractLogger.format("{} {} {}", "a", "b", "c"));
-
-        assertEquals("Hello World", AbstractLogger.format("Hello %s", "World"));
-        assertEquals("a b c", AbstractLogger.format("%s %s %s", "a", "b", "c"));
-
-        assertEquals("Hello [World]", AbstractLogger.format("Hello", "World"));
-
-        assertEquals("Value: null", AbstractLogger.format("Value: {}", (Object) null));
-        assertEquals("null [arg]", AbstractLogger.format(null, "arg"));
-
-        assertEquals("a b [c, d]", AbstractLogger.format("{} {}", "a", "b", "c", "d"));
-
-        Object[] args = { 1, 2, 3, 4, 5 };
-        assertEquals("1 2 3 4 5", AbstractLogger.format("{} {} {} {} {}", args));
-    }
-
-    @Test
-    @DisplayName("Test format with different argument counts")
-    public void testFormatWithDifferentArgCounts() {
-        assertEquals("Value: 42", AbstractLogger.format("Value: {}", 42));
-
-        assertEquals("x=10, y=20", AbstractLogger.format("x={}, y={}", 10, 20));
-
-        assertEquals("RGB: 255,128,0", AbstractLogger.format("RGB: {},{},{}", 255, 128, 0));
-
-        assertEquals("1-2-3-4", AbstractLogger.format("{}-{}-{}-{}", 1, 2, 3, 4));
-
-        assertEquals("a b c d e", AbstractLogger.format("{} {} {} {} {}", "a", "b", "c", "d", "e"));
-
-        assertEquals("1,2,3,4,5,6", AbstractLogger.format("{},{},{},{},{},{}", 1, 2, 3, 4, 5, 6));
-
-        assertEquals("Mon Tue Wed Thu Fri Sat Sun", AbstractLogger.format("{} {} {} {} {} {} {}", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"));
     }
 
     @Test
@@ -406,6 +411,39 @@ public class AbstractLoggerTest extends TestBase {
     }
 
     @Test
+    @DisplayName("Test debug with Supplier")
+    public void testDebugWithSupplier() {
+        Supplier<String> supplier = () -> "Debug supplier message";
+        logger.debug(supplier);
+        assertEquals("Debug supplier message", logger.logs.get(0).message);
+
+        logger.logs.clear();
+        logger.debugEnabled = false;
+        boolean[] called = { false };
+        logger.debug(() -> {
+            called[0] = true;
+            return "Should not be called";
+        });
+        assertFalse(called[0]);
+        assertEquals(0, logger.logs.size());
+    }
+
+    @Test
+    @DisplayName("Test debug disabled skips templated logging")
+    public void testDebugDisabledSkipsTemplatedLogging() {
+        logger.debugEnabled = false;
+        logger.debug("Template {}", "arg1");
+        logger.debug("Template {} {}", "a", "b");
+        logger.debug("Template {} {} {}", "a", "b", "c");
+        logger.debug("Template {} {} {} {}", "a", "b", "c", "d");
+        logger.debug("Template {} {} {} {} {}", 1, 2, 3, 4, 5);
+        logger.debug("Template {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6);
+        logger.debug("Template {} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7);
+        logger.debug("Template", "a", "b", "c", "d", "e", "f", "g", "h");
+        assertEquals(0, logger.logs.size());
+    }
+
+    @Test
     @DisplayName("Test debug with Throwable and message")
     public void testDebugWithThrowableAndMessage() {
         Exception ex = new Exception("Test");
@@ -431,24 +469,6 @@ public class AbstractLoggerTest extends TestBase {
         logger.debug(ex, "Debug {} {} {}", "a", "b", "c");
         assertEquals("Debug a b c", logger.logs.get(0).message);
         assertSame(ex, logger.logs.get(0).throwable);
-    }
-
-    @Test
-    @DisplayName("Test debug with Supplier")
-    public void testDebugWithSupplier() {
-        Supplier<String> supplier = () -> "Debug supplier message";
-        logger.debug(supplier);
-        assertEquals("Debug supplier message", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.debugEnabled = false;
-        boolean[] called = { false };
-        logger.debug(() -> {
-            called[0] = true;
-            return "Should not be called";
-        });
-        assertFalse(called[0]);
-        assertEquals(0, logger.logs.size());
     }
 
     @Test
@@ -507,6 +527,54 @@ public class AbstractLoggerTest extends TestBase {
     }
 
     @Test
+    @DisplayName("Test info with Supplier")
+    public void testInfoWithSupplier() {
+        Supplier<String> supplier = () -> "Info supplier message";
+        logger.info(supplier);
+        assertEquals("Info supplier message", logger.logs.get(0).message);
+
+        logger.logs.clear();
+        logger.infoEnabled = false;
+        boolean[] called = { false };
+        logger.info(() -> {
+            called[0] = true;
+            return "Should not be called";
+        });
+        assertFalse(called[0]);
+        assertEquals(0, logger.logs.size());
+    }
+
+    @Test
+    @DisplayName("Test info disabled skips templated logging")
+    public void testInfoDisabledSkipsTemplatedLogging() {
+        logger.infoEnabled = false;
+        logger.info("Template {}", "arg1");
+        logger.info("Template {} {}", "a", "b");
+        logger.info("Template {} {} {}", "a", "b", "c");
+        logger.info("Template {} {} {} {}", "a", "b", "c", "d");
+        logger.info("Template {} {} {} {} {}", 1, 2, 3, 4, 5);
+        logger.info("Template {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6);
+        logger.info("Template {} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7);
+        logger.info("Template", "a", "b", "c", "d", "e", "f", "g", "h");
+        assertEquals(0, logger.logs.size());
+    }
+
+    @Test
+    @DisplayName("Test info with various argument counts")
+    public void testInfoWithArguments() {
+        logger.info("Info message");
+        assertEquals("INFO", logger.logs.get(0).level);
+
+        logger.logs.clear();
+        logger.info("User: {}", "admin");
+        assertEquals("User: admin", logger.logs.get(0).message);
+
+        logger.logs.clear();
+        logger.info("{} {} {} {} {}", "a", "b", "c", "d", "e");
+        assertEquals("a b c d e", logger.logs.get(0).message);
+    }
+
+    @Test
     @DisplayName("Test info with Throwable and message")
     public void testInfoWithThrowableAndMessage() {
         Exception ex = new Exception("Test");
@@ -530,24 +598,6 @@ public class AbstractLoggerTest extends TestBase {
         logger.logs.clear();
         logger.info(ex, "Info {} {} {}", "a", "b", "c");
         assertEquals("Info a b c", logger.logs.get(0).message);
-    }
-
-    @Test
-    @DisplayName("Test info with Supplier")
-    public void testInfoWithSupplier() {
-        Supplier<String> supplier = () -> "Info supplier message";
-        logger.info(supplier);
-        assertEquals("Info supplier message", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.infoEnabled = false;
-        boolean[] called = { false };
-        logger.info(() -> {
-            called[0] = true;
-            return "Should not be called";
-        });
-        assertFalse(called[0]);
-        assertEquals(0, logger.logs.size());
     }
 
     @Test
@@ -606,6 +656,49 @@ public class AbstractLoggerTest extends TestBase {
     }
 
     @Test
+    @DisplayName("Test warn with Supplier")
+    public void testWarnWithSupplier() {
+        Supplier<String> supplier = () -> "Warn supplier message";
+        logger.warn(supplier);
+        assertEquals("Warn supplier message", logger.logs.get(0).message);
+
+        logger.logs.clear();
+        logger.warnEnabled = false;
+        boolean[] called = { false };
+        logger.warn(() -> {
+            called[0] = true;
+            return "Should not be called";
+        });
+        assertFalse(called[0]);
+        assertEquals(0, logger.logs.size());
+    }
+
+    @Test
+    @DisplayName("Test warn disabled skips templated logging")
+    public void testWarnDisabledSkipsTemplatedLogging() {
+        logger.warnEnabled = false;
+        logger.warn("Template {}", "arg1");
+        logger.warn("Template {} {}", "a", "b");
+        logger.warn("Template {} {} {}", "a", "b", "c");
+        logger.warn("Template {} {} {} {}", "a", "b", "c", "d");
+        logger.warn("Template {} {} {} {} {}", 1, 2, 3, 4, 5);
+        logger.warn("Template {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6);
+        logger.warn("Template {} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7);
+        logger.warn("Template", "a", "b", "c", "d", "e", "f", "g", "h");
+        assertEquals(0, logger.logs.size());
+    }
+
+    @Test
+    @DisplayName("Test warn with exception")
+    public void testWarnWithException() {
+        Exception ex = new Exception("Warning");
+        logger.warn("Warning occurred", ex);
+        assertEquals("WARN", logger.logs.get(0).level);
+        assertEquals("Warning occurred", logger.logs.get(0).message);
+        assertSame(ex, logger.logs.get(0).throwable);
+    }
+
+    @Test
     @DisplayName("Test warn with Throwable and message")
     public void testWarnWithThrowableAndMessage() {
         Exception ex = new Exception("Test");
@@ -632,24 +725,6 @@ public class AbstractLoggerTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test warn with Supplier")
-    public void testWarnWithSupplier() {
-        Supplier<String> supplier = () -> "Warn supplier message";
-        logger.warn(supplier);
-        assertEquals("Warn supplier message", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.warnEnabled = false;
-        boolean[] called = { false };
-        logger.warn(() -> {
-            called[0] = true;
-            return "Should not be called";
-        });
-        assertFalse(called[0]);
-        assertEquals(0, logger.logs.size());
-    }
-
-    @Test
     @DisplayName("Test warn with Supplier and Throwable (deprecated)")
     @SuppressWarnings("deprecation")
     public void testWarnWithSupplierAndThrowable() {
@@ -666,6 +741,21 @@ public class AbstractLoggerTest extends TestBase {
         logger.warn(ex, () -> "Warn t+s msg");
         assertEquals("Warn t+s msg", logger.logs.get(0).message);
         assertSame(ex, logger.logs.get(0).throwable);
+    }
+
+    @Test
+    @DisplayName("Test error with all argument variations")
+    public void testErrorWithAllVariations() {
+        logger.error("Error!");
+        assertEquals("ERROR", logger.logs.get(0).level);
+
+        logger.logs.clear();
+        logger.error("Error code: {}", 500);
+        assertEquals("Error code: 500", logger.logs.get(0).message);
+
+        logger.logs.clear();
+        logger.error(() -> "Error from supplier");
+        assertEquals("Error from supplier", logger.logs.get(0).message);
     }
 
     @Test
@@ -768,10 +858,36 @@ public class AbstractLoggerTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test format with empty string template")
-    public void testFormatWithEmptyTemplate() {
-        assertEquals("", AbstractLogger.format(""));
-        assertEquals(" [x]", AbstractLogger.format("", "x"));
+    @DisplayName("Test error disabled skips templated logging")
+    public void testErrorDisabledSkipsTemplatedLogging() {
+        logger.errorEnabled = false;
+        logger.error("Template {}", "arg1");
+        logger.error("Template {} {}", "a", "b");
+        logger.error("Template {} {} {}", "a", "b", "c");
+        logger.error("Template {} {} {} {}", "a", "b", "c", "d");
+        logger.error("Template {} {} {} {} {}", 1, 2, 3, 4, 5);
+        logger.error("Template {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6);
+        logger.error("Template {} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7);
+        logger.error("Template", "a", "b", "c", "d", "e", "f", "g", "h");
+        assertEquals(0, logger.logs.size());
+    }
+
+    @Test
+    @DisplayName("Test format with different argument counts")
+    public void testFormatWithDifferentArgCounts() {
+        assertEquals("Value: 42", AbstractLogger.format("Value: {}", 42));
+
+        assertEquals("x=10, y=20", AbstractLogger.format("x={}, y={}", 10, 20));
+
+        assertEquals("RGB: 255,128,0", AbstractLogger.format("RGB: {},{},{}", 255, 128, 0));
+
+        assertEquals("1-2-3-4", AbstractLogger.format("{}-{}-{}-{}", 1, 2, 3, 4));
+
+        assertEquals("a b c d e", AbstractLogger.format("{} {} {} {} {}", "a", "b", "c", "d", "e"));
+
+        assertEquals("1,2,3,4,5,6", AbstractLogger.format("{},{},{},{},{},{}", 1, 2, 3, 4, 5, 6));
+
+        assertEquals("Mon Tue Wed Thu Fri Sat Sun", AbstractLogger.format("{} {} {} {} {} {} {}", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"));
     }
 
     @Test
@@ -789,147 +905,29 @@ public class AbstractLoggerTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test trace disabled skips templated logging")
-    public void testTraceDisabledSkipsTemplatedLogging() {
-        logger.traceEnabled = false;
-        logger.trace("Template {}", "arg1");
-        logger.trace("Template {} {}", "a", "b");
-        logger.trace("Template {} {} {}", "a", "b", "c");
-        logger.trace("Template {} {} {} {}", "a", "b", "c", "d");
-        logger.trace("Template {} {} {} {} {}", 1, 2, 3, 4, 5);
-        logger.trace("Template {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6);
-        logger.trace("Template {} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7);
-        logger.trace("Template", "a", "b", "c", "d", "e", "f", "g", "h");
-        assertEquals(0, logger.logs.size());
+    @DisplayName("Test format method with various scenarios")
+    public void testFormatMethod() {
+        assertEquals("Hello World", AbstractLogger.format("Hello {}", "World"));
+        assertEquals("a b c", AbstractLogger.format("{} {} {}", "a", "b", "c"));
+
+        assertEquals("Hello World", AbstractLogger.format("Hello %s", "World"));
+        assertEquals("a b c", AbstractLogger.format("%s %s %s", "a", "b", "c"));
+
+        assertEquals("Hello [World]", AbstractLogger.format("Hello", "World"));
+
+        assertEquals("Value: null", AbstractLogger.format("Value: {}", (Object) null));
+        assertEquals("null [arg]", AbstractLogger.format(null, "arg"));
+
+        assertEquals("a b [c, d]", AbstractLogger.format("{} {}", "a", "b", "c", "d"));
+
+        Object[] args = { 1, 2, 3, 4, 5 };
+        assertEquals("1 2 3 4 5", AbstractLogger.format("{} {} {} {} {}", args));
     }
 
     @Test
-    @DisplayName("Test debug disabled skips templated logging")
-    public void testDebugDisabledSkipsTemplatedLogging() {
-        logger.debugEnabled = false;
-        logger.debug("Template {}", "arg1");
-        logger.debug("Template {} {}", "a", "b");
-        logger.debug("Template {} {} {}", "a", "b", "c");
-        logger.debug("Template {} {} {} {}", "a", "b", "c", "d");
-        logger.debug("Template {} {} {} {} {}", 1, 2, 3, 4, 5);
-        logger.debug("Template {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6);
-        logger.debug("Template {} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7);
-        logger.debug("Template", "a", "b", "c", "d", "e", "f", "g", "h");
-        assertEquals(0, logger.logs.size());
-    }
-
-    @Test
-    @DisplayName("Test info disabled skips templated logging")
-    public void testInfoDisabledSkipsTemplatedLogging() {
-        logger.infoEnabled = false;
-        logger.info("Template {}", "arg1");
-        logger.info("Template {} {}", "a", "b");
-        logger.info("Template {} {} {}", "a", "b", "c");
-        logger.info("Template {} {} {} {}", "a", "b", "c", "d");
-        logger.info("Template {} {} {} {} {}", 1, 2, 3, 4, 5);
-        logger.info("Template {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6);
-        logger.info("Template {} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7);
-        logger.info("Template", "a", "b", "c", "d", "e", "f", "g", "h");
-        assertEquals(0, logger.logs.size());
-    }
-
-    @Test
-    @DisplayName("Test warn disabled skips templated logging")
-    public void testWarnDisabledSkipsTemplatedLogging() {
-        logger.warnEnabled = false;
-        logger.warn("Template {}", "arg1");
-        logger.warn("Template {} {}", "a", "b");
-        logger.warn("Template {} {} {}", "a", "b", "c");
-        logger.warn("Template {} {} {} {}", "a", "b", "c", "d");
-        logger.warn("Template {} {} {} {} {}", 1, 2, 3, 4, 5);
-        logger.warn("Template {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6);
-        logger.warn("Template {} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7);
-        logger.warn("Template", "a", "b", "c", "d", "e", "f", "g", "h");
-        assertEquals(0, logger.logs.size());
-    }
-
-    @Test
-    @DisplayName("Test error disabled skips templated logging")
-    public void testErrorDisabledSkipsTemplatedLogging() {
-        logger.errorEnabled = false;
-        logger.error("Template {}", "arg1");
-        logger.error("Template {} {}", "a", "b");
-        logger.error("Template {} {} {}", "a", "b", "c");
-        logger.error("Template {} {} {} {}", "a", "b", "c", "d");
-        logger.error("Template {} {} {} {} {}", 1, 2, 3, 4, 5);
-        logger.error("Template {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6);
-        logger.error("Template {} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7);
-        logger.error("Template", "a", "b", "c", "d", "e", "f", "g", "h");
-        assertEquals(0, logger.logs.size());
-    }
-
-    @Test
-    @DisplayName("Test throwable+template disabled skips logging")
-    public void testThrowableTemplateDisabledSkipsLogging() {
-        Exception ex = new Exception("Test");
-
-        logger.traceEnabled = false;
-        logger.trace(ex, "msg");
-        logger.trace(ex, "T {}", "a");
-        logger.trace(ex, "T {} {}", "a", "b");
-        logger.trace(ex, "T {} {} {}", "a", "b", "c");
-
-        logger.debugEnabled = false;
-        logger.debug(ex, "msg");
-        logger.debug(ex, "T {}", "a");
-        logger.debug(ex, "T {} {}", "a", "b");
-        logger.debug(ex, "T {} {} {}", "a", "b", "c");
-
-        logger.infoEnabled = false;
-        logger.info(ex, "msg");
-        logger.info(ex, "T {}", "a");
-        logger.info(ex, "T {} {}", "a", "b");
-        logger.info(ex, "T {} {} {}", "a", "b", "c");
-
-        logger.warnEnabled = false;
-        logger.warn(ex, "msg");
-        logger.warn(ex, "T {}", "a");
-        logger.warn(ex, "T {} {}", "a", "b");
-        logger.warn(ex, "T {} {} {}", "a", "b", "c");
-
-        logger.errorEnabled = false;
-        logger.error(ex, "msg");
-        logger.error(ex, "T {}", "a");
-        logger.error(ex, "T {} {}", "a", "b");
-        logger.error(ex, "T {} {} {}", "a", "b", "c");
-
-        assertEquals(0, logger.logs.size());
-    }
-
-    @Test
-    @DisplayName("Test logging when levels are disabled")
-    public void testLoggingWhenDisabled() {
-        logger.traceEnabled = false;
-        logger.debugEnabled = false;
-        logger.infoEnabled = false;
-        logger.warnEnabled = false;
-        logger.errorEnabled = false;
-
-        logger.trace("trace");
-        logger.debug("debug");
-        logger.info("info");
-        logger.warn("warn");
-        logger.error("error");
-
-        assertEquals(0, logger.logs.size());
-
-        boolean[] called = { false };
-        Supplier<String> supplier = () -> {
-            called[0] = true;
-            return "message";
-        };
-
-        logger.trace(supplier);
-        logger.debug(supplier);
-        logger.info(supplier);
-        logger.warn(supplier);
-        logger.error(supplier);
-
-        assertFalse(called[0]);
+    @DisplayName("Test format with empty string template")
+    public void testFormatWithEmptyTemplate() {
+        assertEquals("", AbstractLogger.format(""));
+        assertEquals(" [x]", AbstractLogger.format("", "x"));
     }
 }

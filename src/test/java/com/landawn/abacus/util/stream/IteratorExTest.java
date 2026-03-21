@@ -8,12 +8,10 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class IteratorExTest extends TestBase {
 
     private static class TestIteratorEx<T> implements IteratorEx<T> {
@@ -50,6 +48,21 @@ public class IteratorExTest extends TestBase {
         Assertions.assertEquals("e", iter.next());
 
         iter.advance(10);
+        Assertions.assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testCombinedOperations() {
+        List<Integer> list = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        IteratorEx<Integer> iter = new TestIteratorEx<>(list);
+
+        iter.advance(2);
+        Assertions.assertEquals(3, iter.next().intValue());
+
+        iter.advance(3);
+        Assertions.assertEquals(7, iter.next().intValue());
+
+        Assertions.assertEquals(3, iter.count());
         Assertions.assertFalse(iter.hasNext());
     }
 
@@ -132,21 +145,6 @@ public class IteratorExTest extends TestBase {
             Assertions.assertTrue(iter.hasNext());
             Assertions.assertEquals("a", iter.next());
         }
-    }
-
-    @Test
-    public void testCombinedOperations() {
-        List<Integer> list = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-        IteratorEx<Integer> iter = new TestIteratorEx<>(list);
-
-        iter.advance(2);
-        Assertions.assertEquals(3, iter.next().intValue());
-
-        iter.advance(3);
-        Assertions.assertEquals(7, iter.next().intValue());
-
-        Assertions.assertEquals(3, iter.count());
-        Assertions.assertFalse(iter.hasNext());
     }
 
 }

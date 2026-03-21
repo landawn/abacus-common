@@ -13,12 +13,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ByteTypeTest extends TestBase {
 
     private final ByteType type = new ByteType();
@@ -29,60 +27,9 @@ public class ByteTypeTest extends TestBase {
     }
 
     @Test
-    public void test_name() {
-        assertEquals("Byte", type.name());
-    }
-
-    @Test
-    public void test_stringOf() {
-        assertEquals("10", type.stringOf((byte) 10));
-        assertEquals("-5", type.stringOf((byte) -5));
-        assertEquals("0", type.stringOf((byte) 0));
-        assertEquals("127", type.stringOf(Byte.MAX_VALUE));
-        assertEquals("-128", type.stringOf(Byte.MIN_VALUE));
-        assertNull(type.stringOf(null));
-    }
-
-    @Test
-    public void test_valueOf_String() {
-        assertEquals((byte) 10, type.valueOf("10"));
-        assertEquals((byte) -5, type.valueOf("-5"));
-        assertEquals((byte) 0, type.valueOf("0"));
-        assertEquals(Byte.MAX_VALUE, type.valueOf("127"));
-        assertEquals(Byte.MIN_VALUE, type.valueOf("-128"));
-        assertNull(type.valueOf((String) null));
-        assertNull(type.valueOf(""));
-    }
-
-    @Test
-    public void test_valueOf_Object() {
-        // Byte input
-        assertEquals((byte) 10, type.valueOf(Byte.valueOf((byte) 10)));
-
-        // Number inputs
-        assertEquals((byte) 5, type.valueOf(Integer.valueOf(5)));
-        assertEquals((byte) 20, type.valueOf(Long.valueOf(20L)));
-
-        // String input
-        assertEquals((byte) 15, type.valueOf("15"));
-
-        // Null input
-        assertNull(type.valueOf((Object) null));
-    }
-
-    @Test
-    public void test_valueOf_charArray() {
-        char[] chars = "42".toCharArray();
-        assertEquals((byte) 42, type.valueOf(chars, 0, 2));
-
-        char[] negChars = "-10".toCharArray();
-        assertEquals((byte) -10, type.valueOf(negChars, 0, 3));
-
-        // With offset
-        char[] offsetChars = "xx25yy".toCharArray();
-        assertEquals((byte) 25, type.valueOf(offsetChars, 2, 2));
-
-        assertNull(type.valueOf((char[]) null, 0, 0));
+    public void testClazz() {
+        Class result = type.javaType();
+        assertEquals(Byte.class, result);
     }
 
     @Test
@@ -121,52 +68,6 @@ public class ByteTypeTest extends TestBase {
         // Test with Number
         when(rs.getObject("intCol")).thenReturn(75);
         assertEquals((byte) 75, type.get(rs, "intCol"));
-    }
-
-    @Test
-    public void test_set_PreparedStatement() throws SQLException {
-        PreparedStatement stmt = mock(PreparedStatement.class);
-
-        // Test with value
-        type.set(stmt, 1, (byte) 20);
-        verify(stmt).setByte(1, (byte) 20);
-
-        // Test with null
-        type.set(stmt, 2, null);
-        verify(stmt).setNull(2, java.sql.Types.TINYINT);
-    }
-
-    @Test
-    public void test_set_CallableStatement() throws SQLException {
-        CallableStatement stmt = mock(CallableStatement.class);
-
-        // Test with value
-        type.set(stmt, "param1", (byte) 30);
-        verify(stmt).setByte("param1", (byte) 30);
-
-        // Test with null
-        type.set(stmt, "param2", null);
-        verify(stmt).setNull("param2", java.sql.Types.TINYINT);
-    }
-
-    @Test
-    public void test_appendTo() throws Exception {
-        StringWriter sw = new StringWriter();
-
-        // Test value
-        type.appendTo(sw, (byte) 25);
-        assertEquals("25", sw.toString());
-
-        // Test null
-        sw = new StringWriter();
-        type.appendTo(sw, null);
-        assertEquals("null", sw.toString());
-    }
-
-    @Test
-    public void testClazz() {
-        Class result = type.javaType();
-        assertEquals(Byte.class, result);
     }
 
     @Test
@@ -330,6 +231,103 @@ public class ByteTypeTest extends TestBase {
 
         assertEquals(Byte.valueOf((byte) 0), result);
         verify(rs).getObject("overflowCol");
+    }
+
+    @Test
+    public void test_name() {
+        assertEquals("Byte", type.name());
+    }
+
+    @Test
+    public void test_stringOf() {
+        assertEquals("10", type.stringOf((byte) 10));
+        assertEquals("-5", type.stringOf((byte) -5));
+        assertEquals("0", type.stringOf((byte) 0));
+        assertEquals("127", type.stringOf(Byte.MAX_VALUE));
+        assertEquals("-128", type.stringOf(Byte.MIN_VALUE));
+        assertNull(type.stringOf(null));
+    }
+
+    @Test
+    public void test_valueOf_String() {
+        assertEquals((byte) 10, type.valueOf("10"));
+        assertEquals((byte) -5, type.valueOf("-5"));
+        assertEquals((byte) 0, type.valueOf("0"));
+        assertEquals(Byte.MAX_VALUE, type.valueOf("127"));
+        assertEquals(Byte.MIN_VALUE, type.valueOf("-128"));
+        assertNull(type.valueOf((String) null));
+        assertNull(type.valueOf(""));
+    }
+
+    @Test
+    public void test_valueOf_Object() {
+        // Byte input
+        assertEquals((byte) 10, type.valueOf(Byte.valueOf((byte) 10)));
+
+        // Number inputs
+        assertEquals((byte) 5, type.valueOf(Integer.valueOf(5)));
+        assertEquals((byte) 20, type.valueOf(Long.valueOf(20L)));
+
+        // String input
+        assertEquals((byte) 15, type.valueOf("15"));
+
+        // Null input
+        assertNull(type.valueOf((Object) null));
+    }
+
+    @Test
+    public void test_valueOf_charArray() {
+        char[] chars = "42".toCharArray();
+        assertEquals((byte) 42, type.valueOf(chars, 0, 2));
+
+        char[] negChars = "-10".toCharArray();
+        assertEquals((byte) -10, type.valueOf(negChars, 0, 3));
+
+        // With offset
+        char[] offsetChars = "xx25yy".toCharArray();
+        assertEquals((byte) 25, type.valueOf(offsetChars, 2, 2));
+
+        assertNull(type.valueOf((char[]) null, 0, 0));
+    }
+
+    @Test
+    public void test_set_PreparedStatement() throws SQLException {
+        PreparedStatement stmt = mock(PreparedStatement.class);
+
+        // Test with value
+        type.set(stmt, 1, (byte) 20);
+        verify(stmt).setByte(1, (byte) 20);
+
+        // Test with null
+        type.set(stmt, 2, null);
+        verify(stmt).setNull(2, java.sql.Types.TINYINT);
+    }
+
+    @Test
+    public void test_set_CallableStatement() throws SQLException {
+        CallableStatement stmt = mock(CallableStatement.class);
+
+        // Test with value
+        type.set(stmt, "param1", (byte) 30);
+        verify(stmt).setByte("param1", (byte) 30);
+
+        // Test with null
+        type.set(stmt, "param2", null);
+        verify(stmt).setNull("param2", java.sql.Types.TINYINT);
+    }
+
+    @Test
+    public void test_appendTo() throws Exception {
+        StringWriter sw = new StringWriter();
+
+        // Test value
+        type.appendTo(sw, (byte) 25);
+        assertEquals("25", sw.toString());
+
+        // Test null
+        sw = new StringWriter();
+        type.appendTo(sw, null);
+        assertEquals("null", sw.toString());
     }
 
 }

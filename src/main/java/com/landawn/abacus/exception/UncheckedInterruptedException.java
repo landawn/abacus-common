@@ -19,19 +19,19 @@ import java.io.Serial;
 /**
  * A runtime exception that wraps {@link InterruptedException}, allowing thread interruption
  * exceptions to be thrown without being declared in method signatures.
- * 
- * <p>This exception is useful in contexts where you need to handle InterruptedException but
+ *
+ * <p>This exception is useful in contexts where you need to handle {@link InterruptedException} but
  * cannot change the method signature to declare it, such as in:</p>
  * <ul>
- *   <li>Lambda expressions and functional interfaces that don't declare checked exceptions</li>
- *   <li>Stream operations where checked exceptions are not allowed</li>
- *   <li>Implementing interfaces that don't declare InterruptedException</li>
+ *   <li>Lambda expressions and functional interfaces that don't declare checked exceptions.</li>
+ *   <li>Stream operations where checked exceptions are not allowed.</li>
+ *   <li>Implementing interfaces that don't declare {@link InterruptedException}.</li>
  * </ul>
- * 
- * <p><strong>Important:</strong> When catching and wrapping InterruptedException, it's generally
+ *
+ * <p><strong>Important:</strong> When catching and wrapping {@code InterruptedException}, it's generally
  * recommended to preserve the thread's interrupted status by calling {@code Thread.currentThread().interrupt()}
  * before throwing this exception, unless the interruption has been fully handled.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // In a lambda expression
@@ -43,7 +43,7 @@ import java.io.Serial;
  *         throw new UncheckedInterruptedException("Processing interrupted", e);
  *     }
  * });
- * 
+ *
  * // In a method that can't declare InterruptedException
  * public void process() {
  *     try {
@@ -54,7 +54,7 @@ import java.io.Serial;
  *     }
  * }
  * }</pre>
- * 
+ *
  * @see UncheckedException
  * @see InterruptedException
  * @see Thread#interrupt()
@@ -67,7 +67,7 @@ public class UncheckedInterruptedException extends UncheckedException {
     /**
      * Constructs a new {@code UncheckedInterruptedException} by wrapping the specified {@link InterruptedException}.
      *
-     * <p>This constructor preserves all information from the original InterruptedException including
+     * <p>This constructor preserves all information from the original {@code InterruptedException} including
      * its message, stack trace, and any suppressed exceptions.</p>
      *
      * <p><strong>Note:</strong> Remember to restore the thread's interrupted status before throwing
@@ -75,7 +75,9 @@ public class UncheckedInterruptedException extends UncheckedException {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * catch (InterruptedException e) {
+     * try {
+     *     Thread.sleep(100);
+     * } catch (InterruptedException e) {
      *     Thread.currentThread().interrupt();   // Restore interrupted status
      *     throw new UncheckedInterruptedException(e);
      * }
@@ -100,7 +102,9 @@ public class UncheckedInterruptedException extends UncheckedException {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * catch (InterruptedException e) {
+     * try {
+     *     lock.lockInterruptibly();
+     * } catch (InterruptedException e) {
      *     Thread.currentThread().interrupt();   // Restore interrupted status
      *     throw new UncheckedInterruptedException("Interrupted while waiting for resource", e);
      * }

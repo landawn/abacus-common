@@ -20,17 +20,20 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("2025")
 public class ReaderTypeTest extends TestBase {
 
     private final ReaderType readerType = new ReaderType();
+
+    @Test
+    public void testClazz() {
+        assertEquals(Reader.class, readerType.javaType());
+    }
 
     @Test
     public void test_clazz() {
@@ -38,9 +41,8 @@ public class ReaderTypeTest extends TestBase {
     }
 
     @Test
-    public void test_name() {
-        assertNotNull(readerType.name());
-        assertFalse(readerType.name().isEmpty());
+    public void testIsReader() {
+        assertTrue(readerType.isReader());
     }
 
     @Test
@@ -50,65 +52,20 @@ public class ReaderTypeTest extends TestBase {
     }
 
     @Test
-    public void test_valueOf_String() {
-        // Test with null
-        Object result = readerType.valueOf((String) null);
-        // Result may be null or default value depending on type
-        assertNull(result);
-    }
-
-    @Test
-    public void test_appendTo() throws IOException {
-        StringWriter sw = new StringWriter();
-        readerType.appendTo(sw, null);
-        assertNotNull(sw.toString());
-    }
-
-    @Test
-    public void test_get_ResultSet_byIndex() throws SQLException {
-        ResultSet rs = mock(ResultSet.class);
-        // Basic get test - actual implementation will vary by type
-        assertDoesNotThrow(() -> readerType.get(rs, 1));
-    }
-
-    @Test
-    public void test_get_ResultSet_byLabel() throws SQLException {
-        ResultSet rs = mock(ResultSet.class);
-        // Basic get test - actual implementation will vary by type
-        assertDoesNotThrow(() -> readerType.get(rs, "col"));
-    }
-
-    @Test
-    public void test_set_PreparedStatement() throws SQLException {
-        PreparedStatement stmt = mock(PreparedStatement.class);
-        // Basic set test - actual implementation will vary by type
-        assertDoesNotThrow(() -> readerType.set(stmt, 1, null));
-    }
-
-    @Test
-    public void test_set_CallableStatement() throws SQLException {
-        CallableStatement stmt = mock(CallableStatement.class);
-        // Basic set test - actual implementation will vary by type
-        assertDoesNotThrow(() -> readerType.set(stmt, "param", null));
-    }
-
-    @Test
-    public void testClazz() {
-        assertEquals(Reader.class, readerType.javaType());
-    }
-
-    @Test
-    public void testIsReader() {
-        assertTrue(readerType.isReader());
-    }
-
-    @Test
     public void testStringOf() {
         Reader reader = new StringReader("test content");
         String result = readerType.stringOf(reader);
         assertEquals("test content", result);
 
         assertNull(readerType.stringOf(null));
+    }
+
+    @Test
+    public void test_valueOf_String() {
+        // Test with null
+        Object result = readerType.valueOf((String) null);
+        // Result may be null or default value depending on type
+        assertNull(result);
     }
 
     @Test
@@ -135,6 +92,20 @@ public class ReaderTypeTest extends TestBase {
     }
 
     @Test
+    public void test_get_ResultSet_byIndex() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+        // Basic get test - actual implementation will vary by type
+        assertDoesNotThrow(() -> readerType.get(rs, 1));
+    }
+
+    @Test
+    public void test_get_ResultSet_byLabel() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+        // Basic get test - actual implementation will vary by type
+        assertDoesNotThrow(() -> readerType.get(rs, "col"));
+    }
+
+    @Test
     public void testGetByColumnIndex() throws SQLException {
         ResultSet rs = mock(ResultSet.class);
         Reader reader = new StringReader("test");
@@ -150,6 +121,20 @@ public class ReaderTypeTest extends TestBase {
         when(rs.getCharacterStream("column")).thenReturn(reader);
 
         assertEquals(reader, readerType.get(rs, "column"));
+    }
+
+    @Test
+    public void test_set_PreparedStatement() throws SQLException {
+        PreparedStatement stmt = mock(PreparedStatement.class);
+        // Basic set test - actual implementation will vary by type
+        assertDoesNotThrow(() -> readerType.set(stmt, 1, null));
+    }
+
+    @Test
+    public void test_set_CallableStatement() throws SQLException {
+        CallableStatement stmt = mock(CallableStatement.class);
+        // Basic set test - actual implementation will vary by type
+        assertDoesNotThrow(() -> readerType.set(stmt, "param", null));
     }
 
     @Test
@@ -189,6 +174,13 @@ public class ReaderTypeTest extends TestBase {
     }
 
     @Test
+    public void test_appendTo() throws IOException {
+        StringWriter sw = new StringWriter();
+        readerType.appendTo(sw, null);
+        assertNotNull(sw.toString());
+    }
+
+    @Test
     public void testAppendTo() throws IOException {
         StringWriter writer = new StringWriter();
         Reader reader = new StringReader("test content");
@@ -219,6 +211,12 @@ public class ReaderTypeTest extends TestBase {
         reader = new StringReader("test");
         readerType.writeCharacter(writer, reader, config);
         assertNotNull(reader);
+    }
+
+    @Test
+    public void test_name() {
+        assertNotNull(readerType.name());
+        assertFalse(readerType.name().isEmpty());
     }
 
 }

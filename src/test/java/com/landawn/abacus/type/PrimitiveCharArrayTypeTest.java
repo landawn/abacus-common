@@ -25,7 +25,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -33,7 +32,6 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("2025")
 public class PrimitiveCharArrayTypeTest extends TestBase {
 
     private final PrimitiveCharArrayType type = new PrimitiveCharArrayType();
@@ -44,8 +42,9 @@ public class PrimitiveCharArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void test_isPrimitiveArray() {
-        assertTrue(type.isPrimitiveArray());
+    public void testGetElementType() {
+        Type<Character> elementType = type.elementType();
+        assertNotNull(elementType);
     }
 
     @Test
@@ -55,47 +54,6 @@ public class PrimitiveCharArrayTypeTest extends TestBase {
         assertNotNull(result);
 
         assertNull(type.stringOf(null));
-    }
-
-    @Test
-    public void test_valueOf_String() {
-        char[] result = type.valueOf("[A, B]");
-        assertNotNull(result);
-
-        assertNull(type.valueOf((String) null));
-    }
-
-    @Test
-    public void test_appendTo() throws IOException {
-        StringWriter sw = new StringWriter();
-
-        char[] arr = new char[] { 'A', 'B' };
-        type.appendTo(sw, arr);
-        assertNotNull(sw.toString());
-
-        sw = new StringWriter();
-        type.appendTo(sw, null);
-        assertEquals("null", sw.toString());
-    }
-
-    @Test
-    public void test_writeCharacter() throws IOException {
-        CharacterWriter writer = mock(BufferedJsonWriter.class);
-        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
-
-        char[] arr = new char[] { 'A', 'B' };
-        type.writeCharacter(writer, arr, config);
-        verify(writer, atLeastOnce()).write(any(String.class));
-
-        reset(writer);
-        type.writeCharacter(writer, null, config);
-        verify(writer).write(NULL_CHAR_ARRAY);
-    }
-
-    @Test
-    public void testGetElementType() {
-        Type<Character> elementType = type.elementType();
-        assertNotNull(elementType);
     }
 
     @Test
@@ -114,6 +72,21 @@ public class PrimitiveCharArrayTypeTest extends TestBase {
     public void testStringOfSingleElement() {
         char[] array = { 'x' };
         assertEquals("['x']", type.stringOf(array));
+    }
+
+    @Test
+    public void testValueOfObjectOther() {
+        String input = "['a', 'b', 'c']";
+        char[] result = type.valueOf((Object) input);
+        assertArrayEquals(new char[] { 'a', 'b', 'c' }, result);
+    }
+
+    @Test
+    public void test_valueOf_String() {
+        char[] result = type.valueOf("[A, B]");
+        assertNotNull(result);
+
+        assertNull(type.valueOf((String) null));
     }
 
     @Test
@@ -150,6 +123,15 @@ public class PrimitiveCharArrayTypeTest extends TestBase {
         assertArrayEquals(new char[] { 'a', 'b', 'c' }, result);
     }
 
+    // Covers valueOf(String) - quoted single-char edge cases
+    @Test
+    public void testValueOfQuotedSingleChar() {
+        char[] result = type.valueOf("['a']");
+        assertNotNull(result);
+        assertEquals(1, result.length);
+        assertEquals('a', result[0]);
+    }
+
     @Test
     public void testValueOfObjectClob() throws SQLException {
         Clob clob = mock(Clob.class);
@@ -169,11 +151,26 @@ public class PrimitiveCharArrayTypeTest extends TestBase {
         assertThrows(Exception.class, () -> type.valueOf(clob));
     }
 
+    // Covers valueOf(Object) with Reader input
     @Test
-    public void testValueOfObjectOther() {
-        String input = "['a', 'b', 'c']";
-        char[] result = type.valueOf((Object) input);
+    public void testValueOfObjectReader() throws IOException {
+        java.io.StringReader reader = new java.io.StringReader("abc");
+        char[] result = type.valueOf((Object) reader);
+        assertNotNull(result);
         assertArrayEquals(new char[] { 'a', 'b', 'c' }, result);
+    }
+
+    @Test
+    public void test_appendTo() throws IOException {
+        StringWriter sw = new StringWriter();
+
+        char[] arr = new char[] { 'A', 'B' };
+        type.appendTo(sw, arr);
+        assertNotNull(sw.toString());
+
+        sw = new StringWriter();
+        type.appendTo(sw, null);
+        assertEquals("null", sw.toString());
     }
 
     @Test
@@ -188,6 +185,20 @@ public class PrimitiveCharArrayTypeTest extends TestBase {
         StringBuilder sb = new StringBuilder();
         type.appendTo(sb, new char[] { 'a', 'b', 'c' });
         assertEquals("[a, b, c]", sb.toString());
+    }
+
+    @Test
+    public void test_writeCharacter() throws IOException {
+        CharacterWriter writer = mock(BufferedJsonWriter.class);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
+
+        char[] arr = new char[] { 'A', 'B' };
+        type.writeCharacter(writer, arr, config);
+        verify(writer, atLeastOnce()).write(any(String.class));
+
+        reset(writer);
+        type.writeCharacter(writer, null, config);
+        verify(writer).write(NULL_CHAR_ARRAY);
     }
 
     @Test
@@ -253,6 +264,13 @@ public class PrimitiveCharArrayTypeTest extends TestBase {
         assertArrayEquals(new char[] { 'a', 'b', 'c' }, result);
     }
 
+    // Covers collectionToArray(null) - null path
+    @Test
+    public void testCollectionToArray_Null() {
+        char[] result = type.collectionToArray(null);
+        assertNull(result);
+    }
+
     @Test
     public void testArray2CollectionNull() {
         List<Character> output = new ArrayList<>();
@@ -292,18 +310,6 @@ public class PrimitiveCharArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void testEqualsOneNull() {
-        assertFalse(type.equals(new char[] { 'a' }, null));
-        assertFalse(type.equals(null, new char[] { 'a' }));
-    }
-
-    @Test
-    public void testEqualsSame() {
-        char[] array = { 'a', 'b', 'c' };
-        assertTrue(type.equals(array, array));
-    }
-
-    @Test
     public void testEqualsEqual() {
         char[] array1 = { 'a', 'b', 'c' };
         char[] array2 = { 'a', 'b', 'c' };
@@ -325,6 +331,18 @@ public class PrimitiveCharArrayTypeTest extends TestBase {
     }
 
     @Test
+    public void testEqualsOneNull() {
+        assertFalse(type.equals(new char[] { 'a' }, null));
+        assertFalse(type.equals(null, new char[] { 'a' }));
+    }
+
+    @Test
+    public void testEqualsSame() {
+        char[] array = { 'a', 'b', 'c' };
+        assertTrue(type.equals(array, array));
+    }
+
+    @Test
     public void testToString() {
         char[] array = { 'a', 'b', 'c' };
         assertEquals("[a, b, c]", type.toString(array));
@@ -338,6 +356,11 @@ public class PrimitiveCharArrayTypeTest extends TestBase {
     @Test
     public void testToStringEmpty() {
         assertEquals("[]", type.toString(new char[0]));
+    }
+
+    @Test
+    public void test_isPrimitiveArray() {
+        assertTrue(type.isPrimitiveArray());
     }
 
 }

@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -23,14 +22,15 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("2025")
 public class CharacterArrayTypeTest extends TestBase {
 
     private final CharacterArrayType type = new CharacterArrayType();
 
     @Test
-    public void test_clazz() {
-        assertEquals(Character[].class, type.javaType());
+    public void testStringOf_SpecialCharacters() {
+        Character[] array = new Character[] { '\'', '"', '\n', '\t' };
+        String result = type.stringOf(array);
+        assertEquals("[''', '\"', '\n', '\t']", result);
     }
 
     @Test
@@ -40,41 +40,6 @@ public class CharacterArrayTypeTest extends TestBase {
         assertNotNull(result);
 
         assertNull(type.stringOf(null));
-    }
-
-    @Test
-    public void test_valueOf_String() {
-        Character[] result = type.valueOf("[A, B]");
-        assertNotNull(result);
-
-        assertNull(type.valueOf((String) null));
-    }
-
-    @Test
-    public void test_appendTo() throws IOException {
-        StringWriter sw = new StringWriter();
-
-        Character[] arr = new Character[] { 'A', 'B' };
-        type.appendTo(sw, arr);
-        assertNotNull(sw.toString());
-
-        sw = new StringWriter();
-        type.appendTo(sw, null);
-        assertEquals("null", sw.toString());
-    }
-
-    @Test
-    public void test_writeCharacter() throws IOException {
-        CharacterWriter writer = mock(BufferedJsonWriter.class);
-        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
-
-        Character[] arr = new Character[] { 'A', 'B' };
-        type.writeCharacter(writer, arr, config);
-        verify(writer, atLeastOnce()).write(any(String.class));
-
-        reset(writer);
-        type.writeCharacter(writer, null, config);
-        verify(writer).write(NULL_CHAR_ARRAY);
     }
 
     @Test
@@ -99,10 +64,11 @@ public class CharacterArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void testStringOf_SpecialCharacters() {
-        Character[] array = new Character[] { '\'', '"', '\n', '\t' };
-        String result = type.stringOf(array);
-        assertEquals("[''', '\"', '\n', '\t']", result);
+    public void test_valueOf_String() {
+        Character[] result = type.valueOf("[A, B]");
+        assertNotNull(result);
+
+        assertNull(type.valueOf((String) null));
     }
 
     @Test
@@ -174,6 +140,19 @@ public class CharacterArrayTypeTest extends TestBase {
     }
 
     @Test
+    public void test_appendTo() throws IOException {
+        StringWriter sw = new StringWriter();
+
+        Character[] arr = new Character[] { 'A', 'B' };
+        type.appendTo(sw, arr);
+        assertNotNull(sw.toString());
+
+        sw = new StringWriter();
+        type.appendTo(sw, null);
+        assertEquals("null", sw.toString());
+    }
+
+    @Test
     public void testAppendTo_Empty() throws IOException {
         StringWriter sw = new StringWriter();
         Character[] array = new Character[0];
@@ -195,6 +174,20 @@ public class CharacterArrayTypeTest extends TestBase {
         Character[] array = new Character[] { '1', null, '3' };
         type.appendTo(sw, array);
         assertEquals("[1, null, 3]", sw.toString());
+    }
+
+    @Test
+    public void test_writeCharacter() throws IOException {
+        CharacterWriter writer = mock(BufferedJsonWriter.class);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
+
+        Character[] arr = new Character[] { 'A', 'B' };
+        type.writeCharacter(writer, arr, config);
+        verify(writer, atLeastOnce()).write(any(String.class));
+
+        reset(writer);
+        type.writeCharacter(writer, null, config);
+        verify(writer).write(NULL_CHAR_ARRAY);
     }
 
     @Test
@@ -272,6 +265,11 @@ public class CharacterArrayTypeTest extends TestBase {
         Character[] array = new Character[] { 'A', 'B', null, 'D' };
         String result = type.toString(array);
         assertEquals("[A, B, null, D]", result);
+    }
+
+    @Test
+    public void test_clazz() {
+        assertEquals(Character[].class, type.javaType());
     }
 
 }

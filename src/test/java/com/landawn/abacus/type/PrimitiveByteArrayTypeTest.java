@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -35,7 +34,6 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("2025")
 public class PrimitiveByteArrayTypeTest extends TestBase {
 
     private final PrimitiveByteArrayType type = new PrimitiveByteArrayType();
@@ -46,8 +44,8 @@ public class PrimitiveByteArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void test_isPrimitiveArray() {
-        assertTrue(type.isPrimitiveArray());
+    public void testIsPrimitiveByteArray() {
+        assertTrue(type.isPrimitiveByteArray());
     }
 
     @Test
@@ -57,52 +55,6 @@ public class PrimitiveByteArrayTypeTest extends TestBase {
         assertNotNull(result);
 
         assertNull(type.stringOf(null));
-    }
-
-    @Test
-    public void test_valueOf_String() {
-        byte[] result = type.valueOf("[1, 2]");
-        assertNotNull(result);
-
-        assertNull(type.valueOf((String) null));
-    }
-
-    @Test
-    public void test_appendTo() throws IOException {
-        StringWriter sw = new StringWriter();
-
-        byte[] arr = new byte[] { (byte) 1, (byte) 2 };
-        type.appendTo(sw, arr);
-        assertNotNull(sw.toString());
-
-        sw = new StringWriter();
-        type.appendTo(sw, null);
-        assertEquals("null", sw.toString());
-    }
-
-    @Test
-    public void test_writeCharacter() throws IOException {
-        CharacterWriter writer = mock(BufferedJsonWriter.class);
-        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
-
-        byte[] arr = new byte[] { (byte) 1, (byte) 2 };
-        type.writeCharacter(writer, arr, config);
-        verify(writer, atLeastOnce()).write(any(String.class));
-
-        reset(writer);
-        type.writeCharacter(writer, null, config);
-        verify(writer).write(NULL_CHAR_ARRAY);
-    }
-
-    @Test
-    public void testGetElementType() {
-        Type<Byte> elementType = type.elementType();
-        assertNotNull(elementType);
-    }
-
-    @Test
-    public void testIsPrimitiveByteArray() {
-        assertTrue(type.isPrimitiveByteArray());
     }
 
     @Test
@@ -121,6 +73,21 @@ public class PrimitiveByteArrayTypeTest extends TestBase {
     public void testStringOfSingleElement() {
         byte[] array = { 42 };
         assertEquals("[42]", type.stringOf(array));
+    }
+
+    @Test
+    public void testValueOfObjectOther() {
+        String input = "[1, 2, 3]";
+        byte[] result = type.valueOf((Object) input);
+        assertArrayEquals(new byte[] { 1, 2, 3 }, result);
+    }
+
+    @Test
+    public void test_valueOf_String() {
+        byte[] result = type.valueOf("[1, 2]");
+        assertNotNull(result);
+
+        assertNull(type.valueOf((String) null));
     }
 
     @Test
@@ -176,10 +143,9 @@ public class PrimitiveByteArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void testValueOfObjectOther() {
-        String input = "[1, 2, 3]";
-        byte[] result = type.valueOf((Object) input);
-        assertArrayEquals(new byte[] { 1, 2, 3 }, result);
+    public void testGetElementType() {
+        Type<Byte> elementType = type.elementType();
+        assertNotNull(elementType);
     }
 
     @Test
@@ -239,6 +205,19 @@ public class PrimitiveByteArrayTypeTest extends TestBase {
     }
 
     @Test
+    public void test_appendTo() throws IOException {
+        StringWriter sw = new StringWriter();
+
+        byte[] arr = new byte[] { (byte) 1, (byte) 2 };
+        type.appendTo(sw, arr);
+        assertNotNull(sw.toString());
+
+        sw = new StringWriter();
+        type.appendTo(sw, null);
+        assertEquals("null", sw.toString());
+    }
+
+    @Test
     public void testAppendToEmptyArray() throws IOException {
         StringBuilder sb = new StringBuilder();
         type.appendTo(sb, new byte[0]);
@@ -250,6 +229,20 @@ public class PrimitiveByteArrayTypeTest extends TestBase {
         StringBuilder sb = new StringBuilder();
         type.appendTo(sb, new byte[] { 1, 2, 3 });
         assertEquals("[1, 2, 3]", sb.toString());
+    }
+
+    @Test
+    public void test_writeCharacter() throws IOException {
+        CharacterWriter writer = mock(BufferedJsonWriter.class);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
+
+        byte[] arr = new byte[] { (byte) 1, (byte) 2 };
+        type.writeCharacter(writer, arr, config);
+        verify(writer, atLeastOnce()).write(any(String.class));
+
+        reset(writer);
+        type.writeCharacter(writer, null, config);
+        verify(writer).write(NULL_CHAR_ARRAY);
     }
 
     @Test
@@ -330,11 +323,6 @@ public class PrimitiveByteArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void testHashCodeNull() {
-        assertEquals(0, type.hashCode(null));
-    }
-
-    @Test
     public void testHashCodeDifferent() {
         byte[] array1 = { 1, 2, 3 };
         byte[] array2 = { 1, 2, 4 };
@@ -342,20 +330,8 @@ public class PrimitiveByteArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void testEqualsNull() {
-        assertTrue(type.equals(null, null));
-    }
-
-    @Test
-    public void testEqualsOneNull() {
-        assertFalse(type.equals(new byte[] { 1 }, null));
-        assertFalse(type.equals(null, new byte[] { 1 }));
-    }
-
-    @Test
-    public void testEqualsSame() {
-        byte[] array = { 1, 2, 3 };
-        assertTrue(type.equals(array, array));
+    public void testHashCodeNull() {
+        assertEquals(0, type.hashCode(null));
     }
 
     @Test
@@ -377,6 +353,28 @@ public class PrimitiveByteArrayTypeTest extends TestBase {
         byte[] array1 = { 1, 2, 3 };
         byte[] array2 = { 1, 2, 4 };
         assertFalse(type.equals(array1, array2));
+    }
+
+    @Test
+    public void testEqualsNull() {
+        assertTrue(type.equals(null, null));
+    }
+
+    @Test
+    public void testEqualsOneNull() {
+        assertFalse(type.equals(new byte[] { 1 }, null));
+        assertFalse(type.equals(null, new byte[] { 1 }));
+    }
+
+    @Test
+    public void testEqualsSame() {
+        byte[] array = { 1, 2, 3 };
+        assertTrue(type.equals(array, array));
+    }
+
+    @Test
+    public void test_isPrimitiveArray() {
+        assertTrue(type.isPrimitiveArray());
     }
 
 }

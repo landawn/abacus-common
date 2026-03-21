@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -14,7 +13,6 @@ import com.landawn.abacus.http.HttpUtil;
 import com.landawn.abacus.http.OkHttpRequest;
 import com.landawn.abacus.http.WebUtil;
 
-@Tag("2025")
 public class WebUtilTest extends TestBase {
 
     @Test

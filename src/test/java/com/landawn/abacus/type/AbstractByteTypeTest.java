@@ -14,7 +14,6 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -23,7 +22,6 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("new-test")
 public class AbstractByteTypeTest extends TestBase {
     private Type<Byte> type;
     private CharacterWriter characterWriter;
@@ -48,11 +46,6 @@ public class AbstractByteTypeTest extends TestBase {
     }
 
     @Test
-    public void testStringOf_Null() {
-        assertNull(type.stringOf(null));
-    }
-
-    @Test
     public void testStringOf_ByteValue() {
         assertEquals("0", type.stringOf((byte) 0));
         assertEquals("127", type.stringOf((byte) 127));
@@ -61,15 +54,8 @@ public class AbstractByteTypeTest extends TestBase {
     }
 
     @Test
-    public void testValueOf_String_Null() {
-        Byte result = type.valueOf((String) null);
-        assertNull(result);
-    }
-
-    @Test
-    public void testValueOf_String_Empty() {
-        Byte result = type.valueOf("");
-        assertNull(result);
+    public void testStringOf_Null() {
+        assertNull(type.stringOf(null));
     }
 
     @Test
@@ -91,16 +77,33 @@ public class AbstractByteTypeTest extends TestBase {
     }
 
     @Test
-    public void testValueOf_String_InvalidFormat() {
-        assertThrows(NumberFormatException.class, () -> type.valueOf("abc"));
-        assertThrows(NumberFormatException.class, () -> type.valueOf("12.34"));
+    public void testValueOf_CharArray_ValidByte() {
+        char[] cbuf = "127".toCharArray();
+        assertEquals((byte) 127, type.valueOf(cbuf, 0, 3));
+
+        cbuf = "-128".toCharArray();
+        assertEquals((byte) -128, type.valueOf(cbuf, 0, 4));
+
+        cbuf = "0".toCharArray();
+        assertEquals((byte) 0, type.valueOf(cbuf, 0, 1));
     }
 
     @Test
-    public void testValueOf_String_OutOfRange() {
-        assertThrows(NumberFormatException.class, () -> type.valueOf("128"));
-        assertThrows(NumberFormatException.class, () -> type.valueOf("-129"));
-        assertThrows(NumberFormatException.class, () -> type.valueOf("256"));
+    public void testValueOf_CharArray_WithOffset() {
+        char[] cbuf = "xx42yy".toCharArray();
+        assertEquals((byte) 42, type.valueOf(cbuf, 2, 2));
+    }
+
+    @Test
+    public void testValueOf_String_Null() {
+        Byte result = type.valueOf((String) null);
+        assertNull(result);
+    }
+
+    @Test
+    public void testValueOf_String_Empty() {
+        Byte result = type.valueOf("");
+        assertNull(result);
     }
 
     @Test
@@ -117,21 +120,16 @@ public class AbstractByteTypeTest extends TestBase {
     }
 
     @Test
-    public void testValueOf_CharArray_ValidByte() {
-        char[] cbuf = "127".toCharArray();
-        assertEquals((byte) 127, type.valueOf(cbuf, 0, 3));
-
-        cbuf = "-128".toCharArray();
-        assertEquals((byte) -128, type.valueOf(cbuf, 0, 4));
-
-        cbuf = "0".toCharArray();
-        assertEquals((byte) 0, type.valueOf(cbuf, 0, 1));
+    public void testValueOf_String_InvalidFormat() {
+        assertThrows(NumberFormatException.class, () -> type.valueOf("abc"));
+        assertThrows(NumberFormatException.class, () -> type.valueOf("12.34"));
     }
 
     @Test
-    public void testValueOf_CharArray_WithOffset() {
-        char[] cbuf = "xx42yy".toCharArray();
-        assertEquals((byte) 42, type.valueOf(cbuf, 2, 2));
+    public void testValueOf_String_OutOfRange() {
+        assertThrows(NumberFormatException.class, () -> type.valueOf("128"));
+        assertThrows(NumberFormatException.class, () -> type.valueOf("-129"));
+        assertThrows(NumberFormatException.class, () -> type.valueOf("256"));
     }
 
     @Test

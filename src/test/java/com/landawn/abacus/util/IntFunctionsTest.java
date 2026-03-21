@@ -37,14 +37,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.IntFunction;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableArray;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 
-@Tag("2025")
 public class IntFunctionsTest extends TestBase {
 
     @Test
@@ -543,6 +541,36 @@ public class IntFunctionsTest extends TestBase {
     }
 
     @Test
+    public void testOfMapWithAbstractClasses() {
+        IntFunction<? extends Map<String, Integer>> func1 = IntFunctions.ofMap(Map.class);
+        Map<String, Integer> map1 = func1.apply(10);
+        Assertions.assertTrue(map1 instanceof HashMap);
+
+        IntFunction<? extends Map<String, Integer>> func2 = IntFunctions.ofMap(AbstractMap.class);
+        Map<String, Integer> map2 = func2.apply(10);
+        Assertions.assertTrue(map2 instanceof HashMap);
+
+        IntFunction<? extends Map<String, Integer>> func3 = IntFunctions.ofMap(SortedMap.class);
+        Map<String, Integer> map3 = func3.apply(10);
+        Assertions.assertTrue(map3 instanceof TreeMap);
+
+        IntFunction<? extends Map<String, Integer>> func4 = IntFunctions.ofMap(NavigableMap.class);
+        Map<String, Integer> map4 = func4.apply(10);
+        Assertions.assertTrue(map4 instanceof TreeMap);
+
+        IntFunction<? extends Map<String, Integer>> func5 = IntFunctions.ofMap(ConcurrentMap.class);
+        Map<String, Integer> map5 = func5.apply(10);
+        Assertions.assertTrue(map5 instanceof ConcurrentHashMap);
+    }
+
+    @Test
+    public void testOfMap_ImmutableMap() {
+        IntFunction<? extends Map<String, Integer>> func = IntFunctions.ofMap(ImmutableMap.class);
+        Map<String, Integer> result = func.apply(10);
+        Assertions.assertTrue(result instanceof HashMap);
+    }
+
+    @Test
     public void testOfMap() {
         IntFunction<Map<String, Integer>> func = IntFunctions.ofMap();
         Assertions.assertNotNull(func);
@@ -555,6 +583,93 @@ public class IntFunctionsTest extends TestBase {
         Map<String, Integer> map2 = func.apply(0);
         Assertions.assertNotNull(map2);
         Assertions.assertEquals(0, map2.size());
+    }
+
+    @Test
+    public void testOfMapWithHashMap() {
+        IntFunction<? extends Map<String, Integer>> func = IntFunctions.ofMap(HashMap.class);
+        Assertions.assertNotNull(func);
+
+        Map<String, Integer> map = func.apply(10);
+        Assertions.assertNotNull(map);
+        Assertions.assertTrue(map instanceof HashMap);
+        Assertions.assertEquals(0, map.size());
+    }
+
+    @Test
+    public void testOfMapWithLinkedHashMap() {
+        IntFunction<? extends Map<String, Integer>> func = IntFunctions.ofMap(LinkedHashMap.class);
+        Assertions.assertNotNull(func);
+
+        Map<String, Integer> map = func.apply(10);
+        Assertions.assertNotNull(map);
+        Assertions.assertTrue(map instanceof LinkedHashMap);
+        Assertions.assertEquals(0, map.size());
+    }
+
+    @Test
+    public void testOfMapWithTreeMap() {
+        IntFunction<? extends Map<String, Integer>> func = IntFunctions.ofMap(TreeMap.class);
+        Assertions.assertNotNull(func);
+
+        Map<String, Integer> map = func.apply(10);
+        Assertions.assertNotNull(map);
+        Assertions.assertTrue(map instanceof TreeMap);
+        Assertions.assertEquals(0, map.size());
+    }
+
+    @Test
+    public void testOfMapWithIdentityHashMap() {
+        IntFunction<? extends Map<String, Integer>> func = IntFunctions.ofMap(IdentityHashMap.class);
+        Assertions.assertNotNull(func);
+
+        Map<String, Integer> map = func.apply(10);
+        Assertions.assertNotNull(map);
+        Assertions.assertTrue(map instanceof IdentityHashMap);
+        Assertions.assertEquals(0, map.size());
+    }
+
+    @Test
+    public void testOfMapWithConcurrentHashMap() {
+        IntFunction<? extends Map<String, Integer>> func = IntFunctions.ofMap(ConcurrentHashMap.class);
+        Assertions.assertNotNull(func);
+
+        Map<String, Integer> map = func.apply(10);
+        Assertions.assertNotNull(map);
+        Assertions.assertTrue(map instanceof ConcurrentHashMap);
+        Assertions.assertEquals(0, map.size());
+    }
+
+    @Test
+    public void testOfMapWithBiMap() {
+        IntFunction<? extends Map<String, Integer>> func = IntFunctions.ofMap(BiMap.class);
+        Assertions.assertNotNull(func);
+
+        Map<String, Integer> map = func.apply(10);
+        Assertions.assertNotNull(map);
+        Assertions.assertTrue(map instanceof BiMap);
+        Assertions.assertEquals(0, map.size());
+    }
+
+    @Test
+    public void testOfMapCaching() {
+        IntFunction<? extends Map<String, Integer>> func1 = IntFunctions.ofMap(HashMap.class);
+        IntFunction<? extends Map<String, Integer>> func2 = IntFunctions.ofMap(HashMap.class);
+        Assertions.assertSame(func1, func2);
+
+        IntFunction<? extends Map<String, Integer>> func3 = IntFunctions.ofMap(LinkedHashMap.class);
+        Assertions.assertNotSame(func1, func3);
+    }
+
+    @Test
+    public void testOfMapWithIllegalArgument() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            IntFunctions.ofMap((Class) String.class);
+        });
+
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            IntFunctions.ofMap(null);
+        });
     }
 
     @Test
@@ -752,6 +867,69 @@ public class IntFunctionsTest extends TestBase {
     }
 
     @Test
+    public void testOfCollectionWithAbstractClasses() {
+        IntFunction<? extends Collection<String>> func1 = IntFunctions.ofCollection(Collection.class);
+        Collection<String> coll1 = func1.apply(10);
+        Assertions.assertTrue(coll1 instanceof ArrayList);
+
+        IntFunction<? extends Collection<String>> func2 = IntFunctions.ofCollection(AbstractCollection.class);
+        Collection<String> coll2 = func2.apply(10);
+        Assertions.assertTrue(coll2 instanceof ArrayList);
+
+        IntFunction<? extends Collection<String>> func3 = IntFunctions.ofCollection(List.class);
+        Collection<String> coll3 = func3.apply(10);
+        Assertions.assertTrue(coll3 instanceof ArrayList);
+
+        IntFunction<? extends Collection<String>> func4 = IntFunctions.ofCollection(AbstractList.class);
+        Collection<String> coll4 = func4.apply(10);
+        Assertions.assertTrue(coll4 instanceof ArrayList);
+
+        IntFunction<? extends Collection<String>> func5 = IntFunctions.ofCollection(Set.class);
+        Collection<String> coll5 = func5.apply(10);
+        Assertions.assertTrue(coll5 instanceof HashSet);
+
+        IntFunction<? extends Collection<String>> func6 = IntFunctions.ofCollection(AbstractSet.class);
+        Collection<String> coll6 = func6.apply(10);
+        Assertions.assertTrue(coll6 instanceof HashSet);
+
+        IntFunction<? extends Collection<String>> func7 = IntFunctions.ofCollection(Queue.class);
+        Collection<String> coll7 = func7.apply(10);
+        Assertions.assertTrue(coll7 instanceof LinkedList);
+
+        IntFunction<? extends Collection<String>> func8 = IntFunctions.ofCollection(AbstractQueue.class);
+        Collection<String> coll8 = func8.apply(10);
+        Assertions.assertTrue(coll8 instanceof LinkedList);
+
+        IntFunction<? extends Collection<String>> func9 = IntFunctions.ofCollection(Deque.class);
+        Collection<String> coll9 = func9.apply(10);
+        Assertions.assertTrue(coll9 instanceof LinkedList);
+
+        IntFunction<? extends Collection<String>> func10 = IntFunctions.ofCollection(BlockingQueue.class);
+        Collection<String> coll10 = func10.apply(10);
+        Assertions.assertTrue(coll10 instanceof LinkedBlockingQueue);
+
+        IntFunction<? extends Collection<String>> func11 = IntFunctions.ofCollection(BlockingDeque.class);
+        Collection<String> coll11 = func11.apply(10);
+        Assertions.assertTrue(coll11 instanceof LinkedBlockingDeque);
+    }
+
+    // --- Additional coverage tests ---
+
+    @Test
+    public void testOfCollection_ImmutableList() {
+        IntFunction<? extends Collection<String>> func = IntFunctions.ofCollection(ImmutableList.class);
+        Collection<String> result = func.apply(10);
+        Assertions.assertTrue(result instanceof ArrayList);
+    }
+
+    @Test
+    public void testOfCollection_ImmutableSet() {
+        IntFunction<? extends Collection<String>> func = IntFunctions.ofCollection(ImmutableSet.class);
+        Collection<String> result = func.apply(10);
+        Assertions.assertTrue(result instanceof HashSet);
+    }
+
+    @Test
     public void testOfCollectionWithArrayList() {
         IntFunction<? extends Collection<String>> func = IntFunctions.ofCollection(ArrayList.class);
         Assertions.assertNotNull(func);
@@ -873,53 +1051,6 @@ public class IntFunctionsTest extends TestBase {
     }
 
     @Test
-    public void testOfCollectionWithAbstractClasses() {
-        IntFunction<? extends Collection<String>> func1 = IntFunctions.ofCollection(Collection.class);
-        Collection<String> coll1 = func1.apply(10);
-        Assertions.assertTrue(coll1 instanceof ArrayList);
-
-        IntFunction<? extends Collection<String>> func2 = IntFunctions.ofCollection(AbstractCollection.class);
-        Collection<String> coll2 = func2.apply(10);
-        Assertions.assertTrue(coll2 instanceof ArrayList);
-
-        IntFunction<? extends Collection<String>> func3 = IntFunctions.ofCollection(List.class);
-        Collection<String> coll3 = func3.apply(10);
-        Assertions.assertTrue(coll3 instanceof ArrayList);
-
-        IntFunction<? extends Collection<String>> func4 = IntFunctions.ofCollection(AbstractList.class);
-        Collection<String> coll4 = func4.apply(10);
-        Assertions.assertTrue(coll4 instanceof ArrayList);
-
-        IntFunction<? extends Collection<String>> func5 = IntFunctions.ofCollection(Set.class);
-        Collection<String> coll5 = func5.apply(10);
-        Assertions.assertTrue(coll5 instanceof HashSet);
-
-        IntFunction<? extends Collection<String>> func6 = IntFunctions.ofCollection(AbstractSet.class);
-        Collection<String> coll6 = func6.apply(10);
-        Assertions.assertTrue(coll6 instanceof HashSet);
-
-        IntFunction<? extends Collection<String>> func7 = IntFunctions.ofCollection(Queue.class);
-        Collection<String> coll7 = func7.apply(10);
-        Assertions.assertTrue(coll7 instanceof LinkedList);
-
-        IntFunction<? extends Collection<String>> func8 = IntFunctions.ofCollection(AbstractQueue.class);
-        Collection<String> coll8 = func8.apply(10);
-        Assertions.assertTrue(coll8 instanceof LinkedList);
-
-        IntFunction<? extends Collection<String>> func9 = IntFunctions.ofCollection(Deque.class);
-        Collection<String> coll9 = func9.apply(10);
-        Assertions.assertTrue(coll9 instanceof LinkedList);
-
-        IntFunction<? extends Collection<String>> func10 = IntFunctions.ofCollection(BlockingQueue.class);
-        Collection<String> coll10 = func10.apply(10);
-        Assertions.assertTrue(coll10 instanceof LinkedBlockingQueue);
-
-        IntFunction<? extends Collection<String>> func11 = IntFunctions.ofCollection(BlockingDeque.class);
-        Collection<String> coll11 = func11.apply(10);
-        Assertions.assertTrue(coll11 instanceof LinkedBlockingDeque);
-    }
-
-    @Test
     public void testOfCollectionWithSortedSet() {
         IntFunction<? extends Collection<String>> func = IntFunctions.ofCollection(SortedSet.class);
         Assertions.assertNotNull(func);
@@ -942,17 +1073,6 @@ public class IntFunctionsTest extends TestBase {
     }
 
     @Test
-    public void testOfCollectionWithIllegalArgument() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            IntFunctions.ofCollection((Class) String.class);
-        });
-
-        Assertions.assertThrows(NullPointerException.class, () -> {
-            IntFunctions.ofCollection(null);
-        });
-    }
-
-    @Test
     public void testOfCollectionCaching() {
         IntFunction<? extends Collection<String>> func1 = IntFunctions.ofCollection(ArrayList.class);
         IntFunction<? extends Collection<String>> func2 = IntFunctions.ofCollection(ArrayList.class);
@@ -963,113 +1083,14 @@ public class IntFunctionsTest extends TestBase {
     }
 
     @Test
-    public void testOfMapWithHashMap() {
-        IntFunction<? extends Map<String, Integer>> func = IntFunctions.ofMap(HashMap.class);
-        Assertions.assertNotNull(func);
-
-        Map<String, Integer> map = func.apply(10);
-        Assertions.assertNotNull(map);
-        Assertions.assertTrue(map instanceof HashMap);
-        Assertions.assertEquals(0, map.size());
-    }
-
-    @Test
-    public void testOfMapWithLinkedHashMap() {
-        IntFunction<? extends Map<String, Integer>> func = IntFunctions.ofMap(LinkedHashMap.class);
-        Assertions.assertNotNull(func);
-
-        Map<String, Integer> map = func.apply(10);
-        Assertions.assertNotNull(map);
-        Assertions.assertTrue(map instanceof LinkedHashMap);
-        Assertions.assertEquals(0, map.size());
-    }
-
-    @Test
-    public void testOfMapWithTreeMap() {
-        IntFunction<? extends Map<String, Integer>> func = IntFunctions.ofMap(TreeMap.class);
-        Assertions.assertNotNull(func);
-
-        Map<String, Integer> map = func.apply(10);
-        Assertions.assertNotNull(map);
-        Assertions.assertTrue(map instanceof TreeMap);
-        Assertions.assertEquals(0, map.size());
-    }
-
-    @Test
-    public void testOfMapWithIdentityHashMap() {
-        IntFunction<? extends Map<String, Integer>> func = IntFunctions.ofMap(IdentityHashMap.class);
-        Assertions.assertNotNull(func);
-
-        Map<String, Integer> map = func.apply(10);
-        Assertions.assertNotNull(map);
-        Assertions.assertTrue(map instanceof IdentityHashMap);
-        Assertions.assertEquals(0, map.size());
-    }
-
-    @Test
-    public void testOfMapWithConcurrentHashMap() {
-        IntFunction<? extends Map<String, Integer>> func = IntFunctions.ofMap(ConcurrentHashMap.class);
-        Assertions.assertNotNull(func);
-
-        Map<String, Integer> map = func.apply(10);
-        Assertions.assertNotNull(map);
-        Assertions.assertTrue(map instanceof ConcurrentHashMap);
-        Assertions.assertEquals(0, map.size());
-    }
-
-    @Test
-    public void testOfMapWithAbstractClasses() {
-        IntFunction<? extends Map<String, Integer>> func1 = IntFunctions.ofMap(Map.class);
-        Map<String, Integer> map1 = func1.apply(10);
-        Assertions.assertTrue(map1 instanceof HashMap);
-
-        IntFunction<? extends Map<String, Integer>> func2 = IntFunctions.ofMap(AbstractMap.class);
-        Map<String, Integer> map2 = func2.apply(10);
-        Assertions.assertTrue(map2 instanceof HashMap);
-
-        IntFunction<? extends Map<String, Integer>> func3 = IntFunctions.ofMap(SortedMap.class);
-        Map<String, Integer> map3 = func3.apply(10);
-        Assertions.assertTrue(map3 instanceof TreeMap);
-
-        IntFunction<? extends Map<String, Integer>> func4 = IntFunctions.ofMap(NavigableMap.class);
-        Map<String, Integer> map4 = func4.apply(10);
-        Assertions.assertTrue(map4 instanceof TreeMap);
-
-        IntFunction<? extends Map<String, Integer>> func5 = IntFunctions.ofMap(ConcurrentMap.class);
-        Map<String, Integer> map5 = func5.apply(10);
-        Assertions.assertTrue(map5 instanceof ConcurrentHashMap);
-    }
-
-    @Test
-    public void testOfMapWithBiMap() {
-        IntFunction<? extends Map<String, Integer>> func = IntFunctions.ofMap(BiMap.class);
-        Assertions.assertNotNull(func);
-
-        Map<String, Integer> map = func.apply(10);
-        Assertions.assertNotNull(map);
-        Assertions.assertTrue(map instanceof BiMap);
-        Assertions.assertEquals(0, map.size());
-    }
-
-    @Test
-    public void testOfMapWithIllegalArgument() {
+    public void testOfCollectionWithIllegalArgument() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            IntFunctions.ofMap((Class) String.class);
+            IntFunctions.ofCollection((Class) String.class);
         });
 
         Assertions.assertThrows(NullPointerException.class, () -> {
-            IntFunctions.ofMap(null);
+            IntFunctions.ofCollection(null);
         });
-    }
-
-    @Test
-    public void testOfMapCaching() {
-        IntFunction<? extends Map<String, Integer>> func1 = IntFunctions.ofMap(HashMap.class);
-        IntFunction<? extends Map<String, Integer>> func2 = IntFunctions.ofMap(HashMap.class);
-        Assertions.assertSame(func1, func2);
-
-        IntFunction<? extends Map<String, Integer>> func3 = IntFunctions.ofMap(LinkedHashMap.class);
-        Assertions.assertNotSame(func1, func3);
     }
 
     @Test
@@ -1090,6 +1111,16 @@ public class IntFunctionsTest extends TestBase {
     }
 
     @Test
+    public void testRegisterForCollection_NullClass() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> IntFunctions.registerForCollection(null, size -> new ArrayList<>(size)));
+    }
+
+    @Test
+    public void testRegisterForCollection_NullCreator() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> IntFunctions.registerForCollection(ArrayList.class, null));
+    }
+
+    @Test
     public void testRegisterForMap() {
         // Registering a built-in class should throw
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
@@ -1104,6 +1135,16 @@ public class IntFunctionsTest extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             IntFunctions.registerForMap(HashMap.class, null);
         });
+    }
+
+    @Test
+    public void testRegisterForMap_NullClass() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> IntFunctions.registerForMap(null, size -> new HashMap<>(size)));
+    }
+
+    @Test
+    public void testRegisterForMap_NullCreator() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> IntFunctions.registerForMap(HashMap.class, null));
     }
 
     @Test

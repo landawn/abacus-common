@@ -2,14 +2,12 @@ package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 
-@Tag("old-test")
 public class LogMessageTest extends AbstractTest {
     private static final Logger logger = LoggerFactory.getLogger(LogMessageTest.class);
 

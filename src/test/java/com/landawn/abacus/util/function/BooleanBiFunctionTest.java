@@ -4,45 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BooleanBiFunctionTest extends TestBase {
-    @Test
-    public void testAndThenMultipleChains() {
-        BooleanBiFunction<Integer> function = (t, u) -> (t ? 1 : 0) + (u ? 1 : 0);
-        java.util.function.Function<Integer, Integer> doubleIt = x -> x * 2;
-        java.util.function.Function<Integer, String> toString = Object::toString;
-
-        BooleanBiFunction<String> chainedFunction = function.andThen(doubleIt).andThen(toString);
-        String result = chainedFunction.apply(true, false);
-
-        assertEquals("2", result); // (1 + 0) * 2 = 2
-    }
-
-    @Test
-    public void testAndThenWithException() {
-        BooleanBiFunction<String> function = (t, u) -> "test";
-        java.util.function.Function<String, Integer> afterFunction = s -> {
-            throw new RuntimeException("Test exception");
-        };
-
-        BooleanBiFunction<Integer> chainedFunction = function.andThen(afterFunction);
-
-        assertThrows(RuntimeException.class, () -> chainedFunction.apply(true, false));
-    }
-
-    @Test
-    public void testApplyWithException() {
-        BooleanBiFunction<String> function = (t, u) -> {
-            throw new RuntimeException("Apply exception");
-        };
-
-        assertThrows(RuntimeException.class, () -> function.apply(true, false));
-    }
 
     @Test
     public void testAnonymousClass() {
@@ -56,15 +22,6 @@ public class BooleanBiFunctionTest extends TestBase {
         String result = function.apply(true, false);
 
         assertEquals("t=true, u=false", result);
-    }
-
-    @Test
-    public void testReturnsNull() {
-        BooleanBiFunction<String> function = (t, u) -> null;
-
-        String result = function.apply(true, false);
-
-        assertNull(result);
     }
 
     @Test
@@ -102,5 +59,47 @@ public class BooleanBiFunctionTest extends TestBase {
         assertEquals("FIRST", function.apply(true, false));
         assertEquals("SECOND", function.apply(false, true));
         assertEquals("NEITHER", function.apply(false, false));
+    }
+
+    @Test
+    public void testReturnsNull() {
+        BooleanBiFunction<String> function = (t, u) -> null;
+
+        String result = function.apply(true, false);
+
+        assertNull(result);
+    }
+
+    @Test
+    public void testApplyWithException() {
+        BooleanBiFunction<String> function = (t, u) -> {
+            throw new RuntimeException("Apply exception");
+        };
+
+        assertThrows(RuntimeException.class, () -> function.apply(true, false));
+    }
+
+    @Test
+    public void testAndThenMultipleChains() {
+        BooleanBiFunction<Integer> function = (t, u) -> (t ? 1 : 0) + (u ? 1 : 0);
+        java.util.function.Function<Integer, Integer> doubleIt = x -> x * 2;
+        java.util.function.Function<Integer, String> toString = Object::toString;
+
+        BooleanBiFunction<String> chainedFunction = function.andThen(doubleIt).andThen(toString);
+        String result = chainedFunction.apply(true, false);
+
+        assertEquals("2", result); // (1 + 0) * 2 = 2
+    }
+
+    @Test
+    public void testAndThenWithException() {
+        BooleanBiFunction<String> function = (t, u) -> "test";
+        java.util.function.Function<String, Integer> afterFunction = s -> {
+            throw new RuntimeException("Test exception");
+        };
+
+        BooleanBiFunction<Integer> chainedFunction = function.andThen(afterFunction);
+
+        assertThrows(RuntimeException.class, () -> chainedFunction.apply(true, false));
     }
 }

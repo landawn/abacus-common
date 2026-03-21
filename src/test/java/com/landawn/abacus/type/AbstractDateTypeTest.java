@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.util.Date;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -22,7 +21,6 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 
-@Tag("new-test")
 public class AbstractDateTypeTest extends TestBase {
     private Type<Date> type;
     private CharacterWriter characterWriter;
@@ -40,6 +38,15 @@ public class AbstractDateTypeTest extends TestBase {
     @Test
     public void testIsDate() {
         assertTrue(type.isDate());
+    }
+
+    @Test
+    public void testConstructor_TimestampType() {
+        Type<java.sql.Timestamp> timestampType = createType(java.sql.Timestamp.class);
+
+        assertNotNull(timestampType);
+        assertTrue(timestampType.isDate());
+        assertTrue(timestampType.isComparable());
     }
 
     @Test
@@ -112,14 +119,5 @@ public class AbstractDateTypeTest extends TestBase {
         when(config.getStringQuotation()).thenReturn('\'');
 
         type.writeCharacter(characterWriter, date, config);
-    }
-
-    @Test
-    public void testConstructor_TimestampType() {
-        Type<java.sql.Timestamp> timestampType = createType(java.sql.Timestamp.class);
-
-        assertNotNull(timestampType);
-        assertTrue(timestampType.isDate());
-        assertTrue(timestampType.isComparable());
     }
 }

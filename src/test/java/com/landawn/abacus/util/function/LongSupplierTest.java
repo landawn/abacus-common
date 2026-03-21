@@ -6,13 +6,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class LongSupplierTest extends TestBase {
+
+    private long getValue() {
+        return 42L;
+    }
 
     @Test
     public void testGetAsLong() {
@@ -40,6 +42,44 @@ public class LongSupplierTest extends TestBase {
     }
 
     @Test
+    public void testGetAsLong_stateful() {
+        final AtomicLong counter = new AtomicLong(0);
+        final LongSupplier supplier = counter::incrementAndGet;
+
+        assertEquals(1L, supplier.getAsLong());
+        assertEquals(2L, supplier.getAsLong());
+        assertEquals(3L, supplier.getAsLong());
+    }
+
+    @Test
+    public void testGetAsLong_fromField() {
+        final long value = 999L;
+        final LongSupplier supplier = () -> value;
+        assertEquals(999L, supplier.getAsLong());
+    }
+
+    @Test
+    public void testMethodReference() {
+        final LongSupplier supplier = this::getValue;
+        assertEquals(42L, supplier.getAsLong());
+    }
+
+    @Test
+    public void testGetAsLong_computation() {
+        final LongSupplier supplier = () -> System.currentTimeMillis();
+        final long result = supplier.getAsLong();
+        assertTrue(result > 0);
+    }
+
+    @Test
+    public void testCompatibilityWithJavaUtilFunction() {
+        final java.util.function.LongSupplier javaSupplier = () -> 42L;
+        final LongSupplier abacusSupplier = javaSupplier::getAsLong;
+
+        assertEquals(42L, abacusSupplier.getAsLong());
+    }
+
+    @Test
     public void testGetAsLong_returnsNegative() {
         final LongSupplier supplier = () -> -42L;
         assertEquals(-42L, supplier.getAsLong());
@@ -64,20 +104,25 @@ public class LongSupplierTest extends TestBase {
     }
 
     @Test
-    public void testGetAsLong_stateful() {
-        final AtomicLong counter = new AtomicLong(0);
-        final LongSupplier supplier = counter::incrementAndGet;
-
+    public void testFunctionalInterfaceContract() {
+        final LongSupplier supplier = () -> 1L;
+        assertNotNull(supplier);
         assertEquals(1L, supplier.getAsLong());
-        assertEquals(2L, supplier.getAsLong());
-        assertEquals(3L, supplier.getAsLong());
     }
 
     @Test
-    public void testGetAsLong_fromField() {
-        final long value = 999L;
-        final LongSupplier supplier = () -> value;
-        assertEquals(999L, supplier.getAsLong());
+    public void testGetAsLong_multipleInvocations() {
+        final LongSupplier supplier = () -> 42L;
+        assertEquals(42L, supplier.getAsLong());
+        assertEquals(42L, supplier.getAsLong());
+        assertEquals(42L, supplier.getAsLong());
+    }
+
+    @Test
+    public void testZERO_alwaysReturnsSameValue() {
+        for (int i = 0; i < 10; i++) {
+            assertEquals(0L, LongSupplier.ZERO.getAsLong());
+        }
     }
 
     @Test
@@ -102,53 +147,6 @@ public class LongSupplierTest extends TestBase {
         for (int i = 0; i < 100; i++) {
             final long value = LongSupplier.RANDOM.getAsLong();
             assertTrue(value >= Long.MIN_VALUE && value <= Long.MAX_VALUE);
-        }
-    }
-
-    @Test
-    public void testFunctionalInterfaceContract() {
-        final LongSupplier supplier = () -> 1L;
-        assertNotNull(supplier);
-        assertEquals(1L, supplier.getAsLong());
-    }
-
-    @Test
-    public void testMethodReference() {
-        final LongSupplier supplier = this::getValue;
-        assertEquals(42L, supplier.getAsLong());
-    }
-
-    private long getValue() {
-        return 42L;
-    }
-
-    @Test
-    public void testGetAsLong_multipleInvocations() {
-        final LongSupplier supplier = () -> 42L;
-        assertEquals(42L, supplier.getAsLong());
-        assertEquals(42L, supplier.getAsLong());
-        assertEquals(42L, supplier.getAsLong());
-    }
-
-    @Test
-    public void testGetAsLong_computation() {
-        final LongSupplier supplier = () -> System.currentTimeMillis();
-        final long result = supplier.getAsLong();
-        assertTrue(result > 0);
-    }
-
-    @Test
-    public void testCompatibilityWithJavaUtilFunction() {
-        final java.util.function.LongSupplier javaSupplier = () -> 42L;
-        final LongSupplier abacusSupplier = javaSupplier::getAsLong;
-
-        assertEquals(42L, abacusSupplier.getAsLong());
-    }
-
-    @Test
-    public void testZERO_alwaysReturnsSameValue() {
-        for (int i = 0; i < 10; i++) {
-            assertEquals(0L, LongSupplier.ZERO.getAsLong());
         }
     }
 }

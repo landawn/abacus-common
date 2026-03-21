@@ -41,7 +41,6 @@ import com.landawn.abacus.util.stream.EntryStream;
  *
  * @param <K> the type of key elements in the compound prefix
  * @param <V> the type of values stored in the table
- * @since 7.1
  */
 public final class PrefixSearchTable<K, V> {
     private final Map<K, Node<K, V>> nodes;
@@ -124,7 +123,6 @@ public final class PrefixSearchTable<K, V> {
      * Returns a new builder initialized with the same prefix mappings in this table.
      *
      * @return a builder initialized with the current mappings
-     * @since 7.2
      */
     public Builder<K, V> toBuilder() {
         Builder<K, V> builder = builder();
@@ -189,7 +187,6 @@ public final class PrefixSearchTable<K, V> {
          *
          * @param mappings the mappings to add
          * @return this builder
-         * @since 8.0
          */
         public Builder<K, V> addAll(Map<? extends List<? extends K>, ? extends V> mappings) {
             EntryStream.of(mappings).forEach(this::add);

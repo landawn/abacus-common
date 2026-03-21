@@ -18,7 +18,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -26,7 +25,6 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.u.OptionalChar;
 
-@Tag("new-test")
 public class OptionalCharTypeTest extends TestBase {
 
     private OptionalCharType optionalCharType;
@@ -51,6 +49,12 @@ public class OptionalCharTypeTest extends TestBase {
     }
 
     @Test
+    public void testStringOfWithValue() {
+        OptionalChar opt = OptionalChar.of('A');
+        assertEquals("A", optionalCharType.stringOf(opt));
+    }
+
+    @Test
     public void testStringOfWithNull() {
         assertNull(optionalCharType.stringOf(null));
     }
@@ -59,12 +63,6 @@ public class OptionalCharTypeTest extends TestBase {
     public void testStringOfWithEmpty() {
         OptionalChar empty = OptionalChar.empty();
         assertNull(optionalCharType.stringOf(empty));
-    }
-
-    @Test
-    public void testStringOfWithValue() {
-        OptionalChar opt = OptionalChar.of('A');
-        assertEquals("A", optionalCharType.stringOf(opt));
     }
 
     @Test

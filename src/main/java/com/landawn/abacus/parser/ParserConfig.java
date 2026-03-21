@@ -24,10 +24,10 @@ import com.landawn.abacus.annotation.JsonXmlField;
 /**
  * Abstract base class for parser configuration that provides common settings
  * shared by both serialization and deserialization configurations.
- * 
+ *
  * <p>This class provides functionality for managing ignored properties during
  * parsing operations. Properties can be ignored globally or on a per-class basis.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ParserConfig config = new MyParserConfig()
@@ -48,6 +48,7 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
     protected ParserConfig() {
     }
 
+    /** Map of ignored property names organized by class. */
     Map<Class<?>, Set<String>> ignoredBeanPropNameMap = null;
 
     /**
@@ -68,11 +69,11 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
 
     /**
      * Gets the ignored property names for a specific class.
-     * 
+     *
      * <p>This method first looks for class-specific ignored properties. If none
      * are found, it returns the globally ignored properties (those registered
      * for {@code Object.class}).</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Collection<String> ignoredProps = config.getIgnoredPropNames(User.class);
@@ -100,10 +101,10 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
 
     /**
      * Sets globally ignored property names that apply to all classes.
-     * 
+     *
      * <p>These properties will be ignored during parsing for any class type
      * unless overridden by class-specific settings.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.setIgnoredPropNames(Set.of("internalId", "version", "deleted"));
@@ -118,10 +119,10 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
 
     /**
      * Sets ignored property names for a specific class.
-     * 
+     *
      * <p>These properties will be ignored during parsing only for the specified
      * class type. This overrides any global settings for this class.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.setIgnoredPropNames(User.class, Set.of("password", "salt"));
@@ -144,11 +145,11 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
 
     /**
      * Sets the complete map of ignored property names by class.
-     * 
+     *
      * <p>This replaces any existing ignored property configuration with the
      * provided map. Use {@code Object.class} as a key for globally ignored
      * properties.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<Class<?>, Set<String>> ignoredMap = new HashMap<>();
@@ -168,11 +169,11 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
 
     /**
      * Creates a copy of this configuration.
-     * 
+     *
      * <p>The copy is a shallow clone - the ignored property map and sets are
      * shared with the original. Modifications to the configuration itself are
      * independent, but modifications to the property sets affect both instances.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ParserConfig copy = originalConfig.copy();
@@ -181,6 +182,7 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      *
      * @return a copy of this configuration
      */
+    @SuppressWarnings("unchecked")
     public C copy() {
         try {
             return (C) super.clone();

@@ -15,7 +15,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -23,7 +22,6 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("2025")
 public class CharacterTypeTest extends TestBase {
 
     private final CharacterType type = new CharacterType();
@@ -35,50 +33,8 @@ public class CharacterTypeTest extends TestBase {
     }
 
     @Test
-    public void test_name() {
-        assertEquals("Character", type.name());
-    }
-
-    @Test
     public void test_isPrimitiveWrapper() {
         assertTrue(type.isPrimitiveWrapper());
-    }
-
-    @Test
-    public void test_isCharacter() {
-        assertTrue(type.isCharacter());
-    }
-
-    @Test
-    public void test_stringOf() {
-        assertEquals("A", type.stringOf('A'));
-        assertEquals("Z", type.stringOf('Z'));
-        assertEquals("0", type.stringOf('0'));
-        assertNull(type.stringOf(null));
-    }
-
-    @Test
-    public void test_valueOf_String() {
-        assertEquals('A', type.valueOf("A"));
-        assertEquals('Z', type.valueOf("Z"));
-        assertNull(type.valueOf((String) null));
-        assertNull(type.valueOf(""));
-    }
-
-    @Test
-    public void test_valueOf_charArray() {
-        char[] chars = "A".toCharArray();
-        assertEquals('A', type.valueOf(chars, 0, 1));
-
-        // Multi-char array, single char extraction
-        char[] multiChars = "Hello".toCharArray();
-        assertEquals('H', type.valueOf(multiChars, 0, 1));
-
-        // With offset
-        assertEquals('e', type.valueOf(multiChars, 1, 1));
-
-        assertNull(type.valueOf((char[]) null, 0, 0));
-        assertNull(type.valueOf(chars, 0, 0));
     }
 
     @Test
@@ -219,6 +175,48 @@ public class CharacterTypeTest extends TestBase {
         Assertions.assertNotNull(result);
         assertEquals(Character.valueOf(' '), result);
         verify(rs).getString("spaceColumn");
+    }
+
+    @Test
+    public void test_name() {
+        assertEquals("Character", type.name());
+    }
+
+    @Test
+    public void test_isCharacter() {
+        assertTrue(type.isCharacter());
+    }
+
+    @Test
+    public void test_stringOf() {
+        assertEquals("A", type.stringOf('A'));
+        assertEquals("Z", type.stringOf('Z'));
+        assertEquals("0", type.stringOf('0'));
+        assertNull(type.stringOf(null));
+    }
+
+    @Test
+    public void test_valueOf_String() {
+        assertEquals('A', type.valueOf("A"));
+        assertEquals('Z', type.valueOf("Z"));
+        assertNull(type.valueOf((String) null));
+        assertNull(type.valueOf(""));
+    }
+
+    @Test
+    public void test_valueOf_charArray() {
+        char[] chars = "A".toCharArray();
+        assertEquals('A', type.valueOf(chars, 0, 1));
+
+        // Multi-char array, single char extraction
+        char[] multiChars = "Hello".toCharArray();
+        assertEquals('H', type.valueOf(multiChars, 0, 1));
+
+        // With offset
+        assertEquals('e', type.valueOf(multiChars, 1, 1));
+
+        assertNull(type.valueOf((char[]) null, 0, 0));
+        assertNull(type.valueOf(chars, 0, 0));
     }
 
     @Test

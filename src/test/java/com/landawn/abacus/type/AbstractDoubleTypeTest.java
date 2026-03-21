@@ -15,7 +15,6 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -24,7 +23,6 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("new-test")
 public class AbstractDoubleTypeTest extends TestBase {
     private Type<Double> type;
     private CharacterWriter writer;
@@ -65,6 +63,25 @@ public class AbstractDoubleTypeTest extends TestBase {
     }
 
     @Test
+    public void testValueOf_String_ValidDouble() {
+        assertEquals(0.0, type.valueOf("0.0"));
+        assertEquals(1.23, type.valueOf("1.23"));
+        assertEquals(-45.67, type.valueOf("-45.67"));
+        assertEquals(1.0E10, type.valueOf("1.0E10"));
+        assertEquals(-3.14E-5, type.valueOf("-3.14E-5"));
+    }
+
+    @Test
+    public void testValueOf_String_WithSuffix() {
+        assertEquals(42.5, type.valueOf("42.5l"));
+        assertEquals(42.5, type.valueOf("42.5L"));
+        assertEquals(42.5, type.valueOf("42.5f"));
+        assertEquals(42.5, type.valueOf("42.5F"));
+        assertEquals(42.5, type.valueOf("42.5d"));
+        assertEquals(42.5, type.valueOf("42.5D"));
+    }
+
+    @Test
     public void testValueOf_String_Null() {
         Double result = type.valueOf((String) null);
         assertNull(result);
@@ -77,29 +94,10 @@ public class AbstractDoubleTypeTest extends TestBase {
     }
 
     @Test
-    public void testValueOf_String_ValidDouble() {
-        assertEquals(0.0, type.valueOf("0.0"));
-        assertEquals(1.23, type.valueOf("1.23"));
-        assertEquals(-45.67, type.valueOf("-45.67"));
-        assertEquals(1.0E10, type.valueOf("1.0E10"));
-        assertEquals(-3.14E-5, type.valueOf("-3.14E-5"));
-    }
-
-    @Test
     public void testValueOf_String_SpecialValues() {
         assertEquals(Double.NaN, type.valueOf("NaN"));
         assertEquals(Double.POSITIVE_INFINITY, type.valueOf("Infinity"));
         assertEquals(Double.NEGATIVE_INFINITY, type.valueOf("-Infinity"));
-    }
-
-    @Test
-    public void testValueOf_String_WithSuffix() {
-        assertEquals(42.5, type.valueOf("42.5l"));
-        assertEquals(42.5, type.valueOf("42.5L"));
-        assertEquals(42.5, type.valueOf("42.5f"));
-        assertEquals(42.5, type.valueOf("42.5F"));
-        assertEquals(42.5, type.valueOf("42.5d"));
-        assertEquals(42.5, type.valueOf("42.5D"));
     }
 
     @Test

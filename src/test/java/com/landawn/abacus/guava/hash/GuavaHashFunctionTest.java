@@ -12,7 +12,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.hash.Funnel;
@@ -20,7 +19,6 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.PrimitiveSink;
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class GuavaHashFunctionTest extends TestBase {
 
     // Helper class for testing
@@ -31,6 +29,16 @@ public class GuavaHashFunctionTest extends TestBase {
         Person(String name, int age) {
             this.name = name;
             this.age = age;
+        }
+    }
+
+    private static class TestObject {
+        final String name;
+        final int value;
+
+        TestObject(String name, int value) {
+            this.name = name;
+            this.value = value;
         }
     }
 
@@ -56,6 +64,101 @@ public class GuavaHashFunctionTest extends TestBase {
         assertNotNull(hashFunc1);
         assertNotNull(hashFunc2);
         assertNotSame(hashFunc1.gHashFunction, hashFunc2.gHashFunction);
+    }
+
+    @Test
+    @DisplayName("Test hashing user authentication scenario")
+    public void testUserAuthenticationScenario() {
+        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.sha256());
+
+        String username = "user@example.com";
+        String password = "secret123";
+
+        byte[] credentials = (username + ":" + password).getBytes(StandardCharsets.UTF_8);
+        HashCode hash = hashFunc.hash(credentials);
+
+        assertNotNull(hash);
+        assertEquals(256, hash.bits());
+    }
+
+    @Test
+    @DisplayName("Test hashing file checksum scenario")
+    public void testFileChecksumScenario() {
+        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.sha256());
+
+        byte[] fileContent = "file content here".getBytes(StandardCharsets.UTF_8);
+        HashCode checksum = hashFunc.hash(fileContent);
+
+        assertNotNull(checksum);
+        assertTrue(checksum.toString().length() > 0);
+    }
+
+    @Test
+    @DisplayName("Test consistent hashing with same function")
+    public void testConsistentHashingWithSameFunction() {
+        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
+
+        String data = "consistent data";
+
+        HashCode hash1 = hashFunc.hash(data);
+        HashCode hash2 = hashFunc.hash(data);
+        HashCode hash3 = hashFunc.hash(data);
+
+        assertEquals(hash1, hash2);
+        assertEquals(hash2, hash3);
+    }
+
+    @Test
+    public void testWrapFunctionality() {
+        HashFunction hf = Hashing.sha256();
+        assertNotNull(hf);
+
+        assertEquals(256, hf.bits());
+
+        Hasher hasher1 = hf.newHasher();
+        Hasher hasher2 = hf.newHasher(100);
+        assertNotNull(hasher1);
+        assertNotNull(hasher2);
+        assertNotSame(hasher1, hasher2);
+
+        byte[] data = "test".getBytes();
+        HashCode hash1 = hf.hash(42);
+        HashCode hash2 = hf.hash(123L);
+        HashCode hash3 = hf.hash(data);
+        HashCode hash4 = hf.hash(data, 0, data.length);
+        HashCode hash5 = hf.hash("test");
+        HashCode hash6 = hf.hash("test", StandardCharsets.UTF_8);
+
+        assertNotNull(hash1);
+        assertNotNull(hash2);
+        assertNotNull(hash3);
+        assertNotNull(hash4);
+        assertNotNull(hash5);
+        assertNotNull(hash6);
+
+        assertEquals(hash3, hash4);
+    }
+
+    @Test
+    @DisplayName("Test wrapping null Guava hash function")
+    public void testWrapNull() {
+        assertThrows(NullPointerException.class, () -> {
+            GuavaHashFunction.wrap(null);
+        });
+    }
+
+    @Test
+    @DisplayName("Test comparing newHasher and convenience methods")
+    public void testNewHasherVsConvenienceMethods() {
+        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
+
+        // Using newHasher
+        HashCode hashViaHasher = hashFunc.newHasher().put(42).hash();
+
+        // Using convenience method
+        HashCode hashDirect = hashFunc.hash(42);
+
+        assertEquals(hashViaHasher, hashDirect);
     }
 
     // Test newHasher() method
@@ -143,6 +246,272 @@ public class GuavaHashFunctionTest extends TestBase {
         assertEquals(hash1, hash2);
     }
 
+    @Test
+    public void testHasherCreation() {
+        HashFunction hf = Hashing.sha256();
+
+        Hasher hasher1 = hf.newHasher();
+        hasher1.put("test".getBytes());
+        HashCode hash1 = hasher1.hash();
+
+        Hasher hasher2 = hf.newHasher(1000);
+        hasher2.put("test".getBytes());
+        HashCode hash2 = hasher2.hash();
+
+        assertEquals(hash1, hash2);
+
+        assertThrows(IllegalArgumentException.class, () -> hf.newHasher(-1));
+    }
+
+    @Test
+    @DisplayName("Test hash int consistency")
+    public void testHashIntConsistency() {
+        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
+
+        HashCode hash1 = hashFunc.hash(12345);
+        HashCode hash2 = hashFunc.hash(12345);
+
+        assertEquals(hash1, hash2);
+    }
+
+    @Test
+    @DisplayName("Test hash different ints produce different hashes")
+    public void testHashDifferentInts() {
+        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
+
+        HashCode hash1 = hashFunc.hash(1);
+        HashCode hash2 = hashFunc.hash(2);
+
+        assertNotEquals(hash1, hash2);
+    }
+
+    @Test
+    @DisplayName("Test hash long consistency")
+    public void testHashLongConsistency() {
+        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
+
+        long value = System.currentTimeMillis();
+        HashCode hash1 = hashFunc.hash(value);
+        HashCode hash2 = hashFunc.hash(value);
+
+        assertEquals(hash1, hash2);
+    }
+
+    @Test
+    @DisplayName("Test hash byte array consistency")
+    public void testHashByteArrayConsistency() {
+        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
+        byte[] data = "test data".getBytes(StandardCharsets.UTF_8);
+
+        HashCode hash1 = hashFunc.hash(data);
+        HashCode hash2 = hashFunc.hash(data);
+
+        assertEquals(hash1, hash2);
+    }
+
+    @Test
+    @DisplayName("Test hash different byte arrays produce different hashes")
+    public void testHashDifferentByteArrays() {
+        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
+
+        byte[] data1 = "data1".getBytes(StandardCharsets.UTF_8);
+        byte[] data2 = "data2".getBytes(StandardCharsets.UTF_8);
+
+        HashCode hash1 = hashFunc.hash(data1);
+        HashCode hash2 = hashFunc.hash(data2);
+
+        assertNotEquals(hash1, hash2);
+    }
+
+    @Test
+    @DisplayName("Test hash byte array full range")
+    public void testHashByteArrayFullRange() {
+        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
+        byte[] data = { 10, 20, 30, 40, 50 };
+
+        HashCode hash1 = hashFunc.hash(data);
+        HashCode hash2 = hashFunc.hash(data, 0, data.length);
+
+        assertEquals(hash1, hash2);
+    }
+
+    @Test
+    @DisplayName("Test hash byte array subset")
+    public void testHashByteArraySubset() {
+        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
+        byte[] fullData = { 1, 2, 3, 4, 5 };
+        byte[] subsetData = { 2, 3, 4 };
+
+        HashCode hashSubset1 = hashFunc.hash(fullData, 1, 3);
+        HashCode hashSubset2 = hashFunc.hash(subsetData);
+
+        assertEquals(hashSubset1, hashSubset2);
+    }
+
+    @Test
+    @DisplayName("Test hash CharSequence consistency")
+    public void testHashCharSequenceConsistency() {
+        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
+
+        HashCode hash1 = hashFunc.hash("test");
+        HashCode hash2 = hashFunc.hash("test");
+
+        assertEquals(hash1, hash2);
+    }
+
+    @Test
+    @DisplayName("Test hash CharSequence with charset consistency")
+    public void testHashCharSequenceWithCharsetConsistency() {
+        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
+
+        HashCode hash1 = hashFunc.hash("test", StandardCharsets.UTF_8);
+        HashCode hash2 = hashFunc.hash("test", StandardCharsets.UTF_8);
+
+        assertEquals(hash1, hash2);
+    }
+
+    @Test
+    @DisplayName("Test hash with Funnel consistency")
+    public void testHashWithFunnelConsistency() {
+        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
+
+        Funnel<Person> personFunnel = (person, into) -> {
+            into.putString(person.name, StandardCharsets.UTF_8);
+            into.putInt(person.age);
+        };
+
+        Person person = new Person("Bob", 25);
+
+        HashCode hash1 = hashFunc.hash(person, personFunnel);
+        HashCode hash2 = hashFunc.hash(person, personFunnel);
+
+        assertEquals(hash1, hash2);
+    }
+
+    @Test
+    @DisplayName("Test hash with Funnel different objects")
+    public void testHashWithFunnelDifferentObjects() {
+        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
+
+        Funnel<Person> personFunnel = (person, into) -> {
+            into.putString(person.name, StandardCharsets.UTF_8);
+            into.putInt(person.age);
+        };
+
+        Person person1 = new Person("Alice", 30);
+        Person person2 = new Person("Bob", 30);
+
+        HashCode hash1 = hashFunc.hash(person1, personFunnel);
+        HashCode hash2 = hashFunc.hash(person2, personFunnel);
+
+        assertNotEquals(hash1, hash2);
+    }
+
+    @Test
+    @DisplayName("Test hash function immutability")
+    public void testHashFunctionImmutability() {
+        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
+
+        HashCode hash1 = hashFunc.hash("test1");
+        HashCode hash2 = hashFunc.hash("test2");
+        HashCode hash3 = hashFunc.hash("test1");
+
+        assertNotEquals(hash1, hash2);
+        assertEquals(hash1, hash3);
+    }
+
+    @Test
+    @DisplayName("Test hash distribution with sequential inputs")
+    public void testHashDistribution() {
+        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
+
+        HashCode hash1 = hashFunc.hash(1);
+        HashCode hash2 = hashFunc.hash(2);
+        HashCode hash3 = hashFunc.hash(3);
+
+        // All hashes should be different
+        assertNotEquals(hash1, hash2);
+        assertNotEquals(hash2, hash3);
+        assertNotEquals(hash1, hash3);
+    }
+
+    @Test
+    public void testHashMethodsDelegation() {
+        HashFunction hf = Hashing.murmur3_32();
+
+        int intValue = 42;
+        HashCode hashInt1 = hf.hash(intValue);
+        HashCode hashInt2 = hf.newHasher().put(intValue).hash();
+        assertEquals(hashInt1, hashInt2);
+
+        long longValue = 123456789L;
+        HashCode hashLong1 = hf.hash(longValue);
+        HashCode hashLong2 = hf.newHasher().put(longValue).hash();
+        assertEquals(hashLong1, hashLong2);
+
+        byte[] bytes = "test bytes".getBytes();
+        HashCode hashBytes1 = hf.hash(bytes);
+        HashCode hashBytes2 = hf.newHasher().put(bytes).hash();
+        assertEquals(hashBytes1, hashBytes2);
+
+        HashCode hashPartial1 = hf.hash(bytes, 0, 4);
+        HashCode hashPartial2 = hf.newHasher().put(bytes, 0, 4).hash();
+        assertEquals(hashPartial1, hashPartial2);
+
+        CharSequence cs = "char sequence";
+        HashCode hashCs1 = hf.hash(cs);
+        HashCode hashCs2 = hf.newHasher().put(cs).hash();
+        assertEquals(hashCs1, hashCs2);
+
+        HashCode hashEncoded1 = hf.hash(cs, StandardCharsets.UTF_8);
+        HashCode hashEncoded2 = hf.newHasher().put(cs, StandardCharsets.UTF_8).hash();
+        assertEquals(hashEncoded1, hashEncoded2);
+    }
+
+    @Test
+    public void testHashObjectWithFunnel() {
+        HashFunction hf = Hashing.sha256();
+
+        TestObject obj = new TestObject("test", 42);
+        Funnel<TestObject> funnel = new Funnel<>() {
+            @Override
+            public void funnel(TestObject from, PrimitiveSink into) {
+                into.putString(from.name, StandardCharsets.UTF_8).putInt(from.value);
+            }
+        };
+
+        HashCode hash1 = hf.hash(obj, funnel);
+        HashCode hash2 = hf.newHasher().put(obj, funnel).hash();
+        assertEquals(hash1, hash2);
+
+        TestObject obj2 = new TestObject("different", 99);
+        HashCode hash3 = hf.hash(obj2, funnel);
+        assertNotEquals(hash1, hash3);
+    }
+
+    @Test
+    public void testConsistencyAcrossInvocations() {
+        HashFunction hf1 = Hashing.sha256();
+        HashFunction hf2 = Hashing.sha256();
+
+        byte[] data = "consistency test".getBytes();
+
+        HashCode hash1 = hf1.hash(data);
+        HashCode hash2 = hf1.hash(data);
+        HashCode hash3 = hf2.hash(data);
+
+        assertEquals(hash1, hash2);
+        assertEquals(hash1, hash3);
+
+        HashFunction murmur1 = Hashing.murmur3_128(42);
+        HashFunction murmur2 = Hashing.murmur3_128(42);
+
+        HashCode murmurHash1 = murmur1.hash(data);
+        HashCode murmurHash2 = murmur2.hash(data);
+
+        assertEquals(murmurHash1, murmurHash2);
+    }
+
     // Test hash(int) method
 
     @Test
@@ -170,28 +539,6 @@ public class GuavaHashFunctionTest extends TestBase {
         assertNotEquals(hashMin, hashMax);
     }
 
-    @Test
-    @DisplayName("Test hash int consistency")
-    public void testHashIntConsistency() {
-        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
-
-        HashCode hash1 = hashFunc.hash(12345);
-        HashCode hash2 = hashFunc.hash(12345);
-
-        assertEquals(hash1, hash2);
-    }
-
-    @Test
-    @DisplayName("Test hash different ints produce different hashes")
-    public void testHashDifferentInts() {
-        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
-
-        HashCode hash1 = hashFunc.hash(1);
-        HashCode hash2 = hashFunc.hash(2);
-
-        assertNotEquals(hash1, hash2);
-    }
-
     // Test hash(long) method
 
     @Test
@@ -217,18 +564,6 @@ public class GuavaHashFunctionTest extends TestBase {
         assertNotNull(hashZero);
         assertNotNull(hashMax);
         assertNotEquals(hashMin, hashMax);
-    }
-
-    @Test
-    @DisplayName("Test hash long consistency")
-    public void testHashLongConsistency() {
-        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
-
-        long value = System.currentTimeMillis();
-        HashCode hash1 = hashFunc.hash(value);
-        HashCode hash2 = hashFunc.hash(value);
-
-        assertEquals(hash1, hash2);
     }
 
     // Test hash(byte[]) method
@@ -269,32 +604,6 @@ public class GuavaHashFunctionTest extends TestBase {
         assertNotNull(hash);
     }
 
-    @Test
-    @DisplayName("Test hash byte array consistency")
-    public void testHashByteArrayConsistency() {
-        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
-        byte[] data = "test data".getBytes(StandardCharsets.UTF_8);
-
-        HashCode hash1 = hashFunc.hash(data);
-        HashCode hash2 = hashFunc.hash(data);
-
-        assertEquals(hash1, hash2);
-    }
-
-    @Test
-    @DisplayName("Test hash different byte arrays produce different hashes")
-    public void testHashDifferentByteArrays() {
-        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
-
-        byte[] data1 = "data1".getBytes(StandardCharsets.UTF_8);
-        byte[] data2 = "data2".getBytes(StandardCharsets.UTF_8);
-
-        HashCode hash1 = hashFunc.hash(data1);
-        HashCode hash2 = hashFunc.hash(data2);
-
-        assertNotEquals(hash1, hash2);
-    }
-
     // Test hash(byte[], int, int) method
 
     @Test
@@ -317,31 +626,6 @@ public class GuavaHashFunctionTest extends TestBase {
         HashCode hash = hashFunc.hash(data, 0, 0);
 
         assertNotNull(hash);
-    }
-
-    @Test
-    @DisplayName("Test hash byte array full range")
-    public void testHashByteArrayFullRange() {
-        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
-        byte[] data = { 10, 20, 30, 40, 50 };
-
-        HashCode hash1 = hashFunc.hash(data);
-        HashCode hash2 = hashFunc.hash(data, 0, data.length);
-
-        assertEquals(hash1, hash2);
-    }
-
-    @Test
-    @DisplayName("Test hash byte array subset")
-    public void testHashByteArraySubset() {
-        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
-        byte[] fullData = { 1, 2, 3, 4, 5 };
-        byte[] subsetData = { 2, 3, 4 };
-
-        HashCode hashSubset1 = hashFunc.hash(fullData, 1, 3);
-        HashCode hashSubset2 = hashFunc.hash(subsetData);
-
-        assertEquals(hashSubset1, hashSubset2);
     }
 
     // Test hash(CharSequence) method
@@ -387,17 +671,6 @@ public class GuavaHashFunctionTest extends TestBase {
         assertNotNull(hash);
     }
 
-    @Test
-    @DisplayName("Test hash CharSequence consistency")
-    public void testHashCharSequenceConsistency() {
-        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
-
-        HashCode hash1 = hashFunc.hash("test");
-        HashCode hash2 = hashFunc.hash("test");
-
-        assertEquals(hash1, hash2);
-    }
-
     // Test hash(CharSequence, Charset) method
 
     @Test
@@ -432,17 +705,6 @@ public class GuavaHashFunctionTest extends TestBase {
         assertNotNull(hash);
     }
 
-    @Test
-    @DisplayName("Test hash CharSequence with charset consistency")
-    public void testHashCharSequenceWithCharsetConsistency() {
-        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
-
-        HashCode hash1 = hashFunc.hash("test", StandardCharsets.UTF_8);
-        HashCode hash2 = hashFunc.hash("test", StandardCharsets.UTF_8);
-
-        assertEquals(hash1, hash2);
-    }
-
     // Test hash(T, Funnel<T>) method
 
     @Test
@@ -459,24 +721,6 @@ public class GuavaHashFunctionTest extends TestBase {
         HashCode hash = hashFunc.hash(person, personFunnel);
 
         assertNotNull(hash);
-    }
-
-    @Test
-    @DisplayName("Test hash with Funnel consistency")
-    public void testHashWithFunnelConsistency() {
-        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
-
-        Funnel<Person> personFunnel = (person, into) -> {
-            into.putString(person.name, StandardCharsets.UTF_8);
-            into.putInt(person.age);
-        };
-
-        Person person = new Person("Bob", 25);
-
-        HashCode hash1 = hashFunc.hash(person, personFunnel);
-        HashCode hash2 = hashFunc.hash(person, personFunnel);
-
-        assertEquals(hash1, hash2);
     }
 
     @Test
@@ -498,22 +742,78 @@ public class GuavaHashFunctionTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test hash with Funnel different objects")
-    public void testHashWithFunnelDifferentObjects() {
-        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
+    public void testDifferentHashFunctions() {
+        HashFunction sha256 = Hashing.sha256();
+        HashFunction md5 = Hashing.md5();
+        HashFunction murmur = Hashing.murmur3_128();
 
-        Funnel<Person> personFunnel = (person, into) -> {
-            into.putString(person.name, StandardCharsets.UTF_8);
-            into.putInt(person.age);
+        byte[] data = "same data for all".getBytes();
+
+        HashCode hashSha = sha256.hash(data);
+        HashCode hashMd5 = md5.hash(data);
+        HashCode hashMurmur = murmur.hash(data);
+
+        assertNotEquals(hashSha, hashMd5);
+        assertNotEquals(hashSha, hashMurmur);
+        assertNotEquals(hashMd5, hashMurmur);
+
+        assertNotEquals(sha256.bits(), md5.bits());
+        assertEquals(md5.bits(), murmur.bits());
+    }
+
+    @Test
+    public void testEmptyInputs() {
+        HashFunction hf = Hashing.sha256();
+
+        HashCode hashEmptyBytes = hf.hash(new byte[0]);
+        HashCode hashEmptyString = hf.hash("");
+        HashCode hashEmptyStringEncoded = hf.hash("", StandardCharsets.UTF_8);
+        HashCode hashEmptyPartial = hf.hash(new byte[10], 5, 0);
+
+        assertNotNull(hashEmptyBytes);
+        assertNotNull(hashEmptyString);
+        assertNotNull(hashEmptyStringEncoded);
+        assertNotNull(hashEmptyPartial);
+
+        HashCode hashEmptyHasher = hf.newHasher().hash();
+        assertNotNull(hashEmptyHasher);
+
+        assertEquals(hashEmptyString, hf.newHasher().put("").hash());
+    }
+
+    @Test
+    public void testHashCodeProperties() {
+        HashFunction hf = Hashing.sha256();
+        byte[] data = "test data".getBytes();
+
+        HashCode hash = hf.hash(data);
+
+        assertEquals(32, hash.asBytes().length);
+        assertEquals(256, hash.bits());
+        assertNotNull(hash.toString());
+
+        HashCode hash2 = hf.hash(data);
+        assertEquals(hash, hash2);
+        assertEquals(hash.hashCode(), hash2.hashCode());
+        assertEquals(hash.toString(), hash2.toString());
+    }
+
+    @Test
+    public void testNullHandling() {
+        HashFunction hf = Hashing.sha256();
+
+        assertThrows(NullPointerException.class, () -> hf.hash((byte[]) null));
+        assertThrows(NullPointerException.class, () -> hf.hash(null, 0, 0));
+        assertThrows(NullPointerException.class, () -> hf.hash((CharSequence) null));
+        assertThrows(NullPointerException.class, () -> hf.hash(null, StandardCharsets.UTF_8));
+        assertThrows(NullPointerException.class, () -> hf.hash("text", (Charset) null));
+
+        TestObject obj = new TestObject("test", 1);
+        Funnel<TestObject> funnel = (from, into) -> {
         };
 
-        Person person1 = new Person("Alice", 30);
-        Person person2 = new Person("Bob", 30);
-
-        HashCode hash1 = hashFunc.hash(person1, personFunnel);
-        HashCode hash2 = hashFunc.hash(person2, personFunnel);
-
-        assertNotEquals(hash1, hash2);
+        hf.hash(null, funnel);
+        assertThrows(NullPointerException.class, () -> hf.hash(obj, null));
     }
 
     // Test bits() method
@@ -579,242 +879,6 @@ public class GuavaHashFunctionTest extends TestBase {
         assertEquals(32, bits);
     }
 
-    // Integration tests
-
-    @Test
-    @DisplayName("Test hash function with different algorithms")
-    public void testDifferentAlgorithms() {
-        byte[] data = "test data".getBytes(StandardCharsets.UTF_8);
-
-        HashCode murmur32Hash = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_32_fixed()).hash(data);
-
-        HashCode murmur128Hash = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128()).hash(data);
-
-        HashCode sha256Hash = GuavaHashFunction.wrap(com.google.common.hash.Hashing.sha256()).hash(data);
-
-        assertNotNull(murmur32Hash);
-        assertNotNull(murmur128Hash);
-        assertNotNull(sha256Hash);
-
-        assertEquals(32, murmur32Hash.bits());
-        assertEquals(128, murmur128Hash.bits());
-        assertEquals(256, sha256Hash.bits());
-    }
-
-    @Test
-    @DisplayName("Test hash function immutability")
-    public void testHashFunctionImmutability() {
-        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
-
-        HashCode hash1 = hashFunc.hash("test1");
-        HashCode hash2 = hashFunc.hash("test2");
-        HashCode hash3 = hashFunc.hash("test1");
-
-        assertNotEquals(hash1, hash2);
-        assertEquals(hash1, hash3);
-    }
-
-    @Test
-    @DisplayName("Test comparing newHasher and convenience methods")
-    public void testNewHasherVsConvenienceMethods() {
-        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
-
-        // Using newHasher
-        HashCode hashViaHasher = hashFunc.newHasher().put(42).hash();
-
-        // Using convenience method
-        HashCode hashDirect = hashFunc.hash(42);
-
-        assertEquals(hashViaHasher, hashDirect);
-    }
-
-    @Test
-    @DisplayName("Test hashing user authentication scenario")
-    public void testUserAuthenticationScenario() {
-        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.sha256());
-
-        String username = "user@example.com";
-        String password = "secret123";
-
-        byte[] credentials = (username + ":" + password).getBytes(StandardCharsets.UTF_8);
-        HashCode hash = hashFunc.hash(credentials);
-
-        assertNotNull(hash);
-        assertEquals(256, hash.bits());
-    }
-
-    @Test
-    @DisplayName("Test hashing file checksum scenario")
-    public void testFileChecksumScenario() {
-        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.sha256());
-
-        byte[] fileContent = "file content here".getBytes(StandardCharsets.UTF_8);
-        HashCode checksum = hashFunc.hash(fileContent);
-
-        assertNotNull(checksum);
-        assertTrue(checksum.toString().length() > 0);
-    }
-
-    @Test
-    @DisplayName("Test consistent hashing with same function")
-    public void testConsistentHashingWithSameFunction() {
-        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
-
-        String data = "consistent data";
-
-        HashCode hash1 = hashFunc.hash(data);
-        HashCode hash2 = hashFunc.hash(data);
-        HashCode hash3 = hashFunc.hash(data);
-
-        assertEquals(hash1, hash2);
-        assertEquals(hash2, hash3);
-    }
-
-    @Test
-    @DisplayName("Test hash distribution with sequential inputs")
-    public void testHashDistribution() {
-        GuavaHashFunction hashFunc = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
-
-        HashCode hash1 = hashFunc.hash(1);
-        HashCode hash2 = hashFunc.hash(2);
-        HashCode hash3 = hashFunc.hash(3);
-
-        // All hashes should be different
-        assertNotEquals(hash1, hash2);
-        assertNotEquals(hash2, hash3);
-        assertNotEquals(hash1, hash3);
-    }
-
-    @Test
-    @DisplayName("Test wrapping null Guava hash function")
-    public void testWrapNull() {
-        assertThrows(NullPointerException.class, () -> {
-            GuavaHashFunction.wrap(null);
-        });
-    }
-
-    @Test
-    public void testWrapFunctionality() {
-        HashFunction hf = Hashing.sha256();
-        assertNotNull(hf);
-
-        assertEquals(256, hf.bits());
-
-        Hasher hasher1 = hf.newHasher();
-        Hasher hasher2 = hf.newHasher(100);
-        assertNotNull(hasher1);
-        assertNotNull(hasher2);
-        assertNotSame(hasher1, hasher2);
-
-        byte[] data = "test".getBytes();
-        HashCode hash1 = hf.hash(42);
-        HashCode hash2 = hf.hash(123L);
-        HashCode hash3 = hf.hash(data);
-        HashCode hash4 = hf.hash(data, 0, data.length);
-        HashCode hash5 = hf.hash("test");
-        HashCode hash6 = hf.hash("test", StandardCharsets.UTF_8);
-
-        assertNotNull(hash1);
-        assertNotNull(hash2);
-        assertNotNull(hash3);
-        assertNotNull(hash4);
-        assertNotNull(hash5);
-        assertNotNull(hash6);
-
-        assertEquals(hash3, hash4);
-    }
-
-    @Test
-    public void testDifferentHashFunctions() {
-        HashFunction sha256 = Hashing.sha256();
-        HashFunction md5 = Hashing.md5();
-        HashFunction murmur = Hashing.murmur3_128();
-
-        byte[] data = "same data for all".getBytes();
-
-        HashCode hashSha = sha256.hash(data);
-        HashCode hashMd5 = md5.hash(data);
-        HashCode hashMurmur = murmur.hash(data);
-
-        assertNotEquals(hashSha, hashMd5);
-        assertNotEquals(hashSha, hashMurmur);
-        assertNotEquals(hashMd5, hashMurmur);
-
-        assertNotEquals(sha256.bits(), md5.bits());
-        assertEquals(md5.bits(), murmur.bits());
-    }
-
-    @Test
-    public void testHasherCreation() {
-        HashFunction hf = Hashing.sha256();
-
-        Hasher hasher1 = hf.newHasher();
-        hasher1.put("test".getBytes());
-        HashCode hash1 = hasher1.hash();
-
-        Hasher hasher2 = hf.newHasher(1000);
-        hasher2.put("test".getBytes());
-        HashCode hash2 = hasher2.hash();
-
-        assertEquals(hash1, hash2);
-
-        assertThrows(IllegalArgumentException.class, () -> hf.newHasher(-1));
-    }
-
-    @Test
-    public void testHashMethodsDelegation() {
-        HashFunction hf = Hashing.murmur3_32();
-
-        int intValue = 42;
-        HashCode hashInt1 = hf.hash(intValue);
-        HashCode hashInt2 = hf.newHasher().put(intValue).hash();
-        assertEquals(hashInt1, hashInt2);
-
-        long longValue = 123456789L;
-        HashCode hashLong1 = hf.hash(longValue);
-        HashCode hashLong2 = hf.newHasher().put(longValue).hash();
-        assertEquals(hashLong1, hashLong2);
-
-        byte[] bytes = "test bytes".getBytes();
-        HashCode hashBytes1 = hf.hash(bytes);
-        HashCode hashBytes2 = hf.newHasher().put(bytes).hash();
-        assertEquals(hashBytes1, hashBytes2);
-
-        HashCode hashPartial1 = hf.hash(bytes, 0, 4);
-        HashCode hashPartial2 = hf.newHasher().put(bytes, 0, 4).hash();
-        assertEquals(hashPartial1, hashPartial2);
-
-        CharSequence cs = "char sequence";
-        HashCode hashCs1 = hf.hash(cs);
-        HashCode hashCs2 = hf.newHasher().put(cs).hash();
-        assertEquals(hashCs1, hashCs2);
-
-        HashCode hashEncoded1 = hf.hash(cs, StandardCharsets.UTF_8);
-        HashCode hashEncoded2 = hf.newHasher().put(cs, StandardCharsets.UTF_8).hash();
-        assertEquals(hashEncoded1, hashEncoded2);
-    }
-
-    @Test
-    public void testHashObjectWithFunnel() {
-        HashFunction hf = Hashing.sha256();
-
-        TestObject obj = new TestObject("test", 42);
-        Funnel<TestObject> funnel = new Funnel<>() {
-            @Override
-            public void funnel(TestObject from, PrimitiveSink into) {
-                into.putString(from.name, StandardCharsets.UTF_8).putInt(from.value);
-            }
-        };
-
-        HashCode hash1 = hf.hash(obj, funnel);
-        HashCode hash2 = hf.newHasher().put(obj, funnel).hash();
-        assertEquals(hash1, hash2);
-
-        TestObject obj2 = new TestObject("different", 99);
-        HashCode hash3 = hf.hash(obj2, funnel);
-        assertNotEquals(hash1, hash3);
-    }
-
     @Test
     public void testBitsMethod() {
         assertEquals(32, Hashing.murmur3_32().bits());
@@ -841,91 +905,25 @@ public class GuavaHashFunctionTest extends TestBase {
         assertEquals(64, concat.bits());
     }
 
-    @Test
-    public void testConsistencyAcrossInvocations() {
-        HashFunction hf1 = Hashing.sha256();
-        HashFunction hf2 = Hashing.sha256();
-
-        byte[] data = "consistency test".getBytes();
-
-        HashCode hash1 = hf1.hash(data);
-        HashCode hash2 = hf1.hash(data);
-        HashCode hash3 = hf2.hash(data);
-
-        assertEquals(hash1, hash2);
-        assertEquals(hash1, hash3);
-
-        HashFunction murmur1 = Hashing.murmur3_128(42);
-        HashFunction murmur2 = Hashing.murmur3_128(42);
-
-        HashCode murmurHash1 = murmur1.hash(data);
-        HashCode murmurHash2 = murmur2.hash(data);
-
-        assertEquals(murmurHash1, murmurHash2);
-    }
+    // Integration tests
 
     @Test
-    public void testNullHandling() {
-        HashFunction hf = Hashing.sha256();
+    @DisplayName("Test hash function with different algorithms")
+    public void testDifferentAlgorithms() {
+        byte[] data = "test data".getBytes(StandardCharsets.UTF_8);
 
-        assertThrows(NullPointerException.class, () -> hf.hash((byte[]) null));
-        assertThrows(NullPointerException.class, () -> hf.hash(null, 0, 0));
-        assertThrows(NullPointerException.class, () -> hf.hash((CharSequence) null));
-        assertThrows(NullPointerException.class, () -> hf.hash(null, StandardCharsets.UTF_8));
-        assertThrows(NullPointerException.class, () -> hf.hash("text", (Charset) null));
+        HashCode murmur32Hash = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_32_fixed()).hash(data);
 
-        TestObject obj = new TestObject("test", 1);
-        Funnel<TestObject> funnel = (from, into) -> {
-        };
+        HashCode murmur128Hash = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128()).hash(data);
 
-        hf.hash(null, funnel);
-        assertThrows(NullPointerException.class, () -> hf.hash(obj, null));
-    }
+        HashCode sha256Hash = GuavaHashFunction.wrap(com.google.common.hash.Hashing.sha256()).hash(data);
 
-    @Test
-    public void testEmptyInputs() {
-        HashFunction hf = Hashing.sha256();
+        assertNotNull(murmur32Hash);
+        assertNotNull(murmur128Hash);
+        assertNotNull(sha256Hash);
 
-        HashCode hashEmptyBytes = hf.hash(new byte[0]);
-        HashCode hashEmptyString = hf.hash("");
-        HashCode hashEmptyStringEncoded = hf.hash("", StandardCharsets.UTF_8);
-        HashCode hashEmptyPartial = hf.hash(new byte[10], 5, 0);
-
-        assertNotNull(hashEmptyBytes);
-        assertNotNull(hashEmptyString);
-        assertNotNull(hashEmptyStringEncoded);
-        assertNotNull(hashEmptyPartial);
-
-        HashCode hashEmptyHasher = hf.newHasher().hash();
-        assertNotNull(hashEmptyHasher);
-
-        assertEquals(hashEmptyString, hf.newHasher().put("").hash());
-    }
-
-    @Test
-    public void testHashCodeProperties() {
-        HashFunction hf = Hashing.sha256();
-        byte[] data = "test data".getBytes();
-
-        HashCode hash = hf.hash(data);
-
-        assertEquals(32, hash.asBytes().length);
-        assertEquals(256, hash.bits());
-        assertNotNull(hash.toString());
-
-        HashCode hash2 = hf.hash(data);
-        assertEquals(hash, hash2);
-        assertEquals(hash.hashCode(), hash2.hashCode());
-        assertEquals(hash.toString(), hash2.toString());
-    }
-
-    private static class TestObject {
-        final String name;
-        final int value;
-
-        TestObject(String name, int value) {
-            this.name = name;
-            this.value = value;
-        }
+        assertEquals(32, murmur32Hash.bits());
+        assertEquals(128, murmur128Hash.bits());
+        assertEquals(256, sha256Hash.bits());
     }
 }

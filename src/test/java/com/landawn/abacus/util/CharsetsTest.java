@@ -8,12 +8,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 
-@Tag("old-test")
 public class CharsetsTest extends AbstractTest {
 
     @Test
@@ -23,27 +21,35 @@ public class CharsetsTest extends AbstractTest {
     }
 
     @Test
-    public void testCharsetConstants() {
-        Assertions.assertNotNull(Charsets.US_ASCII);
-        Assertions.assertEquals(StandardCharsets.US_ASCII, Charsets.US_ASCII);
+    public void testGetForEncodingDecoding() {
+        String originalText = "Hello World! 你好世界!";
 
-        Assertions.assertNotNull(Charsets.ISO_8859_1);
-        Assertions.assertEquals(StandardCharsets.ISO_8859_1, Charsets.ISO_8859_1);
+        Charset utf8 = Charsets.get("UTF-8");
+        byte[] utf8Bytes = originalText.getBytes(utf8);
+        String decodedUtf8 = new String(utf8Bytes, utf8);
+        Assertions.assertEquals(originalText, decodedUtf8);
 
-        Assertions.assertNotNull(Charsets.UTF_8);
-        Assertions.assertEquals(StandardCharsets.UTF_8, Charsets.UTF_8);
+        Charset utf16 = Charsets.get("UTF-16");
+        byte[] utf16Bytes = originalText.getBytes(utf16);
+        String decodedUtf16 = new String(utf16Bytes, utf16);
+        Assertions.assertEquals(originalText, decodedUtf16);
 
-        Assertions.assertNotNull(Charsets.UTF_16);
-        Assertions.assertEquals(StandardCharsets.UTF_16, Charsets.UTF_16);
+        Charset ascii = Charsets.get("US-ASCII");
+        String asciiText = "Hello ASCII";
+        byte[] asciiBytes = asciiText.getBytes(ascii);
+        String decodedAscii = new String(asciiBytes, ascii);
+        Assertions.assertEquals(asciiText, decodedAscii);
+    }
 
-        Assertions.assertNotNull(Charsets.UTF_16BE);
-        Assertions.assertEquals(StandardCharsets.UTF_16BE, Charsets.UTF_16BE);
+    @Test
+    public void testGetWithDifferentCasing() {
+        Charset utf8Lower = Charsets.get("utf-8");
+        Charset utf8Upper = Charsets.get("UTF-8");
+        Charset utf8Mixed = Charsets.get("Utf-8");
 
-        Assertions.assertNotNull(Charsets.UTF_16LE);
-        Assertions.assertEquals(StandardCharsets.UTF_16LE, Charsets.UTF_16LE);
+        Assertions.assertEquals(utf8Lower.name(), utf8Upper.name());
+        Assertions.assertEquals(utf8Lower.name(), utf8Mixed.name());
 
-        Assertions.assertNotNull(Charsets.DEFAULT);
-        Assertions.assertEquals(Charset.defaultCharset(), Charsets.DEFAULT);
     }
 
     @Test
@@ -104,6 +110,24 @@ public class CharsetsTest extends AbstractTest {
     }
 
     @Test
+    public void testGetCachesMultipleCharsets() {
+        Charset utf8 = Charsets.get("UTF-8");
+        Charset ascii = Charsets.get("US-ASCII");
+        Charset iso = Charsets.get("ISO-8859-1");
+        Charset utf16 = Charsets.get("UTF-16");
+
+        Charset utf8_2 = Charsets.get("UTF-8");
+        Charset ascii_2 = Charsets.get("US-ASCII");
+        Charset iso_2 = Charsets.get("ISO-8859-1");
+        Charset utf16_2 = Charsets.get("UTF-16");
+
+        Assertions.assertSame(utf8, utf8_2);
+        Assertions.assertSame(ascii, ascii_2);
+        Assertions.assertSame(iso, iso_2);
+        Assertions.assertSame(utf16, utf16_2);
+    }
+
+    @Test
     public void testGetWithNonStandardCharsets() {
         try {
             Charset gbk = Charsets.get("GBK");
@@ -151,24 +175,10 @@ public class CharsetsTest extends AbstractTest {
     }
 
     @Test
-    public void testGetForEncodingDecoding() {
-        String originalText = "Hello World! 你好世界!";
-
-        Charset utf8 = Charsets.get("UTF-8");
-        byte[] utf8Bytes = originalText.getBytes(utf8);
-        String decodedUtf8 = new String(utf8Bytes, utf8);
-        Assertions.assertEquals(originalText, decodedUtf8);
-
-        Charset utf16 = Charsets.get("UTF-16");
-        byte[] utf16Bytes = originalText.getBytes(utf16);
-        String decodedUtf16 = new String(utf16Bytes, utf16);
-        Assertions.assertEquals(originalText, decodedUtf16);
-
-        Charset ascii = Charsets.get("US-ASCII");
-        String asciiText = "Hello ASCII";
-        byte[] asciiBytes = asciiText.getBytes(ascii);
-        String decodedAscii = new String(asciiBytes, ascii);
-        Assertions.assertEquals(asciiText, decodedAscii);
+    public void testGetWithEmptyString() {
+        Assertions.assertThrows(IllegalCharsetNameException.class, () -> {
+            Charsets.get("");
+        }, "Should throw IllegalCharsetNameException for empty charset name");
     }
 
     @Test
@@ -193,32 +203,27 @@ public class CharsetsTest extends AbstractTest {
     }
 
     @Test
-    public void testGetWithDifferentCasing() {
-        Charset utf8Lower = Charsets.get("utf-8");
-        Charset utf8Upper = Charsets.get("UTF-8");
-        Charset utf8Mixed = Charsets.get("Utf-8");
+    public void testCharsetConstants() {
+        Assertions.assertNotNull(Charsets.US_ASCII);
+        Assertions.assertEquals(StandardCharsets.US_ASCII, Charsets.US_ASCII);
 
-        Assertions.assertEquals(utf8Lower.name(), utf8Upper.name());
-        Assertions.assertEquals(utf8Lower.name(), utf8Mixed.name());
+        Assertions.assertNotNull(Charsets.ISO_8859_1);
+        Assertions.assertEquals(StandardCharsets.ISO_8859_1, Charsets.ISO_8859_1);
 
-    }
+        Assertions.assertNotNull(Charsets.UTF_8);
+        Assertions.assertEquals(StandardCharsets.UTF_8, Charsets.UTF_8);
 
-    @Test
-    public void testGetCachesMultipleCharsets() {
-        Charset utf8 = Charsets.get("UTF-8");
-        Charset ascii = Charsets.get("US-ASCII");
-        Charset iso = Charsets.get("ISO-8859-1");
-        Charset utf16 = Charsets.get("UTF-16");
+        Assertions.assertNotNull(Charsets.UTF_16);
+        Assertions.assertEquals(StandardCharsets.UTF_16, Charsets.UTF_16);
 
-        Charset utf8_2 = Charsets.get("UTF-8");
-        Charset ascii_2 = Charsets.get("US-ASCII");
-        Charset iso_2 = Charsets.get("ISO-8859-1");
-        Charset utf16_2 = Charsets.get("UTF-16");
+        Assertions.assertNotNull(Charsets.UTF_16BE);
+        Assertions.assertEquals(StandardCharsets.UTF_16BE, Charsets.UTF_16BE);
 
-        Assertions.assertSame(utf8, utf8_2);
-        Assertions.assertSame(ascii, ascii_2);
-        Assertions.assertSame(iso, iso_2);
-        Assertions.assertSame(utf16, utf16_2);
+        Assertions.assertNotNull(Charsets.UTF_16LE);
+        Assertions.assertEquals(StandardCharsets.UTF_16LE, Charsets.UTF_16LE);
+
+        Assertions.assertNotNull(Charsets.DEFAULT);
+        Assertions.assertEquals(Charset.defaultCharset(), Charsets.DEFAULT);
     }
 
     @Test
@@ -259,13 +264,6 @@ public class CharsetsTest extends AbstractTest {
         byte[] bytes = testString.getBytes(Charsets.DEFAULT);
         String decoded = new String(bytes, Charsets.DEFAULT);
         Assertions.assertEquals(testString, decoded);
-    }
-
-    @Test
-    public void testGetWithEmptyString() {
-        Assertions.assertThrows(IllegalCharsetNameException.class, () -> {
-            Charsets.get("");
-        }, "Should throw IllegalCharsetNameException for empty charset name");
     }
 
     @Test

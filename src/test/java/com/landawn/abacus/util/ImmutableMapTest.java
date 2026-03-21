@@ -9,12 +9,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class ImmutableMapTest extends TestBase {
 
     @Test
@@ -26,11 +24,25 @@ public class ImmutableMapTest extends TestBase {
     }
 
     @Test
-    public void testOf_SingleEntry() {
-        ImmutableMap<String, Integer> map = ImmutableMap.of("one", 1);
-        Assertions.assertEquals(1, map.size());
-        Assertions.assertEquals(1, map.get("one"));
-        Assertions.assertNull(map.get("two"));
+    public void testIsEmpty() {
+        Assertions.assertTrue(ImmutableMap.empty().isEmpty());
+        Assertions.assertFalse(ImmutableMap.of("a", 1).isEmpty());
+    }
+
+    @Test
+    public void testSize() {
+        Assertions.assertEquals(0, ImmutableMap.empty().size());
+        Assertions.assertEquals(1, ImmutableMap.of("a", 1).size());
+        Assertions.assertEquals(3, ImmutableMap.of("a", 1, "b", 2, "c", 3).size());
+    }
+
+    @Test
+    public void testToString() {
+        ImmutableMap<String, Integer> empty = ImmutableMap.empty();
+        Assertions.assertEquals("{}", empty.toString());
+
+        ImmutableMap<String, Integer> single = ImmutableMap.of("a", 1);
+        Assertions.assertEquals("{a=1}", single.toString());
     }
 
     @Test
@@ -91,76 +103,46 @@ public class ImmutableMapTest extends TestBase {
     }
 
     @Test
-    public void testCopyOf() {
-        Map<String, Integer> mutable = new HashMap<>();
-        mutable.put("one", 1);
-        mutable.put("two", 2);
+    public void testEquals() {
+        ImmutableMap<String, Integer> map1 = ImmutableMap.of("a", 1, "b", 2);
+        ImmutableMap<String, Integer> map2 = ImmutableMap.of("a", 1, "b", 2);
+        ImmutableMap<String, Integer> map3 = ImmutableMap.of("a", 1, "c", 3);
 
-        ImmutableMap<String, Integer> immutable = ImmutableMap.copyOf(mutable);
-        Assertions.assertEquals(2, immutable.size());
+        Assertions.assertEquals(map1, map2);
+        Assertions.assertNotEquals(map1, map3);
+        Assertions.assertEquals(map1, map1);
 
-        mutable.put("three", 3);
-        Assertions.assertEquals(2, immutable.size());
-        Assertions.assertNull(immutable.get("three"));
+        // Test equals with regular Map
+        Map<String, Integer> regularMap = new HashMap<>();
+        regularMap.put("a", 1);
+        regularMap.put("b", 2);
+        Assertions.assertEquals(map1, regularMap);
     }
 
     @Test
-    public void testCopyOf_AlreadyImmutable() {
-        ImmutableMap<String, Integer> original = ImmutableMap.of("a", 1);
-        ImmutableMap<String, Integer> copy = ImmutableMap.copyOf(original);
-        Assertions.assertSame(original, copy);
+    public void testHashCode() {
+        ImmutableMap<String, Integer> map1 = ImmutableMap.of("a", 1, "b", 2);
+        ImmutableMap<String, Integer> map2 = ImmutableMap.of("a", 1, "b", 2);
+        Assertions.assertEquals(map1.hashCode(), map2.hashCode());
     }
 
     @Test
-    public void testCopyOf_Empty() {
-        ImmutableMap<String, Integer> map = ImmutableMap.copyOf(new HashMap<>());
-        Assertions.assertTrue(map.isEmpty());
+    public void testForEach_Functional() {
+        ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2, "c", 3);
+        Map<String, Integer> collected = new HashMap<>();
+        map.forEach(collected::put);
+        Assertions.assertEquals(3, collected.size());
+        Assertions.assertEquals(1, collected.get("a"));
+        Assertions.assertEquals(2, collected.get("b"));
+        Assertions.assertEquals(3, collected.get("c"));
     }
 
     @Test
-    public void testCopyOf_Null() {
-        ImmutableMap<String, Integer> map = ImmutableMap.copyOf(null);
-        Assertions.assertTrue(map.isEmpty());
-    }
-
-    @Test
-    public void testCopyOf_PreservesOrder() {
-        LinkedHashMap<String, Integer> linked = new LinkedHashMap<>();
-        linked.put("first", 1);
-        linked.put("second", 2);
-        linked.put("third", 3);
-
-        ImmutableMap<String, Integer> map = ImmutableMap.copyOf(linked);
-        Iterator<String> keys = map.keySet().iterator();
-        Assertions.assertEquals("first", keys.next());
-        Assertions.assertEquals("second", keys.next());
-        Assertions.assertEquals("third", keys.next());
-    }
-
-    @Test
-    public void testWrap() {
-        Map<String, Integer> mutable = new HashMap<>();
-        mutable.put("initial", 1);
-
-        ImmutableMap<String, Integer> wrapped = ImmutableMap.wrap(mutable);
-        Assertions.assertEquals(1, wrapped.size());
-
-        mutable.put("added", 2);
-        Assertions.assertEquals(2, wrapped.size());
-        Assertions.assertEquals(2, wrapped.get("added"));
-    }
-
-    @Test
-    public void testWrap_AlreadyImmutable() {
-        ImmutableMap<String, Integer> original = ImmutableMap.of("a", 1);
-        ImmutableMap<String, Integer> wrapped = ImmutableMap.wrap(original);
-        Assertions.assertSame(original, wrapped);
-    }
-
-    @Test
-    public void testWrap_Null() {
-        ImmutableMap<String, Integer> wrapped = ImmutableMap.wrap(null);
-        Assertions.assertTrue(wrapped.isEmpty());
+    public void testOf_SingleEntry() {
+        ImmutableMap<String, Integer> map = ImmutableMap.of("one", 1);
+        Assertions.assertEquals(1, map.size());
+        Assertions.assertEquals(1, map.get("one"));
+        Assertions.assertNull(map.get("two"));
     }
 
     @Test
@@ -174,13 +156,33 @@ public class ImmutableMapTest extends TestBase {
     }
 
     @Test
-    public void testGetOrDefault_WithNullValue() {
-        Map<String, Integer> mapWithNull = new HashMap<>();
-        mapWithNull.put("key", null);
-        ImmutableMap<String, Integer> map = ImmutableMap.copyOf(mapWithNull);
+    public void testContainsKey() {
+        ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
 
-        Assertions.assertNull(map.getOrDefault("key", 42));
-        Assertions.assertEquals(42, map.getOrDefault("missing", 42));
+        Assertions.assertTrue(map.containsKey("a"));
+        Assertions.assertTrue(map.containsKey("b"));
+        Assertions.assertFalse(map.containsKey("c"));
+        Assertions.assertFalse(map.containsKey(null));
+    }
+
+    @Test
+    public void testContainsValue() {
+        ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2, "c", 1);
+
+        Assertions.assertTrue(map.containsValue(1));
+        Assertions.assertTrue(map.containsValue(2));
+        Assertions.assertFalse(map.containsValue(3));
+        Assertions.assertFalse(map.containsValue(null));
+    }
+
+    @Test
+    public void testGet() {
+        ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
+
+        Assertions.assertEquals(1, map.get("a"));
+        Assertions.assertEquals(2, map.get("b"));
+        Assertions.assertNull(map.get("c"));
+        Assertions.assertNull(map.get(null));
     }
 
     @Test
@@ -258,42 +260,6 @@ public class ImmutableMapTest extends TestBase {
     }
 
     @Test
-    public void testIsEmpty() {
-        Assertions.assertTrue(ImmutableMap.empty().isEmpty());
-        Assertions.assertFalse(ImmutableMap.of("a", 1).isEmpty());
-    }
-
-    @Test
-    public void testContainsKey() {
-        ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
-
-        Assertions.assertTrue(map.containsKey("a"));
-        Assertions.assertTrue(map.containsKey("b"));
-        Assertions.assertFalse(map.containsKey("c"));
-        Assertions.assertFalse(map.containsKey(null));
-    }
-
-    @Test
-    public void testContainsValue() {
-        ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2, "c", 1);
-
-        Assertions.assertTrue(map.containsValue(1));
-        Assertions.assertTrue(map.containsValue(2));
-        Assertions.assertFalse(map.containsValue(3));
-        Assertions.assertFalse(map.containsValue(null));
-    }
-
-    @Test
-    public void testGet() {
-        ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
-
-        Assertions.assertEquals(1, map.get("a"));
-        Assertions.assertEquals(2, map.get("b"));
-        Assertions.assertNull(map.get("c"));
-        Assertions.assertNull(map.get(null));
-    }
-
-    @Test
     public void testKeySet() {
         ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2, "c", 3);
         Set<String> keys = map.keySet();
@@ -343,10 +309,109 @@ public class ImmutableMapTest extends TestBase {
     }
 
     @Test
-    public void testSize() {
-        Assertions.assertEquals(0, ImmutableMap.empty().size());
-        Assertions.assertEquals(1, ImmutableMap.of("a", 1).size());
-        Assertions.assertEquals(3, ImmutableMap.of("a", 1, "b", 2, "c", 3).size());
+    public void testReplaceAll_ThrowsUnsupported() {
+        ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> map.replaceAll((k, v) -> v + 1));
+    }
+
+    @Test
+    public void testCopyOf_PreservesOrder() {
+        LinkedHashMap<String, Integer> linked = new LinkedHashMap<>();
+        linked.put("first", 1);
+        linked.put("second", 2);
+        linked.put("third", 3);
+
+        ImmutableMap<String, Integer> map = ImmutableMap.copyOf(linked);
+        Iterator<String> keys = map.keySet().iterator();
+        Assertions.assertEquals("first", keys.next());
+        Assertions.assertEquals("second", keys.next());
+        Assertions.assertEquals("third", keys.next());
+    }
+
+    @Test
+    public void testCopyOf() {
+        Map<String, Integer> mutable = new HashMap<>();
+        mutable.put("one", 1);
+        mutable.put("two", 2);
+
+        ImmutableMap<String, Integer> immutable = ImmutableMap.copyOf(mutable);
+        Assertions.assertEquals(2, immutable.size());
+
+        mutable.put("three", 3);
+        Assertions.assertEquals(2, immutable.size());
+        Assertions.assertNull(immutable.get("three"));
+    }
+
+    @Test
+    public void testCopyOf_AlreadyImmutable() {
+        ImmutableMap<String, Integer> original = ImmutableMap.of("a", 1);
+        ImmutableMap<String, Integer> copy = ImmutableMap.copyOf(original);
+        Assertions.assertSame(original, copy);
+    }
+
+    @Test
+    public void testCopyOf_Empty() {
+        ImmutableMap<String, Integer> map = ImmutableMap.copyOf(new HashMap<>());
+        Assertions.assertTrue(map.isEmpty());
+    }
+
+    @Test
+    public void testCopyOf_Null() {
+        ImmutableMap<String, Integer> map = ImmutableMap.copyOf(null);
+        Assertions.assertTrue(map.isEmpty());
+    }
+
+    @Test
+    public void testGetOrDefault_WithNullValue() {
+        Map<String, Integer> mapWithNull = new HashMap<>();
+        mapWithNull.put("key", null);
+        ImmutableMap<String, Integer> map = ImmutableMap.copyOf(mapWithNull);
+
+        Assertions.assertNull(map.getOrDefault("key", 42));
+        Assertions.assertEquals(42, map.getOrDefault("missing", 42));
+    }
+
+    @Test
+    public void testWithNullKeyValue() {
+        Map<String, String> mapWithNulls = new HashMap<>();
+        mapWithNulls.put(null, "nullKey");
+        mapWithNulls.put("nullValue", null);
+        mapWithNulls.put("normal", "value");
+
+        ImmutableMap<String, String> map = ImmutableMap.copyOf(mapWithNulls);
+
+        Assertions.assertEquals(3, map.size());
+        Assertions.assertEquals("nullKey", map.get(null));
+        Assertions.assertNull(map.get("nullValue"));
+        Assertions.assertEquals("value", map.get("normal"));
+        Assertions.assertTrue(map.containsKey(null));
+        Assertions.assertTrue(map.containsValue(null));
+    }
+
+    @Test
+    public void testWrap() {
+        Map<String, Integer> mutable = new HashMap<>();
+        mutable.put("initial", 1);
+
+        ImmutableMap<String, Integer> wrapped = ImmutableMap.wrap(mutable);
+        Assertions.assertEquals(1, wrapped.size());
+
+        mutable.put("added", 2);
+        Assertions.assertEquals(2, wrapped.size());
+        Assertions.assertEquals(2, wrapped.get("added"));
+    }
+
+    @Test
+    public void testWrap_AlreadyImmutable() {
+        ImmutableMap<String, Integer> original = ImmutableMap.of("a", 1);
+        ImmutableMap<String, Integer> wrapped = ImmutableMap.wrap(original);
+        Assertions.assertSame(original, wrapped);
+    }
+
+    @Test
+    public void testWrap_Null() {
+        ImmutableMap<String, Integer> wrapped = ImmutableMap.wrap(null);
+        Assertions.assertTrue(wrapped.isEmpty());
     }
 
     @Test
@@ -363,48 +428,12 @@ public class ImmutableMapTest extends TestBase {
     }
 
     @Test
-    public void testBuilder_EmptyPutAll() {
-        ImmutableMap<String, Integer> map = ImmutableMap.<String, Integer> builder().put("a", 1).putAll(null).putAll(new HashMap<>()).build();
-
-        Assertions.assertEquals(1, map.size());
-    }
-
-    @Test
     public void testBuilder_WithBackingMap() {
         Map<String, Integer> backing = new LinkedHashMap<>();
         ImmutableMap<String, Integer> map = ImmutableMap.builder(backing).put("a", 1).put("b", 2).build();
 
         Assertions.assertEquals(2, map.size());
         Assertions.assertEquals(2, backing.size());
-    }
-
-    @Test
-    public void testBuilder_NullBackingMap() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> ImmutableMap.builder(null));
-    }
-
-    @Test
-    public void testToString() {
-        ImmutableMap<String, Integer> empty = ImmutableMap.empty();
-        Assertions.assertEquals("{}", empty.toString());
-
-        ImmutableMap<String, Integer> single = ImmutableMap.of("a", 1);
-        Assertions.assertEquals("{a=1}", single.toString());
-    }
-
-    @Test
-    public void testBuild_emptyBuilder() {
-        ImmutableMap<String, Integer> map = ImmutableMap.<String, Integer> builder().build();
-        Assertions.assertTrue(map.isEmpty());
-        Assertions.assertEquals(0, map.size());
-    }
-
-    @Test
-    public void testBuild_singleEntry() {
-        ImmutableMap<String, Integer> map = ImmutableMap.<String, Integer> builder().put("x", 42).build();
-        Assertions.assertEquals(1, map.size());
-        Assertions.assertEquals(42, map.get("x"));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> map.put("y", 99));
     }
 
     @Test
@@ -425,6 +454,20 @@ public class ImmutableMapTest extends TestBase {
     }
 
     @Test
+    public void testBuilder_EmptyPutAll() {
+        ImmutableMap<String, Integer> map = ImmutableMap.<String, Integer> builder().put("a", 1).putAll(null).putAll(new HashMap<>()).build();
+
+        Assertions.assertEquals(1, map.size());
+    }
+
+    @Test
+    public void testBuild_emptyBuilder() {
+        ImmutableMap<String, Integer> map = ImmutableMap.<String, Integer> builder().build();
+        Assertions.assertTrue(map.isEmpty());
+        Assertions.assertEquals(0, map.size());
+    }
+
+    @Test
     public void testBuild_withNullKeyAndValue() {
         ImmutableMap<String, String> map = ImmutableMap.<String, String> builder().put(null, "nullKey").put("nullVal", null).build();
 
@@ -435,60 +478,15 @@ public class ImmutableMapTest extends TestBase {
     }
 
     @Test
-    public void testEquals() {
-        ImmutableMap<String, Integer> map1 = ImmutableMap.of("a", 1, "b", 2);
-        ImmutableMap<String, Integer> map2 = ImmutableMap.of("a", 1, "b", 2);
-        ImmutableMap<String, Integer> map3 = ImmutableMap.of("a", 1, "c", 3);
-
-        Assertions.assertEquals(map1, map2);
-        Assertions.assertNotEquals(map1, map3);
-        Assertions.assertEquals(map1, map1);
-
-        // Test equals with regular Map
-        Map<String, Integer> regularMap = new HashMap<>();
-        regularMap.put("a", 1);
-        regularMap.put("b", 2);
-        Assertions.assertEquals(map1, regularMap);
+    public void testBuilder_NullBackingMap() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> ImmutableMap.builder(null));
     }
 
     @Test
-    public void testHashCode() {
-        ImmutableMap<String, Integer> map1 = ImmutableMap.of("a", 1, "b", 2);
-        ImmutableMap<String, Integer> map2 = ImmutableMap.of("a", 1, "b", 2);
-        Assertions.assertEquals(map1.hashCode(), map2.hashCode());
-    }
-
-    @Test
-    public void testReplaceAll_ThrowsUnsupported() {
-        ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> map.replaceAll((k, v) -> v + 1));
-    }
-
-    @Test
-    public void testForEach_Functional() {
-        ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2, "c", 3);
-        Map<String, Integer> collected = new HashMap<>();
-        map.forEach(collected::put);
-        Assertions.assertEquals(3, collected.size());
-        Assertions.assertEquals(1, collected.get("a"));
-        Assertions.assertEquals(2, collected.get("b"));
-        Assertions.assertEquals(3, collected.get("c"));
-    }
-
-    @Test
-    public void testWithNullKeyValue() {
-        Map<String, String> mapWithNulls = new HashMap<>();
-        mapWithNulls.put(null, "nullKey");
-        mapWithNulls.put("nullValue", null);
-        mapWithNulls.put("normal", "value");
-
-        ImmutableMap<String, String> map = ImmutableMap.copyOf(mapWithNulls);
-
-        Assertions.assertEquals(3, map.size());
-        Assertions.assertEquals("nullKey", map.get(null));
-        Assertions.assertNull(map.get("nullValue"));
-        Assertions.assertEquals("value", map.get("normal"));
-        Assertions.assertTrue(map.containsKey(null));
-        Assertions.assertTrue(map.containsValue(null));
+    public void testBuild_singleEntry() {
+        ImmutableMap<String, Integer> map = ImmutableMap.<String, Integer> builder().put("x", 42).build();
+        Assertions.assertEquals(1, map.size());
+        Assertions.assertEquals(42, map.get("x"));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> map.put("y", 99));
     }
 }

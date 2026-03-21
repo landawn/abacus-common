@@ -21,7 +21,6 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -39,7 +38,6 @@ import com.landawn.abacus.util.Suppliers;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalShort;
 
-@Tag("new-test")
 public class AbstractShortStreamTest extends TestBase {
 
     private ShortStream stream;
@@ -204,6 +202,79 @@ public class AbstractShortStreamTest extends TestBase {
 
         result = createShortStream(new short[] { 1, 5, 10 }).collapse((first, last, next) -> false, (a, b) -> (short) (a + b));
         assertArrayEquals(new short[] { 1, 5, 10 }, result.toArray());
+    }
+
+    @Test
+    public void testSkipWithAction() {
+        List<Short> skipped = new ArrayList<>();
+        ShortStream result = createShortStream(new short[] { 1, 2, 3, 4, 5 }).skip(3, v -> skipped.add(v));
+
+        assertArrayEquals(new short[] { 4, 5 }, result.toArray());
+        assertEquals(Arrays.asList((short) 1, (short) 2, (short) 3), skipped);
+
+        skipped.clear();
+        result = createShortStream(new short[] { 1, 2, 3 }).skip(0, v -> skipped.add(v));
+        assertArrayEquals(new short[] { 1, 2, 3 }, result.toArray());
+        assertTrue(skipped.isEmpty());
+
+        skipped.clear();
+        result = createShortStream(new short[] { 1, 2, 3 }).skip(5, v -> skipped.add(v));
+        assertArrayEquals(new short[] {}, result.toArray());
+        assertEquals(Arrays.asList((short) 1, (short) 2, (short) 3), skipped);
+    }
+
+    @Test
+    public void testFilterWithAction() {
+        List<Short> dropped = new ArrayList<>();
+        ShortStream result = createShortStream(new short[] { 1, 2, 3, 4, 5 }).filter(v -> v % 2 == 0, v -> dropped.add(v));
+
+        assertArrayEquals(new short[] { 2, 4 }, result.toArray());
+        assertEquals(Arrays.asList((short) 1, (short) 3, (short) 5), dropped);
+
+        dropped.clear();
+        result = createShortStream(new short[] { 1, 3, 5 }).filter(v -> v % 2 == 0, v -> dropped.add(v));
+        assertArrayEquals(new short[] {}, result.toArray());
+        assertEquals(Arrays.asList((short) 1, (short) 3, (short) 5), dropped);
+    }
+
+    @Test
+    public void testDropWhileWithAction() {
+        List<Short> dropped = new ArrayList<>();
+        ShortStream result = createShortStream(new short[] { 1, 2, 3, 4, 5 }).dropWhile(v -> v < 3, v -> dropped.add(v));
+
+        assertArrayEquals(new short[] { 3, 4, 5 }, result.toArray());
+        assertEquals(Arrays.asList((short) 1, (short) 2), dropped);
+
+        dropped.clear();
+        result = createShortStream(new short[] { 3, 4, 5 }).dropWhile(v -> v < 1, v -> dropped.add(v));
+        assertArrayEquals(new short[] { 3, 4, 5 }, result.toArray());
+        assertTrue(dropped.isEmpty());
+
+        dropped.clear();
+        result = createShortStream(new short[] { 1, 2, 3 }).dropWhile(v -> v < 10, v -> dropped.add(v));
+        assertArrayEquals(new short[] {}, result.toArray());
+        assertEquals(Arrays.asList((short) 1, (short) 2, (short) 3), dropped);
+    }
+
+    @Test
+    public void testStep() {
+        ShortStream result = createShortStream(new short[] { 1, 2, 3, 4, 5 }).step(1);
+        assertArrayEquals(new short[] { 1, 2, 3, 4, 5 }, result.toArray());
+
+        result = createShortStream(new short[] { 1, 2, 3, 4, 5, 6 }).step(2);
+        assertArrayEquals(new short[] { 1, 3, 5 }, result.toArray());
+
+        result = createShortStream(new short[] { 1, 2, 3, 4, 5, 6, 7 }).step(3);
+        assertArrayEquals(new short[] { 1, 4, 7 }, result.toArray());
+
+        result = createShortStream(new short[] { 1, 2, 3 }).step(5);
+        assertArrayEquals(new short[] { 1 }, result.toArray());
+
+        result = createShortStream(new short[] {}).step(2);
+        assertArrayEquals(new short[] {}, result.toArray());
+
+        assertThrows(IllegalArgumentException.class, () -> createShortStream(new short[] { 1, 2, 3 }).step(0));
+        assertThrows(IllegalArgumentException.class, () -> createShortStream(new short[] { 1, 2, 3 }).step(-1));
     }
 
     @Test
@@ -374,6 +445,13 @@ public class AbstractShortStreamTest extends TestBase {
     }
 
     @Test
+    public void testCycled_long() {
+        ShortStream stream = ShortStream.of((short) 1, (short) 2);
+        List<Short> result = stream.cycled(3).collect(ArrayList::new, (list, value) -> list.add(value));
+        assertEquals(Arrays.asList((short) 1, (short) 2, (short) 1, (short) 2, (short) 1, (short) 2), result);
+    }
+
+    @Test
     public void testCycledWithRounds() {
         ShortStream result = createShortStream(new short[] { 1, 2, 3 }).cycled(0);
         assertArrayEquals(new short[] {}, result.toArray());
@@ -415,6 +493,15 @@ public class AbstractShortStreamTest extends TestBase {
 
         result = createShortStream(new short[] {}).boxed();
         assertEquals(0, result.count());
+    }
+
+    @Test
+    public void testPrependAppend_Stream_Parallel() {
+        short[] result = createShortStream((short) 3, (short) 4).parallel()
+                .prepend(ShortStream.of((short) 1, (short) 2))
+                .append(ShortStream.of((short) 5))
+                .toArray();
+        assertArrayEquals(new short[] { 1, 2, 3, 4, 5 }, result);
     }
 
     @Test
@@ -545,18 +632,6 @@ public class AbstractShortStreamTest extends TestBase {
     }
 
     @Test
-    public void testToMap() {
-        Map<String, Integer> map = createShortStream(new short[] { 1, 2, 3 }).toMap(v -> "key" + v, v -> (int) v);
-
-        assertEquals(3, map.size());
-        assertEquals(1, map.get("key1"));
-        assertEquals(2, map.get("key2"));
-        assertEquals(3, map.get("key3"));
-
-        assertThrows(IllegalStateException.class, () -> createShortStream(new short[] { 1, 2, 1 }).toMap(v -> "key" + v, v -> (int) v));
-    }
-
-    @Test
     public void testToMapWithSupplier() {
         Map<String, Integer> map = createShortStream(new short[] { 1, 2, 3 }).toMap(v -> "key" + v, v -> (int) v, Suppliers.ofLinkedHashMap());
 
@@ -589,6 +664,18 @@ public class AbstractShortStreamTest extends TestBase {
     }
 
     @Test
+    public void testToMap() {
+        Map<String, Integer> map = createShortStream(new short[] { 1, 2, 3 }).toMap(v -> "key" + v, v -> (int) v);
+
+        assertEquals(3, map.size());
+        assertEquals(1, map.get("key1"));
+        assertEquals(2, map.get("key2"));
+        assertEquals(3, map.get("key3"));
+
+        assertThrows(IllegalStateException.class, () -> createShortStream(new short[] { 1, 2, 1 }).toMap(v -> "key" + v, v -> (int) v));
+    }
+
+    @Test
     public void testGroupTo() {
         Map<Boolean, List<Short>> map = createShortStream(new short[] { 1, 2, 3, 4, 5, 6 }).groupTo(v -> v % 2 == 0, Collectors.toList());
 
@@ -617,6 +704,14 @@ public class AbstractShortStreamTest extends TestBase {
         result.clear();
         createShortStream(new short[] {}).forEachIndexed((idx, value) -> result.add(idx + ":" + value));
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testFirst_MultipleElements() {
+        ShortStream stream = ShortStream.of((short) 1, (short) 2, (short) 3);
+        OptionalShort result = stream.first();
+        assertTrue(result.isPresent());
+        assertEquals((short) 1, result.getAsShort());
     }
 
     @Test
@@ -754,94 +849,6 @@ public class AbstractShortStreamTest extends TestBase {
 
         iter = createShortStream(new short[] {}).iterator();
         assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testSkipWithAction() {
-        List<Short> skipped = new ArrayList<>();
-        ShortStream result = createShortStream(new short[] { 1, 2, 3, 4, 5 }).skip(3, v -> skipped.add(v));
-
-        assertArrayEquals(new short[] { 4, 5 }, result.toArray());
-        assertEquals(Arrays.asList((short) 1, (short) 2, (short) 3), skipped);
-
-        skipped.clear();
-        result = createShortStream(new short[] { 1, 2, 3 }).skip(0, v -> skipped.add(v));
-        assertArrayEquals(new short[] { 1, 2, 3 }, result.toArray());
-        assertTrue(skipped.isEmpty());
-
-        skipped.clear();
-        result = createShortStream(new short[] { 1, 2, 3 }).skip(5, v -> skipped.add(v));
-        assertArrayEquals(new short[] {}, result.toArray());
-        assertEquals(Arrays.asList((short) 1, (short) 2, (short) 3), skipped);
-    }
-
-    @Test
-    public void testFilterWithAction() {
-        List<Short> dropped = new ArrayList<>();
-        ShortStream result = createShortStream(new short[] { 1, 2, 3, 4, 5 }).filter(v -> v % 2 == 0, v -> dropped.add(v));
-
-        assertArrayEquals(new short[] { 2, 4 }, result.toArray());
-        assertEquals(Arrays.asList((short) 1, (short) 3, (short) 5), dropped);
-
-        dropped.clear();
-        result = createShortStream(new short[] { 1, 3, 5 }).filter(v -> v % 2 == 0, v -> dropped.add(v));
-        assertArrayEquals(new short[] {}, result.toArray());
-        assertEquals(Arrays.asList((short) 1, (short) 3, (short) 5), dropped);
-    }
-
-    @Test
-    public void testDropWhileWithAction() {
-        List<Short> dropped = new ArrayList<>();
-        ShortStream result = createShortStream(new short[] { 1, 2, 3, 4, 5 }).dropWhile(v -> v < 3, v -> dropped.add(v));
-
-        assertArrayEquals(new short[] { 3, 4, 5 }, result.toArray());
-        assertEquals(Arrays.asList((short) 1, (short) 2), dropped);
-
-        dropped.clear();
-        result = createShortStream(new short[] { 3, 4, 5 }).dropWhile(v -> v < 1, v -> dropped.add(v));
-        assertArrayEquals(new short[] { 3, 4, 5 }, result.toArray());
-        assertTrue(dropped.isEmpty());
-
-        dropped.clear();
-        result = createShortStream(new short[] { 1, 2, 3 }).dropWhile(v -> v < 10, v -> dropped.add(v));
-        assertArrayEquals(new short[] {}, result.toArray());
-        assertEquals(Arrays.asList((short) 1, (short) 2, (short) 3), dropped);
-    }
-
-    @Test
-    public void testStep() {
-        ShortStream result = createShortStream(new short[] { 1, 2, 3, 4, 5 }).step(1);
-        assertArrayEquals(new short[] { 1, 2, 3, 4, 5 }, result.toArray());
-
-        result = createShortStream(new short[] { 1, 2, 3, 4, 5, 6 }).step(2);
-        assertArrayEquals(new short[] { 1, 3, 5 }, result.toArray());
-
-        result = createShortStream(new short[] { 1, 2, 3, 4, 5, 6, 7 }).step(3);
-        assertArrayEquals(new short[] { 1, 4, 7 }, result.toArray());
-
-        result = createShortStream(new short[] { 1, 2, 3 }).step(5);
-        assertArrayEquals(new short[] { 1 }, result.toArray());
-
-        result = createShortStream(new short[] {}).step(2);
-        assertArrayEquals(new short[] {}, result.toArray());
-
-        assertThrows(IllegalArgumentException.class, () -> createShortStream(new short[] { 1, 2, 3 }).step(0));
-        assertThrows(IllegalArgumentException.class, () -> createShortStream(new short[] { 1, 2, 3 }).step(-1));
-    }
-
-    @Test
-    public void testCycled_long() {
-        ShortStream stream = ShortStream.of((short) 1, (short) 2);
-        List<Short> result = stream.cycled(3).collect(ArrayList::new, (list, value) -> list.add(value));
-        assertEquals(Arrays.asList((short) 1, (short) 2, (short) 1, (short) 2, (short) 1, (short) 2), result);
-    }
-
-    @Test
-    public void testFirst_MultipleElements() {
-        ShortStream stream = ShortStream.of((short) 1, (short) 2, (short) 3);
-        OptionalShort result = stream.first();
-        assertTrue(result.isPresent());
-        assertEquals((short) 1, result.getAsShort());
     }
 
 }

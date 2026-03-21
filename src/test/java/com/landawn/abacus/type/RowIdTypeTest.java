@@ -17,14 +17,12 @@ import java.sql.RowId;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("new-test")
 public class RowIdTypeTest extends TestBase {
 
     private RowIdType rowIdType;

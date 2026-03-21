@@ -26,11 +26,11 @@ import java.lang.annotation.Target;
  * This annotation is primarily used in serialization/deserialization contexts and reflection-based operations
  * to ensure that field access goes through proper accessor methods, allowing for lazy initialization,
  * validation, or other custom logic.
- * 
+ *
  * <p>When applied to a type (class or interface), all fields within that type will be accessed via their
  * corresponding getter/setter methods. When applied to a specific method or field, only that element's
  * access behavior is affected.</p>
- * 
+ *
  * <p>This annotation is useful in scenarios where:</p>
  * <ul>
  *   <li>Fields have lazy initialization logic in their getters</li>
@@ -38,19 +38,19 @@ import java.lang.annotation.Target;
  *   <li>Direct field access would bypass important business logic</li>
  *   <li>Compatibility with frameworks that require method-based access</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * @AccessFieldByMethod
  * public class User {
  *     private String name;
- *     
+ *
  *     public String getName() {
  *         return name != null ? name : "Anonymous";
  *     }
  * }
  * }</pre>
- * 
+ *
  * @see java.lang.reflect.Field
  * @see java.lang.reflect.Method
  */
@@ -62,14 +62,14 @@ public @interface AccessFieldByMethod {
     /**
      * Optional value to specify additional configuration for field access behavior.
      * This value can be used by frameworks to provide custom access strategies or configurations.
-     * 
+     *
      * <p>The interpretation of this value is framework-specific. Common uses include:</p>
      * <ul>
      *   <li>Specifying a custom accessor pattern (e.g., "fluent" for fluent-style accessors)</li>
      *   <li>Providing hints for method name generation</li>
      *   <li>Enabling/disabling specific access behaviors</li>
      * </ul>
-     * 
+     *
      * @return the configuration value, empty string by default (which uses standard getter/setter conventions)
      */
     String value() default "";

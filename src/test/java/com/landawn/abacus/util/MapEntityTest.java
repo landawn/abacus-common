@@ -13,22 +13,81 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class MapEntityTest extends TestBase {
 
     @Test
-    public void testSet_simpleName() {
+    public void testConstructorWithName() {
         MapEntity entity = new MapEntity("User");
-        MapEntity result = entity.set("name", "John");
+        Assertions.assertEquals("User", entity.entityName());
+    }
 
-        assertNotNull(result);
-        assertEquals(entity, result);
-        assertEquals("John", entity.get("name"));
+    @Test
+    public void testConstructorWithNameAndProps() {
+        Map<String, Object> props = new HashMap<>();
+        props.put("name", "John");
+        props.put("age", 30);
+
+        MapEntity entity = new MapEntity("User", props);
+        Assertions.assertEquals("User", entity.entityName());
+        Assertions.assertEquals("John", entity.get("name"));
+        Assertions.assertEquals(30, (Integer) entity.get("age"));
+    }
+
+    @Test
+    public void testConstructorWithNullName() {
+        MapEntity entity = new MapEntity(null);
+        assertEquals("", entity.entityName());
+    }
+
+    @Test
+    public void testEntityName() {
+        MapEntity entity = new MapEntity("Product");
+        Assertions.assertEquals("Product", entity.entityName());
+    }
+
+    @Test
+    public void testGetWithCanonicalName() {
+        MapEntity entity = new MapEntity("User");
+        entity.set("name", "John");
+
+        Assertions.assertEquals("John", entity.get("User.name"));
+    }
+
+    @Test
+    public void testGetWithTargetType() {
+        MapEntity entity = new MapEntity("User");
+        entity.set("age", "25");
+        entity.set("active", "true");
+
+        Integer age = entity.get("age", Integer.class);
+        Boolean active = entity.get("active", Boolean.class);
+
+        Assertions.assertEquals(25, age);
+        Assertions.assertTrue(active);
+    }
+
+    @Test
+    public void testGet() {
+        MapEntity entity = new MapEntity("User");
+        entity.set("name", "John");
+
+        Assertions.assertEquals("John", entity.get("name"));
+        Assertions.assertNull(entity.get("nonexistent"));
+    }
+
+    @Test
+    public void testGetWithTargetType_nullValueReturnsDefault() {
+        MapEntity entity = new MapEntity("User");
+
+        int intDefault = entity.get("missing", int.class);
+        assertEquals(0, intDefault);
+
+        boolean boolDefault = entity.get("missing", boolean.class);
+        assertFalse(boolDefault);
     }
 
     @Test
@@ -72,13 +131,43 @@ public class MapEntityTest extends TestBase {
     }
 
     @Test
-    public void testRemove_simpleName() {
+    public void testSetWithCanonicalName() {
         MapEntity entity = new MapEntity("User");
-        entity.set("tempData", "temp");
+        entity.set("User.name", "John");
 
-        Object removed = entity.remove("tempData");
-        assertEquals("temp", removed);
-        assertNull(entity.get("tempData"));
+        Assertions.assertEquals("John", entity.get("name"));
+    }
+
+    @Test
+    public void testSetMap() {
+        MapEntity entity = new MapEntity("User");
+        Map<String, Object> props = new HashMap<>();
+        props.put("name", "John");
+        props.put("age", 30);
+
+        entity.set(props);
+
+        Assertions.assertEquals("John", entity.get("name"));
+        Assertions.assertEquals(30, (Integer) entity.get("age"));
+    }
+
+    @Test
+    public void testSet_simpleName() {
+        MapEntity entity = new MapEntity("User");
+        MapEntity result = entity.set("name", "John");
+
+        assertNotNull(result);
+        assertEquals(entity, result);
+        assertEquals("John", entity.get("name"));
+    }
+
+    @Test
+    public void testSet() {
+        MapEntity entity = new MapEntity("User");
+        MapEntity result = entity.set("name", "John");
+
+        Assertions.assertSame(entity, result);
+        Assertions.assertEquals("John", entity.get("name"));
     }
 
     @Test
@@ -88,6 +177,16 @@ public class MapEntityTest extends TestBase {
 
         Object removed = entity.remove("User.data");
         assertEquals("value", removed);
+    }
+
+    @Test
+    public void testRemove_simpleName() {
+        MapEntity entity = new MapEntity("User");
+        entity.set("tempData", "temp");
+
+        Object removed = entity.remove("tempData");
+        assertEquals("temp", removed);
+        assertNull(entity.get("tempData"));
     }
 
     @Test
@@ -102,6 +201,26 @@ public class MapEntityTest extends TestBase {
         MapEntity entity = new MapEntity("User");
         Object removed = entity.remove("anything");
         assertNull(removed);
+    }
+
+    @Test
+    public void testRemove() {
+        MapEntity entity = new MapEntity("User");
+        entity.set("name", "John");
+
+        Object removed = entity.remove("name");
+        Assertions.assertEquals("John", removed);
+        Assertions.assertNull(entity.get("name"));
+    }
+
+    @Test
+    public void testRemoveWithCanonicalName() {
+        MapEntity entity = new MapEntity("User");
+        entity.set("name", "John");
+
+        Object removed = entity.remove("User.name");
+        Assertions.assertEquals("John", removed);
+        Assertions.assertNull(entity.get("name"));
     }
 
     @Test
@@ -131,6 +250,23 @@ public class MapEntityTest extends TestBase {
         entity.set("email", "john@example.com");
 
         assertTrue(entity.containsKey("User.email"));
+    }
+
+    @Test
+    public void testContainsKey() {
+        MapEntity entity = new MapEntity("User");
+        entity.set("name", "John");
+
+        Assertions.assertTrue(entity.containsKey("name"));
+        Assertions.assertFalse(entity.containsKey("age"));
+    }
+
+    @Test
+    public void testContainsKeyWithCanonicalName() {
+        MapEntity entity = new MapEntity("User");
+        entity.set("name", "John");
+
+        Assertions.assertTrue(entity.containsKey("User.name"));
     }
 
     @Test
@@ -198,6 +334,15 @@ public class MapEntityTest extends TestBase {
     }
 
     @Test
+    public void testIsEmpty() {
+        MapEntity entity = new MapEntity("User");
+        Assertions.assertTrue(entity.isEmpty());
+
+        entity.set("name", "John");
+        Assertions.assertFalse(entity.isEmpty());
+    }
+
+    @Test
     public void testCopy() {
         MapEntity original = new MapEntity("User");
         original.set("name", "John").set("age", 30);
@@ -235,12 +380,6 @@ public class MapEntityTest extends TestBase {
     }
 
     @Test
-    public void testEquals_same() {
-        MapEntity entity = new MapEntity("User");
-        assertEquals(entity, entity);
-    }
-
-    @Test
     public void testEquals_equal() {
         MapEntity entity1 = new MapEntity("User");
         entity1.set("name", "John");
@@ -274,15 +413,35 @@ public class MapEntityTest extends TestBase {
     }
 
     @Test
-    public void testEquals_null() {
-        MapEntity entity = new MapEntity("User");
-        assertNotEquals(entity, null);
-    }
-
-    @Test
     public void testEquals_differentType() {
         MapEntity entity = new MapEntity("User");
         assertNotEquals(entity, "User");
+    }
+
+    @Test
+    public void testEquals() {
+        MapEntity entity1 = new MapEntity("User");
+        entity1.set("name", "John");
+
+        MapEntity entity2 = new MapEntity("User");
+        entity2.set("name", "John");
+
+        Assertions.assertEquals(entity1, entity2);
+
+        entity2.set("age", 30);
+        Assertions.assertNotEquals(entity1, entity2);
+    }
+
+    @Test
+    public void testEquals_same() {
+        MapEntity entity = new MapEntity("User");
+        assertEquals(entity, entity);
+    }
+
+    @Test
+    public void testEquals_null() {
+        MapEntity entity = new MapEntity("User");
+        assertNotEquals(entity, null);
     }
 
     @Test
@@ -331,167 +490,6 @@ public class MapEntityTest extends TestBase {
 
         copy.set("name", "Jane Doe");
         assertNotEquals((Object) user.get("name"), (Object) copy.get("name"));
-    }
-
-    @Test
-    public void testConstructorWithNullName() {
-        MapEntity entity = new MapEntity(null);
-        assertEquals("", entity.entityName());
-    }
-
-    @Test
-    public void testConstructorWithName() {
-        MapEntity entity = new MapEntity("User");
-        Assertions.assertEquals("User", entity.entityName());
-    }
-
-    @Test
-    public void testConstructorWithNameAndProps() {
-        Map<String, Object> props = new HashMap<>();
-        props.put("name", "John");
-        props.put("age", 30);
-
-        MapEntity entity = new MapEntity("User", props);
-        Assertions.assertEquals("User", entity.entityName());
-        Assertions.assertEquals("John", entity.get("name"));
-        Assertions.assertEquals(30, (Integer) entity.get("age"));
-    }
-
-    @Test
-    public void testEntityName() {
-        MapEntity entity = new MapEntity("Product");
-        Assertions.assertEquals("Product", entity.entityName());
-    }
-
-    @Test
-    public void testGet() {
-        MapEntity entity = new MapEntity("User");
-        entity.set("name", "John");
-
-        Assertions.assertEquals("John", entity.get("name"));
-        Assertions.assertNull(entity.get("nonexistent"));
-    }
-
-    @Test
-    public void testGetWithCanonicalName() {
-        MapEntity entity = new MapEntity("User");
-        entity.set("name", "John");
-
-        Assertions.assertEquals("John", entity.get("User.name"));
-    }
-
-    @Test
-    public void testGetWithTargetType() {
-        MapEntity entity = new MapEntity("User");
-        entity.set("age", "25");
-        entity.set("active", "true");
-
-        Integer age = entity.get("age", Integer.class);
-        Boolean active = entity.get("active", Boolean.class);
-
-        Assertions.assertEquals(25, age);
-        Assertions.assertTrue(active);
-    }
-
-    @Test
-    public void testGetWithTargetType_nullValueReturnsDefault() {
-        MapEntity entity = new MapEntity("User");
-
-        int intDefault = entity.get("missing", int.class);
-        assertEquals(0, intDefault);
-
-        boolean boolDefault = entity.get("missing", boolean.class);
-        assertFalse(boolDefault);
-    }
-
-    @Test
-    public void testSet() {
-        MapEntity entity = new MapEntity("User");
-        MapEntity result = entity.set("name", "John");
-
-        Assertions.assertSame(entity, result);
-        Assertions.assertEquals("John", entity.get("name"));
-    }
-
-    @Test
-    public void testSetWithCanonicalName() {
-        MapEntity entity = new MapEntity("User");
-        entity.set("User.name", "John");
-
-        Assertions.assertEquals("John", entity.get("name"));
-    }
-
-    @Test
-    public void testSetMap() {
-        MapEntity entity = new MapEntity("User");
-        Map<String, Object> props = new HashMap<>();
-        props.put("name", "John");
-        props.put("age", 30);
-
-        entity.set(props);
-
-        Assertions.assertEquals("John", entity.get("name"));
-        Assertions.assertEquals(30, (Integer) entity.get("age"));
-    }
-
-    @Test
-    public void testRemove() {
-        MapEntity entity = new MapEntity("User");
-        entity.set("name", "John");
-
-        Object removed = entity.remove("name");
-        Assertions.assertEquals("John", removed);
-        Assertions.assertNull(entity.get("name"));
-    }
-
-    @Test
-    public void testRemoveWithCanonicalName() {
-        MapEntity entity = new MapEntity("User");
-        entity.set("name", "John");
-
-        Object removed = entity.remove("User.name");
-        Assertions.assertEquals("John", removed);
-        Assertions.assertNull(entity.get("name"));
-    }
-
-    @Test
-    public void testContainsKey() {
-        MapEntity entity = new MapEntity("User");
-        entity.set("name", "John");
-
-        Assertions.assertTrue(entity.containsKey("name"));
-        Assertions.assertFalse(entity.containsKey("age"));
-    }
-
-    @Test
-    public void testContainsKeyWithCanonicalName() {
-        MapEntity entity = new MapEntity("User");
-        entity.set("name", "John");
-
-        Assertions.assertTrue(entity.containsKey("User.name"));
-    }
-
-    @Test
-    public void testIsEmpty() {
-        MapEntity entity = new MapEntity("User");
-        Assertions.assertTrue(entity.isEmpty());
-
-        entity.set("name", "John");
-        Assertions.assertFalse(entity.isEmpty());
-    }
-
-    @Test
-    public void testEquals() {
-        MapEntity entity1 = new MapEntity("User");
-        entity1.set("name", "John");
-
-        MapEntity entity2 = new MapEntity("User");
-        entity2.set("name", "John");
-
-        Assertions.assertEquals(entity1, entity2);
-
-        entity2.set("age", 30);
-        Assertions.assertNotEquals(entity1, entity2);
     }
 
 }

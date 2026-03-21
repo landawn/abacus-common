@@ -29,7 +29,6 @@ import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -45,7 +44,6 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.guava.Files;
 import com.landawn.abacus.guava.Files.MoreFiles;
 
-@Tag("2025")
 public class FilesTest extends TestBase {
 
     @TempDir

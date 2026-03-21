@@ -9,12 +9,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class LoggerFactoryTest extends TestBase {
 
     @BeforeEach
@@ -45,22 +43,6 @@ public class LoggerFactoryTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test getLogger with null Class throws NullPointerException")
-    public void testGetLoggerWithNullClass() {
-        assertThrows(NullPointerException.class, () -> {
-            LoggerFactory.getLogger((Class<?>) null);
-        });
-    }
-
-    @Test
-    @DisplayName("Test getLogger with null String throws NullPointerException")
-    public void testGetLoggerWithNullString() {
-        assertThrows(NullPointerException.class, () -> {
-            LoggerFactory.getLogger((String) null);
-        });
-    }
-
-    @Test
     @DisplayName("Test getLogger with different names returns different loggers")
     public void testGetLoggerWithDifferentNames() {
         Logger logger1 = LoggerFactory.getLogger("logger1");
@@ -84,6 +66,58 @@ public class LoggerFactoryTest extends TestBase {
         assertSame(logger1, logger2);
         assertSame(logger3, logger4);
         assertNotSame(logger1, logger3);
+    }
+
+    @Test
+    @DisplayName("Test logger hierarchy naming")
+    public void testLoggerHierarchyNaming() {
+        Logger rootLogger = LoggerFactory.getLogger("com");
+        Logger parentLogger = LoggerFactory.getLogger("com.landawn");
+        Logger childLogger = LoggerFactory.getLogger("com.landawn.abacus");
+
+        assertNotNull(rootLogger);
+        assertNotNull(parentLogger);
+        assertNotNull(childLogger);
+
+        assertEquals("com", rootLogger.getName());
+        assertEquals("com.landawn", parentLogger.getName());
+        assertEquals("com.landawn.abacus", childLogger.getName());
+
+        assertNotSame(rootLogger, parentLogger);
+        assertNotSame(parentLogger, childLogger);
+        assertNotSame(rootLogger, childLogger);
+    }
+
+    @Test
+    @DisplayName("Test special logger names")
+    public void testSpecialLoggerNames() {
+        Logger emptyLogger = LoggerFactory.getLogger("");
+        assertNotNull(emptyLogger);
+        assertEquals("", emptyLogger.getName());
+
+        Logger rootLogger = LoggerFactory.getLogger("ROOT");
+        assertNotNull(rootLogger);
+        assertEquals("ROOT", rootLogger.getName());
+
+        Logger specialLogger = LoggerFactory.getLogger("com.test$Special_Logger-123");
+        assertNotNull(specialLogger);
+        assertEquals("com.test$Special_Logger-123", specialLogger.getName());
+    }
+
+    @Test
+    @DisplayName("Test getLogger with null Class throws NullPointerException")
+    public void testGetLoggerWithNullClass() {
+        assertThrows(NullPointerException.class, () -> {
+            LoggerFactory.getLogger((Class<?>) null);
+        });
+    }
+
+    @Test
+    @DisplayName("Test getLogger with null String throws NullPointerException")
+    public void testGetLoggerWithNullString() {
+        assertThrows(NullPointerException.class, () -> {
+            LoggerFactory.getLogger((String) null);
+        });
     }
 
     @Test
@@ -127,41 +161,5 @@ public class LoggerFactoryTest extends TestBase {
         for (int i = 1; i < threadCount; i++) {
             assertSame(firstLogger, loggers[i]);
         }
-    }
-
-    @Test
-    @DisplayName("Test logger hierarchy naming")
-    public void testLoggerHierarchyNaming() {
-        Logger rootLogger = LoggerFactory.getLogger("com");
-        Logger parentLogger = LoggerFactory.getLogger("com.landawn");
-        Logger childLogger = LoggerFactory.getLogger("com.landawn.abacus");
-
-        assertNotNull(rootLogger);
-        assertNotNull(parentLogger);
-        assertNotNull(childLogger);
-
-        assertEquals("com", rootLogger.getName());
-        assertEquals("com.landawn", parentLogger.getName());
-        assertEquals("com.landawn.abacus", childLogger.getName());
-
-        assertNotSame(rootLogger, parentLogger);
-        assertNotSame(parentLogger, childLogger);
-        assertNotSame(rootLogger, childLogger);
-    }
-
-    @Test
-    @DisplayName("Test special logger names")
-    public void testSpecialLoggerNames() {
-        Logger emptyLogger = LoggerFactory.getLogger("");
-        assertNotNull(emptyLogger);
-        assertEquals("", emptyLogger.getName());
-
-        Logger rootLogger = LoggerFactory.getLogger("ROOT");
-        assertNotNull(rootLogger);
-        assertEquals("ROOT", rootLogger.getName());
-
-        Logger specialLogger = LoggerFactory.getLogger("com.test$Special_Logger-123");
-        assertNotNull(specialLogger);
-        assertEquals("com.test$Special_Logger-123", specialLogger.getName());
     }
 }

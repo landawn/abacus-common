@@ -15,48 +15,44 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BytesTypeTest extends TestBase {
 
     private final BytesType type = new BytesType();
 
     @Test
-    public void test_name() {
-        assertNotNull(type.name());
-        assertFalse(type.name().isEmpty());
-    }
-
-    @Test
-    public void test_valueOf_String() {
-        // Test with null
-        Object result = type.valueOf((String) null);
-        // Result may be null or default value depending on type
-        assertNull(result);
-    }
-
-    @Test
-    public void test_get_ResultSet_byLabel() throws SQLException {
-        ResultSet rs = mock(ResultSet.class);
-        // Basic get test - actual implementation will vary by type
-        assertDoesNotThrow(() -> type.get(rs, "col"));
-    }
-
-    @Test
-    public void test_set_CallableStatement() throws SQLException {
-        CallableStatement stmt = mock(CallableStatement.class);
-        // Basic set test - actual implementation will vary by type
-        assertDoesNotThrow(() -> type.set(stmt, "param", null));
-    }
-
-    @Test
     public void testClazz() {
         Class<byte[]> result = type.javaType();
         assertEquals(byte[].class, result);
+    }
+
+    @Test
+    public void testRoundTrip() {
+        byte[] original = new byte[256];
+        for (int i = 0; i < 256; i++) {
+            original[i] = (byte) i;
+        }
+
+        String base64 = type.stringOf(original);
+        byte[] restored = type.valueOf(base64);
+
+        Assertions.assertArrayEquals(original, restored);
+    }
+
+    @Test
+    public void testLargeArray() {
+        byte[] largeArray = new byte[10000];
+        for (int i = 0; i < largeArray.length; i++) {
+            largeArray[i] = (byte) (i % 256);
+        }
+
+        String base64 = type.stringOf(largeArray);
+        byte[] restored = type.valueOf(base64);
+
+        Assertions.assertArrayEquals(largeArray, restored);
     }
 
     @Test
@@ -84,6 +80,24 @@ public class BytesTypeTest extends TestBase {
     }
 
     @Test
+    public void testSpecialCases() {
+        byte[] special = new byte[] { 0, 1, 2, 3, 61, 62, 63, 64, 65 };
+
+        String base64 = type.stringOf(special);
+        byte[] restored = type.valueOf(base64);
+
+        Assertions.assertArrayEquals(special, restored);
+    }
+
+    @Test
+    public void test_valueOf_String() {
+        // Test with null
+        Object result = type.valueOf((String) null);
+        // Result may be null or default value depending on type
+        assertNull(result);
+    }
+
+    @Test
     public void testValueOf_Null() {
         byte[] result = type.valueOf(null);
         Assertions.assertNull(result);
@@ -106,6 +120,13 @@ public class BytesTypeTest extends TestBase {
         assertEquals((byte) 1, result[0]);
         assertEquals((byte) 2, result[1]);
         assertEquals((byte) 3, result[2]);
+    }
+
+    @Test
+    public void test_get_ResultSet_byLabel() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+        // Basic get test - actual implementation will vary by type
+        assertDoesNotThrow(() -> type.get(rs, "col"));
     }
 
     @Test
@@ -144,6 +165,13 @@ public class BytesTypeTest extends TestBase {
     }
 
     @Test
+    public void test_set_CallableStatement() throws SQLException {
+        CallableStatement stmt = mock(CallableStatement.class);
+        // Basic set test - actual implementation will vary by type
+        assertDoesNotThrow(() -> type.set(stmt, "param", null));
+    }
+
+    @Test
     public void testSet_PreparedStatement_Int() throws SQLException {
         PreparedStatement stmt = mock(PreparedStatement.class);
         byte[] bytes = new byte[] { 1, 2, 3, 4, 5 };
@@ -173,39 +201,9 @@ public class BytesTypeTest extends TestBase {
     }
 
     @Test
-    public void testRoundTrip() {
-        byte[] original = new byte[256];
-        for (int i = 0; i < 256; i++) {
-            original[i] = (byte) i;
-        }
-
-        String base64 = type.stringOf(original);
-        byte[] restored = type.valueOf(base64);
-
-        Assertions.assertArrayEquals(original, restored);
-    }
-
-    @Test
-    public void testLargeArray() {
-        byte[] largeArray = new byte[10000];
-        for (int i = 0; i < largeArray.length; i++) {
-            largeArray[i] = (byte) (i % 256);
-        }
-
-        String base64 = type.stringOf(largeArray);
-        byte[] restored = type.valueOf(base64);
-
-        Assertions.assertArrayEquals(largeArray, restored);
-    }
-
-    @Test
-    public void testSpecialCases() {
-        byte[] special = new byte[] { 0, 1, 2, 3, 61, 62, 63, 64, 65 };
-
-        String base64 = type.stringOf(special);
-        byte[] restored = type.valueOf(base64);
-
-        Assertions.assertArrayEquals(special, restored);
+    public void test_name() {
+        assertNotNull(type.name());
+        assertFalse(type.name().isEmpty());
     }
 
 }

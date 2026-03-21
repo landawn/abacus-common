@@ -19,16 +19,16 @@ import java.io.Serial;
 /**
  * Exception thrown when an operation encounters more elements than expected or allowed.
  * This exception extends {@link IllegalStateException} to indicate that the application
- * is in an illegal state due to exceeding the expected number of elements.
- * 
+ * is in an illegal state because the number of elements exceeded the expected limit.
+ *
  * <p>Common use cases include:</p>
  * <ul>
- *   <li>Stream operations expecting at most one element but finding multiple</li>
- *   <li>Collection operations with size constraints that are violated</li>
- *   <li>Buffer or queue operations that exceed capacity limits</li>
- *   <li>API responses that return more results than the maximum allowed</li>
+ *   <li>Stream operations expecting at most one element but finding multiple.</li>
+ *   <li>Collection operations with size constraints that are violated.</li>
+ *   <li>Buffer or queue operations that exceed capacity limits.</li>
+ *   <li>API responses that return more results than the maximum allowed.</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // In a stream operation expecting at most one element
@@ -36,13 +36,13 @@ import java.io.Serial;
  * if (results.size() > 1) {
  *     throw new TooManyElementsException("Expected at most 1 element, but found: " + results.size());
  * }
- * 
+ *
  * // In a bounded collection
  * if (queue.size() >= maxCapacity) {
  *     throw new TooManyElementsException("Queue capacity exceeded: " + maxCapacity);
  * }
  * }</pre>
- * 
+ *
  * @see IllegalStateException
  * @see DuplicateResultException
  */
@@ -61,6 +61,7 @@ public class TooManyElementsException extends IllegalStateException {
      * }</pre>
      */
     public TooManyElementsException() {
+        super();
     }
 
     /**
@@ -97,7 +98,7 @@ public class TooManyElementsException extends IllegalStateException {
      * @param message the detail message. The detail message is saved for later retrieval
      *                by the {@link #getMessage()} method.
      * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
-     *              A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.
+     *              (A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.)
      */
     public TooManyElementsException(final String message, final Throwable cause) {
         super(message, cause);
@@ -113,13 +114,15 @@ public class TooManyElementsException extends IllegalStateException {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * catch (SQLException e) {
+     * try {
+     *     // collection operation
+     * } catch (Exception e) {
      *     throw new TooManyElementsException(e);
      * }
      * }</pre>
      *
      * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
-     *              A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.
+     *              (A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.)
      */
     public TooManyElementsException(final Throwable cause) {
         super(cause);

@@ -2,12 +2,10 @@ package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 
-@Tag("old-test")
 public class JDK8BaseTest extends AbstractTest {
 
     @Test

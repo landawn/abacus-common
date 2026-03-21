@@ -21,7 +21,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that the annotated method or type uses lazy evaluation strategy.
+ * Indicates that the annotated method or type uses a lazy evaluation strategy.
  * Lazy evaluation defers computation until the result is actually needed,
  * which can improve performance by avoiding unnecessary calculations.
  *

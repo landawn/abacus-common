@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
@@ -25,162 +24,7 @@ import com.landawn.abacus.util.PropertiesUtil.ConfigBean;
 import com.landawn.abacus.util.PropertiesUtil.Resource;
 import com.landawn.abacus.util.PropertiesUtil.ResourceType;
 
-@Tag("old-test")
 public class PropertiesTest extends AbstractTest {
-
-    @Test
-    public void test_keyValue() {
-        final Properties<String, String> properties = new Properties<>();
-        properties.put("key1", "value1");
-        N.println(properties);
-        assertNotNull(properties);
-    }
-
-    @Test
-    public void test_configBean() {
-        final ConfigBean bean = new ConfigBean();
-        bean.setName("myTestConfig");
-        bean.setContent("abc123");
-        bean.setStatus(UnifiedStatus.ACTIVE);
-        bean.setLastUpdateTime(Dates.currentTimestamp());
-        bean.setCreatedTime(Dates.currentTimestamp());
-
-        final ConfigBean bean2 = Beans.copy(bean);
-        assertEquals(bean, bean2);
-        final Set<ConfigBean> set = CommonUtil.toSet(bean);
-        assertTrue(set.contains(bean2));
-
-        N.println(bean);
-    }
-
-    @Test
-    public void test_loadProperties() throws Exception {
-        {
-            File file = PropertiesUtil.findFile("./src/test/resources/jdbc.properties");
-
-            final Properties<String, String> properties = PropertiesUtil.load(file);
-
-            N.println(properties);
-
-            file = new File("./src/test/resources/jdbc2.xml");
-            if (file.exists()) {
-                file.delete();
-            }
-
-            PropertiesUtil.storeToXml(properties, "jdbc", false, file);
-
-            N.println(IOUtil.readAllToString(file));
-
-            final Properties<String, Object> properties2 = PropertiesUtil.loadFromXml(file);
-
-            N.println(properties2);
-
-            assertEquals(properties, properties2);
-        }
-
-        {
-            File file = PropertiesUtil.findFile("./src/test/resources/jdbc.properties");
-            final Reader reader = new FileReader(file);
-
-            final Properties<String, String> properties = PropertiesUtil.load(reader);
-            reader.close();
-
-            N.println(properties);
-
-            file = new File("./src/test/resources/jdbc2.xml");
-            if (file.exists()) {
-                file.delete();
-            }
-
-            PropertiesUtil.storeToXml(properties, "jdbc", false, file);
-
-            N.println(IOUtil.readAllToString(file));
-
-            final Properties<String, Object> properties2 = PropertiesUtil.loadFromXml(file);
-
-            N.println(properties2);
-
-            assertEquals(properties, properties2);
-        }
-
-    }
-
-    @Test
-    public void test_xmlToJava() throws Exception {
-        N.println(int.class);
-
-        File file = new File("./src/test/resources/myProperties.xml");
-        final String srcPath = "./src/test/java";
-        final String packageName = "com.landawn.abacus.properties";
-        final String className = "MyProperties";
-        PropertiesUtil.xmlToJava(file, srcPath, packageName, className, false);
-        final MyProperties myProperties = PropertiesUtil.loadFromXml(file, MyProperties.class);
-
-        N.println(myProperties);
-
-        file = new File("./src/test/resources/myProperties2.xml");
-        if (file.exists()) {
-            file.delete();
-        }
-
-        PropertiesUtil.storeToXml(myProperties, "myPropertiesNew", false, file);
-
-        N.println(IOUtil.readAllToString(file));
-
-        final Properties<String, Object> myProperties2 = PropertiesUtil.loadFromXml(file, Properties.class);
-        N.println(myProperties2);
-        assertNotNull(myProperties2);
-    }
-
-    @Test
-    public void test_autoRefresh() throws Exception {
-        N.println(int.class);
-
-        final File file = new File("./src/test/resources/myProperties.xml");
-        final MyProperties myProperties = PropertiesUtil.loadFromXml(file, true, MyProperties.class);
-
-        N.println(myProperties);
-
-        final String oldValue = myProperties.getMProps4().getStrProp();
-        N.println(oldValue);
-
-        final String newValue = Strings.uuid();
-        myProperties.getMProps4().setStrProp(newValue);
-
-        N.sleep(1000);
-
-        PropertiesUtil.storeToXml(myProperties, "MyProperties", false, file);
-        myProperties.getMProps4().setStrProp(oldValue);
-
-        N.sleep(3000);
-
-        assertEquals(newValue, myProperties.getMProps4().getStrProp());
-
-        myProperties.getMProps4().setStrProp(oldValue);
-        PropertiesUtil.storeToXml(myProperties, "MyProperties", false, file);
-        N.sleep(2000);
-
-        assertEquals(oldValue, myProperties.getMProps4().getStrProp());
-    }
-
-    @Test
-    public void test_Resource() throws Exception {
-        final File file = PropertiesUtil.findFile("./src/test/resources/jdbc.properties");
-        final Resource resource1 = new Resource(Properties.class, file, ResourceType.PROPERTIES);
-        final Resource resource2 = new Resource(Properties.class, file, ResourceType.PROPERTIES);
-
-        N.println(resource1);
-
-        assertTrue(CommonUtil.toSet(resource1).contains(resource2));
-
-    }
-
-    @Test
-    public void testDefaultConstructor() {
-        Properties<String, Object> props = new Properties<>();
-        assertTrue(props.isEmpty());
-        assertEquals(0, props.size());
-    }
 
     @Test
     public void testCreate() {
@@ -199,6 +43,27 @@ public class PropertiesTest extends AbstractTest {
         Map<String, Object> map = new HashMap<>();
         Properties<String, Object> props = Properties.create(map);
         assertTrue(props.isEmpty());
+    }
+
+    @Test
+    public void testGetWithTypeConversion() {
+        Properties<String, Object> props = new Properties<>();
+        props.put("stringNum", "123");
+        props.put("intNum", 456);
+        props.put("boolTrue", "true");
+        props.put("boolFalse", false);
+
+        int num1 = props.get("stringNum", Integer.class);
+        assertEquals(123, num1);
+
+        int num2 = props.get("intNum", Integer.class);
+        assertEquals(456, num2);
+
+        boolean bool1 = props.get("boolTrue", Boolean.class);
+        assertTrue(bool1);
+
+        boolean bool2 = props.get("boolFalse", Boolean.class);
+        assertFalse(bool2);
     }
 
     @Test
@@ -255,15 +120,6 @@ public class PropertiesTest extends AbstractTest {
     }
 
     @Test
-    public void testGetOrDefaultWithNullValue() {
-        Properties<String, String> props = new Properties<>();
-        props.put("key", null);
-
-        String value = props.getOrDefault("key", "default");
-        assertEquals("default", value);
-    }
-
-    @Test
     public void testGetOrDefaultWithTargetType() {
         Properties<String, Object> props = new Properties<>();
         props.put("timeout", "30");
@@ -273,6 +129,15 @@ public class PropertiesTest extends AbstractTest {
 
         boolean debug = props.getOrDefault("debug", false, Boolean.class);
         assertFalse(debug);
+    }
+
+    @Test
+    public void testGetOrDefaultWithNullValue() {
+        Properties<String, String> props = new Properties<>();
+        props.put("key", null);
+
+        String value = props.getOrDefault("key", "default");
+        assertEquals("default", value);
     }
 
     @Test
@@ -395,6 +260,44 @@ public class PropertiesTest extends AbstractTest {
     }
 
     @Test
+    public void testReplaceWithOldValue() {
+        Properties<String, String> props = new Properties<>();
+        props.put("status", "draft");
+
+        boolean replaced1 = props.replace("status", "published", "approved");
+        assertFalse(replaced1);
+        assertEquals("draft", props.get("status"));
+
+        boolean replaced2 = props.replace("status", "draft", "published");
+        assertTrue(replaced2);
+        assertEquals("published", props.get("status"));
+    }
+
+    @Test
+    public void testComplexScenario() {
+        Properties<String, Object> props = new Properties<>();
+
+        props.set("host", "localhost").set("port", 8080).set("timeout", 30);
+
+        String host = props.get("host", String.class);
+        int port = props.get("port", Integer.class);
+        int timeout = props.get("timeout", Integer.class);
+
+        assertEquals("localhost", host);
+        assertEquals(8080, port);
+        assertEquals(30, timeout);
+
+        props.replace("port", 9090);
+        assertEquals(9090, props.get("port"));
+
+        props.remove("timeout");
+        assertFalse(props.containsKey("timeout"));
+
+        Properties<String, Object> copy = props.copy();
+        assertEquals(props, copy);
+    }
+
+    @Test
     public void testReplace() {
         Properties<String, Integer> props = new Properties<>();
         props.put("version", 1);
@@ -416,20 +319,6 @@ public class PropertiesTest extends AbstractTest {
         String result = props.replace("key", "value");
         assertNull(result);
         assertEquals("value", props.get("key"));
-    }
-
-    @Test
-    public void testReplaceWithOldValue() {
-        Properties<String, String> props = new Properties<>();
-        props.put("status", "draft");
-
-        boolean replaced1 = props.replace("status", "published", "approved");
-        assertFalse(replaced1);
-        assertEquals("draft", props.get("status"));
-
-        boolean replaced2 = props.replace("status", "draft", "published");
-        assertTrue(replaced2);
-        assertEquals("published", props.get("status"));
     }
 
     @Test
@@ -460,6 +349,18 @@ public class PropertiesTest extends AbstractTest {
     }
 
     @Test
+    public void testNullHandling() {
+        Properties<String, String> props = new Properties<>();
+        props.put("nullKey", null);
+
+        assertTrue(props.containsKey("nullKey"));
+        assertNull(props.get("nullKey"));
+
+        String defaultValue = props.getOrDefault("nullKey", "default");
+        assertEquals("default", defaultValue);
+    }
+
+    @Test
     public void testContainsValue() {
         Properties<String, String> props = new Properties<>();
         props.put("host", "localhost");
@@ -479,6 +380,21 @@ public class PropertiesTest extends AbstractTest {
         assertEquals(2, keys.size());
         assertTrue(keys.contains("name"));
         assertTrue(keys.contains("age"));
+    }
+
+    @Test
+    public void testInsertionOrder() {
+        Properties<String, Integer> props = new Properties<>();
+        props.put("first", 1);
+        props.put("second", 2);
+        props.put("third", 3);
+
+        Set<String> keys = props.keySet();
+        String[] keyArray = keys.toArray(new String[0]);
+
+        assertEquals("first", keyArray[0]);
+        assertEquals("second", keyArray[1]);
+        assertEquals("third", keyArray[2]);
     }
 
     @Test
@@ -517,6 +433,13 @@ public class PropertiesTest extends AbstractTest {
     }
 
     @Test
+    public void testDefaultConstructor() {
+        Properties<String, Object> props = new Properties<>();
+        assertTrue(props.isEmpty());
+        assertEquals(0, props.size());
+    }
+
+    @Test
     public void testIsEmpty() {
         Properties<String, Object> props = new Properties<>();
         assertTrue(props.isEmpty());
@@ -526,6 +449,13 @@ public class PropertiesTest extends AbstractTest {
 
         props.clear();
         assertTrue(props.isEmpty());
+    }
+
+    @Test
+    public void testConstructor() {
+        Properties<String, Object> props = new Properties<>();
+        Assertions.assertNotNull(props);
+        Assertions.assertTrue(props.isEmpty());
     }
 
     @Test
@@ -554,6 +484,23 @@ public class PropertiesTest extends AbstractTest {
         props.clear();
         assertTrue(props.isEmpty());
         assertEquals(0, props.size());
+    }
+
+    @Test
+    public void test_configBean() {
+        final ConfigBean bean = new ConfigBean();
+        bean.setName("myTestConfig");
+        bean.setContent("abc123");
+        bean.setStatus(UnifiedStatus.ACTIVE);
+        bean.setLastUpdateTime(Dates.currentTimestamp());
+        bean.setCreatedTime(Dates.currentTimestamp());
+
+        final ConfigBean bean2 = Beans.copy(bean);
+        assertEquals(bean, bean2);
+        final Set<ConfigBean> set = CommonUtil.toSet(bean);
+        assertTrue(set.contains(bean2));
+
+        N.println(bean);
     }
 
     @Test
@@ -607,14 +554,6 @@ public class PropertiesTest extends AbstractTest {
     }
 
     @Test
-    public void testEqualsSameInstance() {
-        Properties<String, Object> props = new Properties<>();
-        props.put("key", "value");
-
-        assertEquals(props, props);
-    }
-
-    @Test
     public void testEqualsNotEqual() {
         Properties<String, Object> props1 = new Properties<>();
         props1.put("key1", "value");
@@ -626,15 +565,23 @@ public class PropertiesTest extends AbstractTest {
     }
 
     @Test
-    public void testEqualsNull() {
-        Properties<String, Object> props = new Properties<>();
-        assertNotEquals(props, null);
-    }
-
-    @Test
     public void testEqualsDifferentType() {
         Properties<String, Object> props = new Properties<>();
         assertNotEquals(props, new HashMap<>());
+    }
+
+    @Test
+    public void testEqualsSameInstance() {
+        Properties<String, Object> props = new Properties<>();
+        props.put("key", "value");
+
+        assertEquals(props, props);
+    }
+
+    @Test
+    public void testEqualsNull() {
+        Properties<String, Object> props = new Properties<>();
+        assertNotEquals(props, null);
     }
 
     @Test
@@ -658,82 +605,133 @@ public class PropertiesTest extends AbstractTest {
     }
 
     @Test
-    public void testInsertionOrder() {
-        Properties<String, Integer> props = new Properties<>();
-        props.put("first", 1);
-        props.put("second", 2);
-        props.put("third", 3);
-
-        Set<String> keys = props.keySet();
-        String[] keyArray = keys.toArray(new String[0]);
-
-        assertEquals("first", keyArray[0]);
-        assertEquals("second", keyArray[1]);
-        assertEquals("third", keyArray[2]);
+    public void test_keyValue() {
+        final Properties<String, String> properties = new Properties<>();
+        properties.put("key1", "value1");
+        N.println(properties);
+        assertNotNull(properties);
     }
 
     @Test
-    public void testComplexScenario() {
-        Properties<String, Object> props = new Properties<>();
+    public void test_loadProperties() throws Exception {
+        {
+            File file = PropertiesUtil.findFile("./src/test/resources/jdbc.properties");
 
-        props.set("host", "localhost").set("port", 8080).set("timeout", 30);
+            final Properties<String, String> properties = PropertiesUtil.load(file);
 
-        String host = props.get("host", String.class);
-        int port = props.get("port", Integer.class);
-        int timeout = props.get("timeout", Integer.class);
+            N.println(properties);
 
-        assertEquals("localhost", host);
-        assertEquals(8080, port);
-        assertEquals(30, timeout);
+            file = new File("./src/test/resources/jdbc2.xml");
+            if (file.exists()) {
+                file.delete();
+            }
 
-        props.replace("port", 9090);
-        assertEquals(9090, props.get("port"));
+            PropertiesUtil.storeToXml(properties, "jdbc", false, file);
 
-        props.remove("timeout");
-        assertFalse(props.containsKey("timeout"));
+            N.println(IOUtil.readAllToString(file));
 
-        Properties<String, Object> copy = props.copy();
-        assertEquals(props, copy);
+            final Properties<String, Object> properties2 = PropertiesUtil.loadFromXml(file);
+
+            N.println(properties2);
+
+            assertEquals(properties, properties2);
+        }
+
+        {
+            File file = PropertiesUtil.findFile("./src/test/resources/jdbc.properties");
+            final Reader reader = new FileReader(file);
+
+            final Properties<String, String> properties = PropertiesUtil.load(reader);
+            reader.close();
+
+            N.println(properties);
+
+            file = new File("./src/test/resources/jdbc2.xml");
+            if (file.exists()) {
+                file.delete();
+            }
+
+            PropertiesUtil.storeToXml(properties, "jdbc", false, file);
+
+            N.println(IOUtil.readAllToString(file));
+
+            final Properties<String, Object> properties2 = PropertiesUtil.loadFromXml(file);
+
+            N.println(properties2);
+
+            assertEquals(properties, properties2);
+        }
+
     }
 
     @Test
-    public void testNullHandling() {
-        Properties<String, String> props = new Properties<>();
-        props.put("nullKey", null);
+    public void test_xmlToJava() throws Exception {
+        N.println(int.class);
 
-        assertTrue(props.containsKey("nullKey"));
-        assertNull(props.get("nullKey"));
+        File file = new File("./src/test/resources/myProperties.xml");
+        final String srcPath = "./src/test/java";
+        final String packageName = "com.landawn.abacus.properties";
+        final String className = "MyProperties";
+        PropertiesUtil.xmlToJava(file, srcPath, packageName, className, false);
+        final MyProperties myProperties = PropertiesUtil.loadFromXml(file, MyProperties.class);
 
-        String defaultValue = props.getOrDefault("nullKey", "default");
-        assertEquals("default", defaultValue);
+        N.println(myProperties);
+
+        file = new File("./src/test/resources/myProperties2.xml");
+        if (file.exists()) {
+            file.delete();
+        }
+
+        PropertiesUtil.storeToXml(myProperties, "myPropertiesNew", false, file);
+
+        N.println(IOUtil.readAllToString(file));
+
+        final Properties<String, Object> myProperties2 = PropertiesUtil.loadFromXml(file, Properties.class);
+        N.println(myProperties2);
+        assertNotNull(myProperties2);
     }
 
     @Test
-    public void testGetWithTypeConversion() {
-        Properties<String, Object> props = new Properties<>();
-        props.put("stringNum", "123");
-        props.put("intNum", 456);
-        props.put("boolTrue", "true");
-        props.put("boolFalse", false);
+    public void test_autoRefresh() throws Exception {
+        N.println(int.class);
 
-        int num1 = props.get("stringNum", Integer.class);
-        assertEquals(123, num1);
+        final File file = new File("./src/test/resources/myProperties.xml");
+        final MyProperties myProperties = PropertiesUtil.loadFromXml(file, true, MyProperties.class);
 
-        int num2 = props.get("intNum", Integer.class);
-        assertEquals(456, num2);
+        N.println(myProperties);
 
-        boolean bool1 = props.get("boolTrue", Boolean.class);
-        assertTrue(bool1);
+        final String oldValue = myProperties.getMProps4().getStrProp();
+        N.println(oldValue);
 
-        boolean bool2 = props.get("boolFalse", Boolean.class);
-        assertFalse(bool2);
+        final String newValue = Strings.uuid();
+        myProperties.getMProps4().setStrProp(newValue);
+
+        N.sleep(1000);
+
+        PropertiesUtil.storeToXml(myProperties, "MyProperties", false, file);
+        myProperties.getMProps4().setStrProp(oldValue);
+
+        N.sleep(3000);
+
+        assertEquals(newValue, myProperties.getMProps4().getStrProp());
+
+        myProperties.getMProps4().setStrProp(oldValue);
+        PropertiesUtil.storeToXml(myProperties, "MyProperties", false, file);
+        N.sleep(2000);
+
+        assertEquals(oldValue, myProperties.getMProps4().getStrProp());
     }
 
     @Test
-    public void testConstructor() {
-        Properties<String, Object> props = new Properties<>();
-        Assertions.assertNotNull(props);
-        Assertions.assertTrue(props.isEmpty());
+    public void test_Resource() throws Exception {
+        final File file = PropertiesUtil.findFile("./src/test/resources/jdbc.properties");
+        final Resource resource1 = new Resource(Properties.class, file, ResourceType.PROPERTIES);
+        final Resource resource2 = new Resource(Properties.class, file, ResourceType.PROPERTIES);
+
+        N.println(resource1);
+
+        assertTrue(CommonUtil.toSet(resource1).contains(resource2));
+
     }
 
 }

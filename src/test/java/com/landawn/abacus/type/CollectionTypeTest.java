@@ -20,14 +20,12 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("new-test")
 public class CollectionTypeTest extends TestBase {
 
     private CollectionType<String, List<String>> listType;
@@ -58,16 +56,16 @@ public class CollectionTypeTest extends TestBase {
     }
 
     @Test
+    public void testGetElementType() {
+        Type<String> elementType = listType.elementType();
+        Assertions.assertNotNull(elementType);
+    }
+
+    @Test
     public void testGetParameterTypes() {
         Type<String>[] paramTypes = listType.parameterTypes();
         Assertions.assertNotNull(paramTypes);
         assertEquals(1, paramTypes.length);
-    }
-
-    @Test
-    public void testGetElementType() {
-        Type<String> elementType = listType.elementType();
-        Assertions.assertNotNull(elementType);
     }
 
     @Test
@@ -111,6 +109,18 @@ public class CollectionTypeTest extends TestBase {
     }
 
     @Test
+    public void testRoundTrip() {
+        List<String> original = Arrays.asList("one", "two", "three");
+        String json = listType.stringOf(original);
+        List<String> restored = listType.valueOf(json);
+
+        assertEquals(original.size(), restored.size());
+        for (int i = 0; i < original.size(); i++) {
+            assertEquals(original.get(i), restored.get(i));
+        }
+    }
+
+    @Test
     public void testStringOf_Null() {
         String result = listType.stringOf(null);
         Assertions.assertNull(result);
@@ -151,6 +161,32 @@ public class CollectionTypeTest extends TestBase {
         Assertions.assertTrue(result.contains("first"));
         Assertions.assertTrue(result.contains("null"));
         Assertions.assertTrue(result.contains("third"));
+    }
+
+    @Test
+    public void testSetType() {
+        Set<Integer> set = new HashSet<>(Arrays.asList(1, 2, 3));
+        String stringRep = setType.stringOf(set);
+        Assertions.assertNotNull(stringRep);
+
+        Set<Integer> restored = setType.valueOf(stringRep);
+        Assertions.assertNotNull(restored);
+        assertEquals(set.size(), restored.size());
+        Assertions.assertTrue(restored.containsAll(set));
+    }
+
+    @Test
+    public void testQueueType() {
+        Queue<Object> queue = new LinkedList<>();
+        queue.offer("first");
+        queue.offer("second");
+
+        String stringRep = queueType.stringOf(queue);
+        Assertions.assertNotNull(stringRep);
+
+        Queue<Object> restored = queueType.valueOf(stringRep);
+        Assertions.assertNotNull(restored);
+        assertEquals(2, restored.size());
     }
 
     @Test
@@ -252,43 +288,5 @@ public class CollectionTypeTest extends TestBase {
         verify(mockWriter).write('[');
         verify(mockWriter).write(']');
         verify(mockWriter, atLeastOnce()).write(any(char[].class));
-    }
-
-    @Test
-    public void testSetType() {
-        Set<Integer> set = new HashSet<>(Arrays.asList(1, 2, 3));
-        String stringRep = setType.stringOf(set);
-        Assertions.assertNotNull(stringRep);
-
-        Set<Integer> restored = setType.valueOf(stringRep);
-        Assertions.assertNotNull(restored);
-        assertEquals(set.size(), restored.size());
-        Assertions.assertTrue(restored.containsAll(set));
-    }
-
-    @Test
-    public void testQueueType() {
-        Queue<Object> queue = new LinkedList<>();
-        queue.offer("first");
-        queue.offer("second");
-
-        String stringRep = queueType.stringOf(queue);
-        Assertions.assertNotNull(stringRep);
-
-        Queue<Object> restored = queueType.valueOf(stringRep);
-        Assertions.assertNotNull(restored);
-        assertEquals(2, restored.size());
-    }
-
-    @Test
-    public void testRoundTrip() {
-        List<String> original = Arrays.asList("one", "two", "three");
-        String json = listType.stringOf(original);
-        List<String> restored = listType.valueOf(json);
-
-        assertEquals(original.size(), restored.size());
-        for (int i = 0; i < original.size(); i++) {
-            assertEquals(original.get(i), restored.get(i));
-        }
     }
 }

@@ -3,12 +3,10 @@ package com.landawn.abacus.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class GenderTest extends TestBase {
 
     @Test
@@ -28,18 +26,18 @@ public class GenderTest extends TestBase {
     }
 
     @Test
-    public void testValueOf_withInvalidIntValue() {
-        assertThrows(IllegalArgumentException.class, () -> Gender.valueOf(-1));
-        assertThrows(IllegalArgumentException.class, () -> Gender.valueOf(4));
-        assertThrows(IllegalArgumentException.class, () -> Gender.valueOf(100));
-    }
-
-    @Test
     public void testValueOf_withStringName() {
         assertEquals(Gender.BLANK, Gender.valueOf("BLANK"));
         assertEquals(Gender.FEMALE, Gender.valueOf("FEMALE"));
         assertEquals(Gender.MALE, Gender.valueOf("MALE"));
         assertEquals(Gender.X, Gender.valueOf("X"));
+    }
+
+    @Test
+    public void testValueOf_withInvalidIntValue() {
+        assertThrows(IllegalArgumentException.class, () -> Gender.valueOf(-1));
+        assertThrows(IllegalArgumentException.class, () -> Gender.valueOf(4));
+        assertThrows(IllegalArgumentException.class, () -> Gender.valueOf(100));
     }
 
     @Test

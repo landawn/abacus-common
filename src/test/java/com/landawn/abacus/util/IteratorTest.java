@@ -1,5 +1,7 @@
 package com.landawn.abacus.util;
 
+import com.landawn.abacus.TestBase;
+
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.Map;
@@ -9,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.util.stream.Stream;
 
-public class IteratorTest {
+public class IteratorTest extends TestBase {
 
     @Test
     public void test_BiIterator_filter() {

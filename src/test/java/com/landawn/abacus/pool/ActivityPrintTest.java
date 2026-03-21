@@ -6,12 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ActivityPrintTest extends TestBase {
 
     @Test
@@ -266,6 +264,14 @@ public class ActivityPrintTest extends TestBase {
     }
 
     @Test
+    public void testIsExpiredWithOldCreatedTime() {
+        ActivityPrint print = new ActivityPrint(1000, 5000);
+        print.setCreatedTime(System.currentTimeMillis() - 2000);
+
+        assertTrue(print.isExpired());
+    }
+
+    @Test
     public void testIsExpiredWithVeryShortLiveTime() throws InterruptedException {
         ActivityPrint print = new ActivityPrint(1, 5000);
 
@@ -279,14 +285,6 @@ public class ActivityPrintTest extends TestBase {
         ActivityPrint print = new ActivityPrint(10000, 1);
 
         Thread.sleep(10);
-
-        assertTrue(print.isExpired());
-    }
-
-    @Test
-    public void testIsExpiredWithOldCreatedTime() {
-        ActivityPrint print = new ActivityPrint(1000, 5000);
-        print.setCreatedTime(System.currentTimeMillis() - 2000);
 
         assertTrue(print.isExpired());
     }
@@ -313,19 +311,19 @@ public class ActivityPrintTest extends TestBase {
     }
 
     @Test
-    public void testClone() {
-        ActivityPrint original = new ActivityPrint(10000, 5000);
-        original.updateAccessCount();
-        original.updateAccessCount();
+    public void testIsExpiredByLiveTime() throws InterruptedException {
+        ActivityPrint shortLivedPrint = new ActivityPrint(50, 1000);
+        assertFalse(shortLivedPrint.isExpired());
+        Thread.sleep(60);
+        assertTrue(shortLivedPrint.isExpired());
+    }
 
-        ActivityPrint cloned = (ActivityPrint) original.clone();
-
-        assertNotNull(cloned);
-        assertEquals(original.getLiveTime(), cloned.getLiveTime());
-        assertEquals(original.getMaxIdleTime(), cloned.getMaxIdleTime());
-        assertEquals(original.getCreatedTime(), cloned.getCreatedTime());
-        assertEquals(original.getLastAccessTime(), cloned.getLastAccessTime());
-        assertEquals(original.getAccessCount(), cloned.getAccessCount());
+    @Test
+    public void testIsExpiredByIdleTime() throws InterruptedException {
+        ActivityPrint shortIdlePrint = new ActivityPrint(1000, 50);
+        assertFalse(shortIdlePrint.isExpired());
+        Thread.sleep(60);
+        assertTrue(shortIdlePrint.isExpired());
     }
 
     @Test
@@ -340,6 +338,22 @@ public class ActivityPrintTest extends TestBase {
         assertEquals(0, cloned.getAccessCount());
         assertEquals(15000, original.getLiveTime());
         assertEquals(10000, cloned.getLiveTime());
+    }
+
+    @Test
+    public void testClone() {
+        ActivityPrint original = new ActivityPrint(10000, 5000);
+        original.updateAccessCount();
+        original.updateAccessCount();
+
+        ActivityPrint cloned = (ActivityPrint) original.clone();
+
+        assertNotNull(cloned);
+        assertEquals(original.getLiveTime(), cloned.getLiveTime());
+        assertEquals(original.getMaxIdleTime(), cloned.getMaxIdleTime());
+        assertEquals(original.getCreatedTime(), cloned.getCreatedTime());
+        assertEquals(original.getLastAccessTime(), cloned.getLastAccessTime());
+        assertEquals(original.getAccessCount(), cloned.getAccessCount());
     }
 
     @Test
@@ -359,13 +373,6 @@ public class ActivityPrintTest extends TestBase {
 
         assertTrue(print1.equals(print2));
         assertTrue(print2.equals(print1));
-    }
-
-    @Test
-    public void testEqualsSameObject() {
-        ActivityPrint print = new ActivityPrint(10000, 5000);
-
-        assertTrue(print.equals(print));
     }
 
     @Test
@@ -389,17 +396,24 @@ public class ActivityPrintTest extends TestBase {
     }
 
     @Test
-    public void testEqualsWithNull() {
-        ActivityPrint print = new ActivityPrint(10000, 5000);
-
-        assertFalse(print.equals(null));
-    }
-
-    @Test
     public void testEqualsWithDifferentClass() {
         ActivityPrint print = new ActivityPrint(10000, 5000);
 
         assertFalse(print.equals("not an ActivityPrint"));
+    }
+
+    @Test
+    public void testEqualsSameObject() {
+        ActivityPrint print = new ActivityPrint(10000, 5000);
+
+        assertTrue(print.equals(print));
+    }
+
+    @Test
+    public void testEqualsWithNull() {
+        ActivityPrint print = new ActivityPrint(10000, 5000);
+
+        assertFalse(print.equals(null));
     }
 
     @Test
@@ -441,22 +455,6 @@ public class ActivityPrintTest extends TestBase {
         assertEquals(print, result);
         assertEquals(15000, print.getLiveTime());
         assertEquals(7500, print.getMaxIdleTime());
-    }
-
-    @Test
-    public void testIsExpiredByLiveTime() throws InterruptedException {
-        ActivityPrint shortLivedPrint = new ActivityPrint(50, 1000);
-        assertFalse(shortLivedPrint.isExpired());
-        Thread.sleep(60);
-        assertTrue(shortLivedPrint.isExpired());
-    }
-
-    @Test
-    public void testIsExpiredByIdleTime() throws InterruptedException {
-        ActivityPrint shortIdlePrint = new ActivityPrint(1000, 50);
-        assertFalse(shortIdlePrint.isExpired());
-        Thread.sleep(60);
-        assertTrue(shortIdlePrint.isExpired());
     }
 
 }

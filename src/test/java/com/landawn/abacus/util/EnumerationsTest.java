@@ -16,13 +16,20 @@ import java.util.TreeSet;
 import java.util.Vector;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class EnumerationsTest extends TestBase {
+
+    @Test
+    public void testEmpty_ReturnsSameSingleton() {
+        Enumeration<String> a = Enumerations.empty();
+        Enumeration<Integer> b = Enumerations.empty();
+        Enumeration<Object> c = Enumerations.empty();
+        Assertions.assertSame(a, b);
+        Assertions.assertSame(b, c);
+    }
 
     @Test
     public void testEmpty() {
@@ -35,12 +42,11 @@ public class EnumerationsTest extends TestBase {
     }
 
     @Test
-    public void testEmpty_ReturnsSameSingleton() {
-        Enumeration<String> a = Enumerations.empty();
-        Enumeration<Integer> b = Enumerations.empty();
-        Enumeration<Object> c = Enumerations.empty();
-        Assertions.assertSame(a, b);
-        Assertions.assertSame(b, c);
+    public void testJust_NullElement() {
+        Enumeration<String> e = Enumerations.just(null);
+        Assertions.assertTrue(e.hasMoreElements());
+        Assertions.assertNull(e.nextElement());
+        Assertions.assertFalse(e.hasMoreElements());
     }
 
     @Test
@@ -71,6 +77,35 @@ public class EnumerationsTest extends TestBase {
     }
 
     @Test
+    public void testOf_SingleElement() {
+        Enumeration<String> e = Enumerations.of("only");
+        Assertions.assertTrue(e.hasMoreElements());
+        Assertions.assertEquals("only", e.nextElement());
+        Assertions.assertFalse(e.hasMoreElements());
+    }
+
+    @Test
+    public void testOf_EmptyArray() {
+        Enumeration<String> e = Enumerations.of(new String[0]);
+        Assertions.assertFalse(e.hasMoreElements());
+    }
+
+    @Test
+    public void testOf_NullArray() {
+        Enumeration<String> e = Enumerations.of((String[]) null);
+        Assertions.assertFalse(e.hasMoreElements());
+    }
+
+    @Test
+    public void testOf_WithNullElements() {
+        Enumeration<String> e = Enumerations.of("a", null, "c");
+        Assertions.assertEquals("a", e.nextElement());
+        Assertions.assertNull(e.nextElement());
+        Assertions.assertEquals("c", e.nextElement());
+        Assertions.assertFalse(e.hasMoreElements());
+    }
+
+    @Test
     public void testOf() {
         Enumeration<String> enum1 = Enumerations.of("a", "b", "c");
         Assertions.assertTrue(enum1.hasMoreElements());
@@ -95,14 +130,6 @@ public class EnumerationsTest extends TestBase {
         Assertions.assertEquals("a", withNulls.nextElement());
         Assertions.assertNull(withNulls.nextElement());
         Assertions.assertEquals("c", withNulls.nextElement());
-    }
-
-    @Test
-    public void testOf_SingleElement() {
-        Enumeration<String> e = Enumerations.of("only");
-        Assertions.assertTrue(e.hasMoreElements());
-        Assertions.assertEquals("only", e.nextElement());
-        Assertions.assertFalse(e.hasMoreElements());
     }
 
     @Test
@@ -153,6 +180,20 @@ public class EnumerationsTest extends TestBase {
     }
 
     @Test
+    public void testCreateFromIterator_SingleElement() {
+        Enumeration<String> e = Enumerations.create(Arrays.asList("one").iterator());
+        Assertions.assertTrue(e.hasMoreElements());
+        Assertions.assertEquals("one", e.nextElement());
+        Assertions.assertFalse(e.hasMoreElements());
+    }
+
+    @Test
+    public void testCreate_NullCollection() {
+        Enumeration<String> e = Enumerations.create((Collection<String>) null);
+        Assertions.assertFalse(e.hasMoreElements());
+    }
+
+    @Test
     public void testCreateFromIterator() {
         List<String> list = Arrays.asList("foo", "bar", "baz");
         Enumeration<String> enum1 = Enumerations.create(list.iterator());
@@ -186,14 +227,6 @@ public class EnumerationsTest extends TestBase {
         Assertions.assertEquals(1, delegatingEnum.nextElement());
         Assertions.assertEquals(2, delegatingEnum.nextElement());
         Assertions.assertFalse(delegatingEnum.hasMoreElements());
-    }
-
-    @Test
-    public void testCreateFromIterator_SingleElement() {
-        Enumeration<String> e = Enumerations.create(Arrays.asList("one").iterator());
-        Assertions.assertTrue(e.hasMoreElements());
-        Assertions.assertEquals("one", e.nextElement());
-        Assertions.assertFalse(e.hasMoreElements());
     }
 
     @Test
@@ -275,6 +308,24 @@ public class EnumerationsTest extends TestBase {
     }
 
     @Test
+    public void testConcat_EmptyVarargs() {
+        Enumeration<String> e = Enumerations.concat();
+        Assertions.assertFalse(e.hasMoreElements());
+    }
+
+    @Test
+    public void testConcat_NullVarargs() {
+        Enumeration<String> e = Enumerations.concat((Enumeration<String>[]) null);
+        Assertions.assertFalse(e.hasMoreElements());
+    }
+
+    @Test
+    public void testConcat_NullCollection() {
+        Enumeration<String> e = Enumerations.concat((Collection<Enumeration<String>>) null);
+        Assertions.assertFalse(e.hasMoreElements());
+    }
+
+    @Test
     public void testConcatCollection_ExhaustedThrowsNoSuchElement() {
         List<Enumeration<String>> enums = new ArrayList<>();
         enums.add(Enumerations.of("x"));
@@ -329,6 +380,22 @@ public class EnumerationsTest extends TestBase {
     }
 
     @Test
+    public void testToIterator_Null() {
+        ObjIterator<String> iter = Enumerations.toIterator(null);
+        Assertions.assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testToList_ReturnsMutableList() {
+        Enumeration<String> e = Enumerations.of("a", "b");
+        List<String> list = Enumerations.toList(e);
+        list.add("c");
+        Assertions.assertEquals(3, list.size());
+        list.remove("a");
+        Assertions.assertEquals(2, list.size());
+    }
+
+    @Test
     public void testToList() {
         Enumeration<String> enum1 = Enumerations.of("one", "two", "three");
         List<String> list = Enumerations.toList(enum1);
@@ -363,13 +430,38 @@ public class EnumerationsTest extends TestBase {
     }
 
     @Test
-    public void testToList_ReturnsMutableList() {
-        Enumeration<String> e = Enumerations.of("a", "b");
-        List<String> list = Enumerations.toList(e);
-        list.add("c");
-        Assertions.assertEquals(3, list.size());
-        list.remove("a");
-        Assertions.assertEquals(2, list.size());
+    public void testToList_NullInput() {
+        List<String> list = Enumerations.toList(null);
+        Assertions.assertNotNull(list);
+        Assertions.assertTrue(list.isEmpty());
+    }
+
+    @Test
+    public void testToSet_AllDuplicates() {
+        Enumeration<String> e = Enumerations.of("x", "x", "x");
+        Set<String> set = Enumerations.toSet(e);
+        Assertions.assertEquals(1, set.size());
+        Assertions.assertTrue(set.contains("x"));
+    }
+
+    @Test
+    public void testToSet_ReturnsMutableSet() {
+        Enumeration<String> e = Enumerations.of("a");
+        Set<String> set = Enumerations.toSet(e);
+        set.add("b");
+        Assertions.assertEquals(2, set.size());
+        set.remove("a");
+        Assertions.assertEquals(1, set.size());
+    }
+
+    @Test
+    public void testToSet_WithDuplicates() {
+        Enumeration<String> e = Enumerations.of("a", "a", "b", "b", "c");
+        Set<String> set = Enumerations.toSet(e);
+        Assertions.assertEquals(3, set.size());
+        Assertions.assertTrue(set.contains("a"));
+        Assertions.assertTrue(set.contains("b"));
+        Assertions.assertTrue(set.contains("c"));
     }
 
     @Test
@@ -399,21 +491,10 @@ public class EnumerationsTest extends TestBase {
     }
 
     @Test
-    public void testToSet_AllDuplicates() {
-        Enumeration<String> e = Enumerations.of("x", "x", "x");
-        Set<String> set = Enumerations.toSet(e);
-        Assertions.assertEquals(1, set.size());
-        Assertions.assertTrue(set.contains("x"));
-    }
-
-    @Test
-    public void testToSet_ReturnsMutableSet() {
-        Enumeration<String> e = Enumerations.of("a");
-        Set<String> set = Enumerations.toSet(e);
-        set.add("b");
-        Assertions.assertEquals(2, set.size());
-        set.remove("a");
-        Assertions.assertEquals(1, set.size());
+    public void testToSet_NullInput() {
+        Set<String> set = Enumerations.toSet(null);
+        Assertions.assertNotNull(set);
+        Assertions.assertTrue(set.isEmpty());
     }
 
     @Test
@@ -457,92 +538,9 @@ public class EnumerationsTest extends TestBase {
     }
 
     @Test
-    public void testOf_EmptyArray() {
-        Enumeration<String> e = Enumerations.of(new String[0]);
-        Assertions.assertFalse(e.hasMoreElements());
-    }
-
-    @Test
-    public void testOf_NullArray() {
-        Enumeration<String> e = Enumerations.of((String[]) null);
-        Assertions.assertFalse(e.hasMoreElements());
-    }
-
-    @Test
-    public void testCreate_NullCollection() {
-        Enumeration<String> e = Enumerations.create((Collection<String>) null);
-        Assertions.assertFalse(e.hasMoreElements());
-    }
-
-    @Test
-    public void testConcat_EmptyVarargs() {
-        Enumeration<String> e = Enumerations.concat();
-        Assertions.assertFalse(e.hasMoreElements());
-    }
-
-    @Test
-    public void testConcat_NullVarargs() {
-        Enumeration<String> e = Enumerations.concat((Enumeration<String>[]) null);
-        Assertions.assertFalse(e.hasMoreElements());
-    }
-
-    @Test
-    public void testConcat_NullCollection() {
-        Enumeration<String> e = Enumerations.concat((Collection<Enumeration<String>>) null);
-        Assertions.assertFalse(e.hasMoreElements());
-    }
-
-    @Test
-    public void testToIterator_Null() {
-        ObjIterator<String> iter = Enumerations.toIterator(null);
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testToList_NullInput() {
-        List<String> list = Enumerations.toList(null);
-        Assertions.assertNotNull(list);
-        Assertions.assertTrue(list.isEmpty());
-    }
-
-    @Test
-    public void testToSet_NullInput() {
-        Set<String> set = Enumerations.toSet(null);
-        Assertions.assertNotNull(set);
-        Assertions.assertTrue(set.isEmpty());
-    }
-
-    @Test
     public void testToCollection_NullInput() {
         ArrayList<String> list = Enumerations.toCollection(null, ArrayList::new);
         Assertions.assertNotNull(list);
         Assertions.assertTrue(list.isEmpty());
-    }
-
-    @Test
-    public void testJust_NullElement() {
-        Enumeration<String> e = Enumerations.just(null);
-        Assertions.assertTrue(e.hasMoreElements());
-        Assertions.assertNull(e.nextElement());
-        Assertions.assertFalse(e.hasMoreElements());
-    }
-
-    @Test
-    public void testOf_WithNullElements() {
-        Enumeration<String> e = Enumerations.of("a", null, "c");
-        Assertions.assertEquals("a", e.nextElement());
-        Assertions.assertNull(e.nextElement());
-        Assertions.assertEquals("c", e.nextElement());
-        Assertions.assertFalse(e.hasMoreElements());
-    }
-
-    @Test
-    public void testToSet_WithDuplicates() {
-        Enumeration<String> e = Enumerations.of("a", "a", "b", "b", "c");
-        Set<String> set = Enumerations.toSet(e);
-        Assertions.assertEquals(3, set.size());
-        Assertions.assertTrue(set.contains("a"));
-        Assertions.assertTrue(set.contains("b"));
-        Assertions.assertTrue(set.contains("c"));
     }
 }

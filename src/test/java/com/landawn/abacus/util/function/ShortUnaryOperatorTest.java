@@ -16,12 +16,10 @@ package com.landawn.abacus.util.function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ShortUnaryOperatorTest extends TestBase {
 
     @Test
@@ -57,6 +55,20 @@ public class ShortUnaryOperatorTest extends TestBase {
     }
 
     @Test
+    public void test_applyAsShort_withMaxValue() {
+        ShortUnaryOperator identity = ShortUnaryOperator.identity();
+
+        assertEquals(Short.MAX_VALUE, identity.applyAsShort(Short.MAX_VALUE));
+    }
+
+    @Test
+    public void test_applyAsShort_withMinValue() {
+        ShortUnaryOperator identity = ShortUnaryOperator.identity();
+
+        assertEquals(Short.MIN_VALUE, identity.applyAsShort(Short.MIN_VALUE));
+    }
+
+    @Test
     public void test_compose() {
         ShortUnaryOperator addTen = operand -> (short) (operand + 10);
         ShortUnaryOperator multiplyByTwo = operand -> (short) (operand * 2);
@@ -78,6 +90,19 @@ public class ShortUnaryOperatorTest extends TestBase {
 
         // First adds 1, then multiplies by 2, then subtracts 5
         assertEquals(7, composed.applyAsShort((short) 5)); // ((5 + 1) * 2) - 5 = 7
+    }
+
+    @Test
+    public void test_compose_vs_andThen() {
+        ShortUnaryOperator addTen = operand -> (short) (operand + 10);
+        ShortUnaryOperator multiplyByTwo = operand -> (short) (operand * 2);
+
+        ShortUnaryOperator composedWithCompose = multiplyByTwo.compose(addTen);
+        ShortUnaryOperator composedWithAndThen = addTen.andThen(multiplyByTwo);
+
+        // Both should give the same result
+        assertEquals(30, composedWithCompose.applyAsShort((short) 5));
+        assertEquals(30, composedWithAndThen.applyAsShort((short) 5));
     }
 
     @Test
@@ -105,30 +130,6 @@ public class ShortUnaryOperatorTest extends TestBase {
     }
 
     @Test
-    public void test_compose_vs_andThen() {
-        ShortUnaryOperator addTen = operand -> (short) (operand + 10);
-        ShortUnaryOperator multiplyByTwo = operand -> (short) (operand * 2);
-
-        ShortUnaryOperator composedWithCompose = multiplyByTwo.compose(addTen);
-        ShortUnaryOperator composedWithAndThen = addTen.andThen(multiplyByTwo);
-
-        // Both should give the same result
-        assertEquals(30, composedWithCompose.applyAsShort((short) 5));
-        assertEquals(30, composedWithAndThen.applyAsShort((short) 5));
-    }
-
-    @Test
-    public void test_identity() {
-        ShortUnaryOperator identity = ShortUnaryOperator.identity();
-
-        assertEquals(42, identity.applyAsShort((short) 42));
-        assertEquals(0, identity.applyAsShort((short) 0));
-        assertEquals(-100, identity.applyAsShort((short) -100));
-        assertEquals(Short.MAX_VALUE, identity.applyAsShort(Short.MAX_VALUE));
-        assertEquals(Short.MIN_VALUE, identity.applyAsShort(Short.MIN_VALUE));
-    }
-
-    @Test
     public void test_identity_composition() {
         ShortUnaryOperator identity = ShortUnaryOperator.identity();
         ShortUnaryOperator doubler = operand -> (short) (operand * 2);
@@ -141,16 +142,13 @@ public class ShortUnaryOperatorTest extends TestBase {
     }
 
     @Test
-    public void test_applyAsShort_withMaxValue() {
+    public void test_identity() {
         ShortUnaryOperator identity = ShortUnaryOperator.identity();
 
+        assertEquals(42, identity.applyAsShort((short) 42));
+        assertEquals(0, identity.applyAsShort((short) 0));
+        assertEquals(-100, identity.applyAsShort((short) -100));
         assertEquals(Short.MAX_VALUE, identity.applyAsShort(Short.MAX_VALUE));
-    }
-
-    @Test
-    public void test_applyAsShort_withMinValue() {
-        ShortUnaryOperator identity = ShortUnaryOperator.identity();
-
         assertEquals(Short.MIN_VALUE, identity.applyAsShort(Short.MIN_VALUE));
     }
 }

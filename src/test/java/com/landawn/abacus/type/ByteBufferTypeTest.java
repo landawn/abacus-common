@@ -10,29 +10,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ByteBufferTypeTest extends TestBase {
 
     private final ByteBufferType type = new ByteBufferType();
-
-    @Test
-    public void test_get_ResultSet_byLabel() throws SQLException {
-        ResultSet rs = mock(ResultSet.class);
-        // Basic get test - actual implementation will vary by type
-        assertDoesNotThrow(() -> type.get(rs, "col"));
-    }
-
-    @Test
-    public void test_set_CallableStatement() throws SQLException {
-        CallableStatement stmt = mock(CallableStatement.class);
-        // Basic set test - actual implementation will vary by type
-        assertDoesNotThrow(() -> type.set(stmt, "param", null));
-    }
 
     @Test
     public void testClazz() {
@@ -44,6 +28,23 @@ public class ByteBufferTypeTest extends TestBase {
     public void testIsByteBuffer() {
         boolean result = type.isByteBuffer();
         Assertions.assertTrue(result);
+    }
+
+    @Test
+    public void testComplexData() {
+        ByteBuffer buffer = ByteBuffer.allocate(256);
+        for (int i = 0; i < 256; i++) {
+            buffer.put((byte) i);
+        }
+
+        String base64 = type.stringOf(buffer);
+        ByteBuffer restored = type.valueOf(base64);
+
+        assertEquals(256, restored.position());
+        restored.position(0);
+        for (int i = 0; i < 256; i++) {
+            assertEquals((byte) i, restored.get());
+        }
     }
 
     @Test
@@ -64,6 +65,30 @@ public class ByteBufferTypeTest extends TestBase {
         String result = type.stringOf(buffer);
         Assertions.assertNotNull(result);
         assertEquals("AQID", result);
+    }
+
+    @Test
+    public void testRoundTrip() {
+        ByteBuffer original = ByteBuffer.allocate(4);
+        original.put((byte) 10);
+        original.put((byte) 20);
+        original.put((byte) 30);
+        original.put((byte) 40);
+
+        String base64 = type.stringOf(original);
+        Assertions.assertNotNull(base64);
+
+        ByteBuffer restored = type.valueOf(base64);
+        Assertions.assertNotNull(restored);
+
+        assertEquals(original.position(), restored.position());
+        assertEquals(original.limit(), restored.limit());
+
+        original.position(0);
+        restored.position(0);
+        while (original.hasRemaining()) {
+            assertEquals(original.get(), restored.get());
+        }
     }
 
     @Test
@@ -95,6 +120,33 @@ public class ByteBufferTypeTest extends TestBase {
         assertEquals((byte) 1, result.get());
         assertEquals((byte) 2, result.get());
         assertEquals((byte) 3, result.get());
+    }
+
+    @Test
+    public void testValueOf_ByteArray() {
+        byte[] bytes = new byte[] { (byte) -1, (byte) 0, (byte) 127 };
+        ByteBuffer result = ByteBufferType.valueOf(bytes);
+
+        Assertions.assertNotNull(result);
+        assertEquals(3, result.position());
+        assertEquals(3, result.limit());
+        assertEquals(3, result.capacity());
+
+        result.position(0);
+        assertEquals((byte) -1, result.get());
+        assertEquals((byte) 0, result.get());
+        assertEquals((byte) 127, result.get());
+    }
+
+    @Test
+    public void testValueOf_EmptyByteArray() {
+        byte[] bytes = new byte[0];
+        ByteBuffer result = ByteBufferType.valueOf(bytes);
+
+        Assertions.assertNotNull(result);
+        assertEquals(0, result.position());
+        assertEquals(0, result.limit());
+        assertEquals(0, result.capacity());
     }
 
     @Test
@@ -136,71 +188,17 @@ public class ByteBufferTypeTest extends TestBase {
     }
 
     @Test
-    public void testValueOf_ByteArray() {
-        byte[] bytes = new byte[] { (byte) -1, (byte) 0, (byte) 127 };
-        ByteBuffer result = ByteBufferType.valueOf(bytes);
-
-        Assertions.assertNotNull(result);
-        assertEquals(3, result.position());
-        assertEquals(3, result.limit());
-        assertEquals(3, result.capacity());
-
-        result.position(0);
-        assertEquals((byte) -1, result.get());
-        assertEquals((byte) 0, result.get());
-        assertEquals((byte) 127, result.get());
+    public void test_get_ResultSet_byLabel() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+        // Basic get test - actual implementation will vary by type
+        assertDoesNotThrow(() -> type.get(rs, "col"));
     }
 
     @Test
-    public void testValueOf_EmptyByteArray() {
-        byte[] bytes = new byte[0];
-        ByteBuffer result = ByteBufferType.valueOf(bytes);
-
-        Assertions.assertNotNull(result);
-        assertEquals(0, result.position());
-        assertEquals(0, result.limit());
-        assertEquals(0, result.capacity());
-    }
-
-    @Test
-    public void testRoundTrip() {
-        ByteBuffer original = ByteBuffer.allocate(4);
-        original.put((byte) 10);
-        original.put((byte) 20);
-        original.put((byte) 30);
-        original.put((byte) 40);
-
-        String base64 = type.stringOf(original);
-        Assertions.assertNotNull(base64);
-
-        ByteBuffer restored = type.valueOf(base64);
-        Assertions.assertNotNull(restored);
-
-        assertEquals(original.position(), restored.position());
-        assertEquals(original.limit(), restored.limit());
-
-        original.position(0);
-        restored.position(0);
-        while (original.hasRemaining()) {
-            assertEquals(original.get(), restored.get());
-        }
-    }
-
-    @Test
-    public void testComplexData() {
-        ByteBuffer buffer = ByteBuffer.allocate(256);
-        for (int i = 0; i < 256; i++) {
-            buffer.put((byte) i);
-        }
-
-        String base64 = type.stringOf(buffer);
-        ByteBuffer restored = type.valueOf(base64);
-
-        assertEquals(256, restored.position());
-        restored.position(0);
-        for (int i = 0; i < 256; i++) {
-            assertEquals((byte) i, restored.get());
-        }
+    public void test_set_CallableStatement() throws SQLException {
+        CallableStatement stmt = mock(CallableStatement.class);
+        // Basic set test - actual implementation will vary by type
+        assertDoesNotThrow(() -> type.set(stmt, "param", null));
     }
 
 }

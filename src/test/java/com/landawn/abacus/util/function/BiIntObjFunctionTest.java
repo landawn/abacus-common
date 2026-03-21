@@ -4,12 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BiIntObjFunctionTest extends TestBase {
 
     @Test
@@ -39,6 +37,80 @@ public class BiIntObjFunctionTest extends TestBase {
         String result = function.apply(7, 3, 42);
 
         assertEquals("i=7, j=3, obj=42", result);
+    }
+
+    @Test
+    public void testAnonymousClass() {
+        BiIntObjFunction<String, String> function = new BiIntObjFunction<>() {
+            @Override
+            public String apply(int i, int j, String s) {
+                return s + ":" + i + "," + j;
+            }
+        };
+
+        String result = function.apply(1, 2, "coords");
+
+        assertEquals("coords:1,2", result);
+    }
+
+    @Test
+    public void testWithDifferentObjectTypes() {
+        BiIntObjFunction<Integer, Double> function = (i, j, obj) -> (double) (i + j + obj);
+
+        Double result = function.apply(10, 20, 5);
+
+        assertEquals(35.0, result, 0.001);
+    }
+
+    @Test
+    public void testWithNullObject() {
+        BiIntObjFunction<String, String> function = (i, j, s) -> String.valueOf(s) + (i + j);
+
+        String result = function.apply(5, 10, null);
+
+        assertEquals("null15", result);
+    }
+
+    @Test
+    public void testReturnsNull() {
+        BiIntObjFunction<String, String> function = (i, j, s) -> null;
+
+        String result = function.apply(5, 10, "test");
+
+        assertNull(result);
+    }
+
+    @Test
+    public void testWithNegativeInts() {
+        BiIntObjFunction<String, Integer> function = (i, j, s) -> i * j;
+
+        Integer result = function.apply(-5, 7, "ignored");
+
+        assertEquals(-35, result);
+    }
+
+    @Test
+    public void testApplyWithException() {
+        BiIntObjFunction<String, String> function = (i, j, s) -> {
+            throw new RuntimeException("Apply exception");
+        };
+
+        assertThrows(RuntimeException.class, () -> function.apply(5, 10, "test"));
+    }
+
+    @Test
+    public void testComplexOperation() {
+        BiIntObjFunction<String, String> function = (i, j, s) -> {
+            if (s == null || s.isEmpty()) {
+                return "Invalid";
+            }
+            int sum = i + j;
+            return s + " sum=" + sum + " avg=" + (sum / 2.0);
+        };
+
+        assertEquals("test sum=15 avg=7.5", function.apply(5, 10, "test"));
+        assertEquals("Invalid", function.apply(5, 10, ""));
+        assertEquals("Invalid", function.apply(5, 10, null));
     }
 
     @Test
@@ -74,79 +146,5 @@ public class BiIntObjFunctionTest extends TestBase {
         BiIntObjFunction<String, Integer> chainedFunction = function.andThen(afterFunction);
 
         assertThrows(RuntimeException.class, () -> chainedFunction.apply(5, 10, "test"));
-    }
-
-    @Test
-    public void testApplyWithException() {
-        BiIntObjFunction<String, String> function = (i, j, s) -> {
-            throw new RuntimeException("Apply exception");
-        };
-
-        assertThrows(RuntimeException.class, () -> function.apply(5, 10, "test"));
-    }
-
-    @Test
-    public void testAnonymousClass() {
-        BiIntObjFunction<String, String> function = new BiIntObjFunction<>() {
-            @Override
-            public String apply(int i, int j, String s) {
-                return s + ":" + i + "," + j;
-            }
-        };
-
-        String result = function.apply(1, 2, "coords");
-
-        assertEquals("coords:1,2", result);
-    }
-
-    @Test
-    public void testWithNullObject() {
-        BiIntObjFunction<String, String> function = (i, j, s) -> String.valueOf(s) + (i + j);
-
-        String result = function.apply(5, 10, null);
-
-        assertEquals("null15", result);
-    }
-
-    @Test
-    public void testReturnsNull() {
-        BiIntObjFunction<String, String> function = (i, j, s) -> null;
-
-        String result = function.apply(5, 10, "test");
-
-        assertNull(result);
-    }
-
-    @Test
-    public void testWithNegativeInts() {
-        BiIntObjFunction<String, Integer> function = (i, j, s) -> i * j;
-
-        Integer result = function.apply(-5, 7, "ignored");
-
-        assertEquals(-35, result);
-    }
-
-    @Test
-    public void testComplexOperation() {
-        BiIntObjFunction<String, String> function = (i, j, s) -> {
-            if (s == null || s.isEmpty()) {
-                return "Invalid";
-            }
-            int sum = i + j;
-            return s + " sum=" + sum + " avg=" + (sum / 2.0);
-        };
-
-        assertEquals("test sum=15 avg=7.5", function.apply(5, 10, "test"));
-        assertEquals("Invalid", function.apply(5, 10, ""));
-        assertEquals("Invalid", function.apply(5, 10, null));
-    }
-
-    @Test
-    public void testWithDifferentObjectTypes() {
-        BiIntObjFunction<Integer, Double> function = (i, j, obj) -> (double) (i + j + obj);
-
-        Double result = function.apply(10, 20, 5);
-
-        assertEquals(35.0, result, 0.001);
     }
 }

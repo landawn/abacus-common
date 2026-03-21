@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collector;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
@@ -18,7 +17,6 @@ import com.landawn.abacus.util.stream.Collectors;
 import com.landawn.abacus.util.stream.Collectors.MoreCollectors;
 import com.landawn.abacus.util.stream.Stream;
 
-@Tag("old-test")
 public class CollectorTest extends AbstractTest {
 
     @Test

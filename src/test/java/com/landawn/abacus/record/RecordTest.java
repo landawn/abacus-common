@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.util.Beans;
@@ -14,7 +15,7 @@ import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.N;
 
-public class RecordTest {
+public class RecordTest extends TestBase {
 
     @Test
     public void test_01() {
@@ -35,7 +36,9 @@ public class RecordTest {
 
         ds.toList(RecordB.class).forEach(Fn.println());
 
-        N.println(N.convert(record2, RecordB.class));
+        final RecordB converted = N.convert(record2, RecordB.class);
+        N.println(converted);
+        assertEquals(new RecordB(1, "RecordA"), converted);
 
         assertEquals(recordA, Beans.mapToBean(Beans.beanToMap(record2), RecordA.class));
     }
@@ -59,7 +62,9 @@ public class RecordTest {
 
         ds.toList(RecordA.class).forEach(Fn.println());
 
-        N.println(N.convert(record2, RecordA.class));
+        final RecordA converted = N.convert(record2, RecordA.class);
+        N.println(converted);
+        assertEquals(new RecordA(2, "RecordB"), converted);
 
         assertEquals(recordA, Beans.mapToBean(Beans.beanToMap(record2), RecordB.class));
 

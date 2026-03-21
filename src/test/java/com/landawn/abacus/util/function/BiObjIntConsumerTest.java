@@ -6,12 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BiObjIntConsumerTest extends TestBase {
 
     @Test
@@ -51,6 +49,70 @@ public class BiObjIntConsumerTest extends TestBase {
         assertEquals("item", list.get(0));
         assertEquals("item", list.get(1));
         assertEquals("item", list.get(2));
+    }
+
+    @Test
+    public void testAnonymousClass() {
+        List<String> results = new ArrayList<>();
+        BiObjIntConsumer<String, String> consumer = new BiObjIntConsumer<>() {
+            @Override
+            public void accept(String t, String u, int i) {
+                results.add(t + "-" + u + "-" + i);
+            }
+        };
+
+        consumer.accept("foo", "bar", 99);
+
+        assertEquals(1, results.size());
+        assertEquals("foo-bar-99", results.get(0));
+    }
+
+    @Test
+    public void testComplexOperation() {
+        StringBuilder sb = new StringBuilder();
+        BiObjIntConsumer<String, String> consumer = (t, u, i) -> {
+            sb.append("[").append(t).append(", ").append(u).append("] repeated ").append(i).append(" times: ");
+            for (int j = 0; j < i; j++) {
+                sb.append(t).append(u);
+                if (j < i - 1)
+                    sb.append(", ");
+            }
+        };
+
+        consumer.accept("X", "Y", 3);
+
+        assertEquals("[X, Y] repeated 3 times: XY, XY, XY", sb.toString());
+    }
+
+    @Test
+    public void testWithNullObjects() {
+        List<String> results = new ArrayList<>();
+        BiObjIntConsumer<String, String> consumer = (t, u, i) -> results.add(String.valueOf(t) + "," + String.valueOf(u) + "," + i);
+
+        consumer.accept(null, null, 42);
+
+        assertEquals(1, results.size());
+        assertEquals("null,null,42", results.get(0));
+    }
+
+    @Test
+    public void testWithNegativeInt() {
+        List<String> results = new ArrayList<>();
+        BiObjIntConsumer<String, String> consumer = (t, u, i) -> results.add(i + ":" + t + u);
+
+        consumer.accept("A", "B", -10);
+
+        assertEquals(1, results.size());
+        assertEquals("-10:AB", results.get(0));
+    }
+
+    @Test
+    public void testAcceptWithException() {
+        BiObjIntConsumer<String, String> consumer = (t, u, i) -> {
+            throw new RuntimeException("Test exception");
+        };
+
+        assertThrows(RuntimeException.class, () -> consumer.accept("test", "value", 5));
     }
 
     @Test
@@ -96,69 +158,5 @@ public class BiObjIntConsumerTest extends TestBase {
         assertThrows(RuntimeException.class, () -> chainedConsumer.accept("test", "value", 5));
         assertEquals(1, results.size()); // First consumer should have executed
         assertEquals("test", results.get(0));
-    }
-
-    @Test
-    public void testAcceptWithException() {
-        BiObjIntConsumer<String, String> consumer = (t, u, i) -> {
-            throw new RuntimeException("Test exception");
-        };
-
-        assertThrows(RuntimeException.class, () -> consumer.accept("test", "value", 5));
-    }
-
-    @Test
-    public void testAnonymousClass() {
-        List<String> results = new ArrayList<>();
-        BiObjIntConsumer<String, String> consumer = new BiObjIntConsumer<>() {
-            @Override
-            public void accept(String t, String u, int i) {
-                results.add(t + "-" + u + "-" + i);
-            }
-        };
-
-        consumer.accept("foo", "bar", 99);
-
-        assertEquals(1, results.size());
-        assertEquals("foo-bar-99", results.get(0));
-    }
-
-    @Test
-    public void testWithNullObjects() {
-        List<String> results = new ArrayList<>();
-        BiObjIntConsumer<String, String> consumer = (t, u, i) -> results.add(String.valueOf(t) + "," + String.valueOf(u) + "," + i);
-
-        consumer.accept(null, null, 42);
-
-        assertEquals(1, results.size());
-        assertEquals("null,null,42", results.get(0));
-    }
-
-    @Test
-    public void testWithNegativeInt() {
-        List<String> results = new ArrayList<>();
-        BiObjIntConsumer<String, String> consumer = (t, u, i) -> results.add(i + ":" + t + u);
-
-        consumer.accept("A", "B", -10);
-
-        assertEquals(1, results.size());
-        assertEquals("-10:AB", results.get(0));
-    }
-
-    @Test
-    public void testComplexOperation() {
-        StringBuilder sb = new StringBuilder();
-        BiObjIntConsumer<String, String> consumer = (t, u, i) -> {
-            sb.append("[").append(t).append(", ").append(u).append("] repeated ").append(i).append(" times: ");
-            for (int j = 0; j < i; j++) {
-                sb.append(t).append(u);
-                if (j < i - 1)
-                    sb.append(", ");
-            }
-        };
-
-        consumer.accept("X", "Y", 3);
-
-        assertEquals("[X, Y] repeated 3 times: XY, XY, XY", sb.toString());
     }
 }

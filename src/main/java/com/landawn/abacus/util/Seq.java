@@ -4110,6 +4110,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * are then flattened into a single sequence.
      * This is an intermediate operation that does not consume the sequence.
      *
+     * <p><b>Naming Convention:</b> This library uses specific naming for different {@code flatMap} variants:
+     * <ul>
+     *   <li>{@link #flatMap(Throwables.Function) flatMap} (this method) - transforms elements into {@link com.landawn.abacus.util.Seq Seq} or {@link com.landawn.abacus.util.stream.Stream Stream}.</li>
+     *   <li>{@link #flatmap(Throwables.Function) flatmap} (lowercase 'm') - transforms elements into {@link java.util.Collection Collection}.</li>
+     *   <li>{@link #flatMapArray(Throwables.Function) flatMapArray} - transforms elements into an array.</li>
+     * </ul></p>
+     *
      * <p>This is the monadic bind operation for sequences. Each sequence returned by the mapper
      * is consumed completely before moving to the next element.</p>
      *
@@ -4213,6 +4220,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * which returns a collection of new elements for each element. The resulting collections
      * are then flattened into a single sequence.
      * This is an intermediate operation that does not consume the sequence.
+     *
+     * <p><b>Naming Convention:</b> This library uses specific naming for different {@code flatMap} variants:
+     * <ul>
+     *   <li>{@link #flatMap(Throwables.Function) flatMap} (uppercase 'M') - transforms elements into {@link com.landawn.abacus.util.Seq Seq} or {@link com.landawn.abacus.util.stream.Stream Stream}.</li>
+     *   <li>{@link #flatmap(Throwables.Function) flatmap} (this method) - transforms elements into {@link java.util.Collection Collection}.</li>
+     *   <li>{@link #flatMapArray(Throwables.Function) flatMapArray} - transforms elements into an array.</li>
+     * </ul></p>
      *
      * <p>This is similar to flatMap but works with collections instead of sequences.
      * It's more efficient when the mapper returns small collections.</p>

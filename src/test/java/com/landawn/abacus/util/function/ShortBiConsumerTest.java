@@ -18,14 +18,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Pair;
 
-@Tag("2025")
 public class ShortBiConsumerTest extends TestBase {
+
+    private void acceptHelper(short t, short u) {
+        // Helper method for method reference test
+        short sum = (short) (t + u);
+        assertTrue(sum > 0 || sum <= 0); // Always true, just using the values
+    }
 
     @Test
     public void test_accept() {
@@ -52,24 +56,6 @@ public class ShortBiConsumerTest extends TestBase {
     }
 
     @Test
-    public void test_accept_methodReference() {
-        final Pair<Short, Short> result = Pair.of((short) 0, (short) 0);
-
-        ShortBiConsumer consumer = this::acceptHelper;
-
-        consumer.accept((short) 7, (short) 14);
-        // Method reference calls helper, we can't verify result directly
-        // but we can verify it doesn't throw
-        assertNotNull(consumer);
-    }
-
-    private void acceptHelper(short t, short u) {
-        // Helper method for method reference test
-        short sum = (short) (t + u);
-        assertTrue(sum > 0 || sum <= 0); // Always true, just using the values
-    }
-
-    @Test
     public void test_accept_anonymousClass() {
         final short[] product = { 1 };
 
@@ -82,50 +68,6 @@ public class ShortBiConsumerTest extends TestBase {
 
         consumer.accept((short) 5, (short) 6);
         assertEquals(30, product[0]);
-    }
-
-    @Test
-    public void test_andThen() {
-        final Pair<Short, Short> result = Pair.of((short) 0, (short) 0);
-
-        ShortBiConsumer first = (t, u) -> result.setLeft((short) (t + u));
-        ShortBiConsumer second = (t, u) -> result.setRight((short) (t * u));
-
-        ShortBiConsumer combined = first.andThen(second);
-        combined.accept((short) 3, (short) 4);
-
-        assertEquals(7, result.left().shortValue());
-        assertEquals(12, result.right().shortValue());
-    }
-
-    @Test
-    public void test_andThen_multipleChaining() {
-        final short[] results = new short[3];
-
-        ShortBiConsumer first = (t, u) -> results[0] = (short) (t + u);
-        ShortBiConsumer second = (t, u) -> results[1] = (short) (t - u);
-        ShortBiConsumer third = (t, u) -> results[2] = (short) (t * u);
-
-        ShortBiConsumer combined = first.andThen(second).andThen(third);
-        combined.accept((short) 10, (short) 3);
-
-        assertEquals(13, results[0]);
-        assertEquals(7, results[1]);
-        assertEquals(30, results[2]);
-    }
-
-    @Test
-    public void test_andThen_orderOfExecution() {
-        final StringBuilder order = new StringBuilder();
-
-        ShortBiConsumer first = (t, u) -> order.append("1");
-        ShortBiConsumer second = (t, u) -> order.append("2");
-        ShortBiConsumer third = (t, u) -> order.append("3");
-
-        ShortBiConsumer combined = first.andThen(second).andThen(third);
-        combined.accept((short) 1, (short) 2);
-
-        assertEquals("123", order.toString());
     }
 
     @Test
@@ -160,5 +102,61 @@ public class ShortBiConsumerTest extends TestBase {
 
         consumer.accept((short) 0, (short) 100);
         assertEquals(0, result[0]);
+    }
+
+    @Test
+    public void test_accept_methodReference() {
+        final Pair<Short, Short> result = Pair.of((short) 0, (short) 0);
+
+        ShortBiConsumer consumer = this::acceptHelper;
+
+        consumer.accept((short) 7, (short) 14);
+        // Method reference calls helper, we can't verify result directly
+        // but we can verify it doesn't throw
+        assertNotNull(consumer);
+    }
+
+    @Test
+    public void test_andThen() {
+        final Pair<Short, Short> result = Pair.of((short) 0, (short) 0);
+
+        ShortBiConsumer first = (t, u) -> result.setLeft((short) (t + u));
+        ShortBiConsumer second = (t, u) -> result.setRight((short) (t * u));
+
+        ShortBiConsumer combined = first.andThen(second);
+        combined.accept((short) 3, (short) 4);
+
+        assertEquals(7, result.left().shortValue());
+        assertEquals(12, result.right().shortValue());
+    }
+
+    @Test
+    public void test_andThen_orderOfExecution() {
+        final StringBuilder order = new StringBuilder();
+
+        ShortBiConsumer first = (t, u) -> order.append("1");
+        ShortBiConsumer second = (t, u) -> order.append("2");
+        ShortBiConsumer third = (t, u) -> order.append("3");
+
+        ShortBiConsumer combined = first.andThen(second).andThen(third);
+        combined.accept((short) 1, (short) 2);
+
+        assertEquals("123", order.toString());
+    }
+
+    @Test
+    public void test_andThen_multipleChaining() {
+        final short[] results = new short[3];
+
+        ShortBiConsumer first = (t, u) -> results[0] = (short) (t + u);
+        ShortBiConsumer second = (t, u) -> results[1] = (short) (t - u);
+        ShortBiConsumer third = (t, u) -> results[2] = (short) (t * u);
+
+        ShortBiConsumer combined = first.andThen(second).andThen(third);
+        combined.accept((short) 10, (short) 3);
+
+        assertEquals(13, results[0]);
+        assertEquals(7, results[1]);
+        assertEquals(30, results[2]);
     }
 }

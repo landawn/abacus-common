@@ -7,13 +7,43 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class MutableLongTest extends TestBase {
+
+    @Test
+    public void test_combinedOperations_incrementAndAdd() {
+        MutableLong ml = MutableLong.of(10L);
+        ml.increment();
+        ml.add(5L);
+        assertEquals(16L, ml.value());
+    }
+
+    @Test
+    public void test_combinedOperations_decrementAndSubtract() {
+        MutableLong ml = MutableLong.of(20L);
+        ml.decrement();
+        ml.subtract(5L);
+        assertEquals(14L, ml.value());
+    }
+
+    @Test
+    public void test_combinedOperations_mixedIncrementDecrement() {
+        MutableLong ml = MutableLong.of(5L);
+        ml.incrementAndGet();
+        ml.decrementAndGet();
+        ml.incrementAndGet();
+
+        assertEquals(6L, ml.value());
+    }
+
+    @Test
+    public void testOf() {
+        MutableLong mutableLong = MutableLong.of(42L);
+        Assertions.assertEquals(42L, mutableLong.value());
+    }
 
     @Test
     public void test_of() {
@@ -47,9 +77,94 @@ public class MutableLongTest extends TestBase {
     }
 
     @Test
+    public void test_combinedOperations_multipleGetAnd() {
+        MutableLong ml = MutableLong.of(10L);
+        long val1 = ml.getAndIncrement();
+        long val2 = ml.getAndAdd(5L);
+        long val3 = ml.getAndDecrement();
+
+        assertEquals(10L, val1);
+        assertEquals(11L, val2);
+        assertEquals(16L, val3);
+        assertEquals(15L, ml.value());
+    }
+
+    @Test
+    public void test_edgeCase_maxValueOperations() {
+        MutableLong ml = MutableLong.of(Long.MAX_VALUE);
+        long oldValue = ml.value();
+        ml.increment();
+        assertTrue(ml.value() < oldValue);
+    }
+
+    @Test
+    public void test_edgeCase_minValueOperations() {
+        MutableLong ml = MutableLong.of(Long.MIN_VALUE);
+        long oldValue = ml.value();
+        ml.decrement();
+        assertTrue(ml.value() > oldValue);
+    }
+
+    @Test
+    public void test_edgeCase_zeroOperations() {
+        MutableLong ml = MutableLong.of(0L);
+        ml.add(0L);
+        ml.subtract(0L);
+        ml.increment();
+        ml.decrement();
+        assertEquals(0L, ml.value());
+    }
+
+    @Test
+    public void test_edgeCase_alternatingOperations() {
+        MutableLong ml = MutableLong.of(0L);
+        for (int i = 0; i < 100; i++) {
+            ml.increment();
+            ml.decrement();
+        }
+        assertEquals(0L, ml.value());
+    }
+
+    @Test
+    public void test_edgeCase_largeAdditions() {
+        MutableLong ml = MutableLong.of(0L);
+        ml.add(Long.MAX_VALUE / 2);
+        ml.add(Long.MAX_VALUE / 2);
+        assertTrue(ml.value() > 0);
+        assertEquals(Long.MAX_VALUE - 1, ml.value());
+    }
+
+    @Test
+    public void testOverflowBehavior() {
+        MutableLong mutableLong = MutableLong.of(Long.MAX_VALUE);
+        mutableLong.increment();
+        Assertions.assertEquals(Long.MIN_VALUE, mutableLong.value());
+
+        mutableLong.setValue(Long.MIN_VALUE);
+        mutableLong.decrement();
+        Assertions.assertEquals(Long.MAX_VALUE, mutableLong.value());
+    }
+
+    @Test
+    public void test_combinedOperations_setIfChain() throws Exception {
+        MutableLong ml = MutableLong.of(0L);
+        ml.setIf(v -> v == 0L, 10L);
+        ml.setIf(v -> v == 10L, 20L);
+        ml.setIf(v -> v < 25L, 30L);
+
+        assertEquals(30L, ml.value());
+    }
+
+    @Test
     public void test_value() {
         MutableLong ml = MutableLong.of(12345L);
         assertEquals(12345L, ml.value());
+    }
+
+    @Test
+    public void testValue() {
+        MutableLong mutableLong = MutableLong.of(100L);
+        Assertions.assertEquals(100L, mutableLong.value());
     }
 
     @Test
@@ -59,10 +174,23 @@ public class MutableLongTest extends TestBase {
     }
 
     @Test
+    public void testGetValue() {
+        MutableLong mutableLong = MutableLong.of(50L);
+        Assertions.assertEquals(50L, mutableLong.getValue());
+    }
+
+    @Test
     public void test_setValue() {
         MutableLong ml = MutableLong.of(10L);
         ml.setValue(20L);
         assertEquals(20L, ml.value());
+    }
+
+    @Test
+    public void testSetValue() {
+        MutableLong mutableLong = MutableLong.of(10L);
+        mutableLong.setValue(20L);
+        Assertions.assertEquals(20L, mutableLong.value());
     }
 
     @Test
@@ -90,6 +218,14 @@ public class MutableLongTest extends TestBase {
     }
 
     @Test
+    public void testGetAndSet() {
+        MutableLong mutableLong = MutableLong.of(30L);
+        long oldValue = mutableLong.getAndSet(40L);
+        Assertions.assertEquals(30L, oldValue);
+        Assertions.assertEquals(40L, mutableLong.value());
+    }
+
+    @Test
     public void test_getAndSet_sameValue() {
         MutableLong ml = MutableLong.of(42L);
         long oldValue = ml.getAndSet(42L);
@@ -113,6 +249,14 @@ public class MutableLongTest extends TestBase {
         assertEquals(10L, val1);
         assertEquals(15L, val2);
         assertEquals(15L, ml.value());
+    }
+
+    @Test
+    public void testSetAndGet() {
+        MutableLong mutableLong = MutableLong.of(50L);
+        long newValue = mutableLong.setAndGet(60L);
+        Assertions.assertEquals(60L, newValue);
+        Assertions.assertEquals(60L, mutableLong.value());
     }
 
     @Test
@@ -151,10 +295,30 @@ public class MutableLongTest extends TestBase {
     }
 
     @Test
+    public void testSetIf() throws Exception {
+        MutableLong mutableLong = MutableLong.of(10L);
+
+        boolean updated = mutableLong.setIf(v -> v < 15L, 20L);
+        Assertions.assertTrue(updated);
+        Assertions.assertEquals(20L, mutableLong.value());
+
+        updated = mutableLong.setIf(v -> v < 15L, 30L);
+        Assertions.assertFalse(updated);
+        Assertions.assertEquals(20L, mutableLong.value());
+    }
+
+    @Test
     public void test_increment() {
         MutableLong ml = MutableLong.of(10L);
         ml.increment();
         assertEquals(11L, ml.value());
+    }
+
+    @Test
+    public void testIncrement() {
+        MutableLong mutableLong = MutableLong.of(5L);
+        mutableLong.increment();
+        Assertions.assertEquals(6L, mutableLong.value());
     }
 
     @Test
@@ -188,6 +352,13 @@ public class MutableLongTest extends TestBase {
     }
 
     @Test
+    public void testDecrement() {
+        MutableLong mutableLong = MutableLong.of(5L);
+        mutableLong.decrement();
+        Assertions.assertEquals(4L, mutableLong.value());
+    }
+
+    @Test
     public void test_decrement_multiple() {
         MutableLong ml = MutableLong.of(5L);
         ml.decrement();
@@ -218,6 +389,23 @@ public class MutableLongTest extends TestBase {
     }
 
     @Test
+    public void test_add_large() {
+        MutableLong ml = MutableLong.of(1000000L);
+        ml.add(2000000L);
+        assertEquals(3000000L, ml.value());
+    }
+
+    @Test
+    public void testAdd() {
+        MutableLong mutableLong = MutableLong.of(10L);
+        mutableLong.add(5L);
+        Assertions.assertEquals(15L, mutableLong.value());
+
+        mutableLong.add(-3L);
+        Assertions.assertEquals(12L, mutableLong.value());
+    }
+
+    @Test
     public void test_add_negative() {
         MutableLong ml = MutableLong.of(10L);
         ml.add(-3L);
@@ -232,17 +420,20 @@ public class MutableLongTest extends TestBase {
     }
 
     @Test
-    public void test_add_large() {
-        MutableLong ml = MutableLong.of(1000000L);
-        ml.add(2000000L);
-        assertEquals(3000000L, ml.value());
-    }
-
-    @Test
     public void test_subtract() {
         MutableLong ml = MutableLong.of(10L);
         ml.subtract(3L);
         assertEquals(7L, ml.value());
+    }
+
+    @Test
+    public void testSubtract() {
+        MutableLong mutableLong = MutableLong.of(10L);
+        mutableLong.subtract(3L);
+        Assertions.assertEquals(7L, mutableLong.value());
+
+        mutableLong.subtract(-2L);
+        Assertions.assertEquals(9L, mutableLong.value());
     }
 
     @Test
@@ -275,6 +466,14 @@ public class MutableLongTest extends TestBase {
     }
 
     @Test
+    public void testGetAndIncrement() {
+        MutableLong mutableLong = MutableLong.of(10L);
+        long oldValue = mutableLong.getAndIncrement();
+        Assertions.assertEquals(10L, oldValue);
+        Assertions.assertEquals(11L, mutableLong.value());
+    }
+
+    @Test
     public void test_getAndIncrement_multiple() {
         MutableLong ml = MutableLong.of(0L);
         assertEquals(0L, ml.getAndIncrement());
@@ -289,6 +488,14 @@ public class MutableLongTest extends TestBase {
         long oldValue = ml.getAndDecrement();
         assertEquals(10L, oldValue);
         assertEquals(9L, ml.value());
+    }
+
+    @Test
+    public void testGetAndDecrement() {
+        MutableLong mutableLong = MutableLong.of(10L);
+        long oldValue = mutableLong.getAndDecrement();
+        Assertions.assertEquals(10L, oldValue);
+        Assertions.assertEquals(9L, mutableLong.value());
     }
 
     @Test
@@ -308,6 +515,14 @@ public class MutableLongTest extends TestBase {
     }
 
     @Test
+    public void testIncrementAndGet() {
+        MutableLong mutableLong = MutableLong.of(10L);
+        long newValue = mutableLong.incrementAndGet();
+        Assertions.assertEquals(11L, newValue);
+        Assertions.assertEquals(11L, mutableLong.value());
+    }
+
+    @Test
     public void test_incrementAndGet_multiple() {
         MutableLong ml = MutableLong.of(0L);
         assertEquals(1L, ml.incrementAndGet());
@@ -324,6 +539,14 @@ public class MutableLongTest extends TestBase {
     }
 
     @Test
+    public void testDecrementAndGet() {
+        MutableLong mutableLong = MutableLong.of(10L);
+        long newValue = mutableLong.decrementAndGet();
+        Assertions.assertEquals(9L, newValue);
+        Assertions.assertEquals(9L, mutableLong.value());
+    }
+
+    @Test
     public void test_decrementAndGet_multiple() {
         MutableLong ml = MutableLong.of(5L);
         assertEquals(4L, ml.decrementAndGet());
@@ -337,6 +560,14 @@ public class MutableLongTest extends TestBase {
         long oldValue = ml.getAndAdd(5L);
         assertEquals(10L, oldValue);
         assertEquals(15L, ml.value());
+    }
+
+    @Test
+    public void testGetAndAdd() {
+        MutableLong mutableLong = MutableLong.of(10L);
+        long oldValue = mutableLong.getAndAdd(5L);
+        Assertions.assertEquals(10L, oldValue);
+        Assertions.assertEquals(15L, mutableLong.value());
     }
 
     @Test
@@ -361,6 +592,14 @@ public class MutableLongTest extends TestBase {
         long newValue = ml.addAndGet(5L);
         assertEquals(15L, newValue);
         assertEquals(15L, ml.value());
+    }
+
+    @Test
+    public void testAddAndGet() {
+        MutableLong mutableLong = MutableLong.of(10L);
+        long newValue = mutableLong.addAndGet(5L);
+        Assertions.assertEquals(15L, newValue);
+        Assertions.assertEquals(15L, mutableLong.value());
     }
 
     @Test
@@ -412,9 +651,24 @@ public class MutableLongTest extends TestBase {
     }
 
     @Test
+    public void testIntValue() {
+        MutableLong mutableLong = MutableLong.of(42L);
+        Assertions.assertEquals(42, mutableLong.intValue());
+
+        mutableLong.setValue(Long.MAX_VALUE);
+        Assertions.assertEquals(-1, mutableLong.intValue());
+    }
+
+    @Test
     public void test_longValue() {
         MutableLong ml = MutableLong.of(12345678901234L);
         assertEquals(12345678901234L, ml.longValue());
+    }
+
+    @Test
+    public void testLongValue() {
+        MutableLong mutableLong = MutableLong.of(42L);
+        Assertions.assertEquals(42L, mutableLong.longValue());
     }
 
     @Test
@@ -436,6 +690,12 @@ public class MutableLongTest extends TestBase {
     }
 
     @Test
+    public void testFloatValue() {
+        MutableLong mutableLong = MutableLong.of(42L);
+        Assertions.assertEquals(42.0f, mutableLong.floatValue());
+    }
+
+    @Test
     public void test_floatValue_precisionLoss() {
         MutableLong ml = MutableLong.of(Long.MAX_VALUE);
         float result = ml.floatValue();
@@ -452,6 +712,12 @@ public class MutableLongTest extends TestBase {
     public void test_doubleValue() {
         MutableLong ml = MutableLong.of(123456789L);
         assertEquals(123456789.0, ml.doubleValue(), 0.0001);
+    }
+
+    @Test
+    public void testDoubleValue() {
+        MutableLong mutableLong = MutableLong.of(42L);
+        Assertions.assertEquals(42.0, mutableLong.doubleValue());
     }
 
     @Test
@@ -488,13 +754,6 @@ public class MutableLongTest extends TestBase {
     }
 
     @Test
-    public void test_compareTo_negative() {
-        MutableLong ml1 = MutableLong.of(-10L);
-        MutableLong ml2 = MutableLong.of(-20L);
-        assertTrue(ml1.compareTo(ml2) > 0);
-    }
-
-    @Test
     public void test_compareTo_mixedSigns() {
         MutableLong ml1 = MutableLong.of(-5L);
         MutableLong ml2 = MutableLong.of(5L);
@@ -502,16 +761,28 @@ public class MutableLongTest extends TestBase {
     }
 
     @Test
-    public void test_compareTo_extremeValues() {
-        MutableLong ml1 = MutableLong.of(Long.MAX_VALUE);
-        MutableLong ml2 = MutableLong.of(Long.MIN_VALUE);
+    public void testCompareTo() {
+        MutableLong a = MutableLong.of(10L);
+        MutableLong b = MutableLong.of(20L);
+        MutableLong c = MutableLong.of(10L);
+
+        Assertions.assertTrue(a.compareTo(b) < 0);
+        Assertions.assertTrue(b.compareTo(a) > 0);
+        Assertions.assertEquals(0, a.compareTo(c));
+    }
+
+    @Test
+    public void test_compareTo_negative() {
+        MutableLong ml1 = MutableLong.of(-10L);
+        MutableLong ml2 = MutableLong.of(-20L);
         assertTrue(ml1.compareTo(ml2) > 0);
     }
 
     @Test
-    public void test_equals_same() {
-        MutableLong ml = MutableLong.of(42L);
-        assertTrue(ml.equals(ml));
+    public void test_compareTo_extremeValues() {
+        MutableLong ml1 = MutableLong.of(Long.MAX_VALUE);
+        MutableLong ml2 = MutableLong.of(Long.MIN_VALUE);
+        assertTrue(ml1.compareTo(ml2) > 0);
     }
 
     @Test
@@ -531,17 +802,23 @@ public class MutableLongTest extends TestBase {
     }
 
     @Test
-    public void test_equals_null() {
-        MutableLong ml = MutableLong.of(42L);
-        assertFalse(ml.equals(null));
-    }
-
-    @Test
     public void test_equals_differentType() {
         MutableLong ml = MutableLong.of(42L);
         assertFalse(ml.equals("42"));
         assertFalse(ml.equals(42L));
         assertFalse(ml.equals(42));
+    }
+
+    @Test
+    public void test_equals_same() {
+        MutableLong ml = MutableLong.of(42L);
+        assertTrue(ml.equals(ml));
+    }
+
+    @Test
+    public void test_equals_null() {
+        MutableLong ml = MutableLong.of(42L);
+        assertFalse(ml.equals(null));
     }
 
     @Test
@@ -556,6 +833,18 @@ public class MutableLongTest extends TestBase {
         MutableLong ml1 = MutableLong.of(0L);
         MutableLong ml2 = MutableLong.of(0L);
         assertTrue(ml1.equals(ml2));
+    }
+
+    @Test
+    public void testEquals() {
+        MutableLong a = MutableLong.of(10L);
+        MutableLong b = MutableLong.of(10L);
+        MutableLong c = MutableLong.of(20L);
+
+        Assertions.assertTrue(a.equals(b));
+        Assertions.assertFalse(a.equals(c));
+        Assertions.assertFalse(a.equals(null));
+        Assertions.assertFalse(a.equals("10"));
     }
 
     @Test
@@ -581,6 +870,17 @@ public class MutableLongTest extends TestBase {
     }
 
     @Test
+    public void testHashCode() {
+        MutableLong a = MutableLong.of(10L);
+        MutableLong b = MutableLong.of(10L);
+        MutableLong c = MutableLong.of(20L);
+
+        Assertions.assertEquals(a.hashCode(), b.hashCode());
+        Assertions.assertNotEquals(a.hashCode(), c.hashCode());
+        Assertions.assertEquals(Long.hashCode(10L), a.hashCode());
+    }
+
+    @Test
     public void test_hashCode_negative() {
         MutableLong ml1 = MutableLong.of(-100L);
         MutableLong ml2 = MutableLong.of(-100L);
@@ -599,6 +899,22 @@ public class MutableLongTest extends TestBase {
         MutableLong mlMin = MutableLong.of(Long.MIN_VALUE);
         assertEquals(Long.hashCode(Long.MAX_VALUE), mlMax.hashCode());
         assertEquals(Long.hashCode(Long.MIN_VALUE), mlMin.hashCode());
+    }
+
+    @Test
+    public void test_toString_afterModification() {
+        MutableLong ml = MutableLong.of(10L);
+        ml.add(5L);
+        assertEquals("15", ml.toString());
+    }
+
+    @Test
+    public void testToString() {
+        MutableLong mutableLong = MutableLong.of(42L);
+        Assertions.assertEquals("42", mutableLong.toString());
+
+        mutableLong.setValue(-100L);
+        Assertions.assertEquals("-100", mutableLong.toString());
     }
 
     @Test
@@ -631,324 +947,6 @@ public class MutableLongTest extends TestBase {
     public void test_toString_minValue() {
         MutableLong ml = MutableLong.of(Long.MIN_VALUE);
         assertEquals(String.valueOf(Long.MIN_VALUE), ml.toString());
-    }
-
-    @Test
-    public void test_toString_afterModification() {
-        MutableLong ml = MutableLong.of(10L);
-        ml.add(5L);
-        assertEquals("15", ml.toString());
-    }
-
-    @Test
-    public void test_combinedOperations_incrementAndAdd() {
-        MutableLong ml = MutableLong.of(10L);
-        ml.increment();
-        ml.add(5L);
-        assertEquals(16L, ml.value());
-    }
-
-    @Test
-    public void test_combinedOperations_decrementAndSubtract() {
-        MutableLong ml = MutableLong.of(20L);
-        ml.decrement();
-        ml.subtract(5L);
-        assertEquals(14L, ml.value());
-    }
-
-    @Test
-    public void test_combinedOperations_multipleGetAnd() {
-        MutableLong ml = MutableLong.of(10L);
-        long val1 = ml.getAndIncrement();
-        long val2 = ml.getAndAdd(5L);
-        long val3 = ml.getAndDecrement();
-
-        assertEquals(10L, val1);
-        assertEquals(11L, val2);
-        assertEquals(16L, val3);
-        assertEquals(15L, ml.value());
-    }
-
-    @Test
-    public void test_combinedOperations_setIfChain() throws Exception {
-        MutableLong ml = MutableLong.of(0L);
-        ml.setIf(v -> v == 0L, 10L);
-        ml.setIf(v -> v == 10L, 20L);
-        ml.setIf(v -> v < 25L, 30L);
-
-        assertEquals(30L, ml.value());
-    }
-
-    @Test
-    public void test_combinedOperations_mixedIncrementDecrement() {
-        MutableLong ml = MutableLong.of(5L);
-        ml.incrementAndGet();
-        ml.decrementAndGet();
-        ml.incrementAndGet();
-
-        assertEquals(6L, ml.value());
-    }
-
-    @Test
-    public void test_edgeCase_maxValueOperations() {
-        MutableLong ml = MutableLong.of(Long.MAX_VALUE);
-        long oldValue = ml.value();
-        ml.increment();
-        assertTrue(ml.value() < oldValue);
-    }
-
-    @Test
-    public void test_edgeCase_minValueOperations() {
-        MutableLong ml = MutableLong.of(Long.MIN_VALUE);
-        long oldValue = ml.value();
-        ml.decrement();
-        assertTrue(ml.value() > oldValue);
-    }
-
-    @Test
-    public void test_edgeCase_zeroOperations() {
-        MutableLong ml = MutableLong.of(0L);
-        ml.add(0L);
-        ml.subtract(0L);
-        ml.increment();
-        ml.decrement();
-        assertEquals(0L, ml.value());
-    }
-
-    @Test
-    public void test_edgeCase_alternatingOperations() {
-        MutableLong ml = MutableLong.of(0L);
-        for (int i = 0; i < 100; i++) {
-            ml.increment();
-            ml.decrement();
-        }
-        assertEquals(0L, ml.value());
-    }
-
-    @Test
-    public void test_edgeCase_largeAdditions() {
-        MutableLong ml = MutableLong.of(0L);
-        ml.add(Long.MAX_VALUE / 2);
-        ml.add(Long.MAX_VALUE / 2);
-        assertTrue(ml.value() > 0);
-        assertEquals(Long.MAX_VALUE - 1, ml.value());
-    }
-
-    @Test
-    public void testOf() {
-        MutableLong mutableLong = MutableLong.of(42L);
-        Assertions.assertEquals(42L, mutableLong.value());
-    }
-
-    @Test
-    public void testValue() {
-        MutableLong mutableLong = MutableLong.of(100L);
-        Assertions.assertEquals(100L, mutableLong.value());
-    }
-
-    @Test
-    public void testGetValue() {
-        MutableLong mutableLong = MutableLong.of(50L);
-        Assertions.assertEquals(50L, mutableLong.getValue());
-    }
-
-    @Test
-    public void testSetValue() {
-        MutableLong mutableLong = MutableLong.of(10L);
-        mutableLong.setValue(20L);
-        Assertions.assertEquals(20L, mutableLong.value());
-    }
-
-    @Test
-    public void testGetAndSet() {
-        MutableLong mutableLong = MutableLong.of(30L);
-        long oldValue = mutableLong.getAndSet(40L);
-        Assertions.assertEquals(30L, oldValue);
-        Assertions.assertEquals(40L, mutableLong.value());
-    }
-
-    @Test
-    public void testSetAndGet() {
-        MutableLong mutableLong = MutableLong.of(50L);
-        long newValue = mutableLong.setAndGet(60L);
-        Assertions.assertEquals(60L, newValue);
-        Assertions.assertEquals(60L, mutableLong.value());
-    }
-
-    @Test
-    public void testSetIf() throws Exception {
-        MutableLong mutableLong = MutableLong.of(10L);
-
-        boolean updated = mutableLong.setIf(v -> v < 15L, 20L);
-        Assertions.assertTrue(updated);
-        Assertions.assertEquals(20L, mutableLong.value());
-
-        updated = mutableLong.setIf(v -> v < 15L, 30L);
-        Assertions.assertFalse(updated);
-        Assertions.assertEquals(20L, mutableLong.value());
-    }
-
-    @Test
-    public void testIncrement() {
-        MutableLong mutableLong = MutableLong.of(5L);
-        mutableLong.increment();
-        Assertions.assertEquals(6L, mutableLong.value());
-    }
-
-    @Test
-    public void testDecrement() {
-        MutableLong mutableLong = MutableLong.of(5L);
-        mutableLong.decrement();
-        Assertions.assertEquals(4L, mutableLong.value());
-    }
-
-    @Test
-    public void testAdd() {
-        MutableLong mutableLong = MutableLong.of(10L);
-        mutableLong.add(5L);
-        Assertions.assertEquals(15L, mutableLong.value());
-
-        mutableLong.add(-3L);
-        Assertions.assertEquals(12L, mutableLong.value());
-    }
-
-    @Test
-    public void testSubtract() {
-        MutableLong mutableLong = MutableLong.of(10L);
-        mutableLong.subtract(3L);
-        Assertions.assertEquals(7L, mutableLong.value());
-
-        mutableLong.subtract(-2L);
-        Assertions.assertEquals(9L, mutableLong.value());
-    }
-
-    @Test
-    public void testGetAndIncrement() {
-        MutableLong mutableLong = MutableLong.of(10L);
-        long oldValue = mutableLong.getAndIncrement();
-        Assertions.assertEquals(10L, oldValue);
-        Assertions.assertEquals(11L, mutableLong.value());
-    }
-
-    @Test
-    public void testGetAndDecrement() {
-        MutableLong mutableLong = MutableLong.of(10L);
-        long oldValue = mutableLong.getAndDecrement();
-        Assertions.assertEquals(10L, oldValue);
-        Assertions.assertEquals(9L, mutableLong.value());
-    }
-
-    @Test
-    public void testIncrementAndGet() {
-        MutableLong mutableLong = MutableLong.of(10L);
-        long newValue = mutableLong.incrementAndGet();
-        Assertions.assertEquals(11L, newValue);
-        Assertions.assertEquals(11L, mutableLong.value());
-    }
-
-    @Test
-    public void testDecrementAndGet() {
-        MutableLong mutableLong = MutableLong.of(10L);
-        long newValue = mutableLong.decrementAndGet();
-        Assertions.assertEquals(9L, newValue);
-        Assertions.assertEquals(9L, mutableLong.value());
-    }
-
-    @Test
-    public void testGetAndAdd() {
-        MutableLong mutableLong = MutableLong.of(10L);
-        long oldValue = mutableLong.getAndAdd(5L);
-        Assertions.assertEquals(10L, oldValue);
-        Assertions.assertEquals(15L, mutableLong.value());
-    }
-
-    @Test
-    public void testAddAndGet() {
-        MutableLong mutableLong = MutableLong.of(10L);
-        long newValue = mutableLong.addAndGet(5L);
-        Assertions.assertEquals(15L, newValue);
-        Assertions.assertEquals(15L, mutableLong.value());
-    }
-
-    @Test
-    public void testIntValue() {
-        MutableLong mutableLong = MutableLong.of(42L);
-        Assertions.assertEquals(42, mutableLong.intValue());
-
-        mutableLong.setValue(Long.MAX_VALUE);
-        Assertions.assertEquals(-1, mutableLong.intValue());
-    }
-
-    @Test
-    public void testLongValue() {
-        MutableLong mutableLong = MutableLong.of(42L);
-        Assertions.assertEquals(42L, mutableLong.longValue());
-    }
-
-    @Test
-    public void testFloatValue() {
-        MutableLong mutableLong = MutableLong.of(42L);
-        Assertions.assertEquals(42.0f, mutableLong.floatValue());
-    }
-
-    @Test
-    public void testDoubleValue() {
-        MutableLong mutableLong = MutableLong.of(42L);
-        Assertions.assertEquals(42.0, mutableLong.doubleValue());
-    }
-
-    @Test
-    public void testCompareTo() {
-        MutableLong a = MutableLong.of(10L);
-        MutableLong b = MutableLong.of(20L);
-        MutableLong c = MutableLong.of(10L);
-
-        Assertions.assertTrue(a.compareTo(b) < 0);
-        Assertions.assertTrue(b.compareTo(a) > 0);
-        Assertions.assertEquals(0, a.compareTo(c));
-    }
-
-    @Test
-    public void testEquals() {
-        MutableLong a = MutableLong.of(10L);
-        MutableLong b = MutableLong.of(10L);
-        MutableLong c = MutableLong.of(20L);
-
-        Assertions.assertTrue(a.equals(b));
-        Assertions.assertFalse(a.equals(c));
-        Assertions.assertFalse(a.equals(null));
-        Assertions.assertFalse(a.equals("10"));
-    }
-
-    @Test
-    public void testHashCode() {
-        MutableLong a = MutableLong.of(10L);
-        MutableLong b = MutableLong.of(10L);
-        MutableLong c = MutableLong.of(20L);
-
-        Assertions.assertEquals(a.hashCode(), b.hashCode());
-        Assertions.assertNotEquals(a.hashCode(), c.hashCode());
-        Assertions.assertEquals(Long.hashCode(10L), a.hashCode());
-    }
-
-    @Test
-    public void testToString() {
-        MutableLong mutableLong = MutableLong.of(42L);
-        Assertions.assertEquals("42", mutableLong.toString());
-
-        mutableLong.setValue(-100L);
-        Assertions.assertEquals("-100", mutableLong.toString());
-    }
-
-    @Test
-    public void testOverflowBehavior() {
-        MutableLong mutableLong = MutableLong.of(Long.MAX_VALUE);
-        mutableLong.increment();
-        Assertions.assertEquals(Long.MIN_VALUE, mutableLong.value());
-
-        mutableLong.setValue(Long.MIN_VALUE);
-        mutableLong.decrement();
-        Assertions.assertEquals(Long.MAX_VALUE, mutableLong.value());
     }
 
 }

@@ -13,7 +13,6 @@ import java.sql.Types;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -21,7 +20,6 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.MutableByte;
 
-@Tag("new-test")
 public class MutableByteTypeTest extends TestBase {
 
     private MutableByteType mutableByteType;

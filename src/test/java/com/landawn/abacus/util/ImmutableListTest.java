@@ -11,12 +11,10 @@ import java.util.List;
 import java.util.function.UnaryOperator;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ImmutableListTest extends TestBase {
 
     @Test
@@ -27,12 +25,25 @@ public class ImmutableListTest extends TestBase {
         Assertions.assertSame(ImmutableList.empty(), emptyList);
     }
 
-    //
     @Test
-    public void testOf_SingleElement() {
-        ImmutableList<Integer> list = ImmutableList.of(42);
-        Assertions.assertEquals(1, list.size());
-        Assertions.assertEquals(42, list.get(0));
+    public void testReverse_Empty() {
+        ImmutableList<String> list = ImmutableList.empty();
+        ImmutableList<String> reversed = list.reversed();
+        Assertions.assertSame(list, reversed);
+    }
+
+    @Test
+    public void testSize() {
+        Assertions.assertEquals(0, ImmutableList.empty().size());
+        Assertions.assertEquals(1, ImmutableList.of("a").size());
+        Assertions.assertEquals(3, ImmutableList.of("a", "b", "c").size());
+    }
+
+    @Test
+    public void testIsEmpty() {
+        Assertions.assertTrue(ImmutableList.empty().isEmpty());
+        Assertions.assertFalse(ImmutableList.of("a").isEmpty());
+        Assertions.assertFalse(ImmutableList.of("a", "b").isEmpty());
     }
 
     @Test
@@ -110,6 +121,368 @@ public class ImmutableListTest extends TestBase {
         Assertions.assertEquals("four", list.get(3));
     }
 
+    @Test
+    public void testReverse() {
+        ImmutableList<String> list = ImmutableList.of("a", "b", "c");
+        ImmutableList<String> reversed = list.reversed();
+
+        Assertions.assertEquals(3, reversed.size());
+        Assertions.assertEquals("c", reversed.get(0));
+        Assertions.assertEquals("b", reversed.get(1));
+        Assertions.assertEquals("a", reversed.get(2));
+    }
+
+    @Test
+    public void testReverse_Contains() {
+        ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d", "e");
+        ImmutableList<String> reversed = list.reversed();
+
+        Assertions.assertTrue(reversed.contains("a"));
+        Assertions.assertTrue(reversed.contains("c"));
+        Assertions.assertTrue(reversed.contains("e"));
+        Assertions.assertFalse(reversed.contains("x"));
+    }
+
+    @Test
+    public void testReverse_IndexOf() {
+        ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d", "e");
+        ImmutableList<String> reversed = list.reversed();
+
+        Assertions.assertEquals(4, reversed.indexOf("a"));
+        Assertions.assertEquals(3, reversed.indexOf("b"));
+        Assertions.assertEquals(2, reversed.indexOf("c"));
+        Assertions.assertEquals(1, reversed.indexOf("d"));
+        Assertions.assertEquals(0, reversed.indexOf("e"));
+        Assertions.assertEquals(-1, reversed.indexOf("x"));
+    }
+
+    @Test
+    public void testReverse_LastIndexOf() {
+        ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d", "e");
+        ImmutableList<String> reversed = list.reversed();
+
+        Assertions.assertEquals(4, reversed.lastIndexOf("a"));
+        Assertions.assertEquals(0, reversed.lastIndexOf("e"));
+    }
+
+    @Test
+    public void testReverse_SubList() {
+        ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d", "e");
+        ImmutableList<String> reversed = list.reversed();
+        ImmutableList<String> sub = reversed.subList(1, 3);
+
+        Assertions.assertEquals(2, sub.size());
+        Assertions.assertEquals("d", sub.get(0));
+        Assertions.assertEquals("c", sub.get(1));
+    }
+
+    @Test
+    public void testReverse_Size() {
+        ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d");
+        ImmutableList<String> reversed = list.reversed();
+        Assertions.assertEquals(4, reversed.size());
+    }
+
+    @Test
+    public void testReverse_Iterator() {
+        ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d");
+        ImmutableList<String> reversed = list.reversed();
+        ObjIterator<String> iter = reversed.iterator();
+
+        List<String> collected = new ArrayList<>();
+        while (iter.hasNext()) {
+            collected.add(iter.next());
+        }
+
+        Assertions.assertEquals(Arrays.asList("d", "c", "b", "a"), collected);
+    }
+
+    @Test
+    public void testReverse_ListIterator() {
+        ImmutableList<String> list = ImmutableList.of("a", "b", "c");
+        ImmutableList<String> reversed = list.reversed();
+        ImmutableListIterator<String> iter = reversed.listIterator();
+
+        Assertions.assertTrue(iter.hasNext());
+        Assertions.assertFalse(iter.hasPrevious());
+        Assertions.assertEquals("c", iter.next());
+        Assertions.assertEquals("b", iter.next());
+        Assertions.assertTrue(iter.hasPrevious());
+        Assertions.assertEquals("b", iter.previous());
+
+        ImmutableListIterator<String> iterAt2 = reversed.listIterator(2);
+        Assertions.assertEquals("a", iterAt2.next());
+        Assertions.assertFalse(iterAt2.hasNext());
+    }
+
+    @Test
+    public void testIterator() {
+        ImmutableList<String> list = ImmutableList.of("a", "b", "c");
+        ObjIterator<String> iter = list.iterator();
+
+        List<String> collected = new ArrayList<>();
+        while (iter.hasNext()) {
+            collected.add(iter.next());
+        }
+
+        Assertions.assertEquals(Arrays.asList("a", "b", "c"), collected);
+    }
+
+    @Test
+    public void testToArray() {
+        ImmutableList<String> list = ImmutableList.of("a", "b", "c");
+        Object[] array = list.toArray();
+
+        Assertions.assertEquals(3, array.length);
+        Assertions.assertEquals("a", array[0]);
+        Assertions.assertEquals("b", array[1]);
+        Assertions.assertEquals("c", array[2]);
+    }
+
+    @Test
+    public void testContainsAll() {
+        ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d");
+
+        Assertions.assertTrue(list.containsAll(Arrays.asList("a", "c")));
+        Assertions.assertTrue(list.containsAll(Arrays.asList("b", "d")));
+        Assertions.assertFalse(list.containsAll(Arrays.asList("a", "x")));
+    }
+
+    @Test
+    public void testEquals() {
+        ImmutableList<String> list1 = ImmutableList.of("a", "b", "c");
+        ImmutableList<String> list2 = ImmutableList.of("a", "b", "c");
+        List<String> list3 = Arrays.asList("a", "b", "c");
+
+        Assertions.assertEquals(list1, list2);
+        Assertions.assertEquals(list1, list3);
+    }
+
+    @Test
+    public void testHashCode() {
+        ImmutableList<String> list1 = ImmutableList.of("a", "b", "c");
+        ImmutableList<String> list2 = ImmutableList.of("a", "b", "c");
+
+        Assertions.assertEquals(list1.hashCode(), list2.hashCode());
+    }
+
+    @Test
+    public void testReverse_Operations() {
+        ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d", "e");
+        ImmutableList<String> reversed = list.reversed();
+
+        Assertions.assertTrue(reversed.contains("c"));
+
+        Assertions.assertEquals(0, reversed.indexOf("e"));
+        Assertions.assertEquals(4, reversed.indexOf("a"));
+
+        Assertions.assertEquals(0, reversed.lastIndexOf("e"));
+        Assertions.assertEquals(4, reversed.lastIndexOf("a"));
+
+        ImmutableList<String> sub = reversed.subList(1, 3);
+        Assertions.assertEquals("d", sub.get(0));
+        Assertions.assertEquals("c", sub.get(1));
+    }
+
+    @Test
+    public void testReverse_IndexOf_WithDuplicates() {
+        ImmutableList<String> list = ImmutableList.of("a", "b", "a", "b", "a");
+        ImmutableList<String> reversed = list.reversed();
+        // reversed: ["a", "b", "a", "b", "a"]
+        // forward has "a" at 0,2,4 so lastIndexOf("a") is 4 -> reversed indexOf is 5-1-4=0
+        Assertions.assertEquals(0, reversed.indexOf("a"));
+        // forward has "b" at 1,3 so lastIndexOf("b") is 3 -> reversed indexOf is 5-1-3=1
+        Assertions.assertEquals(1, reversed.indexOf("b"));
+    }
+
+    @Test
+    public void testReverse_LastIndexOf_WithDuplicates() {
+        ImmutableList<String> list = ImmutableList.of("a", "b", "a", "b", "a");
+        ImmutableList<String> reversed = list.reversed();
+        // forward has "a" at 0,2,4 so indexOf("a") is 0 -> reversed lastIndexOf is 5-1-0=4
+        Assertions.assertEquals(4, reversed.lastIndexOf("a"));
+        // forward has "b" at 1,3 so indexOf("b") is 1 -> reversed lastIndexOf is 5-1-1=3
+        Assertions.assertEquals(3, reversed.lastIndexOf("b"));
+    }
+
+    //
+    @Test
+    public void testOf_SingleElement() {
+        ImmutableList<Integer> list = ImmutableList.of(42);
+        Assertions.assertEquals(1, list.size());
+        Assertions.assertEquals(42, list.get(0));
+    }
+
+    //
+    //
+    @Test
+    public void testOf_VarArgs_WithNullElement() {
+        ImmutableList<String> list = ImmutableList.of("a", null, "c");
+        Assertions.assertEquals(3, list.size());
+        Assertions.assertNull(list.get(1));
+    }
+
+    @Test
+    public void testReverse_DoubleReverse() {
+        ImmutableList<String> list = ImmutableList.of("a", "b", "c");
+        ImmutableList<String> reversed = list.reversed();
+        ImmutableList<String> doubleReversed = reversed.reversed();
+
+        Assertions.assertSame(list, doubleReversed);
+    }
+
+    @Test
+    public void testReverse_SingleElement() {
+        ImmutableList<String> list = ImmutableList.of("single");
+        ImmutableList<String> reversed = list.reversed();
+        Assertions.assertSame(list, reversed);
+    }
+
+    @Test
+    public void testReverse_ToArray() {
+        ImmutableList<String> list = ImmutableList.of("a", "b", "c");
+        ImmutableList<String> reversed = list.reversed();
+
+        Object[] array = reversed.toArray();
+        Assertions.assertEquals(3, array.length);
+        Assertions.assertEquals("c", array[0]);
+        Assertions.assertEquals("b", array[1]);
+        Assertions.assertEquals("a", array[2]);
+
+        String[] typedArray = reversed.toArray(new String[0]);
+        Assertions.assertEquals(3, typedArray.length);
+        Assertions.assertEquals("c", typedArray[0]);
+        Assertions.assertEquals("a", typedArray[2]);
+
+        String[] largerArray = reversed.toArray(new String[5]);
+        Assertions.assertEquals(5, largerArray.length);
+        Assertions.assertEquals("c", largerArray[0]);
+        Assertions.assertEquals("a", largerArray[2]);
+        Assertions.assertNull(largerArray[3]);
+    }
+
+    @Test
+    public void testContains() {
+        ImmutableList<String> list = ImmutableList.of("a", "b", "c");
+
+        Assertions.assertTrue(list.contains("a"));
+        Assertions.assertTrue(list.contains("b"));
+        Assertions.assertTrue(list.contains("c"));
+        Assertions.assertFalse(list.contains("d"));
+        Assertions.assertFalse(list.contains(null));
+    }
+
+    @Test
+    public void testContains_WithNull() {
+        ImmutableList<String> list = ImmutableList.of("a", null, "c");
+        Assertions.assertTrue(list.contains(null));
+    }
+
+    @Test
+    public void testToString() {
+        ImmutableList<String> list = ImmutableList.of("a", "b", "c");
+        String str = list.toString();
+        Assertions.assertNotNull(str);
+        Assertions.assertTrue(str.contains("a"));
+        Assertions.assertTrue(str.contains("b"));
+        Assertions.assertTrue(str.contains("c"));
+
+        ImmutableList<String> empty = ImmutableList.empty();
+        Assertions.assertEquals("[]", empty.toString());
+    }
+
+    @Test
+    public void testMutationMethods_Add_ThrowsException() {
+        ImmutableList<String> list = ImmutableList.of("a", "b");
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.add("c"));
+    }
+
+    @Test
+    public void testMutationMethods_AddAll_ThrowsException() {
+        ImmutableList<String> list = ImmutableList.of("a", "b");
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.addAll(Arrays.asList("c", "d")));
+    }
+
+    @Test
+    public void testMutationMethods_Remove_ThrowsException() {
+        ImmutableList<String> list = ImmutableList.of("a", "b");
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.remove("a"));
+    }
+
+    @Test
+    public void testMutationMethods_RemoveAll_ThrowsException() {
+        ImmutableList<String> list = ImmutableList.of("a", "b");
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.removeAll(Arrays.asList("a")));
+    }
+
+    @Test
+    public void testMutationMethods_RetainAll_ThrowsException() {
+        ImmutableList<String> list = ImmutableList.of("a", "b");
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.retainAll(Arrays.asList("a")));
+    }
+
+    @Test
+    public void testMutationMethods_Clear_ThrowsException() {
+        ImmutableList<String> list = ImmutableList.of("a", "b");
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.clear());
+    }
+
+    @Test
+    public void testMutationMethods_RemoveIf_ThrowsException() {
+        ImmutableList<String> list = ImmutableList.of("a", "b");
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.removeIf(s -> s.equals("a")));
+    }
+
+    @Test
+    public void testMutationMethods_ThrowUnsupported() {
+        ImmutableList<String> list = ImmutableList.of("a", "b");
+
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.add("c"));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.add(0, "c"));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.addAll(Arrays.asList("c")));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.addAll(0, Arrays.asList("c")));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.remove("a"));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.remove(0));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.removeAll(Arrays.asList("a")));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.retainAll(Arrays.asList("a")));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.clear());
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.set(0, "c"));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.replaceAll(UnaryOperator.identity()));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.sort(null));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.removeIf(s -> true));
+    }
+
+    @Test
+    public void testReverse_Iterator_Remove_ThrowsException() {
+        ImmutableList<String> list = ImmutableList.of("a", "b", "c");
+        ImmutableList<String> reversed = list.reversed();
+        ObjIterator<String> iter = reversed.iterator();
+        iter.next();
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> iter.remove());
+    }
+
+    @Test
+    public void testCopyOf() {
+        List<String> mutable = new ArrayList<>(Arrays.asList("a", "b", "c"));
+        ImmutableList<String> immutable = ImmutableList.copyOf(mutable);
+
+        Assertions.assertEquals(3, immutable.size());
+        Assertions.assertEquals("a", immutable.get(0));
+        Assertions.assertEquals("b", immutable.get(1));
+        Assertions.assertEquals("c", immutable.get(2));
+
+        mutable.add("d");
+        Assertions.assertEquals(3, immutable.size());
+    }
+
+    @Test
+    public void testCopyOf_FromNonListCollection() {
+        java.util.Set<String> set = new java.util.LinkedHashSet<>(Arrays.asList("x", "y", "z"));
+        ImmutableList<String> list = ImmutableList.copyOf(set);
+        Assertions.assertEquals(3, list.size());
+        Assertions.assertEquals("x", list.get(0));
+    }
+
     //    @Test
     //    public void testOf_VarArgs_Empty() {
     //        ImmutableList<String> list = ImmutableList.of();
@@ -156,29 +529,6 @@ public class ImmutableListTest extends TestBase {
         Assertions.assertEquals("only", list.get(0));
     }
 
-    //
-    //
-    @Test
-    public void testOf_VarArgs_WithNullElement() {
-        ImmutableList<String> list = ImmutableList.of("a", null, "c");
-        Assertions.assertEquals(3, list.size());
-        Assertions.assertNull(list.get(1));
-    }
-
-    @Test
-    public void testCopyOf() {
-        List<String> mutable = new ArrayList<>(Arrays.asList("a", "b", "c"));
-        ImmutableList<String> immutable = ImmutableList.copyOf(mutable);
-
-        Assertions.assertEquals(3, immutable.size());
-        Assertions.assertEquals("a", immutable.get(0));
-        Assertions.assertEquals("b", immutable.get(1));
-        Assertions.assertEquals("c", immutable.get(2));
-
-        mutable.add("d");
-        Assertions.assertEquals(3, immutable.size());
-    }
-
     @Test
     public void testCopyOf_AlreadyImmutable() {
         ImmutableList<String> original = ImmutableList.of("a", "b");
@@ -210,6 +560,20 @@ public class ImmutableListTest extends TestBase {
         ImmutableList<String> list = ImmutableList.copyOf(withNull);
         Assertions.assertEquals(3, list.size());
         Assertions.assertNull(list.get(1));
+    }
+
+    @Test
+    public void testWithNullElements() {
+        List<String> withNull = new ArrayList<>();
+        withNull.add("a");
+        withNull.add(null);
+        withNull.add("c");
+
+        ImmutableList<String> list = ImmutableList.copyOf(withNull);
+        Assertions.assertEquals(3, list.size());
+        Assertions.assertNull(list.get(1));
+        Assertions.assertTrue(list.contains(null));
+        Assertions.assertEquals(1, list.indexOf(null));
     }
 
     @Test
@@ -341,18 +705,18 @@ public class ImmutableListTest extends TestBase {
     }
 
     @Test
-    public void testSubList_Empty() {
-        ImmutableList<String> list = ImmutableList.of("a", "b", "c");
-        ImmutableList<String> sub = list.subList(1, 1);
-        Assertions.assertTrue(sub.isEmpty());
-    }
-
-    @Test
     public void testSubList_FullRange() {
         ImmutableList<String> list = ImmutableList.of("a", "b", "c");
         ImmutableList<String> sub = list.subList(0, 3);
         Assertions.assertEquals(3, sub.size());
         Assertions.assertEquals(list.get(0), sub.get(0));
+    }
+
+    @Test
+    public void testSubList_Empty() {
+        ImmutableList<String> list = ImmutableList.of("a", "b", "c");
+        ImmutableList<String> sub = list.subList(1, 1);
+        Assertions.assertTrue(sub.isEmpty());
     }
 
     @Test
@@ -417,146 +781,6 @@ public class ImmutableListTest extends TestBase {
     }
 
     @Test
-    public void testReverse() {
-        ImmutableList<String> list = ImmutableList.of("a", "b", "c");
-        ImmutableList<String> reversed = list.reversed();
-
-        Assertions.assertEquals(3, reversed.size());
-        Assertions.assertEquals("c", reversed.get(0));
-        Assertions.assertEquals("b", reversed.get(1));
-        Assertions.assertEquals("a", reversed.get(2));
-    }
-
-    @Test
-    public void testReverse_DoubleReverse() {
-        ImmutableList<String> list = ImmutableList.of("a", "b", "c");
-        ImmutableList<String> reversed = list.reversed();
-        ImmutableList<String> doubleReversed = reversed.reversed();
-
-        Assertions.assertSame(list, doubleReversed);
-    }
-
-    @Test
-    public void testReverse_SingleElement() {
-        ImmutableList<String> list = ImmutableList.of("single");
-        ImmutableList<String> reversed = list.reversed();
-        Assertions.assertSame(list, reversed);
-    }
-
-    @Test
-    public void testReverse_Empty() {
-        ImmutableList<String> list = ImmutableList.empty();
-        ImmutableList<String> reversed = list.reversed();
-        Assertions.assertSame(list, reversed);
-    }
-
-    @Test
-    public void testReverse_Contains() {
-        ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d", "e");
-        ImmutableList<String> reversed = list.reversed();
-
-        Assertions.assertTrue(reversed.contains("a"));
-        Assertions.assertTrue(reversed.contains("c"));
-        Assertions.assertTrue(reversed.contains("e"));
-        Assertions.assertFalse(reversed.contains("x"));
-    }
-
-    @Test
-    public void testReverse_IndexOf() {
-        ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d", "e");
-        ImmutableList<String> reversed = list.reversed();
-
-        Assertions.assertEquals(4, reversed.indexOf("a"));
-        Assertions.assertEquals(3, reversed.indexOf("b"));
-        Assertions.assertEquals(2, reversed.indexOf("c"));
-        Assertions.assertEquals(1, reversed.indexOf("d"));
-        Assertions.assertEquals(0, reversed.indexOf("e"));
-        Assertions.assertEquals(-1, reversed.indexOf("x"));
-    }
-
-    @Test
-    public void testReverse_LastIndexOf() {
-        ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d", "e");
-        ImmutableList<String> reversed = list.reversed();
-
-        Assertions.assertEquals(4, reversed.lastIndexOf("a"));
-        Assertions.assertEquals(0, reversed.lastIndexOf("e"));
-    }
-
-    @Test
-    public void testReverse_SubList() {
-        ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d", "e");
-        ImmutableList<String> reversed = list.reversed();
-        ImmutableList<String> sub = reversed.subList(1, 3);
-
-        Assertions.assertEquals(2, sub.size());
-        Assertions.assertEquals("d", sub.get(0));
-        Assertions.assertEquals("c", sub.get(1));
-    }
-
-    @Test
-    public void testReverse_Size() {
-        ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d");
-        ImmutableList<String> reversed = list.reversed();
-        Assertions.assertEquals(4, reversed.size());
-    }
-
-    @Test
-    public void testReverse_Iterator() {
-        ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d");
-        ImmutableList<String> reversed = list.reversed();
-        ObjIterator<String> iter = reversed.iterator();
-
-        List<String> collected = new ArrayList<>();
-        while (iter.hasNext()) {
-            collected.add(iter.next());
-        }
-
-        Assertions.assertEquals(Arrays.asList("d", "c", "b", "a"), collected);
-    }
-
-    @Test
-    public void testReverse_ListIterator() {
-        ImmutableList<String> list = ImmutableList.of("a", "b", "c");
-        ImmutableList<String> reversed = list.reversed();
-        ImmutableListIterator<String> iter = reversed.listIterator();
-
-        Assertions.assertTrue(iter.hasNext());
-        Assertions.assertFalse(iter.hasPrevious());
-        Assertions.assertEquals("c", iter.next());
-        Assertions.assertEquals("b", iter.next());
-        Assertions.assertTrue(iter.hasPrevious());
-        Assertions.assertEquals("b", iter.previous());
-
-        ImmutableListIterator<String> iterAt2 = reversed.listIterator(2);
-        Assertions.assertEquals("a", iterAt2.next());
-        Assertions.assertFalse(iterAt2.hasNext());
-    }
-
-    @Test
-    public void testReverse_ToArray() {
-        ImmutableList<String> list = ImmutableList.of("a", "b", "c");
-        ImmutableList<String> reversed = list.reversed();
-
-        Object[] array = reversed.toArray();
-        Assertions.assertEquals(3, array.length);
-        Assertions.assertEquals("c", array[0]);
-        Assertions.assertEquals("b", array[1]);
-        Assertions.assertEquals("a", array[2]);
-
-        String[] typedArray = reversed.toArray(new String[0]);
-        Assertions.assertEquals(3, typedArray.length);
-        Assertions.assertEquals("c", typedArray[0]);
-        Assertions.assertEquals("a", typedArray[2]);
-
-        String[] largerArray = reversed.toArray(new String[5]);
-        Assertions.assertEquals(5, largerArray.length);
-        Assertions.assertEquals("c", largerArray[0]);
-        Assertions.assertEquals("a", largerArray[2]);
-        Assertions.assertNull(largerArray[3]);
-    }
-
-    @Test
     public void testBuilder() {
         ImmutableList<String> list = ImmutableList.<String> builder().add("one").add("two", "three").addAll(Arrays.asList("four", "five")).build();
 
@@ -566,6 +790,49 @@ public class ImmutableListTest extends TestBase {
         Assertions.assertEquals("three", list.get(2));
         Assertions.assertEquals("four", list.get(3));
         Assertions.assertEquals("five", list.get(4));
+    }
+
+    @Test
+    public void testBuilder_Add_Varargs() {
+        ImmutableList<String> list = ImmutableList.<String> builder().add("a", "b", "c").build();
+        Assertions.assertEquals(3, list.size());
+    }
+
+    @Test
+    public void testBuilder_AddAll_Collection() {
+        List<String> source = Arrays.asList("a", "b", "c");
+        ImmutableList<String> list = ImmutableList.<String> builder().addAll(source).build();
+
+        Assertions.assertEquals(3, list.size());
+        Assertions.assertEquals("a", list.get(0));
+    }
+
+    @Test
+    public void testBuilder_AddAll_Iterator() {
+        List<String> source = Arrays.asList("a", "b", "c");
+        ImmutableList<String> list = ImmutableList.<String> builder().addAll(source.iterator()).build();
+
+        Assertions.assertEquals(3, list.size());
+        Assertions.assertEquals("a", list.get(0));
+    }
+
+    @Test
+    public void testBuilder_WithBackingList() {
+        List<String> backing = new ArrayList<>();
+        ImmutableList<String> list = ImmutableList.builder(backing).add("a").add("b").build();
+
+        Assertions.assertEquals(2, list.size());
+        Assertions.assertEquals(2, backing.size());
+        Assertions.assertEquals("a", backing.get(0));
+        Assertions.assertEquals("b", backing.get(1));
+    }
+
+    @Test
+    public void testBuilder_WithIterator() {
+        List<String> source = Arrays.asList("a", "b", "c");
+        ImmutableList<String> list = ImmutableList.<String> builder().addAll(source.iterator()).build();
+
+        Assertions.assertEquals(3, list.size());
     }
 
     @Test
@@ -582,12 +849,6 @@ public class ImmutableListTest extends TestBase {
     }
 
     @Test
-    public void testBuilder_Add_Varargs() {
-        ImmutableList<String> list = ImmutableList.<String> builder().add("a", "b", "c").build();
-        Assertions.assertEquals(3, list.size());
-    }
-
-    @Test
     public void testBuilder_Add_Varargs_Null() {
         ImmutableList<String> list = ImmutableList.<String> builder().add((String[]) null).build();
         Assertions.assertTrue(list.isEmpty());
@@ -597,15 +858,6 @@ public class ImmutableListTest extends TestBase {
     public void testBuilder_Add_Varargs_Empty() {
         ImmutableList<String> list = ImmutableList.<String> builder().add(new String[0]).build();
         Assertions.assertTrue(list.isEmpty());
-    }
-
-    @Test
-    public void testBuilder_AddAll_Collection() {
-        List<String> source = Arrays.asList("a", "b", "c");
-        ImmutableList<String> list = ImmutableList.<String> builder().addAll(source).build();
-
-        Assertions.assertEquals(3, list.size());
-        Assertions.assertEquals("a", list.get(0));
     }
 
     @Test
@@ -621,15 +873,6 @@ public class ImmutableListTest extends TestBase {
     }
 
     @Test
-    public void testBuilder_AddAll_Iterator() {
-        List<String> source = Arrays.asList("a", "b", "c");
-        ImmutableList<String> list = ImmutableList.<String> builder().addAll(source.iterator()).build();
-
-        Assertions.assertEquals(3, list.size());
-        Assertions.assertEquals("a", list.get(0));
-    }
-
-    @Test
     public void testBuilder_AddAll_Iterator_Null() {
         ImmutableList<String> list = ImmutableList.<String> builder().addAll((Iterator<String>) null).build();
         Assertions.assertTrue(list.isEmpty());
@@ -639,17 +882,6 @@ public class ImmutableListTest extends TestBase {
     public void testBuilder_AddAll_Iterator_Empty() {
         ImmutableList<String> list = ImmutableList.<String> builder().addAll(Collections.emptyIterator()).build();
         Assertions.assertTrue(list.isEmpty());
-    }
-
-    @Test
-    public void testBuilder_WithBackingList() {
-        List<String> backing = new ArrayList<>();
-        ImmutableList<String> list = ImmutableList.builder(backing).add("a").add("b").build();
-
-        Assertions.assertEquals(2, list.size());
-        Assertions.assertEquals(2, backing.size());
-        Assertions.assertEquals("a", backing.get(0));
-        Assertions.assertEquals("b", backing.get(1));
     }
 
     @Test
@@ -667,240 +899,6 @@ public class ImmutableListTest extends TestBase {
 
         ImmutableList<String> list = builder.build();
         Assertions.assertEquals(5, list.size());
-    }
-
-    @Test
-    public void testMutationMethods_Add_ThrowsException() {
-        ImmutableList<String> list = ImmutableList.of("a", "b");
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.add("c"));
-    }
-
-    @Test
-    public void testMutationMethods_AddAll_ThrowsException() {
-        ImmutableList<String> list = ImmutableList.of("a", "b");
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.addAll(Arrays.asList("c", "d")));
-    }
-
-    @Test
-    public void testMutationMethods_Remove_ThrowsException() {
-        ImmutableList<String> list = ImmutableList.of("a", "b");
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.remove("a"));
-    }
-
-    @Test
-    public void testMutationMethods_RemoveAll_ThrowsException() {
-        ImmutableList<String> list = ImmutableList.of("a", "b");
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.removeAll(Arrays.asList("a")));
-    }
-
-    @Test
-    public void testMutationMethods_RetainAll_ThrowsException() {
-        ImmutableList<String> list = ImmutableList.of("a", "b");
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.retainAll(Arrays.asList("a")));
-    }
-
-    @Test
-    public void testMutationMethods_Clear_ThrowsException() {
-        ImmutableList<String> list = ImmutableList.of("a", "b");
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.clear());
-    }
-
-    @Test
-    public void testMutationMethods_RemoveIf_ThrowsException() {
-        ImmutableList<String> list = ImmutableList.of("a", "b");
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.removeIf(s -> s.equals("a")));
-    }
-
-    @Test
-    public void testIterator() {
-        ImmutableList<String> list = ImmutableList.of("a", "b", "c");
-        ObjIterator<String> iter = list.iterator();
-
-        List<String> collected = new ArrayList<>();
-        while (iter.hasNext()) {
-            collected.add(iter.next());
-        }
-
-        Assertions.assertEquals(Arrays.asList("a", "b", "c"), collected);
-    }
-
-    @Test
-    public void testContains() {
-        ImmutableList<String> list = ImmutableList.of("a", "b", "c");
-
-        Assertions.assertTrue(list.contains("a"));
-        Assertions.assertTrue(list.contains("b"));
-        Assertions.assertTrue(list.contains("c"));
-        Assertions.assertFalse(list.contains("d"));
-        Assertions.assertFalse(list.contains(null));
-    }
-
-    @Test
-    public void testContains_WithNull() {
-        ImmutableList<String> list = ImmutableList.of("a", null, "c");
-        Assertions.assertTrue(list.contains(null));
-    }
-
-    @Test
-    public void testSize() {
-        Assertions.assertEquals(0, ImmutableList.empty().size());
-        Assertions.assertEquals(1, ImmutableList.of("a").size());
-        Assertions.assertEquals(3, ImmutableList.of("a", "b", "c").size());
-    }
-
-    @Test
-    public void testIsEmpty() {
-        Assertions.assertTrue(ImmutableList.empty().isEmpty());
-        Assertions.assertFalse(ImmutableList.of("a").isEmpty());
-        Assertions.assertFalse(ImmutableList.of("a", "b").isEmpty());
-    }
-
-    @Test
-    public void testToArray() {
-        ImmutableList<String> list = ImmutableList.of("a", "b", "c");
-        Object[] array = list.toArray();
-
-        Assertions.assertEquals(3, array.length);
-        Assertions.assertEquals("a", array[0]);
-        Assertions.assertEquals("b", array[1]);
-        Assertions.assertEquals("c", array[2]);
-    }
-
-    @Test
-    public void testContainsAll() {
-        ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d");
-
-        Assertions.assertTrue(list.containsAll(Arrays.asList("a", "c")));
-        Assertions.assertTrue(list.containsAll(Arrays.asList("b", "d")));
-        Assertions.assertFalse(list.containsAll(Arrays.asList("a", "x")));
-    }
-
-    @Test
-    public void testEquals() {
-        ImmutableList<String> list1 = ImmutableList.of("a", "b", "c");
-        ImmutableList<String> list2 = ImmutableList.of("a", "b", "c");
-        List<String> list3 = Arrays.asList("a", "b", "c");
-
-        Assertions.assertEquals(list1, list2);
-        Assertions.assertEquals(list1, list3);
-    }
-
-    @Test
-    public void testHashCode() {
-        ImmutableList<String> list1 = ImmutableList.of("a", "b", "c");
-        ImmutableList<String> list2 = ImmutableList.of("a", "b", "c");
-
-        Assertions.assertEquals(list1.hashCode(), list2.hashCode());
-    }
-
-    @Test
-    public void testReverse_Operations() {
-        ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d", "e");
-        ImmutableList<String> reversed = list.reversed();
-
-        Assertions.assertTrue(reversed.contains("c"));
-
-        Assertions.assertEquals(0, reversed.indexOf("e"));
-        Assertions.assertEquals(4, reversed.indexOf("a"));
-
-        Assertions.assertEquals(0, reversed.lastIndexOf("e"));
-        Assertions.assertEquals(4, reversed.lastIndexOf("a"));
-
-        ImmutableList<String> sub = reversed.subList(1, 3);
-        Assertions.assertEquals("d", sub.get(0));
-        Assertions.assertEquals("c", sub.get(1));
-    }
-
-    @Test
-    public void testBuilder_WithIterator() {
-        List<String> source = Arrays.asList("a", "b", "c");
-        ImmutableList<String> list = ImmutableList.<String> builder().addAll(source.iterator()).build();
-
-        Assertions.assertEquals(3, list.size());
-    }
-
-    @Test
-    public void testMutationMethods_ThrowUnsupported() {
-        ImmutableList<String> list = ImmutableList.of("a", "b");
-
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.add("c"));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.add(0, "c"));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.addAll(Arrays.asList("c")));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.addAll(0, Arrays.asList("c")));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.remove("a"));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.remove(0));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.removeAll(Arrays.asList("a")));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.retainAll(Arrays.asList("a")));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.clear());
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.set(0, "c"));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.replaceAll(UnaryOperator.identity()));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.sort(null));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.removeIf(s -> true));
-    }
-
-    @Test
-    public void testWithNullElements() {
-        List<String> withNull = new ArrayList<>();
-        withNull.add("a");
-        withNull.add(null);
-        withNull.add("c");
-
-        ImmutableList<String> list = ImmutableList.copyOf(withNull);
-        Assertions.assertEquals(3, list.size());
-        Assertions.assertNull(list.get(1));
-        Assertions.assertTrue(list.contains(null));
-        Assertions.assertEquals(1, list.indexOf(null));
-    }
-
-    @Test
-    public void testToString() {
-        ImmutableList<String> list = ImmutableList.of("a", "b", "c");
-        String str = list.toString();
-        Assertions.assertNotNull(str);
-        Assertions.assertTrue(str.contains("a"));
-        Assertions.assertTrue(str.contains("b"));
-        Assertions.assertTrue(str.contains("c"));
-
-        ImmutableList<String> empty = ImmutableList.empty();
-        Assertions.assertEquals("[]", empty.toString());
-    }
-
-    @Test
-    public void testCopyOf_FromNonListCollection() {
-        java.util.Set<String> set = new java.util.LinkedHashSet<>(Arrays.asList("x", "y", "z"));
-        ImmutableList<String> list = ImmutableList.copyOf(set);
-        Assertions.assertEquals(3, list.size());
-        Assertions.assertEquals("x", list.get(0));
-    }
-
-    @Test
-    public void testReverse_IndexOf_WithDuplicates() {
-        ImmutableList<String> list = ImmutableList.of("a", "b", "a", "b", "a");
-        ImmutableList<String> reversed = list.reversed();
-        // reversed: ["a", "b", "a", "b", "a"]
-        // forward has "a" at 0,2,4 so lastIndexOf("a") is 4 -> reversed indexOf is 5-1-4=0
-        Assertions.assertEquals(0, reversed.indexOf("a"));
-        // forward has "b" at 1,3 so lastIndexOf("b") is 3 -> reversed indexOf is 5-1-3=1
-        Assertions.assertEquals(1, reversed.indexOf("b"));
-    }
-
-    @Test
-    public void testReverse_LastIndexOf_WithDuplicates() {
-        ImmutableList<String> list = ImmutableList.of("a", "b", "a", "b", "a");
-        ImmutableList<String> reversed = list.reversed();
-        // forward has "a" at 0,2,4 so indexOf("a") is 0 -> reversed lastIndexOf is 5-1-0=4
-        Assertions.assertEquals(4, reversed.lastIndexOf("a"));
-        // forward has "b" at 1,3 so indexOf("b") is 1 -> reversed lastIndexOf is 5-1-1=3
-        Assertions.assertEquals(3, reversed.lastIndexOf("b"));
-    }
-
-    @Test
-    public void testReverse_Iterator_Remove_ThrowsException() {
-        ImmutableList<String> list = ImmutableList.of("a", "b", "c");
-        ImmutableList<String> reversed = list.reversed();
-        ObjIterator<String> iter = reversed.iterator();
-        iter.next();
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> iter.remove());
     }
 
 }

@@ -13,15 +13,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class PrimitiveShortTypeTest extends TestBase {
 
     private final PrimitiveShortType primitiveShortType = new PrimitiveShortType();
+
+    @Test
+    public void testDefaultValue() {
+        assertEquals(Short.valueOf((short) 0), primitiveShortType.defaultValue());
+    }
 
     @Test
     public void test_set_PreparedStatement() throws SQLException {
@@ -70,11 +73,6 @@ public class PrimitiveShortTypeTest extends TestBase {
     @Test
     public void test_isCsvQuoteRequired() {
         assertFalse(primitiveShortType.isCsvQuoteRequired());
-    }
-
-    @Test
-    public void testDefaultValue() {
-        assertEquals(Short.valueOf((short) 0), primitiveShortType.defaultValue());
     }
 
 }

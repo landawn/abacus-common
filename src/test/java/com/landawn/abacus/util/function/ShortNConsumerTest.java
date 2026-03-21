@@ -16,12 +16,10 @@ package com.landawn.abacus.util.function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ShortNConsumerTest extends TestBase {
 
     @Test
@@ -32,6 +30,39 @@ public class ShortNConsumerTest extends TestBase {
 
         consumer.accept();
         assertEquals(0, count[0]);
+    }
+
+    @Test
+    public void test_accept_lambda() {
+        final int[] count = { 0 };
+
+        ShortNConsumer consumer = args -> count[0] = args.length;
+
+        consumer.accept((short) 10, (short) 20, (short) 30);
+        assertEquals(3, count[0]);
+    }
+
+    @Test
+    public void test_accept_varargs() {
+        final short[] result = { 0 };
+
+        ShortNConsumer consumer = args -> {
+            for (short value : args) {
+                result[0] += value;
+            }
+        };
+
+        // Test with different number of arguments
+        consumer.accept((short) 1);
+        assertEquals(1, result[0]);
+
+        result[0] = 0;
+        consumer.accept((short) 1, (short) 2);
+        assertEquals(3, result[0]);
+
+        result[0] = 0;
+        consumer.accept((short) 1, (short) 2, (short) 3, (short) 4);
+        assertEquals(10, result[0]);
     }
 
     @Test
@@ -65,16 +96,6 @@ public class ShortNConsumerTest extends TestBase {
     }
 
     @Test
-    public void test_accept_lambda() {
-        final int[] count = { 0 };
-
-        ShortNConsumer consumer = args -> count[0] = args.length;
-
-        consumer.accept((short) 10, (short) 20, (short) 30);
-        assertEquals(3, count[0]);
-    }
-
-    @Test
     public void test_accept_anonymousClass() {
         final short[] max = { Short.MIN_VALUE };
 
@@ -91,6 +112,38 @@ public class ShortNConsumerTest extends TestBase {
 
         consumer.accept((short) 5, (short) 10, (short) 3, (short) 15, (short) 7);
         assertEquals(15, max[0]);
+    }
+
+    @Test
+    public void test_accept_withNegativeValues() {
+        final short[] sum = { 0 };
+
+        ShortNConsumer consumer = args -> {
+            short total = 0;
+            for (short value : args) {
+                total += value;
+            }
+            sum[0] = total;
+        };
+
+        consumer.accept((short) -10, (short) -20, (short) -30);
+        assertEquals(-60, sum[0]);
+    }
+
+    @Test
+    public void test_accept_withZero() {
+        final int[] countZeros = { 0 };
+
+        ShortNConsumer consumer = args -> {
+            for (short value : args) {
+                if (value == 0) {
+                    countZeros[0]++;
+                }
+            }
+        };
+
+        consumer.accept((short) 0, (short) 1, (short) 0, (short) 2, (short) 0);
+        assertEquals(3, countZeros[0]);
     }
 
     @Test
@@ -134,60 +187,5 @@ public class ShortNConsumerTest extends TestBase {
         assertEquals(3, results[0]);
         assertEquals(10, results[1]);
         assertEquals(20, results[2]);
-    }
-
-    @Test
-    public void test_accept_withNegativeValues() {
-        final short[] sum = { 0 };
-
-        ShortNConsumer consumer = args -> {
-            short total = 0;
-            for (short value : args) {
-                total += value;
-            }
-            sum[0] = total;
-        };
-
-        consumer.accept((short) -10, (short) -20, (short) -30);
-        assertEquals(-60, sum[0]);
-    }
-
-    @Test
-    public void test_accept_withZero() {
-        final int[] countZeros = { 0 };
-
-        ShortNConsumer consumer = args -> {
-            for (short value : args) {
-                if (value == 0) {
-                    countZeros[0]++;
-                }
-            }
-        };
-
-        consumer.accept((short) 0, (short) 1, (short) 0, (short) 2, (short) 0);
-        assertEquals(3, countZeros[0]);
-    }
-
-    @Test
-    public void test_accept_varargs() {
-        final short[] result = { 0 };
-
-        ShortNConsumer consumer = args -> {
-            for (short value : args) {
-                result[0] += value;
-            }
-        };
-
-        // Test with different number of arguments
-        consumer.accept((short) 1);
-        assertEquals(1, result[0]);
-
-        result[0] = 0;
-        consumer.accept((short) 1, (short) 2);
-        assertEquals(3, result[0]);
-
-        result[0] = 0;
-        consumer.accept((short) 1, (short) 2, (short) 3, (short) 4);
-        assertEquals(10, result[0]);
     }
 }

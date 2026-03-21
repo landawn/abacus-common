@@ -11,12 +11,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ByteArrayOutputStreamTest extends TestBase {
 
     @Test
@@ -34,8 +32,32 @@ public class ByteArrayOutputStreamTest extends TestBase {
     }
 
     @Test
-    public void testConstructorWithNegativeCapacity() {
-        assertThrows(IllegalArgumentException.class, () -> new ByteArrayOutputStream(-1));
+    public void testLargeWrite() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] largeData = new byte[10000];
+        for (int i = 0; i < largeData.length; i++) {
+            largeData[i] = (byte) (i % 256);
+        }
+
+        baos.write(largeData, 0, largeData.length);
+
+        assertEquals(10000, baos.size());
+        assertArrayEquals(largeData, baos.toByteArray());
+    }
+
+    @Test
+    public void testSequentialWrites() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        for (int i = 0; i < 256; i++) {
+            baos.write(i);
+        }
+
+        assertEquals(256, baos.size());
+        byte[] result = baos.toByteArray();
+        for (int i = 0; i < 256; i++) {
+            assertEquals((byte) i, result[i]);
+        }
     }
 
     @Test
@@ -43,6 +65,32 @@ public class ByteArrayOutputStreamTest extends TestBase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(0);
         assertEquals(0, baos.size());
         assertEquals(0, baos.capacity());
+    }
+
+    @Test
+    public void testConstructorWithNegativeCapacity() {
+        assertThrows(IllegalArgumentException.class, () -> new ByteArrayOutputStream(-1));
+    }
+
+    @Test
+    public void testFlush() throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        baos.write("Hello".getBytes());
+        assertDoesNotThrow(() -> baos.flush());
+        assertEquals("Hello", baos.toString());
+    }
+
+    @Test
+    public void testMixedWrites() throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        baos.write(65);
+        baos.write("BC".getBytes());
+        baos.write((byte) 'D');
+        baos.write("EFGH".getBytes(), 1, 2);
+
+        assertEquals("ABCDFG", baos.toString());
+        assertEquals(6, baos.size());
     }
 
     @Test
@@ -80,6 +128,20 @@ public class ByteArrayOutputStreamTest extends TestBase {
     }
 
     @Test
+    public void testWriteByte() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        baos.write((byte) 0xFF);
+        baos.write((byte) 0x00);
+        baos.write((byte) 0x7F);
+
+        assertEquals(3, baos.size());
+        byte[] result = baos.toByteArray();
+        assertEquals((byte) 0xFF, result[0]);
+        assertEquals((byte) 0x00, result[1]);
+        assertEquals((byte) 0x7F, result[2]);
+    }
+
+    @Test
     public void testWriteByteArrayInvalidRange() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         byte[] data = "Hello".getBytes();
@@ -105,20 +167,6 @@ public class ByteArrayOutputStreamTest extends TestBase {
         baos.write(new byte[0]);
 
         assertEquals(0, baos.size());
-    }
-
-    @Test
-    public void testWriteByte() {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        baos.write((byte) 0xFF);
-        baos.write((byte) 0x00);
-        baos.write((byte) 0x7F);
-
-        assertEquals(3, baos.size());
-        byte[] result = baos.toByteArray();
-        assertEquals((byte) 0xFF, result[0]);
-        assertEquals((byte) 0x00, result[1]);
-        assertEquals((byte) 0x7F, result[2]);
     }
 
     @Test
@@ -152,10 +200,30 @@ public class ByteArrayOutputStreamTest extends TestBase {
     }
 
     @Test
+    public void testCapacityGrowth() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(10);
+        assertEquals(10, baos.capacity());
+
+        byte[] data = new byte[20];
+        baos.write(data, 0, data.length);
+
+        assertTrue(baos.capacity() >= 20);
+        assertEquals(20, baos.size());
+    }
+
+    @Test
     public void testCapacityWithNullBuffer() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         baos.buf = null;
         assertEquals(0, baos.capacity());
+    }
+
+    @Test
+    public void testArray_EmptyStream() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] internalArray = baos.array();
+        assertNotNull(internalArray);
+        assertEquals(baos.capacity(), internalArray.length);
     }
 
     @Test
@@ -169,14 +237,6 @@ public class ByteArrayOutputStreamTest extends TestBase {
         byte[] validData = new byte[5];
         System.arraycopy(internalArray, 0, validData, 0, 5);
         assertArrayEquals("Hello".getBytes(), validData);
-    }
-
-    @Test
-    public void testArray_EmptyStream() {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] internalArray = baos.array();
-        assertNotNull(internalArray);
-        assertEquals(baos.capacity(), internalArray.length);
     }
 
     @Test
@@ -204,6 +264,13 @@ public class ByteArrayOutputStreamTest extends TestBase {
     }
 
     @Test
+    public void testToByteArrayEmpty() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] result = baos.toByteArray();
+        assertEquals(0, result.length);
+    }
+
+    @Test
     public void testToByteArray() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         baos.write("Hello World".getBytes());
@@ -217,10 +284,9 @@ public class ByteArrayOutputStreamTest extends TestBase {
     }
 
     @Test
-    public void testToByteArrayEmpty() {
+    public void testToStringEmpty() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] result = baos.toByteArray();
-        assertEquals(0, result.length);
+        assertEquals("", baos.toString());
     }
 
     @Test
@@ -229,12 +295,6 @@ public class ByteArrayOutputStreamTest extends TestBase {
         baos.write("Hello World".getBytes());
 
         assertEquals("Hello World", baos.toString());
-    }
-
-    @Test
-    public void testToStringEmpty() {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        assertEquals("", baos.toString());
     }
 
     @Test
@@ -280,67 +340,5 @@ public class ByteArrayOutputStreamTest extends TestBase {
 
         baos.write(" World".getBytes());
         assertEquals("Hello World", baos.toString());
-    }
-
-    @Test
-    public void testFlush() throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        baos.write("Hello".getBytes());
-        assertDoesNotThrow(() -> baos.flush());
-        assertEquals("Hello", baos.toString());
-    }
-
-    @Test
-    public void testCapacityGrowth() {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(10);
-        assertEquals(10, baos.capacity());
-
-        byte[] data = new byte[20];
-        baos.write(data, 0, data.length);
-
-        assertTrue(baos.capacity() >= 20);
-        assertEquals(20, baos.size());
-    }
-
-    @Test
-    public void testLargeWrite() {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] largeData = new byte[10000];
-        for (int i = 0; i < largeData.length; i++) {
-            largeData[i] = (byte) (i % 256);
-        }
-
-        baos.write(largeData, 0, largeData.length);
-
-        assertEquals(10000, baos.size());
-        assertArrayEquals(largeData, baos.toByteArray());
-    }
-
-    @Test
-    public void testSequentialWrites() {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        for (int i = 0; i < 256; i++) {
-            baos.write(i);
-        }
-
-        assertEquals(256, baos.size());
-        byte[] result = baos.toByteArray();
-        for (int i = 0; i < 256; i++) {
-            assertEquals((byte) i, result[i]);
-        }
-    }
-
-    @Test
-    public void testMixedWrites() throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        baos.write(65);
-        baos.write("BC".getBytes());
-        baos.write((byte) 'D');
-        baos.write("EFGH".getBytes(), 1, 2);
-
-        assertEquals("ABCDFG", baos.toString());
-        assertEquals(6, baos.size());
     }
 }

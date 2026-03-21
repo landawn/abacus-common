@@ -17,27 +17,11 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class IntBiPredicateTest extends TestBase {
-
-    @Test
-    public void test_ALWAYS_TRUE() {
-        assertTrue(IntBiPredicate.ALWAYS_TRUE.test(0, 0));
-        assertTrue(IntBiPredicate.ALWAYS_TRUE.test(100, 200));
-        assertTrue(IntBiPredicate.ALWAYS_TRUE.test(Integer.MAX_VALUE, Integer.MIN_VALUE));
-    }
-
-    @Test
-    public void test_ALWAYS_FALSE() {
-        assertFalse(IntBiPredicate.ALWAYS_FALSE.test(0, 0));
-        assertFalse(IntBiPredicate.ALWAYS_FALSE.test(100, 200));
-        assertFalse(IntBiPredicate.ALWAYS_FALSE.test(Integer.MAX_VALUE, Integer.MIN_VALUE));
-    }
 
     @Test
     public void test_EQUAL() {
@@ -95,6 +79,20 @@ public class IntBiPredicateTest extends TestBase {
         assertTrue(sumIsEven.test(2, 4));
         assertTrue(sumIsEven.test(1, 3));
         assertFalse(sumIsEven.test(1, 2));
+    }
+
+    @Test
+    public void test_ALWAYS_TRUE() {
+        assertTrue(IntBiPredicate.ALWAYS_TRUE.test(0, 0));
+        assertTrue(IntBiPredicate.ALWAYS_TRUE.test(100, 200));
+        assertTrue(IntBiPredicate.ALWAYS_TRUE.test(Integer.MAX_VALUE, Integer.MIN_VALUE));
+    }
+
+    @Test
+    public void test_ALWAYS_FALSE() {
+        assertFalse(IntBiPredicate.ALWAYS_FALSE.test(0, 0));
+        assertFalse(IntBiPredicate.ALWAYS_FALSE.test(100, 200));
+        assertFalse(IntBiPredicate.ALWAYS_FALSE.test(Integer.MAX_VALUE, Integer.MIN_VALUE));
     }
 
     @Test

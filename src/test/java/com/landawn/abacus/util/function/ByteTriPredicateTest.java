@@ -4,22 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ByteTriPredicateTest extends TestBase {
-
-    @Test
-    public void testTest() {
-        ByteTriPredicate allPositive = (a, b, c) -> a > 0 && b > 0 && c > 0;
-
-        assertTrue(allPositive.test((byte) 1, (byte) 2, (byte) 3));
-        assertFalse(allPositive.test((byte) -1, (byte) 2, (byte) 3));
-        assertFalse(allPositive.test((byte) 1, (byte) -2, (byte) 3));
-    }
 
     @Test
     public void testTestWithLambda() {
@@ -43,23 +32,43 @@ public class ByteTriPredicateTest extends TestBase {
     }
 
     @Test
+    public void testAlwaysTrue() {
+        assertTrue(ByteTriPredicate.ALWAYS_TRUE.test((byte) 1, (byte) 2, (byte) 3));
+        assertTrue(ByteTriPredicate.ALWAYS_TRUE.test((byte) 0, (byte) 0, (byte) 0));
+        assertTrue(ByteTriPredicate.ALWAYS_TRUE.test((byte) -5, (byte) 10, (byte) 15));
+    }
+
+    @Test
+    public void testAlwaysFalse() {
+        assertFalse(ByteTriPredicate.ALWAYS_FALSE.test((byte) 1, (byte) 2, (byte) 3));
+        assertFalse(ByteTriPredicate.ALWAYS_FALSE.test((byte) 0, (byte) 0, (byte) 0));
+        assertFalse(ByteTriPredicate.ALWAYS_FALSE.test((byte) -5, (byte) 10, (byte) 15));
+    }
+
+    @Test
+    public void testTest() {
+        ByteTriPredicate allPositive = (a, b, c) -> a > 0 && b > 0 && c > 0;
+
+        assertTrue(allPositive.test((byte) 1, (byte) 2, (byte) 3));
+        assertFalse(allPositive.test((byte) -1, (byte) 2, (byte) 3));
+        assertFalse(allPositive.test((byte) 1, (byte) -2, (byte) 3));
+    }
+
+    @Test
+    public void testWithBoundaryValues() {
+        ByteTriPredicate allEqual = (a, b, c) -> a == b && b == c;
+
+        assertFalse(allEqual.test(Byte.MIN_VALUE, (byte) 0, Byte.MAX_VALUE));
+        assertTrue(allEqual.test(Byte.MAX_VALUE, Byte.MAX_VALUE, Byte.MAX_VALUE));
+    }
+
+    @Test
     public void testNegate() {
         ByteTriPredicate allEqual = (a, b, c) -> a == b && b == c;
         ByteTriPredicate notAllEqual = allEqual.negate();
 
         assertFalse(notAllEqual.test((byte) 5, (byte) 5, (byte) 5));
         assertTrue(notAllEqual.test((byte) 5, (byte) 5, (byte) 6));
-    }
-
-    @Test
-    public void testAnd() {
-        ByteTriPredicate allPositive = (a, b, c) -> a > 0 && b > 0 && c > 0;
-        ByteTriPredicate sumLessThan20 = (a, b, c) -> (a + b + c) < 20;
-        ByteTriPredicate combined = allPositive.and(sumLessThan20);
-
-        assertTrue(combined.test((byte) 3, (byte) 4, (byte) 5));
-        assertFalse(combined.test((byte) -1, (byte) 4, (byte) 5));
-        assertFalse(combined.test((byte) 10, (byte) 10, (byte) 10));
     }
 
     @Test
@@ -77,14 +86,14 @@ public class ByteTriPredicateTest extends TestBase {
     }
 
     @Test
-    public void testOr() {
-        ByteTriPredicate hasNegative = (a, b, c) -> a < 0 || b < 0 || c < 0;
-        ByteTriPredicate sumGreaterThan20 = (a, b, c) -> (a + b + c) > 20;
-        ByteTriPredicate combined = hasNegative.or(sumGreaterThan20);
+    public void testAnd() {
+        ByteTriPredicate allPositive = (a, b, c) -> a > 0 && b > 0 && c > 0;
+        ByteTriPredicate sumLessThan20 = (a, b, c) -> (a + b + c) < 20;
+        ByteTriPredicate combined = allPositive.and(sumLessThan20);
 
-        assertTrue(combined.test((byte) -1, (byte) 2, (byte) 3));
-        assertTrue(combined.test((byte) 10, (byte) 10, (byte) 10));
-        assertFalse(combined.test((byte) 2, (byte) 3, (byte) 4));
+        assertTrue(combined.test((byte) 3, (byte) 4, (byte) 5));
+        assertFalse(combined.test((byte) -1, (byte) 4, (byte) 5));
+        assertFalse(combined.test((byte) 10, (byte) 10, (byte) 10));
     }
 
     @Test
@@ -102,25 +111,14 @@ public class ByteTriPredicateTest extends TestBase {
     }
 
     @Test
-    public void testAlwaysTrue() {
-        assertTrue(ByteTriPredicate.ALWAYS_TRUE.test((byte) 1, (byte) 2, (byte) 3));
-        assertTrue(ByteTriPredicate.ALWAYS_TRUE.test((byte) 0, (byte) 0, (byte) 0));
-        assertTrue(ByteTriPredicate.ALWAYS_TRUE.test((byte) -5, (byte) 10, (byte) 15));
-    }
+    public void testOr() {
+        ByteTriPredicate hasNegative = (a, b, c) -> a < 0 || b < 0 || c < 0;
+        ByteTriPredicate sumGreaterThan20 = (a, b, c) -> (a + b + c) > 20;
+        ByteTriPredicate combined = hasNegative.or(sumGreaterThan20);
 
-    @Test
-    public void testAlwaysFalse() {
-        assertFalse(ByteTriPredicate.ALWAYS_FALSE.test((byte) 1, (byte) 2, (byte) 3));
-        assertFalse(ByteTriPredicate.ALWAYS_FALSE.test((byte) 0, (byte) 0, (byte) 0));
-        assertFalse(ByteTriPredicate.ALWAYS_FALSE.test((byte) -5, (byte) 10, (byte) 15));
-    }
-
-    @Test
-    public void testWithBoundaryValues() {
-        ByteTriPredicate allEqual = (a, b, c) -> a == b && b == c;
-
-        assertFalse(allEqual.test(Byte.MIN_VALUE, (byte) 0, Byte.MAX_VALUE));
-        assertTrue(allEqual.test(Byte.MAX_VALUE, Byte.MAX_VALUE, Byte.MAX_VALUE));
+        assertTrue(combined.test((byte) -1, (byte) 2, (byte) 3));
+        assertTrue(combined.test((byte) 10, (byte) 10, (byte) 10));
+        assertFalse(combined.test((byte) 2, (byte) 3, (byte) 4));
     }
 
     @Test

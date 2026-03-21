@@ -1,5 +1,7 @@
 package com.landawn.abacus.util;
 
+import com.landawn.abacus.TestBase;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -31,7 +33,22 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class ClazzTest {
+public class ClazzTest extends TestBase {
+
+    @Test
+    public void testOf() {
+        Class<ArrayList<String>> arrayListClass = Clazz.of(ArrayList.class);
+        Assertions.assertEquals(ArrayList.class, arrayListClass);
+
+        Class<HashMap<String, Integer>> hashMapClass = Clazz.of(HashMap.class);
+        Assertions.assertEquals(HashMap.class, hashMapClass);
+
+        Class<TreeSet<Long>> treeSetClass = Clazz.of(TreeSet.class);
+        Assertions.assertEquals(TreeSet.class, treeSetClass);
+
+        Class<LinkedList<Double>> linkedListClass = Clazz.of(LinkedList.class);
+        Assertions.assertEquals(LinkedList.class, linkedListClass);
+    }
 
     @Test
     public void test_01() {
@@ -47,54 +64,136 @@ public class ClazzTest {
     }
 
     @Test
-    public void testConstants() {
-        Assertions.assertNotNull(Clazz.PROPS_MAP);
-        Assertions.assertNotNull(Clazz.MAP);
-        Assertions.assertNotNull(Clazz.LINKED_HASH_MAP);
-        Assertions.assertNotNull(Clazz.STRING_LIST);
-        Assertions.assertNotNull(Clazz.INTEGER_LIST);
-        Assertions.assertNotNull(Clazz.LONG_LIST);
-        Assertions.assertNotNull(Clazz.DOUBLE_LIST);
-        Assertions.assertNotNull(Clazz.OBJECT_LIST);
-        Assertions.assertNotNull(Clazz.STRING_SET);
-        Assertions.assertNotNull(Clazz.INTEGER_SET);
-        Assertions.assertNotNull(Clazz.LONG_SET);
-        Assertions.assertNotNull(Clazz.DOUBLE_SET);
-        Assertions.assertNotNull(Clazz.OBJECT_SET);
-
-        Assertions.assertEquals(LinkedHashMap.class, Clazz.PROPS_MAP);
-        Assertions.assertEquals(Map.class, Clazz.MAP);
-        Assertions.assertEquals(LinkedHashMap.class, Clazz.LINKED_HASH_MAP);
+    public void testAllMethodsReturnNonNull() {
+        Assertions.assertNotNull(Clazz.of(ArrayList.class));
+        Assertions.assertNotNull(Clazz.ofList());
+        Assertions.assertNotNull(Clazz.ofList(String.class));
+        Assertions.assertNotNull(Clazz.ofLinkedList());
+        Assertions.assertNotNull(Clazz.ofLinkedList(String.class));
+        Assertions.assertNotNull(Clazz.ofListOfMap(String.class, Object.class));
+        Assertions.assertNotNull(Clazz.ofSetOfMap(String.class, Object.class));
+        Assertions.assertNotNull(Clazz.ofSet());
+        Assertions.assertNotNull(Clazz.ofSet(String.class));
+        Assertions.assertNotNull(Clazz.ofLinkedHashSet());
+        Assertions.assertNotNull(Clazz.ofLinkedHashSet(String.class));
+        Assertions.assertNotNull(Clazz.ofSortedSet());
+        Assertions.assertNotNull(Clazz.ofSortedSet(String.class));
+        Assertions.assertNotNull(Clazz.ofNavigableSet());
+        Assertions.assertNotNull(Clazz.ofNavigableSet(String.class));
+        Assertions.assertNotNull(Clazz.ofTreeSet());
+        Assertions.assertNotNull(Clazz.ofTreeSet(String.class));
+        Assertions.assertNotNull(Clazz.ofQueue());
+        Assertions.assertNotNull(Clazz.ofQueue(String.class));
+        Assertions.assertNotNull(Clazz.ofDeque());
+        Assertions.assertNotNull(Clazz.ofDeque(String.class));
+        Assertions.assertNotNull(Clazz.ofArrayDeque());
+        Assertions.assertNotNull(Clazz.ofArrayDeque(String.class));
+        Assertions.assertNotNull(Clazz.ofConcurrentLinkedQueue());
+        Assertions.assertNotNull(Clazz.ofConcurrentLinkedQueue(String.class));
+        Assertions.assertNotNull(Clazz.ofPriorityQueue());
+        Assertions.assertNotNull(Clazz.ofPriorityQueue(String.class));
+        Assertions.assertNotNull(Clazz.ofLinkedBlockingQueue());
+        Assertions.assertNotNull(Clazz.ofLinkedBlockingQueue(String.class));
+        Assertions.assertNotNull(Clazz.ofCollection());
+        Assertions.assertNotNull(Clazz.ofCollection(String.class));
+        Assertions.assertNotNull(Clazz.ofMap());
+        Assertions.assertNotNull(Clazz.ofMap(String.class, Object.class));
+        Assertions.assertNotNull(Clazz.ofLinkedHashMap());
+        Assertions.assertNotNull(Clazz.ofLinkedHashMap(String.class, Object.class));
+        Assertions.assertNotNull(Clazz.ofSortedMap());
+        Assertions.assertNotNull(Clazz.ofSortedMap(String.class, Object.class));
+        Assertions.assertNotNull(Clazz.ofNavigableMap());
+        Assertions.assertNotNull(Clazz.ofNavigableMap(String.class, Object.class));
+        Assertions.assertNotNull(Clazz.ofTreeMap());
+        Assertions.assertNotNull(Clazz.ofTreeMap(String.class, Object.class));
+        Assertions.assertNotNull(Clazz.ofConcurrentMap());
+        Assertions.assertNotNull(Clazz.ofConcurrentMap(String.class, Object.class));
+        Assertions.assertNotNull(Clazz.ofConcurrentHashMap());
+        Assertions.assertNotNull(Clazz.ofConcurrentHashMap(String.class, Object.class));
+        Assertions.assertNotNull(Clazz.ofBiMap());
+        Assertions.assertNotNull(Clazz.ofBiMap(String.class, Object.class));
+        Assertions.assertNotNull(Clazz.ofMultiset());
+        Assertions.assertNotNull(Clazz.ofMultiset(String.class));
+        Assertions.assertNotNull(Clazz.ofListMultimap());
+        Assertions.assertNotNull(Clazz.ofListMultimap(String.class, Object.class));
+        Assertions.assertNotNull(Clazz.ofSetMultimap());
+        Assertions.assertNotNull(Clazz.ofSetMultimap(String.class, Object.class));
     }
 
     @Test
-    public void testConstantsAreCorrectTypes() {
-        Assertions.assertEquals(List.class, Clazz.STRING_LIST);
-        Assertions.assertEquals(List.class, Clazz.INTEGER_LIST);
-        Assertions.assertEquals(List.class, Clazz.LONG_LIST);
-        Assertions.assertEquals(List.class, Clazz.DOUBLE_LIST);
-        Assertions.assertEquals(List.class, Clazz.OBJECT_LIST);
+    public void testTypeErasure() {
+        Class<List<String>> stringListClass = Clazz.ofList(String.class);
+        Class<List<Integer>> intListClass = Clazz.ofList(Integer.class);
+        Class<List<Double>> doubleListClass = Clazz.ofList(Double.class);
 
-        Assertions.assertEquals(Set.class, Clazz.STRING_SET);
-        Assertions.assertEquals(Set.class, Clazz.INTEGER_SET);
-        Assertions.assertEquals(Set.class, Clazz.LONG_SET);
-        Assertions.assertEquals(Set.class, Clazz.DOUBLE_SET);
-        Assertions.assertEquals(Set.class, Clazz.OBJECT_SET);
+        Assertions.assertEquals(stringListClass, intListClass);
+        Assertions.assertEquals(stringListClass, doubleListClass);
+        Assertions.assertEquals(List.class, stringListClass);
+        Assertions.assertEquals(List.class, intListClass);
+        Assertions.assertEquals(List.class, doubleListClass);
+
+        Class<Map<String, Integer>> stringIntMapClass = Clazz.ofMap(String.class, Integer.class);
+        Class<Map<Long, Double>> longDoubleMapClass = Clazz.ofMap(Long.class, Double.class);
+
+        Assertions.assertEquals(stringIntMapClass, longDoubleMapClass);
+        Assertions.assertEquals(Map.class, stringIntMapClass);
+        Assertions.assertEquals(Map.class, longDoubleMapClass);
     }
 
     @Test
-    public void testOf() {
-        Class<ArrayList<String>> arrayListClass = Clazz.of(ArrayList.class);
-        Assertions.assertEquals(ArrayList.class, arrayListClass);
+    public void testUsageWithInstanceOf() {
+        Object obj = new ArrayList<String>();
+        Assertions.assertTrue(Clazz.ofList().isInstance(obj));
+        Assertions.assertTrue(Clazz.ofList(String.class).isInstance(obj));
+        Assertions.assertTrue(Clazz.ofCollection().isInstance(obj));
 
-        Class<HashMap<String, Integer>> hashMapClass = Clazz.of(HashMap.class);
-        Assertions.assertEquals(HashMap.class, hashMapClass);
+        obj = new LinkedHashMap<String, Object>();
+        Assertions.assertTrue(Clazz.PROPS_MAP.isInstance(obj));
+        Assertions.assertTrue(Clazz.ofLinkedHashMap().isInstance(obj));
+        Assertions.assertTrue(Clazz.ofMap().isInstance(obj));
 
-        Class<TreeSet<Long>> treeSetClass = Clazz.of(TreeSet.class);
-        Assertions.assertEquals(TreeSet.class, treeSetClass);
+        obj = new TreeSet<Integer>();
+        Assertions.assertTrue(Clazz.ofTreeSet().isInstance(obj));
+        Assertions.assertTrue(Clazz.ofNavigableSet().isInstance(obj));
+        Assertions.assertTrue(Clazz.ofSortedSet().isInstance(obj));
+        Assertions.assertTrue(Clazz.ofSet().isInstance(obj));
+        Assertions.assertTrue(Clazz.ofCollection().isInstance(obj));
 
-        Class<LinkedList<Double>> linkedListClass = Clazz.of(LinkedList.class);
-        Assertions.assertEquals(LinkedList.class, linkedListClass);
+        obj = new LinkedList<String>();
+        Assertions.assertTrue(Clazz.ofLinkedList().isInstance(obj));
+        Assertions.assertTrue(Clazz.ofList().isInstance(obj));
+        Assertions.assertTrue(Clazz.ofCollection().isInstance(obj));
+
+        obj = new ConcurrentHashMap<String, Object>();
+        Assertions.assertTrue(Clazz.ofConcurrentHashMap().isInstance(obj));
+        Assertions.assertTrue(Clazz.ofConcurrentMap().isInstance(obj));
+        Assertions.assertTrue(Clazz.ofMap().isInstance(obj));
+    }
+
+    @Test
+    public void testInterfaceVsImplementationClasses() {
+        Assertions.assertTrue(Clazz.ofList().isInterface());
+        Assertions.assertTrue(Clazz.ofSet().isInterface());
+        Assertions.assertTrue(Clazz.ofMap().isInterface());
+        Assertions.assertTrue(Clazz.ofQueue().isInterface());
+        Assertions.assertTrue(Clazz.ofDeque().isInterface());
+        Assertions.assertTrue(Clazz.ofCollection().isInterface());
+        Assertions.assertTrue(Clazz.ofSortedSet().isInterface());
+        Assertions.assertTrue(Clazz.ofNavigableSet().isInterface());
+        Assertions.assertTrue(Clazz.ofSortedMap().isInterface());
+        Assertions.assertTrue(Clazz.ofNavigableMap().isInterface());
+        Assertions.assertTrue(Clazz.ofConcurrentMap().isInterface());
+
+        Assertions.assertFalse(Clazz.ofLinkedList().isInterface());
+        Assertions.assertFalse(Clazz.ofLinkedHashSet().isInterface());
+        Assertions.assertFalse(Clazz.ofTreeSet().isInterface());
+        Assertions.assertFalse(Clazz.ofLinkedHashMap().isInterface());
+        Assertions.assertFalse(Clazz.ofTreeMap().isInterface());
+        Assertions.assertFalse(Clazz.ofArrayDeque().isInterface());
+        Assertions.assertFalse(Clazz.ofConcurrentLinkedQueue().isInterface());
+        Assertions.assertFalse(Clazz.ofPriorityQueue().isInterface());
+        Assertions.assertFalse(Clazz.ofLinkedBlockingQueue().isInterface());
+        Assertions.assertFalse(Clazz.ofConcurrentHashMap().isInterface());
     }
 
     @Test
@@ -512,136 +611,39 @@ public class ClazzTest {
     }
 
     @Test
-    public void testTypeErasure() {
-        Class<List<String>> stringListClass = Clazz.ofList(String.class);
-        Class<List<Integer>> intListClass = Clazz.ofList(Integer.class);
-        Class<List<Double>> doubleListClass = Clazz.ofList(Double.class);
+    public void testConstants() {
+        Assertions.assertNotNull(Clazz.PROPS_MAP);
+        Assertions.assertNotNull(Clazz.MAP);
+        Assertions.assertNotNull(Clazz.LINKED_HASH_MAP);
+        Assertions.assertNotNull(Clazz.STRING_LIST);
+        Assertions.assertNotNull(Clazz.INTEGER_LIST);
+        Assertions.assertNotNull(Clazz.LONG_LIST);
+        Assertions.assertNotNull(Clazz.DOUBLE_LIST);
+        Assertions.assertNotNull(Clazz.OBJECT_LIST);
+        Assertions.assertNotNull(Clazz.STRING_SET);
+        Assertions.assertNotNull(Clazz.INTEGER_SET);
+        Assertions.assertNotNull(Clazz.LONG_SET);
+        Assertions.assertNotNull(Clazz.DOUBLE_SET);
+        Assertions.assertNotNull(Clazz.OBJECT_SET);
 
-        Assertions.assertEquals(stringListClass, intListClass);
-        Assertions.assertEquals(stringListClass, doubleListClass);
-        Assertions.assertEquals(List.class, stringListClass);
-        Assertions.assertEquals(List.class, intListClass);
-        Assertions.assertEquals(List.class, doubleListClass);
-
-        Class<Map<String, Integer>> stringIntMapClass = Clazz.ofMap(String.class, Integer.class);
-        Class<Map<Long, Double>> longDoubleMapClass = Clazz.ofMap(Long.class, Double.class);
-
-        Assertions.assertEquals(stringIntMapClass, longDoubleMapClass);
-        Assertions.assertEquals(Map.class, stringIntMapClass);
-        Assertions.assertEquals(Map.class, longDoubleMapClass);
+        Assertions.assertEquals(LinkedHashMap.class, Clazz.PROPS_MAP);
+        Assertions.assertEquals(Map.class, Clazz.MAP);
+        Assertions.assertEquals(LinkedHashMap.class, Clazz.LINKED_HASH_MAP);
     }
 
     @Test
-    public void testUsageWithInstanceOf() {
-        Object obj = new ArrayList<String>();
-        Assertions.assertTrue(Clazz.ofList().isInstance(obj));
-        Assertions.assertTrue(Clazz.ofList(String.class).isInstance(obj));
-        Assertions.assertTrue(Clazz.ofCollection().isInstance(obj));
+    public void testConstantsAreCorrectTypes() {
+        Assertions.assertEquals(List.class, Clazz.STRING_LIST);
+        Assertions.assertEquals(List.class, Clazz.INTEGER_LIST);
+        Assertions.assertEquals(List.class, Clazz.LONG_LIST);
+        Assertions.assertEquals(List.class, Clazz.DOUBLE_LIST);
+        Assertions.assertEquals(List.class, Clazz.OBJECT_LIST);
 
-        obj = new LinkedHashMap<String, Object>();
-        Assertions.assertTrue(Clazz.PROPS_MAP.isInstance(obj));
-        Assertions.assertTrue(Clazz.ofLinkedHashMap().isInstance(obj));
-        Assertions.assertTrue(Clazz.ofMap().isInstance(obj));
-
-        obj = new TreeSet<Integer>();
-        Assertions.assertTrue(Clazz.ofTreeSet().isInstance(obj));
-        Assertions.assertTrue(Clazz.ofNavigableSet().isInstance(obj));
-        Assertions.assertTrue(Clazz.ofSortedSet().isInstance(obj));
-        Assertions.assertTrue(Clazz.ofSet().isInstance(obj));
-        Assertions.assertTrue(Clazz.ofCollection().isInstance(obj));
-
-        obj = new LinkedList<String>();
-        Assertions.assertTrue(Clazz.ofLinkedList().isInstance(obj));
-        Assertions.assertTrue(Clazz.ofList().isInstance(obj));
-        Assertions.assertTrue(Clazz.ofCollection().isInstance(obj));
-
-        obj = new ConcurrentHashMap<String, Object>();
-        Assertions.assertTrue(Clazz.ofConcurrentHashMap().isInstance(obj));
-        Assertions.assertTrue(Clazz.ofConcurrentMap().isInstance(obj));
-        Assertions.assertTrue(Clazz.ofMap().isInstance(obj));
-    }
-
-    @Test
-    public void testAllMethodsReturnNonNull() {
-        Assertions.assertNotNull(Clazz.of(ArrayList.class));
-        Assertions.assertNotNull(Clazz.ofList());
-        Assertions.assertNotNull(Clazz.ofList(String.class));
-        Assertions.assertNotNull(Clazz.ofLinkedList());
-        Assertions.assertNotNull(Clazz.ofLinkedList(String.class));
-        Assertions.assertNotNull(Clazz.ofListOfMap(String.class, Object.class));
-        Assertions.assertNotNull(Clazz.ofSetOfMap(String.class, Object.class));
-        Assertions.assertNotNull(Clazz.ofSet());
-        Assertions.assertNotNull(Clazz.ofSet(String.class));
-        Assertions.assertNotNull(Clazz.ofLinkedHashSet());
-        Assertions.assertNotNull(Clazz.ofLinkedHashSet(String.class));
-        Assertions.assertNotNull(Clazz.ofSortedSet());
-        Assertions.assertNotNull(Clazz.ofSortedSet(String.class));
-        Assertions.assertNotNull(Clazz.ofNavigableSet());
-        Assertions.assertNotNull(Clazz.ofNavigableSet(String.class));
-        Assertions.assertNotNull(Clazz.ofTreeSet());
-        Assertions.assertNotNull(Clazz.ofTreeSet(String.class));
-        Assertions.assertNotNull(Clazz.ofQueue());
-        Assertions.assertNotNull(Clazz.ofQueue(String.class));
-        Assertions.assertNotNull(Clazz.ofDeque());
-        Assertions.assertNotNull(Clazz.ofDeque(String.class));
-        Assertions.assertNotNull(Clazz.ofArrayDeque());
-        Assertions.assertNotNull(Clazz.ofArrayDeque(String.class));
-        Assertions.assertNotNull(Clazz.ofConcurrentLinkedQueue());
-        Assertions.assertNotNull(Clazz.ofConcurrentLinkedQueue(String.class));
-        Assertions.assertNotNull(Clazz.ofPriorityQueue());
-        Assertions.assertNotNull(Clazz.ofPriorityQueue(String.class));
-        Assertions.assertNotNull(Clazz.ofLinkedBlockingQueue());
-        Assertions.assertNotNull(Clazz.ofLinkedBlockingQueue(String.class));
-        Assertions.assertNotNull(Clazz.ofCollection());
-        Assertions.assertNotNull(Clazz.ofCollection(String.class));
-        Assertions.assertNotNull(Clazz.ofMap());
-        Assertions.assertNotNull(Clazz.ofMap(String.class, Object.class));
-        Assertions.assertNotNull(Clazz.ofLinkedHashMap());
-        Assertions.assertNotNull(Clazz.ofLinkedHashMap(String.class, Object.class));
-        Assertions.assertNotNull(Clazz.ofSortedMap());
-        Assertions.assertNotNull(Clazz.ofSortedMap(String.class, Object.class));
-        Assertions.assertNotNull(Clazz.ofNavigableMap());
-        Assertions.assertNotNull(Clazz.ofNavigableMap(String.class, Object.class));
-        Assertions.assertNotNull(Clazz.ofTreeMap());
-        Assertions.assertNotNull(Clazz.ofTreeMap(String.class, Object.class));
-        Assertions.assertNotNull(Clazz.ofConcurrentMap());
-        Assertions.assertNotNull(Clazz.ofConcurrentMap(String.class, Object.class));
-        Assertions.assertNotNull(Clazz.ofConcurrentHashMap());
-        Assertions.assertNotNull(Clazz.ofConcurrentHashMap(String.class, Object.class));
-        Assertions.assertNotNull(Clazz.ofBiMap());
-        Assertions.assertNotNull(Clazz.ofBiMap(String.class, Object.class));
-        Assertions.assertNotNull(Clazz.ofMultiset());
-        Assertions.assertNotNull(Clazz.ofMultiset(String.class));
-        Assertions.assertNotNull(Clazz.ofListMultimap());
-        Assertions.assertNotNull(Clazz.ofListMultimap(String.class, Object.class));
-        Assertions.assertNotNull(Clazz.ofSetMultimap());
-        Assertions.assertNotNull(Clazz.ofSetMultimap(String.class, Object.class));
-    }
-
-    @Test
-    public void testInterfaceVsImplementationClasses() {
-        Assertions.assertTrue(Clazz.ofList().isInterface());
-        Assertions.assertTrue(Clazz.ofSet().isInterface());
-        Assertions.assertTrue(Clazz.ofMap().isInterface());
-        Assertions.assertTrue(Clazz.ofQueue().isInterface());
-        Assertions.assertTrue(Clazz.ofDeque().isInterface());
-        Assertions.assertTrue(Clazz.ofCollection().isInterface());
-        Assertions.assertTrue(Clazz.ofSortedSet().isInterface());
-        Assertions.assertTrue(Clazz.ofNavigableSet().isInterface());
-        Assertions.assertTrue(Clazz.ofSortedMap().isInterface());
-        Assertions.assertTrue(Clazz.ofNavigableMap().isInterface());
-        Assertions.assertTrue(Clazz.ofConcurrentMap().isInterface());
-
-        Assertions.assertFalse(Clazz.ofLinkedList().isInterface());
-        Assertions.assertFalse(Clazz.ofLinkedHashSet().isInterface());
-        Assertions.assertFalse(Clazz.ofTreeSet().isInterface());
-        Assertions.assertFalse(Clazz.ofLinkedHashMap().isInterface());
-        Assertions.assertFalse(Clazz.ofTreeMap().isInterface());
-        Assertions.assertFalse(Clazz.ofArrayDeque().isInterface());
-        Assertions.assertFalse(Clazz.ofConcurrentLinkedQueue().isInterface());
-        Assertions.assertFalse(Clazz.ofPriorityQueue().isInterface());
-        Assertions.assertFalse(Clazz.ofLinkedBlockingQueue().isInterface());
-        Assertions.assertFalse(Clazz.ofConcurrentHashMap().isInterface());
+        Assertions.assertEquals(Set.class, Clazz.STRING_SET);
+        Assertions.assertEquals(Set.class, Clazz.INTEGER_SET);
+        Assertions.assertEquals(Set.class, Clazz.LONG_SET);
+        Assertions.assertEquals(Set.class, Clazz.DOUBLE_SET);
+        Assertions.assertEquals(Set.class, Clazz.OBJECT_SET);
     }
 
     @Test

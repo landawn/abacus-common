@@ -19,7 +19,7 @@ import com.landawn.abacus.annotation.Internal;
 
 /**
  * A utility class that provides a comprehensive dictionary of commonly used characters and strings,
- * including special characters, operators, SQL keywords, and mathematical functions.
+ * including SQL keywords, special characters, operators, and mathematical functions.
  * This class serves as a centralized repository for string constants to avoid hardcoding
  * and improve code maintainability.
  * 

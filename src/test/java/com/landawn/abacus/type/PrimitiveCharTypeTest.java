@@ -13,7 +13,6 @@ import java.io.StringWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -21,7 +20,6 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("2025")
 public class PrimitiveCharTypeTest extends TestBase {
 
     private final PrimitiveCharType type = new PrimitiveCharType();
@@ -32,13 +30,20 @@ public class PrimitiveCharTypeTest extends TestBase {
     }
 
     @Test
-    public void test_name() {
-        assertEquals("char", type.name());
+    public void test_defaultValue() {
+        assertEquals(Character.valueOf((char) 0), type.defaultValue());
     }
 
     @Test
-    public void test_defaultValue() {
-        assertEquals(Character.valueOf((char) 0), type.defaultValue());
+    public void testDefaultValue() {
+        Character defaultValue = type.defaultValue();
+        assertNotNull(defaultValue);
+        assertEquals((char) 0, defaultValue);
+    }
+
+    @Test
+    public void test_name() {
+        assertEquals("char", type.name());
     }
 
     @Test
@@ -126,13 +131,6 @@ public class PrimitiveCharTypeTest extends TestBase {
         reset(writer);
         type.writeCharacter(writer, null, config);
         verify(writer).write(NULL_CHAR_ARRAY);
-    }
-
-    @Test
-    public void testDefaultValue() {
-        Character defaultValue = type.defaultValue();
-        assertNotNull(defaultValue);
-        assertEquals((char) 0, defaultValue);
     }
 
 }

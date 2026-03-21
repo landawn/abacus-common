@@ -23,10 +23,10 @@ import java.lang.annotation.Target;
 
 /**
  * Marks a field as transient, indicating it should be excluded from persistence operations.
- * Fields annotated with @Transient will be ignored during database operations such as
- * insert, update, and select when working with entity objects.
- * 
- * <p><b>Common use cases for transient fields:</b></p>
+ * Fields annotated with {@link Transient} will be ignored during database operations such as
+ * {@code insert}, {@code update}, and {@code select} when working with entity objects.
+ *
+ * <p>Common use cases for transient fields:</p>
  * <ul>
  *   <li>Calculated or derived values that shouldn't be stored</li>
  *   <li>Temporary state or cache data</li>
@@ -34,18 +34,17 @@ import java.lang.annotation.Target;
  *   <li>Fields that are populated from other sources</li>
  *   <li>Security-sensitive data that shouldn't be persisted</li>
  * </ul>
- * 
- * <p><b>Important notes:</b></p>
+ *
+ * <p>Important notes:</p>
  * <ul>
- *   <li>This annotation only affects persistence operations, not serialization</li>
- *   <li>For serialization exclusion, use {@link JsonXmlField}{@code (ignore = true)}</li>
- *   <li>Transient fields may still be included in toString(), equals(), and hashCode()</li>
- *   <li>The field will still occupy memory in the object instance</li>
+ *   <li>This annotation only affects persistence operations, not serialization.</li>
+ *   <li>For serialization exclusion, use {@link JsonXmlField#ignore() JsonXmlField(ignore = true)}.</li>
+ *   <li>Transient fields may still be included in {@link Object#toString() toString()}, {@link Object#equals(Object) equals()}, and {@link Object#hashCode() hashCode()}.</li>
+ *   <li>The field will still occupy memory in the object instance.</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- *
  * @Entity
  * public class Product {
  *     @Id
@@ -67,7 +66,7 @@ import java.lang.annotation.Target;
  *     private List<Review> reviews;  // Loaded separately
  * }
  * }</pre>
- * 
+ *
  * @see Column
  * @see Entity
  */

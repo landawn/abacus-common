@@ -16,12 +16,10 @@ package com.landawn.abacus.util.function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class IntUnaryOperatorTest extends TestBase {
 
     @Test
@@ -57,6 +55,20 @@ public class IntUnaryOperatorTest extends TestBase {
     }
 
     @Test
+    public void test_applyAsInt_withMaxValue() {
+        IntUnaryOperator identity = IntUnaryOperator.identity();
+
+        assertEquals(Integer.MAX_VALUE, identity.applyAsInt(Integer.MAX_VALUE));
+    }
+
+    @Test
+    public void test_applyAsInt_withMinValue() {
+        IntUnaryOperator identity = IntUnaryOperator.identity();
+
+        assertEquals(Integer.MIN_VALUE, identity.applyAsInt(Integer.MIN_VALUE));
+    }
+
+    @Test
     public void test_compose() {
         IntUnaryOperator addTen = operand -> operand + 10;
         IntUnaryOperator multiplyByTwo = operand -> operand * 2;
@@ -78,6 +90,19 @@ public class IntUnaryOperatorTest extends TestBase {
 
         // First adds 1, then multiplies by 2, then subtracts 5
         assertEquals(7, composed.applyAsInt(5)); // ((5 + 1) * 2) - 5 = 7
+    }
+
+    @Test
+    public void test_compose_vs_andThen() {
+        IntUnaryOperator addTen = operand -> operand + 10;
+        IntUnaryOperator multiplyByTwo = operand -> operand * 2;
+
+        IntUnaryOperator composedWithCompose = multiplyByTwo.compose(addTen);
+        IntUnaryOperator composedWithAndThen = addTen.andThen(multiplyByTwo);
+
+        // Both should give the same result
+        assertEquals(30, composedWithCompose.applyAsInt(5));
+        assertEquals(30, composedWithAndThen.applyAsInt(5));
     }
 
     @Test
@@ -105,30 +130,6 @@ public class IntUnaryOperatorTest extends TestBase {
     }
 
     @Test
-    public void test_compose_vs_andThen() {
-        IntUnaryOperator addTen = operand -> operand + 10;
-        IntUnaryOperator multiplyByTwo = operand -> operand * 2;
-
-        IntUnaryOperator composedWithCompose = multiplyByTwo.compose(addTen);
-        IntUnaryOperator composedWithAndThen = addTen.andThen(multiplyByTwo);
-
-        // Both should give the same result
-        assertEquals(30, composedWithCompose.applyAsInt(5));
-        assertEquals(30, composedWithAndThen.applyAsInt(5));
-    }
-
-    @Test
-    public void test_identity() {
-        IntUnaryOperator identity = IntUnaryOperator.identity();
-
-        assertEquals(42, identity.applyAsInt(42));
-        assertEquals(0, identity.applyAsInt(0));
-        assertEquals(-100, identity.applyAsInt(-100));
-        assertEquals(Integer.MAX_VALUE, identity.applyAsInt(Integer.MAX_VALUE));
-        assertEquals(Integer.MIN_VALUE, identity.applyAsInt(Integer.MIN_VALUE));
-    }
-
-    @Test
     public void test_identity_composition() {
         IntUnaryOperator identity = IntUnaryOperator.identity();
         IntUnaryOperator doubler = operand -> operand * 2;
@@ -141,16 +142,13 @@ public class IntUnaryOperatorTest extends TestBase {
     }
 
     @Test
-    public void test_applyAsInt_withMaxValue() {
+    public void test_identity() {
         IntUnaryOperator identity = IntUnaryOperator.identity();
 
+        assertEquals(42, identity.applyAsInt(42));
+        assertEquals(0, identity.applyAsInt(0));
+        assertEquals(-100, identity.applyAsInt(-100));
         assertEquals(Integer.MAX_VALUE, identity.applyAsInt(Integer.MAX_VALUE));
-    }
-
-    @Test
-    public void test_applyAsInt_withMinValue() {
-        IntUnaryOperator identity = IntUnaryOperator.identity();
-
         assertEquals(Integer.MIN_VALUE, identity.applyAsInt(Integer.MIN_VALUE));
     }
 }

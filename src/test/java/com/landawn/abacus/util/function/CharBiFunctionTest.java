@@ -3,13 +3,21 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class CharBiFunctionTest extends TestBase {
+
+    private static class TestObject {
+        final char first;
+        final char second;
+
+        TestObject(char first, char second) {
+            this.first = first;
+            this.second = second;
+        }
+    }
 
     @Test
     public void testApply() {
@@ -28,6 +36,15 @@ public class CharBiFunctionTest extends TestBase {
     }
 
     @Test
+    public void testReturningComplexObject() {
+        CharBiFunction<TestObject> createObject = (t, u) -> new TestObject(t, u);
+
+        TestObject obj = createObject.apply('a', 'b');
+        assertEquals('a', obj.first);
+        assertEquals('b', obj.second);
+    }
+
+    @Test
     public void testApplyWithAnonymousClass() {
         CharBiFunction<String> concat = new CharBiFunction<>() {
             @Override
@@ -38,6 +55,14 @@ public class CharBiFunctionTest extends TestBase {
 
         assertEquals("AB", concat.apply('a', 'b'));
         assertEquals("XY", concat.apply('x', 'y'));
+    }
+
+    @Test
+    public void testWithBoundaryValues() {
+        CharBiFunction<String> toString = (t, u) -> "" + t + "," + u;
+
+        String result = toString.apply(Character.MIN_VALUE, Character.MAX_VALUE);
+        assertEquals(Character.MIN_VALUE + "," + Character.MAX_VALUE, result);
     }
 
     @Test
@@ -63,34 +88,7 @@ public class CharBiFunctionTest extends TestBase {
     }
 
     @Test
-    public void testReturningComplexObject() {
-        CharBiFunction<TestObject> createObject = (t, u) -> new TestObject(t, u);
-
-        TestObject obj = createObject.apply('a', 'b');
-        assertEquals('a', obj.first);
-        assertEquals('b', obj.second);
-    }
-
-    @Test
-    public void testWithBoundaryValues() {
-        CharBiFunction<String> toString = (t, u) -> "" + t + "," + u;
-
-        String result = toString.apply(Character.MIN_VALUE, Character.MAX_VALUE);
-        assertEquals(Character.MIN_VALUE + "," + Character.MAX_VALUE, result);
-    }
-
-    @Test
     public void testFunctionalInterface() {
         assertNotNull(CharBiFunction.class.getAnnotation(FunctionalInterface.class));
-    }
-
-    private static class TestObject {
-        final char first;
-        final char second;
-
-        TestObject(char first, char second) {
-            this.first = first;
-            this.second = second;
-        }
     }
 }

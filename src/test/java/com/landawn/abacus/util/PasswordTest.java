@@ -10,12 +10,10 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Set;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 
-@Tag("old-test")
 public class PasswordTest extends AbstractTest {
 
     @Test
@@ -59,6 +57,14 @@ public class PasswordTest extends AbstractTest {
     }
 
     @Test
+    public void testEncrypt_consistent() {
+        Password password = new Password("SHA-256");
+        String encrypted1 = password.encrypt("testPassword");
+        String encrypted2 = password.encrypt("testPassword");
+        assertEquals(encrypted1, encrypted2);
+    }
+
+    @Test
     public void testEncrypt_notNull() {
         Password password = new Password("SHA-256");
         String encrypted = password.encrypt("testPassword");
@@ -70,14 +76,6 @@ public class PasswordTest extends AbstractTest {
         Password password = new Password("SHA-256");
         String encrypted = password.encrypt(null);
         assertNull(encrypted);
-    }
-
-    @Test
-    public void testEncrypt_consistent() {
-        Password password = new Password("SHA-256");
-        String encrypted1 = password.encrypt("testPassword");
-        String encrypted2 = password.encrypt("testPassword");
-        assertEquals(encrypted1, encrypted2);
     }
 
     @Test
@@ -107,10 +105,9 @@ public class PasswordTest extends AbstractTest {
     }
 
     @Test
-    public void testEquals_sameAlgorithm() {
-        Password p1 = new Password("SHA-256");
-        Password p2 = new Password("SHA-256");
-        assertEquals(p1, p2);
+    public void testHashCode_consistent() {
+        Password password = new Password("SHA-256");
+        assertEquals(password.hashCode(), password.hashCode());
     }
 
     @Test
@@ -121,9 +118,10 @@ public class PasswordTest extends AbstractTest {
     }
 
     @Test
-    public void testHashCode_consistent() {
-        Password password = new Password("SHA-256");
-        assertEquals(password.hashCode(), password.hashCode());
+    public void testEquals_sameAlgorithm() {
+        Password p1 = new Password("SHA-256");
+        Password p2 = new Password("SHA-256");
+        assertEquals(p1, p2);
     }
 
     @Test

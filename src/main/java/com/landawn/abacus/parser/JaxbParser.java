@@ -289,11 +289,27 @@ final class JaxbParser extends AbstractXmlParser {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param source {@inheritDoc}
+     * @param config {@inheritDoc}
+     * @param targetType {@inheritDoc}
+     * @return {@inheritDoc}
+     */
     @Override
     public <T> T deserialize(final String source, final XmlDeserConfig config, final Type<? extends T> targetType) {
         return deserialize(source, config, targetType.javaType());
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param source {@inheritDoc}
+     * @param config {@inheritDoc}
+     * @param targetClass {@inheritDoc}
+     * @return {@inheritDoc}
+     */
     @Override
     public <T> T deserialize(final String source, final XmlDeserConfig config, final Class<? extends T> targetClass) {
         if (Strings.isEmpty(source)) {
@@ -309,11 +325,27 @@ final class JaxbParser extends AbstractXmlParser {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param source {@inheritDoc}
+     * @param config {@inheritDoc}
+     * @param targetType {@inheritDoc}
+     * @return {@inheritDoc}
+     */
     @Override
     public <T> T deserialize(final File source, final XmlDeserConfig config, final Type<? extends T> targetType) {
         return deserialize(source, config, targetType.javaType());
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param source {@inheritDoc}
+     * @param config {@inheritDoc}
+     * @param targetClass {@inheritDoc}
+     * @return {@inheritDoc}
+     */
     @Override
     public <T> T deserialize(final File source, final XmlDeserConfig config, final Class<? extends T> targetClass) {
         InputStream is = null;
@@ -327,50 +359,100 @@ final class JaxbParser extends AbstractXmlParser {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param source {@inheritDoc}
+     * @param config {@inheritDoc}
+     * @param targetType {@inheritDoc}
+     * @return {@inheritDoc}
+     */
     @Override
     public <T> T deserialize(final InputStream source, final XmlDeserConfig config, final Type<? extends T> targetType) {
         return deserialize(source, config, targetType.javaType());
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param source {@inheritDoc}
+     * @param config {@inheritDoc}
+     * @param targetClass {@inheritDoc}
+     * @return {@inheritDoc}
+     */
     @Override
     public <T> T deserialize(final InputStream source, final XmlDeserConfig config, final Class<? extends T> targetClass) {
         return read(source, config, targetClass);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param source {@inheritDoc}
+     * @param config {@inheritDoc}
+     * @param targetType {@inheritDoc}
+     * @return {@inheritDoc}
+     */
     @Override
     public <T> T deserialize(final Reader source, final XmlDeserConfig config, final Type<? extends T> targetType) {
         return deserialize(source, config, targetType.javaType());
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param source {@inheritDoc}
+     * @param config {@inheritDoc}
+     * @param targetClass {@inheritDoc}
+     * @return {@inheritDoc}
+     */
     @Override
     public <T> T deserialize(final Reader source, final XmlDeserConfig config, final Class<? extends T> targetClass) {
         return read(source, config, targetClass);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param source {@inheritDoc}
+     * @param config {@inheritDoc}
+     * @param targetType {@inheritDoc}
+     * @return {@inheritDoc}
+     * @throws UnsupportedOperationException always
+     */
     @Override
     public <T> T deserialize(final Node source, final XmlDeserConfig config, final Type<? extends T> targetType) {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param source {@inheritDoc}
+     * @param config {@inheritDoc}
+     * @param targetClass {@inheritDoc}
+     * @return {@inheritDoc}
+     * @throws UnsupportedOperationException always
+     */
     @Override
     public <T> T deserialize(final Node source, final XmlDeserConfig config, final Class<? extends T> targetClass) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * Internal method to read XML from a reader and unmarshal it to an object.
-     * 
+     * Internal method to read XML from an input stream and unmarshal it to an object.
+     *
      * <p>This method handles the actual JAXB unmarshalling process. It creates a
      * JAXB unmarshaller for the target class and uses it to convert XML to
      * a Java object.</p>
-     * 
+     *
      * <p>Note: The <i>ignoredPropNames</i> configuration option is not supported by JAXB
      * and will throw a {@link ParsingException} if specified.</p>
      *
-     * @param source the reader containing XML data
+     * @param <T> the type of the object to deserialize to
+     * @param source the input stream containing XML data
      * @param config the XML deserialization configuration (optional)
      * @param targetClass the class of the object to create
-     * @param <T> the type of the object to deserialize to
      * @return the deserialized object
      * @throws ParsingException if ignoredPropNames is specified in config or if JAXB unmarshalling fails
      */
@@ -389,6 +471,23 @@ final class JaxbParser extends AbstractXmlParser {
         }
     }
 
+    /**
+     * Internal method to read XML from a reader and unmarshal it to an object.
+     *
+     * <p>This method handles the actual JAXB unmarshalling process. It creates a
+     * JAXB unmarshaller for the target class and uses it to convert XML to
+     * a Java object.</p>
+     *
+     * <p>Note: The <i>ignoredPropNames</i> configuration option is not supported by JAXB
+     * and will throw a {@link ParsingException} if specified.</p>
+     *
+     * @param <T> the type of the object to deserialize to
+     * @param source the reader containing XML data
+     * @param config the XML deserialization configuration (optional)
+     * @param targetClass the class of the object to create
+     * @return the deserialized object
+     * @throws ParsingException if ignoredPropNames is specified in config or if JAXB unmarshalling fails
+     */
     @SuppressWarnings("unchecked")
     <T> T read(final Reader source, final XmlDeserConfig config, final Class<? extends T> targetClass) {
         if (config != null && N.notEmpty(config.getIgnoredPropNames())) {

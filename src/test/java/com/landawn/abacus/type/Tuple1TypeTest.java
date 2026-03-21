@@ -21,12 +21,10 @@ import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class Tuple1TypeTest extends TestBase {
 
     private final Tuple1Type type = new Tuple1Type("String");

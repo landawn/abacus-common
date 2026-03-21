@@ -16,12 +16,10 @@ import java.util.Set;
 import org.apache.avro.Schema;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class AvroSerConfigTest extends TestBase {
 
     private AvroSerConfig config;
@@ -32,6 +30,14 @@ public class AvroSerConfigTest extends TestBase {
     }
 
     private static final String TEST_SCHEMA_JSON = "{\"type\":\"record\",\"name\":\"User\",\"fields\":[{\"name\":\"name\",\"type\":\"string\"}]}";
+
+    // constructor
+    @Test
+    public void test_constructor() {
+        AvroSerConfig config = new AvroSerConfig();
+        assertNotNull(config);
+        assertNull(config.getSchema());
+    }
 
     // getSchema
     @Test
@@ -67,6 +73,20 @@ public class AvroSerConfigTest extends TestBase {
 
         config.setSchema(null);
         Assertions.assertNull(config.getSchema());
+    }
+
+    // copy
+    @Test
+    public void testCopy() {
+        Schema schema = new Schema.Parser().parse(TEST_SCHEMA_JSON);
+        config.setSchema(schema);
+        config.setExclusion(Exclusion.NULL);
+
+        AvroSerConfig copy = config.copy();
+        assertNotNull(copy);
+        assertNotSame(config, copy);
+        assertEquals(schema, copy.getSchema());
+        assertEquals(Exclusion.NULL, copy.getExclusion());
     }
 
     // hashCode
@@ -163,28 +183,6 @@ public class AvroSerConfigTest extends TestBase {
         AvroSerConfig config = AvroSerConfig.create();
         Assertions.assertNotNull(config);
         Assertions.assertNull(config.getSchema());
-    }
-
-    // copy
-    @Test
-    public void testCopy() {
-        Schema schema = new Schema.Parser().parse(TEST_SCHEMA_JSON);
-        config.setSchema(schema);
-        config.setExclusion(Exclusion.NULL);
-
-        AvroSerConfig copy = config.copy();
-        assertNotNull(copy);
-        assertNotSame(config, copy);
-        assertEquals(schema, copy.getSchema());
-        assertEquals(Exclusion.NULL, copy.getExclusion());
-    }
-
-    // constructor
-    @Test
-    public void test_constructor() {
-        AvroSerConfig config = new AvroSerConfig();
-        assertNotNull(config);
-        assertNull(config.getSchema());
     }
 
     // combined config tests

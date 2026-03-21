@@ -7,13 +7,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class LongBiConsumerTest extends TestBase {
+
+    private void addToList(final List<Long> list, final long a, final long b) {
+        list.add(a + b);
+    }
 
     @Test
     public void testAccept() {
@@ -53,47 +55,29 @@ public class LongBiConsumerTest extends TestBase {
     }
 
     @Test
-    public void testAndThen() {
+    public void testMethodReference() {
         final List<Long> results = new ArrayList<>();
-        final LongBiConsumer first = (t, u) -> results.add(t + u);
-        final LongBiConsumer second = (t, u) -> results.add(t - u);
 
-        final LongBiConsumer chained = first.andThen(second);
-        chained.accept(20L, 5L);
+        // Cannot directly use method reference for primitive types, but can use wrapper method
+        final LongBiConsumer consumer = (t, u) -> addToList(results, t, u);
+        consumer.accept(5L, 10L);
 
-        assertEquals(2, results.size());
-        assertEquals(25L, results.get(0));
-        assertEquals(15L, results.get(1));
+        assertEquals(1, results.size());
+        assertEquals(15L, results.get(0));
     }
 
     @Test
-    public void testAndThen_multipleChains() {
-        final List<Long> results = new ArrayList<>();
-        final LongBiConsumer first = (t, u) -> results.add(t + u);
-        final LongBiConsumer second = (t, u) -> results.add(t * u);
-        final LongBiConsumer third = (t, u) -> results.add(Math.max(t, u));
+    public void testAccept_sideEffects() {
+        final long[] array = new long[2];
+        final LongBiConsumer consumer = (t, u) -> {
+            array[0] = t;
+            array[1] = u;
+        };
 
-        final LongBiConsumer chained = first.andThen(second).andThen(third);
-        chained.accept(3L, 4L);
+        consumer.accept(42L, 84L);
 
-        assertEquals(3, results.size());
-        assertEquals(7L, results.get(0));
-        assertEquals(12L, results.get(1));
-        assertEquals(4L, results.get(2));
-    }
-
-    @Test
-    public void testAndThen_orderOfExecution() {
-        final List<String> executionOrder = new ArrayList<>();
-        final LongBiConsumer first = (t, u) -> executionOrder.add("first");
-        final LongBiConsumer second = (t, u) -> executionOrder.add("second");
-
-        final LongBiConsumer chained = first.andThen(second);
-        chained.accept(1L, 2L);
-
-        assertEquals(2, executionOrder.size());
-        assertEquals("first", executionOrder.get(0));
-        assertEquals("second", executionOrder.get(1));
+        assertEquals(42L, array[0]);
+        assertEquals(84L, array[1]);
     }
 
     @Test
@@ -138,32 +122,46 @@ public class LongBiConsumerTest extends TestBase {
     }
 
     @Test
-    public void testMethodReference() {
+    public void testAndThen() {
         final List<Long> results = new ArrayList<>();
+        final LongBiConsumer first = (t, u) -> results.add(t + u);
+        final LongBiConsumer second = (t, u) -> results.add(t - u);
 
-        // Cannot directly use method reference for primitive types, but can use wrapper method
-        final LongBiConsumer consumer = (t, u) -> addToList(results, t, u);
-        consumer.accept(5L, 10L);
+        final LongBiConsumer chained = first.andThen(second);
+        chained.accept(20L, 5L);
 
-        assertEquals(1, results.size());
-        assertEquals(15L, results.get(0));
-    }
-
-    private void addToList(final List<Long> list, final long a, final long b) {
-        list.add(a + b);
+        assertEquals(2, results.size());
+        assertEquals(25L, results.get(0));
+        assertEquals(15L, results.get(1));
     }
 
     @Test
-    public void testAccept_sideEffects() {
-        final long[] array = new long[2];
-        final LongBiConsumer consumer = (t, u) -> {
-            array[0] = t;
-            array[1] = u;
-        };
+    public void testAndThen_orderOfExecution() {
+        final List<String> executionOrder = new ArrayList<>();
+        final LongBiConsumer first = (t, u) -> executionOrder.add("first");
+        final LongBiConsumer second = (t, u) -> executionOrder.add("second");
 
-        consumer.accept(42L, 84L);
+        final LongBiConsumer chained = first.andThen(second);
+        chained.accept(1L, 2L);
 
-        assertEquals(42L, array[0]);
-        assertEquals(84L, array[1]);
+        assertEquals(2, executionOrder.size());
+        assertEquals("first", executionOrder.get(0));
+        assertEquals("second", executionOrder.get(1));
+    }
+
+    @Test
+    public void testAndThen_multipleChains() {
+        final List<Long> results = new ArrayList<>();
+        final LongBiConsumer first = (t, u) -> results.add(t + u);
+        final LongBiConsumer second = (t, u) -> results.add(t * u);
+        final LongBiConsumer third = (t, u) -> results.add(Math.max(t, u));
+
+        final LongBiConsumer chained = first.andThen(second).andThen(third);
+        chained.accept(3L, 4L);
+
+        assertEquals(3, results.size());
+        assertEquals(7L, results.get(0));
+        assertEquals(12L, results.get(1));
+        assertEquals(4L, results.get(2));
     }
 }

@@ -12,7 +12,6 @@ import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -20,24 +19,9 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.FloatList;
 
-@Tag("2025")
 public class PrimitiveFloatListTypeTest extends TestBase {
 
     private final PrimitiveFloatListType type = new PrimitiveFloatListType();
-
-    @Test
-    public void test_get_ResultSet_byLabel() throws SQLException {
-        ResultSet rs = mock(ResultSet.class);
-        // Basic get test - actual implementation will vary by type
-        assertDoesNotThrow(() -> type.get(rs, "col"));
-    }
-
-    @Test
-    public void test_set_CallableStatement() throws SQLException {
-        CallableStatement stmt = mock(CallableStatement.class);
-        // Basic set test - actual implementation will vary by type
-        assertDoesNotThrow(() -> type.set(stmt, "param", null));
-    }
 
     @Test
     public void testClazz() {
@@ -117,6 +101,20 @@ public class PrimitiveFloatListTypeTest extends TestBase {
         verify(writer).write(", ");
         verify(writer).write(2.7f);
         verify(writer).write(']');
+    }
+
+    @Test
+    public void test_get_ResultSet_byLabel() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+        // Basic get test - actual implementation will vary by type
+        assertDoesNotThrow(() -> type.get(rs, "col"));
+    }
+
+    @Test
+    public void test_set_CallableStatement() throws SQLException {
+        CallableStatement stmt = mock(CallableStatement.class);
+        // Basic set test - actual implementation will vary by type
+        assertDoesNotThrow(() -> type.set(stmt, "param", null));
     }
 
 }

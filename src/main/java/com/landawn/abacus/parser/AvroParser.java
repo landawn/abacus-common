@@ -54,7 +54,7 @@ import com.landawn.abacus.util.Strings;
 
 /**
  * Parser implementation for Apache Avro format serialization and deserialization.
- * 
+ *
  * <p>This parser handles Avro data serialization with special encoding rules:</p>
  * <ul>
  *   <li>Content is Base64 encoded when output is String or Writer</li>
@@ -62,30 +62,30 @@ import com.landawn.abacus.util.Strings;
  *   <li>Input must be Base64 encoded when source is String or Reader</li>
  *   <li>Input must NOT be Base64 encoded when source is File or InputStream</li>
  * </ul>
- * 
+ *
  * <p>The reason for not encoding content with Base64 for File/OutputStream is to provide
  * a higher performance solution for binary data handling.</p>
- * 
- * <p><b>Usage Examples:</b></p>
+ *
+ * <p>Usage Examples:</p>
  * <pre>{@code
  * // With SpecificRecord
  * User user = new User("John", 30);
  * AvroParser parser = new AvroParser();
- * 
+ *
  * // Serialize to file (not Base64 encoded)
  * parser.serialize(user, new File("user.avro"));
- * 
+ *
  * // Serialize to string (Base64 encoded)
  * String encoded = parser.serialize(user);
- * 
+ *
  * // With generic records and schema
  * Schema schema = new Schema.Parser().parse(schemaJson);
  * AvroSerConfig config = new AvroSerConfig().setSchema(schema);
- * 
+ *
  * Map<String, Object> data = Map.of("name", "John", "age", 30);
  * parser.serialize(data, config, outputStream);
  * }</pre>
- * 
+ *
  */
 public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserConfig> {
 
@@ -104,7 +104,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * as a Base64 string suitable for text-based transmission. The output is Base64 encoded
      * to make it suitable for text-based storage and transmission.</p>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * User user = new User("John", 30);
      * AvroSerConfig config = new AvroSerConfig()
@@ -137,7 +137,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * Parent directories must exist or an exception will be thrown. The content
      * is written in raw binary format without Base64 encoding for optimal performance.</p>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * List<User> users = Arrays.asList(
      *     new User("John", 30),
@@ -185,7 +185,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      *   <li>Regular Java beans and Maps (requires schema in config)</li>
      * </ul>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * // With SpecificRecord
      * User user = new User("John", 30);

@@ -3,13 +3,15 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class CharToIntFunctionTest extends TestBase {
+
+    private static int charToInt(char value) {
+        return value;
+    }
 
     @Test
     public void testApplyAsInt() {
@@ -50,21 +52,6 @@ public class CharToIntFunctionTest extends TestBase {
     }
 
     @Test
-    public void testDefaultWithBoundaryValues() {
-        assertEquals(Character.MAX_VALUE, CharToIntFunction.DEFAULT.applyAsInt(Character.MAX_VALUE));
-        assertEquals(Character.MIN_VALUE, CharToIntFunction.DEFAULT.applyAsInt(Character.MIN_VALUE));
-    }
-
-    @Test
-    public void testWideningConversion() {
-        CharToIntFunction widen = value -> value;
-
-        assertEquals(97, widen.applyAsInt('a'));
-        assertEquals(65535, widen.applyAsInt(Character.MAX_VALUE));
-        assertEquals(0, widen.applyAsInt(Character.MIN_VALUE));
-    }
-
-    @Test
     public void testCharacterCodePoint() {
         CharToIntFunction toCodePoint = value -> (int) value;
 
@@ -95,6 +82,28 @@ public class CharToIntFunctionTest extends TestBase {
     }
 
     @Test
+    public void testMethodReference() {
+        CharToIntFunction toInt = CharToIntFunctionTest::charToInt;
+
+        assertEquals(97, toInt.applyAsInt('a'));
+    }
+
+    @Test
+    public void testDefaultWithBoundaryValues() {
+        assertEquals(Character.MAX_VALUE, CharToIntFunction.DEFAULT.applyAsInt(Character.MAX_VALUE));
+        assertEquals(Character.MIN_VALUE, CharToIntFunction.DEFAULT.applyAsInt(Character.MIN_VALUE));
+    }
+
+    @Test
+    public void testWideningConversion() {
+        CharToIntFunction widen = value -> value;
+
+        assertEquals(97, widen.applyAsInt('a'));
+        assertEquals(65535, widen.applyAsInt(Character.MAX_VALUE));
+        assertEquals(0, widen.applyAsInt(Character.MIN_VALUE));
+    }
+
+    @Test
     public void testWithBoundaryValues() {
         CharToIntFunction toInt = value -> (int) value;
 
@@ -103,18 +112,7 @@ public class CharToIntFunctionTest extends TestBase {
     }
 
     @Test
-    public void testMethodReference() {
-        CharToIntFunction toInt = CharToIntFunctionTest::charToInt;
-
-        assertEquals(97, toInt.applyAsInt('a'));
-    }
-
-    @Test
     public void testFunctionalInterface() {
         assertNotNull(CharToIntFunction.class.getAnnotation(FunctionalInterface.class));
-    }
-
-    private static int charToInt(char value) {
-        return value;
     }
 }

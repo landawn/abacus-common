@@ -11,8 +11,6 @@ Perform a thorough deep line by line review for javadocs in all the classes unde
 
 Perform a thorough deep line by line review for javadocs in all the classes in package com.landawn.abacus.type under folder: ./src/main/java to improve/correct existing javadocs
 
-Perform a thorough, line-by-line review of the Javadocs in all classes under the ./src/main/java directory. Improve and correct the existing documentation where necessary, ensuring clarity, accuracy, and completeness. Align the style, structure, and conventions with the standard JDK Javadoc guidelines wherever possible.
-
 Perform a thorough deep line by line review for javadocs in Multiset.java to improve/correct existing javadocs
 
 
@@ -459,7 +457,8 @@ CONSTRAINTS
 
 
 Read the Eclipse-generated HTML coverage reports located in ./report/coverage/260315/ batch by batch.
-Each batch contains 20 HTML files, ordered by highest "Missed Instructions" first (start with the classes that have the most uncovered instructions). For each class report in the batch:
+Each batch contains 20 HTML files, ordered by highest "Missed Instructions" first (start with the classes that have the most uncovered instructions). 
+For each class report in the batch:
 
   - Identify the lines that are not covered by existing tests.
   - Add unit tests that execute those uncovered lines.
@@ -482,6 +481,10 @@ The newly added unit tests must follow the requirements below:
   - Add a one-line comment above each new test group if the intent is not obvious
     from the method name.
 
+  - Use methods from Suppliers and IntFunctions to create Supplier and IntFunction instances for input parameters whenever appropriate.
+  
+  - Avoid using size()/length() > 0 or < 0 in assertions. When possible, use assertEquals(expectedSizeOrLength, size()/length()) instead.
+
   - Before adding a test method, check whether a method with the same name already
     exists in the test class. If so, append a disambiguating suffix to avoid
     duplicate method names.
@@ -494,7 +497,6 @@ The newly added unit tests must follow the requirements below:
     class explaining why.
 
 
-After completing each batch, run only the newly added test methods and fix any failing tests.
-Do not modify the source code in order to make the unit tests pass.
+After completing each batch, run only the newly added test methods. If any tests fail, fix them — updating the source code if the failure is caused by a bug, or correcting the test itself if the test is wrong.
 
 

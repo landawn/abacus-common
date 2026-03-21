@@ -13,13 +13,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedSQLException;
 
-@Tag("new-test")
 public class DataSourceUtilTest extends TestBase {
 
     @Test
@@ -283,6 +281,37 @@ public class DataSourceUtilTest extends TestBase {
     }
 
     @Test
+    public void testCloseQuietlyWithNullResources() {
+        assertDoesNotThrow(() -> {
+            DataSourceUtil.closeQuietly(null, null, null);
+        });
+    }
+
+    @Test
+    public void testCloseQuietlyResultSetWithStatementException() throws SQLException {
+        ResultSet mockRs = mock(ResultSet.class);
+        when(mockRs.getStatement()).thenThrow(new SQLException("Test exception"));
+
+        DataSourceUtil.closeQuietly(mockRs, true);
+
+        verify(mockRs).close();
+    }
+
+    @Test
+    public void testCloseQuietlyResultSetWithConnectionException() throws SQLException {
+        ResultSet mockRs = mock(ResultSet.class);
+        Statement mockStmt = mock(Statement.class);
+
+        when(mockRs.getStatement()).thenReturn(mockStmt);
+        when(mockStmt.getConnection()).thenThrow(new SQLException("Test exception"));
+
+        DataSourceUtil.closeQuietly(mockRs, true, true);
+
+        verify(mockRs).close();
+        verify(mockStmt).close();
+    }
+
+    @Test
     public void testExecuteBatch() throws SQLException {
         Statement mockStmt = mock(Statement.class);
         int[] expected = { 1, 2, 3 };
@@ -317,36 +346,5 @@ public class DataSourceUtilTest extends TestBase {
         assertArrayEquals(expected, result);
         verify(mockStmt).executeBatch();
         verify(mockStmt).clearBatch();
-    }
-
-    @Test
-    public void testCloseQuietlyWithNullResources() {
-        assertDoesNotThrow(() -> {
-            DataSourceUtil.closeQuietly(null, null, null);
-        });
-    }
-
-    @Test
-    public void testCloseQuietlyResultSetWithStatementException() throws SQLException {
-        ResultSet mockRs = mock(ResultSet.class);
-        when(mockRs.getStatement()).thenThrow(new SQLException("Test exception"));
-
-        DataSourceUtil.closeQuietly(mockRs, true);
-
-        verify(mockRs).close();
-    }
-
-    @Test
-    public void testCloseQuietlyResultSetWithConnectionException() throws SQLException {
-        ResultSet mockRs = mock(ResultSet.class);
-        Statement mockStmt = mock(Statement.class);
-
-        when(mockRs.getStatement()).thenReturn(mockStmt);
-        when(mockStmt.getConnection()).thenThrow(new SQLException("Test exception"));
-
-        DataSourceUtil.closeQuietly(mockRs, true, true);
-
-        verify(mockRs).close();
-        verify(mockStmt).close();
     }
 }

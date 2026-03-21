@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -31,7 +30,6 @@ import com.landawn.abacus.util.function.ShortUnaryOperator;
 import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
 import com.landawn.abacus.util.stream.BaseStream.Splitor;
 
-@Tag("new-test")
 public class ParallelIteratorShortStreamTest extends TestBase {
 
     private static final int testMaxThreadNum = 4;
@@ -56,6 +54,24 @@ public class ParallelIteratorShortStreamTest extends TestBase {
         emptyParallelStream = createShortStream();
     }
 
+    // ---- Sequential-fallback path: 1-thread iterator stream => canBeSequential(maxThreadNum) == true ----
+
+    private ShortStream createSingleThreadStream(short... elements) {
+        return ShortStream.of(elements).map(e -> (short) (e + 0)).parallel(PS.create(Splitor.ITERATOR).maxThreadNum(1));
+    }
+
+    @Test
+    @DisplayName("Test with specific short patterns")
+    public void testSpecificShortPatterns() {
+        parallelStream = createShortStream(new short[] { 1, 2, 4, 8, 16, 32, 64, 128 });
+        short[] powersOfTwo = parallelStream.filter(s -> (s & (s - 1)) == 0).toArray();
+        assertEquals(8, powersOfTwo.length);
+
+        parallelStream = createShortStream(new short[] { 3, 6, 9, 12, 15 });
+        boolean allDivisibleBy3 = parallelStream.allMatch(s -> s % 3 == 0);
+        assertTrue(allDivisibleBy3);
+    }
+
     @Test
     public void testFilter() {
         ShortStream stream = createShortStream(TEST_ARRAY);
@@ -71,6 +87,50 @@ public class ParallelIteratorShortStreamTest extends TestBase {
     }
 
     @Test
+    @DisplayName("Test edge cases")
+    public void testEdgeCases() {
+        parallelStream = createShortStream(new short[0]);
+        assertEquals(0, parallelStream.count());
+
+        parallelStream = createShortStream(new short[] { 42 });
+        assertEquals(42, parallelStream.first().get());
+
+        parallelStream = createShortStream(new short[] { -5, -3, -1, 0, 1, 3, 5 });
+        long positiveCount = parallelStream.filter(s -> s > 0).count();
+        assertEquals(3, positiveCount);
+
+        parallelStream = createShortStream(new short[] { Short.MIN_VALUE, -1, 0, 1, Short.MAX_VALUE });
+        assertEquals(5, parallelStream.count());
+    }
+
+    @Test
+    public void testFilter_SequentialFallback() {
+        List<Short> result = createSingleThreadStream((short) 1, (short) 2, (short) 3, (short) 4).filter(s -> s % 2 == 0).toList();
+        assertHaveSameElements(Arrays.asList((short) 2, (short) 4), result);
+    }
+
+    @Test
+    @DisplayName("Test exception handling in parallel operations")
+    public void testExceptionHandling() {
+        assertThrows(RuntimeException.class, () -> {
+            parallelStream.filter(s -> {
+                if (s == 5)
+                    throw new RuntimeException("Test exception in filter");
+                return true;
+            }).count();
+        });
+
+        parallelStream = createShortStream(TEST_ARRAY);
+        assertThrows(RuntimeException.class, () -> {
+            parallelStream.map(s -> {
+                if (s == 7)
+                    throw new RuntimeException("Test exception in map");
+                return s;
+            }).toArray();
+        });
+    }
+
+    @Test
     public void testTakeWhile() {
         ShortStream stream = createShortStream(TEST_ARRAY);
         ShortPredicate predicate = s -> s < 4;
@@ -80,6 +140,12 @@ public class ParallelIteratorShortStreamTest extends TestBase {
         assertTrue(result.contains((short) 2));
         assertTrue(result.contains((short) 3));
         assertFalse(result.contains((short) 4));
+    }
+
+    @Test
+    public void testTakeWhile_SequentialFallback() {
+        List<Short> result = createSingleThreadStream((short) 1, (short) 2, (short) 3, (short) 4).takeWhile(s -> s < 3).toList();
+        assertHaveSameElements(Arrays.asList((short) 1, (short) 2), result);
     }
 
     @Test
@@ -94,6 +160,12 @@ public class ParallelIteratorShortStreamTest extends TestBase {
     }
 
     @Test
+    public void testDropWhile_SequentialFallback() {
+        List<Short> result = createSingleThreadStream((short) 1, (short) 2, (short) 3, (short) 4).dropWhile(s -> s < 3).toList();
+        assertHaveSameElements(Arrays.asList((short) 3, (short) 4), result);
+    }
+
+    @Test
     public void testMap() {
         ShortStream stream = createShortStream(TEST_ARRAY);
         ShortUnaryOperator mapper = s -> (short) (s + 1);
@@ -104,9 +176,21 @@ public class ParallelIteratorShortStreamTest extends TestBase {
     }
 
     @Test
+    public void testMap_SequentialFallback() {
+        List<Short> result = createSingleThreadStream((short) 1, (short) 2, (short) 3).map(s -> (short) (s + 10)).toList();
+        assertHaveSameElements(Arrays.asList((short) 11, (short) 12, (short) 13), result);
+    }
+
+    @Test
     public void testMapToInt() {
         ShortStream stream = createShortStream(new short[] { 1, 2, 3 });
         List<Integer> result = stream.mapToInt(s -> s * 10).toList();
+        assertHaveSameElements(Arrays.asList(10, 20, 30), result);
+    }
+
+    @Test
+    public void testMapToInt_SequentialFallback() {
+        List<Integer> result = createSingleThreadStream((short) 1, (short) 2, (short) 3).mapToInt(s -> s * 10).toList();
         assertHaveSameElements(Arrays.asList(10, 20, 30), result);
     }
 
@@ -118,6 +202,12 @@ public class ParallelIteratorShortStreamTest extends TestBase {
         assertEquals(TEST_ARRAY.length, result.size());
         assertTrue(result.contains("Short_1"));
         assertTrue(result.contains("Short_26"));
+    }
+
+    @Test
+    public void testMapToObj_SequentialFallback() {
+        List<String> result = createSingleThreadStream((short) 1, (short) 2).mapToObj(s -> "v" + s).toList();
+        assertHaveSameElements(Arrays.asList("v1", "v2"), result);
     }
 
     @Test
@@ -138,6 +228,18 @@ public class ParallelIteratorShortStreamTest extends TestBase {
     }
 
     @Test
+    public void testFlatMap_SequentialFallback() {
+        List<Short> result = createSingleThreadStream((short) 1, (short) 2).flatMap(s -> ShortStream.of(s, (short) (s + 10))).toList();
+        assertHaveSameElements(Arrays.asList((short) 1, (short) 11, (short) 2, (short) 12), result);
+    }
+
+    @Test
+    public void testFlatmap_SequentialFallback() {
+        List<Short> result = createSingleThreadStream((short) 1, (short) 2).flatmap(s -> new short[] { s, (short) (s + 10) }).toList();
+        assertHaveSameElements(Arrays.asList((short) 1, (short) 11, (short) 2, (short) 12), result);
+    }
+
+    @Test
     public void testFlatMapToInt() {
         ShortStream stream = createShortStream(new short[] { 1, 2 });
         List<Integer> result = stream.flatMapToInt(s -> IntStream.of(s, s * 10)).toList();
@@ -146,6 +248,12 @@ public class ParallelIteratorShortStreamTest extends TestBase {
         assertTrue(result.contains(10));
         assertTrue(result.contains(2));
         assertTrue(result.contains(20));
+    }
+
+    @Test
+    public void testFlatMapToInt_SequentialFallback() {
+        List<Integer> result = createSingleThreadStream((short) 1, (short) 2).flatMapToInt(s -> IntStream.of(s, s * 10)).toList();
+        assertHaveSameElements(Arrays.asList(1, 10, 2, 20), result);
     }
 
     @Test
@@ -168,6 +276,50 @@ public class ParallelIteratorShortStreamTest extends TestBase {
     }
 
     @Test
+    @DisplayName("Test flatMapToObj method")
+    public void testFlatMapToObj() {
+        Stream<String> flattened = parallelStream.flatMapToObj(s -> Stream.of("A" + s, "B" + s));
+        List<String> result = flattened.sorted().toList();
+
+        assertEquals(20, result.size());
+        assertTrue(result.contains("A1"));
+        assertTrue(result.contains("B10"));
+    }
+
+    @Test
+    public void testFlatMapToObj_largeArray() {
+        List<String> result = createShortStream(TEST_ARRAY).flatMapToObj(s -> Stream.of(new String[] { "v" + s })).toList();
+        assertEquals(26, result.size());
+        assertTrue(result.contains("v1"));
+    }
+
+    @Test
+    public void testFlatmapToObj_largeArray() {
+        List<String> result = createShortStream(TEST_ARRAY).flatmapToObj(s -> Arrays.asList("a" + s, "b" + s)).toList();
+        assertEquals(52, result.size());
+    }
+
+    @Test
+    public void testFlatMapToObj_SequentialFallback() {
+        List<String> result = createSingleThreadStream((short) 1, (short) 2).flatMapToObj(s -> Stream.of("A" + s, "B" + s)).toList();
+        assertHaveSameElements(Arrays.asList("A1", "B1", "A2", "B2"), result);
+    }
+
+    @Test
+    public void testFlatmapToObj_SequentialFallback() {
+        List<String> result = createSingleThreadStream((short) 1, (short) 2).flatmapToObj(s -> Arrays.asList("X" + s, "Y" + s)).toList();
+        assertHaveSameElements(Arrays.asList("X1", "Y1", "X2", "Y2"), result);
+    }
+
+    @Test
+    public void testOnEach_ParallelPath_Iterator() {
+        AtomicInteger count = new AtomicInteger(0);
+        long total = createShortStream(TEST_ARRAY).peek(s -> count.incrementAndGet()).count();
+        assertEquals(TEST_ARRAY.length, total);
+        assertEquals(TEST_ARRAY.length, count.get());
+    }
+
+    @Test
     public void testOnEach() {
         ShortStream stream = createShortStream(TEST_ARRAY);
         List<Short> consumed = new ArrayList<>();
@@ -183,6 +335,20 @@ public class ParallelIteratorShortStreamTest extends TestBase {
     }
 
     @Test
+    public void testOnEach_SequentialFallback() {
+        AtomicInteger count = new AtomicInteger(0);
+        createSingleThreadStream((short) 1, (short) 2, (short) 3).peek(s -> count.incrementAndGet()).count();
+        assertEquals(3, count.get());
+    }
+
+    @Test
+    public void testForEach_ParallelPath_Iterator() {
+        AtomicInteger count = new AtomicInteger(0);
+        createShortStream(TEST_ARRAY).forEach(s -> count.incrementAndGet());
+        assertEquals(TEST_ARRAY.length, count.get());
+    }
+
+    @Test
     public void testForEach() {
         List<Short> consumed = new ArrayList<>();
         ShortStream stream = createShortStream(new short[] { 1, 2, 3 });
@@ -193,6 +359,13 @@ public class ParallelIteratorShortStreamTest extends TestBase {
         });
         assertEquals(3, consumed.size());
         assertHaveSameElements(Arrays.asList((short) 1, (short) 2, (short) 3), consumed);
+    }
+
+    @Test
+    public void testForEach_SequentialFallback() {
+        AtomicInteger count = new AtomicInteger(0);
+        createSingleThreadStream((short) 1, (short) 2, (short) 3).forEach(s -> count.incrementAndGet());
+        assertEquals(3, count.get());
     }
 
     @Test
@@ -219,6 +392,13 @@ public class ParallelIteratorShortStreamTest extends TestBase {
     }
 
     @Test
+    public void testToMap_SequentialFallback() {
+        Map<String, Integer> result = createSingleThreadStream((short) 1, (short) 2).toMap(s -> "k" + s, s -> (int) s, (v1, v2) -> v1, ConcurrentHashMap::new);
+        assertEquals(2, result.size());
+        assertEquals(1, (int) result.get("k1"));
+    }
+
+    @Test
     public void testGroupTo() {
         ShortStream stream = createShortStream(new short[] { 1, 2, 1, 3, 2 });
         Map<String, List<Short>> result = stream.groupTo(s -> String.valueOf(s), Collectors.toList(), ConcurrentHashMap::new);
@@ -226,6 +406,35 @@ public class ParallelIteratorShortStreamTest extends TestBase {
         assertEquals(List.of((short) 1, (short) 1), result.get("1"));
         assertEquals(List.of((short) 2, (short) 2), result.get("2"));
         assertEquals(List.of((short) 3), result.get("3"));
+    }
+
+    @Test
+    public void testGroupTo_SequentialFallback() {
+        Map<Boolean, List<Short>> result = createSingleThreadStream((short) 1, (short) 2, (short) 3, (short) 4).groupTo(s -> s % 2 == 0, Collectors.toList(),
+                ConcurrentHashMap::new);
+        assertEquals(2, result.size());
+        assertEquals(2, result.get(true).size());
+        assertEquals(2, result.get(false).size());
+    }
+
+    @Test
+    public void testReduce_parallelWithLargeArray() {
+        short sum = createShortStream(TEST_ARRAY).reduce((short) 0, (a, b) -> (short) (a + b));
+        assertEquals((short) 351, sum);
+
+        OptionalShort opt = createShortStream(TEST_ARRAY).reduce((a, b) -> (short) (a + b));
+        assertTrue(opt.isPresent());
+        assertEquals((short) 351, opt.get());
+    }
+
+    @Test
+    public void testConstructor_withDefaultValues() {
+        ShortStream stream = ShortStream
+                .of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5, (short) 6, (short) 7, (short) 8, (short) 9, (short) 10, (short) 11, (short) 12,
+                        (short) 13, (short) 14, (short) 15, (short) 16, (short) 17, (short) 18, (short) 19, (short) 20)
+                .parallel();
+        short sum = stream.reduce((short) 0, (a, b) -> (short) (a + b));
+        assertEquals((short) 210, sum);
     }
 
     @Test
@@ -253,330 +462,28 @@ public class ParallelIteratorShortStreamTest extends TestBase {
     }
 
     @Test
-    public void testCollect() {
-        ShortStream stream = createShortStream(new short[] { 1, 2, 3 });
-        List<Short> collectedList = stream.collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
-        assertHaveSameElements(List.of((short) 1, (short) 2, (short) 3), collectedList);
+    public void testReduce_emptyStreamParallel() {
+        short result = createShortStream(new short[0]).reduce((short) 0, (a, b) -> (short) (a + b));
+        assertEquals((short) 0, result);
+
+        OptionalShort opt = createShortStream(new short[0]).reduce((a, b) -> (short) (a + b));
+        assertFalse(opt.isPresent());
     }
 
     @Test
-    public void testAnyMatch() {
-        assertTrue(createShortStream(TEST_ARRAY).anyMatch(s -> s == 26));
-        assertFalse(createShortStream(TEST_ARRAY).anyMatch(s -> s == 100));
-        assertFalse(createShortStream(new short[] {}).anyMatch(s -> true));
+    public void testReduceWithIdentity_SequentialFallback() {
+        short result = createSingleThreadStream((short) 1, (short) 2, (short) 3).reduce((short) 0, (s1, s2) -> (short) (s1 + s2));
+        assertEquals((short) 6, result);
     }
 
     @Test
-    public void testAllMatch() {
-        assertTrue(createShortStream(TEST_ARRAY).allMatch(s -> s >= 1 && s <= 26));
-        assertFalse(createShortStream(TEST_ARRAY).allMatch(s -> s < 26));
-        assertTrue(createShortStream(new short[] {}).allMatch(s -> false));
-    }
-
-    @Test
-    public void testNoneMatch() {
-        assertTrue(createShortStream(TEST_ARRAY).noneMatch(s -> s > 100));
-        assertFalse(createShortStream(TEST_ARRAY).noneMatch(s -> s == 1));
-        assertTrue(createShortStream(new short[] {}).noneMatch(s -> true));
-    }
-
-    @Test
-    public void testFindFirst() {
-        ShortStream stream = createShortStream(new short[] { 4, 2, 1, 3, 1 });
-        OptionalShort result = stream.findFirst(s -> s == 1);
+    public void testReduceWithoutIdentity_SequentialFallback() {
+        OptionalShort result = createSingleThreadStream((short) 1, (short) 2, (short) 3).reduce((s1, s2) -> (short) (s1 + s2));
         assertTrue(result.isPresent());
-        assertEquals((short) 1, result.get());
+        assertEquals((short) 6, result.get());
 
-        stream = createShortStream(new short[] { 4, 2, 1, 3, 1 });
-        OptionalShort notFound = stream.findFirst(s -> s == 10);
-        assertFalse(notFound.isPresent());
-
-        OptionalShort empty = createShortStream(new short[] {}).findFirst(s -> true);
+        OptionalShort empty = createSingleThreadStream(new short[0]).reduce((s1, s2) -> (short) (s1 + s2));
         assertFalse(empty.isPresent());
-    }
-
-    @Test
-    public void testFindAny() {
-        ShortStream stream = createShortStream(TEST_ARRAY);
-        OptionalShort result = stream.findAny(s -> s == 13);
-        assertTrue(result.isPresent());
-        assertEquals((short) 13, result.get());
-
-        ShortStream stream2 = createShortStream(TEST_ARRAY);
-        OptionalShort notFound = stream2.findAny(s -> s == 100);
-        assertFalse(notFound.isPresent());
-
-        OptionalShort empty = createShortStream(new short[] {}).findAny(s -> true);
-        assertFalse(empty.isPresent());
-    }
-
-    @Test
-    public void testFindLast() {
-        ShortStream stream = createShortStream(new short[] { 4, 2, 1, 3, 1 });
-        OptionalShort result = stream.findLast(s -> s == 1);
-        assertTrue(result.isPresent());
-        assertEquals((short) 1, result.get());
-
-        stream = createShortStream(new short[] { 4, 2, 1, 3, 1 });
-        OptionalShort notFound = stream.findLast(s -> s == 10);
-        assertFalse(notFound.isPresent());
-
-        OptionalShort empty = createShortStream(new short[] {}).findLast(s -> true);
-        assertFalse(empty.isPresent());
-    }
-
-    @Test
-    public void testZipWithTwoStreams() {
-        ShortStream s1 = createShortStream(largeArray).parallel();
-        ShortStream s2 = createShortStream(largeArray).parallel();
-        long count = s1.zipWith(s2, (a, b) -> (short) (a + b)).count();
-        assertEquals(largeArray.length, count);
-
-        long sum = createShortStream(largeArray).parallel().zipWith(createShortStream(largeArray), (a, b) -> (short) (a + b)).sum();
-        assertEquals(N.sum(largeArray) * 2, sum);
-    }
-
-    @Test
-    public void testZipWithDefaultValues() {
-        short[] shortArr = { 10, 20 };
-        ShortStream s1 = createShortStream(smallArray).parallel();
-        ShortStream s2 = createShortStream(shortArr).parallel();
-
-        ShortList result = s1.zipWith(s2, (short) 99, (short) 100, (a, b) -> (short) (a + b)).toShortList();
-
-        ShortList expected = new ShortList();
-        expected.add((short) (1 + 10));
-        expected.add((short) (2 + 20));
-        expected.add((short) (3 + 100));
-        expected.add((short) (4 + 100));
-        expected.add((short) (5 + 100));
-
-        assertHaveSameElements(expected.boxed(), result.boxed());
-    }
-
-    @Test
-    public void testZipWithTernaryOperator() {
-        ShortStream streamA = createShortStream(new short[] { 1, 2 });
-        ShortStream streamB = ShortStream.of((short) 10, (short) 20);
-        ShortStream streamC = ShortStream.of((short) 100, (short) 101);
-        ShortTernaryOperator zipper = (s1, s2, s3) -> (short) (s1 + s2 + s3);
-        List<Short> result = streamA.zipWith(streamB, streamC, zipper).sorted().toList();
-        assertEquals(2, result.size());
-        assertEquals((short) (1 + 10 + 100), result.get(0));
-        assertEquals((short) (2 + 20 + 101), result.get(1));
-    }
-
-    @Test
-    public void testZipWithTernaryOperatorWithNoneValues() {
-        ShortStream streamA = createShortStream(new short[] { 1 });
-        ShortStream streamB = ShortStream.of((short) 10, (short) 20);
-        ShortStream streamC = ShortStream.of((short) 100, (short) 101, (short) 102);
-        short valA = 0;
-        short valB = -1;
-        short valC = -2;
-        ShortTernaryOperator zipper = (s1, s2, s3) -> {
-            return (short) (s1 + s2 + s3);
-        };
-        List<Short> result = streamA.zipWith(streamB, streamC, valA, valB, valC, zipper).sorted().toList();
-        assertEquals(3, result.size());
-        assertEquals((short) (1 + 10 + 100), result.get(1));
-        assertEquals((short) (0 + 20 + 101), result.get(2));
-        assertEquals((short) (0 + -1 + 102), result.get(0));
-    }
-
-    @Test
-    public void testIsParallel() {
-        ShortStream stream = createShortStream(TEST_ARRAY);
-        assertTrue(stream.isParallel());
-        stream.close();
-    }
-
-    @Test
-    public void testSequential() {
-        ShortStream parallelStream = createShortStream(TEST_ARRAY);
-        ShortStream sequentialStream = parallelStream.sequential();
-        assertFalse(sequentialStream.isParallel());
-        List<Short> result = sequentialStream.toList();
-        assertEquals(TEST_ARRAY.length, result.size());
-        for (int i = 0; i < TEST_ARRAY.length; i++) {
-            assertEquals(TEST_ARRAY[i], result.get(i));
-        }
-        parallelStream.close();
-        sequentialStream.close();
-    }
-
-    @Test
-    public void testMaxThreadNum() throws IllegalAccessException, NoSuchFieldException {
-    }
-
-    @Test
-    public void testSplitor() throws IllegalAccessException, NoSuchFieldException {
-    }
-
-    @Test
-    public void testAsyncExecutor() throws IllegalAccessException, NoSuchFieldException {
-    }
-
-    @Test
-    public void testOnCloseMultipleHandlers() {
-        ShortStream stream = createShortStream(TEST_ARRAY);
-        AtomicInteger closedCount = new AtomicInteger(0);
-        Runnable handler1 = () -> closedCount.incrementAndGet();
-        Runnable handler2 = () -> closedCount.incrementAndGet();
-
-        ShortStream newStream = stream.onClose(handler1).onClose(handler2);
-        assertEquals(0, closedCount.get());
-        newStream.close();
-        assertEquals(2, closedCount.get());
-    }
-
-    @Test
-    @DisplayName("Test flatMapToObj method")
-    public void testFlatMapToObj() {
-        Stream<String> flattened = parallelStream.flatMapToObj(s -> Stream.of("A" + s, "B" + s));
-        List<String> result = flattened.sorted().toList();
-
-        assertEquals(20, result.size());
-        assertTrue(result.contains("A1"));
-        assertTrue(result.contains("B10"));
-    }
-
-    @Test
-    @DisplayName("Test findFirst with predicate method")
-    public void testFindFirstWithPredicate() throws Exception {
-        OptionalShort result = parallelStream.findFirst(s -> s > 5);
-
-        assertTrue(result.isPresent());
-        assertEquals(6, result.get());
-
-        parallelStream = createShortStream(TEST_ARRAY);
-        result = parallelStream.findFirst(s -> s > 30);
-        assertFalse(result.isPresent());
-
-        parallelStream = createShortStream(TEST_ARRAY);
-        result = parallelStream.findFirst(s -> s == 1);
-        assertTrue(result.isPresent());
-        assertEquals(1, result.get());
-    }
-
-    @Test
-    @DisplayName("Test findLast with predicate method")
-    public void testFindLastWithPredicate() throws Exception {
-        OptionalShort result = parallelStream.findLast(s -> s < 5);
-
-        assertTrue(result.isPresent());
-        assertEquals(4, result.get());
-
-        parallelStream = createShortStream(TEST_ARRAY);
-        result = parallelStream.findLast(s -> s > 30);
-        assertFalse(result.isPresent());
-
-        parallelStream = createShortStream(TEST_ARRAY);
-        result = parallelStream.findLast(s -> s == 10);
-        assertTrue(result.isPresent());
-        assertEquals(10, result.get());
-    }
-
-    @Test
-    @DisplayName("Test zipWith three streams with ternary operator")
-    public void testZipWithTernary() {
-        ShortStream stream2 = createShortStream(new short[] { 10, 20, 30, 40, 50 });
-        ShortStream stream3 = createShortStream(new short[] { 100, 100, 100, 100, 100 });
-        ShortStream zipped = parallelStream.zipWith(stream2, stream3, (a, b, c) -> (short) ((a + b) * c / 100));
-        short[] result = zipped.toArray();
-
-        assertEquals(5, result.length);
-        assertHaveSameElements(new short[] { 11, 22, 33, 44, 55 }, result);
-    }
-
-    @Test
-    @DisplayName("Test zipWith three streams with default values")
-    public void testZipWithTernaryDefaults() {
-        ShortStream stream2 = createShortStream(new short[] { 10, 20 });
-        ShortStream stream3 = createShortStream(new short[] { 1, 2, 3, 4 });
-        short[] result = parallelStream.zipWith(stream2, stream3, (short) 0, (short) 0, (short) 1, (a, b, c) -> (short) (a + b + c)).sorted().toArray();
-
-        assertEquals(10, result.length);
-        assertEquals(6, result[0]);
-        assertEquals(6, result[1]);
-        assertEquals(24, result[9]);
-    }
-
-    @Test
-    @DisplayName("Test edge cases")
-    public void testEdgeCases() {
-        parallelStream = createShortStream(new short[0]);
-        assertEquals(0, parallelStream.count());
-
-        parallelStream = createShortStream(new short[] { 42 });
-        assertEquals(42, parallelStream.first().get());
-
-        parallelStream = createShortStream(new short[] { -5, -3, -1, 0, 1, 3, 5 });
-        long positiveCount = parallelStream.filter(s -> s > 0).count();
-        assertEquals(3, positiveCount);
-
-        parallelStream = createShortStream(new short[] { Short.MIN_VALUE, -1, 0, 1, Short.MAX_VALUE });
-        assertEquals(5, parallelStream.count());
-    }
-
-    @Test
-    @DisplayName("Test exception handling in parallel operations")
-    public void testExceptionHandling() {
-        assertThrows(RuntimeException.class, () -> {
-            parallelStream.filter(s -> {
-                if (s == 5)
-                    throw new RuntimeException("Test exception in filter");
-                return true;
-            }).count();
-        });
-
-        parallelStream = createShortStream(TEST_ARRAY);
-        assertThrows(RuntimeException.class, () -> {
-            parallelStream.map(s -> {
-                if (s == 7)
-                    throw new RuntimeException("Test exception in map");
-                return s;
-            }).toArray();
-        });
-    }
-
-    @Test
-    @DisplayName("Test method chaining")
-    public void testMethodChaining() {
-        List<String> result = parallelStream.filter(s -> s > 3)
-                .map(s -> (short) (s * 2))
-                .flatMapToObj(s -> Stream.of("Value: " + s, "Half: " + (s / 2)))
-                .sorted()
-                .toList();
-
-        assertTrue(result.size() > 0);
-        assertTrue(result.contains("Value: 8"));
-        assertTrue(result.contains("Half: 4"));
-    }
-
-    @Test
-    @DisplayName("Test with specific short patterns")
-    public void testSpecificShortPatterns() {
-        parallelStream = createShortStream(new short[] { 1, 2, 4, 8, 16, 32, 64, 128 });
-        short[] powersOfTwo = parallelStream.filter(s -> (s & (s - 1)) == 0).toArray();
-        assertEquals(8, powersOfTwo.length);
-
-        parallelStream = createShortStream(new short[] { 3, 6, 9, 12, 15 });
-        boolean allDivisibleBy3 = parallelStream.allMatch(s -> s % 3 == 0);
-        assertTrue(allDivisibleBy3);
-    }
-
-    @Test
-    @DisplayName("Test boundary values")
-    public void testBoundaryValues() {
-        short[] boundaryArray = new short[] { Short.MIN_VALUE, (short) (Short.MIN_VALUE + 1), -1, 0, 1, (short) (Short.MAX_VALUE - 1), Short.MAX_VALUE };
-
-        parallelStream = createShortStream(boundaryArray);
-
-        short[] result = parallelStream.sorted().toArray();
-        assertEquals(7, result.length);
-        assertEquals(Short.MIN_VALUE, result[0]);
-        assertEquals(Short.MAX_VALUE, result[6]);
     }
 
     // Covers delayed-match ordering for iterator-backed terminal operations.
@@ -623,4 +530,347 @@ public class ParallelIteratorShortStreamTest extends TestBase {
         assertEquals((short) 13, lastMatch.get());
     }
 
+    @Test
+    public void testCollect() {
+        ShortStream stream = createShortStream(new short[] { 1, 2, 3 });
+        List<Short> collectedList = stream.collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+        assertHaveSameElements(List.of((short) 1, (short) 2, (short) 3), collectedList);
+    }
+
+    @Test
+    public void testCollect_SequentialFallback() {
+        List<Short> result = createSingleThreadStream((short) 1, (short) 2, (short) 3).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+        assertHaveSameElements(Arrays.asList((short) 1, (short) 2, (short) 3), result);
+    }
+
+    @Test
+    public void testAnyMatch() {
+        assertTrue(createShortStream(TEST_ARRAY).anyMatch(s -> s == 26));
+        assertFalse(createShortStream(TEST_ARRAY).anyMatch(s -> s == 100));
+        assertFalse(createShortStream(new short[] {}).anyMatch(s -> true));
+    }
+
+    @Test
+    public void testAnyMatch_SequentialFallback() {
+        assertTrue(createSingleThreadStream((short) 1, (short) 2, (short) 3).anyMatch(s -> s == 3));
+        assertFalse(createSingleThreadStream((short) 1, (short) 2, (short) 3).anyMatch(s -> s > 10));
+    }
+
+    @Test
+    public void testAllMatch() {
+        assertTrue(createShortStream(TEST_ARRAY).allMatch(s -> s >= 1 && s <= 26));
+        assertFalse(createShortStream(TEST_ARRAY).allMatch(s -> s < 26));
+        assertTrue(createShortStream(new short[] {}).allMatch(s -> false));
+    }
+
+    @Test
+    public void testAllMatch_SequentialFallback() {
+        assertTrue(createSingleThreadStream((short) 1, (short) 2, (short) 3).allMatch(s -> s > 0));
+        assertFalse(createSingleThreadStream((short) 1, (short) 2, (short) 3).allMatch(s -> s > 1));
+    }
+
+    @Test
+    public void testNoneMatch() {
+        assertTrue(createShortStream(TEST_ARRAY).noneMatch(s -> s > 100));
+        assertFalse(createShortStream(TEST_ARRAY).noneMatch(s -> s == 1));
+        assertTrue(createShortStream(new short[] {}).noneMatch(s -> true));
+    }
+
+    @Test
+    public void testNoneMatch_SequentialFallback() {
+        assertTrue(createSingleThreadStream((short) 1, (short) 2, (short) 3).noneMatch(s -> s > 10));
+        assertFalse(createSingleThreadStream((short) 1, (short) 2, (short) 3).noneMatch(s -> s == 2));
+    }
+
+    @Test
+    public void testFindFirst() {
+        ShortStream stream = createShortStream(new short[] { 4, 2, 1, 3, 1 });
+        OptionalShort result = stream.findFirst(s -> s == 1);
+        assertTrue(result.isPresent());
+        assertEquals((short) 1, result.get());
+
+        stream = createShortStream(new short[] { 4, 2, 1, 3, 1 });
+        OptionalShort notFound = stream.findFirst(s -> s == 10);
+        assertFalse(notFound.isPresent());
+
+        OptionalShort empty = createShortStream(new short[] {}).findFirst(s -> true);
+        assertFalse(empty.isPresent());
+    }
+
+    @Test
+    public void testFindFirst_SequentialFallback() {
+        OptionalShort found = createSingleThreadStream((short) 1, (short) 2, (short) 3).findFirst(s -> s == 2);
+        assertTrue(found.isPresent());
+        assertEquals((short) 2, found.get());
+
+        OptionalShort notFound = createSingleThreadStream((short) 1, (short) 2).findFirst(s -> s > 10);
+        assertFalse(notFound.isPresent());
+    }
+
+    @Test
+    @DisplayName("Test findFirst with predicate method")
+    public void testFindFirstWithPredicate() throws Exception {
+        OptionalShort result = parallelStream.findFirst(s -> s > 5);
+
+        assertTrue(result.isPresent());
+        assertEquals(6, result.get());
+
+        parallelStream = createShortStream(TEST_ARRAY);
+        result = parallelStream.findFirst(s -> s > 30);
+        assertFalse(result.isPresent());
+
+        parallelStream = createShortStream(TEST_ARRAY);
+        result = parallelStream.findFirst(s -> s == 1);
+        assertTrue(result.isPresent());
+        assertEquals(1, result.get());
+    }
+
+    @Test
+    public void testFindAny() {
+        ShortStream stream = createShortStream(TEST_ARRAY);
+        OptionalShort result = stream.findAny(s -> s == 13);
+        assertTrue(result.isPresent());
+        assertEquals((short) 13, result.get());
+
+        ShortStream stream2 = createShortStream(TEST_ARRAY);
+        OptionalShort notFound = stream2.findAny(s -> s == 100);
+        assertFalse(notFound.isPresent());
+
+        OptionalShort empty = createShortStream(new short[] {}).findAny(s -> true);
+        assertFalse(empty.isPresent());
+    }
+
+    @Test
+    public void testFindAny_SequentialFallback() {
+        OptionalShort found = createSingleThreadStream((short) 1, (short) 2, (short) 3).findAny(s -> s == 2);
+        assertTrue(found.isPresent());
+
+        OptionalShort notFound = createSingleThreadStream((short) 1, (short) 2).findAny(s -> s > 10);
+        assertFalse(notFound.isPresent());
+    }
+
+    @Test
+    public void testFindLast() {
+        ShortStream stream = createShortStream(new short[] { 4, 2, 1, 3, 1 });
+        OptionalShort result = stream.findLast(s -> s == 1);
+        assertTrue(result.isPresent());
+        assertEquals((short) 1, result.get());
+
+        stream = createShortStream(new short[] { 4, 2, 1, 3, 1 });
+        OptionalShort notFound = stream.findLast(s -> s == 10);
+        assertFalse(notFound.isPresent());
+
+        OptionalShort empty = createShortStream(new short[] {}).findLast(s -> true);
+        assertFalse(empty.isPresent());
+    }
+
+    @Test
+    public void testFindLast_SequentialFallback() {
+        OptionalShort found = createSingleThreadStream((short) 1, (short) 2, (short) 1, (short) 3).findLast(s -> s == 1);
+        assertTrue(found.isPresent());
+        assertEquals((short) 1, found.get());
+
+        OptionalShort notFound = createSingleThreadStream((short) 1, (short) 2).findLast(s -> s > 10);
+        assertFalse(notFound.isPresent());
+    }
+
+    @Test
+    @DisplayName("Test findLast with predicate method")
+    public void testFindLastWithPredicate() throws Exception {
+        OptionalShort result = parallelStream.findLast(s -> s < 5);
+
+        assertTrue(result.isPresent());
+        assertEquals(4, result.get());
+
+        parallelStream = createShortStream(TEST_ARRAY);
+        result = parallelStream.findLast(s -> s > 30);
+        assertFalse(result.isPresent());
+
+        parallelStream = createShortStream(TEST_ARRAY);
+        result = parallelStream.findLast(s -> s == 10);
+        assertTrue(result.isPresent());
+        assertEquals(10, result.get());
+    }
+
+    @Test
+    public void testZipWithTwoStreams() {
+        ShortStream s1 = createShortStream(largeArray).parallel();
+        ShortStream s2 = createShortStream(largeArray).parallel();
+        long count = s1.zipWith(s2, (a, b) -> (short) (a + b)).count();
+        assertEquals(largeArray.length, count);
+
+        long sum = createShortStream(largeArray).parallel().zipWith(createShortStream(largeArray), (a, b) -> (short) (a + b)).sum();
+        assertEquals(N.sum(largeArray) * 2, sum);
+    }
+
+    @Test
+    public void testZipWithTernaryOperator() {
+        ShortStream streamA = createShortStream(new short[] { 1, 2 });
+        ShortStream streamB = ShortStream.of((short) 10, (short) 20);
+        ShortStream streamC = ShortStream.of((short) 100, (short) 101);
+        ShortTernaryOperator zipper = (s1, s2, s3) -> (short) (s1 + s2 + s3);
+        List<Short> result = streamA.zipWith(streamB, streamC, zipper).sorted().toList();
+        assertEquals(2, result.size());
+        assertEquals((short) (1 + 10 + 100), result.get(0));
+        assertEquals((short) (2 + 20 + 101), result.get(1));
+    }
+
+    @Test
+    @DisplayName("Test zipWith three streams with default values")
+    public void testZipWithTernaryDefaults() {
+        ShortStream stream2 = createShortStream(new short[] { 10, 20 });
+        ShortStream stream3 = createShortStream(new short[] { 1, 2, 3, 4 });
+        short[] result = parallelStream.zipWith(stream2, stream3, (short) 0, (short) 0, (short) 1, (a, b, c) -> (short) (a + b + c)).sorted().toArray();
+
+        assertEquals(10, result.length);
+        assertEquals(6, result[0]);
+        assertEquals(6, result[1]);
+        assertEquals(24, result[9]);
+    }
+
+    @Test
+    public void testZipWithDefaultValues() {
+        short[] shortArr = { 10, 20 };
+        ShortStream s1 = createShortStream(smallArray).parallel();
+        ShortStream s2 = createShortStream(shortArr).parallel();
+
+        ShortList result = s1.zipWith(s2, (short) 99, (short) 100, (a, b) -> (short) (a + b)).toShortList();
+
+        ShortList expected = new ShortList();
+        expected.add((short) (1 + 10));
+        expected.add((short) (2 + 20));
+        expected.add((short) (3 + 100));
+        expected.add((short) (4 + 100));
+        expected.add((short) (5 + 100));
+
+        assertHaveSameElements(expected.boxed(), result.boxed());
+    }
+
+    @Test
+    public void testZipWithTernaryOperatorWithNoneValues() {
+        ShortStream streamA = createShortStream(new short[] { 1 });
+        ShortStream streamB = ShortStream.of((short) 10, (short) 20);
+        ShortStream streamC = ShortStream.of((short) 100, (short) 101, (short) 102);
+        short valA = 0;
+        short valB = -1;
+        short valC = -2;
+        ShortTernaryOperator zipper = (s1, s2, s3) -> {
+            return (short) (s1 + s2 + s3);
+        };
+        List<Short> result = streamA.zipWith(streamB, streamC, valA, valB, valC, zipper).sorted().toList();
+        assertEquals(3, result.size());
+        assertEquals((short) (1 + 10 + 100), result.get(1));
+        assertEquals((short) (0 + 20 + 101), result.get(2));
+        assertEquals((short) (0 + -1 + 102), result.get(0));
+    }
+
+    @Test
+    @DisplayName("Test zipWith three streams with ternary operator")
+    public void testZipWithTernary() {
+        ShortStream stream2 = createShortStream(new short[] { 10, 20, 30, 40, 50 });
+        ShortStream stream3 = createShortStream(new short[] { 100, 100, 100, 100, 100 });
+        ShortStream zipped = parallelStream.zipWith(stream2, stream3, (a, b, c) -> (short) ((a + b) * c / 100));
+        short[] result = zipped.toArray();
+
+        assertEquals(5, result.length);
+        assertHaveSameElements(new short[] { 11, 22, 33, 44, 55 }, result);
+    }
+
+    @Test
+    public void testZipWithDefaultValues_SequentialFallback_UnevenLengths() {
+        List<Short> result = ShortStream.of((short) 1, (short) 2, (short) 3)
+                .parallel(PS.create(Splitor.ITERATOR).maxThreadNum(1))
+                .zipWith(ShortStream.of((short) 10), (short) 0, (short) -1, (a, b) -> (short) (a + b))
+                .toList();
+
+        assertEquals(Arrays.asList((short) 11, (short) 1, (short) 2), result);
+    }
+
+    @Test
+    public void testIsParallel() {
+        ShortStream stream = createShortStream(TEST_ARRAY);
+        assertTrue(stream.isParallel());
+        stream.close();
+    }
+
+    @Test
+    public void testSequential() {
+        ShortStream parallelStream = createShortStream(TEST_ARRAY);
+        ShortStream sequentialStream = parallelStream.sequential();
+        assertFalse(sequentialStream.isParallel());
+        List<Short> result = sequentialStream.toList();
+        assertEquals(TEST_ARRAY.length, result.size());
+        for (int i = 0; i < TEST_ARRAY.length; i++) {
+            assertEquals(TEST_ARRAY[i], result.get(i));
+        }
+        parallelStream.close();
+        sequentialStream.close();
+    }
+
+    @Test
+    public void testMaxThreadNum_SequentialFallback() {
+        assertEquals(testMaxThreadNum, ((ParallelIteratorShortStream) createShortStream(TEST_ARRAY)).maxThreadNum());
+    }
+
+    @Test
+    public void testMaxThreadNum() throws IllegalAccessException, NoSuchFieldException {
+    }
+
+    @Test
+    public void testSplitor_SequentialFallback() {
+        assertEquals(Splitor.ITERATOR, ((ParallelIteratorShortStream) createShortStream(TEST_ARRAY)).splitor());
+    }
+
+    @Test
+    public void testSplitor() throws IllegalAccessException, NoSuchFieldException {
+    }
+
+    @Test
+    public void testAsyncExecutor_SequentialFallback() {
+        assertTrue(((ParallelIteratorShortStream) createShortStream(TEST_ARRAY)).asyncExecutor() != null);
+    }
+
+    @Test
+    public void testAsyncExecutor() throws IllegalAccessException, NoSuchFieldException {
+    }
+
+    @Test
+    @DisplayName("Test method chaining")
+    public void testMethodChaining() {
+        List<String> result = parallelStream.filter(s -> s > 3)
+                .map(s -> (short) (s * 2))
+                .flatMapToObj(s -> Stream.of("Value: " + s, "Half: " + (s / 2)))
+                .sorted()
+                .toList();
+
+        assertTrue(result.size() > 0);
+        assertTrue(result.contains("Value: 8"));
+        assertTrue(result.contains("Half: 4"));
+    }
+
+    @Test
+    public void testOnCloseMultipleHandlers() {
+        ShortStream stream = createShortStream(TEST_ARRAY);
+        AtomicInteger closedCount = new AtomicInteger(0);
+        Runnable handler1 = () -> closedCount.incrementAndGet();
+        Runnable handler2 = () -> closedCount.incrementAndGet();
+
+        ShortStream newStream = stream.onClose(handler1).onClose(handler2);
+        assertEquals(0, closedCount.get());
+        newStream.close();
+        assertEquals(2, closedCount.get());
+    }
+
+    @Test
+    @DisplayName("Test boundary values")
+    public void testBoundaryValues() {
+        short[] boundaryArray = new short[] { Short.MIN_VALUE, (short) (Short.MIN_VALUE + 1), -1, 0, 1, (short) (Short.MAX_VALUE - 1), Short.MAX_VALUE };
+
+        parallelStream = createShortStream(boundaryArray);
+
+        short[] result = parallelStream.sorted().toArray();
+        assertEquals(7, result.length);
+        assertEquals(Short.MIN_VALUE, result[0]);
+        assertEquals(Short.MAX_VALUE, result[6]);
+    }
 }

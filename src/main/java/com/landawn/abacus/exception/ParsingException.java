@@ -20,31 +20,31 @@ import java.io.Serial;
  * Exception thrown when a parsing operation fails.
  * This is a runtime exception that indicates an error occurred while parsing text, data structures,
  * or other formatted input. Unlike {@link java.text.ParseException}, this is an unchecked exception.
- * 
+ *
  * <p>This exception can optionally store a token value that indicates the position or type of token
- * where the parsing error occurred. The default token value is -2 when not specified.</p>
- * 
+ * where the parsing error occurred. The default token value is {@code -2} when not specified.</p>
+ *
  * <p>Common use cases include:</p>
  * <ul>
- *   <li>JSON/XML parsing failures</li>
- *   <li>Custom data format parsing errors</li>
- *   <li>Configuration file parsing problems</li>
- *   <li>Query language or expression parsing failures</li>
+ *   <li>JSON/XML parsing failures.</li>
+ *   <li>Custom data format parsing errors.</li>
+ *   <li>Configuration file parsing problems.</li>
+ *   <li>Query language or expression parsing failures.</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Basic usage
  * if (!isValidFormat(input)) {
  *     throw new ParsingException("Invalid date format: " + input);
  * }
- * 
+ *
  * // With token information
  * if (unexpectedToken) {
  *     throw new ParsingException("Unexpected token at position " + position, currentToken);
  * }
  * }</pre>
- * 
+ *
  * @see RuntimeException
  * @see java.text.ParseException
  */
@@ -53,12 +53,15 @@ public class ParsingException extends RuntimeException {
     @Serial
     private static final long serialVersionUID = 7678894353902496315L;
 
-    /** The error token position or type associated with this parse exception. Default value is -2. */
+    /**
+     * The error token position or type associated with this parse exception.
+     * The default value is {@code -2} if not specified.
+     */
     private int errorToken = -2; //NOSONAR
 
     /**
      * Constructs a new {@code ParsingException} with no detail message.
-     * The cause is not initialized, and the token value is set to the default of -2.
+     * The cause is not initialized, and the token value is set to the default of {@code -2}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -66,11 +69,12 @@ public class ParsingException extends RuntimeException {
      * }</pre>
      */
     public ParsingException() {
+        super();
     }
 
     /**
      * Constructs a new {@code ParsingException} with the specified detail message.
-     * The cause is not initialized, and the token value is set to the default of -2.
+     * The cause is not initialized, and the token value is set to the default of {@code -2}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -107,7 +111,7 @@ public class ParsingException extends RuntimeException {
 
     /**
      * Constructs a new {@code ParsingException} with the specified detail message and cause.
-     * The token value is set to the default of -2.
+     * The token value is set to the default of {@code -2}.
      *
      * <p>Note that the detail message associated with {@code cause} is <i>not</i> automatically
      * incorporated in this exception's detail message.</p>
@@ -124,7 +128,7 @@ public class ParsingException extends RuntimeException {
      * @param message the detail message. The detail message is saved for later retrieval
      *                by the {@link #getMessage()} method.
      * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
-     *              A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.
+     *              (A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.)
      */
     public ParsingException(final String message, final Throwable cause) {
         super(message, cause);
@@ -133,20 +137,22 @@ public class ParsingException extends RuntimeException {
     /**
      * Constructs a new {@code ParsingException} with the specified cause and a detail
      * message of {@code (cause==null ? null : cause.toString())} (which typically contains the
-     * class and detail message of {@code cause}). The token value is set to the default of -2.
+     * class and detail message of {@code cause}). The token value is set to the default of {@code -2}.
      *
      * <p>This constructor is useful for exceptions that are little more than wrappers for other
      * throwables.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * catch (IOException e) {
+     * try {
+     *     // parsing operation
+     * } catch (IOException e) {
      *     throw new ParsingException(e);
      * }
      * }</pre>
      *
      * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
-     *              A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.
+     *              (A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.)
      */
     public ParsingException(final Throwable cause) {
         super(cause);
@@ -156,12 +162,12 @@ public class ParsingException extends RuntimeException {
      * Returns the token value associated with this parsing exception.
      * The token can represent various things depending on the context:
      * <ul>
-     *   <li>The position in the input where parsing failed</li>
-     *   <li>The type of token that caused the error</li>
-     *   <li>An error code specific to the parser</li>
-     *   <li>-2 if no token was specified (default value)</li>
+     *   <li>The position in the input where parsing failed.</li>
+     *   <li>The type of token that caused the error.</li>
+     *   <li>An error code specific to the parser.</li>
+     *   <li>{@code -2} if no token was specified (default value).</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
@@ -171,7 +177,7 @@ public class ParsingException extends RuntimeException {
      * }
      * }</pre>
      *
-     * @return the token value where the parsing error occurred, or -2 if not specified
+     * @return the token value where the parsing error occurred, or {@code -2} if not specified
      */
     public int getErrorToken() {
         return errorToken;

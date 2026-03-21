@@ -3,12 +3,10 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BooleanToIntFunctionTest extends TestBase {
 
     @Test
@@ -25,6 +23,27 @@ public class BooleanToIntFunctionTest extends TestBase {
 
         assertEquals(100, function.applyAsInt(true));
         assertEquals(-100, function.applyAsInt(false));
+    }
+
+    @Test
+    public void testAnonymousClass() {
+        BooleanToIntFunction function = new BooleanToIntFunction() {
+            @Override
+            public int applyAsInt(boolean value) {
+                return value ? 42 : 0;
+            }
+        };
+
+        assertEquals(42, function.applyAsInt(true));
+        assertEquals(0, function.applyAsInt(false));
+    }
+
+    @Test
+    public void testMultiplication() {
+        BooleanToIntFunction function = value -> value ? 10 * 10 : 5 * 5;
+
+        assertEquals(100, function.applyAsInt(true));
+        assertEquals(25, function.applyAsInt(false));
     }
 
     @Test
@@ -45,31 +64,10 @@ public class BooleanToIntFunctionTest extends TestBase {
     }
 
     @Test
-    public void testAnonymousClass() {
-        BooleanToIntFunction function = new BooleanToIntFunction() {
-            @Override
-            public int applyAsInt(boolean value) {
-                return value ? 42 : 0;
-            }
-        };
-
-        assertEquals(42, function.applyAsInt(true));
-        assertEquals(0, function.applyAsInt(false));
-    }
-
-    @Test
     public void testConstantReturn() {
         BooleanToIntFunction function = value -> 5;
 
         assertEquals(5, function.applyAsInt(true));
         assertEquals(5, function.applyAsInt(false));
-    }
-
-    @Test
-    public void testMultiplication() {
-        BooleanToIntFunction function = value -> value ? 10 * 10 : 5 * 5;
-
-        assertEquals(100, function.applyAsInt(true));
-        assertEquals(25, function.applyAsInt(false));
     }
 }

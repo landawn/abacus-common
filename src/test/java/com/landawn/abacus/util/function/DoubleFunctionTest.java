@@ -5,12 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class DoubleFunctionTest extends TestBase {
 
     @Test
@@ -48,40 +46,28 @@ public class DoubleFunctionTest extends TestBase {
     }
 
     @Test
-    public void testAndThen() {
+    public void testApply_ReturningComplexObject() {
+        DoubleFunction<java.util.Map<String, Object>> function = value -> {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            map.put("original", value);
+            map.put("doubled", value * 2);
+            map.put("squared", value * value);
+            return map;
+        };
+
+        java.util.Map<String, Object> result = function.apply(5.0);
+        assertEquals(5.0, (Double) result.get("original"), 0.0001);
+        assertEquals(10.0, (Double) result.get("doubled"), 0.0001);
+        assertEquals(25.0, (Double) result.get("squared"), 0.0001);
+    }
+
+    @Test
+    public void testJavaUtilFunctionCompatibility() {
         DoubleFunction<String> function = value -> "value=" + value;
-        java.util.function.Function<String, Integer> after = String::length;
+        java.util.function.DoubleFunction<String> javaFunction = function;
 
-        DoubleFunction<Integer> composed = function.andThen(after);
-        Integer result = composed.apply(5.5);
-
-        assertEquals(9, result); // "value=5.5".length() = 9
-    }
-
-    @Test
-    public void testAndThen_MultipleChains() {
-        DoubleFunction<Double> function = value -> value * 2;
-        java.util.function.Function<Double, String> after1 = d -> "result=" + d;
-        java.util.function.Function<String, Integer> after2 = String::length;
-
-        DoubleFunction<Integer> composed = function.andThen(after1).andThen(after2);
-        Integer result = composed.apply(5.0);
-
-        assertEquals(11, result); // "result=10.0".length() = 11
-    }
-
-    @Test
-    public void testIdentity() {
-        DoubleFunction<Double> identity = DoubleFunction.identity();
-        Double result = identity.apply(5.5);
-        assertEquals(5.5, result, 0.0001);
-    }
-
-    @Test
-    public void testIdentity_WithNegativeValue() {
-        DoubleFunction<Double> identity = DoubleFunction.identity();
-        Double result = identity.apply(-5.5);
-        assertEquals(-5.5, result, 0.0001);
+        String result = javaFunction.apply(5.5);
+        assertEquals("value=5.5", result);
     }
 
     @Test
@@ -115,19 +101,21 @@ public class DoubleFunctionTest extends TestBase {
     }
 
     @Test
-    public void testApply_ReturningComplexObject() {
-        DoubleFunction<java.util.Map<String, Object>> function = value -> {
-            java.util.Map<String, Object> map = new java.util.HashMap<>();
-            map.put("original", value);
-            map.put("doubled", value * 2);
-            map.put("squared", value * value);
-            return map;
-        };
+    public void testFunctionalInterfaceContract() {
+        DoubleFunction<String> lambda = value -> "test";
+        assertNotNull(lambda);
+        assertDoesNotThrow(() -> lambda.apply(1.0));
+    }
 
-        java.util.Map<String, Object> result = function.apply(5.0);
-        assertEquals(5.0, (Double) result.get("original"), 0.0001);
-        assertEquals(10.0, (Double) result.get("doubled"), 0.0001);
-        assertEquals(25.0, (Double) result.get("squared"), 0.0001);
+    @Test
+    public void testAndThen() {
+        DoubleFunction<String> function = value -> "value=" + value;
+        java.util.function.Function<String, Integer> after = String::length;
+
+        DoubleFunction<Integer> composed = function.andThen(after);
+        Integer result = composed.apply(5.5);
+
+        assertEquals(9, result); // "value=5.5".length() = 9
     }
 
     @Test
@@ -140,12 +128,29 @@ public class DoubleFunctionTest extends TestBase {
     }
 
     @Test
-    public void testJavaUtilFunctionCompatibility() {
-        DoubleFunction<String> function = value -> "value=" + value;
-        java.util.function.DoubleFunction<String> javaFunction = function;
+    public void testAndThen_MultipleChains() {
+        DoubleFunction<Double> function = value -> value * 2;
+        java.util.function.Function<Double, String> after1 = d -> "result=" + d;
+        java.util.function.Function<String, Integer> after2 = String::length;
 
-        String result = javaFunction.apply(5.5);
-        assertEquals("value=5.5", result);
+        DoubleFunction<Integer> composed = function.andThen(after1).andThen(after2);
+        Integer result = composed.apply(5.0);
+
+        assertEquals(11, result); // "result=10.0".length() = 11
+    }
+
+    @Test
+    public void testIdentity() {
+        DoubleFunction<Double> identity = DoubleFunction.identity();
+        Double result = identity.apply(5.5);
+        assertEquals(5.5, result, 0.0001);
+    }
+
+    @Test
+    public void testIdentity_WithNegativeValue() {
+        DoubleFunction<Double> identity = DoubleFunction.identity();
+        Double result = identity.apply(-5.5);
+        assertEquals(-5.5, result, 0.0001);
     }
 
     @Test
@@ -153,12 +158,5 @@ public class DoubleFunctionTest extends TestBase {
         DoubleFunction<Double> box1 = DoubleFunction.BOX;
         DoubleFunction<Double> box2 = DoubleFunction.BOX;
         assertSame(box1, box2);
-    }
-
-    @Test
-    public void testFunctionalInterfaceContract() {
-        DoubleFunction<String> lambda = value -> "test";
-        assertNotNull(lambda);
-        assertDoesNotThrow(() -> lambda.apply(1.0));
     }
 }

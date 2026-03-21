@@ -4,13 +4,60 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class AsciiTest extends TestBase {
+
+    @Test
+    public void testAsciiRangeValidation() {
+        assertTrue(Ascii.NUL >= Ascii.MIN && Ascii.NUL <= Ascii.MAX);
+        assertTrue(Ascii.SOH >= Ascii.MIN && Ascii.SOH <= Ascii.MAX);
+        assertTrue(Ascii.STX >= Ascii.MIN && Ascii.STX <= Ascii.MAX);
+        assertTrue(Ascii.ETX >= Ascii.MIN && Ascii.ETX <= Ascii.MAX);
+        assertTrue(Ascii.EOT >= Ascii.MIN && Ascii.EOT <= Ascii.MAX);
+        assertTrue(Ascii.ENQ >= Ascii.MIN && Ascii.ENQ <= Ascii.MAX);
+        assertTrue(Ascii.ACK >= Ascii.MIN && Ascii.ACK <= Ascii.MAX);
+        assertTrue(Ascii.BEL >= Ascii.MIN && Ascii.BEL <= Ascii.MAX);
+        assertTrue(Ascii.BS >= Ascii.MIN && Ascii.BS <= Ascii.MAX);
+        assertTrue(Ascii.HT >= Ascii.MIN && Ascii.HT <= Ascii.MAX);
+        assertTrue(Ascii.LF >= Ascii.MIN && Ascii.LF <= Ascii.MAX);
+        assertTrue(Ascii.NL >= Ascii.MIN && Ascii.NL <= Ascii.MAX);
+        assertTrue(Ascii.VT >= Ascii.MIN && Ascii.VT <= Ascii.MAX);
+        assertTrue(Ascii.FF >= Ascii.MIN && Ascii.FF <= Ascii.MAX);
+        assertTrue(Ascii.CR >= Ascii.MIN && Ascii.CR <= Ascii.MAX);
+        assertTrue(Ascii.SO >= Ascii.MIN && Ascii.SO <= Ascii.MAX);
+        assertTrue(Ascii.SI >= Ascii.MIN && Ascii.SI <= Ascii.MAX);
+        assertTrue(Ascii.DLE >= Ascii.MIN && Ascii.DLE <= Ascii.MAX);
+        assertTrue(Ascii.DC1 >= Ascii.MIN && Ascii.DC1 <= Ascii.MAX);
+        assertTrue(Ascii.XON >= Ascii.MIN && Ascii.XON <= Ascii.MAX);
+        assertTrue(Ascii.DC2 >= Ascii.MIN && Ascii.DC2 <= Ascii.MAX);
+        assertTrue(Ascii.DC3 >= Ascii.MIN && Ascii.DC3 <= Ascii.MAX);
+        assertTrue(Ascii.XOFF >= Ascii.MIN && Ascii.XOFF <= Ascii.MAX);
+        assertTrue(Ascii.DC4 >= Ascii.MIN && Ascii.DC4 <= Ascii.MAX);
+        assertTrue(Ascii.NAK >= Ascii.MIN && Ascii.NAK <= Ascii.MAX);
+        assertTrue(Ascii.SYN >= Ascii.MIN && Ascii.SYN <= Ascii.MAX);
+        assertTrue(Ascii.ETB >= Ascii.MIN && Ascii.ETB <= Ascii.MAX);
+        assertTrue(Ascii.CAN >= Ascii.MIN && Ascii.CAN <= Ascii.MAX);
+        assertTrue(Ascii.EM >= Ascii.MIN && Ascii.EM <= Ascii.MAX);
+        assertTrue(Ascii.SUB >= Ascii.MIN && Ascii.SUB <= Ascii.MAX);
+        assertTrue(Ascii.ESC >= Ascii.MIN && Ascii.ESC <= Ascii.MAX);
+        assertTrue(Ascii.FS >= Ascii.MIN && Ascii.FS <= Ascii.MAX);
+        assertTrue(Ascii.GS >= Ascii.MIN && Ascii.GS <= Ascii.MAX);
+        assertTrue(Ascii.RS >= Ascii.MIN && Ascii.RS <= Ascii.MAX);
+        assertTrue(Ascii.US >= Ascii.MIN && Ascii.US <= Ascii.MAX);
+        assertTrue(Ascii.SP >= Ascii.MIN && Ascii.SP <= Ascii.MAX);
+        assertTrue(Ascii.SPACE >= Ascii.MIN && Ascii.SPACE <= Ascii.MAX);
+        assertTrue(Ascii.DEL >= Ascii.MIN && Ascii.DEL <= Ascii.MAX);
+    }
+
+    @Test
+    public void testAsciiRange() {
+        for (int i = Ascii.MIN; i <= Ascii.MAX; i++) {
+            Assertions.assertTrue(i >= 0 && i <= 127);
+        }
+    }
 
     @Test
     public void testNullCharacter() {
@@ -228,48 +275,6 @@ public class AsciiTest extends TestBase {
     }
 
     @Test
-    public void testAsciiRangeValidation() {
-        assertTrue(Ascii.NUL >= Ascii.MIN && Ascii.NUL <= Ascii.MAX);
-        assertTrue(Ascii.SOH >= Ascii.MIN && Ascii.SOH <= Ascii.MAX);
-        assertTrue(Ascii.STX >= Ascii.MIN && Ascii.STX <= Ascii.MAX);
-        assertTrue(Ascii.ETX >= Ascii.MIN && Ascii.ETX <= Ascii.MAX);
-        assertTrue(Ascii.EOT >= Ascii.MIN && Ascii.EOT <= Ascii.MAX);
-        assertTrue(Ascii.ENQ >= Ascii.MIN && Ascii.ENQ <= Ascii.MAX);
-        assertTrue(Ascii.ACK >= Ascii.MIN && Ascii.ACK <= Ascii.MAX);
-        assertTrue(Ascii.BEL >= Ascii.MIN && Ascii.BEL <= Ascii.MAX);
-        assertTrue(Ascii.BS >= Ascii.MIN && Ascii.BS <= Ascii.MAX);
-        assertTrue(Ascii.HT >= Ascii.MIN && Ascii.HT <= Ascii.MAX);
-        assertTrue(Ascii.LF >= Ascii.MIN && Ascii.LF <= Ascii.MAX);
-        assertTrue(Ascii.NL >= Ascii.MIN && Ascii.NL <= Ascii.MAX);
-        assertTrue(Ascii.VT >= Ascii.MIN && Ascii.VT <= Ascii.MAX);
-        assertTrue(Ascii.FF >= Ascii.MIN && Ascii.FF <= Ascii.MAX);
-        assertTrue(Ascii.CR >= Ascii.MIN && Ascii.CR <= Ascii.MAX);
-        assertTrue(Ascii.SO >= Ascii.MIN && Ascii.SO <= Ascii.MAX);
-        assertTrue(Ascii.SI >= Ascii.MIN && Ascii.SI <= Ascii.MAX);
-        assertTrue(Ascii.DLE >= Ascii.MIN && Ascii.DLE <= Ascii.MAX);
-        assertTrue(Ascii.DC1 >= Ascii.MIN && Ascii.DC1 <= Ascii.MAX);
-        assertTrue(Ascii.XON >= Ascii.MIN && Ascii.XON <= Ascii.MAX);
-        assertTrue(Ascii.DC2 >= Ascii.MIN && Ascii.DC2 <= Ascii.MAX);
-        assertTrue(Ascii.DC3 >= Ascii.MIN && Ascii.DC3 <= Ascii.MAX);
-        assertTrue(Ascii.XOFF >= Ascii.MIN && Ascii.XOFF <= Ascii.MAX);
-        assertTrue(Ascii.DC4 >= Ascii.MIN && Ascii.DC4 <= Ascii.MAX);
-        assertTrue(Ascii.NAK >= Ascii.MIN && Ascii.NAK <= Ascii.MAX);
-        assertTrue(Ascii.SYN >= Ascii.MIN && Ascii.SYN <= Ascii.MAX);
-        assertTrue(Ascii.ETB >= Ascii.MIN && Ascii.ETB <= Ascii.MAX);
-        assertTrue(Ascii.CAN >= Ascii.MIN && Ascii.CAN <= Ascii.MAX);
-        assertTrue(Ascii.EM >= Ascii.MIN && Ascii.EM <= Ascii.MAX);
-        assertTrue(Ascii.SUB >= Ascii.MIN && Ascii.SUB <= Ascii.MAX);
-        assertTrue(Ascii.ESC >= Ascii.MIN && Ascii.ESC <= Ascii.MAX);
-        assertTrue(Ascii.FS >= Ascii.MIN && Ascii.FS <= Ascii.MAX);
-        assertTrue(Ascii.GS >= Ascii.MIN && Ascii.GS <= Ascii.MAX);
-        assertTrue(Ascii.RS >= Ascii.MIN && Ascii.RS <= Ascii.MAX);
-        assertTrue(Ascii.US >= Ascii.MIN && Ascii.US <= Ascii.MAX);
-        assertTrue(Ascii.SP >= Ascii.MIN && Ascii.SP <= Ascii.MAX);
-        assertTrue(Ascii.SPACE >= Ascii.MIN && Ascii.SPACE <= Ascii.MAX);
-        assertTrue(Ascii.DEL >= Ascii.MIN && Ascii.DEL <= Ascii.MAX);
-    }
-
-    @Test
     public void testControlCharactersSequence() {
         assertEquals(Ascii.NUL + 1, Ascii.SOH);
         assertEquals(Ascii.SOH + 1, Ascii.STX);
@@ -427,13 +432,6 @@ public class AsciiTest extends TestBase {
     public void testMinMaxValues() {
         Assertions.assertEquals(0, Ascii.MIN);
         Assertions.assertEquals(127, Ascii.MAX);
-    }
-
-    @Test
-    public void testAsciiRange() {
-        for (int i = Ascii.MIN; i <= Ascii.MAX; i++) {
-            Assertions.assertTrue(i >= 0 && i <= 127);
-        }
     }
 
 }

@@ -18,14 +18,12 @@ import java.sql.SQLException;
 import java.util.OptionalDouble;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("new-test")
 public class JdkOptionalDoubleTypeTest extends TestBase {
 
     private JdkOptionalDoubleType optionalDoubleType;
@@ -53,14 +51,14 @@ public class JdkOptionalDoubleTypeTest extends TestBase {
     }
 
     @Test
-    public void testStringOf_Empty() {
-        assertNull(optionalDoubleType.stringOf(OptionalDouble.empty()));
-    }
-
-    @Test
     public void testStringOf_Present() {
         OptionalDouble opt = OptionalDouble.of(42.5);
         assertEquals("42.5", optionalDoubleType.stringOf(opt));
+    }
+
+    @Test
+    public void testStringOf_Empty() {
+        assertNull(optionalDoubleType.stringOf(OptionalDouble.empty()));
     }
 
     @Test

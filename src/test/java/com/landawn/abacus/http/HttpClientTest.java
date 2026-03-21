@@ -29,14 +29,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.IOUtil;
 
-@Tag("2025")
 public class HttpClientTest extends TestBase {
 
     private MockWebServer server;
@@ -166,6 +164,12 @@ public class HttpClientTest extends TestBase {
     }
 
     @Test
+    public void testCheckSupportedProtocol_invalidProtocol() {
+        assertThrows(IllegalArgumentException.class, () -> HttpClient.create("ftp://example.com"));
+        assertThrows(IllegalArgumentException.class, () -> HttpClient.create("file:///tmp/test"));
+    }
+
+    @Test
     public void testUrl() {
         HttpClient client = HttpClient.create("https://api.example.com");
         assertEquals("https://api.example.com", client.url());
@@ -220,6 +224,13 @@ public class HttpClientTest extends TestBase {
         Executor executor = Executors.newSingleThreadExecutor();
         HttpClient client = HttpClient.create("https://api.example.com", 16, 5000L, 10000L, settings, counter, executor);
         assertNotNull(client);
+    }
+
+    @Test
+    public void testCreate_withTimeouts() {
+        HttpClient client = HttpClient.create("http://localhost:9999", 5000L, 10000L);
+        assertNotNull(client);
+        assertEquals("http://localhost:9999", client.url());
     }
 
     @Test
@@ -294,6 +305,28 @@ public class HttpClientTest extends TestBase {
     }
 
     @Test
+    public void testInvalidArguments() {
+        assertThrows(IllegalArgumentException.class, () -> HttpClient.create(""));
+        assertThrows(IllegalArgumentException.class, () -> HttpClient.create((String) null, 16, 5000L, 10000L));
+        assertThrows(IllegalArgumentException.class, () -> HttpClient.create("https://api.example.com", -1, 5000L, 10000L));
+        assertThrows(IllegalArgumentException.class, () -> HttpClient.create("https://api.example.com", 16, -1L, 10000L));
+        assertThrows(IllegalArgumentException.class, () -> HttpClient.create("https://api.example.com", 16, 5000L, -1L));
+    }
+
+    @Test
+    public void testCreateCopiesSettingsDefensively() throws IOException {
+        HttpSettings settings = HttpSettings.create().useCaches(false).header("X-Test", "initial");
+        HttpClient client = HttpClient.create(baseUrl, 16, 5000L, 10000L, settings);
+
+        settings.useCaches(true).header("X-Test", "mutated");
+
+        HttpURLConnection connection = client.openConnection(HttpMethod.GET, null, false, String.class);
+        assertFalse(connection.getUseCaches());
+        assertEquals("initial", connection.getRequestProperty("X-Test"));
+        connection.disconnect();
+    }
+
+    @Test
     public void testGet() throws IOException {
         server.enqueue(new MockResponse().setBody("Hello World"));
         HttpClient client = HttpClient.create(baseUrl);
@@ -362,6 +395,55 @@ public class HttpClientTest extends TestBase {
         HttpSettings settings = HttpSettings.create();
         String response = client.get("param=value", settings, String.class);
         assertEquals("test response", response);
+    }
+
+    @Test
+    public void testGetWithQueryParametersMap() throws IOException {
+        server.enqueue(new MockResponse().setBody("Hello World"));
+        HttpClient client = HttpClient.create(baseUrl);
+        Map<String, Object> params = new HashMap<>();
+        params.put("key", "value");
+        String response = client.get(params);
+        assertEquals("Hello World", response);
+    }
+
+    @Test
+    public void testGetHttpResponseRequestUrlContainsQueryParameters() throws IOException {
+        server.enqueue(new MockResponse().setBody("Hello World"));
+        HttpClient client = HttpClient.create(baseUrl);
+
+        HttpResponse response = client.get("param=value", HttpResponse.class);
+
+        assertNotNull(response);
+        assertTrue(response.requestUrl().contains("param=value"));
+    }
+
+    @Test
+    public void testGetWithContentFormat_settings() throws IOException {
+        server.enqueue(new MockResponse().setBody("content"));
+        HttpClient client = HttpClient.create(baseUrl);
+        HttpSettings settings = HttpSettings.create().setContentFormat(com.landawn.abacus.http.ContentFormat.JSON);
+        String result = client.get(settings);
+        assertEquals("content", result);
+    }
+
+    @Test
+    public void testGetWithContentEncodingInSettings() throws IOException {
+        server.enqueue(new MockResponse().setBody("encoded response"));
+        HttpClient client = HttpClient.create(baseUrl);
+        HttpSettings settings = HttpSettings.create().setContentType("text/plain").header("Accept-Encoding", "gzip");
+        String result = client.get(settings);
+        assertEquals("encoded response", result);
+    }
+
+    @Test
+    public void testGetWithSettingsOverridingClientDefaults() throws IOException {
+        server.enqueue(new MockResponse().setBody("override response"));
+        HttpSettings baseSettings = HttpSettings.create().setContentFormat(com.landawn.abacus.http.ContentFormat.JSON);
+        HttpClient client = HttpClient.create(baseUrl, 8, 5000L, 10000L, baseSettings);
+        HttpSettings requestSettings = HttpSettings.create().header("X-Custom", "value");
+        String result = client.get(requestSettings);
+        assertEquals("override response", result);
     }
 
     @Test
@@ -467,6 +549,32 @@ public class HttpClientTest extends TestBase {
     }
 
     @Test
+    public void testPost_File() throws IOException {
+        File tempFile = File.createTempFile("test", ".txt");
+        IOUtil.write("test content", tempFile);
+        server.enqueue(new MockResponse().setBody("OK"));
+        HttpClient client = HttpClient.create(baseUrl);
+        assertEquals("OK", client.post(tempFile, String.class));
+        tempFile.delete();
+    }
+
+    @Test
+    public void testPost_InputStream() throws IOException {
+        java.io.InputStream is = new java.io.ByteArrayInputStream("test content".getBytes());
+        server.enqueue(new MockResponse().setBody("OK"));
+        HttpClient client = HttpClient.create(baseUrl);
+        assertEquals("OK", client.post(is, String.class));
+    }
+
+    @Test
+    public void testPost_Reader() throws IOException {
+        java.io.Reader reader = new java.io.StringReader("test content");
+        server.enqueue(new MockResponse().setBody("OK"));
+        HttpClient client = HttpClient.create(baseUrl);
+        assertEquals("OK", client.post(reader, String.class));
+    }
+
+    @Test
     public void testPut() throws IOException {
         server.enqueue(new MockResponse().setBody("Updated"));
         HttpClient client = HttpClient.create(baseUrl);
@@ -498,6 +606,16 @@ public class HttpClientTest extends TestBase {
         HttpSettings settings = HttpSettings.create();
         String response = client.put("test data", settings, String.class);
         assertEquals("Updated", response);
+    }
+
+    @Test
+    public void testPutWithMap() throws IOException {
+        server.enqueue(new MockResponse().setBody("put response"));
+        HttpClient client = HttpClient.create(baseUrl);
+        java.util.Map<String, String> body = new HashMap<>();
+        body.put("key", "value");
+        String result = client.put(body, String.class);
+        assertEquals("put response", result);
     }
 
     @Test
@@ -595,6 +713,56 @@ public class HttpClientTest extends TestBase {
     }
 
     @Test
+    public void testExecute_404Error() {
+        server.enqueue(new MockResponse().setResponseCode(404).setBody("Not Found"));
+        HttpClient client = HttpClient.create(baseUrl);
+        assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> client.get());
+    }
+
+    @Test
+    public void testExecute_500Error() {
+        server.enqueue(new MockResponse().setResponseCode(500).setBody("Internal Server Error"));
+        HttpClient client = HttpClient.create(baseUrl);
+        assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> client.get());
+    }
+
+    @Test
+    public void testExecuteWithOutputStreamResult() throws IOException {
+        server.enqueue(new MockResponse().setBody("stream response"));
+        HttpClient client = HttpClient.create(baseUrl);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        client.execute(com.landawn.abacus.http.HttpMethod.POST, "test body", null, baos);
+        assertEquals("stream response", baos.toString());
+    }
+
+    @Test
+    public void testExecuteWithWriterResult() throws IOException {
+        server.enqueue(new MockResponse().setBody("writer response"));
+        HttpClient client = HttpClient.create(baseUrl);
+        StringWriter sw = new StringWriter();
+        client.execute(com.landawn.abacus.http.HttpMethod.POST, "test body", null, sw);
+        assertEquals("writer response", sw.toString());
+    }
+
+    @Test
+    public void testExecuteHead() throws IOException {
+        server.enqueue(new MockResponse().setBody(""));
+        HttpClient client = HttpClient.create(baseUrl);
+        // HEAD requests return no body
+        client.execute(com.landawn.abacus.http.HttpMethod.HEAD, null, String.class);
+        assertTrue(true); // no exception expected
+    }
+
+    @Test
+    public void testIsOneWayRequest_viaVoidResultClass() throws IOException {
+        server.enqueue(new MockResponse().setBody(""));
+        HttpClient client = HttpClient.create(baseUrl);
+        // Void.class as result type exercises isOneWayRequest returning true
+        client.get(Void.class);
+        assertTrue(true); // no exception expected
+    }
+
+    @Test
     public void testOpenConnectionWithHttpMethodSettingsDoOutputAndResultClass() throws IOException {
         HttpClient client = HttpClient.create(baseUrl);
         HttpSettings settings = HttpSettings.create();
@@ -611,6 +779,57 @@ public class HttpClientTest extends TestBase {
         assertNotNull(connection);
         String urlStr = connection.getURL().toString();
         assertTrue(urlStr.contains("param=value"));
+    }
+
+    @Test
+    public void testOpenConnection() throws IOException {
+        HttpClient client = HttpClient.create(baseUrl);
+        HttpURLConnection connection = client.openConnection(HttpMethod.GET, null, false, String.class);
+        assertNotNull(connection);
+        assertEquals("GET", connection.getRequestMethod());
+    }
+
+    @Test
+    public void testOpenConnectionRequestSettingsOverrideBaseUseCaches() throws IOException {
+        HttpSettings baseSettings = HttpSettings.create().useCaches(false);
+        HttpClient client = HttpClient.create(baseUrl, 16, 5000L, 10000L, baseSettings);
+        HttpSettings requestSettings = HttpSettings.create().useCaches(true);
+
+        HttpURLConnection connection = client.openConnection(HttpMethod.GET, requestSettings, false, String.class);
+        assertTrue(connection.getUseCaches());
+        connection.disconnect();
+    }
+
+    @Test
+    public void testOpenConnectionWithQueryParameters() throws IOException {
+        HttpClient client = HttpClient.create(baseUrl);
+        HttpURLConnection connection = client.openConnection(HttpMethod.GET, "param=value", null, false, String.class);
+        assertNotNull(connection);
+        String urlStr = connection.getURL().toString();
+        assertTrue(urlStr.contains("param=value"));
+    }
+
+    @Test
+    public void testOpenConnectionDoesNotExhaustConnectionLimit() throws IOException {
+        HttpClient client = HttpClient.create(baseUrl, 1);
+
+        HttpURLConnection firstConnection = client.openConnection(HttpMethod.GET, null, false, String.class);
+        assertNotNull(firstConnection);
+        firstConnection.disconnect();
+
+        HttpURLConnection secondConnection = client.openConnection(HttpMethod.GET, null, false, String.class);
+        assertNotNull(secondConnection);
+        secondConnection.disconnect();
+
+        server.enqueue(new MockResponse().setBody("OK"));
+        assertEquals("OK", client.get());
+    }
+
+    @Test
+    public void testClose() {
+        HttpClient client = HttpClient.create("https://api.example.com");
+        client.close();
+        assertNotNull(client);
     }
 
     @Test
@@ -855,6 +1074,17 @@ public class HttpClientTest extends TestBase {
     }
 
     @Test
+    public void testAsyncPutWithSettingsAndResultClass() throws Exception {
+        server.enqueue(new MockResponse().setBody("Async updated"));
+        HttpClient client = HttpClient.create(baseUrl);
+        HttpSettings settings = HttpSettings.create();
+
+        ContinuableFuture<String> future = client.asyncPut("test data", settings, String.class);
+        String response = future.get();
+        assertEquals("Async updated", response);
+    }
+
+    @Test
     public void testAsyncHead() throws Exception {
         server.enqueue(new MockResponse());
         HttpClient client = HttpClient.create(baseUrl);
@@ -961,151 +1191,6 @@ public class HttpClientTest extends TestBase {
         future.get();
 
         assertEquals("Writer content", writer.toString());
-    }
-
-    @Test
-    public void testClose() {
-        HttpClient client = HttpClient.create("https://api.example.com");
-        client.close();
-        assertNotNull(client);
-    }
-
-    @Test
-    public void testInvalidArguments() {
-        assertThrows(IllegalArgumentException.class, () -> HttpClient.create(""));
-        assertThrows(IllegalArgumentException.class, () -> HttpClient.create((String) null, 16, 5000L, 10000L));
-        assertThrows(IllegalArgumentException.class, () -> HttpClient.create("https://api.example.com", -1, 5000L, 10000L));
-        assertThrows(IllegalArgumentException.class, () -> HttpClient.create("https://api.example.com", 16, -1L, 10000L));
-        assertThrows(IllegalArgumentException.class, () -> HttpClient.create("https://api.example.com", 16, 5000L, -1L));
-    }
-
-    @Test
-    public void testGetWithQueryParametersMap() throws IOException {
-        server.enqueue(new MockResponse().setBody("Hello World"));
-        HttpClient client = HttpClient.create(baseUrl);
-        Map<String, Object> params = new HashMap<>();
-        params.put("key", "value");
-        String response = client.get(params);
-        assertEquals("Hello World", response);
-    }
-
-    @Test
-    public void testGetHttpResponseRequestUrlContainsQueryParameters() throws IOException {
-        server.enqueue(new MockResponse().setBody("Hello World"));
-        HttpClient client = HttpClient.create(baseUrl);
-
-        HttpResponse response = client.get("param=value", HttpResponse.class);
-
-        assertNotNull(response);
-        assertTrue(response.requestUrl().contains("param=value"));
-    }
-
-    @Test
-    public void testOpenConnection() throws IOException {
-        HttpClient client = HttpClient.create(baseUrl);
-        HttpURLConnection connection = client.openConnection(HttpMethod.GET, null, false, String.class);
-        assertNotNull(connection);
-        assertEquals("GET", connection.getRequestMethod());
-    }
-
-    @Test
-    public void testCreateCopiesSettingsDefensively() throws IOException {
-        HttpSettings settings = HttpSettings.create().useCaches(false).header("X-Test", "initial");
-        HttpClient client = HttpClient.create(baseUrl, 16, 5000L, 10000L, settings);
-
-        settings.useCaches(true).header("X-Test", "mutated");
-
-        HttpURLConnection connection = client.openConnection(HttpMethod.GET, null, false, String.class);
-        assertFalse(connection.getUseCaches());
-        assertEquals("initial", connection.getRequestProperty("X-Test"));
-        connection.disconnect();
-    }
-
-    @Test
-    public void testOpenConnectionRequestSettingsOverrideBaseUseCaches() throws IOException {
-        HttpSettings baseSettings = HttpSettings.create().useCaches(false);
-        HttpClient client = HttpClient.create(baseUrl, 16, 5000L, 10000L, baseSettings);
-        HttpSettings requestSettings = HttpSettings.create().useCaches(true);
-
-        HttpURLConnection connection = client.openConnection(HttpMethod.GET, requestSettings, false, String.class);
-        assertTrue(connection.getUseCaches());
-        connection.disconnect();
-    }
-
-    @Test
-    public void testOpenConnectionWithQueryParameters() throws IOException {
-        HttpClient client = HttpClient.create(baseUrl);
-        HttpURLConnection connection = client.openConnection(HttpMethod.GET, "param=value", null, false, String.class);
-        assertNotNull(connection);
-        String urlStr = connection.getURL().toString();
-        assertTrue(urlStr.contains("param=value"));
-    }
-
-    @Test
-    public void testOpenConnectionDoesNotExhaustConnectionLimit() throws IOException {
-        HttpClient client = HttpClient.create(baseUrl, 1);
-
-        HttpURLConnection firstConnection = client.openConnection(HttpMethod.GET, null, false, String.class);
-        assertNotNull(firstConnection);
-        firstConnection.disconnect();
-
-        HttpURLConnection secondConnection = client.openConnection(HttpMethod.GET, null, false, String.class);
-        assertNotNull(secondConnection);
-        secondConnection.disconnect();
-
-        server.enqueue(new MockResponse().setBody("OK"));
-        assertEquals("OK", client.get());
-    }
-
-    @Test
-    public void testAsyncPutWithSettingsAndResultClass() throws Exception {
-        server.enqueue(new MockResponse().setBody("Async updated"));
-        HttpClient client = HttpClient.create(baseUrl);
-        HttpSettings settings = HttpSettings.create();
-
-        ContinuableFuture<String> future = client.asyncPut("test data", settings, String.class);
-        String response = future.get();
-        assertEquals("Async updated", response);
-    }
-
-    @Test
-    public void testPost_File() throws IOException {
-        File tempFile = File.createTempFile("test", ".txt");
-        IOUtil.write("test content", tempFile);
-        server.enqueue(new MockResponse().setBody("OK"));
-        HttpClient client = HttpClient.create(baseUrl);
-        assertEquals("OK", client.post(tempFile, String.class));
-        tempFile.delete();
-    }
-
-    @Test
-    public void testPost_InputStream() throws IOException {
-        java.io.InputStream is = new java.io.ByteArrayInputStream("test content".getBytes());
-        server.enqueue(new MockResponse().setBody("OK"));
-        HttpClient client = HttpClient.create(baseUrl);
-        assertEquals("OK", client.post(is, String.class));
-    }
-
-    @Test
-    public void testPost_Reader() throws IOException {
-        java.io.Reader reader = new java.io.StringReader("test content");
-        server.enqueue(new MockResponse().setBody("OK"));
-        HttpClient client = HttpClient.create(baseUrl);
-        assertEquals("OK", client.post(reader, String.class));
-    }
-
-    @Test
-    public void testExecute_404Error() {
-        server.enqueue(new MockResponse().setResponseCode(404).setBody("Not Found"));
-        HttpClient client = HttpClient.create(baseUrl);
-        assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> client.get());
-    }
-
-    @Test
-    public void testExecute_500Error() {
-        server.enqueue(new MockResponse().setResponseCode(500).setBody("Internal Server Error"));
-        HttpClient client = HttpClient.create(baseUrl);
-        assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> client.get());
     }
 
 }

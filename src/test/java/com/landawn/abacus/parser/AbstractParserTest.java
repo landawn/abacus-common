@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,7 +31,6 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-@Tag("old-test")
 public abstract class AbstractParserTest extends AbstractTest {
 
     static final String NULL_STRING = "null".intern();

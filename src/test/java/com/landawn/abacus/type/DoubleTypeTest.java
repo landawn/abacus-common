@@ -13,14 +13,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("2025")
 public class DoubleTypeTest extends TestBase {
 
     private final DoubleType type = new DoubleType();
@@ -31,13 +29,51 @@ public class DoubleTypeTest extends TestBase {
     }
 
     @Test
-    public void test_name() {
-        assertEquals("Double", type.name());
+    public void test_isPrimitiveWrapper() {
+        assertTrue(type.isPrimitiveWrapper());
     }
 
     @Test
-    public void test_isPrimitiveWrapper() {
-        assertTrue(type.isPrimitiveWrapper());
+    public void test_get_ResultSet_byIndex() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+
+        // Test with null
+        when(rs.getObject(1)).thenReturn(null);
+        assertNull(type.get(rs, 1));
+
+        // Test with Double
+        when(rs.getObject(2)).thenReturn(42.5);
+        assertEquals(42.5, type.get(rs, 2));
+
+        // Test with Number (Float)
+        when(rs.getObject(3)).thenReturn(100.75f);
+        assertEquals(100.75, type.get(rs, 3), 0.001);
+
+        // Test with String
+        when(rs.getObject(4)).thenReturn("50.25");
+        assertEquals(50.25, type.get(rs, 4));
+    }
+
+    @Test
+    public void test_get_ResultSet_byLabel() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+
+        // Test with null
+        when(rs.getObject("nullCol")).thenReturn(null);
+        assertNull(type.get(rs, "nullCol"));
+
+        // Test with Double
+        when(rs.getObject("doubleCol")).thenReturn(75.5);
+        assertEquals(75.5, type.get(rs, "doubleCol"));
+
+        // Test with Number
+        when(rs.getObject("intCol")).thenReturn(999);
+        assertEquals(999.0, type.get(rs, "intCol"));
+    }
+
+    @Test
+    public void test_name() {
+        assertEquals("Double", type.name());
     }
 
     @Test
@@ -89,44 +125,6 @@ public class DoubleTypeTest extends TestBase {
         assertEquals(-99.999, type.valueOf(negChars, 0, 7));
 
         assertNull(type.valueOf((char[]) null, 0, 0));
-    }
-
-    @Test
-    public void test_get_ResultSet_byIndex() throws SQLException {
-        ResultSet rs = mock(ResultSet.class);
-
-        // Test with null
-        when(rs.getObject(1)).thenReturn(null);
-        assertNull(type.get(rs, 1));
-
-        // Test with Double
-        when(rs.getObject(2)).thenReturn(42.5);
-        assertEquals(42.5, type.get(rs, 2));
-
-        // Test with Number (Float)
-        when(rs.getObject(3)).thenReturn(100.75f);
-        assertEquals(100.75, type.get(rs, 3), 0.001);
-
-        // Test with String
-        when(rs.getObject(4)).thenReturn("50.25");
-        assertEquals(50.25, type.get(rs, 4));
-    }
-
-    @Test
-    public void test_get_ResultSet_byLabel() throws SQLException {
-        ResultSet rs = mock(ResultSet.class);
-
-        // Test with null
-        when(rs.getObject("nullCol")).thenReturn(null);
-        assertNull(type.get(rs, "nullCol"));
-
-        // Test with Double
-        when(rs.getObject("doubleCol")).thenReturn(75.5);
-        assertEquals(75.5, type.get(rs, "doubleCol"));
-
-        // Test with Number
-        when(rs.getObject("intCol")).thenReturn(999);
-        assertEquals(999.0, type.get(rs, "intCol"));
     }
 
     @Test

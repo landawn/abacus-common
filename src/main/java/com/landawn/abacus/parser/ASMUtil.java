@@ -28,11 +28,11 @@ import lombok.Data;
  * Utility class for checking ASM (reflectasm) availability in the runtime environment.
  * This class provides functionality to determine if the reflectasm library is available
  * and can be used for optimized reflection operations.
- * 
+ *
  * <p>The class performs a runtime check to verify if reflectasm classes are present
  * and functional by attempting to use MethodAccess and FieldAccess on a test bean.</p>
- * 
- * <p><b>Usage Examples:</b></p>
+ *
+ * <p>Usage Examples:</p>
  * <pre>{@code
  * if (ASMUtil.isASMAvailable()) {
  *     // Use ASM-optimized reflection
@@ -40,7 +40,7 @@ import lombok.Data;
  *     // Fall back to standard reflection
  * }
  * }</pre>
- * 
+ *
  */
 final class ASMUtil {
     private static final Logger logger = LoggerFactory.getLogger(ASMUtil.class);
@@ -89,12 +89,12 @@ final class ASMUtil {
 
     /**
      * Checks if ASM (reflectasm) is available in the runtime environment.
-     * 
+     *
      * <p>This method returns the result of the static initialization check that determines
      * whether the reflectasm library is present and functional. The check is performed
      * once during class loading.</p>
-     * 
-     * <p><b>Usage Examples:</b></p>
+     *
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * if (ASMUtil.isASMAvailable()) {
      *     // Use optimized reflection with ASM
@@ -113,7 +113,7 @@ final class ASMUtil {
 
     /**
      * Private constructor to prevent instantiation of this utility class.
-     * This class is designed as a singleton utility and should not be instantiated.
+     * This class is designed as a utility class and should not be instantiated.
      */
     private ASMUtil() {
         // Singleton.
@@ -123,8 +123,8 @@ final class ASMUtil {
      * Test bean class used internally for verifying ASM functionality.
      * This class is used during the static initialization to test whether
      * reflectasm can successfully access fields and methods.
-     * 
-     * <p>The class contains a private id field and a public name field
+     *
+     * <p>The class contains a private {@code id} field and a public {@code name} field
      * to test different access levels with ASM.</p>
      */
     @Data

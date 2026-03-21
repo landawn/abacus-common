@@ -11,7 +11,6 @@ import java.util.Arrays;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.hash.Funnel;
@@ -19,7 +18,6 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.PrimitiveSink;
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class HashFunctionTest extends TestBase {
 
     private HashFunction hashFunction;
@@ -49,6 +47,42 @@ public class HashFunctionTest extends TestBase {
     }
 
     @Test
+    @DisplayName("Test newHasher produces consistent hashes")
+    public void testNewHasherConsistency() {
+        HashFunction hashFunc = Hashing.murmur3_128();
+
+        HashCode hash1 = hashFunc.newHasher().put("test").hash();
+        HashCode hash2 = hashFunc.newHasher().put("test").hash();
+
+        assertEquals(hash1, hash2);
+    }
+
+    @Test
+    @DisplayName("Test newHasher expected size hint does not affect hash")
+    public void testNewHasherExpectedSizeDoesNotAffectHash() {
+        HashFunction hashFunc = Hashing.murmur3_128();
+        byte[] data = "test data".getBytes(StandardCharsets.UTF_8);
+
+        HashCode hash1 = hashFunc.newHasher().put(data).hash();
+        HashCode hash2 = hashFunc.newHasher(10).put(data).hash();
+        HashCode hash3 = hashFunc.newHasher(1000).put(data).hash();
+
+        assertEquals(hash1, hash2);
+        assertEquals(hash2, hash3);
+    }
+
+    @Test
+    @DisplayName("Test comparing newHasher and convenience methods")
+    public void testNewHasherVsConvenienceMethods() {
+        HashFunction hashFunc = Hashing.murmur3_128();
+
+        HashCode hashViaHasher = hashFunc.newHasher().put(42).hash();
+        HashCode hashDirect = hashFunc.hash(42);
+
+        assertEquals(hashViaHasher, hashDirect);
+    }
+
+    @Test
     @DisplayName("Test newHasher creates instance")
     public void testNewHasher() {
         HashFunction hashFunc = Hashing.murmur3_128();
@@ -69,17 +103,6 @@ public class HashFunctionTest extends TestBase {
         assertNotNull(hasher1);
         assertNotNull(hasher2);
         assertNotSame(hasher1, hasher2);
-    }
-
-    @Test
-    @DisplayName("Test newHasher produces consistent hashes")
-    public void testNewHasherConsistency() {
-        HashFunction hashFunc = Hashing.murmur3_128();
-
-        HashCode hash1 = hashFunc.newHasher().put("test").hash();
-        HashCode hash2 = hashFunc.newHasher().put("test").hash();
-
-        assertEquals(hash1, hash2);
     }
 
     // Test newHasher(int) method
@@ -117,17 +140,164 @@ public class HashFunctionTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test newHasher expected size hint does not affect hash")
-    public void testNewHasherExpectedSizeDoesNotAffectHash() {
-        HashFunction hashFunc = Hashing.murmur3_128();
-        byte[] data = "test data".getBytes(StandardCharsets.UTF_8);
+    public void testNewHasherWithExpectedInputSize() {
+        Hasher hasher1 = hashFunction.newHasher(100);
+        Hasher hasher2 = hashFunction.newHasher(1000);
 
-        HashCode hash1 = hashFunc.newHasher().put(data).hash();
-        HashCode hash2 = hashFunc.newHasher(10).put(data).hash();
-        HashCode hash3 = hashFunc.newHasher(1000).put(data).hash();
+        assertNotNull(hasher1);
+        assertNotNull(hasher2);
+
+        byte[] smallData = "small".getBytes();
+        byte[] largeData = new byte[1000];
+        Arrays.fill(largeData, (byte) 42);
+
+        HashCode hash1 = hasher1.put(smallData).hash();
+        HashCode hash2 = hasher2.put(smallData).hash();
+        assertEquals(hash1, hash2);
+
+        assertThrows(IllegalArgumentException.class, () -> hashFunction.newHasher(-1));
+    }
+
+    @Test
+    @DisplayName("Test hash byte array full range equals whole array")
+    public void testHashByteArrayFullRange() {
+        HashFunction hashFunc = Hashing.murmur3_128();
+        byte[] data = { 10, 20, 30, 40, 50 };
+
+        HashCode hash1 = hashFunc.hash(data);
+        HashCode hash2 = hashFunc.hash(data, 0, data.length);
 
         assertEquals(hash1, hash2);
-        assertEquals(hash2, hash3);
+    }
+
+    @Test
+    @DisplayName("Test hash byte array subset equals separate array")
+    public void testHashByteArraySubset() {
+        HashFunction hashFunc = Hashing.murmur3_128();
+        byte[] fullData = { 1, 2, 3, 4, 5 };
+        byte[] subsetData = { 2, 3, 4 };
+
+        HashCode hashSubset1 = hashFunc.hash(fullData, 1, 3);
+        HashCode hashSubset2 = hashFunc.hash(subsetData);
+
+        assertEquals(hashSubset1, hashSubset2);
+    }
+
+    @Test
+    @DisplayName("Test hash CharSequence different charsets produce different hashes")
+    public void testHashCharSequenceDifferentCharsets() {
+        HashFunction hashFunc = Hashing.murmur3_128();
+        String text = "Test";
+
+        HashCode hashUtf8 = hashFunc.hash(text, StandardCharsets.UTF_8);
+        HashCode hashUTF16 = hashFunc.hash(text, StandardCharsets.UTF_16);
+        HashCode hashISO = hashFunc.hash(text, StandardCharsets.ISO_8859_1);
+
+        assertNotEquals(hashUtf8, hashUTF16);
+        assertEquals(hashUtf8, hashISO);
+    }
+
+    @Test
+    @DisplayName("Test hash with Funnel different objects")
+    public void testHashWithFunnelDifferentObjects() {
+        HashFunction hashFunc = Hashing.murmur3_128();
+
+        Funnel<Person> personFunnel = (person, into) -> {
+            into.putString(person.name, StandardCharsets.UTF_8);
+            into.putInt(person.age);
+        };
+
+        Person person1 = new Person("Alice", 30);
+        Person person2 = new Person("Bob", 30);
+
+        HashCode hash1 = hashFunc.hash(person1, personFunnel);
+        HashCode hash2 = hashFunc.hash(person2, personFunnel);
+
+        assertNotEquals(hash1, hash2);
+    }
+
+    @Test
+    @DisplayName("Test hash function immutability")
+    public void testHashFunctionImmutability() {
+        HashFunction hashFunc = Hashing.murmur3_128();
+
+        HashCode hash1 = hashFunc.hash("test1");
+        HashCode hash2 = hashFunc.hash("test2");
+        HashCode hash3 = hashFunc.hash("test1");
+
+        assertNotEquals(hash1, hash2);
+        assertEquals(hash1, hash3);
+    }
+
+    @Test
+    @DisplayName("Test hash collision resistance")
+    public void testHashCollisionResistance() {
+        HashFunction hashFunc = Hashing.murmur3_128();
+
+        // Hash slightly different inputs
+        HashCode hash1 = hashFunc.hash("test");
+        HashCode hash2 = hashFunc.hash("Test");
+        HashCode hash3 = hashFunc.hash("test ");
+        HashCode hash4 = hashFunc.hash("tset");
+
+        // All should be different
+        assertNotEquals(hash1, hash2);
+        assertNotEquals(hash1, hash3);
+        assertNotEquals(hash1, hash4);
+        assertNotEquals(hash2, hash3);
+        assertNotEquals(hash2, hash4);
+        assertNotEquals(hash3, hash4);
+    }
+
+    @Test
+    @DisplayName("Test hash function avalanche effect")
+    public void testHashFunctionAvalancheEffect() {
+        HashFunction hashFunc = Hashing.murmur3_128();
+
+        // One bit difference in input should cause significant difference in output
+        HashCode hash1 = hashFunc.hash(0b00000000);
+        HashCode hash2 = hashFunc.hash(0b00000001);
+        HashCode hash3 = hashFunc.hash(0b00000010);
+
+        assertNotEquals(hash1, hash2);
+        assertNotEquals(hash2, hash3);
+        assertNotEquals(hash1, hash3);
+    }
+
+    @Test
+    @DisplayName("Test real-world scenario - data integrity check")
+    public void testDataIntegrityCheckScenario() {
+        HashFunction hashFunc = Hashing.sha256();
+
+        byte[] originalData = "Important data".getBytes(StandardCharsets.UTF_8);
+        byte[] modifiedData = "Important Data".getBytes(StandardCharsets.UTF_8);
+
+        HashCode originalHash = hashFunc.hash(originalData);
+        HashCode modifiedHash = hashFunc.hash(modifiedData);
+
+        assertNotEquals(originalHash, modifiedHash);
+    }
+
+    @Test
+    public void testComparisonBetweenHashMethods() {
+        byte[] data = "test data".getBytes();
+
+        HashCode hash1 = hashFunction.hash(data);
+        HashCode hash2 = hashFunction.newHasher().put(data).hash();
+        assertEquals(hash1, hash2);
+
+        HashCode hash3 = hashFunction.hash(42);
+        HashCode hash4 = hashFunction.newHasher().put(42).hash();
+        assertEquals(hash3, hash4);
+
+        CharSequence text = "hello";
+        HashCode hash5 = hashFunction.hash(text);
+        HashCode hash6 = hashFunction.newHasher().put(text).hash();
+        assertEquals(hash5, hash6);
+
+        HashCode hash7 = hashFunction.hash(text, StandardCharsets.UTF_8);
+        HashCode hash8 = hashFunction.newHasher().put(text, StandardCharsets.UTF_8).hash();
+        assertEquals(hash7, hash8);
     }
 
     // Test hash(int) method
@@ -285,31 +455,6 @@ public class HashFunctionTest extends TestBase {
         assertNotNull(hash);
     }
 
-    @Test
-    @DisplayName("Test hash byte array full range equals whole array")
-    public void testHashByteArrayFullRange() {
-        HashFunction hashFunc = Hashing.murmur3_128();
-        byte[] data = { 10, 20, 30, 40, 50 };
-
-        HashCode hash1 = hashFunc.hash(data);
-        HashCode hash2 = hashFunc.hash(data, 0, data.length);
-
-        assertEquals(hash1, hash2);
-    }
-
-    @Test
-    @DisplayName("Test hash byte array subset equals separate array")
-    public void testHashByteArraySubset() {
-        HashFunction hashFunc = Hashing.murmur3_128();
-        byte[] fullData = { 1, 2, 3, 4, 5 };
-        byte[] subsetData = { 2, 3, 4 };
-
-        HashCode hashSubset1 = hashFunc.hash(fullData, 1, 3);
-        HashCode hashSubset2 = hashFunc.hash(subsetData);
-
-        assertEquals(hashSubset1, hashSubset2);
-    }
-
     // Test hash(CharSequence) method
 
     @Test
@@ -366,20 +511,6 @@ public class HashFunctionTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test hash CharSequence different charsets produce different hashes")
-    public void testHashCharSequenceDifferentCharsets() {
-        HashFunction hashFunc = Hashing.murmur3_128();
-        String text = "Test";
-
-        HashCode hashUtf8 = hashFunc.hash(text, StandardCharsets.UTF_8);
-        HashCode hashUTF16 = hashFunc.hash(text, StandardCharsets.UTF_16);
-        HashCode hashISO = hashFunc.hash(text, StandardCharsets.ISO_8859_1);
-
-        assertNotEquals(hashUtf8, hashUTF16);
-        assertEquals(hashUtf8, hashISO);
-    }
-
-    @Test
     @DisplayName("Test hash CharSequence with charset produces deterministic result")
     public void testHashCharSequenceWithCharsetDeterministic() {
         HashFunction hashFunc = Hashing.murmur3_128();
@@ -427,50 +558,48 @@ public class HashFunctionTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test hash with Funnel different objects")
-    public void testHashWithFunnelDifferentObjects() {
+    @DisplayName("Test empty input produces consistent hash")
+    public void testEmptyInputConsistentHash() {
         HashFunction hashFunc = Hashing.murmur3_128();
 
-        Funnel<Person> personFunnel = (person, into) -> {
-            into.putString(person.name, StandardCharsets.UTF_8);
-            into.putInt(person.age);
-        };
+        HashCode hashEmptyBytes = hashFunc.hash(new byte[0]);
+        HashCode hashEmptyString = hashFunc.hash("");
 
-        Person person1 = new Person("Alice", 30);
-        Person person2 = new Person("Bob", 30);
-
-        HashCode hash1 = hashFunc.hash(person1, personFunnel);
-        HashCode hash2 = hashFunc.hash(person2, personFunnel);
-
-        assertNotEquals(hash1, hash2);
-    }
-
-    // Test bits() method
-
-    @Test
-    @DisplayName("Test bits returns correct value")
-    public void testBits() {
-        HashFunction murmur32 = Hashing.murmur3_32();
-        HashFunction murmur128 = Hashing.murmur3_128();
-        HashFunction sha256 = Hashing.sha256();
-
-        assertEquals(32, murmur32.bits());
-        assertEquals(128, murmur128.bits());
-        assertEquals(256, sha256.bits());
+        assertNotNull(hashEmptyBytes);
+        assertNotNull(hashEmptyString);
+        // These might be different because they use different methods
     }
 
     @Test
-    @DisplayName("Test bits consistent across calls")
-    public void testBitsConsistent() {
-        HashFunction hashFunc = Hashing.murmur3_128();
+    @DisplayName("Test hash function with large data")
+    public void testHashFunctionWithLargeData() {
+        HashFunction hashFunc = Hashing.sha256();
 
-        int bits1 = hashFunc.bits();
-        int bits2 = hashFunc.bits();
-        int bits3 = hashFunc.bits();
+        byte[] largeData = new byte[1024 * 1024]; // 1MB
+        for (int i = 0; i < largeData.length; i++) {
+            largeData[i] = (byte) (i % 256);
+        }
 
-        assertEquals(bits1, bits2);
-        assertEquals(bits2, bits3);
-        assertEquals(128, bits1);
+        HashCode hash = hashFunc.hash(largeData);
+
+        assertNotNull(hash);
+        assertEquals(256, hash.bits());
+    }
+
+    @Test
+    @DisplayName("Test real-world scenario - password hashing")
+    public void testPasswordHashingScenario() {
+        HashFunction hashFunc = Hashing.sha256();
+
+        String username = "user@example.com";
+        String password = "secret123";
+        String salt = "random_salt_value";
+
+        byte[] credentials = (username + ":" + password + ":" + salt).getBytes(StandardCharsets.UTF_8);
+        HashCode hash = hashFunc.hash(credentials);
+
+        assertNotNull(hash);
+        assertEquals(256, hash.bits());
     }
 
     // Integration tests
@@ -501,143 +630,6 @@ public class HashFunctionTest extends TestBase {
         // If we get here without exception, thread-safety is maintained
         HashCode hash = hashFunc.hash(data);
         assertNotNull(hash);
-    }
-
-    @Test
-    @DisplayName("Test comparing newHasher and convenience methods")
-    public void testNewHasherVsConvenienceMethods() {
-        HashFunction hashFunc = Hashing.murmur3_128();
-
-        HashCode hashViaHasher = hashFunc.newHasher().put(42).hash();
-        HashCode hashDirect = hashFunc.hash(42);
-
-        assertEquals(hashViaHasher, hashDirect);
-    }
-
-    @Test
-    @DisplayName("Test hash function immutability")
-    public void testHashFunctionImmutability() {
-        HashFunction hashFunc = Hashing.murmur3_128();
-
-        HashCode hash1 = hashFunc.hash("test1");
-        HashCode hash2 = hashFunc.hash("test2");
-        HashCode hash3 = hashFunc.hash("test1");
-
-        assertNotEquals(hash1, hash2);
-        assertEquals(hash1, hash3);
-    }
-
-    @Test
-    @DisplayName("Test hash collision resistance")
-    public void testHashCollisionResistance() {
-        HashFunction hashFunc = Hashing.murmur3_128();
-
-        // Hash slightly different inputs
-        HashCode hash1 = hashFunc.hash("test");
-        HashCode hash2 = hashFunc.hash("Test");
-        HashCode hash3 = hashFunc.hash("test ");
-        HashCode hash4 = hashFunc.hash("tset");
-
-        // All should be different
-        assertNotEquals(hash1, hash2);
-        assertNotEquals(hash1, hash3);
-        assertNotEquals(hash1, hash4);
-        assertNotEquals(hash2, hash3);
-        assertNotEquals(hash2, hash4);
-        assertNotEquals(hash3, hash4);
-    }
-
-    @Test
-    @DisplayName("Test empty input produces consistent hash")
-    public void testEmptyInputConsistentHash() {
-        HashFunction hashFunc = Hashing.murmur3_128();
-
-        HashCode hashEmptyBytes = hashFunc.hash(new byte[0]);
-        HashCode hashEmptyString = hashFunc.hash("");
-
-        assertNotNull(hashEmptyBytes);
-        assertNotNull(hashEmptyString);
-        // These might be different because they use different methods
-    }
-
-    @Test
-    @DisplayName("Test hash function with large data")
-    public void testHashFunctionWithLargeData() {
-        HashFunction hashFunc = Hashing.sha256();
-
-        byte[] largeData = new byte[1024 * 1024]; // 1MB
-        for (int i = 0; i < largeData.length; i++) {
-            largeData[i] = (byte) (i % 256);
-        }
-
-        HashCode hash = hashFunc.hash(largeData);
-
-        assertNotNull(hash);
-        assertEquals(256, hash.bits());
-    }
-
-    @Test
-    @DisplayName("Test hash function avalanche effect")
-    public void testHashFunctionAvalancheEffect() {
-        HashFunction hashFunc = Hashing.murmur3_128();
-
-        // One bit difference in input should cause significant difference in output
-        HashCode hash1 = hashFunc.hash(0b00000000);
-        HashCode hash2 = hashFunc.hash(0b00000001);
-        HashCode hash3 = hashFunc.hash(0b00000010);
-
-        assertNotEquals(hash1, hash2);
-        assertNotEquals(hash2, hash3);
-        assertNotEquals(hash1, hash3);
-    }
-
-    @Test
-    @DisplayName("Test real-world scenario - password hashing")
-    public void testPasswordHashingScenario() {
-        HashFunction hashFunc = Hashing.sha256();
-
-        String username = "user@example.com";
-        String password = "secret123";
-        String salt = "random_salt_value";
-
-        byte[] credentials = (username + ":" + password + ":" + salt).getBytes(StandardCharsets.UTF_8);
-        HashCode hash = hashFunc.hash(credentials);
-
-        assertNotNull(hash);
-        assertEquals(256, hash.bits());
-    }
-
-    @Test
-    @DisplayName("Test real-world scenario - data integrity check")
-    public void testDataIntegrityCheckScenario() {
-        HashFunction hashFunc = Hashing.sha256();
-
-        byte[] originalData = "Important data".getBytes(StandardCharsets.UTF_8);
-        byte[] modifiedData = "Important Data".getBytes(StandardCharsets.UTF_8);
-
-        HashCode originalHash = hashFunc.hash(originalData);
-        HashCode modifiedHash = hashFunc.hash(modifiedData);
-
-        assertNotEquals(originalHash, modifiedHash);
-    }
-
-    @Test
-    public void testNewHasherWithExpectedInputSize() {
-        Hasher hasher1 = hashFunction.newHasher(100);
-        Hasher hasher2 = hashFunction.newHasher(1000);
-
-        assertNotNull(hasher1);
-        assertNotNull(hasher2);
-
-        byte[] smallData = "small".getBytes();
-        byte[] largeData = new byte[1000];
-        Arrays.fill(largeData, (byte) 42);
-
-        HashCode hash1 = hasher1.put(smallData).hash();
-        HashCode hash2 = hasher2.put(smallData).hash();
-        assertEquals(hash1, hash2);
-
-        assertThrows(IllegalArgumentException.class, () -> hashFunction.newHasher(-1));
     }
 
     @Test
@@ -691,26 +683,32 @@ public class HashFunctionTest extends TestBase {
         assertThrows(NullPointerException.class, () -> hashFunction.hash(null, personFunnel));
     }
 
+    // Test bits() method
+
     @Test
-    public void testComparisonBetweenHashMethods() {
-        byte[] data = "test data".getBytes();
+    @DisplayName("Test bits returns correct value")
+    public void testBits() {
+        HashFunction murmur32 = Hashing.murmur3_32();
+        HashFunction murmur128 = Hashing.murmur3_128();
+        HashFunction sha256 = Hashing.sha256();
 
-        HashCode hash1 = hashFunction.hash(data);
-        HashCode hash2 = hashFunction.newHasher().put(data).hash();
-        assertEquals(hash1, hash2);
+        assertEquals(32, murmur32.bits());
+        assertEquals(128, murmur128.bits());
+        assertEquals(256, sha256.bits());
+    }
 
-        HashCode hash3 = hashFunction.hash(42);
-        HashCode hash4 = hashFunction.newHasher().put(42).hash();
-        assertEquals(hash3, hash4);
+    @Test
+    @DisplayName("Test bits consistent across calls")
+    public void testBitsConsistent() {
+        HashFunction hashFunc = Hashing.murmur3_128();
 
-        CharSequence text = "hello";
-        HashCode hash5 = hashFunction.hash(text);
-        HashCode hash6 = hashFunction.newHasher().put(text).hash();
-        assertEquals(hash5, hash6);
+        int bits1 = hashFunc.bits();
+        int bits2 = hashFunc.bits();
+        int bits3 = hashFunc.bits();
 
-        HashCode hash7 = hashFunction.hash(text, StandardCharsets.UTF_8);
-        HashCode hash8 = hashFunction.newHasher().put(text, StandardCharsets.UTF_8).hash();
-        assertEquals(hash7, hash8);
+        assertEquals(bits1, bits2);
+        assertEquals(bits2, bits3);
+        assertEquals(128, bits1);
     }
 
 }

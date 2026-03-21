@@ -6,26 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 
-@Tag("old-test")
 public class LockModeTest extends AbstractTest {
-
-    @Test
-    public void testValueOf() {
-        for (LockMode e : LockMode.values()) {
-            assertEquals(e, LockMode.valueOf(e.intValue()));
-        }
-
-        try {
-            LockMode.valueOf(-1000);
-            fail("should throw IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
-        }
-    }
 
     @Test
     public void testIntValue() {
@@ -44,6 +29,20 @@ public class LockModeTest extends AbstractTest {
         assertEquals(13, LockMode.RUD.intValue());
         assertEquals(14, LockMode.AUD.intValue());
         assertEquals(15, LockMode.RAUD.intValue());
+    }
+
+    @Test
+    public void testBitmaskPattern() {
+        // Test that the int values follow power of 2 pattern for basic locks
+        assertEquals(1, LockMode.R.intValue());
+        assertEquals(2, LockMode.A.intValue());
+        assertEquals(4, LockMode.U.intValue());
+        assertEquals(8, LockMode.D.intValue());
+
+        // Test that combined locks are sums of their components
+        assertEquals(LockMode.R.intValue() + LockMode.U.intValue(), LockMode.RU.intValue());
+        assertEquals(LockMode.U.intValue() + LockMode.D.intValue(), LockMode.UD.intValue());
+        assertEquals(LockMode.R.intValue() + LockMode.A.intValue() + LockMode.U.intValue() + LockMode.D.intValue(), LockMode.RAUD.intValue());
     }
 
     @Test
@@ -66,14 +65,6 @@ public class LockModeTest extends AbstractTest {
     }
 
     @Test
-    public void testValueOf_withInvalidIntValue() {
-        assertThrows(IllegalArgumentException.class, () -> LockMode.valueOf(0));
-        assertThrows(IllegalArgumentException.class, () -> LockMode.valueOf(16));
-        assertThrows(IllegalArgumentException.class, () -> LockMode.valueOf(-1));
-        assertThrows(IllegalArgumentException.class, () -> LockMode.valueOf(100));
-    }
-
-    @Test
     public void testValueOf_withStringName() {
         assertEquals(LockMode.R, LockMode.valueOf("R"));
         assertEquals(LockMode.U, LockMode.valueOf("U"));
@@ -84,13 +75,24 @@ public class LockModeTest extends AbstractTest {
     }
 
     @Test
-    public void testIsXLockOf_singleLock() {
-        assertTrue(LockMode.R.isXLockOf(LockMode.R));
-        assertTrue(LockMode.U.isXLockOf(LockMode.U));
-        assertTrue(LockMode.D.isXLockOf(LockMode.D));
-        assertFalse(LockMode.R.isXLockOf(LockMode.U));
-        assertFalse(LockMode.R.isXLockOf(LockMode.D));
-        assertFalse(LockMode.U.isXLockOf(LockMode.D));
+    public void testValueOf() {
+        for (LockMode e : LockMode.values()) {
+            assertEquals(e, LockMode.valueOf(e.intValue()));
+        }
+
+        try {
+            LockMode.valueOf(-1000);
+            fail("should throw IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+        }
+    }
+
+    @Test
+    public void testValueOf_withInvalidIntValue() {
+        assertThrows(IllegalArgumentException.class, () -> LockMode.valueOf(0));
+        assertThrows(IllegalArgumentException.class, () -> LockMode.valueOf(16));
+        assertThrows(IllegalArgumentException.class, () -> LockMode.valueOf(-1));
+        assertThrows(IllegalArgumentException.class, () -> LockMode.valueOf(100));
     }
 
     @Test
@@ -121,6 +123,16 @@ public class LockModeTest extends AbstractTest {
     }
 
     @Test
+    public void testIsXLockOf_singleLock() {
+        assertTrue(LockMode.R.isXLockOf(LockMode.R));
+        assertTrue(LockMode.U.isXLockOf(LockMode.U));
+        assertTrue(LockMode.D.isXLockOf(LockMode.D));
+        assertFalse(LockMode.R.isXLockOf(LockMode.U));
+        assertFalse(LockMode.R.isXLockOf(LockMode.D));
+        assertFalse(LockMode.U.isXLockOf(LockMode.D));
+    }
+
+    @Test
     public void testValues() {
         LockMode[] values = LockMode.values();
         assertEquals(15, values.length);
@@ -143,20 +155,6 @@ public class LockModeTest extends AbstractTest {
         assertEquals("R", LockMode.R.toString());
         assertEquals("RU", LockMode.RU.toString());
         assertEquals("RAUD", LockMode.RAUD.toString());
-    }
-
-    @Test
-    public void testBitmaskPattern() {
-        // Test that the int values follow power of 2 pattern for basic locks
-        assertEquals(1, LockMode.R.intValue());
-        assertEquals(2, LockMode.A.intValue());
-        assertEquals(4, LockMode.U.intValue());
-        assertEquals(8, LockMode.D.intValue());
-
-        // Test that combined locks are sums of their components
-        assertEquals(LockMode.R.intValue() + LockMode.U.intValue(), LockMode.RU.intValue());
-        assertEquals(LockMode.U.intValue() + LockMode.D.intValue(), LockMode.UD.intValue());
-        assertEquals(LockMode.R.intValue() + LockMode.A.intValue() + LockMode.U.intValue() + LockMode.D.intValue(), LockMode.RAUD.intValue());
     }
 
 }

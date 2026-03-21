@@ -5,13 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Throwables;
 
-@Tag("2025")
 public class BiPredicateTest extends TestBase {
 
     @Test
@@ -40,12 +38,74 @@ public class BiPredicateTest extends TestBase {
     }
 
     @Test
+    public void testComplexCombination() {
+        BiPredicate<Integer, Integer> greaterThan = (a, b) -> a > b;
+        BiPredicate<Integer, Integer> lessThan100 = (a, b) -> a < 100;
+        BiPredicate<Integer, Integer> evenSum = (a, b) -> (a + b) % 2 == 0;
+
+        BiPredicate<Integer, Integer> complex = greaterThan.and(lessThan100).and(evenSum);
+
+        assertTrue(complex.test(50, 10)); // 50 > 10, 50 < 100, (50+10) is even
+        assertFalse(complex.test(50, 11)); // 50 > 11, 50 < 100, but (50+11) is odd
+    }
+
+    @Test
+    public void testAnonymousClass() {
+        BiPredicate<String, String> predicate = new BiPredicate<>() {
+            @Override
+            public boolean test(String s1, String s2) {
+                return s1.length() > s2.length();
+            }
+        };
+
+        assertTrue(predicate.test("hello", "hi"));
+        assertFalse(predicate.test("hi", "hello"));
+    }
+
+    @Test
+    public void testWithDifferentTypes() {
+        BiPredicate<Integer, String> predicate = (i, s) -> i == s.length();
+
+        assertTrue(predicate.test(5, "hello"));
+        assertFalse(predicate.test(5, "hi"));
+    }
+
+    @Test
+    public void testWithNullValues() {
+        BiPredicate<String, String> predicate = (s1, s2) -> s1 == null && s2 == null;
+
+        assertTrue(predicate.test(null, null));
+        assertFalse(predicate.test("test", null));
+        assertFalse(predicate.test(null, "test"));
+    }
+
+    @Test
+    public void testTestWithException() {
+        BiPredicate<String, Integer> predicate = (s, i) -> {
+            throw new RuntimeException("Test exception");
+        };
+
+        assertThrows(RuntimeException.class, () -> predicate.test("test", 5));
+    }
+
+    @Test
     public void testNegate() {
         BiPredicate<String, Integer> predicate = (s, i) -> s.length() == i;
         BiPredicate<String, Integer> negated = predicate.negate();
 
         assertFalse(negated.test("hello", 5));
         assertTrue(negated.test("hello", 3));
+    }
+
+    @Test
+    public void testNegateAfterAnd() {
+        BiPredicate<Integer, Integer> greaterThan = (a, b) -> a > b;
+        BiPredicate<Integer, Integer> lessThan100 = (a, b) -> a < 100;
+
+        BiPredicate<Integer, Integer> combined = greaterThan.and(lessThan100).negate();
+
+        assertFalse(combined.test(50, 10)); // negation of (50 > 10 && 50 < 100)
+        assertTrue(combined.test(5, 10)); // negation of (5 > 10 && 5 < 100)
     }
 
     @Test
@@ -97,38 +157,6 @@ public class BiPredicateTest extends TestBase {
     }
 
     @Test
-    public void testComplexCombination() {
-        BiPredicate<Integer, Integer> greaterThan = (a, b) -> a > b;
-        BiPredicate<Integer, Integer> lessThan100 = (a, b) -> a < 100;
-        BiPredicate<Integer, Integer> evenSum = (a, b) -> (a + b) % 2 == 0;
-
-        BiPredicate<Integer, Integer> complex = greaterThan.and(lessThan100).and(evenSum);
-
-        assertTrue(complex.test(50, 10)); // 50 > 10, 50 < 100, (50+10) is even
-        assertFalse(complex.test(50, 11)); // 50 > 11, 50 < 100, but (50+11) is odd
-    }
-
-    @Test
-    public void testNegateAfterAnd() {
-        BiPredicate<Integer, Integer> greaterThan = (a, b) -> a > b;
-        BiPredicate<Integer, Integer> lessThan100 = (a, b) -> a < 100;
-
-        BiPredicate<Integer, Integer> combined = greaterThan.and(lessThan100).negate();
-
-        assertFalse(combined.test(50, 10)); // negation of (50 > 10 && 50 < 100)
-        assertTrue(combined.test(5, 10)); // negation of (5 > 10 && 5 < 100)
-    }
-
-    @Test
-    public void testTestWithException() {
-        BiPredicate<String, Integer> predicate = (s, i) -> {
-            throw new RuntimeException("Test exception");
-        };
-
-        assertThrows(RuntimeException.class, () -> predicate.test("test", 5));
-    }
-
-    @Test
     public void testToThrowable() {
         BiPredicate<String, Integer> predicate = (s, i) -> s.length() == i;
         Throwables.BiPredicate<String, Integer, ?> throwablePredicate = predicate.toThrowable();
@@ -143,35 +171,5 @@ public class BiPredicateTest extends TestBase {
 
         assertTrue(throwablePredicate.test(42, 42));
         assertFalse(throwablePredicate.test(42, 43));
-    }
-
-    @Test
-    public void testAnonymousClass() {
-        BiPredicate<String, String> predicate = new BiPredicate<>() {
-            @Override
-            public boolean test(String s1, String s2) {
-                return s1.length() > s2.length();
-            }
-        };
-
-        assertTrue(predicate.test("hello", "hi"));
-        assertFalse(predicate.test("hi", "hello"));
-    }
-
-    @Test
-    public void testWithNullValues() {
-        BiPredicate<String, String> predicate = (s1, s2) -> s1 == null && s2 == null;
-
-        assertTrue(predicate.test(null, null));
-        assertFalse(predicate.test("test", null));
-        assertFalse(predicate.test(null, "test"));
-    }
-
-    @Test
-    public void testWithDifferentTypes() {
-        BiPredicate<Integer, String> predicate = (i, s) -> i == s.length();
-
-        assertTrue(predicate.test(5, "hello"));
-        assertFalse(predicate.test(5, "hi"));
     }
 }

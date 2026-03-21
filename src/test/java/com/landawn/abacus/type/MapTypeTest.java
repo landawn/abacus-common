@@ -11,7 +11,6 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -21,7 +20,6 @@ import com.landawn.abacus.util.N;
 
 import lombok.Data;
 
-@Tag("new-test")
 public class MapTypeTest extends TestBase {
 
     private MapType<String, Integer, Map<String, Integer>> mapType;
@@ -31,6 +29,18 @@ public class MapTypeTest extends TestBase {
     public void setUp() {
         mapType = (MapType<String, Integer, Map<String, Integer>>) createType("Map<String, Integer>");
         characterWriter = createCharacterWriter();
+    }
+
+    @Data
+    public static class TestModel {
+
+        public boolean a = true;
+        public Test2 test2 = new Test2();
+
+        @Data
+        static class Test2 {
+            public boolean b = true;
+        }
     }
 
     @Test
@@ -139,18 +149,6 @@ public class MapTypeTest extends TestBase {
 
         assertTrue(N.deepEquals(new String[][] { null, { "123", "345" } }, twoArray2));
 
-    }
-
-    @Data
-    public static class TestModel {
-
-        public boolean a = true;
-        public Test2 test2 = new Test2();
-
-        @Data
-        static class Test2 {
-            public boolean b = true;
-        }
     }
 
     @Test

@@ -16,12 +16,10 @@ import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class JsonDeserConfigTest extends TestBase {
 
     private JsonDeserConfig config;
@@ -48,6 +46,21 @@ public class JsonDeserConfigTest extends TestBase {
 
         config.setIgnoreNullOrEmpty(false);
         Assertions.assertFalse(config.isIgnoreNullOrEmpty());
+    }
+
+    // copy
+    @Test
+    public void testCopy() {
+        config.setIgnoreNullOrEmpty(true);
+        config.setReadNullToEmpty(true);
+        config.setMapInstanceType(java.util.LinkedHashMap.class);
+
+        JsonDeserConfig copy = config.copy();
+        assertNotNull(copy);
+        assertNotSame(config, copy);
+        assertTrue(copy.isIgnoreNullOrEmpty());
+        assertTrue(copy.isReadNullToEmpty());
+        assertEquals(java.util.LinkedHashMap.class, copy.getMapInstanceType());
     }
 
     // isReadNullToEmpty
@@ -209,64 +222,6 @@ public class JsonDeserConfigTest extends TestBase {
         Assertions.assertTrue(str.contains("mapInstanceType="));
     }
 
-    // create
-    @Test
-    public void testJDCCreate() {
-        JsonDeserConfig config = JsonDeserConfig.create();
-        Assertions.assertNotNull(config);
-        Assertions.assertFalse(config.isIgnoreNullOrEmpty());
-        Assertions.assertFalse(config.isReadNullToEmpty());
-    }
-
-    // copy
-    @Test
-    public void testCopy() {
-        config.setIgnoreNullOrEmpty(true);
-        config.setReadNullToEmpty(true);
-        config.setMapInstanceType(java.util.LinkedHashMap.class);
-
-        JsonDeserConfig copy = config.copy();
-        assertNotNull(copy);
-        assertNotSame(config, copy);
-        assertTrue(copy.isIgnoreNullOrEmpty());
-        assertTrue(copy.isReadNullToEmpty());
-        assertEquals(java.util.LinkedHashMap.class, copy.getMapInstanceType());
-    }
-
-    // setIgnoreUnmatchedProperty / isIgnoreUnmatchedProperty
-    @Test
-    public void testIgnoreUnmatchedProperty() {
-        assertTrue(config.isIgnoreUnmatchedProperty());
-
-        config.setIgnoreUnmatchedProperty(false);
-        assertFalse(config.isIgnoreUnmatchedProperty());
-
-        config.setIgnoreUnmatchedProperty(true);
-        assertTrue(config.isIgnoreUnmatchedProperty());
-    }
-
-    // setElementType / getElementType
-    @Test
-    public void testElementType() {
-        Assertions.assertNull(config.getElementType());
-
-        config.setElementType(String.class);
-        assertNotNull(config.getElementType());
-        assertEquals(String.class, config.getElementType().javaType());
-    }
-
-    // setMapKeyType / getMapKeyType and setMapValueType / getMapValueType
-    @Test
-    public void testMapKeyValueType() {
-        Assertions.assertNull(config.getMapKeyType());
-        Assertions.assertNull(config.getMapValueType());
-
-        config.setMapKeyType(String.class);
-        config.setMapValueType(Integer.class);
-        assertEquals(String.class, config.getMapKeyType().javaType());
-        assertEquals(Integer.class, config.getMapValueType().javaType());
-    }
-
     // combined config tests
     @Test
     public void testJDCOf() {
@@ -304,6 +259,49 @@ public class JsonDeserConfigTest extends TestBase {
         Assertions.assertEquals(String.class, config6.getMapKeyType().javaType());
         Assertions.assertEquals(Integer.class, config6.getMapValueType().javaType());
         Assertions.assertTrue(config6.isIgnoreUnmatchedProperty());
+    }
+
+    // create
+    @Test
+    public void testJDCCreate() {
+        JsonDeserConfig config = JsonDeserConfig.create();
+        Assertions.assertNotNull(config);
+        Assertions.assertFalse(config.isIgnoreNullOrEmpty());
+        Assertions.assertFalse(config.isReadNullToEmpty());
+    }
+
+    // setIgnoreUnmatchedProperty / isIgnoreUnmatchedProperty
+    @Test
+    public void testIgnoreUnmatchedProperty() {
+        assertTrue(config.isIgnoreUnmatchedProperty());
+
+        config.setIgnoreUnmatchedProperty(false);
+        assertFalse(config.isIgnoreUnmatchedProperty());
+
+        config.setIgnoreUnmatchedProperty(true);
+        assertTrue(config.isIgnoreUnmatchedProperty());
+    }
+
+    // setElementType / getElementType
+    @Test
+    public void testElementType() {
+        Assertions.assertNull(config.getElementType());
+
+        config.setElementType(String.class);
+        assertNotNull(config.getElementType());
+        assertEquals(String.class, config.getElementType().javaType());
+    }
+
+    // setMapKeyType / getMapKeyType and setMapValueType / getMapValueType
+    @Test
+    public void testMapKeyValueType() {
+        Assertions.assertNull(config.getMapKeyType());
+        Assertions.assertNull(config.getMapValueType());
+
+        config.setMapKeyType(String.class);
+        config.setMapValueType(Integer.class);
+        assertEquals(String.class, config.getMapKeyType().javaType());
+        assertEquals(Integer.class, config.getMapValueType().javaType());
     }
 
 }

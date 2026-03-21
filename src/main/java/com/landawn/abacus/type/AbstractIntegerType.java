@@ -28,16 +28,18 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Abstract base class for integer types in the type system.
- * This class provides common functionality for handling integer values,
+ * The Abstract base class for {@code integer} types in the type system.
+ * <p>
+ * This class provides common functionality for handling {@code integer} values,
  * including conversion, database operations, and serialization.
- * Note that this class uses Number as its generic type to allow for both
- * primitive int and Integer wrapper handling.
+ * Note that this class uses {@code Number} as its generic type to allow for both
+ * primitive {@code int} and {@code Integer} wrapper handling.
+ * </p>
  */
 public abstract class AbstractIntegerType extends NumberType<Number> {
 
     /**
-     * Constructs an AbstractIntegerType with the specified type name.
+     * Constructs an {@code AbstractIntegerType} with the specified type name.
      *
      * @param typeName the name of the integer type (e.g., "Integer", "int")
      */
@@ -46,12 +48,14 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
     }
 
     /**
-     * Converts a Number value to its string representation as an integer.
+     * Converts a {@code Number} value to its string representation as an {@code integer}.
+     * <p>
      * Returns {@code null} if the input is {@code null}, otherwise returns
-     * the string representation of the integer value.
+     * the string representation of the {@code integer} value.
+     * </p>
      *
-     * @param x the Number value to convert
-     * @return the string representation of the integer value, or {@code null} if input is {@code null}
+     * @param x the {@code Number} value to convert
+     * @return the string representation of the {@code integer} value, or {@code null} if input is {@code null}
      */
     @Override
     public String stringOf(final Number x) {
@@ -63,15 +67,17 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
     }
 
     /**
-     * Converts a string to an Integer value.
+     * Converts a string to an {@code Integer} value.
+     * <p>
      * This method handles various string formats:
+     * </p>
      * <ul>
      *   <li>Empty or {@code null} strings return the default value</li>
      *   <li>Strings ending with 'l', 'L', 'f', 'F', 'd', or 'D' have the suffix stripped before parsing</li>
-     *   <li>Valid numeric strings are parsed to integer values</li>
+     *   <li>Valid numeric strings are parsed to {@code integer} values</li>
      * </ul>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * Type<Integer> type = TypeFactory.getType(Integer.class);
      * Integer value1 = type.valueOf("42");     // returns 42
@@ -81,8 +87,8 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      * }</pre>
      *
      * @param str the string to convert
-     * @return the Integer value
-     * @throws NumberFormatException if the string cannot be parsed as an integer
+     * @return the {@code Integer} value
+     * @throws NumberFormatException if the string cannot be parsed as an {@code integer}
      */
     @Override
     public Integer valueOf(final String str) {
@@ -106,10 +112,12 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
     }
 
     /**
-     * Converts a character array to an Integer value.
+     * Converts a character array to an {@code Integer} value.
+     * <p>
      * Delegates to the {@link #parseInt(char[], int, int)} method for parsing.
+     * </p>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * Type<Integer> type = TypeFactory.getType(Integer.class);
      * char[] buffer = "12345".toCharArray();
@@ -119,7 +127,7 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      * @param cbuf the character array to convert
      * @param offset the starting position in the array
      * @param len the number of characters to read
-     * @return the Integer value, or default value if input is {@code null} or empty
+     * @return the {@code Integer} value, or default value if input is {@code null} or empty
      */
     @Override
     public Integer valueOf(final char[] cbuf, final int offset, final int len) {
@@ -127,10 +135,12 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
     }
 
     /**
-     * Checks if this type represents an integer type.
-     * This method always returns {@code true} for integer types.
+     * Checks if this type represents an {@code integer} type.
+     * <p>
+     * This method always returns {@code true} for {@code integer} types.
+     * </p>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * Type<Integer> type = TypeFactory.getType(Integer.class);
      * if (type.isInteger()) {
@@ -139,7 +149,7 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      * }
      * }</pre>
      *
-     * @return {@code true}, indicating this is an integer type
+     * @return {@code true}, indicating this is an {@code integer} type
      */
     @Override
     public boolean isInteger() {
@@ -147,11 +157,13 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
     }
 
     /**
-     * Retrieves an integer value from a ResultSet at the specified column index.
-     * This method uses rs.getInt() which returns 0 for SQL NULL values.
-     * Subclasses may override this to return {@code null} for SQL NULL values.
+     * Retrieves an {@code integer} value from a {@code ResultSet} at the specified column index.
+     * <p>
+     * This method uses {@code rs.getInt()} which returns {@code 0} for SQL {@code NULL} values.
+     * Subclasses may override this to return {@code null} for SQL {@code NULL} values.
+     * </p>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * // For primitive int types
      * Type<Integer> type = TypeFactory.getType(int.class);
@@ -162,10 +174,10 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      * Integer value = type.get(rs, 1);   // Returns null for SQL NULL (overridden in subclass)
      * }</pre>
      *
-     * @param rs the ResultSet to read from
+     * @param rs the {@code ResultSet} to read from
      * @param columnIndex the column index (1-based)
-     * @return the integer value at the specified column; returns 0 if SQL NULL (may be overridden by subclasses to return null)
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @return the {@code integer} value at the specified column; returns {@code 0} if SQL {@code NULL} (may be overridden by subclasses to return {@code null})
+     * @throws SQLException if a database access error occurs or the {@code columnIndex} is invalid
      */
     @Override
     public Integer get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -173,11 +185,13 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
     }
 
     /**
-     * Retrieves an integer value from a ResultSet using the specified column label.
-     * This method uses rs.getInt() which returns 0 for SQL NULL values.
-     * Subclasses may override this to return {@code null} for SQL NULL values.
+     * Retrieves an {@code integer} value from a {@code ResultSet} using the specified column label.
+     * <p>
+     * This method uses {@code rs.getInt()} which returns {@code 0} for SQL {@code NULL} values.
+     * Subclasses may override this to return {@code null} for SQL {@code NULL} values.
+     * </p>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * // For primitive int types
      * Type<Integer> type = TypeFactory.getType(int.class);
@@ -188,10 +202,10 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      * Integer value = type.get(rs, "count");   // Returns null for SQL NULL (overridden in subclass)
      * }</pre>
      *
-     * @param rs the ResultSet to read from
+     * @param rs the {@code ResultSet} to read from
      * @param columnName the column label
-     * @return the integer value at the specified column; returns 0 if SQL NULL (may be overridden by subclasses to return null)
-     * @throws SQLException if a database access error occurs or the columnName is not found
+     * @return the {@code integer} value at the specified column; returns {@code 0} if SQL {@code NULL} (may be overridden by subclasses to return {@code null})
+     * @throws SQLException if a database access error occurs or the {@code columnName} is not found
      */
     @Override
     public Integer get(final ResultSet rs, final String columnName) throws SQLException {
@@ -199,13 +213,15 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
     }
 
     /**
-     * Sets an integer parameter in a PreparedStatement at the specified position.
-     * If the value is {@code null}, sets the parameter to SQL NULL.
-     * Otherwise, converts the Number to an integer value.
+     * Sets an {@code integer} parameter in a {@code PreparedStatement} at the specified position.
+     * <p>
+     * If the value is {@code null}, sets the parameter to SQL {@code NULL}.
+     * Otherwise, converts the {@code Number} to an {@code integer} value.
+     * </p>
      *
-     * @param stmt the PreparedStatement to set the parameter on
+     * @param stmt the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the parameter index (1-based)
-     * @param x the Number value to set as integer, or {@code null} for SQL NULL
+     * @param x the {@code Number} value to set as {@code integer}, or {@code null} for SQL {@code NULL}
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -218,13 +234,15 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
     }
 
     /**
-     * Sets an integer parameter in a CallableStatement using the specified parameter name.
-     * If the value is {@code null}, sets the parameter to SQL NULL.
-     * Otherwise, converts the Number to an integer value.
+     * Sets an {@code integer} parameter in a {@code CallableStatement} using the specified parameter name.
+     * <p>
+     * If the value is {@code null}, sets the parameter to SQL {@code NULL}.
+     * Otherwise, converts the {@code Number} to an {@code integer} value.
+     * </p>
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the parameter name
-     * @param x the Number value to set as integer, or {@code null} for SQL NULL
+     * @param x the {@code Number} value to set as {@code integer}, or {@code null} for SQL {@code NULL}
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -237,11 +255,13 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
     }
 
     /**
-     * Appends the string representation of an integer value to an Appendable.
+     * Appends the string representation of an {@code integer} value to an {@code Appendable}.
+     * <p>
      * Writes "null" if the value is {@code null}, otherwise writes the numeric value.
+     * </p>
      *
-     * @param appendable the Appendable to write to
-     * @param x the Number value to append as integer
+     * @param appendable the {@code Appendable} to write to
+     * @param x the {@code Number} value to append as {@code integer}
      * @throws IOException if an I/O error occurs
      */
     @Override
@@ -254,12 +274,14 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
     }
 
     /**
-     * Writes an integer value to a CharacterWriter with optional configuration.
+     * Writes an {@code integer} value to a {@code CharacterWriter} with optional configuration.
+     * <p>
      * If the configuration specifies {@code writeNullNumberAsZero} and the value is {@code null},
-     * writes 0 instead of {@code null}.
+     * writes {@code 0} instead of {@code null}.
+     * </p>
      *
-     * @param writer the CharacterWriter to write to
-     * @param x the Number value to write as integer
+     * @param writer the {@code CharacterWriter} to write to
+     * @param x the {@code Number} value to write as {@code integer}
      * @param config the serialization configuration, may be {@code null}
      * @throws IOException if an I/O error occurs
      */

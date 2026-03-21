@@ -23,14 +23,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("2025")
 public class ClobAsciiStreamTypeTest extends TestBase {
 
     private final ClobAsciiStreamType type = new ClobAsciiStreamType();
@@ -40,13 +38,6 @@ public class ClobAsciiStreamTypeTest extends TestBase {
         ResultSet rs = mock(ResultSet.class);
         // Basic get test - actual implementation will vary by type
         assertDoesNotThrow(() -> type.get(rs, "col"));
-    }
-
-    @Test
-    public void test_set_CallableStatement() throws SQLException {
-        CallableStatement stmt = mock(CallableStatement.class);
-        // Basic set test - actual implementation will vary by type
-        assertDoesNotThrow(() -> type.set(stmt, "param", null));
     }
 
     @Test
@@ -90,6 +81,13 @@ public class ClobAsciiStreamTypeTest extends TestBase {
         assertEquals(expectedStream, result);
         verify(rs).getClob("columnName");
         verify(clob).getAsciiStream();
+    }
+
+    @Test
+    public void test_set_CallableStatement() throws SQLException {
+        CallableStatement stmt = mock(CallableStatement.class);
+        // Basic set test - actual implementation will vary by type
+        assertDoesNotThrow(() -> type.set(stmt, "param", null));
     }
 
     @Test

@@ -3,29 +3,11 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class CharTernaryOperatorTest extends TestBase {
-
-    @Test
-    public void testApplyAsChar() {
-        CharTernaryOperator max = (a, b, c) -> (char) Math.max(a, Math.max(b, c));
-
-        assertEquals('z', max.applyAsChar('a', 'z', 'm'));
-        assertEquals('Z', max.applyAsChar('A', 'B', 'Z'));
-    }
-
-    @Test
-    public void testApplyAsCharWithLambda() {
-        CharTernaryOperator min = (a, b, c) -> (char) Math.min(a, Math.min(b, c));
-
-        assertEquals('a', min.applyAsChar('a', 'z', 'm'));
-        assertEquals('A', min.applyAsChar('A', 'B', 'Z'));
-    }
 
     @Test
     public void testApplyAsCharWithAnonymousClass() {
@@ -42,6 +24,22 @@ public class CharTernaryOperatorTest extends TestBase {
 
         assertEquals('m', middle.applyAsChar('a', 'm', 'z'));
         assertEquals('m', middle.applyAsChar('z', 'm', 'a'));
+    }
+
+    @Test
+    public void testApplyAsChar() {
+        CharTernaryOperator max = (a, b, c) -> (char) Math.max(a, Math.max(b, c));
+
+        assertEquals('z', max.applyAsChar('a', 'z', 'm'));
+        assertEquals('Z', max.applyAsChar('A', 'B', 'Z'));
+    }
+
+    @Test
+    public void testApplyAsCharWithLambda() {
+        CharTernaryOperator min = (a, b, c) -> (char) Math.min(a, Math.min(b, c));
+
+        assertEquals('a', min.applyAsChar('a', 'z', 'm'));
+        assertEquals('A', min.applyAsChar('A', 'B', 'Z'));
     }
 
     @Test

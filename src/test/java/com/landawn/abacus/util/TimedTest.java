@@ -7,13 +7,33 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class TimedTest extends TestBase {
+
+    @Test
+    public void testUsageScenarios() {
+        String cachedData = "cached result";
+        long cacheTime = System.currentTimeMillis();
+        Timed<String> cachedResult = Timed.of(cachedData, cacheTime);
+
+        long currentTime = System.currentTimeMillis();
+        boolean cacheValid = (currentTime - cachedResult.timestamp()) < 60000;
+        Assertions.assertTrue(cacheValid || (currentTime - cachedResult.timestamp()) >= 0);
+
+        String event = "User logged in";
+        Timed<String> logEntry = Timed.of(event);
+        Assertions.assertEquals(event, logEntry.value());
+        Assertions.assertTrue(logEntry.timestamp() <= System.currentTimeMillis());
+
+        long historicalTime = System.currentTimeMillis() - 86400000;
+        Double historicalPrice = 99.99;
+        Timed<Double> pricePoint = Timed.of(historicalPrice, historicalTime);
+        Assertions.assertEquals(historicalPrice, pricePoint.value());
+        Assertions.assertEquals(historicalTime, pricePoint.timestamp());
+    }
 
     @Test
     public void testOf_value() {
@@ -36,55 +56,6 @@ public class TimedTest extends TestBase {
         Timed<String> timed = Timed.of(null);
         assertNotNull(timed);
         assertNull(timed.value());
-    }
-
-    @Test
-    public void testTimestamp() {
-        long before = System.currentTimeMillis();
-        Timed<String> timed = Timed.of("test");
-        long after = System.currentTimeMillis();
-        assertTrue(timed.timestamp() >= before && timed.timestamp() <= after);
-    }
-
-    @Test
-    public void testValue() {
-        Timed<Integer> timed = Timed.of(42, 1000L);
-        assertEquals(Integer.valueOf(42), timed.value());
-    }
-
-    @Test
-    public void testEquals_same() {
-        Timed<String> t1 = Timed.of("test", 1000L);
-        Timed<String> t2 = Timed.of("test", 1000L);
-        assertEquals(t1, t2);
-    }
-
-    @Test
-    public void testEquals_differentValue() {
-        Timed<String> t1 = Timed.of("test1", 1000L);
-        Timed<String> t2 = Timed.of("test2", 1000L);
-        assertNotEquals(t1, t2);
-    }
-
-    @Test
-    public void testEquals_differentTimestamp() {
-        Timed<String> t1 = Timed.of("test", 1000L);
-        Timed<String> t2 = Timed.of("test", 2000L);
-        assertNotEquals(t1, t2);
-    }
-
-    @Test
-    public void testHashCode_consistent() {
-        Timed<String> timed = Timed.of("test", 1000L);
-        assertEquals(timed.hashCode(), timed.hashCode());
-    }
-
-    @Test
-    public void testToString() {
-        Timed<String> timed = Timed.of("test", 1000L);
-        String str = timed.toString();
-        assertTrue(str.contains("1000"));
-        assertTrue(str.contains("test"));
     }
 
     @Test
@@ -134,6 +105,43 @@ public class TimedTest extends TestBase {
     }
 
     @Test
+    public void testImmutability() {
+        String value = "original";
+        long time = 1000L;
+        Timed<String> timed = Timed.of(value, time);
+
+        Assertions.assertEquals(value, timed.value());
+        Assertions.assertEquals(time, timed.timestamp());
+
+        StringBuilder mutableValue = new StringBuilder("mutable");
+        Timed<StringBuilder> mutableTimed = Timed.of(mutableValue, 2000L);
+        mutableValue.append(" modified");
+
+        Assertions.assertSame(mutableValue, mutableTimed.value());
+        Assertions.assertEquals("mutable modified", mutableTimed.value().toString());
+    }
+
+    @Test
+    public void testTimestamp() {
+        long before = System.currentTimeMillis();
+        Timed<String> timed = Timed.of("test");
+        long after = System.currentTimeMillis();
+        assertTrue(timed.timestamp() >= before && timed.timestamp() <= after);
+    }
+
+    @Test
+    public void testValue() {
+        Timed<Integer> timed = Timed.of(42, 1000L);
+        assertEquals(Integer.valueOf(42), timed.value());
+    }
+
+    @Test
+    public void testHashCode_consistent() {
+        Timed<String> timed = Timed.of("test", 1000L);
+        assertEquals(timed.hashCode(), timed.hashCode());
+    }
+
+    @Test
     public void testHashCode() {
         Timed<String> timed1 = Timed.of("test", 1000L);
         Timed<String> timed2 = Timed.of("test", 1000L);
@@ -155,6 +163,27 @@ public class TimedTest extends TestBase {
         Timed<String> hashTimed = Timed.of(testValue, testTime);
         int expectedHash = (int) (testTime * 31 + testValue.hashCode());
         Assertions.assertEquals(expectedHash, hashTimed.hashCode());
+    }
+
+    @Test
+    public void testEquals_differentValue() {
+        Timed<String> t1 = Timed.of("test1", 1000L);
+        Timed<String> t2 = Timed.of("test2", 1000L);
+        assertNotEquals(t1, t2);
+    }
+
+    @Test
+    public void testEquals_differentTimestamp() {
+        Timed<String> t1 = Timed.of("test", 1000L);
+        Timed<String> t2 = Timed.of("test", 2000L);
+        assertNotEquals(t1, t2);
+    }
+
+    @Test
+    public void testEquals_same() {
+        Timed<String> t1 = Timed.of("test", 1000L);
+        Timed<String> t2 = Timed.of("test", 1000L);
+        assertEquals(t1, t2);
     }
 
     @Test
@@ -187,42 +216,11 @@ public class TimedTest extends TestBase {
     }
 
     @Test
-    public void testImmutability() {
-        String value = "original";
-        long time = 1000L;
-        Timed<String> timed = Timed.of(value, time);
-
-        Assertions.assertEquals(value, timed.value());
-        Assertions.assertEquals(time, timed.timestamp());
-
-        StringBuilder mutableValue = new StringBuilder("mutable");
-        Timed<StringBuilder> mutableTimed = Timed.of(mutableValue, 2000L);
-        mutableValue.append(" modified");
-
-        Assertions.assertSame(mutableValue, mutableTimed.value());
-        Assertions.assertEquals("mutable modified", mutableTimed.value().toString());
-    }
-
-    @Test
-    public void testUsageScenarios() {
-        String cachedData = "cached result";
-        long cacheTime = System.currentTimeMillis();
-        Timed<String> cachedResult = Timed.of(cachedData, cacheTime);
-
-        long currentTime = System.currentTimeMillis();
-        boolean cacheValid = (currentTime - cachedResult.timestamp()) < 60000;
-        Assertions.assertTrue(cacheValid || (currentTime - cachedResult.timestamp()) >= 0);
-
-        String event = "User logged in";
-        Timed<String> logEntry = Timed.of(event);
-        Assertions.assertEquals(event, logEntry.value());
-        Assertions.assertTrue(logEntry.timestamp() <= System.currentTimeMillis());
-
-        long historicalTime = System.currentTimeMillis() - 86400000;
-        Double historicalPrice = 99.99;
-        Timed<Double> pricePoint = Timed.of(historicalPrice, historicalTime);
-        Assertions.assertEquals(historicalPrice, pricePoint.value());
-        Assertions.assertEquals(historicalTime, pricePoint.timestamp());
+    public void testToString() {
+        Timed<String> timed = Timed.of("test", 1000L);
+        String str = timed.toString();
+        assertTrue(str.contains("1000"));
+        assertTrue(str.contains("test"));
     }
 
     @Test

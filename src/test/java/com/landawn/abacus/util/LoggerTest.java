@@ -1,5 +1,7 @@
 package com.landawn.abacus.util;
 
+import com.landawn.abacus.TestBase;
+
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import org.junit.jupiter.api.Test;
@@ -7,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 
-public class LoggerTest {
+public class LoggerTest extends TestBase {
     private static final Logger logger = LoggerFactory.getLogger(LoggerTest.class);
 
     @Test

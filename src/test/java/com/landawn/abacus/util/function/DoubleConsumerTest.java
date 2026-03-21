@@ -7,12 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class DoubleConsumerTest extends TestBase {
 
     @Test
@@ -54,33 +52,15 @@ public class DoubleConsumerTest extends TestBase {
     }
 
     @Test
-    public void testAndThen() {
-        List<String> results = new ArrayList<>();
-        DoubleConsumer consumer1 = t -> results.add("first:" + t);
-        DoubleConsumer consumer2 = t -> results.add("second:" + t);
+    public void testJavaUtilFunctionCompatibility() {
+        List<Double> results = new ArrayList<>();
+        DoubleConsumer consumer = t -> results.add(t);
+        java.util.function.DoubleConsumer javaConsumer = consumer;
 
-        DoubleConsumer chained = consumer1.andThen(consumer2);
-        chained.accept(5.0);
+        javaConsumer.accept(5.5);
 
-        assertEquals(2, results.size());
-        assertEquals("first:5.0", results.get(0));
-        assertEquals("second:5.0", results.get(1));
-    }
-
-    @Test
-    public void testAndThen_MultipleChains() {
-        List<Integer> results = new ArrayList<>();
-        DoubleConsumer consumer1 = t -> results.add(1);
-        DoubleConsumer consumer2 = t -> results.add(2);
-        DoubleConsumer consumer3 = t -> results.add(3);
-
-        DoubleConsumer chained = consumer1.andThen(consumer2).andThen(consumer3);
-        chained.accept(1.0);
-
-        assertEquals(3, results.size());
-        assertEquals(1, results.get(0));
-        assertEquals(2, results.get(1));
-        assertEquals(3, results.get(2));
+        assertEquals(1, results.size());
+        assertEquals(5.5, results.get(0), 0.0001);
     }
 
     @Test
@@ -125,6 +105,28 @@ public class DoubleConsumerTest extends TestBase {
     }
 
     @Test
+    public void testFunctionalInterfaceContract() {
+        DoubleConsumer lambda = t -> {
+        };
+        assertNotNull(lambda);
+        assertDoesNotThrow(() -> lambda.accept(1.0));
+    }
+
+    @Test
+    public void testAndThen() {
+        List<String> results = new ArrayList<>();
+        DoubleConsumer consumer1 = t -> results.add("first:" + t);
+        DoubleConsumer consumer2 = t -> results.add("second:" + t);
+
+        DoubleConsumer chained = consumer1.andThen(consumer2);
+        chained.accept(5.0);
+
+        assertEquals(2, results.size());
+        assertEquals("first:5.0", results.get(0));
+        assertEquals("second:5.0", results.get(1));
+    }
+
+    @Test
     public void testAndThen_ExecutionOrder() {
         List<String> results = new ArrayList<>();
         DoubleConsumer consumer1 = t -> results.add("A");
@@ -135,18 +137,6 @@ public class DoubleConsumerTest extends TestBase {
 
         assertEquals("A", results.get(0));
         assertEquals("B", results.get(1));
-    }
-
-    @Test
-    public void testJavaUtilFunctionCompatibility() {
-        List<Double> results = new ArrayList<>();
-        DoubleConsumer consumer = t -> results.add(t);
-        java.util.function.DoubleConsumer javaConsumer = consumer;
-
-        javaConsumer.accept(5.5);
-
-        assertEquals(1, results.size());
-        assertEquals(5.5, results.get(0), 0.0001);
     }
 
     @Test
@@ -164,10 +154,18 @@ public class DoubleConsumerTest extends TestBase {
     }
 
     @Test
-    public void testFunctionalInterfaceContract() {
-        DoubleConsumer lambda = t -> {
-        };
-        assertNotNull(lambda);
-        assertDoesNotThrow(() -> lambda.accept(1.0));
+    public void testAndThen_MultipleChains() {
+        List<Integer> results = new ArrayList<>();
+        DoubleConsumer consumer1 = t -> results.add(1);
+        DoubleConsumer consumer2 = t -> results.add(2);
+        DoubleConsumer consumer3 = t -> results.add(3);
+
+        DoubleConsumer chained = consumer1.andThen(consumer2).andThen(consumer3);
+        chained.accept(1.0);
+
+        assertEquals(3, results.size());
+        assertEquals(1, results.get(0));
+        assertEquals(2, results.get(1));
+        assertEquals(3, results.get(2));
     }
 }

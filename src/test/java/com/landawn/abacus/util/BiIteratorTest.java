@@ -33,7 +33,6 @@ import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -42,8 +41,62 @@ import com.landawn.abacus.util.function.IntObjConsumer;
 import com.landawn.abacus.util.stream.EntryStream;
 import com.landawn.abacus.util.stream.Stream;
 
-@Tag("2025")
 public class BiIteratorTest extends TestBase {
+
+    @Test
+    public void testEmpty_forEachRemaining_doesNothing() {
+        BiIterator<String, Integer> iter = BiIterator.empty();
+        AtomicInteger count = new AtomicInteger(0);
+        iter.forEachRemaining((a, b) -> count.incrementAndGet());
+        assertEquals(0, count.get());
+    }
+
+    @Test
+    @DisplayName("Test empty iterator operations chaining")
+    public void testEmptyChaining() {
+        BiIterator<String, Integer> result = BiIterator.<String, Integer> empty().skip(10).limit(5).filter((a, b) -> true);
+
+        assertFalse(result.hasNext());
+        assertEquals(0, result.toList().size());
+    }
+
+    @Test
+    public void testToSet_empty() {
+        BiIterator<String, Integer> iter = BiIterator.empty();
+        Set<Pair<String, Integer>> set = iter.toSet();
+
+        assertTrue(set.isEmpty());
+    }
+
+    @Test
+    public void testToCollection_empty() {
+        BiIterator<String, Integer> iter = BiIterator.empty();
+        ArrayList<Pair<String, Integer>> collection = iter.toCollection(ArrayList::new);
+
+        assertTrue(collection.isEmpty());
+    }
+
+    @Test
+    public void testToImmutableList_empty() {
+        BiIterator<String, Integer> iter = BiIterator.empty();
+        ImmutableList<Pair<String, Integer>> immutableList = iter.toImmutableList();
+
+        assertTrue(immutableList.isEmpty());
+    }
+
+    @Test
+    public void testToImmutableSet_empty() {
+        BiIterator<String, Integer> iter = BiIterator.empty();
+        ImmutableSet<Pair<String, Integer>> immutableSet = iter.toImmutableSet();
+
+        assertTrue(immutableSet.isEmpty());
+    }
+
+    @Test
+    public void testCount_empty() {
+        BiIterator<String, Integer> iter = BiIterator.empty();
+        assertEquals(0, iter.count());
+    }
 
     // =====================================================================
     // empty()
@@ -71,14 +124,6 @@ public class BiIteratorTest extends TestBase {
     }
 
     @Test
-    public void testEmpty_forEachRemaining_doesNothing() {
-        BiIterator<String, Integer> iter = BiIterator.empty();
-        AtomicInteger count = new AtomicInteger(0);
-        iter.forEachRemaining((a, b) -> count.incrementAndGet());
-        assertEquals(0, count.get());
-    }
-
-    @Test
     @DisplayName("Test empty iterator map() returns empty ObjIterator")
     public void testEmptyMap() {
         BiIterator<String, Integer> empty = BiIterator.empty();
@@ -86,15 +131,6 @@ public class BiIteratorTest extends TestBase {
 
         assertFalse(mapped.hasNext());
         assertThrows(NoSuchElementException.class, () -> mapped.next());
-    }
-
-    @Test
-    @DisplayName("Test empty iterator operations chaining")
-    public void testEmptyChaining() {
-        BiIterator<String, Integer> result = BiIterator.<String, Integer> empty().skip(10).limit(5).filter((a, b) -> true);
-
-        assertFalse(result.hasNext());
-        assertEquals(0, result.toList().size());
     }
 
     @Test
@@ -121,6 +157,12 @@ public class BiIteratorTest extends TestBase {
         iter.foreachRemaining((k, v) -> {
             Assertions.fail("Should not be called");
         });
+    }
+
+    @Test
+    public void testRemove_empty() {
+        BiIterator<String, Integer> iter = BiIterator.empty();
+        assertThrows(UnsupportedOperationException.class, () -> iter.remove());
     }
 
     // =====================================================================
@@ -150,21 +192,6 @@ public class BiIteratorTest extends TestBase {
 
         Assertions.assertEquals(Arrays.asList("two", "three"), keys);
         Assertions.assertEquals(Arrays.asList(2, 3), values);
-    }
-
-    @Test
-    public void testOfMap_null() {
-        BiIterator<String, Integer> iter = BiIterator.of((Map<String, Integer>) null);
-        assertNotNull(iter);
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfMap_empty() {
-        Map<String, Integer> map = new HashMap<>();
-        BiIterator<String, Integer> iter = BiIterator.of(map);
-        assertNotNull(iter);
-        assertFalse(iter.hasNext());
     }
 
     @Test
@@ -226,6 +253,141 @@ public class BiIteratorTest extends TestBase {
     }
 
     @Test
+    public void testDeprecatedForEachRemaining() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("a", 1);
+        map.put("b", 2);
+
+        BiIterator<String, Integer> iter = BiIterator.of(map);
+
+        List<Pair<String, Integer>> pairs = new ArrayList<>();
+        Consumer<Pair<String, Integer>> consumer = pairs::add;
+
+        iter.forEachRemaining(consumer);
+
+        Assertions.assertEquals(2, pairs.size());
+        Assertions.assertEquals("a", pairs.get(0).left());
+        Assertions.assertEquals("b", pairs.get(1).left());
+    }
+
+    // =====================================================================
+    // toSet() (inherited from ImmutableIterator)
+    // =====================================================================
+
+    @Test
+    public void testToSet() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("a", 1);
+        map.put("b", 2);
+
+        BiIterator<String, Integer> iter = BiIterator.of(map);
+        Set<Pair<String, Integer>> set = iter.toSet();
+
+        assertEquals(2, set.size());
+        assertTrue(set.contains(Pair.of("a", 1)));
+        assertTrue(set.contains(Pair.of("b", 2)));
+    }
+
+    // =====================================================================
+    // toCollection(Supplier) (inherited from ImmutableIterator)
+    // =====================================================================
+
+    @Test
+    public void testToCollection() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("a", 1);
+        map.put("b", 2);
+        map.put("c", 3);
+
+        BiIterator<String, Integer> iter = BiIterator.of(map);
+        LinkedList<Pair<String, Integer>> collection = iter.toCollection(LinkedList::new);
+
+        assertEquals(3, collection.size());
+        assertEquals(Pair.of("a", 1), collection.getFirst());
+        assertEquals(Pair.of("c", 3), collection.getLast());
+    }
+
+    // =====================================================================
+    // toImmutableList() (inherited from ImmutableIterator)
+    // =====================================================================
+
+    @Test
+    public void testToImmutableList() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("a", 1);
+        map.put("b", 2);
+
+        BiIterator<String, Integer> iter = BiIterator.of(map);
+        ImmutableList<Pair<String, Integer>> immutableList = iter.toImmutableList();
+
+        assertEquals(2, immutableList.size());
+        assertEquals(Pair.of("a", 1), immutableList.get(0));
+        assertEquals(Pair.of("b", 2), immutableList.get(1));
+    }
+
+    // =====================================================================
+    // toImmutableSet() (inherited from ImmutableIterator)
+    // =====================================================================
+
+    @Test
+    public void testToImmutableSet() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("a", 1);
+        map.put("b", 2);
+
+        BiIterator<String, Integer> iter = BiIterator.of(map);
+        ImmutableSet<Pair<String, Integer>> immutableSet = iter.toImmutableSet();
+
+        assertEquals(2, immutableSet.size());
+        assertTrue(immutableSet.contains(Pair.of("a", 1)));
+        assertTrue(immutableSet.contains(Pair.of("b", 2)));
+    }
+
+    // =====================================================================
+    // count() (inherited from ImmutableIterator)
+    // =====================================================================
+
+    @Test
+    public void testCount() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("a", 1);
+        map.put("b", 2);
+        map.put("c", 3);
+
+        BiIterator<String, Integer> iter = BiIterator.of(map);
+        assertEquals(3, iter.count());
+    }
+
+    @Test
+    @DisplayName("Test with large dataset")
+    public void testLargeDataset() {
+        final int size = 10000;
+        Map<Integer, String> largeMap = new LinkedHashMap<>();
+        for (int i = 0; i < size; i++) {
+            largeMap.put(i, "value" + i);
+        }
+
+        long count = BiIterator.of(largeMap).filter((k, v) -> k % 100 == 0).map((k, v) -> k).count();
+
+        assertEquals(100, count);
+    }
+
+    @Test
+    public void testOfMap_null() {
+        BiIterator<String, Integer> iter = BiIterator.of((Map<String, Integer>) null);
+        assertNotNull(iter);
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testOfMap_empty() {
+        Map<String, Integer> map = new HashMap<>();
+        BiIterator<String, Integer> iter = BiIterator.of(map);
+        assertNotNull(iter);
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
     public void testOfMapEntryIterator_null() {
         BiIterator<String, Integer> iter = BiIterator.of((Iterator<Map.Entry<String, Integer>>) null);
         assertNotNull(iter);
@@ -254,6 +416,74 @@ public class BiIteratorTest extends TestBase {
             count++;
         }
         assertEquals(2, count);
+    }
+
+    @Test
+    @DisplayName("Test multiple filters chained")
+    public void testMultipleFilters() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        for (int i = 0; i < 20; i++) {
+            map.put("key" + i, i);
+        }
+
+        BiIterator<String, Integer> iter = BiIterator.of(map).filter((k, v) -> v % 2 == 0).filter((k, v) -> v % 3 == 0);
+
+        List<Pair<String, Integer>> results = iter.toList();
+        assertTrue(results.stream().allMatch(p -> p.right() % 6 == 0));
+    }
+
+    // =====================================================================
+    // remove() (inherited from ImmutableIterator)
+    // =====================================================================
+
+    @Test
+    public void testRemove() {
+        BiIterator<String, Integer> iter = BiIterator.of(Map.of("a", 1));
+        assertThrows(UnsupportedOperationException.class, () -> iter.remove());
+    }
+
+    @Test
+    public void testToImmutableList_isImmutable() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("a", 1);
+
+        BiIterator<String, Integer> iter = BiIterator.of(map);
+        ImmutableList<Pair<String, Integer>> immutableList = iter.toImmutableList();
+
+        assertThrows(UnsupportedOperationException.class, () -> immutableList.add(Pair.of("b", 2)));
+    }
+
+    @Test
+    public void testToImmutableSet_isImmutable() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("a", 1);
+
+        BiIterator<String, Integer> iter = BiIterator.of(map);
+        ImmutableSet<Pair<String, Integer>> immutableSet = iter.toImmutableSet();
+
+        assertThrows(UnsupportedOperationException.class, () -> immutableSet.add(Pair.of("b", 2)));
+    }
+
+    @Test
+    @DisplayName("Test concurrent modification scenarios")
+    public void testConcurrentModification() {
+        Map<String, Integer> map = new HashMap<>();
+        map.put("a", 1);
+        map.put("b", 2);
+        map.put("c", 3);
+
+        BiIterator<String, Integer> iter = BiIterator.of(map);
+
+        iter.next();
+
+        map.put("d", 4);
+
+        try {
+            iter.forEachRemaining((k, v) -> {
+            });
+        } catch (ConcurrentModificationException e) {
+        }
+        assertNotNull(iter);
     }
 
     // =====================================================================
@@ -322,37 +552,6 @@ public class BiIteratorTest extends TestBase {
         assertTrue(iter.hasNext());
     }
 
-    @Test
-    @DisplayName("Test generate with stateful output consumer")
-    public void testGenerateStateful() {
-        MutableInt counter = MutableInt.of(10);
-        BiIterator<Integer, Integer> fib = BiIterator.generate(() -> counter.getAndDecrement() > 0, pair -> {
-            if (pair.left() == null || pair.right() == null) {
-                pair.set(0, 1);
-            } else {
-                int next = pair.left() + pair.right();
-                pair.set(pair.right(), next);
-            }
-        });
-
-        List<Pair<Integer, Integer>> fibPairs = fib.toList();
-        assertEquals(10, fibPairs.size());
-        assertEquals(Pair.of(0, 1), fibPairs.get(0));
-        assertEquals(Pair.of(1, 1), fibPairs.get(1));
-        assertEquals(Pair.of(1, 2), fibPairs.get(2));
-        assertEquals(Pair.of(2, 3), fibPairs.get(3));
-    }
-
-    @Test
-    @DisplayName("Test generate with exception in output consumer")
-    public void testGenerateWithException() {
-        BiIterator<String, String> iter = BiIterator.generate(() -> true, pair -> {
-            throw new RuntimeException("Test exception");
-        });
-
-        assertThrows(RuntimeException.class, () -> iter.next());
-    }
-
     // =====================================================================
     // generate(BooleanSupplier, Consumer)
     // =====================================================================
@@ -378,14 +577,6 @@ public class BiIteratorTest extends TestBase {
         Assertions.assertEquals("0", pairs.get(0).right());
         Assertions.assertEquals(Integer.valueOf(2), pairs.get(2).left());
         Assertions.assertEquals("2", pairs.get(2).right());
-    }
-
-    @Test
-    public void testGenerateWithHasNextAndOutput_nullChecks() {
-        assertThrows(IllegalArgumentException.class, () -> BiIterator.generate(null, pair -> {
-        }));
-
-        assertThrows(IllegalArgumentException.class, () -> BiIterator.generate(() -> true, null));
     }
 
     @Test
@@ -428,42 +619,6 @@ public class BiIteratorTest extends TestBase {
         Assertions.assertTrue(mapped.hasNext());
         Assertions.assertEquals("1-1", mapped.next());
         Assertions.assertFalse(mapped.hasNext());
-    }
-
-    @Test
-    @DisplayName("Test generate with finite generator")
-    public void testGenerateFinite() {
-        MutableInt counter = MutableInt.of(0);
-
-        BiIterator<Integer, Integer> iter = BiIterator.generate(() -> counter.value() < 3, pair -> {
-            int val = counter.getAndIncrement();
-            pair.set(val, val * 2);
-        });
-
-        assertTrue(iter.hasNext());
-        assertEquals(Pair.of(0, 0), iter.next());
-
-        assertTrue(iter.hasNext());
-        assertEquals(Pair.of(1, 2), iter.next());
-
-        assertTrue(iter.hasNext());
-        assertEquals(Pair.of(2, 4), iter.next());
-
-        assertFalse(iter.hasNext());
-        assertThrows(NoSuchElementException.class, () -> iter.next());
-    }
-
-    @Test
-    public void testGenerateEdgeCases() {
-        Consumer<Pair<Integer, String>> output = pair -> {
-            pair.set(1, "first");
-            pair.set(2, "second");
-        };
-
-        BiIterator<Integer, String> iter = BiIterator.generate(() -> true, output).limit(1);
-        Pair<Integer, String> result = iter.next();
-        Assertions.assertEquals(Integer.valueOf(2), result.left());
-        Assertions.assertEquals("second", result.right());
     }
 
     // =====================================================================
@@ -524,11 +679,111 @@ public class BiIteratorTest extends TestBase {
     }
 
     @Test
+    public void testCount_afterPartialConsumption() {
+        BiIterator<Integer, Integer> iter = BiIterator.generate(0, 5, (i, pair) -> pair.set(i, i));
+        iter.next();
+        iter.next();
+        assertEquals(3, iter.count());
+    }
+
+    @Test
+    public void testCount_exhaustsIterator() {
+        BiIterator<Integer, Integer> iter = BiIterator.generate(0, 3, (i, pair) -> pair.set(i, i));
+        iter.count();
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    @DisplayName("Test generate with stateful output consumer")
+    public void testGenerateStateful() {
+        MutableInt counter = MutableInt.of(10);
+        BiIterator<Integer, Integer> fib = BiIterator.generate(() -> counter.getAndDecrement() > 0, pair -> {
+            if (pair.left() == null || pair.right() == null) {
+                pair.set(0, 1);
+            } else {
+                int next = pair.left() + pair.right();
+                pair.set(pair.right(), next);
+            }
+        });
+
+        List<Pair<Integer, Integer>> fibPairs = fib.toList();
+        assertEquals(10, fibPairs.size());
+        assertEquals(Pair.of(0, 1), fibPairs.get(0));
+        assertEquals(Pair.of(1, 1), fibPairs.get(1));
+        assertEquals(Pair.of(1, 2), fibPairs.get(2));
+        assertEquals(Pair.of(2, 3), fibPairs.get(3));
+    }
+
+    @Test
+    public void testGenerateEdgeCases() {
+        Consumer<Pair<Integer, String>> output = pair -> {
+            pair.set(1, "first");
+            pair.set(2, "second");
+        };
+
+        BiIterator<Integer, String> iter = BiIterator.generate(() -> true, output).limit(1);
+        Pair<Integer, String> result = iter.next();
+        Assertions.assertEquals(Integer.valueOf(2), result.left());
+        Assertions.assertEquals("second", result.right());
+    }
+
+    @Test
     public void testGenerateWithIndices_emptyRange() {
         BiIterator<Integer, Integer> iter = BiIterator.generate(5, 5, (i, pair) -> {
             pair.set(i, i);
         });
         assertFalse(iter.hasNext());
+    }
+
+    @Test
+    @DisplayName("Test generate with index at boundaries")
+    public void testGenerateIndexBoundaries() {
+        BiIterator<Long, Long> iter = BiIterator.generate(Integer.MAX_VALUE - 5, Integer.MAX_VALUE - 1, (index, pair) -> pair.set((long) index, (long) index));
+
+        List<Pair<Long, Long>> results = iter.toList();
+        assertEquals(4, results.size());
+        assertEquals(Integer.MAX_VALUE - 5, results.get(0).left());
+    }
+
+    @Test
+    @DisplayName("Test generate with exception in output consumer")
+    public void testGenerateWithException() {
+        BiIterator<String, String> iter = BiIterator.generate(() -> true, pair -> {
+            throw new RuntimeException("Test exception");
+        });
+
+        assertThrows(RuntimeException.class, () -> iter.next());
+    }
+
+    @Test
+    public void testGenerateWithHasNextAndOutput_nullChecks() {
+        assertThrows(IllegalArgumentException.class, () -> BiIterator.generate(null, pair -> {
+        }));
+
+        assertThrows(IllegalArgumentException.class, () -> BiIterator.generate(() -> true, null));
+    }
+
+    @Test
+    @DisplayName("Test generate with finite generator")
+    public void testGenerateFinite() {
+        MutableInt counter = MutableInt.of(0);
+
+        BiIterator<Integer, Integer> iter = BiIterator.generate(() -> counter.value() < 3, pair -> {
+            int val = counter.getAndIncrement();
+            pair.set(val, val * 2);
+        });
+
+        assertTrue(iter.hasNext());
+        assertEquals(Pair.of(0, 0), iter.next());
+
+        assertTrue(iter.hasNext());
+        assertEquals(Pair.of(1, 2), iter.next());
+
+        assertTrue(iter.hasNext());
+        assertEquals(Pair.of(2, 4), iter.next());
+
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, () -> iter.next());
     }
 
     @Test
@@ -540,16 +795,6 @@ public class BiIteratorTest extends TestBase {
     @Test
     public void testGenerateWithIndices_nullOutput() {
         assertThrows(IllegalArgumentException.class, () -> BiIterator.generate(0, 5, null));
-    }
-
-    @Test
-    @DisplayName("Test generate with index at boundaries")
-    public void testGenerateIndexBoundaries() {
-        BiIterator<Long, Long> iter = BiIterator.generate(Integer.MAX_VALUE - 5, Integer.MAX_VALUE - 1, (index, pair) -> pair.set((long) index, (long) index));
-
-        List<Pair<Long, Long>> results = iter.toList();
-        assertEquals(4, results.size());
-        assertEquals(Integer.MAX_VALUE - 5, results.get(0).left());
     }
 
     // =====================================================================
@@ -579,6 +824,106 @@ public class BiIteratorTest extends TestBase {
         Assertions.assertEquals(Pair.of("a", 1), iter.next());
         Assertions.assertEquals(Pair.of("b", 2), iter.next());
         Assertions.assertFalse(iter.hasNext());
+    }
+
+    // =====================================================================
+    // zip(A[], B[], A, B)
+    // =====================================================================
+
+    @Test
+    public void testZipArraysWithDefaults() {
+        String[] arr1 = { "a", "b" };
+        Integer[] arr2 = { 1, 2, 3, 4 };
+
+        BiIterator<String, Integer> iter = BiIterator.zip(arr1, arr2, "default", -1);
+
+        Assertions.assertEquals(Pair.of("a", 1), iter.next());
+        Assertions.assertEquals(Pair.of("b", 2), iter.next());
+        Assertions.assertEquals(Pair.of("default", 3), iter.next());
+        Assertions.assertEquals(Pair.of("default", 4), iter.next());
+        Assertions.assertFalse(iter.hasNext());
+    }
+
+    // =====================================================================
+    // zip(Iterable, Iterable)
+    // =====================================================================
+
+    @Test
+    public void testZipIterables() {
+        List<String> list1 = Arrays.asList("x", "y", "z");
+        Set<Integer> set2 = new LinkedHashSet<>(Arrays.asList(10, 20, 30));
+
+        BiIterator<String, Integer> iter = BiIterator.zip(list1, set2);
+
+        List<Pair<String, Integer>> pairs = new ArrayList<>();
+        while (iter.hasNext()) {
+            pairs.add(iter.next());
+        }
+
+        Assertions.assertEquals(3, pairs.size());
+        Assertions.assertEquals("x", pairs.get(0).left());
+        Assertions.assertEquals(Integer.valueOf(10), pairs.get(0).right());
+    }
+
+    // =====================================================================
+    // zip(Iterator, Iterator)
+    // =====================================================================
+
+    @Test
+    public void testZipIterators() {
+        Iterator<String> iter1 = Arrays.asList("one", "two", "three").iterator();
+        Iterator<Integer> iter2 = Arrays.asList(1, 2, 3, 4).iterator();
+
+        BiIterator<String, Integer> biIter = BiIterator.zip(iter1, iter2);
+
+        ObjIterator<String> mapped = biIter.map((s, i) -> s + ":" + i);
+        Assertions.assertEquals("one:1", mapped.next());
+        Assertions.assertEquals("two:2", mapped.next());
+        Assertions.assertEquals("three:3", mapped.next());
+        Assertions.assertFalse(mapped.hasNext());
+    }
+
+    @Test
+    public void testZipIterators_differentLengths() {
+        Iterator<String> names = List.of("Alice", "Bob", "Charlie").iterator();
+        Iterator<Integer> ages = List.of(25, 30).iterator();
+
+        BiIterator<String, Integer> iter = BiIterator.zip(names, ages);
+
+        int count = 0;
+        while (iter.hasNext()) {
+            iter.next();
+            count++;
+        }
+        assertEquals(2, count);
+    }
+
+    @Test
+    public void testToSet_duplicates() {
+        // When zipping with defaults, duplicates can occur
+        BiIterator<String, Integer> iter = BiIterator.zip(new String[] { "a", "a" }, new Integer[] { 1, 1 });
+        Set<Pair<String, Integer>> set = iter.toSet();
+
+        assertEquals(1, set.size());
+        assertTrue(set.contains(Pair.of("a", 1)));
+    }
+
+    @Test
+    @DisplayName("Test operations after iterator exhaustion")
+    public void testOperationsAfterExhaustion() {
+        String[] arr1 = { "a" };
+        Integer[] arr2 = { 1 };
+
+        BiIterator<String, Integer> iter = BiIterator.zip(arr1, arr2);
+
+        iter.next();
+
+        assertFalse(iter.hasNext());
+        assertEquals(0, iter.toList().size());
+
+        AtomicInteger count = new AtomicInteger(0);
+        iter.forEachRemaining((a, b) -> count.incrementAndGet());
+        assertEquals(0, count.get());
     }
 
     @Test
@@ -624,24 +969,6 @@ public class BiIteratorTest extends TestBase {
         Assertions.assertFalse(iter.hasNext());
     }
 
-    // =====================================================================
-    // zip(A[], B[], A, B)
-    // =====================================================================
-
-    @Test
-    public void testZipArraysWithDefaults() {
-        String[] arr1 = { "a", "b" };
-        Integer[] arr2 = { 1, 2, 3, 4 };
-
-        BiIterator<String, Integer> iter = BiIterator.zip(arr1, arr2, "default", -1);
-
-        Assertions.assertEquals(Pair.of("a", 1), iter.next());
-        Assertions.assertEquals(Pair.of("b", 2), iter.next());
-        Assertions.assertEquals(Pair.of("default", 3), iter.next());
-        Assertions.assertEquals(Pair.of("default", 4), iter.next());
-        Assertions.assertFalse(iter.hasNext());
-    }
-
     @Test
     @DisplayName("Test zip with one empty array and defaults")
     public void testZipOneEmptyWithDefaults() {
@@ -653,27 +980,6 @@ public class BiIteratorTest extends TestBase {
         List<Pair<String, Integer>> results = iter.toList();
         assertEquals(3, results.size());
         assertTrue(results.stream().allMatch(p -> p.right().equals(99)));
-    }
-
-    // =====================================================================
-    // zip(Iterable, Iterable)
-    // =====================================================================
-
-    @Test
-    public void testZipIterables() {
-        List<String> list1 = Arrays.asList("x", "y", "z");
-        Set<Integer> set2 = new LinkedHashSet<>(Arrays.asList(10, 20, 30));
-
-        BiIterator<String, Integer> iter = BiIterator.zip(list1, set2);
-
-        List<Pair<String, Integer>> pairs = new ArrayList<>();
-        while (iter.hasNext()) {
-            pairs.add(iter.next());
-        }
-
-        Assertions.assertEquals(3, pairs.size());
-        Assertions.assertEquals("x", pairs.get(0).left());
-        Assertions.assertEquals(Integer.valueOf(10), pairs.get(0).right());
     }
 
     @Test
@@ -726,24 +1032,6 @@ public class BiIteratorTest extends TestBase {
         Assertions.assertEquals(Arrays.asList(1, 2, 3), values);
     }
 
-    // =====================================================================
-    // zip(Iterator, Iterator)
-    // =====================================================================
-
-    @Test
-    public void testZipIterators() {
-        Iterator<String> iter1 = Arrays.asList("one", "two", "three").iterator();
-        Iterator<Integer> iter2 = Arrays.asList(1, 2, 3, 4).iterator();
-
-        BiIterator<String, Integer> biIter = BiIterator.zip(iter1, iter2);
-
-        ObjIterator<String> mapped = biIter.map((s, i) -> s + ":" + i);
-        Assertions.assertEquals("one:1", mapped.next());
-        Assertions.assertEquals("two:2", mapped.next());
-        Assertions.assertEquals("three:3", mapped.next());
-        Assertions.assertFalse(mapped.hasNext());
-    }
-
     @Test
     public void testZipIteratorsNull() {
         BiIterator<String, Integer> iter = BiIterator.zip((Iterator<String>) null, Arrays.asList(1, 2).iterator());
@@ -751,21 +1039,6 @@ public class BiIteratorTest extends TestBase {
 
         iter = BiIterator.zip(Arrays.asList("a").iterator(), (Iterator<Integer>) null);
         Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testZipIterators_differentLengths() {
-        Iterator<String> names = List.of("Alice", "Bob", "Charlie").iterator();
-        Iterator<Integer> ages = List.of(25, 30).iterator();
-
-        BiIterator<String, Integer> iter = BiIterator.zip(names, ages);
-
-        int count = 0;
-        while (iter.hasNext()) {
-            iter.next();
-            count++;
-        }
-        assertEquals(2, count);
     }
 
     // =====================================================================
@@ -791,6 +1064,28 @@ public class BiIteratorTest extends TestBase {
         assertFalse(iter.hasNext());
     }
 
+    @Test
+    @DisplayName("Test iterator exhaustion behavior")
+    public void testIteratorExhaustion() {
+        String[] arr1 = { "a" };
+        Integer[] arr2 = { 1 };
+
+        BiIterator<String, Integer> iter = BiIterator.zip(arr1, arr2);
+
+        assertTrue(iter.hasNext());
+        assertEquals(Pair.of("a", 1), iter.next());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, () -> iter.next());
+    }
+
+    @Test
+    @DisplayName("Test null arguments validation")
+    public void testNullArgumentsValidation() {
+        BiIterator<String, Integer> iter = BiIterator.zip(new String[] { "a" }, new Integer[] { 1 });
+
+        assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
+    }
+
     // =====================================================================
     // unzip(Iterable, BiConsumer)
     // =====================================================================
@@ -809,13 +1104,6 @@ public class BiIteratorTest extends TestBase {
         Assertions.assertEquals(Pair.of(2, "two"), iter.next());
         Assertions.assertEquals(Pair.of(3, "three"), iter.next());
         Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testUnzipIterable_null() {
-        BiIterator<String, Integer> iter = BiIterator.unzip((Iterable<String>) null, (s, pair) -> {
-        });
-        assertFalse(iter.hasNext());
     }
 
     @Test
@@ -870,26 +1158,36 @@ public class BiIteratorTest extends TestBase {
     }
 
     @Test
+    public void testUnzipIterable_null() {
+        BiIterator<String, Integer> iter = BiIterator.unzip((Iterable<String>) null, (s, pair) -> {
+        });
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
     public void testUnzipIterator_null() {
         BiIterator<String, Integer> iter = BiIterator.unzip((Iterator<String>) null, (s, pair) -> {
         });
         assertFalse(iter.hasNext());
     }
 
-    // =====================================================================
-    // remove() (inherited from ImmutableIterator)
-    // =====================================================================
-
     @Test
-    public void testRemove() {
-        BiIterator<String, Integer> iter = BiIterator.of(Map.of("a", 1));
-        assertThrows(UnsupportedOperationException.class, () -> iter.remove());
-    }
+    public void testNextThrowable() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("error", 1);
 
-    @Test
-    public void testRemove_empty() {
-        BiIterator<String, Integer> iter = BiIterator.empty();
-        assertThrows(UnsupportedOperationException.class, () -> iter.remove());
+        BiIterator<String, Integer> iter = BiIterator.of(map);
+
+        try {
+            iter.next((k, v) -> {
+                if ("error".equals(k)) {
+                    throw new Exception("Test exception in next");
+                }
+            });
+            Assertions.fail("Expected exception");
+        } catch (Exception e) {
+            Assertions.assertEquals("Test exception in next", e.getMessage());
+        }
     }
 
     // =====================================================================
@@ -905,24 +1203,6 @@ public class BiIteratorTest extends TestBase {
         iter.forEachRemaining(pair -> collected.add(pair));
 
         assertEquals(2, collected.size());
-    }
-
-    @Test
-    public void testDeprecatedForEachRemaining() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("a", 1);
-        map.put("b", 2);
-
-        BiIterator<String, Integer> iter = BiIterator.of(map);
-
-        List<Pair<String, Integer>> pairs = new ArrayList<>();
-        Consumer<Pair<String, Integer>> consumer = pairs::add;
-
-        iter.forEachRemaining(consumer);
-
-        Assertions.assertEquals(2, pairs.size());
-        Assertions.assertEquals("a", pairs.get(0).left());
-        Assertions.assertEquals("b", pairs.get(1).left());
     }
 
     // =====================================================================
@@ -947,14 +1227,6 @@ public class BiIteratorTest extends TestBase {
     }
 
     @Test
-    public void testForEachRemaining_biConsumer_empty() {
-        BiIterator<String, Integer> iter = BiIterator.empty();
-        AtomicInteger count = new AtomicInteger(0);
-        iter.forEachRemaining((k, v) -> count.incrementAndGet());
-        assertEquals(0, count.get());
-    }
-
-    @Test
     @DisplayName("Test forEachRemaining with BiConsumer")
     public void testForEachRemainingBiConsumer() {
         String[] arr1 = { "x", "y", "z" };
@@ -970,6 +1242,14 @@ public class BiIteratorTest extends TestBase {
         assertEquals(2, remaining.size());
         assertEquals(20, remaining.get("y"));
         assertEquals(30, remaining.get("z"));
+    }
+
+    @Test
+    public void testForEachRemaining_biConsumer_empty() {
+        BiIterator<String, Integer> iter = BiIterator.empty();
+        AtomicInteger count = new AtomicInteger(0);
+        iter.forEachRemaining((k, v) -> count.incrementAndGet());
+        assertEquals(0, count.get());
     }
 
     // =====================================================================
@@ -1029,25 +1309,6 @@ public class BiIteratorTest extends TestBase {
         assertEquals(Arrays.asList("a1", "b2", "c3"), collected);
     }
 
-    @Test
-    public void testNextThrowable() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("error", 1);
-
-        BiIterator<String, Integer> iter = BiIterator.of(map);
-
-        try {
-            iter.next((k, v) -> {
-                if ("error".equals(k)) {
-                    throw new Exception("Test exception in next");
-                }
-            });
-            Assertions.fail("Expected exception");
-        } catch (Exception e) {
-            Assertions.assertEquals("Test exception in next", e.getMessage());
-        }
-    }
-
     // =====================================================================
     // skip(long)
     // =====================================================================
@@ -1065,20 +1326,6 @@ public class BiIteratorTest extends TestBase {
         Assertions.assertEquals(Pair.of("c", 3), iter.next());
         Assertions.assertEquals(Pair.of("d", 4), iter.next());
         Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testSkip_zero() {
-        BiIterator<Integer, Integer> iter = BiIterator.generate(0, 5, (i, pair) -> pair.set(i, i));
-        BiIterator<Integer, Integer> skipped = iter.skip(0);
-
-        assertSame(iter, skipped);
-    }
-
-    @Test
-    public void testSkip_negative() {
-        BiIterator<Integer, Integer> iter = BiIterator.generate(0, 5, (i, pair) -> pair.set(i, i));
-        assertThrows(IllegalArgumentException.class, () -> iter.skip(-1));
     }
 
     @Test
@@ -1119,6 +1366,37 @@ public class BiIteratorTest extends TestBase {
         Assertions.assertFalse(mapped.hasNext());
     }
 
+    @Test
+    @DisplayName("Test skip and limit with exact boundaries")
+    public void testSkipLimitExactBoundaries() {
+        List<String> list = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            list.add("item" + i);
+        }
+
+        BiIterator<String, Integer> iter = BiIterator.unzip(list, (s, pair) -> pair.set(s, Integer.parseInt(s.substring(4))));
+
+        List<Pair<String, Integer>> result = iter.skip(3).limit(7).toList();
+
+        assertEquals(7, result.size());
+        assertEquals("item3", result.get(0).left());
+        assertEquals("item9", result.get(6).left());
+    }
+
+    @Test
+    public void testSkip_zero() {
+        BiIterator<Integer, Integer> iter = BiIterator.generate(0, 5, (i, pair) -> pair.set(i, i));
+        BiIterator<Integer, Integer> skipped = iter.skip(0);
+
+        assertSame(iter, skipped);
+    }
+
+    @Test
+    public void testSkip_negative() {
+        BiIterator<Integer, Integer> iter = BiIterator.generate(0, 5, (i, pair) -> pair.set(i, i));
+        assertThrows(IllegalArgumentException.class, () -> iter.skip(-1));
+    }
+
     // =====================================================================
     // limit(long)
     // =====================================================================
@@ -1136,20 +1414,6 @@ public class BiIteratorTest extends TestBase {
         Assertions.assertEquals(Pair.of("a", 1), iter.next());
         Assertions.assertEquals(Pair.of("b", 2), iter.next());
         Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testLimit_zero() {
-        BiIterator<Integer, Integer> iter = BiIterator.generate(0, 5, (i, pair) -> pair.set(i, i));
-        BiIterator<Integer, Integer> limited = iter.limit(0);
-
-        assertFalse(limited.hasNext());
-    }
-
-    @Test
-    public void testLimit_negative() {
-        BiIterator<Integer, Integer> iter = BiIterator.generate(0, 5, (i, pair) -> pair.set(i, i));
-        assertThrows(IllegalArgumentException.class, () -> iter.limit(-1));
     }
 
     @Test
@@ -1195,6 +1459,35 @@ public class BiIteratorTest extends TestBase {
         Assertions.assertFalse(mapped.hasNext());
     }
 
+    @Test
+    @DisplayName("Test limit then skip")
+    public void testLimitThenSkip() {
+        Map<Integer, String> map = new LinkedHashMap<>();
+        for (int i = 0; i < 20; i++) {
+            map.put(i, "value" + i);
+        }
+
+        List<Pair<Integer, String>> result = BiIterator.of(map).limit(10).skip(5).toList();
+
+        assertEquals(5, result.size());
+        assertEquals(5, result.get(0).left());
+        assertEquals(9, result.get(4).left());
+    }
+
+    @Test
+    public void testLimit_zero() {
+        BiIterator<Integer, Integer> iter = BiIterator.generate(0, 5, (i, pair) -> pair.set(i, i));
+        BiIterator<Integer, Integer> limited = iter.limit(0);
+
+        assertFalse(limited.hasNext());
+    }
+
+    @Test
+    public void testLimit_negative() {
+        BiIterator<Integer, Integer> iter = BiIterator.generate(0, 5, (i, pair) -> pair.set(i, i));
+        assertThrows(IllegalArgumentException.class, () -> iter.limit(-1));
+    }
+
     // =====================================================================
     // filter(BiPredicate)
     // =====================================================================
@@ -1215,14 +1508,6 @@ public class BiIteratorTest extends TestBase {
     }
 
     @Test
-    public void testFilter_noneMatch() {
-        BiIterator<Integer, Integer> iter = BiIterator.generate(0, 5, (i, pair) -> pair.set(i, i));
-        BiIterator<Integer, Integer> filtered = iter.filter((a, b) -> a > 10);
-
-        assertFalse(filtered.hasNext());
-    }
-
-    @Test
     public void testFilter_allMatch() {
         BiIterator<Integer, Integer> iter = BiIterator.generate(0, 5, (i, pair) -> pair.set(i, i));
         BiIterator<Integer, Integer> filtered = iter.filter((a, b) -> a >= 0);
@@ -1233,12 +1518,6 @@ public class BiIteratorTest extends TestBase {
             count++;
         }
         assertEquals(5, count);
-    }
-
-    @Test
-    public void testFilter_null() {
-        BiIterator<Integer, Integer> iter = BiIterator.generate(0, 5, (i, pair) -> pair.set(i, i));
-        assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
     }
 
     @Test
@@ -1263,21 +1542,6 @@ public class BiIteratorTest extends TestBase {
     }
 
     @Test
-    public void testFilterMap() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("a", 1);
-        map.put("b", 2);
-        map.put("c", 3);
-
-        BiIterator<String, Integer> iter = BiIterator.of(map).filter((k, v) -> k.compareTo("b") >= 0);
-        ObjIterator<String> mapped = iter.map((k, v) -> k.toUpperCase() + v);
-
-        Assertions.assertEquals("B2", mapped.next());
-        Assertions.assertEquals("C3", mapped.next());
-        Assertions.assertFalse(mapped.hasNext());
-    }
-
-    @Test
     public void testFilterComplexPredicate() {
         Map<String, Integer> map = new LinkedHashMap<>();
         map.put("apple", 5);
@@ -1295,17 +1559,32 @@ public class BiIteratorTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test multiple filters chained")
-    public void testMultipleFilters() {
+    public void testFilter_noneMatch() {
+        BiIterator<Integer, Integer> iter = BiIterator.generate(0, 5, (i, pair) -> pair.set(i, i));
+        BiIterator<Integer, Integer> filtered = iter.filter((a, b) -> a > 10);
+
+        assertFalse(filtered.hasNext());
+    }
+
+    @Test
+    public void testFilterMap() {
         Map<String, Integer> map = new LinkedHashMap<>();
-        for (int i = 0; i < 20; i++) {
-            map.put("key" + i, i);
-        }
+        map.put("a", 1);
+        map.put("b", 2);
+        map.put("c", 3);
 
-        BiIterator<String, Integer> iter = BiIterator.of(map).filter((k, v) -> v % 2 == 0).filter((k, v) -> v % 3 == 0);
+        BiIterator<String, Integer> iter = BiIterator.of(map).filter((k, v) -> k.compareTo("b") >= 0);
+        ObjIterator<String> mapped = iter.map((k, v) -> k.toUpperCase() + v);
 
-        List<Pair<String, Integer>> results = iter.toList();
-        assertTrue(results.stream().allMatch(p -> p.right() % 6 == 0));
+        Assertions.assertEquals("B2", mapped.next());
+        Assertions.assertEquals("C3", mapped.next());
+        Assertions.assertFalse(mapped.hasNext());
+    }
+
+    @Test
+    public void testFilter_null() {
+        BiIterator<Integer, Integer> iter = BiIterator.generate(0, 5, (i, pair) -> pair.set(i, i));
+        assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
     }
 
     // =====================================================================
@@ -1341,19 +1620,6 @@ public class BiIteratorTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test map with null transformation result")
-    public void testMapToNull() {
-        String[] arr1 = { "a", "b", "c" };
-        Integer[] arr2 = { 1, 2, 3 };
-
-        ObjIterator<String> iter = BiIterator.zip(arr1, arr2).map((s, i) -> i == 2 ? null : s + i);
-
-        assertEquals("a1", iter.next());
-        assertNull(iter.next());
-        assertEquals("c3", iter.next());
-    }
-
-    @Test
     @DisplayName("Test map after filter")
     public void testMapAfterFilter() {
         Map<String, Integer> map = new LinkedHashMap<>();
@@ -1370,15 +1636,16 @@ public class BiIteratorTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test map with exception in mapper")
-    public void testMapWithException() {
-        String[] arr1 = { "a", "b" };
-        Integer[] arr2 = { 1, 0 };
+    @DisplayName("Test map with null transformation result")
+    public void testMapToNull() {
+        String[] arr1 = { "a", "b", "c" };
+        Integer[] arr2 = { 1, 2, 3 };
 
-        ObjIterator<Integer> iter = BiIterator.zip(arr1, arr2).map((s, i) -> 10 / i);
+        ObjIterator<String> iter = BiIterator.zip(arr1, arr2).map((s, i) -> i == 2 ? null : s + i);
 
-        assertEquals(10, iter.next());
-        assertThrows(ArithmeticException.class, () -> iter.next());
+        assertEquals("a1", iter.next());
+        assertNull(iter.next());
+        assertEquals("c3", iter.next());
     }
 
     @Test
@@ -1391,31 +1658,16 @@ public class BiIteratorTest extends TestBase {
         assertNotNull(iter);
     }
 
-    // =====================================================================
-    // stream()
-    // =====================================================================
-
     @Test
-    public void testStream() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("a", 1);
-        map.put("b", 2);
+    @DisplayName("Test map with exception in mapper")
+    public void testMapWithException() {
+        String[] arr1 = { "a", "b" };
+        Integer[] arr2 = { 1, 0 };
 
-        BiIterator<String, Integer> iter = BiIterator.of(map);
-        EntryStream<String, Integer> stream = iter.stream();
+        ObjIterator<Integer> iter = BiIterator.zip(arr1, arr2).map((s, i) -> 10 / i);
 
-        Assertions.assertNotNull(stream);
-        List<Map.Entry<String, Integer>> entries = stream.toList();
-        Assertions.assertEquals(2, entries.size());
-    }
-
-    @Test
-    public void testStream_empty() {
-        BiIterator<String, Integer> iter = BiIterator.empty();
-        com.landawn.abacus.util.stream.EntryStream<String, Integer> stream = iter.stream();
-
-        long count = stream.count();
-        assertEquals(0, count);
+        assertEquals(10, iter.next());
+        assertThrows(ArithmeticException.class, () -> iter.next());
     }
 
     @Test
@@ -1444,6 +1696,33 @@ public class BiIteratorTest extends TestBase {
 
         List<String> result = stream.toList();
         Assertions.assertEquals(Arrays.asList("a=1", "b=2"), result);
+    }
+
+    // =====================================================================
+    // stream()
+    // =====================================================================
+
+    @Test
+    public void testStream() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("a", 1);
+        map.put("b", 2);
+
+        BiIterator<String, Integer> iter = BiIterator.of(map);
+        EntryStream<String, Integer> stream = iter.stream();
+
+        Assertions.assertNotNull(stream);
+        List<Map.Entry<String, Integer>> entries = stream.toList();
+        Assertions.assertEquals(2, entries.size());
+    }
+
+    @Test
+    public void testStream_empty() {
+        BiIterator<String, Integer> iter = BiIterator.empty();
+        com.landawn.abacus.util.stream.EntryStream<String, Integer> stream = iter.stream();
+
+        long count = stream.count();
+        assertEquals(0, count);
     }
 
     @Test
@@ -1485,13 +1764,6 @@ public class BiIteratorTest extends TestBase {
         Assertions.assertEquals(Integer.valueOf(2), array[1].right());
     }
 
-    @Test
-    public void testToArray_empty() {
-        BiIterator<String, Integer> iter = BiIterator.empty();
-        Pair<String, Integer>[] array = iter.toArray();
-        assertEquals(0, array.length);
-    }
-
     // =====================================================================
     // toArray(T[]) (deprecated)
     // =====================================================================
@@ -1510,177 +1782,11 @@ public class BiIteratorTest extends TestBase {
         Assertions.assertEquals("a", array[0].left());
     }
 
-    // =====================================================================
-    // toSet() (inherited from ImmutableIterator)
-    // =====================================================================
-
     @Test
-    public void testToSet() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("a", 1);
-        map.put("b", 2);
-
-        BiIterator<String, Integer> iter = BiIterator.of(map);
-        Set<Pair<String, Integer>> set = iter.toSet();
-
-        assertEquals(2, set.size());
-        assertTrue(set.contains(Pair.of("a", 1)));
-        assertTrue(set.contains(Pair.of("b", 2)));
-    }
-
-    @Test
-    public void testToSet_empty() {
+    public void testToArray_empty() {
         BiIterator<String, Integer> iter = BiIterator.empty();
-        Set<Pair<String, Integer>> set = iter.toSet();
-
-        assertTrue(set.isEmpty());
-    }
-
-    @Test
-    public void testToSet_duplicates() {
-        // When zipping with defaults, duplicates can occur
-        BiIterator<String, Integer> iter = BiIterator.zip(new String[] { "a", "a" }, new Integer[] { 1, 1 });
-        Set<Pair<String, Integer>> set = iter.toSet();
-
-        assertEquals(1, set.size());
-        assertTrue(set.contains(Pair.of("a", 1)));
-    }
-
-    // =====================================================================
-    // toCollection(Supplier) (inherited from ImmutableIterator)
-    // =====================================================================
-
-    @Test
-    public void testToCollection() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("a", 1);
-        map.put("b", 2);
-        map.put("c", 3);
-
-        BiIterator<String, Integer> iter = BiIterator.of(map);
-        LinkedList<Pair<String, Integer>> collection = iter.toCollection(LinkedList::new);
-
-        assertEquals(3, collection.size());
-        assertEquals(Pair.of("a", 1), collection.getFirst());
-        assertEquals(Pair.of("c", 3), collection.getLast());
-    }
-
-    @Test
-    public void testToCollection_empty() {
-        BiIterator<String, Integer> iter = BiIterator.empty();
-        ArrayList<Pair<String, Integer>> collection = iter.toCollection(ArrayList::new);
-
-        assertTrue(collection.isEmpty());
-    }
-
-    // =====================================================================
-    // toImmutableList() (inherited from ImmutableIterator)
-    // =====================================================================
-
-    @Test
-    public void testToImmutableList() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("a", 1);
-        map.put("b", 2);
-
-        BiIterator<String, Integer> iter = BiIterator.of(map);
-        ImmutableList<Pair<String, Integer>> immutableList = iter.toImmutableList();
-
-        assertEquals(2, immutableList.size());
-        assertEquals(Pair.of("a", 1), immutableList.get(0));
-        assertEquals(Pair.of("b", 2), immutableList.get(1));
-    }
-
-    @Test
-    public void testToImmutableList_empty() {
-        BiIterator<String, Integer> iter = BiIterator.empty();
-        ImmutableList<Pair<String, Integer>> immutableList = iter.toImmutableList();
-
-        assertTrue(immutableList.isEmpty());
-    }
-
-    @Test
-    public void testToImmutableList_isImmutable() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("a", 1);
-
-        BiIterator<String, Integer> iter = BiIterator.of(map);
-        ImmutableList<Pair<String, Integer>> immutableList = iter.toImmutableList();
-
-        assertThrows(UnsupportedOperationException.class, () -> immutableList.add(Pair.of("b", 2)));
-    }
-
-    // =====================================================================
-    // toImmutableSet() (inherited from ImmutableIterator)
-    // =====================================================================
-
-    @Test
-    public void testToImmutableSet() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("a", 1);
-        map.put("b", 2);
-
-        BiIterator<String, Integer> iter = BiIterator.of(map);
-        ImmutableSet<Pair<String, Integer>> immutableSet = iter.toImmutableSet();
-
-        assertEquals(2, immutableSet.size());
-        assertTrue(immutableSet.contains(Pair.of("a", 1)));
-        assertTrue(immutableSet.contains(Pair.of("b", 2)));
-    }
-
-    @Test
-    public void testToImmutableSet_empty() {
-        BiIterator<String, Integer> iter = BiIterator.empty();
-        ImmutableSet<Pair<String, Integer>> immutableSet = iter.toImmutableSet();
-
-        assertTrue(immutableSet.isEmpty());
-    }
-
-    @Test
-    public void testToImmutableSet_isImmutable() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("a", 1);
-
-        BiIterator<String, Integer> iter = BiIterator.of(map);
-        ImmutableSet<Pair<String, Integer>> immutableSet = iter.toImmutableSet();
-
-        assertThrows(UnsupportedOperationException.class, () -> immutableSet.add(Pair.of("b", 2)));
-    }
-
-    // =====================================================================
-    // count() (inherited from ImmutableIterator)
-    // =====================================================================
-
-    @Test
-    public void testCount() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("a", 1);
-        map.put("b", 2);
-        map.put("c", 3);
-
-        BiIterator<String, Integer> iter = BiIterator.of(map);
-        assertEquals(3, iter.count());
-    }
-
-    @Test
-    public void testCount_empty() {
-        BiIterator<String, Integer> iter = BiIterator.empty();
-        assertEquals(0, iter.count());
-    }
-
-    @Test
-    public void testCount_afterPartialConsumption() {
-        BiIterator<Integer, Integer> iter = BiIterator.generate(0, 5, (i, pair) -> pair.set(i, i));
-        iter.next();
-        iter.next();
-        assertEquals(3, iter.count());
-    }
-
-    @Test
-    public void testCount_exhaustsIterator() {
-        BiIterator<Integer, Integer> iter = BiIterator.generate(0, 3, (i, pair) -> pair.set(i, i));
-        iter.count();
-        assertFalse(iter.hasNext());
+        Pair<String, Integer>[] array = iter.toArray();
+        assertEquals(0, array.length);
     }
 
     // =====================================================================
@@ -1730,15 +1836,6 @@ public class BiIteratorTest extends TestBase {
     }
 
     @Test
-    public void testToMultiList_empty() {
-        BiIterator<String, Integer> iter = BiIterator.empty();
-        Pair<List<String>, List<Integer>> multiList = iter.toMultiList(LinkedList::new);
-
-        Assertions.assertTrue(multiList.left().isEmpty());
-        Assertions.assertTrue(multiList.right().isEmpty());
-    }
-
-    @Test
     @DisplayName("Test toMultiList with custom list implementations")
     public void testToMultiListCustomImpl() {
         String[] arr1 = { "a", "b", "c" };
@@ -1750,6 +1847,15 @@ public class BiIteratorTest extends TestBase {
         assertTrue(result.right() instanceof LinkedList);
         assertEquals(3, result.left().size());
         assertEquals(3, result.right().size());
+    }
+
+    @Test
+    public void testToMultiList_empty() {
+        BiIterator<String, Integer> iter = BiIterator.empty();
+        Pair<List<String>, List<Integer>> multiList = iter.toMultiList(LinkedList::new);
+
+        Assertions.assertTrue(multiList.left().isEmpty());
+        Assertions.assertTrue(multiList.right().isEmpty());
     }
 
     // =====================================================================
@@ -1771,15 +1877,6 @@ public class BiIteratorTest extends TestBase {
         Assertions.assertTrue(multiSet.left().contains("b"));
         Assertions.assertTrue(multiSet.right().contains(2));
         Assertions.assertTrue(multiSet.right().contains(3));
-    }
-
-    @Test
-    public void testToMultiSet_empty() {
-        BiIterator<String, Integer> iter = BiIterator.empty();
-        Pair<Set<String>, Set<Integer>> sets = iter.toMultiSet(HashSet::new);
-
-        assertTrue(sets.left().isEmpty());
-        assertTrue(sets.right().isEmpty());
     }
 
     @Test
@@ -1818,6 +1915,15 @@ public class BiIteratorTest extends TestBase {
 
         assertEquals("a", result.left().iterator().next());
         assertEquals(1, result.right().iterator().next());
+    }
+
+    @Test
+    public void testToMultiSet_empty() {
+        BiIterator<String, Integer> iter = BiIterator.empty();
+        Pair<Set<String>, Set<Integer>> sets = iter.toMultiSet(HashSet::new);
+
+        assertTrue(sets.left().isEmpty());
+        assertTrue(sets.right().isEmpty());
     }
 
     // =====================================================================
@@ -1865,113 +1971,5 @@ public class BiIteratorTest extends TestBase {
             int second = Integer.parseInt(parts[1]);
             return first % 2 == 0 && second % 4 == 0;
         }));
-    }
-
-    @Test
-    @DisplayName("Test limit then skip")
-    public void testLimitThenSkip() {
-        Map<Integer, String> map = new LinkedHashMap<>();
-        for (int i = 0; i < 20; i++) {
-            map.put(i, "value" + i);
-        }
-
-        List<Pair<Integer, String>> result = BiIterator.of(map).limit(10).skip(5).toList();
-
-        assertEquals(5, result.size());
-        assertEquals(5, result.get(0).left());
-        assertEquals(9, result.get(4).left());
-    }
-
-    @Test
-    @DisplayName("Test operations after iterator exhaustion")
-    public void testOperationsAfterExhaustion() {
-        String[] arr1 = { "a" };
-        Integer[] arr2 = { 1 };
-
-        BiIterator<String, Integer> iter = BiIterator.zip(arr1, arr2);
-
-        iter.next();
-
-        assertFalse(iter.hasNext());
-        assertEquals(0, iter.toList().size());
-
-        AtomicInteger count = new AtomicInteger(0);
-        iter.forEachRemaining((a, b) -> count.incrementAndGet());
-        assertEquals(0, count.get());
-    }
-
-    @Test
-    @DisplayName("Test iterator exhaustion behavior")
-    public void testIteratorExhaustion() {
-        String[] arr1 = { "a" };
-        Integer[] arr2 = { 1 };
-
-        BiIterator<String, Integer> iter = BiIterator.zip(arr1, arr2);
-
-        assertTrue(iter.hasNext());
-        assertEquals(Pair.of("a", 1), iter.next());
-        assertFalse(iter.hasNext());
-        assertThrows(NoSuchElementException.class, () -> iter.next());
-    }
-
-    @Test
-    @DisplayName("Test concurrent modification scenarios")
-    public void testConcurrentModification() {
-        Map<String, Integer> map = new HashMap<>();
-        map.put("a", 1);
-        map.put("b", 2);
-        map.put("c", 3);
-
-        BiIterator<String, Integer> iter = BiIterator.of(map);
-
-        iter.next();
-
-        map.put("d", 4);
-
-        try {
-            iter.forEachRemaining((k, v) -> {
-            });
-        } catch (ConcurrentModificationException e) {
-        }
-        assertNotNull(iter);
-    }
-
-    @Test
-    @DisplayName("Test with large dataset")
-    public void testLargeDataset() {
-        final int size = 10000;
-        Map<Integer, String> largeMap = new LinkedHashMap<>();
-        for (int i = 0; i < size; i++) {
-            largeMap.put(i, "value" + i);
-        }
-
-        long count = BiIterator.of(largeMap).filter((k, v) -> k % 100 == 0).map((k, v) -> k).count();
-
-        assertEquals(100, count);
-    }
-
-    @Test
-    @DisplayName("Test skip and limit with exact boundaries")
-    public void testSkipLimitExactBoundaries() {
-        List<String> list = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            list.add("item" + i);
-        }
-
-        BiIterator<String, Integer> iter = BiIterator.unzip(list, (s, pair) -> pair.set(s, Integer.parseInt(s.substring(4))));
-
-        List<Pair<String, Integer>> result = iter.skip(3).limit(7).toList();
-
-        assertEquals(7, result.size());
-        assertEquals("item3", result.get(0).left());
-        assertEquals("item9", result.get(6).left());
-    }
-
-    @Test
-    @DisplayName("Test null arguments validation")
-    public void testNullArgumentsValidation() {
-        BiIterator<String, Integer> iter = BiIterator.zip(new String[] { "a" }, new Integer[] { 1 });
-
-        assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
     }
 }

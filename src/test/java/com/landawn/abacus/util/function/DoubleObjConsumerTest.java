@@ -6,12 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class DoubleObjConsumerTest extends TestBase {
 
     @Test
@@ -25,21 +23,6 @@ public class DoubleObjConsumerTest extends TestBase {
         assertEquals(2, result.size());
         assertEquals("5.0:test", result.get(0));
         assertEquals("10.5:value", result.get(1));
-    }
-
-    @Test
-    public void testAcceptWithLambda() {
-        final double[] doubleResult = new double[1];
-        final String[] stringResult = new String[1];
-        DoubleObjConsumer<String> consumer = (d, s) -> {
-            doubleResult[0] = d * 2;
-            stringResult[0] = s.toUpperCase();
-        };
-
-        consumer.accept(7.5, "hello");
-
-        assertEquals(15.0, doubleResult[0]);
-        assertEquals("HELLO", stringResult[0]);
     }
 
     @Test
@@ -59,33 +42,43 @@ public class DoubleObjConsumerTest extends TestBase {
     }
 
     @Test
-    public void testAndThen() {
+    public void testWithDifferentObjectTypes() {
         final List<String> result = new ArrayList<>();
-        DoubleObjConsumer<String> first = (d, s) -> result.add(d + ":" + s);
-        DoubleObjConsumer<String> second = (d, s) -> result.add(s + ":" + d);
+        DoubleObjConsumer<Integer> consumer = (d, i) -> result.add(d + ":" + i);
 
-        DoubleObjConsumer<String> combined = first.andThen(second);
-        combined.accept(5.0, "test");
+        consumer.accept(5.5, 10);
+        consumer.accept(7.5, 20);
 
         assertEquals(2, result.size());
-        assertEquals("5.0:test", result.get(0));
-        assertEquals("test:5.0", result.get(1));
+        assertEquals("5.5:10", result.get(0));
+        assertEquals("7.5:20", result.get(1));
     }
 
     @Test
-    public void testAndThenChaining() {
-        final List<String> result = new ArrayList<>();
-        DoubleObjConsumer<String> first = (d, s) -> result.add("first");
-        DoubleObjConsumer<String> second = (d, s) -> result.add("second");
-        DoubleObjConsumer<String> third = (d, s) -> result.add("third");
+    public void testSideEffects() {
+        final int[] counter = { 0 };
+        DoubleObjConsumer<String> consumer = (d, s) -> counter[0]++;
 
-        DoubleObjConsumer<String> combined = first.andThen(second).andThen(third);
-        combined.accept(5.0, "test");
+        consumer.accept(1.0, "a");
+        consumer.accept(2.0, "b");
+        consumer.accept(3.0, "c");
 
-        assertEquals(3, result.size());
-        assertEquals("first", result.get(0));
-        assertEquals("second", result.get(1));
-        assertEquals("third", result.get(2));
+        assertEquals(3, counter[0]);
+    }
+
+    @Test
+    public void testAcceptWithLambda() {
+        final double[] doubleResult = new double[1];
+        final String[] stringResult = new String[1];
+        DoubleObjConsumer<String> consumer = (d, s) -> {
+            doubleResult[0] = d * 2;
+            stringResult[0] = s.toUpperCase();
+        };
+
+        consumer.accept(7.5, "hello");
+
+        assertEquals(15.0, doubleResult[0]);
+        assertEquals("HELLO", stringResult[0]);
     }
 
     @Test
@@ -143,28 +136,33 @@ public class DoubleObjConsumerTest extends TestBase {
     }
 
     @Test
-    public void testWithDifferentObjectTypes() {
+    public void testAndThen() {
         final List<String> result = new ArrayList<>();
-        DoubleObjConsumer<Integer> consumer = (d, i) -> result.add(d + ":" + i);
+        DoubleObjConsumer<String> first = (d, s) -> result.add(d + ":" + s);
+        DoubleObjConsumer<String> second = (d, s) -> result.add(s + ":" + d);
 
-        consumer.accept(5.5, 10);
-        consumer.accept(7.5, 20);
+        DoubleObjConsumer<String> combined = first.andThen(second);
+        combined.accept(5.0, "test");
 
         assertEquals(2, result.size());
-        assertEquals("5.5:10", result.get(0));
-        assertEquals("7.5:20", result.get(1));
+        assertEquals("5.0:test", result.get(0));
+        assertEquals("test:5.0", result.get(1));
     }
 
     @Test
-    public void testSideEffects() {
-        final int[] counter = { 0 };
-        DoubleObjConsumer<String> consumer = (d, s) -> counter[0]++;
+    public void testAndThenChaining() {
+        final List<String> result = new ArrayList<>();
+        DoubleObjConsumer<String> first = (d, s) -> result.add("first");
+        DoubleObjConsumer<String> second = (d, s) -> result.add("second");
+        DoubleObjConsumer<String> third = (d, s) -> result.add("third");
 
-        consumer.accept(1.0, "a");
-        consumer.accept(2.0, "b");
-        consumer.accept(3.0, "c");
+        DoubleObjConsumer<String> combined = first.andThen(second).andThen(third);
+        combined.accept(5.0, "test");
 
-        assertEquals(3, counter[0]);
+        assertEquals(3, result.size());
+        assertEquals("first", result.get(0));
+        assertEquals("second", result.get(1));
+        assertEquals("third", result.get(2));
     }
 
     @Test

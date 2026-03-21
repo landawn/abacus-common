@@ -5,12 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class AbstractCharSequenceTypeTest extends TestBase {
     private Type<String> type;
 
@@ -25,14 +23,6 @@ public class AbstractCharSequenceTypeTest extends TestBase {
     }
 
     @Test
-    public void testConstructor() {
-        Type<String> stringType = createType(String.class);
-
-        assertNotNull(stringType);
-        assertTrue(stringType.isCharSequence());
-    }
-
-    @Test
     public void testIsCharSequence_DifferentImplementations() {
         Type<StringBuilder> stringBuilderType = createType(StringBuilder.class);
         assertTrue(stringBuilderType.isCharSequence());
@@ -40,6 +30,14 @@ public class AbstractCharSequenceTypeTest extends TestBase {
         Type<StringBuffer> stringBufferType = createType(StringBuffer.class);
 
         assertTrue(stringBufferType.isCharSequence());
+    }
+
+    @Test
+    public void testConstructor() {
+        Type<String> stringType = createType(String.class);
+
+        assertNotNull(stringType);
+        assertTrue(stringType.isCharSequence());
     }
 
     @Test

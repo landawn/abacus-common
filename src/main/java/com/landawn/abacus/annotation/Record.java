@@ -24,19 +24,19 @@ import java.lang.annotation.Target;
  * A test annotation used to mark classes as record-like entities, particularly for testing purposes.
  * This annotation is primarily used to identify entity classes created by Lombok that simulate
  * the behavior of Java 16+ record types in environments where records are not available.
- * 
+ *
  * <p>This annotation serves as a marker for testing frameworks and tools to understand that
  * the annotated class represents a data-only structure similar to a Java record, even when
  * implemented using traditional class syntax with Lombok annotations.</p>
- * 
+ *
  * <p><b>Primary use cases:</b></p>
  * <ul>
- *   <li>Testing record-like behavior in pre-Java 16 environments</li>
- *   <li>Marking Lombok-generated classes that simulate records</li>
- *   <li>Providing metadata for tools that need to distinguish record-like classes</li>
- *   <li>Supporting backward compatibility testing for record migration</li>
+ *   <li>Testing record-like behavior in pre-Java 16 environments.</li>
+ *   <li>Marking Lombok-generated classes that simulate records.</li>
+ *   <li>Providing metadata for tools that need to distinguish record-like classes.</li>
+ *   <li>Supporting backward compatibility testing for record migration.</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * @Record
@@ -48,22 +48,22 @@ import java.lang.annotation.Target;
  *     private final String email;
  *     // Lombok generates constructor, getters, equals, hashCode, toString
  * }
- * 
+ *
  * // This class behaves similarly to a Java 16+ record:
  * // public record PersonRecord(String name, int age, String email) {}
  * }</pre>
- * 
+ *
  * <p><b>Testing implications:</b></p>
  * <ul>
- *   <li>Classes marked with this annotation should be treated as immutable</li>
- *   <li>All fields should be effectively final</li>
- *   <li>Equality should be based on field values, not identity</li>
- *   <li>String representation should include all field values</li>
+ *   <li>Classes marked with this annotation should be treated as immutable.</li>
+ *   <li>All fields should be effectively final.</li>
+ *   <li>Equality should be based on field values, not identity.</li>
+ *   <li>String representation should include all field values.</li>
  * </ul>
- * 
+ *
  * <p><strong>Note:</strong> This annotation is meta-annotated with {@link Test}, indicating it is
  * primarily intended for testing purposes and may not be suitable for production code.</p>
- * 
+ *
  * @see Test
  * @see java.lang.Record
  */

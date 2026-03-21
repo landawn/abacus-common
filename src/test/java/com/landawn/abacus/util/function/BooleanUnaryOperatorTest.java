@@ -5,12 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BooleanUnaryOperatorTest extends TestBase {
 
     @Test
@@ -30,19 +28,33 @@ public class BooleanUnaryOperatorTest extends TestBase {
     }
 
     @Test
-    public void testIdentity() {
-        BooleanUnaryOperator identity = BooleanUnaryOperator.identity();
-
-        assertTrue(identity.applyAsBoolean(true));
-        assertFalse(identity.applyAsBoolean(false));
-    }
-
-    @Test
     public void testNegation() {
         BooleanUnaryOperator negation = operand -> !operand;
 
         assertFalse(negation.applyAsBoolean(true));
         assertTrue(negation.applyAsBoolean(false));
+    }
+
+    @Test
+    public void testAnonymousClass() {
+        BooleanUnaryOperator operator = new BooleanUnaryOperator() {
+            @Override
+            public boolean applyAsBoolean(boolean operand) {
+                return !operand;
+            }
+        };
+
+        assertFalse(operator.applyAsBoolean(true));
+        assertTrue(operator.applyAsBoolean(false));
+    }
+
+    @Test
+    public void testApplyAsBooleanWithException() {
+        BooleanUnaryOperator operator = operand -> {
+            throw new RuntimeException("Test exception");
+        };
+
+        assertThrows(RuntimeException.class, () -> operator.applyAsBoolean(true));
     }
 
     @Test
@@ -57,6 +69,16 @@ public class BooleanUnaryOperatorTest extends TestBase {
     }
 
     @Test
+    public void testComposeMultiple() {
+        BooleanUnaryOperator negate = operand -> !operand;
+
+        BooleanUnaryOperator doubleNegate = negate.compose(negate);
+
+        assertTrue(doubleNegate.applyAsBoolean(true)); // negate(negate(true)) = true
+        assertFalse(doubleNegate.applyAsBoolean(false)); // negate(negate(false)) = false
+    }
+
+    @Test
     public void testAndThen() {
         BooleanUnaryOperator identity = operand -> operand;
         BooleanUnaryOperator negate = operand -> !operand;
@@ -65,16 +87,6 @@ public class BooleanUnaryOperatorTest extends TestBase {
 
         assertFalse(chained.applyAsBoolean(true)); // identity(true) = true, negate(true) = false
         assertTrue(chained.applyAsBoolean(false)); // identity(false) = false, negate(false) = true
-    }
-
-    @Test
-    public void testComposeMultiple() {
-        BooleanUnaryOperator negate = operand -> !operand;
-
-        BooleanUnaryOperator doubleNegate = negate.compose(negate);
-
-        assertTrue(doubleNegate.applyAsBoolean(true)); // negate(negate(true)) = true
-        assertFalse(doubleNegate.applyAsBoolean(false)); // negate(negate(false)) = false
     }
 
     @Test
@@ -88,25 +100,11 @@ public class BooleanUnaryOperatorTest extends TestBase {
     }
 
     @Test
-    public void testApplyAsBooleanWithException() {
-        BooleanUnaryOperator operator = operand -> {
-            throw new RuntimeException("Test exception");
-        };
+    public void testIdentity() {
+        BooleanUnaryOperator identity = BooleanUnaryOperator.identity();
 
-        assertThrows(RuntimeException.class, () -> operator.applyAsBoolean(true));
-    }
-
-    @Test
-    public void testAnonymousClass() {
-        BooleanUnaryOperator operator = new BooleanUnaryOperator() {
-            @Override
-            public boolean applyAsBoolean(boolean operand) {
-                return !operand;
-            }
-        };
-
-        assertFalse(operator.applyAsBoolean(true));
-        assertTrue(operator.applyAsBoolean(false));
+        assertTrue(identity.applyAsBoolean(true));
+        assertFalse(identity.applyAsBoolean(false));
     }
 
     @Test

@@ -23,7 +23,6 @@ import java.util.Set;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -67,8 +66,48 @@ import lombok.Builder;
 import lombok.Data;
 
 @SuppressWarnings("rawtypes")
-@Tag("old-test")
 public class TypeTest extends AbstractTest {
+
+    @Data
+    @Builder
+    public static class DataTypeA {
+        private Multiset<Character> multiset;
+        private Multimap<Character, String, List<String>> listMultimap;
+        private SetMultimap<Character, String> setMultimap;
+        private com.google.common.collect.Multiset<Character> guavaMultiset;
+        private com.google.common.collect.Multimap<Character, Integer> guavaListMultimap;
+        private com.google.common.collect.SetMultimap<String, Long> guavaSetMultimap;
+    }
+
+    @BeforeEach
+    public void setUp() {
+        TypeFactory.getType(String.class);
+        TypeFactory.getType("JSON<Map>");
+        TypeFactory.getType("XML<Map>");
+
+        TypeFactory.getType("JSON<List>");
+        TypeFactory.getType("XML<List>");
+
+        TypeFactory.getType(MyConstant.class);
+        TypeFactory.getType(UnifiedStatus.class);
+        TypeFactory.getType(UnifiedStatus.class);
+        TypeFactory.getType("Status(true)");
+    }
+
+    @Deprecated
+    static <T> T[] asArray(final T... a) {
+        return a;
+    }
+
+    @Test
+    public void test_001() {
+        for (int i = 0; i < 3; i++) {
+            assertEquals("Map<List<com.landawn.abacus.util.stream.Stream>, String>",
+                    TypeFactory.getType("Map<List<com.landawn.abacus.util.stream.Stream>, String>").name());
+            assertEquals("Map<List<com.landawn.abacus.util.stream.Stream<String>>, String>",
+                    TypeFactory.getType("Map<List<com.landawn.abacus.util.stream.Stream<String>>, String>").declaringName());
+        }
+    }
 
     @Test
     public void test_GuavaTypes() throws Exception {
@@ -117,57 +156,6 @@ public class TypeTest extends AbstractTest {
         }
     }
 
-    @Data
-    @Builder
-    public static class DataTypeA {
-        private Multiset<Character> multiset;
-        private Multimap<Character, String, List<String>> listMultimap;
-        private SetMultimap<Character, String> setMultimap;
-        private com.google.common.collect.Multiset<Character> guavaMultiset;
-        private com.google.common.collect.Multimap<Character, Integer> guavaListMultimap;
-        private com.google.common.collect.SetMultimap<String, Long> guavaSetMultimap;
-    }
-
-    @Test
-    public void test_001() {
-        for (int i = 0; i < 3; i++) {
-            assertEquals("Map<List<com.landawn.abacus.util.stream.Stream>, String>",
-                    TypeFactory.getType("Map<List<com.landawn.abacus.util.stream.Stream>, String>").name());
-            assertEquals("Map<List<com.landawn.abacus.util.stream.Stream<String>>, String>",
-                    TypeFactory.getType("Map<List<com.landawn.abacus.util.stream.Stream<String>>, String>").declaringName());
-        }
-    }
-
-    @Test
-    public void testURI() {
-        String uriString = N.stringOf(URI.create("http://www.google.com"));
-        N.println(uriString);
-
-        URI uri = N.valueOf(uriString, URI.class);
-
-        assertEquals(URI.create("http://www.google.com"), uri);
-    }
-
-    @Test
-    public void test_type2() {
-        assertDoesNotThrow(() -> {
-            TypeFactory.getType("List<com.landawn.abacus.types.WeekDay(NAME)>");
-        });
-    }
-
-    @Test
-    public void test_char() {
-        {
-            char[] a = { 'a', 'b', 'c' };
-            N.println(Arrays.toString(a));
-        }
-
-        {
-            List<?> list = N.toList('a', 'b', 'c');
-            N.println(list.toString());
-        }
-    }
-
     @Test
     public void test_Multimap() throws Exception {
         {
@@ -202,6 +190,59 @@ public class TypeTest extends AbstractTest {
             assertTrue(type.isSerializable());
         }
     }
+    //
+    //    @Test
+    //    public void test_byte_2() {
+    //        List<Type<Number>> types = TypeFactory.getType(Byte.class, Short.class, Integer.class, Long.class, Float.class, Double.class);
+    //        String[] strs = { "2", "-1", "2l", "-1l", "2f", "-1f", "2d", "-1d" };
+    //
+    //        for (Type type : types) {
+    //            for (String str : strs) {
+    //                N.println(type.valueOf(str));
+    //            }
+    //        }
+    //    }
+
+    @Test
+    public void test_TypeFactory() {
+        // N.println(TypeFactory.getType(Long.class, long.class, int.class, Timestamp.class));
+
+        //    List<Class<?>> classes = N.toList(Long.class, long.class, int.class, Timestamp.class);
+        //    N.println(TypeFactory.getType(classes));
+
+        N.println(TypeFactory.getType("List<String>").name());
+        N.println(TypeFactory.getType("ArrayList<String>").name());
+        N.println(TypeFactory.getType("Set<String>").name());
+        N.println(TypeFactory.getType("HashSet<String>").name());
+        N.println(TypeFactory.getType("LinkedHashSet<String>").name());
+        N.println(TypeFactory.getType("Map<String, Object>").name());
+        N.println(TypeFactory.getType("HashMap<String, Object>").name());
+        N.println(TypeFactory.getType("LinkedHashMap<String, Object>").name());
+
+        try {
+            TypeFactory.getType("LinkedHashSet<String, Integer>").name();
+            fail("Should throw RuntimeException");
+        } catch (IllegalArgumentException e) {
+        }
+
+        try {
+            TypeFactory.getType("LinkedHashSet<String>(||)").name();
+            fail("Should throw RuntimeException");
+        } catch (IllegalArgumentException e) {
+        }
+
+        try {
+            TypeFactory.getType("LinkedHashMap<String>").name();
+            fail("Should throw RuntimeException");
+        } catch (IllegalArgumentException e) {
+        }
+
+        try {
+            TypeFactory.getType("LinkedHashMap<String, Object>(||)").name();
+            fail("Should throw RuntimeException");
+        } catch (IllegalArgumentException e) {
+        }
+    }
 
     @Test
     public void test_Multiset() throws Exception {
@@ -214,6 +255,66 @@ public class TypeTest extends AbstractTest {
         assertEquals(Date.class, type.parameterTypes()[0].javaType());
 
         assertTrue(type.isSerializable());
+    }
+
+    @Test
+    public void test_clazz() throws IOException {
+        Type<Object> type = N.typeOf("clazz<int>");
+
+        N.println(type.javaType());
+
+        assertEquals(int.class, type.javaType());
+    }
+
+    @Test
+    public void test_AbstractType() throws IOException {
+        Type<InputStream> type = N.typeOf(InputStream.class);
+
+        assertFalse(type.isArray());
+        assertFalse(type.isPrimitiveWrapper());
+        assertFalse(type.isPrimitiveList());
+        assertFalse(type.isString());
+        assertFalse(type.isDate());
+        assertFalse(type.isCalendar());
+        assertFalse(type.isPrimitiveArray());
+        assertFalse(type.isObjectArray());
+        assertFalse(type.isBean());
+        assertFalse(type.isReader());
+        assertTrue(type.isInputStream());
+    }
+
+    @Test
+    public void testURI() {
+        String uriString = N.stringOf(URI.create("http://www.google.com"));
+        N.println(uriString);
+
+        URI uri = N.valueOf(uriString, URI.class);
+
+        assertEquals(URI.create("http://www.google.com"), uri);
+    }
+
+    @Test
+    public void test_int2String() {
+
+        long startTime = System.currentTimeMillis();
+        Type type = N.typeOf(int.class);
+        for (int k = 0; k < 1000; k++) {
+            for (int i = -1000; i < 10000; i++) {
+                assertEquals(i, ((Integer) type.valueOf(type.stringOf(i))).intValue());
+            }
+        }
+
+        N.println("Took: " + (System.currentTimeMillis() - startTime));
+    }
+
+    @Test
+    public void test_int2String2() {
+        final Type type = N.typeOf(int.class);
+        Profiler.run(1, 100, 1, () -> {
+            for (int i = -1000; i < 10000; i++) {
+                assertEquals(i, ((Integer) type.valueOf(type.stringOf(i))).intValue());
+            }
+        }).printResult();
     }
 
     @Test
@@ -232,28 +333,6 @@ public class TypeTest extends AbstractTest {
                 assertEquals(i, ((Number) type.valueOf(String.valueOf(i))).intValue());
             }
         }
-    }
-
-    @Test
-    public void test_XMLGregorianCalendar() throws IOException {
-        final Type<Object> type = N.typeOf(XMLGregorianCalendar.class);
-        Dates.currentXMLGregorianCalendar();
-
-        BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
-        type.writeCharacter(writer, Dates.currentXMLGregorianCalendar(), JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.LONG));
-
-        N.println(writer.toString());
-
-        writer = Objectory.createBufferedJsonWriter();
-        type.writeCharacter(writer, Dates.currentXMLGregorianCalendar(), JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_DATE_TIME));
-
-        N.println(writer.toString());
-
-        writer = Objectory.createBufferedJsonWriter();
-        type.writeCharacter(writer, Dates.currentXMLGregorianCalendar(), JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP));
-
-        N.println(writer.toString());
-        assertNotNull(writer);
     }
 
     @Test
@@ -292,12 +371,16 @@ public class TypeTest extends AbstractTest {
     }
 
     @Test
-    public void test_clazz() throws IOException {
-        Type<Object> type = N.typeOf("clazz<int>");
-
-        N.println(type.javaType());
-
-        assertEquals(int.class, type.javaType());
+    public void test_getType() {
+        assertDoesNotThrow(() -> {
+            N.println(N.typeOf("Type"));
+            N.println(N.typeOf("Type<?>"));
+            N.println(N.typeOf("Type<Object>"));
+            N.println(N.typeOf("Type<String>"));
+            N.println(N.typeOf("Type<Integer>"));
+            N.println(N.typeOf("Type<int>"));
+            N.println(N.typeOf("Type<unknown>"));
+        });
     }
 
     @Test
@@ -935,23 +1018,6 @@ public class TypeTest extends AbstractTest {
     }
 
     @Test
-    public void test_AbstractType() throws IOException {
-        Type<InputStream> type = N.typeOf(InputStream.class);
-
-        assertFalse(type.isArray());
-        assertFalse(type.isPrimitiveWrapper());
-        assertFalse(type.isPrimitiveList());
-        assertFalse(type.isString());
-        assertFalse(type.isDate());
-        assertFalse(type.isCalendar());
-        assertFalse(type.isPrimitiveArray());
-        assertFalse(type.isObjectArray());
-        assertFalse(type.isBean());
-        assertFalse(type.isReader());
-        assertTrue(type.isInputStream());
-    }
-
-    @Test
     public void test_ClobAsciiStreamType() throws IOException {
         Type<InputStream> type = N.typeOf(ClobAsciiStreamType.CLOB_ASCII_STREAM);
 
@@ -1065,112 +1131,44 @@ public class TypeTest extends AbstractTest {
     }
 
     @Test
-    public void test_getType() {
+    public void test_XMLGregorianCalendar() throws IOException {
+        final Type<Object> type = N.typeOf(XMLGregorianCalendar.class);
+        Dates.currentXMLGregorianCalendar();
+
+        BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+        type.writeCharacter(writer, Dates.currentXMLGregorianCalendar(), JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.LONG));
+
+        N.println(writer.toString());
+
+        writer = Objectory.createBufferedJsonWriter();
+        type.writeCharacter(writer, Dates.currentXMLGregorianCalendar(), JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_DATE_TIME));
+
+        N.println(writer.toString());
+
+        writer = Objectory.createBufferedJsonWriter();
+        type.writeCharacter(writer, Dates.currentXMLGregorianCalendar(), JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP));
+
+        N.println(writer.toString());
+        assertNotNull(writer);
+    }
+
+    @Test
+    public void test_char() {
+        {
+            char[] a = { 'a', 'b', 'c' };
+            N.println(Arrays.toString(a));
+        }
+
+        {
+            List<?> list = N.toList('a', 'b', 'c');
+            N.println(list.toString());
+        }
+    }
+
+    @Test
+    public void test_type2() {
         assertDoesNotThrow(() -> {
-            N.println(N.typeOf("Type"));
-            N.println(N.typeOf("Type<?>"));
-            N.println(N.typeOf("Type<Object>"));
-            N.println(N.typeOf("Type<String>"));
-            N.println(N.typeOf("Type<Integer>"));
-            N.println(N.typeOf("Type<int>"));
-            N.println(N.typeOf("Type<unknown>"));
+            TypeFactory.getType("List<com.landawn.abacus.types.WeekDay(NAME)>");
         });
-    }
-
-    @Test
-    public void test_int2String() {
-
-        long startTime = System.currentTimeMillis();
-        Type type = N.typeOf(int.class);
-        for (int k = 0; k < 1000; k++) {
-            for (int i = -1000; i < 10000; i++) {
-                assertEquals(i, ((Integer) type.valueOf(type.stringOf(i))).intValue());
-            }
-        }
-
-        N.println("Took: " + (System.currentTimeMillis() - startTime));
-    }
-
-    @Test
-    public void test_int2String2() {
-        final Type type = N.typeOf(int.class);
-        Profiler.run(1, 100, 1, () -> {
-            for (int i = -1000; i < 10000; i++) {
-                assertEquals(i, ((Integer) type.valueOf(type.stringOf(i))).intValue());
-            }
-        }).printResult();
-    }
-    //
-    //    @Test
-    //    public void test_byte_2() {
-    //        List<Type<Number>> types = TypeFactory.getType(Byte.class, Short.class, Integer.class, Long.class, Float.class, Double.class);
-    //        String[] strs = { "2", "-1", "2l", "-1l", "2f", "-1f", "2d", "-1d" };
-    //
-    //        for (Type type : types) {
-    //            for (String str : strs) {
-    //                N.println(type.valueOf(str));
-    //            }
-    //        }
-    //    }
-
-    @Test
-    public void test_TypeFactory() {
-        // N.println(TypeFactory.getType(Long.class, long.class, int.class, Timestamp.class));
-
-        //    List<Class<?>> classes = N.toList(Long.class, long.class, int.class, Timestamp.class);
-        //    N.println(TypeFactory.getType(classes));
-
-        N.println(TypeFactory.getType("List<String>").name());
-        N.println(TypeFactory.getType("ArrayList<String>").name());
-        N.println(TypeFactory.getType("Set<String>").name());
-        N.println(TypeFactory.getType("HashSet<String>").name());
-        N.println(TypeFactory.getType("LinkedHashSet<String>").name());
-        N.println(TypeFactory.getType("Map<String, Object>").name());
-        N.println(TypeFactory.getType("HashMap<String, Object>").name());
-        N.println(TypeFactory.getType("LinkedHashMap<String, Object>").name());
-
-        try {
-            TypeFactory.getType("LinkedHashSet<String, Integer>").name();
-            fail("Should throw RuntimeException");
-        } catch (IllegalArgumentException e) {
-        }
-
-        try {
-            TypeFactory.getType("LinkedHashSet<String>(||)").name();
-            fail("Should throw RuntimeException");
-        } catch (IllegalArgumentException e) {
-        }
-
-        try {
-            TypeFactory.getType("LinkedHashMap<String>").name();
-            fail("Should throw RuntimeException");
-        } catch (IllegalArgumentException e) {
-        }
-
-        try {
-            TypeFactory.getType("LinkedHashMap<String, Object>(||)").name();
-            fail("Should throw RuntimeException");
-        } catch (IllegalArgumentException e) {
-        }
-    }
-
-    @BeforeEach
-    public void setUp() {
-        TypeFactory.getType(String.class);
-        TypeFactory.getType("JSON<Map>");
-        TypeFactory.getType("XML<Map>");
-
-        TypeFactory.getType("JSON<List>");
-        TypeFactory.getType("XML<List>");
-
-        TypeFactory.getType(MyConstant.class);
-        TypeFactory.getType(UnifiedStatus.class);
-        TypeFactory.getType(UnifiedStatus.class);
-        TypeFactory.getType("Status(true)");
-    }
-
-    @Deprecated
-    static <T> T[] asArray(final T... a) {
-        return a;
     }
 }

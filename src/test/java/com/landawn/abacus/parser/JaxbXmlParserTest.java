@@ -6,14 +6,12 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.util.Map;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Node;
 
 import com.landawn.abacus.entity.extendDirty.basic.Account;
 import com.landawn.abacus.type.Type;
 
-@Tag("old-test")
 public class JaxbXmlParserTest extends AbstractXmlParserTest {
     @Override
     protected Parser<?, ?> getParser() {

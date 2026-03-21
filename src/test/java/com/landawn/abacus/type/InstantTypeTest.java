@@ -20,7 +20,6 @@ import java.sql.Timestamp;
 import java.time.Instant;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -28,7 +27,6 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 
-@Tag("new-test")
 public class InstantTypeTest extends TestBase {
 
     private InstantType instantType;

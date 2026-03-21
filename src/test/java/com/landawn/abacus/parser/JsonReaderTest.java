@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
@@ -15,11 +14,184 @@ import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 
-@Tag("old-test")
 public class JsonReaderTest extends AbstractTest {
 
     private JsonReader reader;
     private char[] cbuf = new char[1024];
+
+    @Test
+    public void testNextTokenWithObject() {
+        String json = "{\"name\":\"John\",\"age\":30}";
+        reader = JsonStringReader.parse(json, cbuf);
+
+        assertEquals(JsonReader.START_BRACE, reader.nextToken());
+        assertEquals(JsonReader.START_DOUBLE_QUOTE, reader.nextToken());
+        assertEquals(JsonReader.END_DOUBLE_QUOTE, reader.nextToken());
+        assertEquals("name", reader.getText());
+
+        assertEquals(JsonReader.COLON, reader.nextToken());
+        assertEquals(JsonReader.START_DOUBLE_QUOTE, reader.nextToken());
+        assertEquals(JsonReader.END_DOUBLE_QUOTE, reader.nextToken());
+        assertEquals("John", reader.getText());
+
+        assertEquals(JsonReader.COMMA, reader.nextToken());
+        assertEquals(JsonReader.START_DOUBLE_QUOTE, reader.nextToken());
+        assertEquals(JsonReader.END_DOUBLE_QUOTE, reader.nextToken());
+        assertEquals("age", reader.getText());
+
+        assertEquals(JsonReader.COLON, reader.nextToken());
+        assertEquals(JsonReader.END_BRACE, reader.nextToken());
+        assertEquals("30", reader.getText());
+
+        assertEquals(JsonReader.EOF, reader.nextToken());
+    }
+
+    @Test
+    public void testNextTokenWithArray() {
+        String json = "[1,2,3]";
+        reader = JsonStringReader.parse(json, cbuf);
+
+        assertEquals(JsonReader.START_BRACKET, reader.nextToken());
+
+        assertEquals(JsonReader.COMMA, reader.nextToken());
+        assertEquals("1", reader.getText());
+
+        assertEquals(JsonReader.COMMA, reader.nextToken());
+        assertEquals("2", reader.getText());
+
+        assertEquals(JsonReader.END_BRACKET, reader.nextToken());
+        assertEquals("3", reader.getText());
+
+        assertEquals(JsonReader.EOF, reader.nextToken());
+    }
+
+    @Test
+    public void testSpecialCharacters() {
+        String json = "{\"key\":\"value\\nwith\\nnewlines\"}";
+        reader = JsonStringReader.parse(json, cbuf);
+
+        reader.nextToken();
+        reader.nextToken();
+        reader.nextToken();
+        assertEquals("key", reader.getText());
+
+        reader.nextToken();
+        reader.nextToken();
+        reader.nextToken();
+        assertEquals("value\nwith\nnewlines", reader.getText());
+    }
+
+    @Test
+    public void testArrayOfObjects() {
+        String json = "[{\"id\":1},{\"id\":2}]";
+        reader = JsonStringReader.parse(json, cbuf);
+
+        assertEquals(JsonReader.START_BRACKET, reader.nextToken());
+        assertEquals(JsonReader.START_BRACE, reader.nextToken());
+        reader.nextToken();
+        reader.nextToken();
+        assertEquals("id", reader.getText());
+        assertEquals(JsonReader.COLON, reader.nextToken());
+        assertEquals(JsonReader.END_BRACE, reader.nextToken());
+        assertEquals("1", reader.getText());
+
+        assertEquals(JsonReader.COMMA, reader.nextToken());
+
+        assertEquals(JsonReader.START_BRACE, reader.nextToken());
+        reader.nextToken();
+        reader.nextToken();
+        assertEquals("id", reader.getText());
+        assertEquals(JsonReader.COLON, reader.nextToken());
+        assertEquals(JsonReader.END_BRACE, reader.nextToken());
+        assertEquals("2", reader.getText());
+
+        assertEquals(JsonReader.END_BRACKET, reader.nextToken());
+    }
+
+    @Test
+    public void testFloatingPointNumbers() {
+        String json = "[3.14, -2.5, 1.23e10, 4.56E-7]";
+        reader = JsonStringReader.parse(json, cbuf);
+
+        assertEquals(JsonReader.START_BRACKET, reader.nextToken());
+
+        assertEquals(JsonReader.COMMA, reader.nextToken());
+        assertEquals("3.14", reader.getText());
+
+        assertEquals(JsonReader.COMMA, reader.nextToken());
+        assertEquals("-2.5", reader.getText());
+
+        assertEquals(JsonReader.COMMA, reader.nextToken());
+        assertEquals("1.23e10", reader.getText());
+
+        assertEquals(JsonReader.END_BRACKET, reader.nextToken());
+        assertEquals("4.56E-7", reader.getText());
+
+        assertEquals(JsonReader.EOF, reader.nextToken());
+    }
+
+    @Test
+    public void testEmptyObject() {
+        String json = "{}";
+        reader = JsonStringReader.parse(json, cbuf);
+
+        assertEquals(JsonReader.START_BRACE, reader.nextToken());
+        assertEquals(JsonReader.END_BRACE, reader.nextToken());
+        assertEquals(JsonReader.EOF, reader.nextToken());
+    }
+
+    @Test
+    public void testEmptyArray() {
+        String json = "[]";
+        reader = JsonStringReader.parse(json, cbuf);
+
+        assertEquals(JsonReader.START_BRACKET, reader.nextToken());
+        assertEquals(JsonReader.END_BRACKET, reader.nextToken());
+        assertEquals(JsonReader.EOF, reader.nextToken());
+    }
+
+    @Test
+    public void testNestedStructure() {
+        String json = "{\"outer\":{\"inner\":\"value\"}}";
+        reader = JsonStringReader.parse(json, cbuf);
+
+        assertEquals(JsonReader.START_BRACE, reader.nextToken());
+        reader.nextToken();
+        reader.nextToken();
+        assertEquals("outer", reader.getText());
+
+        assertEquals(JsonReader.COLON, reader.nextToken());
+        assertEquals(JsonReader.START_BRACE, reader.nextToken());
+        reader.nextToken();
+        reader.nextToken();
+        assertEquals("inner", reader.getText());
+
+        assertEquals(JsonReader.COLON, reader.nextToken());
+        reader.nextToken();
+        reader.nextToken();
+        assertEquals("value", reader.getText());
+
+        assertEquals(JsonReader.END_BRACE, reader.nextToken());
+        assertEquals(JsonReader.END_BRACE, reader.nextToken());
+    }
+
+    @Test
+    public void testSingleQuotes() {
+        String json = "{'key':'value'}";
+        reader = JsonStringReader.parse(json, cbuf);
+
+        assertEquals(JsonReader.START_BRACE, reader.nextToken());
+        assertEquals(JsonReader.START_SINGLE_QUOTE, reader.nextToken());
+        assertEquals(JsonReader.END_SINGLE_QUOTE, reader.nextToken());
+        assertEquals("key", reader.getText());
+
+        assertEquals(JsonReader.COLON, reader.nextToken());
+        assertEquals(JsonReader.START_SINGLE_QUOTE, reader.nextToken());
+        assertEquals(JsonReader.END_SINGLE_QUOTE, reader.nextToken());
+        assertEquals("value", reader.getText());
+
+        assertEquals(JsonReader.END_BRACE, reader.nextToken());
+    }
 
     @Test
     public void test_parser() throws Exception {
@@ -76,52 +248,6 @@ public class JsonReaderTest extends AbstractTest {
         N.println(reader.hasText() ? reader.getText() : "null");
         reader.nextToken();
         assertNotNull(token);
-    }
-
-    @Test
-    public void testNextTokenWithObject() {
-        String json = "{\"name\":\"John\",\"age\":30}";
-        reader = JsonStringReader.parse(json, cbuf);
-
-        assertEquals(JsonReader.START_BRACE, reader.nextToken());
-        assertEquals(JsonReader.START_DOUBLE_QUOTE, reader.nextToken());
-        assertEquals(JsonReader.END_DOUBLE_QUOTE, reader.nextToken());
-        assertEquals("name", reader.getText());
-
-        assertEquals(JsonReader.COLON, reader.nextToken());
-        assertEquals(JsonReader.START_DOUBLE_QUOTE, reader.nextToken());
-        assertEquals(JsonReader.END_DOUBLE_QUOTE, reader.nextToken());
-        assertEquals("John", reader.getText());
-
-        assertEquals(JsonReader.COMMA, reader.nextToken());
-        assertEquals(JsonReader.START_DOUBLE_QUOTE, reader.nextToken());
-        assertEquals(JsonReader.END_DOUBLE_QUOTE, reader.nextToken());
-        assertEquals("age", reader.getText());
-
-        assertEquals(JsonReader.COLON, reader.nextToken());
-        assertEquals(JsonReader.END_BRACE, reader.nextToken());
-        assertEquals("30", reader.getText());
-
-        assertEquals(JsonReader.EOF, reader.nextToken());
-    }
-
-    @Test
-    public void testNextTokenWithArray() {
-        String json = "[1,2,3]";
-        reader = JsonStringReader.parse(json, cbuf);
-
-        assertEquals(JsonReader.START_BRACKET, reader.nextToken());
-
-        assertEquals(JsonReader.COMMA, reader.nextToken());
-        assertEquals("1", reader.getText());
-
-        assertEquals(JsonReader.COMMA, reader.nextToken());
-        assertEquals("2", reader.getText());
-
-        assertEquals(JsonReader.END_BRACKET, reader.nextToken());
-        assertEquals("3", reader.getText());
-
-        assertEquals(JsonReader.EOF, reader.nextToken());
     }
 
     @Test
@@ -209,134 +335,6 @@ public class JsonReaderTest extends AbstractTest {
         Type<String> stringType = N.typeOf(String.class);
         String value = reader.readValue(stringType);
         assertNull(value);
-    }
-
-    @Test
-    public void testSpecialCharacters() {
-        String json = "{\"key\":\"value\\nwith\\nnewlines\"}";
-        reader = JsonStringReader.parse(json, cbuf);
-
-        reader.nextToken();
-        reader.nextToken();
-        reader.nextToken();
-        assertEquals("key", reader.getText());
-
-        reader.nextToken();
-        reader.nextToken();
-        reader.nextToken();
-        assertEquals("value\nwith\nnewlines", reader.getText());
-    }
-
-    @Test
-    public void testEmptyObject() {
-        String json = "{}";
-        reader = JsonStringReader.parse(json, cbuf);
-
-        assertEquals(JsonReader.START_BRACE, reader.nextToken());
-        assertEquals(JsonReader.END_BRACE, reader.nextToken());
-        assertEquals(JsonReader.EOF, reader.nextToken());
-    }
-
-    @Test
-    public void testEmptyArray() {
-        String json = "[]";
-        reader = JsonStringReader.parse(json, cbuf);
-
-        assertEquals(JsonReader.START_BRACKET, reader.nextToken());
-        assertEquals(JsonReader.END_BRACKET, reader.nextToken());
-        assertEquals(JsonReader.EOF, reader.nextToken());
-    }
-
-    @Test
-    public void testNestedStructure() {
-        String json = "{\"outer\":{\"inner\":\"value\"}}";
-        reader = JsonStringReader.parse(json, cbuf);
-
-        assertEquals(JsonReader.START_BRACE, reader.nextToken());
-        reader.nextToken();
-        reader.nextToken();
-        assertEquals("outer", reader.getText());
-
-        assertEquals(JsonReader.COLON, reader.nextToken());
-        assertEquals(JsonReader.START_BRACE, reader.nextToken());
-        reader.nextToken();
-        reader.nextToken();
-        assertEquals("inner", reader.getText());
-
-        assertEquals(JsonReader.COLON, reader.nextToken());
-        reader.nextToken();
-        reader.nextToken();
-        assertEquals("value", reader.getText());
-
-        assertEquals(JsonReader.END_BRACE, reader.nextToken());
-        assertEquals(JsonReader.END_BRACE, reader.nextToken());
-    }
-
-    @Test
-    public void testArrayOfObjects() {
-        String json = "[{\"id\":1},{\"id\":2}]";
-        reader = JsonStringReader.parse(json, cbuf);
-
-        assertEquals(JsonReader.START_BRACKET, reader.nextToken());
-        assertEquals(JsonReader.START_BRACE, reader.nextToken());
-        reader.nextToken();
-        reader.nextToken();
-        assertEquals("id", reader.getText());
-        assertEquals(JsonReader.COLON, reader.nextToken());
-        assertEquals(JsonReader.END_BRACE, reader.nextToken());
-        assertEquals("1", reader.getText());
-
-        assertEquals(JsonReader.COMMA, reader.nextToken());
-
-        assertEquals(JsonReader.START_BRACE, reader.nextToken());
-        reader.nextToken();
-        reader.nextToken();
-        assertEquals("id", reader.getText());
-        assertEquals(JsonReader.COLON, reader.nextToken());
-        assertEquals(JsonReader.END_BRACE, reader.nextToken());
-        assertEquals("2", reader.getText());
-
-        assertEquals(JsonReader.END_BRACKET, reader.nextToken());
-    }
-
-    @Test
-    public void testSingleQuotes() {
-        String json = "{'key':'value'}";
-        reader = JsonStringReader.parse(json, cbuf);
-
-        assertEquals(JsonReader.START_BRACE, reader.nextToken());
-        assertEquals(JsonReader.START_SINGLE_QUOTE, reader.nextToken());
-        assertEquals(JsonReader.END_SINGLE_QUOTE, reader.nextToken());
-        assertEquals("key", reader.getText());
-
-        assertEquals(JsonReader.COLON, reader.nextToken());
-        assertEquals(JsonReader.START_SINGLE_QUOTE, reader.nextToken());
-        assertEquals(JsonReader.END_SINGLE_QUOTE, reader.nextToken());
-        assertEquals("value", reader.getText());
-
-        assertEquals(JsonReader.END_BRACE, reader.nextToken());
-    }
-
-    @Test
-    public void testFloatingPointNumbers() {
-        String json = "[3.14, -2.5, 1.23e10, 4.56E-7]";
-        reader = JsonStringReader.parse(json, cbuf);
-
-        assertEquals(JsonReader.START_BRACKET, reader.nextToken());
-
-        assertEquals(JsonReader.COMMA, reader.nextToken());
-        assertEquals("3.14", reader.getText());
-
-        assertEquals(JsonReader.COMMA, reader.nextToken());
-        assertEquals("-2.5", reader.getText());
-
-        assertEquals(JsonReader.COMMA, reader.nextToken());
-        assertEquals("1.23e10", reader.getText());
-
-        assertEquals(JsonReader.END_BRACKET, reader.nextToken());
-        assertEquals("4.56E-7", reader.getText());
-
-        assertEquals(JsonReader.EOF, reader.nextToken());
     }
 
     @Test

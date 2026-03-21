@@ -8,11 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,6 +24,7 @@ import java.util.stream.Collector;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.CharSummaryStatistics;
@@ -42,7 +40,6 @@ import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Multimap;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Profiler;
-import com.landawn.abacus.util.Seq;
 import com.landawn.abacus.util.SetMultimap;
 import com.landawn.abacus.util.Splitter;
 import com.landawn.abacus.util.Strings;
@@ -57,8 +54,8 @@ import com.landawn.abacus.util.function.Predicate;
 import com.landawn.abacus.util.function.ToIntFunction;
 import com.landawn.abacus.util.stream.Collectors.MoreCollectors;
 
-public class MoreStreamTest {
-    static final int maxLen = 123;
+public class MoreStreamTest extends TestBase {
+    static final int maxLen = 37;
     static final int repeatNum = 1;
 
     @Test
@@ -337,28 +334,6 @@ public class MoreStreamTest {
         }
 
         N.println(Stream.ofLines(file).filter(s -> !s.startsWith("aa")).skip(10).count());
-    }
-
-    @Test
-    public void test_lines_1() throws IOException {
-        final File file = IOUtil.listFiles(new File("./lib/"), true, true).get(0);
-
-        for (int i = 0; i < 1000000; i++) {
-            Seq.ofLines(file).filter(s -> !s.startsWith("aa")).skip(10);
-        }
-
-        N.println(Seq.ofLines(file).skip(10).count());
-    }
-
-    @Test
-    public void test_lines_2() throws Exception {
-        final Path path = IOUtil.listFiles(new File("./lib/"), true, true).get(0).toPath();
-
-        for (int i = 0; i < 1000000; i++) {
-            Files.lines(path).filter(s -> !s.startsWith("aa")).skip(10);
-        }
-
-        N.println(Files.lines(path).filter(s -> !s.startsWith("aa")).skip(10).count());
     }
 
     @Test

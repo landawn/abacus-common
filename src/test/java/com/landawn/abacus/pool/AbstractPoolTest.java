@@ -13,12 +13,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class AbstractPoolTest extends TestBase {
 
     private TestAbstractPool pool;
@@ -90,63 +88,13 @@ public class AbstractPoolTest extends TestBase {
     }
 
     @Test
-    public void testConstructor() {
-        assertNotNull(pool);
-        assertEquals(100, pool.capacity());
-        assertEquals(0, pool.size());
-        assertFalse(pool.isClosed());
-    }
-
-    @Test
-    public void testConstructorWithNegativeCapacity() {
-        assertThrows(IllegalArgumentException.class, () -> new TestAbstractPool(-1, 3000, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f, 0));
-    }
-
-    @Test
-    public void testConstructorWithNegativeEvictDelay() {
-        assertThrows(IllegalArgumentException.class, () -> new TestAbstractPool(100, -1, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f, 0));
-    }
-
-    @Test
-    public void testConstructorWithNegativeBalanceFactor() {
-        assertThrows(IllegalArgumentException.class, () -> new TestAbstractPool(100, 3000, EvictionPolicy.LAST_ACCESS_TIME, true, -0.1f, 0));
-    }
-
-    @Test
-    public void testConstructorWithNegativeMaxMemorySize() {
-        assertThrows(IllegalArgumentException.class, () -> new TestAbstractPool(100, 3000, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f, -1));
-    }
-
-    @Test
-    public void testConstructorWithCustomBalanceFactor() {
-        TestAbstractPool customPool = new TestAbstractPool(100, 3000, EvictionPolicy.LAST_ACCESS_TIME, true, 0.5f, 0);
-        assertEquals(0.5f, customPool.balanceFactor);
-
-        TestAbstractPool defaultPool = new TestAbstractPool(100, 3000, EvictionPolicy.LAST_ACCESS_TIME, true, 0f, 0);
-        assertEquals(AbstractPool.DEFAULT_BALANCE_FACTOR, defaultPool.balanceFactor);
-    }
-
-    @Test
-    public void testConstructorWithNullEvictionPolicy() {
-        TestAbstractPool poolWithNull = new TestAbstractPool(100, 3000, null, true, 0.2f, 0);
-        assertEquals(EvictionPolicy.LAST_ACCESS_TIME, poolWithNull.evictionPolicy);
-    }
-
-    @Test
-    public void testLockAndUnlock() throws InterruptedException {
-        assertFalse(pool.getLock().isLocked());
-
-        pool.lock();
-        assertTrue(pool.getLock().isLocked());
-        assertTrue(pool.getLock().isHeldByCurrentThread());
-
-        pool.unlock();
-        assertFalse(pool.getLock().isLocked());
-    }
-
-    @Test
-    public void testUnlockWithoutLock() {
-        assertThrows(IllegalMonitorStateException.class, () -> pool.unlock());
+    public void testRemoveShutdownHook() {
+        TestAbstractPool hookPool = new TestAbstractPool(10, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f, 0);
+        // removeShutdownHook should not throw when called
+        hookPool.removeShutdownHook();
+        // calling it again after already removed should also not throw
+        hookPool.removeShutdownHook();
+        hookPool.close();
     }
 
     @Test
@@ -159,6 +107,18 @@ public class AbstractPoolTest extends TestBase {
         pool.unlock();
         assertTrue(pool.getLock().isLocked());
         assertEquals(1, pool.getLock().getHoldCount());
+
+        pool.unlock();
+        assertFalse(pool.getLock().isLocked());
+    }
+
+    @Test
+    public void testLockAndUnlock() throws InterruptedException {
+        assertFalse(pool.getLock().isLocked());
+
+        pool.lock();
+        assertTrue(pool.getLock().isLocked());
+        assertTrue(pool.getLock().isHeldByCurrentThread());
 
         pool.unlock();
         assertFalse(pool.getLock().isLocked());
@@ -193,8 +153,40 @@ public class AbstractPoolTest extends TestBase {
     }
 
     @Test
+    public void testUnlockWithoutLock() {
+        assertThrows(IllegalMonitorStateException.class, () -> pool.unlock());
+    }
+
+    @Test
     public void testCapacity() {
         assertEquals(100, pool.capacity());
+    }
+
+    @Test
+    public void testConstructor() {
+        assertNotNull(pool);
+        assertEquals(100, pool.capacity());
+        assertEquals(0, pool.size());
+        assertFalse(pool.isClosed());
+    }
+
+    @Test
+    public void testConstructorWithZeroCapacity() {
+        TestAbstractPool zeroCapPool = new TestAbstractPool(0, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f, 0);
+        assertEquals(0, zeroCapPool.capacity());
+        zeroCapPool.close();
+    }
+
+    @Test
+    public void testStatsWithNoOperations() {
+        PoolStats stats = pool.stats();
+        assertEquals(100, stats.capacity());
+        assertEquals(0, stats.size());
+        assertEquals(0, stats.putCount());
+        assertEquals(0, stats.getCount());
+        assertEquals(0, stats.hitCount());
+        assertEquals(0, stats.missCount());
+        assertEquals(0, stats.evictionCount());
     }
 
     @Test
@@ -227,86 +219,6 @@ public class AbstractPoolTest extends TestBase {
         PoolStats stats = memPool.stats();
         assertEquals(1024 * 1024, stats.maxMemory());
         assertEquals(512 * 1024, stats.dataSize());
-    }
-
-    @Test
-    public void testSize() {
-        assertEquals(0, pool.size());
-        pool.setSize(50);
-        assertEquals(50, pool.size());
-    }
-
-    @Test
-    public void testIsEmpty() {
-        assertTrue(pool.isEmpty());
-        pool.setSize(1);
-        assertFalse(pool.isEmpty());
-        pool.setSize(0);
-        assertTrue(pool.isEmpty());
-    }
-
-    @Test
-    public void testVacate() {
-        pool.setSize(10);
-        assertEquals(10, pool.size());
-        pool.evict();
-        assertEquals(9, pool.size());
-    }
-
-    @Test
-    public void testVacateOnClosedPool() {
-        pool.close();
-        assertThrows(IllegalStateException.class, () -> pool.evict());
-    }
-
-    @Test
-    public void testClear() {
-        pool.setSize(10);
-        assertEquals(10, pool.size());
-        pool.clear();
-        assertEquals(0, pool.size());
-    }
-
-    @Test
-    public void testClearOnClosedPool() {
-        pool.close();
-        assertThrows(IllegalStateException.class, () -> pool.clear());
-    }
-
-    @Test
-    public void testClose() {
-        assertFalse(pool.isClosed());
-        pool.close();
-        assertTrue(pool.isClosed());
-        assertEquals(0, pool.size());
-
-        pool.close();
-        assertTrue(pool.isClosed());
-    }
-
-    @Test
-    public void testIsClosed() {
-        assertFalse(pool.isClosed());
-        pool.close();
-        assertTrue(pool.isClosed());
-    }
-
-    @Test
-    public void testAssertNotClosed() {
-        assertDoesNotThrow(() -> pool.assertNotClosed());
-
-        pool.close();
-        assertThrows(IllegalStateException.class, () -> pool.assertNotClosed());
-    }
-
-    @Test
-    public void testDefaultEvictDelay() {
-        assertEquals(3000, AbstractPool.DEFAULT_EVICT_DELAY);
-    }
-
-    @Test
-    public void testDefaultBalanceFactor() {
-        assertEquals(0.2f, AbstractPool.DEFAULT_BALANCE_FACTOR);
     }
 
     @Test
@@ -351,13 +263,118 @@ public class AbstractPoolTest extends TestBase {
     }
 
     @Test
-    public void testRemoveShutdownHook() {
-        TestAbstractPool hookPool = new TestAbstractPool(10, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f, 0);
-        // removeShutdownHook should not throw when called
-        hookPool.removeShutdownHook();
-        // calling it again after already removed should also not throw
-        hookPool.removeShutdownHook();
-        hookPool.close();
+    public void testIsEmpty() {
+        assertTrue(pool.isEmpty());
+        pool.setSize(1);
+        assertFalse(pool.isEmpty());
+        pool.setSize(0);
+        assertTrue(pool.isEmpty());
+    }
+
+    @Test
+    public void testClose() {
+        assertFalse(pool.isClosed());
+        pool.close();
+        assertTrue(pool.isClosed());
+        assertEquals(0, pool.size());
+
+        pool.close();
+        assertTrue(pool.isClosed());
+    }
+
+    @Test
+    public void testIsClosed() {
+        assertFalse(pool.isClosed());
+        pool.close();
+        assertTrue(pool.isClosed());
+    }
+
+    @Test
+    public void testAssertNotClosed() {
+        assertDoesNotThrow(() -> pool.assertNotClosed());
+
+        pool.close();
+        assertThrows(IllegalStateException.class, () -> pool.assertNotClosed());
+    }
+
+    @Test
+    public void testConstructorWithNegativeCapacity() {
+        assertThrows(IllegalArgumentException.class, () -> new TestAbstractPool(-1, 3000, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f, 0));
+    }
+
+    @Test
+    public void testConstructorWithNegativeEvictDelay() {
+        assertThrows(IllegalArgumentException.class, () -> new TestAbstractPool(100, -1, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f, 0));
+    }
+
+    @Test
+    public void testConstructorWithNegativeBalanceFactor() {
+        assertThrows(IllegalArgumentException.class, () -> new TestAbstractPool(100, 3000, EvictionPolicy.LAST_ACCESS_TIME, true, -0.1f, 0));
+    }
+
+    @Test
+    public void testConstructorWithNegativeMaxMemorySize() {
+        assertThrows(IllegalArgumentException.class, () -> new TestAbstractPool(100, 3000, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f, -1));
+    }
+
+    @Test
+    public void testConstructorWithCustomBalanceFactor() {
+        TestAbstractPool customPool = new TestAbstractPool(100, 3000, EvictionPolicy.LAST_ACCESS_TIME, true, 0.5f, 0);
+        assertEquals(0.5f, customPool.balanceFactor);
+
+        TestAbstractPool defaultPool = new TestAbstractPool(100, 3000, EvictionPolicy.LAST_ACCESS_TIME, true, 0f, 0);
+        assertEquals(AbstractPool.DEFAULT_BALANCE_FACTOR, defaultPool.balanceFactor);
+    }
+
+    @Test
+    public void testConstructorWithNullEvictionPolicy() {
+        TestAbstractPool poolWithNull = new TestAbstractPool(100, 3000, null, true, 0.2f, 0);
+        assertEquals(EvictionPolicy.LAST_ACCESS_TIME, poolWithNull.evictionPolicy);
+    }
+
+    @Test
+    public void testSize() {
+        assertEquals(0, pool.size());
+        pool.setSize(50);
+        assertEquals(50, pool.size());
+    }
+
+    @Test
+    public void testVacate() {
+        pool.setSize(10);
+        assertEquals(10, pool.size());
+        pool.evict();
+        assertEquals(9, pool.size());
+    }
+
+    @Test
+    public void testVacateOnClosedPool() {
+        pool.close();
+        assertThrows(IllegalStateException.class, () -> pool.evict());
+    }
+
+    @Test
+    public void testClear() {
+        pool.setSize(10);
+        assertEquals(10, pool.size());
+        pool.clear();
+        assertEquals(0, pool.size());
+    }
+
+    @Test
+    public void testClearOnClosedPool() {
+        pool.close();
+        assertThrows(IllegalStateException.class, () -> pool.clear());
+    }
+
+    @Test
+    public void testDefaultEvictDelay() {
+        assertEquals(3000, AbstractPool.DEFAULT_EVICT_DELAY);
+    }
+
+    @Test
+    public void testDefaultBalanceFactor() {
+        assertEquals(0.2f, AbstractPool.DEFAULT_BALANCE_FACTOR);
     }
 
     @Test
@@ -373,29 +390,10 @@ public class AbstractPoolTest extends TestBase {
     }
 
     @Test
-    public void testConstructorWithZeroCapacity() {
-        TestAbstractPool zeroCapPool = new TestAbstractPool(0, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f, 0);
-        assertEquals(0, zeroCapPool.capacity());
-        zeroCapPool.close();
-    }
-
-    @Test
     public void testConstructorWithZeroEvictDelay() {
         TestAbstractPool noEvictPool = new TestAbstractPool(10, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f, 0);
         assertEquals(0, noEvictPool.evictDelay);
         noEvictPool.close();
-    }
-
-    @Test
-    public void testStatsWithNoOperations() {
-        PoolStats stats = pool.stats();
-        assertEquals(100, stats.capacity());
-        assertEquals(0, stats.size());
-        assertEquals(0, stats.putCount());
-        assertEquals(0, stats.getCount());
-        assertEquals(0, stats.hitCount());
-        assertEquals(0, stats.missCount());
-        assertEquals(0, stats.evictionCount());
     }
 
     @Test

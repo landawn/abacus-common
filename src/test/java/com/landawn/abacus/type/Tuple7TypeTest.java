@@ -15,21 +15,94 @@
 package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.Tuple;
+import com.landawn.abacus.util.Tuple.Tuple7;
 
-@Tag("2025")
 public class Tuple7TypeTest extends TestBase {
 
     private final Tuple7Type type = new Tuple7Type("String", "String", "String", "String", "String", "String", "String");
+
+    @Test
+    public void test_valueOf_Null() {
+        assertNull(type.valueOf((String) null));
+    }
+
+    @Test
+    public void test_valueOf_Empty() {
+        assertNull(type.valueOf(""));
+    }
+
+    @Test
+    public void test_valueOf_ValidJson() {
+        Tuple7<String, String, String, String, String, String, String> t = Tuple.of("a", "b", "c", "d", "e", "f", "g");
+        String json = type.stringOf(t);
+        @SuppressWarnings("unchecked")
+        Tuple7<String, String, String, String, String, String, String> result = (Tuple7<String, String, String, String, String, String, String>) type
+                .valueOf(json);
+        assertNotNull(result);
+        assertEquals("a", result._1);
+        assertEquals("g", result._7);
+    }
+
+    @Test
+    public void test_appendTo_Null() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        type.appendTo(sb, null);
+        assertEquals("null", sb.toString());
+    }
+
+    @Test
+    public void test_appendTo_WithStringBuilder() throws IOException {
+        Tuple7<String, String, String, String, String, String, String> t = Tuple.of("a", "b", "c", "d", "e", "f", "g");
+        StringBuilder sb = new StringBuilder();
+        type.appendTo(sb, t);
+        String result = sb.toString();
+        assertNotNull(result);
+        assertTrue(result.startsWith("["));
+        assertTrue(result.endsWith("]"));
+        assertTrue(result.contains("a"));
+        assertTrue(result.contains("g"));
+    }
+
+    @Test
+    public void test_appendTo_WithWriter() throws IOException {
+        Tuple7<String, String, String, String, String, String, String> t = Tuple.of("a", "b", "c", "d", "e", "f", "g");
+        StringWriter sw = new StringWriter();
+        type.appendTo(sw, t);
+        String result = sw.toString();
+        assertNotNull(result);
+        assertTrue(result.startsWith("["));
+        assertTrue(result.endsWith("]"));
+    }
+
+    @Test
+    public void test_writeCharacter_Null() throws IOException {
+        var writer = Objectory.createBufferedJsonWriter();
+        assertDoesNotThrow(() -> type.writeCharacter(writer, null, null));
+    }
+
+    @Test
+    public void test_writeCharacter_NonNull() throws IOException {
+        Tuple7<String, String, String, String, String, String, String> t = Tuple.of("a", "b", "c", "d", "e", "f", "g");
+        var writer = Objectory.createBufferedJsonWriter();
+        assertDoesNotThrow(() -> type.writeCharacter(writer, t, null));
+    }
 
     @Test
     public void test_get_ResultSet_byLabel() throws SQLException {

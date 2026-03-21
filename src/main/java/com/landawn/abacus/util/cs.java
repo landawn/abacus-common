@@ -352,6 +352,8 @@ public final class cs { // NOSONAR
     public static final String temporal1 = "temporal1";
     public static final String temporal2 = "temporal2";
 
+    public static final String exceptionHandler = "exceptionHandler";
+
     private cs() {
         // Utility class for constant string values.
     }

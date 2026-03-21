@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -19,7 +18,6 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Indexed;
 
-@Tag("new-test")
 public class IndexedTypeTest extends TestBase {
 
     private IndexedType<String> indexedType;

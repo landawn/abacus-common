@@ -11,12 +11,10 @@ import java.io.Writer;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BufferedWriterTest extends TestBase {
 
     // === Constructors ===
@@ -46,6 +44,67 @@ public class BufferedWriterTest extends TestBase {
         writer.flush();
         writer.close();
         assertEquals("abc", sw.toString());
+    }
+
+    // === Combined writes ===
+
+    @Test
+    public void testCombinedWrites() throws IOException {
+        BufferedWriter writer = new BufferedWriter();
+        writer.write("Name: ");
+        writer.write(true);
+        writer.write(", Age: ");
+        writer.writeInt(25);
+        writer.write(", Score: ");
+        writer.write(99.5);
+        String result = writer.toString();
+        assertEquals("Name: true, Age: 25, Score: 99.5", result);
+    }
+
+    // === Large content to test buffer expansion ===
+
+    @Test
+    public void testLargeContent() throws IOException {
+        BufferedWriter writer = new BufferedWriter();
+        StringBuilder expected = new StringBuilder();
+        for (int i = 0; i < 1000; i++) {
+            String s = "item" + i + ",";
+            writer.write(s);
+            expected.append(s);
+        }
+        assertEquals(expected.toString(), writer.toString());
+    }
+
+    @Test
+    public void testLargeContent_CharArray() throws IOException {
+        BufferedWriter writer = new BufferedWriter();
+        char[] largeArray = new char[10000];
+        java.util.Arrays.fill(largeArray, 'X');
+        writer.write(largeArray);
+        assertEquals(10000, writer.toString().length());
+    }
+
+    // === write(Date) ===
+
+    @Test
+    public void testWriteDate() {
+        BufferedWriter writer = new BufferedWriter();
+        Date date = new Date(0);
+        writer.write(date);
+        String result = writer.toString();
+        assertTrue(result.length() > 0);
+    }
+
+    // === write(Calendar) ===
+
+    @Test
+    public void testWriteCalendar() {
+        BufferedWriter writer = new BufferedWriter();
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(0);
+        writer.write(cal);
+        String result = writer.toString();
+        assertTrue(result.length() > 0);
     }
 
     // === write(boolean) ===
@@ -98,22 +157,6 @@ public class BufferedWriterTest extends TestBase {
         assertEquals("A", writer.toString());
     }
 
-    // === writeInt(int) ===
-
-    @Test
-    public void testWriteInt() throws IOException {
-        BufferedWriter writer = new BufferedWriter();
-        writer.writeInt(12345);
-        assertEquals("12345", writer.toString());
-    }
-
-    @Test
-    public void testWriteInt_Negative() throws IOException {
-        BufferedWriter writer = new BufferedWriter();
-        writer.writeInt(-999);
-        assertEquals("-999", writer.toString());
-    }
-
     // === write(long) ===
 
     @Test
@@ -139,29 +182,6 @@ public class BufferedWriterTest extends TestBase {
         BufferedWriter writer = new BufferedWriter();
         writer.write(3.14159);
         assertEquals("3.14159", writer.toString());
-    }
-
-    // === write(Date) ===
-
-    @Test
-    public void testWriteDate() {
-        BufferedWriter writer = new BufferedWriter();
-        Date date = new Date(0);
-        writer.write(date);
-        String result = writer.toString();
-        assertTrue(result.length() > 0);
-    }
-
-    // === write(Calendar) ===
-
-    @Test
-    public void testWriteCalendar() {
-        BufferedWriter writer = new BufferedWriter();
-        Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(0);
-        writer.write(cal);
-        String result = writer.toString();
-        assertTrue(result.length() > 0);
     }
 
     // === write(char) ===
@@ -235,6 +255,48 @@ public class BufferedWriterTest extends TestBase {
         assertEquals("", writer.toString());
     }
 
+    // Exercise package-private writer pooling and reset paths directly.
+
+    @Test
+    public void testWriteNonNull_WithExternalWriter_BufferedAndDirect() throws IOException {
+        StringWriter sw = new StringWriter();
+        BufferedWriter writer = new BufferedWriter(sw);
+        String large = "Z".repeat(Objectory.BUFFER_SIZE + 5);
+
+        writer.writeNonNull("ab", 0, 2);
+        writer.writeNonNull(large, 0, large.length());
+        writer.flush();
+
+        assertEquals("ab" + large, sw.toString());
+    }
+
+    @Test
+    public void testReinit_InternalBufferAfterExternalWriter() throws IOException {
+        StringWriter sw = new StringWriter();
+        BufferedWriter writer = new BufferedWriter(sw);
+        writer.write("before");
+        writer.flush();
+
+        writer.reinit();
+        writer.write("after");
+
+        assertEquals("before", sw.toString());
+        assertEquals("after", writer.toString());
+    }
+
+    @Test
+    public void testReinit_WriterClearsInternalBuffer() throws IOException {
+        BufferedWriter writer = new BufferedWriter();
+        writer.write("internal");
+
+        StringWriter sw = new StringWriter();
+        writer.reinit(sw);
+        writer.write("external");
+        writer.flush();
+
+        assertEquals("external", sw.toString());
+    }
+
     // === write(char[]) ===
 
     @Test
@@ -275,6 +337,59 @@ public class BufferedWriterTest extends TestBase {
         BufferedWriter writer = new BufferedWriter();
         writer.write(new char[] { 'a', 'b' }, 0, 0);
         assertEquals("", writer.toString());
+    }
+
+    // === Write with external writer large content ===
+
+    @Test
+    public void testWriteString_ExternalWriter_LargeContent() throws IOException {
+        StringWriter sw = new StringWriter();
+        BufferedWriter writer = new BufferedWriter(sw);
+        StringBuilder expected = new StringBuilder();
+        for (int i = 0; i < 1000; i++) {
+            String s = "data" + i;
+            writer.write(s);
+            expected.append(s);
+        }
+        writer.flush();
+        writer.close();
+        assertEquals(expected.toString(), sw.toString());
+    }
+
+    @Test
+    public void testWriteCharArray_ExternalWriter_LargeContent() throws IOException {
+        StringWriter sw = new StringWriter();
+        BufferedWriter writer = new BufferedWriter(sw);
+        char[] largeArray = new char[10000];
+        java.util.Arrays.fill(largeArray, 'Y');
+        writer.write(largeArray);
+        writer.flush();
+        writer.close();
+        assertEquals(10000, sw.toString().length());
+    }
+
+    // === DummyWriter ===
+
+    @Test
+    public void testDummyWriter_write() {
+        BufferedWriter.DummyWriter dw = new BufferedWriter.DummyWriter();
+        assertThrows(UnsupportedOperationException.class, () -> dw.write(new char[] { 'a' }, 0, 1));
+    }
+
+    // === writeInt(int) ===
+
+    @Test
+    public void testWriteInt() throws IOException {
+        BufferedWriter writer = new BufferedWriter();
+        writer.writeInt(12345);
+        assertEquals("12345", writer.toString());
+    }
+
+    @Test
+    public void testWriteInt_Negative() throws IOException {
+        BufferedWriter writer = new BufferedWriter();
+        writer.writeInt(-999);
+        assertEquals("-999", writer.toString());
     }
 
     // === newLine() ===
@@ -345,6 +460,21 @@ public class BufferedWriterTest extends TestBase {
         assertEquals("data", sw.toString());
     }
 
+    @Test
+    public void testDummyWriter_flush() {
+        BufferedWriter.DummyWriter dw = new BufferedWriter.DummyWriter();
+        assertThrows(UnsupportedOperationException.class, () -> dw.flush());
+    }
+
+    // === ensureOpen() ===
+
+    @Test
+    public void testEnsureOpen_Closed() throws IOException {
+        BufferedWriter writer = new BufferedWriter();
+        writer.close();
+        assertThrows(IOException.class, () -> writer.write('a'));
+    }
+
     // === close() ===
 
     @Test
@@ -371,6 +501,18 @@ public class BufferedWriterTest extends TestBase {
         assertThrows(IOException.class, () -> writer.write("more"));
     }
 
+    @Test
+    public void testDummyWriter_close() {
+        BufferedWriter.DummyWriter dw = new BufferedWriter.DummyWriter();
+        assertThrows(UnsupportedOperationException.class, () -> dw.close());
+    }
+
+    @Test
+    public void testToString_Empty() {
+        BufferedWriter writer = new BufferedWriter();
+        assertEquals("", writer.toString());
+    }
+
     // === toString() ===
 
     @Test
@@ -382,114 +524,12 @@ public class BufferedWriterTest extends TestBase {
     }
 
     @Test
-    public void testToString_Empty() {
-        BufferedWriter writer = new BufferedWriter();
-        assertEquals("", writer.toString());
-    }
-
-    @Test
     public void testToString_WithExternalWriter() throws IOException {
         StringWriter sw = new StringWriter();
         BufferedWriter writer = new BufferedWriter(sw);
         writer.write("test");
         String result = writer.toString();
         assertEquals("test", result);
-    }
-
-    // === ensureOpen() ===
-
-    @Test
-    public void testEnsureOpen_Closed() throws IOException {
-        BufferedWriter writer = new BufferedWriter();
-        writer.close();
-        assertThrows(IOException.class, () -> writer.write('a'));
-    }
-
-    // === Combined writes ===
-
-    @Test
-    public void testCombinedWrites() throws IOException {
-        BufferedWriter writer = new BufferedWriter();
-        writer.write("Name: ");
-        writer.write(true);
-        writer.write(", Age: ");
-        writer.writeInt(25);
-        writer.write(", Score: ");
-        writer.write(99.5);
-        String result = writer.toString();
-        assertEquals("Name: true, Age: 25, Score: 99.5", result);
-    }
-
-    // === Large content to test buffer expansion ===
-
-    @Test
-    public void testLargeContent() throws IOException {
-        BufferedWriter writer = new BufferedWriter();
-        StringBuilder expected = new StringBuilder();
-        for (int i = 0; i < 1000; i++) {
-            String s = "item" + i + ",";
-            writer.write(s);
-            expected.append(s);
-        }
-        assertEquals(expected.toString(), writer.toString());
-    }
-
-    @Test
-    public void testLargeContent_CharArray() throws IOException {
-        BufferedWriter writer = new BufferedWriter();
-        char[] largeArray = new char[10000];
-        java.util.Arrays.fill(largeArray, 'X');
-        writer.write(largeArray);
-        assertEquals(10000, writer.toString().length());
-    }
-
-    // === Write with external writer large content ===
-
-    @Test
-    public void testWriteString_ExternalWriter_LargeContent() throws IOException {
-        StringWriter sw = new StringWriter();
-        BufferedWriter writer = new BufferedWriter(sw);
-        StringBuilder expected = new StringBuilder();
-        for (int i = 0; i < 1000; i++) {
-            String s = "data" + i;
-            writer.write(s);
-            expected.append(s);
-        }
-        writer.flush();
-        writer.close();
-        assertEquals(expected.toString(), sw.toString());
-    }
-
-    @Test
-    public void testWriteCharArray_ExternalWriter_LargeContent() throws IOException {
-        StringWriter sw = new StringWriter();
-        BufferedWriter writer = new BufferedWriter(sw);
-        char[] largeArray = new char[10000];
-        java.util.Arrays.fill(largeArray, 'Y');
-        writer.write(largeArray);
-        writer.flush();
-        writer.close();
-        assertEquals(10000, sw.toString().length());
-    }
-
-    // === DummyWriter ===
-
-    @Test
-    public void testDummyWriter_write() {
-        BufferedWriter.DummyWriter dw = new BufferedWriter.DummyWriter();
-        assertThrows(UnsupportedOperationException.class, () -> dw.write(new char[] { 'a' }, 0, 1));
-    }
-
-    @Test
-    public void testDummyWriter_flush() {
-        BufferedWriter.DummyWriter dw = new BufferedWriter.DummyWriter();
-        assertThrows(UnsupportedOperationException.class, () -> dw.flush());
-    }
-
-    @Test
-    public void testDummyWriter_close() {
-        BufferedWriter.DummyWriter dw = new BufferedWriter.DummyWriter();
-        assertThrows(UnsupportedOperationException.class, () -> dw.close());
     }
 
     // === Class structure ===

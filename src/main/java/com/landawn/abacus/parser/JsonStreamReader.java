@@ -30,10 +30,26 @@ import com.landawn.abacus.util.SK;
  */
 class JsonStreamReader extends JsonStringReader {
 
+    /**
+     * Constructs a new {@code JsonStreamReader} with the specified reader and buffers.
+     *
+     * @param reader the character stream source
+     * @param rbuf the read buffer for streaming input
+     * @param cbuf the character buffer for token processing
+     */
     JsonStreamReader(final Reader reader, final char[] rbuf, final char[] cbuf) {
         super(rbuf, 0, 0, cbuf, reader);
     }
 
+    /**
+     * Constructs a new {@code JsonStreamReader} with the specified reader, buffers, and range.
+     *
+     * @param reader the character stream source
+     * @param rbuf the read buffer for streaming input
+     * @param beginIndex the starting index in the read buffer
+     * @param toIndex the ending index in the read buffer
+     * @param cbuf the character buffer for token processing
+     */
     JsonStreamReader(final Reader reader, final char[] rbuf, final int beginIndex, final int toIndex, final char[] cbuf) {
         super(rbuf, beginIndex, toIndex, cbuf, reader);
     }
@@ -44,14 +60,16 @@ class JsonStreamReader extends JsonStringReader {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Reader reader = new FileReader("data.json");
-     * JsonReader jsonReader = JsonStreamReader.parse(reader, new char[8192], new char[8192]);
+     * try (Reader reader = new FileReader("data.json")) {
+     *     JsonReader jsonReader = JsonStreamReader.parse(reader, new char[8192], new char[8192]);
+     *     // ... use jsonReader ...
+     * }
      * }</pre>
      *
      * @param reader the character stream containing JSON content to parse
      * @param rbuf the read buffer for streaming input (recommended size: 8192 or larger)
      * @param cbuf the character buffer for token processing (recommended size: 8192 or larger)
-     * @return a JsonReader instance configured for streaming JSON parsing
+     * @return a {@code JsonReader} instance configured for streaming JSON parsing
      * @throws UncheckedIOException if an I/O error occurs during initial setup
      */
     public static JsonReader parse(final Reader reader, final char[] rbuf, final char[] cbuf) {
@@ -60,7 +78,7 @@ class JsonStreamReader extends JsonStringReader {
     }
 
     /**
-     * Reads and returns the next token from the JSON input.
+     * Reads and returns the next token identifier from the JSON input.
      * This method advances the reader position and identifies the next
      * structural token or value in the JSON stream.
      * 
@@ -327,6 +345,11 @@ class JsonStreamReader extends JsonStringReader {
         return super.saveChar(ch);
     }
 
+    /**
+     * Reads the next character from the input source, refilling the buffer if necessary.
+     * 
+     * @return the next character, or -1 if the end of the input is reached
+     */
     protected int nextChar() {
         if (strBeginIndex >= strEndIndex) {
             refill();
@@ -406,6 +429,11 @@ class JsonStreamReader extends JsonStringReader {
         }
     }
 
+    /**
+     * Refills the internal read buffer from the underlying reader.
+     * 
+     * @throws UncheckedIOException if an I/O error occurs
+     */
     protected void refill() {
         if (strBeginIndex >= strEndIndex) {
             if (nextChar == 0) {

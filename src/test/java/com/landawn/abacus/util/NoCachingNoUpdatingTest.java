@@ -32,7 +32,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -52,7 +51,6 @@ import com.landawn.abacus.util.NoCachingNoUpdating.DisposableShortArray;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableTriple;
 import com.landawn.abacus.util.NoCachingNoUpdating.Timed;
 
-@Tag("2025")
 public class NoCachingNoUpdatingTest extends TestBase {
 
     private NoCachingNoUpdating.DisposableArray<String> disposableArray;
@@ -79,6 +77,34 @@ public class NoCachingNoUpdatingTest extends TestBase {
         value = "test-value";
         timestamp = System.currentTimeMillis();
         timed = NoCachingNoUpdating.Timed.of(value, timestamp);
+    }
+
+    private static String[] disposableArrayFixtureSource() {
+        return new String[] { "a", "b", "c" };
+    }
+
+    private static DisposableArray<String> disposableArrayFixture() {
+        return DisposableArray.wrap(disposableArrayFixtureSource());
+    }
+
+    private static DisposableDeque<Integer> disposableDequeFixture() {
+        return DisposableDeque.wrap(new ArrayDeque<>(Arrays.asList(1, 2, 3)));
+    }
+
+    private static DisposableEntry<String, Integer> disposableEntryFixture() {
+        return DisposableEntry.wrap(new AbstractMap.SimpleEntry<>("key", 123));
+    }
+
+    private static String timedFixtureValue() {
+        return "test-value";
+    }
+
+    private static long timedFixtureTimestamp() {
+        return 12345L;
+    }
+
+    private static Timed<String> timedFixture() {
+        return Timed.of(timedFixtureValue(), timedFixtureTimestamp());
     }
 
     @Test
@@ -2256,34 +2282,6 @@ public class NoCachingNoUpdatingTest extends TestBase {
         String result = timed.toString();
         assertNotNull(result);
         assertTrue(result.contains("12345"));
-    }
-
-    private static String[] disposableArrayFixtureSource() {
-        return new String[] { "a", "b", "c" };
-    }
-
-    private static DisposableArray<String> disposableArrayFixture() {
-        return DisposableArray.wrap(disposableArrayFixtureSource());
-    }
-
-    private static DisposableDeque<Integer> disposableDequeFixture() {
-        return DisposableDeque.wrap(new ArrayDeque<>(Arrays.asList(1, 2, 3)));
-    }
-
-    private static DisposableEntry<String, Integer> disposableEntryFixture() {
-        return DisposableEntry.wrap(new AbstractMap.SimpleEntry<>("key", 123));
-    }
-
-    private static String timedFixtureValue() {
-        return "test-value";
-    }
-
-    private static long timedFixtureTimestamp() {
-        return 12345L;
-    }
-
-    private static Timed<String> timedFixture() {
-        return Timed.of(timedFixtureValue(), timedFixtureTimestamp());
     }
 
     @Test

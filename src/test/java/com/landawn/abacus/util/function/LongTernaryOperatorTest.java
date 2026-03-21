@@ -3,13 +3,15 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class LongTernaryOperatorTest extends TestBase {
+
+    private long sumThree(final long a, final long b, final long c) {
+        return a + b + c;
+    }
 
     @Test
     public void testApplyAsLong() {
@@ -51,18 +53,6 @@ public class LongTernaryOperatorTest extends TestBase {
     }
 
     @Test
-    public void testApplyAsLong_max() {
-        final LongTernaryOperator max = (a, b, c) -> Math.max(a, Math.max(b, c));
-        assertEquals(100L, max.applyAsLong(5L, 100L, 50L));
-    }
-
-    @Test
-    public void testApplyAsLong_min() {
-        final LongTernaryOperator min = (a, b, c) -> Math.min(a, Math.min(b, c));
-        assertEquals(5L, min.applyAsLong(5L, 100L, 50L));
-    }
-
-    @Test
     public void testApplyAsLong_median() {
         final LongTernaryOperator median = (a, b, c) -> {
             if ((a >= b && a <= c) || (a <= b && a >= c))
@@ -72,18 +62,6 @@ public class LongTernaryOperatorTest extends TestBase {
             return c;
         };
         assertEquals(50L, median.applyAsLong(5L, 100L, 50L));
-    }
-
-    @Test
-    public void testApplyAsLong_withNegativeValues() {
-        final LongTernaryOperator operator = (a, b, c) -> a + b + c;
-        assertEquals(-60L, operator.applyAsLong(-10L, -20L, -30L));
-    }
-
-    @Test
-    public void testApplyAsLong_withZeroValues() {
-        final LongTernaryOperator operator = (a, b, c) -> a * b * c;
-        assertEquals(0L, operator.applyAsLong(0L, 5L, 10L));
     }
 
     @Test
@@ -99,19 +77,39 @@ public class LongTernaryOperatorTest extends TestBase {
     }
 
     @Test
-    public void testFunctionalInterfaceContract() {
-        final LongTernaryOperator operator = (a, b, c) -> a + b + c;
-        assertNotNull(operator);
-        assertEquals(60L, operator.applyAsLong(10L, 20L, 30L));
-    }
-
-    @Test
     public void testMethodReference() {
         final LongTernaryOperator operator = this::sumThree;
         assertEquals(30L, operator.applyAsLong(5L, 10L, 15L));
     }
 
-    private long sumThree(final long a, final long b, final long c) {
-        return a + b + c;
+    @Test
+    public void testApplyAsLong_max() {
+        final LongTernaryOperator max = (a, b, c) -> Math.max(a, Math.max(b, c));
+        assertEquals(100L, max.applyAsLong(5L, 100L, 50L));
+    }
+
+    @Test
+    public void testApplyAsLong_min() {
+        final LongTernaryOperator min = (a, b, c) -> Math.min(a, Math.min(b, c));
+        assertEquals(5L, min.applyAsLong(5L, 100L, 50L));
+    }
+
+    @Test
+    public void testApplyAsLong_withNegativeValues() {
+        final LongTernaryOperator operator = (a, b, c) -> a + b + c;
+        assertEquals(-60L, operator.applyAsLong(-10L, -20L, -30L));
+    }
+
+    @Test
+    public void testApplyAsLong_withZeroValues() {
+        final LongTernaryOperator operator = (a, b, c) -> a * b * c;
+        assertEquals(0L, operator.applyAsLong(0L, 5L, 10L));
+    }
+
+    @Test
+    public void testFunctionalInterfaceContract() {
+        final LongTernaryOperator operator = (a, b, c) -> a + b + c;
+        assertNotNull(operator);
+        assertEquals(60L, operator.applyAsLong(10L, 20L, 30L));
     }
 }

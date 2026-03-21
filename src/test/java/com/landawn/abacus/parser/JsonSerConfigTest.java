@@ -13,13 +13,11 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.DateTimeFormat;
 
-@Tag("2025")
 public class JsonSerConfigTest extends TestBase {
 
     private JsonSerConfig config;
@@ -27,6 +25,22 @@ public class JsonSerConfigTest extends TestBase {
     @BeforeEach
     void setUp() {
         config = JsonSerConfig.create();
+    }
+
+    @Test
+    public void test_prettyFormat() {
+        JsonSerConfig config = new JsonSerConfig();
+        assertFalse(config.isPrettyFormat());
+
+        config.setPrettyFormat(true);
+        assertTrue(config.isPrettyFormat());
+    }
+
+    @Test
+    public void test_setDateTimeFormat() {
+        JsonSerConfig config = new JsonSerConfig();
+        config.setDateTimeFormat(DateTimeFormat.ISO_8601_DATE_TIME);
+        assertEquals(DateTimeFormat.ISO_8601_DATE_TIME, config.getDateTimeFormat());
     }
 
     @Test
@@ -39,12 +53,6 @@ public class JsonSerConfigTest extends TestBase {
         assertFalse(config.isWrapRootValue());
         assertFalse(config.isWriteNullToEmpty());
         assertFalse(config.isWriteDatasetByRow());
-    }
-
-    @Test
-    public void test_JSC_create() {
-        JsonSerConfig config = JsonSerConfig.create();
-        assertNotNull(config);
     }
 
     @Test
@@ -131,102 +139,6 @@ public class JsonSerConfigTest extends TestBase {
         JsonSerConfig result = config.setWrapRootValue(true);
         assertSame(config, result);
         assertTrue(config.isWrapRootValue());
-    }
-
-    @Test
-    public void test_JSC_of_quotePropName_quoteMapKey() {
-        JsonSerConfig config = JsonSerConfig.create().setQuotePropName(true).setQuoteMapKey(false);
-        assertNotNull(config);
-        assertTrue(config.isQuotePropName());
-        assertFalse(config.isQuoteMapKey());
-    }
-
-    @Test
-    public void test_JSC_of_dateTimeFormat() {
-        JsonSerConfig config = JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP);
-        assertNotNull(config);
-        assertEquals(DateTimeFormat.ISO_8601_TIMESTAMP, config.getDateTimeFormat());
-    }
-
-    @Test
-    public void test_JSC_of_exclusion_ignoredPropNames() {
-        Map<Class<?>, Set<String>> ignoredPropNames = new HashMap<>();
-        Set<String> props = new HashSet<>();
-        props.add("prop1");
-        ignoredPropNames.put(String.class, props);
-
-        JsonSerConfig config = JsonSerConfig.create().setExclusion(Exclusion.NULL).setIgnoredPropNames(ignoredPropNames);
-        assertNotNull(config);
-        assertEquals(Exclusion.NULL, config.getExclusion());
-        assertNotNull(config.getIgnoredPropNames());
-    }
-
-    @Test
-    public void test_JSC_of_all_parameters() {
-        Map<Class<?>, Set<String>> ignoredPropNames = new HashMap<>();
-        Set<String> props = new HashSet<>();
-        props.add("prop1");
-        ignoredPropNames.put(String.class, props);
-
-        JsonSerConfig config = JsonSerConfig.create()
-                .setQuotePropName(true)
-                .setQuoteMapKey(false)
-                .setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP)
-                .setExclusion(Exclusion.NULL)
-                .setIgnoredPropNames(ignoredPropNames);
-        assertNotNull(config);
-        assertTrue(config.isQuotePropName());
-        assertFalse(config.isQuoteMapKey());
-        assertEquals(DateTimeFormat.ISO_8601_TIMESTAMP, config.getDateTimeFormat());
-        assertEquals(Exclusion.NULL, config.getExclusion());
-    }
-
-    @Test
-    public void test_equals() {
-        JsonSerConfig config1 = new JsonSerConfig();
-        JsonSerConfig config2 = new JsonSerConfig();
-
-        assertTrue(config1.equals(config1));
-        assertTrue(config1.equals(config2));
-
-        config2.setQuotePropName(false);
-        assertFalse(config1.equals(config2));
-
-        assertFalse(config1.equals(null));
-        assertFalse(config1.equals("not a config"));
-    }
-
-    @Test
-    public void test_hashCode() {
-        JsonSerConfig config1 = new JsonSerConfig();
-        JsonSerConfig config2 = new JsonSerConfig();
-
-        assertEquals(config1.hashCode(), config2.hashCode());
-    }
-
-    @Test
-    public void test_toString() {
-        JsonSerConfig config = new JsonSerConfig();
-        String str = config.toString();
-        assertNotNull(str);
-        assertTrue(str.contains("quotePropName"));
-        assertTrue(str.contains("quoteMapKey"));
-    }
-
-    @Test
-    public void test_prettyFormat() {
-        JsonSerConfig config = new JsonSerConfig();
-        assertFalse(config.isPrettyFormat());
-
-        config.setPrettyFormat(true);
-        assertTrue(config.isPrettyFormat());
-    }
-
-    @Test
-    public void test_setDateTimeFormat() {
-        JsonSerConfig config = new JsonSerConfig();
-        config.setDateTimeFormat(DateTimeFormat.ISO_8601_DATE_TIME);
-        assertEquals(DateTimeFormat.ISO_8601_DATE_TIME, config.getDateTimeFormat());
     }
 
     @Test
@@ -362,6 +274,14 @@ public class JsonSerConfigTest extends TestBase {
     }
 
     @Test
+    public void test_hashCode() {
+        JsonSerConfig config1 = new JsonSerConfig();
+        JsonSerConfig config2 = new JsonSerConfig();
+
+        assertEquals(config1.hashCode(), config2.hashCode());
+    }
+
+    @Test
     public void testHashCode() {
         JsonSerConfig config1 = new JsonSerConfig();
         JsonSerConfig config2 = new JsonSerConfig();
@@ -373,75 +293,37 @@ public class JsonSerConfigTest extends TestBase {
     }
 
     @Test
-    public void testEquals() {
-        JsonSerConfig config1 = new JsonSerConfig();
-        JsonSerConfig config2 = new JsonSerConfig();
+    public void testHashCodeVariesByField() {
+        JsonSerConfig base = new JsonSerConfig();
+        int baseHash = base.hashCode();
 
-        Assertions.assertEquals(config1, config1);
-        Assertions.assertEquals(config1, config2);
-        Assertions.assertNotEquals(config1, null);
-        Assertions.assertNotEquals(config1, "string");
+        JsonSerConfig modified = new JsonSerConfig();
+        modified.setWriteNullToEmpty(true);
+        Assertions.assertNotEquals(baseHash, modified.hashCode());
 
-        config1.setQuotePropName(false);
-        Assertions.assertNotEquals(config1, config2);
+        modified = new JsonSerConfig();
+        modified.setWriteDatasetByRow(true);
+        Assertions.assertNotEquals(baseHash, modified.hashCode());
 
-        config2.setQuotePropName(false);
-        Assertions.assertEquals(config1, config2);
-    }
+        modified = new JsonSerConfig();
+        modified.setWriteRowColumnKeyType(true);
+        Assertions.assertNotEquals(baseHash, modified.hashCode());
 
-    @Test
-    public void testToString() {
-        String str = config.toString();
-        Assertions.assertNotNull(str);
-        Assertions.assertTrue(str.contains("quotePropName="));
-        Assertions.assertTrue(str.contains("quoteMapKey="));
-        Assertions.assertTrue(str.contains("bracketRootValue="));
-        Assertions.assertTrue(str.contains("wrapRootValue="));
-    }
+        modified = new JsonSerConfig();
+        modified.setWriteColumnType(true);
+        Assertions.assertNotEquals(baseHash, modified.hashCode());
 
-    @Test
-    public void testJSCCreate() {
-        JsonSerConfig config = JsonSerConfig.create();
-        Assertions.assertNotNull(config);
-        Assertions.assertTrue(config.isQuotePropName());
-        Assertions.assertTrue(config.isQuoteMapKey());
-    }
+        modified = new JsonSerConfig();
+        modified.setQuoteMapKey(false);
+        Assertions.assertNotEquals(baseHash, modified.hashCode());
 
-    @Test
-    public void testJSCOf() {
-        JsonSerConfig config1 = JsonSerConfig.create().setQuotePropName(false).setQuoteMapKey(true);
-        Assertions.assertFalse(config1.isQuotePropName());
-        Assertions.assertTrue(config1.isQuoteMapKey());
+        modified = new JsonSerConfig();
+        modified.setBracketRootValue(false);
+        Assertions.assertNotEquals(baseHash, modified.hashCode());
 
-        JsonSerConfig config2 = JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_DATE_TIME);
-        Assertions.assertEquals(DateTimeFormat.ISO_8601_DATE_TIME, config2.getDateTimeFormat());
-
-        Map<Class<?>, Set<String>> ignoredProps = new HashMap<>();
-        ignoredProps.put(String.class, new HashSet<>());
-        JsonSerConfig config3 = JsonSerConfig.create().setExclusion(Exclusion.NULL).setIgnoredPropNames(ignoredProps);
-        Assertions.assertEquals(Exclusion.NULL, config3.getExclusion());
-
-        JsonSerConfig config4 = JsonSerConfig.create()
-                .setQuotePropName(true)
-                .setQuoteMapKey(false)
-                .setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP)
-                .setExclusion(Exclusion.NULL)
-                .setIgnoredPropNames(ignoredProps);
-        Assertions.assertTrue(config4.isQuotePropName());
-        Assertions.assertFalse(config4.isQuoteMapKey());
-        Assertions.assertEquals(DateTimeFormat.ISO_8601_TIMESTAMP, config4.getDateTimeFormat());
-        Assertions.assertEquals(Exclusion.NULL, config4.getExclusion());
-    }
-
-    @Test
-    public void testEqualsWithWriteNullToEmpty() {
-        JsonSerConfig c1 = new JsonSerConfig();
-        JsonSerConfig c2 = new JsonSerConfig();
-        c2.setWriteNullToEmpty(true);
-        Assertions.assertNotEquals(c1, c2);
-
-        c1.setWriteNullToEmpty(true);
-        Assertions.assertEquals(c1, c2);
+        modified = new JsonSerConfig();
+        modified.setWrapRootValue(true);
+        Assertions.assertNotEquals(baseHash, modified.hashCode());
     }
 
     @Test
@@ -502,37 +384,65 @@ public class JsonSerConfigTest extends TestBase {
     }
 
     @Test
-    public void testHashCodeVariesByField() {
-        JsonSerConfig base = new JsonSerConfig();
-        int baseHash = base.hashCode();
+    public void test_equals() {
+        JsonSerConfig config1 = new JsonSerConfig();
+        JsonSerConfig config2 = new JsonSerConfig();
 
-        JsonSerConfig modified = new JsonSerConfig();
-        modified.setWriteNullToEmpty(true);
-        Assertions.assertNotEquals(baseHash, modified.hashCode());
+        assertTrue(config1.equals(config1));
+        assertTrue(config1.equals(config2));
 
-        modified = new JsonSerConfig();
-        modified.setWriteDatasetByRow(true);
-        Assertions.assertNotEquals(baseHash, modified.hashCode());
+        config2.setQuotePropName(false);
+        assertFalse(config1.equals(config2));
 
-        modified = new JsonSerConfig();
-        modified.setWriteRowColumnKeyType(true);
-        Assertions.assertNotEquals(baseHash, modified.hashCode());
+        assertFalse(config1.equals(null));
+        assertFalse(config1.equals("not a config"));
+    }
 
-        modified = new JsonSerConfig();
-        modified.setWriteColumnType(true);
-        Assertions.assertNotEquals(baseHash, modified.hashCode());
+    @Test
+    public void testEquals() {
+        JsonSerConfig config1 = new JsonSerConfig();
+        JsonSerConfig config2 = new JsonSerConfig();
 
-        modified = new JsonSerConfig();
-        modified.setQuoteMapKey(false);
-        Assertions.assertNotEquals(baseHash, modified.hashCode());
+        Assertions.assertEquals(config1, config1);
+        Assertions.assertEquals(config1, config2);
+        Assertions.assertNotEquals(config1, null);
+        Assertions.assertNotEquals(config1, "string");
 
-        modified = new JsonSerConfig();
-        modified.setBracketRootValue(false);
-        Assertions.assertNotEquals(baseHash, modified.hashCode());
+        config1.setQuotePropName(false);
+        Assertions.assertNotEquals(config1, config2);
 
-        modified = new JsonSerConfig();
-        modified.setWrapRootValue(true);
-        Assertions.assertNotEquals(baseHash, modified.hashCode());
+        config2.setQuotePropName(false);
+        Assertions.assertEquals(config1, config2);
+    }
+
+    @Test
+    public void testEqualsWithWriteNullToEmpty() {
+        JsonSerConfig c1 = new JsonSerConfig();
+        JsonSerConfig c2 = new JsonSerConfig();
+        c2.setWriteNullToEmpty(true);
+        Assertions.assertNotEquals(c1, c2);
+
+        c1.setWriteNullToEmpty(true);
+        Assertions.assertEquals(c1, c2);
+    }
+
+    @Test
+    public void test_toString() {
+        JsonSerConfig config = new JsonSerConfig();
+        String str = config.toString();
+        assertNotNull(str);
+        assertTrue(str.contains("quotePropName"));
+        assertTrue(str.contains("quoteMapKey"));
+    }
+
+    @Test
+    public void testToString() {
+        String str = config.toString();
+        Assertions.assertNotNull(str);
+        Assertions.assertTrue(str.contains("quotePropName="));
+        Assertions.assertTrue(str.contains("quoteMapKey="));
+        Assertions.assertTrue(str.contains("bracketRootValue="));
+        Assertions.assertTrue(str.contains("wrapRootValue="));
     }
 
     @Test
@@ -548,6 +458,94 @@ public class JsonSerConfigTest extends TestBase {
         Assertions.assertTrue(str.contains("supportCircularReference="));
         Assertions.assertTrue(str.contains("indentation="));
         Assertions.assertTrue(str.contains("propNamingPolicy="));
+    }
+
+    @Test
+    public void test_JSC_create() {
+        JsonSerConfig config = JsonSerConfig.create();
+        assertNotNull(config);
+    }
+
+    @Test
+    public void test_JSC_of_quotePropName_quoteMapKey() {
+        JsonSerConfig config = JsonSerConfig.create().setQuotePropName(true).setQuoteMapKey(false);
+        assertNotNull(config);
+        assertTrue(config.isQuotePropName());
+        assertFalse(config.isQuoteMapKey());
+    }
+
+    @Test
+    public void test_JSC_of_dateTimeFormat() {
+        JsonSerConfig config = JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP);
+        assertNotNull(config);
+        assertEquals(DateTimeFormat.ISO_8601_TIMESTAMP, config.getDateTimeFormat());
+    }
+
+    @Test
+    public void test_JSC_of_exclusion_ignoredPropNames() {
+        Map<Class<?>, Set<String>> ignoredPropNames = new HashMap<>();
+        Set<String> props = new HashSet<>();
+        props.add("prop1");
+        ignoredPropNames.put(String.class, props);
+
+        JsonSerConfig config = JsonSerConfig.create().setExclusion(Exclusion.NULL).setIgnoredPropNames(ignoredPropNames);
+        assertNotNull(config);
+        assertEquals(Exclusion.NULL, config.getExclusion());
+        assertNotNull(config.getIgnoredPropNames());
+    }
+
+    @Test
+    public void test_JSC_of_all_parameters() {
+        Map<Class<?>, Set<String>> ignoredPropNames = new HashMap<>();
+        Set<String> props = new HashSet<>();
+        props.add("prop1");
+        ignoredPropNames.put(String.class, props);
+
+        JsonSerConfig config = JsonSerConfig.create()
+                .setQuotePropName(true)
+                .setQuoteMapKey(false)
+                .setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP)
+                .setExclusion(Exclusion.NULL)
+                .setIgnoredPropNames(ignoredPropNames);
+        assertNotNull(config);
+        assertTrue(config.isQuotePropName());
+        assertFalse(config.isQuoteMapKey());
+        assertEquals(DateTimeFormat.ISO_8601_TIMESTAMP, config.getDateTimeFormat());
+        assertEquals(Exclusion.NULL, config.getExclusion());
+    }
+
+    @Test
+    public void testJSCCreate() {
+        JsonSerConfig config = JsonSerConfig.create();
+        Assertions.assertNotNull(config);
+        Assertions.assertTrue(config.isQuotePropName());
+        Assertions.assertTrue(config.isQuoteMapKey());
+    }
+
+    @Test
+    public void testJSCOf() {
+        JsonSerConfig config1 = JsonSerConfig.create().setQuotePropName(false).setQuoteMapKey(true);
+        Assertions.assertFalse(config1.isQuotePropName());
+        Assertions.assertTrue(config1.isQuoteMapKey());
+
+        JsonSerConfig config2 = JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_DATE_TIME);
+        Assertions.assertEquals(DateTimeFormat.ISO_8601_DATE_TIME, config2.getDateTimeFormat());
+
+        Map<Class<?>, Set<String>> ignoredProps = new HashMap<>();
+        ignoredProps.put(String.class, new HashSet<>());
+        JsonSerConfig config3 = JsonSerConfig.create().setExclusion(Exclusion.NULL).setIgnoredPropNames(ignoredProps);
+        Assertions.assertEquals(Exclusion.NULL, config3.getExclusion());
+
+        JsonSerConfig config4 = JsonSerConfig.create()
+                .setQuotePropName(true)
+                .setQuoteMapKey(false)
+                .setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP)
+                .setExclusion(Exclusion.NULL)
+                .setIgnoredPropNames(ignoredProps);
+        Assertions.assertTrue(config4.isQuotePropName());
+        Assertions.assertFalse(config4.isQuoteMapKey());
+        Assertions.assertEquals(DateTimeFormat.ISO_8601_TIMESTAMP, config4.getDateTimeFormat());
+        Assertions.assertEquals(Exclusion.NULL, config4.getExclusion());
     }
 
     @Test

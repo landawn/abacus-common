@@ -6,35 +6,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class ObjectPoolTest extends TestBase {
-
-    @Test
-    public void testConstructor() {
-        ObjectPool<String, Integer> pool = new ObjectPool<>(16);
-        Assertions.assertNotNull(pool);
-        Assertions.assertTrue(pool.isEmpty());
-        Assertions.assertEquals(0, pool.size());
-    }
-
-    @Test
-    public void testConstructorZeroCapacity() {
-        // ConcurrentHashMap accepts 0 as initial capacity hint
-        ObjectPool<String, Integer> pool = new ObjectPool<>(0);
-        Assertions.assertNotNull(pool);
-        pool.put("key", 1);
-        Assertions.assertEquals(1, pool.get("key"));
-    }
-
-    @Test
-    public void testConstructorInvalidCapacity() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> new ObjectPool<>(-1));
-    }
 
     @Test
     public void testGet() {
@@ -53,6 +29,21 @@ public class ObjectPoolTest extends TestBase {
         ObjectPool<String, Integer> pool = new ObjectPool<>(10);
         Integer value = pool.get(null);
         Assertions.assertNull(value);
+    }
+
+    @Test
+    public void testPutCollision() {
+        ObjectPool<String, Integer> pool = new ObjectPool<>(4);
+
+        pool.put("key1", 1);
+        pool.put("key2", 2);
+        pool.put("key3", 3);
+        pool.put("key4", 4);
+
+        Assertions.assertEquals(1, pool.get("key1"));
+        Assertions.assertEquals(2, pool.get("key2"));
+        Assertions.assertEquals(3, pool.get("key3"));
+        Assertions.assertEquals(4, pool.get("key4"));
     }
 
     @Test
@@ -78,50 +69,6 @@ public class ObjectPoolTest extends TestBase {
     public void testPutNullValue() {
         ObjectPool<String, Integer> pool = new ObjectPool<>(10);
         Assertions.assertThrows(NullPointerException.class, () -> pool.put("key", null));
-    }
-
-    @Test
-    public void testPutCollision() {
-        ObjectPool<String, Integer> pool = new ObjectPool<>(4);
-
-        pool.put("key1", 1);
-        pool.put("key2", 2);
-        pool.put("key3", 3);
-        pool.put("key4", 4);
-
-        Assertions.assertEquals(1, pool.get("key1"));
-        Assertions.assertEquals(2, pool.get("key2"));
-        Assertions.assertEquals(3, pool.get("key3"));
-        Assertions.assertEquals(4, pool.get("key4"));
-    }
-
-    @Test
-    public void testMultipleEntriesWithSameHash() {
-        ObjectPool<String, Integer> pool = new ObjectPool<>(4);
-
-        for (int i = 0; i < 10; i++) {
-            pool.put("key" + i, i);
-        }
-
-        for (int i = 0; i < 10; i++) {
-            Assertions.assertEquals(i, pool.get("key" + i));
-        }
-
-        Assertions.assertEquals(10, pool.size());
-    }
-
-    @Test
-    public void testExceedCapacity() {
-        ObjectPool<String, Integer> pool = new ObjectPool<>(2);
-
-        pool.put("one", 1);
-        pool.put("two", 2);
-        pool.put("three", 3);
-
-        Assertions.assertEquals(3, pool.size());
-        Assertions.assertEquals(1, pool.get("one"));
-        Assertions.assertEquals(2, pool.get("two"));
-        Assertions.assertEquals(3, pool.get("three"));
     }
 
     @Test
@@ -241,21 +188,6 @@ public class ObjectPoolTest extends TestBase {
     }
 
     @Test
-    public void testKeySet() {
-        ObjectPool<String, Integer> pool = new ObjectPool<>(10);
-        pool.put("one", 1);
-        pool.put("two", 2);
-        pool.put("three", 3);
-
-        Set<String> keys = pool.keySet();
-        Assertions.assertNotNull(keys);
-        Assertions.assertEquals(3, keys.size());
-        Assertions.assertTrue(keys.contains("one"));
-        Assertions.assertTrue(keys.contains("two"));
-        Assertions.assertTrue(keys.contains("three"));
-    }
-
-    @Test
     public void testKeySetIsLiveView() {
         ObjectPool<String, Integer> pool = new ObjectPool<>(10);
         pool.put("key1", 1);
@@ -275,13 +207,32 @@ public class ObjectPoolTest extends TestBase {
     }
 
     @Test
-    public void testKeySetAddUnsupported() {
+    public void testKeySetReflectsChanges() {
         ObjectPool<String, Integer> pool = new ObjectPool<>(10);
-        pool.put("key", 100);
+        pool.put("key1", 1);
+
+        Set<String> keys1 = pool.keySet();
+        Assertions.assertEquals(1, keys1.size());
+
+        pool.put("key2", 2);
+        Set<String> keys2 = pool.keySet();
+        Assertions.assertEquals(2, keys2.size());
+        Assertions.assertTrue(keys2.contains("key2"));
+    }
+
+    @Test
+    public void testKeySet() {
+        ObjectPool<String, Integer> pool = new ObjectPool<>(10);
+        pool.put("one", 1);
+        pool.put("two", 2);
+        pool.put("three", 3);
 
         Set<String> keys = pool.keySet();
-        // add is unsupported on ConcurrentHashMap's keySet (no default mapped value)
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> keys.add("new"));
+        Assertions.assertNotNull(keys);
+        Assertions.assertEquals(3, keys.size());
+        Assertions.assertTrue(keys.contains("one"));
+        Assertions.assertTrue(keys.contains("two"));
+        Assertions.assertTrue(keys.contains("three"));
     }
 
     @Test
@@ -297,17 +248,13 @@ public class ObjectPoolTest extends TestBase {
     }
 
     @Test
-    public void testKeySetReflectsChanges() {
+    public void testKeySetAddUnsupported() {
         ObjectPool<String, Integer> pool = new ObjectPool<>(10);
-        pool.put("key1", 1);
+        pool.put("key", 100);
 
-        Set<String> keys1 = pool.keySet();
-        Assertions.assertEquals(1, keys1.size());
-
-        pool.put("key2", 2);
-        Set<String> keys2 = pool.keySet();
-        Assertions.assertEquals(2, keys2.size());
-        Assertions.assertTrue(keys2.contains("key2"));
+        Set<String> keys = pool.keySet();
+        // add is unsupported on ConcurrentHashMap's keySet (no default mapped value)
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> keys.add("new"));
     }
 
     @Test
@@ -326,6 +273,17 @@ public class ObjectPoolTest extends TestBase {
     }
 
     @Test
+    public void testValuesRemoveWritesThrough() {
+        ObjectPool<String, Integer> pool = new ObjectPool<>(10);
+        pool.put("key", 100);
+
+        Collection<Integer> values = pool.values();
+        // remove on live view writes through to the map
+        Assertions.assertTrue(values.remove(100));
+        Assertions.assertTrue(pool.isEmpty());
+    }
+
+    @Test
     public void testValuesAddUnsupported() {
         ObjectPool<String, Integer> pool = new ObjectPool<>(10);
         pool.put("key", 100);
@@ -336,14 +294,45 @@ public class ObjectPoolTest extends TestBase {
     }
 
     @Test
-    public void testValuesRemoveWritesThrough() {
+    public void testEntryHashCode() {
         ObjectPool<String, Integer> pool = new ObjectPool<>(10);
         pool.put("key", 100);
 
-        Collection<Integer> values = pool.values();
-        // remove on live view writes through to the map
-        Assertions.assertTrue(values.remove(100));
-        Assertions.assertTrue(pool.isEmpty());
+        Map.Entry<String, Integer> entry = pool.entrySet().iterator().next();
+        int hashCode = entry.hashCode();
+
+        Assertions.assertEquals(hashCode, entry.hashCode());
+    }
+
+    @Test
+    public void testEntryGetKey() {
+        ObjectPool<String, Integer> pool = new ObjectPool<>(10);
+        pool.put("testkey", 100);
+
+        Map.Entry<String, Integer> entry = pool.entrySet().iterator().next();
+        Assertions.assertEquals("testkey", entry.getKey());
+    }
+
+    @Test
+    public void testEntryGetValue() {
+        ObjectPool<String, Integer> pool = new ObjectPool<>(10);
+        pool.put("key", 200);
+
+        Map.Entry<String, Integer> entry = pool.entrySet().iterator().next();
+        Assertions.assertEquals(200, entry.getValue());
+    }
+
+    @Test
+    public void testEntrySetValue() {
+        ObjectPool<String, Integer> pool = new ObjectPool<>(10);
+        pool.put("key", 100);
+
+        Map.Entry<String, Integer> entry = pool.entrySet().iterator().next();
+        Integer oldValue = entry.setValue(200);
+
+        Assertions.assertEquals(100, oldValue);
+        Assertions.assertEquals(200, entry.getValue());
+        Assertions.assertEquals(200, pool.get("key"));
     }
 
     @Test
@@ -397,17 +386,6 @@ public class ObjectPoolTest extends TestBase {
     }
 
     @Test
-    public void testEntryHashCode() {
-        ObjectPool<String, Integer> pool = new ObjectPool<>(10);
-        pool.put("key", 100);
-
-        Map.Entry<String, Integer> entry = pool.entrySet().iterator().next();
-        int hashCode = entry.hashCode();
-
-        Assertions.assertEquals(hashCode, entry.hashCode());
-    }
-
-    @Test
     public void testEntryToString() {
         ObjectPool<String, Integer> pool = new ObjectPool<>(10);
         pool.put("key", 100);
@@ -422,34 +400,17 @@ public class ObjectPoolTest extends TestBase {
     }
 
     @Test
-    public void testEntryGetKey() {
-        ObjectPool<String, Integer> pool = new ObjectPool<>(10);
-        pool.put("testkey", 100);
+    public void testExceedCapacity() {
+        ObjectPool<String, Integer> pool = new ObjectPool<>(2);
 
-        Map.Entry<String, Integer> entry = pool.entrySet().iterator().next();
-        Assertions.assertEquals("testkey", entry.getKey());
-    }
+        pool.put("one", 1);
+        pool.put("two", 2);
+        pool.put("three", 3);
 
-    @Test
-    public void testEntryGetValue() {
-        ObjectPool<String, Integer> pool = new ObjectPool<>(10);
-        pool.put("key", 200);
-
-        Map.Entry<String, Integer> entry = pool.entrySet().iterator().next();
-        Assertions.assertEquals(200, entry.getValue());
-    }
-
-    @Test
-    public void testEntrySetValue() {
-        ObjectPool<String, Integer> pool = new ObjectPool<>(10);
-        pool.put("key", 100);
-
-        Map.Entry<String, Integer> entry = pool.entrySet().iterator().next();
-        Integer oldValue = entry.setValue(200);
-
-        Assertions.assertEquals(100, oldValue);
-        Assertions.assertEquals(200, entry.getValue());
-        Assertions.assertEquals(200, pool.get("key"));
+        Assertions.assertEquals(3, pool.size());
+        Assertions.assertEquals(1, pool.get("one"));
+        Assertions.assertEquals(2, pool.get("two"));
+        Assertions.assertEquals(3, pool.get("three"));
     }
 
     @Test
@@ -468,6 +429,56 @@ public class ObjectPoolTest extends TestBase {
     }
 
     @Test
+    public void testMultipleEntriesWithSameHash() {
+        ObjectPool<String, Integer> pool = new ObjectPool<>(4);
+
+        for (int i = 0; i < 10; i++) {
+            pool.put("key" + i, i);
+        }
+
+        for (int i = 0; i < 10; i++) {
+            Assertions.assertEquals(i, pool.get("key" + i));
+        }
+
+        Assertions.assertEquals(10, pool.size());
+    }
+
+    @Test
+    public void testConcurrentAccess() throws InterruptedException {
+        ObjectPool<String, Integer> pool = new ObjectPool<>(100);
+
+        Thread t1 = new Thread(() -> {
+            for (int i = 0; i < 50; i++) {
+                pool.put("key" + i, i);
+            }
+        });
+
+        Thread t2 = new Thread(() -> {
+            for (int i = 50; i < 100; i++) {
+                pool.put("key" + i, i);
+            }
+        });
+
+        t1.start();
+        t2.start();
+        t1.join();
+        t2.join();
+
+        Assertions.assertEquals(100, pool.size());
+        for (int i = 0; i < 100; i++) {
+            Assertions.assertEquals(i, pool.get("key" + i));
+        }
+    }
+
+    @Test
+    public void testConstructor() {
+        ObjectPool<String, Integer> pool = new ObjectPool<>(16);
+        Assertions.assertNotNull(pool);
+        Assertions.assertTrue(pool.isEmpty());
+        Assertions.assertEquals(0, pool.size());
+    }
+
+    @Test
     public void testIsEmpty() {
         ObjectPool<String, Integer> pool = new ObjectPool<>(10);
         Assertions.assertTrue(pool.isEmpty());
@@ -477,6 +488,17 @@ public class ObjectPoolTest extends TestBase {
 
         pool.remove("key");
         Assertions.assertTrue(pool.isEmpty());
+    }
+
+    @Test
+    public void testClearAndReuse() {
+        ObjectPool<String, Integer> pool = new ObjectPool<>(10);
+        pool.put("key", 100);
+        pool.clear();
+
+        pool.put("newkey", 200);
+        Assertions.assertEquals(200, pool.get("newkey"));
+        Assertions.assertEquals(1, pool.size());
     }
 
     @Test
@@ -495,17 +517,6 @@ public class ObjectPoolTest extends TestBase {
         Assertions.assertNull(pool.get("one"));
         Assertions.assertNull(pool.get("two"));
         Assertions.assertNull(pool.get("three"));
-    }
-
-    @Test
-    public void testClearAndReuse() {
-        ObjectPool<String, Integer> pool = new ObjectPool<>(10);
-        pool.put("key", 100);
-        pool.clear();
-
-        pool.put("newkey", 200);
-        Assertions.assertEquals(200, pool.get("newkey"));
-        Assertions.assertEquals(1, pool.size());
     }
 
     //    @Test
@@ -584,29 +595,16 @@ public class ObjectPoolTest extends TestBase {
     }
 
     @Test
-    public void testConcurrentAccess() throws InterruptedException {
-        ObjectPool<String, Integer> pool = new ObjectPool<>(100);
+    public void testConstructorZeroCapacity() {
+        // ConcurrentHashMap accepts 0 as initial capacity hint
+        ObjectPool<String, Integer> pool = new ObjectPool<>(0);
+        Assertions.assertNotNull(pool);
+        pool.put("key", 1);
+        Assertions.assertEquals(1, pool.get("key"));
+    }
 
-        Thread t1 = new Thread(() -> {
-            for (int i = 0; i < 50; i++) {
-                pool.put("key" + i, i);
-            }
-        });
-
-        Thread t2 = new Thread(() -> {
-            for (int i = 50; i < 100; i++) {
-                pool.put("key" + i, i);
-            }
-        });
-
-        t1.start();
-        t2.start();
-        t1.join();
-        t2.join();
-
-        Assertions.assertEquals(100, pool.size());
-        for (int i = 0; i < 100; i++) {
-            Assertions.assertEquals(i, pool.get("key" + i));
-        }
+    @Test
+    public void testConstructorInvalidCapacity() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new ObjectPool<>(-1));
     }
 }

@@ -6,12 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ObjBiIntConsumerTest extends TestBase {
 
     @Test
@@ -54,33 +52,13 @@ public class ObjBiIntConsumerTest extends TestBase {
     }
 
     @Test
-    public void testAndThen() {
-        final List<String> result = new ArrayList<>();
-        ObjBiIntConsumer<String> first = (t, i, j) -> result.add(t + ":" + i);
-        ObjBiIntConsumer<String> second = (t, i, j) -> result.add(t + ":" + j);
+    public void testSideEffects() {
+        final int[] counter = { 0 };
+        ObjBiIntConsumer<String> consumer = (t, i, j) -> counter[0] = i + j;
 
-        ObjBiIntConsumer<String> combined = first.andThen(second);
-        combined.accept("test", 1, 2);
+        consumer.accept("test", 10, 20);
 
-        assertEquals(2, result.size());
-        assertEquals("test:1", result.get(0));
-        assertEquals("test:2", result.get(1));
-    }
-
-    @Test
-    public void testAndThenChaining() {
-        final List<String> result = new ArrayList<>();
-        ObjBiIntConsumer<String> first = (t, i, j) -> result.add("first");
-        ObjBiIntConsumer<String> second = (t, i, j) -> result.add("second");
-        ObjBiIntConsumer<String> third = (t, i, j) -> result.add("third");
-
-        ObjBiIntConsumer<String> combined = first.andThen(second).andThen(third);
-        combined.accept("test", 1, 2);
-
-        assertEquals(3, result.size());
-        assertEquals("first", result.get(0));
-        assertEquals("second", result.get(1));
-        assertEquals("third", result.get(2));
+        assertEquals(30, counter[0]);
     }
 
     @Test
@@ -128,13 +106,33 @@ public class ObjBiIntConsumerTest extends TestBase {
     }
 
     @Test
-    public void testSideEffects() {
-        final int[] counter = { 0 };
-        ObjBiIntConsumer<String> consumer = (t, i, j) -> counter[0] = i + j;
+    public void testAndThen() {
+        final List<String> result = new ArrayList<>();
+        ObjBiIntConsumer<String> first = (t, i, j) -> result.add(t + ":" + i);
+        ObjBiIntConsumer<String> second = (t, i, j) -> result.add(t + ":" + j);
 
-        consumer.accept("test", 10, 20);
+        ObjBiIntConsumer<String> combined = first.andThen(second);
+        combined.accept("test", 1, 2);
 
-        assertEquals(30, counter[0]);
+        assertEquals(2, result.size());
+        assertEquals("test:1", result.get(0));
+        assertEquals("test:2", result.get(1));
+    }
+
+    @Test
+    public void testAndThenChaining() {
+        final List<String> result = new ArrayList<>();
+        ObjBiIntConsumer<String> first = (t, i, j) -> result.add("first");
+        ObjBiIntConsumer<String> second = (t, i, j) -> result.add("second");
+        ObjBiIntConsumer<String> third = (t, i, j) -> result.add("third");
+
+        ObjBiIntConsumer<String> combined = first.andThen(second).andThen(third);
+        combined.accept("test", 1, 2);
+
+        assertEquals(3, result.size());
+        assertEquals("first", result.get(0));
+        assertEquals("second", result.get(1));
+        assertEquals("third", result.get(2));
     }
 
     @Test

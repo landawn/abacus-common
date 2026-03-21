@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.base.Strings;
@@ -38,8 +37,6 @@ import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalChar;
 import com.landawn.abacus.util.u.OptionalDouble;
 
-@Tag("new-test")
-@Tag("2025")
 public class ArrayCharStreamTest extends TestBase {
 
     private static final char[] TEST_ARRAY = new char[] { 'a', 'b', 'c', 'd', 'e' };
@@ -143,6 +140,15 @@ public class ArrayCharStreamTest extends TestBase {
     }
 
     @Test
+    public void testStep() {
+        List<Character> result = createCharStream('a', 'b', 'c', 'd', 'e').step(2).boxed().toList();
+        assertEquals(Arrays.asList('a', 'c', 'e'), result);
+
+        result = createCharStream('a', 'b', 'c').step(5).boxed().toList();
+        assertEquals(Arrays.asList('a'), result);
+    }
+
+    @Test
     public void testStepWithZero() {
         assertThrows(IllegalArgumentException.class, () -> createCharStream(new char[] { 'a', 'b' }).step(0));
     }
@@ -175,6 +181,16 @@ public class ArrayCharStreamTest extends TestBase {
     }
 
     @Test
+    public void testApplyIfNotEmpty() {
+        Optional<String> result = stream.applyIfNotEmpty(s -> s.mapToObj(c -> String.valueOf(c)).join(""));
+        assertTrue(result.isPresent());
+        assertEquals("abcde", result.get());
+
+        result = createCharStream(new char[] {}).applyIfNotEmpty(s -> "not empty");
+        assertFalse(result.isPresent());
+    }
+
+    @Test
     public void testFlatMap() {
         List<Character> result = createCharStream(new char[] { 'a', 'b' }).flatMap(c -> createCharStream(new char[] { c, Character.toUpperCase(c) }))
                 .boxed()
@@ -183,6 +199,12 @@ public class ArrayCharStreamTest extends TestBase {
 
         result = createCharStream(new char[] {}).flatMap(c -> createCharStream(new char[] { c })).boxed().toList();
         assertEquals(0, result.size());
+    }
+
+    @Test
+    public void testFlatmap() {
+        List<Character> result = createCharStream('a', 'b').flatmap(c -> new char[] { c, Character.toUpperCase(c) }).boxed().toList();
+        assertEquals(Arrays.asList('a', 'A', 'b', 'B'), result);
     }
 
     @Test
@@ -206,6 +228,82 @@ public class ArrayCharStreamTest extends TestBase {
     }
 
     @Test
+    public void testFlatmapToObj() {
+        List<String> result = createCharStream('a', 'b').flatmapToObj(c -> Arrays.asList(String.valueOf(c), String.valueOf(c).toUpperCase())).toList();
+        assertEquals(Arrays.asList("a", "A", "b", "B"), result);
+    }
+
+    @Test
+    public void testDistinct() {
+        List<Character> result = createCharStream('a', 'b', 'a', 'c', 'b').distinct().boxed().toList();
+        assertEquals(3, result.size());
+        assertTrue(result.containsAll(Arrays.asList('a', 'b', 'c')));
+    }
+
+    @Test
+    public void testRandomRange() {
+        char start = 'a';
+        char end = 'z';
+        assertEquals(10, CharStream.random(start, end).limit(10).count());
+        CharStream.random(start, end).limit(10).forEach(c -> assertTrue(c >= start && c < end));
+    }
+
+    @Test
+    public void testIterateInitCharUnaryOperator() {
+        List<Character> result = CharStream.iterate('0', c -> (char) (c + 1)).limit(5).boxed().toList();
+        assertEquals(Arrays.asList('0', '1', '2', '3', '4'), result);
+    }
+
+    @Test
+    public void testGenerate() {
+        AtomicInteger counter = new AtomicInteger(0);
+        List<Character> result = CharStream.generate(() -> (char) ('X' + counter.getAndIncrement())).limit(3).boxed().toList();
+        assertEquals(Arrays.asList('X', 'Y', 'Z'), result);
+    }
+
+    @Test
+    public void testOfCharBuffer() {
+        CharBuffer buffer = CharBuffer.wrap(new char[] { 't', 'e', 's', 't' });
+        buffer.position(1).limit(3);
+        CharStream stream1 = createCharStream(buffer);
+        assertEquals(Arrays.asList('e', 's'), stream1.boxed().toList());
+
+        CharStream stream2 = createCharStream((CharBuffer) null);
+        assertTrue(stream2.boxed().toList().isEmpty());
+    }
+
+    @Test
+    public void testRandom() {
+        assertEquals(5, CharStream.random().limit(5).count());
+        CharStream.random().limit(5).forEach(c -> assertTrue(c >= Character.MIN_VALUE && c <= Character.MAX_VALUE));
+    }
+
+    @Test
+    public void testRandomCandidates() {
+        char[] candidates = { 'x', 'y', 'z' };
+        assertEquals(10, CharStream.random(candidates).limit(10).count());
+        CharStream.random(candidates).limit(10).forEach(c -> assertTrue(c == 'x' || c == 'y' || c == 'z'));
+
+        CharStream emptyRandom = CharStream.random(new char[] {});
+        assertTrue(emptyRandom.boxed().toList().isEmpty());
+    }
+
+    @Test
+    public void testOnEach() {
+        List<Character> sideEffect = new ArrayList<>();
+        List<Character> result = createCharStream('a', 'b', 'c').onEach(c -> sideEffect.add(c)).boxed().toList();
+        assertEquals(Arrays.asList('a', 'b', 'c'), result);
+        assertEquals(Arrays.asList('a', 'b', 'c'), sideEffect);
+    }
+
+    @Test
+    public void testForEach() {
+        List<Character> result = new ArrayList<>();
+        createCharStream('a', 'b', 'c').forEach(c -> result.add(c));
+        assertEquals(Arrays.asList('a', 'b', 'c'), result);
+    }
+
+    @Test
     public void testToCharList() {
         CharList list = stream.toCharList();
         assertEquals(CharList.of('a', 'b', 'c', 'd', 'e'), list);
@@ -215,12 +313,550 @@ public class ArrayCharStreamTest extends TestBase {
     }
 
     @Test
+    public void testDefer() {
+        AtomicInteger counter = new AtomicInteger(0);
+        CharStream deferredStream = CharStream.defer(() -> {
+            counter.incrementAndGet();
+            return createCharStream(new char[] { 'd', 'e', 'f' });
+        });
+        assertEquals(0, counter.get());
+        List<Character> result = deferredStream.boxed().toList();
+        assertEquals(1, counter.get());
+        assertEquals(Arrays.asList('d', 'e', 'f'), result);
+    }
+
+    @Test
+    public void testOfCharacterArrayRange() {
+        Character[] data = { 'A', 'B', 'C', 'D' };
+        CharStream stream1 = createCharStream(data, 1, 3);
+        assertEquals(Arrays.asList('B', 'C'), stream1.boxed().toList());
+    }
+
+    @Test
+    public void testFlatten2DArrayVertically() {
+        char[][] data = { { 'a', 'b' }, { 'c', 'd', 'e' } };
+        List<Character> result = CharStream.flatten(data, true).boxed().toList();
+        assertEquals(Arrays.asList('a', 'c', 'b', 'd', 'e'), result);
+
+        result = CharStream.flatten(new char[][] { { 'x' } }, true).boxed().toList();
+        assertEquals(Arrays.asList('x'), result);
+    }
+
+    @Test
+    public void testFlatten2DArrayWithAlignment() {
+        char[][] data = { { 'a', 'b' }, { 'c', 'd', 'e' } };
+        char padding = '-';
+        List<Character> result = CharStream.flatten(data, padding, false).boxed().toList();
+        assertEquals(Arrays.asList('a', 'b', '-', 'c', 'd', 'e'), result);
+
+        result = CharStream.flatten(data, padding, true).boxed().toList();
+        assertEquals(Arrays.asList('a', 'c', 'b', 'd', '-', 'e'), result);
+
+        result = CharStream.flatten(new char[][] { { 'x' } }, padding, false).boxed().toList();
+        assertEquals(Arrays.asList('x'), result);
+    }
+
+    @Test
+    public void testRangeClosedWithStep() {
+        List<Character> result = CharStream.rangeClosed('a', 'e', 2).boxed().toList();
+        assertEquals(Arrays.asList('a', 'c', 'e'), result);
+
+        result = CharStream.rangeClosed('e', 'a', -2).boxed().toList();
+        assertEquals(Arrays.asList('e', 'c', 'a'), result);
+
+        result = CharStream.rangeClosed('a', 'b', 5).boxed().toList();
+        assertEquals(Arrays.asList('a'), result);
+    }
+
+    @Test
+    public void testIterateInitBooleanSupplierCharUnaryOperator() {
+        AtomicInteger callCount = new AtomicInteger(0);
+        CharStream iteratedStream = CharStream.iterate('A', () -> callCount.incrementAndGet() <= 3, c -> (char) (c + 1));
+        List<Character> result = iteratedStream.boxed().toList();
+        assertEquals(Arrays.asList('A', 'B', 'C'), result);
+    }
+
+    @Test
+    public void testConcatCharIterators() {
+        CharIterator iter1 = CharList.of('a', 'b').iterator();
+        CharIterator iter2 = CharList.of('c', 'd').iterator();
+        List<Character> result = CharStream.concat(iter1, iter2).boxed().toList();
+        assertEquals(Arrays.asList('a', 'b', 'c', 'd'), result);
+    }
+
+    @Test
+    public void testConcatCharStreams() {
+        CharStream stream1 = createCharStream(new char[] { 'x', 'y' });
+        CharStream stream2 = createCharStream(new char[] { 'z' });
+        List<Character> result = CharStream.concat(stream1, stream2).boxed().toList();
+        assertEquals(Arrays.asList('x', 'y', 'z'), result);
+    }
+
+    @Test
+    public void testConcatListOfCharArrays() {
+        List<char[]> listOfArrays = Arrays.asList(new char[] { 'h', 'i' }, new char[] { 'j', 'k' });
+        List<Character> result = CharStream.concat(listOfArrays).boxed().toList();
+        assertEquals(Arrays.asList('h', 'i', 'j', 'k'), result);
+    }
+
+    @Test
+    public void testConcatCollectionOfCharStreams() {
+        Collection<CharStream> streams = Arrays.asList(createCharStream(new char[] { 'o', 'n', 'e' }), createCharStream(new char[] { 't', 'w', 'o' }));
+        List<Character> result = CharStream.concat(streams).boxed().toList();
+        assertEquals(Arrays.asList('o', 'n', 'e', 't', 'w', 'o'), result);
+    }
+
+    @Test
+    public void testConcatCollectionOfCharIterators() {
+        Collection<CharIterator> iterators = Arrays.asList(CharList.of('u', 'v').iterator(), CharList.of('w').iterator());
+        List<Character> result = CharStream.concatIterators(iterators).boxed().toList();
+        assertEquals(Arrays.asList('u', 'v', 'w'), result);
+    }
+
+    @Test
+    public void testZipThreeCharArrays() {
+        char[] arr1 = { '1', '2', '3' };
+        char[] arr2 = { 'a', 'b' };
+        char[] arr3 = { 'x', 'y', 'z' };
+        List<Character> result = CharStream.zip(arr1, arr2, arr3, (c1, c2, c3) -> (char) (c1 + c2 + c3)).boxed().toList();
+        assertEquals(Arrays.asList((char) ('1' + 'a' + 'x'), (char) ('2' + 'b' + 'y')), result);
+    }
+
+    @Test
+    public void testZipTwoCharIterators() {
+        CharIterator iter1 = CharList.of('A', 'B', 'C').iterator();
+        CharIterator iter2 = CharList.of('D', 'E').iterator();
+        List<Character> result = CharStream.zip(iter1, iter2, (c1, c2) -> (char) (c1 + c2)).boxed().toList();
+        assertEquals(Arrays.asList((char) ('A' + 'D'), (char) ('B' + 'E')), result);
+    }
+
+    @Test
+    public void testZipThreeCharIterators() {
+        CharIterator iter1 = CharList.of('1', '2').iterator();
+        CharIterator iter2 = CharList.of('a', 'b').iterator();
+        CharIterator iter3 = CharList.of('X').iterator();
+        List<Character> result = CharStream.zip(iter1, iter2, iter3, (c1, c2, c3) -> (char) (c1 + c2 + c3)).boxed().toList();
+        assertEquals(Arrays.asList((char) ('1' + 'a' + 'X')), result);
+    }
+
+    @Test
+    public void testZipTwoCharStreams() {
+        CharStream stream1 = createCharStream(new char[] { 'P', 'Q' });
+        CharStream stream2 = createCharStream(new char[] { 'R', 'S', 'T' });
+        List<Character> result = CharStream.zip(stream1, stream2, (c1, c2) -> (char) (c1 + c2)).boxed().toList();
+        assertEquals(Arrays.asList((char) ('P' + 'R'), (char) ('Q' + 'S')), result);
+    }
+
+    @Test
+    public void testZipThreeCharStreams() {
+        CharStream stream1 = createCharStream(new char[] { '1', '2', '3' });
+        CharStream stream2 = createCharStream(new char[] { 'a', 'b' });
+        CharStream stream3 = createCharStream(new char[] { 'x', 'y', 'z' });
+        List<Character> result = CharStream.zip(stream1, stream2, stream3, (c1, c2, c3) -> (char) (c1 + c2 + c3)).boxed().toList();
+        assertEquals(Arrays.asList((char) ('1' + 'a' + 'x'), (char) ('2' + 'b' + 'y')), result);
+    }
+
+    @Test
+    public void testZipCollectionOfCharStreams() {
+        Collection<CharStream> streams = Arrays.asList(createCharStream(new char[] { 'A', 'B' }), createCharStream(new char[] { '1', '2', '3' }));
+        List<Character> result = CharStream.zip(streams, chars -> (char) (chars[0] + chars[1])).boxed().toList();
+        assertEquals(Arrays.asList((char) ('A' + '1'), (char) ('B' + '2')), result);
+    }
+
+    @Test
+    public void testMergeTwoCharArrays() {
+        char[] arr1 = { 'a', 'c', 'e' };
+        char[] arr2 = { 'b', 'd', 'f' };
+        List<Character> result = CharStream.merge(arr1, arr2, (c1, c2) -> c1 < c2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).boxed().toList();
+        assertEquals(Arrays.asList('a', 'b', 'c', 'd', 'e', 'f'), result);
+
+        result = CharStream.merge(new char[] { 'x' }, new char[] {}, (c1, c2) -> MergeResult.TAKE_FIRST).boxed().toList();
+        assertEquals(Arrays.asList('x'), result);
+
+        result = CharStream.merge(new char[] {}, new char[] { 'y' }, (c1, c2) -> MergeResult.TAKE_SECOND).boxed().toList();
+        assertEquals(Arrays.asList('y'), result);
+    }
+
+    @Test
+    public void testMergeThreeCharArrays() {
+        char[] arr1 = { '1', '4' };
+        char[] arr2 = { '2', '5' };
+        char[] arr3 = { '3', '6' };
+        List<Character> result = CharStream.merge(arr1, arr2, arr3, (c1, c2) -> c1 < c2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).boxed().toList();
+        assertEquals(Arrays.asList('1', '2', '3', '4', '5', '6'), result);
+    }
+
+    @Test
+    public void testMergeTwoCharIterators() {
+        CharIterator iter1 = CharList.of('A', 'C').iterator();
+        CharIterator iter2 = CharList.of('B', 'D').iterator();
+        List<Character> result = CharStream.merge(iter1, iter2, (c1, c2) -> c1 < c2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).boxed().toList();
+        assertEquals(Arrays.asList('A', 'B', 'C', 'D'), result);
+    }
+
+    @Test
+    public void testMergeThreeCharIterators() {
+        CharIterator iter1 = CharList.of('a', 'd').iterator();
+        CharIterator iter2 = CharList.of('b', 'e').iterator();
+        CharIterator iter3 = CharList.of('c', 'f').iterator();
+        List<Character> result = CharStream.merge(iter1, iter2, iter3, (c1, c2) -> c1 < c2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).boxed().toList();
+        assertEquals(Arrays.asList('a', 'b', 'c', 'd', 'e', 'f'), result);
+    }
+
+    @Test
+    public void testMergeTwoCharStreams() {
+        CharStream stream1 = createCharStream(new char[] { 'X', 'Z' });
+        CharStream stream2 = createCharStream(new char[] { 'Y' });
+        List<Character> result = CharStream.merge(stream1, stream2, (c1, c2) -> c1 < c2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).boxed().toList();
+        assertEquals(Arrays.asList('X', 'Y', 'Z'), result);
+    }
+
+    @Test
+    public void testMergeThreeCharStreams() {
+        CharStream stream1 = createCharStream(new char[] { '1', '2' });
+        CharStream stream2 = createCharStream(new char[] { '3' });
+        CharStream stream3 = createCharStream(new char[] { '4', '5' });
+        List<Character> result = CharStream.merge(stream1, stream2, stream3, (c1, c2) -> c1 < c2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+                .boxed()
+                .toList();
+        assertEquals(Arrays.asList('1', '2', '3', '4', '5'), result);
+    }
+
+    @Test
+    public void testMergeCollectionOfCharStreams() {
+        Collection<CharStream> streams = Arrays.asList(createCharStream(new char[] { '1', '5' }), createCharStream(new char[] { '2', '6' }),
+                createCharStream(new char[] { '3', '4' }));
+        List<Character> result = CharStream.merge(streams, (c1, c2) -> c1 < c2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).boxed().toList();
+        assertEquals(Arrays.asList('1', '2', '3', '4', '5', '6'), result);
+    }
+
+    @Test
+    public void testBoxed() {
+        List<Character> result = createCharStream('a', 'b', 'c').boxed().toList();
+        assertEquals(Arrays.asList('a', 'b', 'c'), result);
+    }
+
+    @Test
     public void testToList() {
         List<Character> list = stream.toList();
         assertEquals(Arrays.asList('a', 'b', 'c', 'd', 'e'), list);
 
         list = createCharStream(new char[] {}).toList();
         assertTrue(list.isEmpty());
+    }
+
+    @Test
+    public void testOfNullable() {
+        CharStream stream1 = CharStream.ofNullable('a');
+        assertEquals(Arrays.asList('a'), stream1.boxed().toList());
+
+        CharStream stream2 = CharStream.ofNullable(null);
+        assertTrue(stream2.boxed().toList().isEmpty());
+    }
+
+    @Test
+    public void testOfCharArray() {
+        CharStream stream1 = createCharStream('a', 'b', 'c');
+        assertEquals(Arrays.asList('a', 'b', 'c'), stream1.boxed().toList());
+
+        CharStream stream2 = createCharStream();
+        assertTrue(stream2.boxed().toList().isEmpty());
+    }
+
+    @Test
+    public void testOfCharSequence() {
+        CharStream stream1 = createCharStream("hello");
+        assertEquals(Arrays.asList('h', 'e', 'l', 'l', 'o'), stream1.boxed().toList());
+
+        CharStream stream2 = createCharStream("");
+        assertTrue(stream2.boxed().toList().isEmpty());
+    }
+
+    @Test
+    public void testOfCharacterArray() {
+        Character[] data = { 'X', 'Y', 'Z' };
+        CharStream stream1 = createCharStream(data);
+        assertEquals(Arrays.asList('X', 'Y', 'Z'), stream1.boxed().toList());
+
+        CharStream stream2 = createCharStream(new Character[] {});
+        assertTrue(stream2.boxed().toList().isEmpty());
+    }
+
+    @Test
+    public void testOfCharacterCollection() {
+        List<Character> list = Arrays.asList('1', '2', '3');
+        CharStream stream1 = createCharStream(list);
+        assertEquals(Arrays.asList('1', '2', '3'), stream1.boxed().toList());
+
+        CharStream stream2 = createCharStream(Arrays.asList());
+        assertTrue(stream2.boxed().toList().isEmpty());
+    }
+
+    @Test
+    public void testOfCharIterator() {
+        CharIterator iterator = CharList.of('x', 'y').iterator();
+        CharStream stream1 = createCharStream(iterator);
+        assertEquals(Arrays.asList('x', 'y'), stream1.boxed().toList());
+
+        CharStream stream2 = createCharStream((CharIterator) null);
+        assertTrue(stream2.boxed().toList().isEmpty());
+    }
+
+    @Test
+    public void testFlatten2DArray() {
+        char[][] data = { { 'a', 'b' }, { 'c', 'd', 'e' } };
+        List<Character> result = CharStream.flatten(data).boxed().toList();
+        assertEquals(Arrays.asList('a', 'b', 'c', 'd', 'e'), result);
+
+        result = CharStream.flatten(new char[][] {}).boxed().toList();
+        assertTrue(result.isEmpty());
+
+        result = CharStream.flatten(new char[][] { { 'a' }, {} }).boxed().toList();
+        assertEquals(Arrays.asList('a'), result);
+    }
+
+    @Test
+    public void testFlatten3DArray() {
+        char[][][] data = { { { 'a', 'b' }, { 'c' } }, { { 'd' } } };
+        List<Character> result = CharStream.flatten(data).boxed().toList();
+        assertEquals(Arrays.asList('a', 'b', 'c', 'd'), result);
+
+        result = CharStream.flatten(new char[][][] {}).boxed().toList();
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testRange() {
+        List<Character> result = CharStream.range('a', 'd').boxed().toList();
+        assertEquals(Arrays.asList('a', 'b', 'c'), result);
+
+        result = CharStream.range('d', 'a').boxed().toList();
+        assertTrue(result.isEmpty());
+
+        result = CharStream.range('a', 'a').boxed().toList();
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testRangeWithStep() {
+        List<Character> result = CharStream.range('a', 'g', 2).boxed().toList();
+        assertEquals(Arrays.asList('a', 'c', 'e'), result);
+
+        result = CharStream.range('g', 'a', -2).boxed().toList();
+        assertEquals(Arrays.asList('g', 'e', 'c'), result);
+
+        result = CharStream.range('a', 'a', 1).boxed().toList();
+        assertTrue(result.isEmpty());
+
+        result = CharStream.range('a', 'b', 5).boxed().toList();
+        assertEquals(Arrays.asList('a'), result);
+    }
+
+    @Test
+    public void testRangeClosed() {
+        List<Character> result = CharStream.rangeClosed('a', 'c').boxed().toList();
+        assertEquals(Arrays.asList('a', 'b', 'c'), result);
+
+        result = CharStream.rangeClosed('a', 'a').boxed().toList();
+        assertEquals(Arrays.asList('a'), result);
+
+        result = CharStream.rangeClosed('c', 'a').boxed().toList();
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testRepeat() {
+        List<Character> result = CharStream.repeat('X', 3).boxed().toList();
+        assertEquals(Arrays.asList('X', 'X', 'X'), result);
+
+        result = CharStream.repeat('Y', 0).boxed().toList();
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testIterateBooleanSupplierCharSupplier() {
+        AtomicInteger count = new AtomicInteger(0);
+        CharStream iteratedStream = CharStream.iterate(() -> count.get() < 3, () -> (char) ('a' + count.getAndIncrement()));
+        List<Character> result = iteratedStream.boxed().toList();
+        assertEquals(Arrays.asList('a', 'b', 'c'), result);
+
+        result = CharStream.iterate(() -> false, () -> 'x').boxed().toList();
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testIterateInitCharPredicateCharUnaryOperator() {
+        CharStream iteratedStream = CharStream.iterate('A', c -> c <= 'C', c -> (char) (c + 1));
+        List<Character> result = iteratedStream.boxed().toList();
+        assertEquals(Arrays.asList('A', 'B', 'C'), result);
+
+        result = CharStream.iterate('Z', c -> false, c -> c).boxed().toList();
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testConcatCharArrays() {
+        char[] arr1 = { '1', '2' };
+        char[] arr2 = { '3', '4', '5' };
+        List<Character> result = CharStream.concat(arr1, arr2).boxed().toList();
+        assertEquals(Arrays.asList('1', '2', '3', '4', '5'), result);
+
+        result = CharStream.concat(new char[0][0]).boxed().toList();
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testZipTwoCharArrays() {
+        char[] arr1 = { '1', '2', '3' };
+        char[] arr2 = { 'a', 'b' };
+        List<Character> result = CharStream.zip(arr1, arr2, (c1, c2) -> (char) (c1 + c2)).boxed().toList();
+        assertEquals(Arrays.asList((char) ('1' + 'a'), (char) ('2' + 'b')), result);
+
+        result = CharStream.zip(new char[] {}, new char[] { 'a' }, (c1, c2) -> c1).boxed().toList();
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testZipTwoCharArraysWithNoneValues() {
+        char[] arr1 = { '1', '2' };
+        char[] arr2 = { 'a', 'b', 'c' };
+        List<Character> result = CharStream.zip(arr1, arr2, 'X', 'Y', (c1, c2) -> (char) (c1 + c2)).boxed().toList();
+        assertEquals(Arrays.asList((char) ('1' + 'a'), (char) ('2' + 'b'), (char) ('X' + 'c')), result);
+    }
+
+    @Test
+    public void testZipThreeCharArraysWithNoneValues() {
+        char[] arr1 = { '1', '2' };
+        char[] arr2 = { 'a', 'b', 'c' };
+        char[] arr3 = { 'x' };
+        List<Character> result = CharStream.zip(arr1, arr2, arr3, 'X', 'Y', 'Z', (c1, c2, c3) -> (char) (c1 + c2 + c3)).boxed().toList();
+        assertEquals(Arrays.asList((char) ('1' + 'a' + 'x'), (char) ('2' + 'b' + 'Z'), (char) ('X' + 'c' + 'Z')), result);
+    }
+
+    @Test
+    public void testZipTwoCharIteratorsWithNoneValues() {
+        CharIterator iter1 = CharList.of('A', 'B').iterator();
+        CharIterator iter2 = CharList.of('C', 'D', 'E').iterator();
+        List<Character> result = CharStream.zip(iter1, iter2, 'X', 'Y', (c1, c2) -> (char) (c1 + c2)).boxed().toList();
+        assertEquals(Arrays.asList((char) ('A' + 'C'), (char) ('B' + 'D'), (char) ('X' + 'E')), result);
+    }
+
+    @Test
+    public void testZipThreeCharIteratorsWithNoneValues() {
+        CharIterator iter1 = CharList.of('1').iterator();
+        CharIterator iter2 = CharList.of('a', 'b').iterator();
+        CharIterator iter3 = CharList.of('x', 'y', 'z').iterator();
+        List<Character> result = CharStream.zip(iter1, iter2, iter3, 'X', 'Y', 'Z', (c1, c2, c3) -> (char) (c1 + c2 + c3)).boxed().toList();
+        assertEquals(Arrays.asList((char) ('1' + 'a' + 'x'), (char) ('X' + 'b' + 'y'), (char) ('X' + 'Y' + 'z')), result);
+    }
+
+    @Test
+    public void testZipTwoCharStreamsWithNoneValues() {
+        CharStream stream1 = createCharStream(new char[] { 'F', 'G' });
+        CharStream stream2 = createCharStream(new char[] { 'H', 'I', 'J' });
+        List<Character> result = CharStream.zip(stream1, stream2, 'U', 'V', (c1, c2) -> (char) (c1 + c2)).boxed().toList();
+        assertEquals(Arrays.asList((char) ('F' + 'H'), (char) ('G' + 'I'), (char) ('U' + 'J')), result);
+    }
+
+    @Test
+    public void testZipThreeCharStreamsWithNoneValues() {
+        CharStream stream1 = createCharStream(new char[] { 'X' });
+        CharStream stream2 = createCharStream(new char[] { 'Y', 'Z' });
+        CharStream stream3 = createCharStream('a', 'b', 'c');
+        List<Character> result = CharStream.zip(stream1, stream2, stream3, 'D', 'E', 'F', (c1, c2, c3) -> (char) (c1 + c2 + c3)).boxed().toList();
+        assertEquals(Arrays.asList((char) ('X' + 'Y' + 'a'), (char) ('D' + 'Z' + 'b'), (char) ('D' + 'E' + 'c')), result);
+    }
+
+    @Test
+    public void testZipCollectionOfCharStreamsWithNoneValues() {
+        Collection<CharStream> streams = Arrays.asList(createCharStream(new char[] { '1' }), createCharStream(new char[] { 'a', 'b' }));
+        char[] valuesForNone = { 'X', 'Y' };
+        List<Character> result = CharStream.zip(streams, valuesForNone, chars -> (char) (chars[0] + chars[1])).boxed().toList();
+        assertEquals(Arrays.asList((char) ('1' + 'a'), (char) ('X' + 'b')), result);
+    }
+
+    @Test
+    public void testSorted() {
+        List<Character> result = createCharStream('c', 'a', 'b', 'e', 'd').sorted().boxed().toList();
+        assertEquals(Arrays.asList('a', 'b', 'c', 'd', 'e'), result);
+
+        result = createCharStream(new char[] {}).sorted().boxed().toList();
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testOfCharArrayRange() {
+        char[] data = { 'a', 'b', 'c', 'd', 'e' };
+        CharStream stream1 = createCharStream(data, 1, 4);
+        assertEquals(Arrays.asList('b', 'c', 'd'), stream1.boxed().toList());
+
+        CharStream stream2 = createCharStream(data, 0, 0);
+        assertTrue(stream2.boxed().toList().isEmpty());
+
+        try {
+            createCharStream(data, -1, 2);
+            fail("Expected IndexOutOfBoundsException");
+        } catch (IndexOutOfBoundsException e) {
+        }
+
+        try {
+            createCharStream(data, 2, 1);
+            fail("Expected IndexOutOfBoundsException");
+        } catch (IndexOutOfBoundsException e) {
+        }
+
+        try {
+            createCharStream(data, 0, 10);
+            fail("Expected IndexOutOfBoundsException");
+        } catch (IndexOutOfBoundsException e) {
+        }
+    }
+
+    @Test
+    public void testOfCharSequenceRange() {
+        CharSequence str = "world";
+        CharStream stream1 = createCharStream(str, 1, 4);
+        assertEquals(Arrays.asList('o', 'r', 'l'), stream1.boxed().toList());
+
+        CharStream stream2 = createCharStream(str, 0, 0);
+        assertTrue(stream2.boxed().toList().isEmpty());
+
+        try {
+            createCharStream(str, -1, 2);
+            fail("Expected IndexOutOfBoundsException");
+        } catch (IndexOutOfBoundsException e) {
+        }
+    }
+
+    @Test
+    public void testOfFile() throws IOException {
+        File tempFile = File.createTempFile("charstream_test", ".txt");
+        tempFile.deleteOnExit();
+        IOUtil.write("Hello World".toCharArray(), tempFile);
+
+        CharStream stream1 = createCharStream(tempFile);
+        assertEquals(Arrays.asList('H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd'), stream1.boxed().toList());
+    }
+
+    @Test
+    public void testOfReader() throws IOException {
+        Reader reader = new java.io.StringReader("abc");
+        CharStream stream1 = createCharStream(reader);
+        assertEquals(Arrays.asList('a', 'b', 'c'), stream1.boxed().toList());
+        reader.read();
+    }
+
+    @Test
+    public void testOfReaderWithCloseOption() throws IOException {
+        java.io.StringReader reader = new java.io.StringReader("xyz");
+        CharStream stream1 = createCharStream(reader, true);
+        assertEquals(Arrays.asList('x', 'y', 'z'), stream1.boxed().toList());
+
+        try {
+            reader.read();
+            fail("Expected IOException due to closed reader");
+        } catch (IOException e) {
+        }
     }
 
     @Test
@@ -243,6 +879,14 @@ public class ArrayCharStreamTest extends TestBase {
     }
 
     @Test
+    public void testToMultisetWithSupplier() {
+        Multiset<Character> multiset = createCharStream(new char[] { 'a', 'b', 'a' }).toMultiset(N::newMultiset);
+        assertEquals(3, multiset.size());
+        assertEquals(2, multiset.count('a'));
+        assertEquals(1, multiset.count('b'));
+    }
+
+    @Test
     public void testToMultiset() {
         Multiset<Character> multiset = createCharStream(new char[] { 'a', 'b', 'a', 'c', 'b' }).toMultiset();
         assertEquals(5, multiset.size());
@@ -252,14 +896,6 @@ public class ArrayCharStreamTest extends TestBase {
 
         multiset = createCharStream(new char[] {}).toMultiset();
         assertTrue(multiset.isEmpty());
-    }
-
-    @Test
-    public void testToMultisetWithSupplier() {
-        Multiset<Character> multiset = createCharStream(new char[] { 'a', 'b', 'a' }).toMultiset(N::newMultiset);
-        assertEquals(3, multiset.size());
-        assertEquals(2, multiset.count('a'));
-        assertEquals(1, multiset.count('b'));
     }
 
     @Test
@@ -282,6 +918,13 @@ public class ArrayCharStreamTest extends TestBase {
         Map<String, Integer> result = createCharStream(new char[] { 'a', 'b', 'a' }).toMap(c -> String.valueOf(c), c -> (int) c, (v1, v2) -> v1 + v2,
                 () -> N.newLinkedHashMap());
         assertEquals(2, result.size());
+    }
+
+    @Test
+    public void testToMapWithMergeFunction() {
+        Map<Character, Integer> result = createCharStream('a', 'b', 'a', 'c').toMap(c -> c, c -> 1, (v1, v2) -> v1 + v2, java.util.LinkedHashMap::new);
+        assertEquals(3, result.size());
+        assertEquals(2, (int) result.get('a'));
     }
 
     @Test
@@ -472,6 +1115,37 @@ public class ArrayCharStreamTest extends TestBase {
     }
 
     @Test
+    public void testOnClose() {
+        AtomicInteger closeCount = new AtomicInteger(0);
+        CharStream closableStream = createCharStream('a', 'b', 'c').onClose(() -> closeCount.incrementAndGet());
+        closableStream.count();
+        assertEquals(1, closeCount.get());
+
+        closeCount.set(0);
+        closableStream = createCharStream('a', 'b', 'c').onClose(() -> closeCount.incrementAndGet()).onClose(() -> closeCount.incrementAndGet());
+        closableStream.toList();
+        assertEquals(2, closeCount.get());
+
+        closeCount.set(0);
+        closableStream = createCharStream(new char[] { 'a' }).onClose(() -> closeCount.incrementAndGet());
+        closableStream = closableStream.filter(c -> true);
+        closableStream.forEach(c -> {
+        });
+        assertEquals(1, closeCount.get());
+
+        closeCount.set(0);
+        createCharStream(new char[] {}).onClose(() -> closeCount.incrementAndGet()).count();
+        assertEquals(1, closeCount.get());
+    }
+
+    @Test
+    public void testEmpty() {
+        CharStream emptyStream = CharStream.empty();
+        assertFalse(emptyStream.iterator().hasNext());
+        assertEquals(0, emptyStream.count());
+    }
+
+    @Test
     public void testsummaryStatistics() {
         CharSummaryStatistics stats = createCharStream(new char[] { 'z', 'y', 'x', 'w' }).summaryStatistics();
         assertEquals(4, stats.getCount());
@@ -567,6 +1241,13 @@ public class ArrayCharStreamTest extends TestBase {
     }
 
     @Test
+    public void testParallel() {
+        CharStream pStream = createCharStream('a', 'b', 'c').parallel();
+        assertTrue(pStream.isParallel());
+        assertEquals(3, pStream.count());
+    }
+
+    @Test
     public void testCycledRounds() {
         List<Character> result = createCharStream(new char[] { 'a', 'b' }).cycled(3).boxed().toList();
         assertEquals(Arrays.asList('a', 'b', 'a', 'b', 'a', 'b'), result);
@@ -587,16 +1268,6 @@ public class ArrayCharStreamTest extends TestBase {
     }
 
     @Test
-    public void testApplyIfNotEmpty() {
-        Optional<String> result = stream.applyIfNotEmpty(s -> s.mapToObj(c -> String.valueOf(c)).join(""));
-        assertTrue(result.isPresent());
-        assertEquals("abcde", result.get());
-
-        result = createCharStream(new char[] {}).applyIfNotEmpty(s -> "not empty");
-        assertFalse(result.isPresent());
-    }
-
-    @Test
     public void testAcceptIfNotEmpty() {
         AtomicInteger counter = new AtomicInteger(0);
         stream.acceptIfNotEmpty(s -> counter.incrementAndGet());
@@ -608,300 +1279,8 @@ public class ArrayCharStreamTest extends TestBase {
     }
 
     @Test
-    public void testOnClose() {
-        AtomicInteger closeCount = new AtomicInteger(0);
-        CharStream closableStream = createCharStream('a', 'b', 'c').onClose(() -> closeCount.incrementAndGet());
-        closableStream.count();
-        assertEquals(1, closeCount.get());
-
-        closeCount.set(0);
-        closableStream = createCharStream('a', 'b', 'c').onClose(() -> closeCount.incrementAndGet()).onClose(() -> closeCount.incrementAndGet());
-        closableStream.toList();
-        assertEquals(2, closeCount.get());
-
-        closeCount.set(0);
-        closableStream = createCharStream(new char[] { 'a' }).onClose(() -> closeCount.incrementAndGet());
-        closableStream = closableStream.filter(c -> true);
-        closableStream.forEach(c -> {
-        });
-        assertEquals(1, closeCount.get());
-
-        closeCount.set(0);
-        createCharStream(new char[] {}).onClose(() -> closeCount.incrementAndGet()).count();
-        assertEquals(1, closeCount.get());
-    }
-
-    @Test
-    public void testEmpty() {
-        CharStream emptyStream = CharStream.empty();
-        assertFalse(emptyStream.iterator().hasNext());
-        assertEquals(0, emptyStream.count());
-    }
-
-    @Test
-    public void testDefer() {
-        AtomicInteger counter = new AtomicInteger(0);
-        CharStream deferredStream = CharStream.defer(() -> {
-            counter.incrementAndGet();
-            return createCharStream(new char[] { 'd', 'e', 'f' });
-        });
-        assertEquals(0, counter.get());
-        List<Character> result = deferredStream.boxed().toList();
-        assertEquals(1, counter.get());
-        assertEquals(Arrays.asList('d', 'e', 'f'), result);
-    }
-
-    @Test
-    public void testOfNullable() {
-        CharStream stream1 = CharStream.ofNullable('a');
-        assertEquals(Arrays.asList('a'), stream1.boxed().toList());
-
-        CharStream stream2 = CharStream.ofNullable(null);
-        assertTrue(stream2.boxed().toList().isEmpty());
-    }
-
-    @Test
-    public void testOfCharArray() {
-        CharStream stream1 = createCharStream('a', 'b', 'c');
-        assertEquals(Arrays.asList('a', 'b', 'c'), stream1.boxed().toList());
-
-        CharStream stream2 = createCharStream();
-        assertTrue(stream2.boxed().toList().isEmpty());
-    }
-
-    @Test
-    public void testOfCharArrayRange() {
-        char[] data = { 'a', 'b', 'c', 'd', 'e' };
-        CharStream stream1 = createCharStream(data, 1, 4);
-        assertEquals(Arrays.asList('b', 'c', 'd'), stream1.boxed().toList());
-
-        CharStream stream2 = createCharStream(data, 0, 0);
-        assertTrue(stream2.boxed().toList().isEmpty());
-
-        try {
-            createCharStream(data, -1, 2);
-            fail("Expected IndexOutOfBoundsException");
-        } catch (IndexOutOfBoundsException e) {
-        }
-
-        try {
-            createCharStream(data, 2, 1);
-            fail("Expected IndexOutOfBoundsException");
-        } catch (IndexOutOfBoundsException e) {
-        }
-
-        try {
-            createCharStream(data, 0, 10);
-            fail("Expected IndexOutOfBoundsException");
-        } catch (IndexOutOfBoundsException e) {
-        }
-    }
-
-    @Test
-    public void testOfCharSequence() {
-        CharStream stream1 = createCharStream("hello");
-        assertEquals(Arrays.asList('h', 'e', 'l', 'l', 'o'), stream1.boxed().toList());
-
-        CharStream stream2 = createCharStream("");
-        assertTrue(stream2.boxed().toList().isEmpty());
-    }
-
-    @Test
-    public void testOfCharSequenceRange() {
-        CharSequence str = "world";
-        CharStream stream1 = createCharStream(str, 1, 4);
-        assertEquals(Arrays.asList('o', 'r', 'l'), stream1.boxed().toList());
-
-        CharStream stream2 = createCharStream(str, 0, 0);
-        assertTrue(stream2.boxed().toList().isEmpty());
-
-        try {
-            createCharStream(str, -1, 2);
-            fail("Expected IndexOutOfBoundsException");
-        } catch (IndexOutOfBoundsException e) {
-        }
-    }
-
-    @Test
-    public void testOfCharacterArray() {
-        Character[] data = { 'X', 'Y', 'Z' };
-        CharStream stream1 = createCharStream(data);
-        assertEquals(Arrays.asList('X', 'Y', 'Z'), stream1.boxed().toList());
-
-        CharStream stream2 = createCharStream(new Character[] {});
-        assertTrue(stream2.boxed().toList().isEmpty());
-    }
-
-    @Test
-    public void testOfCharacterArrayRange() {
-        Character[] data = { 'A', 'B', 'C', 'D' };
-        CharStream stream1 = createCharStream(data, 1, 3);
-        assertEquals(Arrays.asList('B', 'C'), stream1.boxed().toList());
-    }
-
-    @Test
-    public void testOfCharacterCollection() {
-        List<Character> list = Arrays.asList('1', '2', '3');
-        CharStream stream1 = createCharStream(list);
-        assertEquals(Arrays.asList('1', '2', '3'), stream1.boxed().toList());
-
-        CharStream stream2 = createCharStream(Arrays.asList());
-        assertTrue(stream2.boxed().toList().isEmpty());
-    }
-
-    @Test
-    public void testOfCharIterator() {
-        CharIterator iterator = CharList.of('x', 'y').iterator();
-        CharStream stream1 = createCharStream(iterator);
-        assertEquals(Arrays.asList('x', 'y'), stream1.boxed().toList());
-
-        CharStream stream2 = createCharStream((CharIterator) null);
-        assertTrue(stream2.boxed().toList().isEmpty());
-    }
-
-    @Test
-    public void testOfCharBuffer() {
-        CharBuffer buffer = CharBuffer.wrap(new char[] { 't', 'e', 's', 't' });
-        buffer.position(1).limit(3);
-        CharStream stream1 = createCharStream(buffer);
-        assertEquals(Arrays.asList('e', 's'), stream1.boxed().toList());
-
-        CharStream stream2 = createCharStream((CharBuffer) null);
-        assertTrue(stream2.boxed().toList().isEmpty());
-    }
-
-    @Test
-    public void testOfFile() throws IOException {
-        File tempFile = File.createTempFile("charstream_test", ".txt");
-        tempFile.deleteOnExit();
-        IOUtil.write("Hello World".toCharArray(), tempFile);
-
-        CharStream stream1 = createCharStream(tempFile);
-        assertEquals(Arrays.asList('H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd'), stream1.boxed().toList());
-    }
-
-    @Test
-    public void testOfReader() throws IOException {
-        Reader reader = new java.io.StringReader("abc");
-        CharStream stream1 = createCharStream(reader);
-        assertEquals(Arrays.asList('a', 'b', 'c'), stream1.boxed().toList());
-        reader.read();
-    }
-
-    @Test
-    public void testOfReaderWithCloseOption() throws IOException {
-        java.io.StringReader reader = new java.io.StringReader("xyz");
-        CharStream stream1 = createCharStream(reader, true);
-        assertEquals(Arrays.asList('x', 'y', 'z'), stream1.boxed().toList());
-
-        try {
-            reader.read();
-            fail("Expected IOException due to closed reader");
-        } catch (IOException e) {
-        }
-    }
-
-    @Test
-    public void testFlatten2DArray() {
-        char[][] data = { { 'a', 'b' }, { 'c', 'd', 'e' } };
-        List<Character> result = CharStream.flatten(data).boxed().toList();
-        assertEquals(Arrays.asList('a', 'b', 'c', 'd', 'e'), result);
-
-        result = CharStream.flatten(new char[][] {}).boxed().toList();
-        assertTrue(result.isEmpty());
-
-        result = CharStream.flatten(new char[][] { { 'a' }, {} }).boxed().toList();
-        assertEquals(Arrays.asList('a'), result);
-    }
-
-    @Test
-    public void testFlatten2DArrayVertically() {
-        char[][] data = { { 'a', 'b' }, { 'c', 'd', 'e' } };
-        List<Character> result = CharStream.flatten(data, true).boxed().toList();
-        assertEquals(Arrays.asList('a', 'c', 'b', 'd', 'e'), result);
-
-        result = CharStream.flatten(new char[][] { { 'x' } }, true).boxed().toList();
-        assertEquals(Arrays.asList('x'), result);
-    }
-
-    @Test
-    public void testFlatten2DArrayWithAlignment() {
-        char[][] data = { { 'a', 'b' }, { 'c', 'd', 'e' } };
-        char padding = '-';
-        List<Character> result = CharStream.flatten(data, padding, false).boxed().toList();
-        assertEquals(Arrays.asList('a', 'b', '-', 'c', 'd', 'e'), result);
-
-        result = CharStream.flatten(data, padding, true).boxed().toList();
-        assertEquals(Arrays.asList('a', 'c', 'b', 'd', '-', 'e'), result);
-
-        result = CharStream.flatten(new char[][] { { 'x' } }, padding, false).boxed().toList();
-        assertEquals(Arrays.asList('x'), result);
-    }
-
-    @Test
-    public void testFlatten3DArray() {
-        char[][][] data = { { { 'a', 'b' }, { 'c' } }, { { 'd' } } };
-        List<Character> result = CharStream.flatten(data).boxed().toList();
-        assertEquals(Arrays.asList('a', 'b', 'c', 'd'), result);
-
-        result = CharStream.flatten(new char[][][] {}).boxed().toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testRange() {
-        List<Character> result = CharStream.range('a', 'd').boxed().toList();
-        assertEquals(Arrays.asList('a', 'b', 'c'), result);
-
-        result = CharStream.range('d', 'a').boxed().toList();
-        assertTrue(result.isEmpty());
-
-        result = CharStream.range('a', 'a').boxed().toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testRangeWithStep() {
-        List<Character> result = CharStream.range('a', 'g', 2).boxed().toList();
-        assertEquals(Arrays.asList('a', 'c', 'e'), result);
-
-        result = CharStream.range('g', 'a', -2).boxed().toList();
-        assertEquals(Arrays.asList('g', 'e', 'c'), result);
-
-        result = CharStream.range('a', 'a', 1).boxed().toList();
-        assertTrue(result.isEmpty());
-
-        result = CharStream.range('a', 'b', 5).boxed().toList();
-        assertEquals(Arrays.asList('a'), result);
-    }
-
-    @Test
     public void testRangeWithZeroStep() {
         assertThrows(IllegalArgumentException.class, () -> CharStream.range('a', 'c', 0));
-    }
-
-    @Test
-    public void testRangeClosed() {
-        List<Character> result = CharStream.rangeClosed('a', 'c').boxed().toList();
-        assertEquals(Arrays.asList('a', 'b', 'c'), result);
-
-        result = CharStream.rangeClosed('a', 'a').boxed().toList();
-        assertEquals(Arrays.asList('a'), result);
-
-        result = CharStream.rangeClosed('c', 'a').boxed().toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testRangeClosedWithStep() {
-        List<Character> result = CharStream.rangeClosed('a', 'e', 2).boxed().toList();
-        assertEquals(Arrays.asList('a', 'c', 'e'), result);
-
-        result = CharStream.rangeClosed('e', 'a', -2).boxed().toList();
-        assertEquals(Arrays.asList('e', 'c', 'a'), result);
-
-        result = CharStream.rangeClosed('a', 'b', 5).boxed().toList();
-        assertEquals(Arrays.asList('a'), result);
     }
 
     @Test
@@ -910,31 +1289,8 @@ public class ArrayCharStreamTest extends TestBase {
     }
 
     @Test
-    public void testRepeat() {
-        List<Character> result = CharStream.repeat('X', 3).boxed().toList();
-        assertEquals(Arrays.asList('X', 'X', 'X'), result);
-
-        result = CharStream.repeat('Y', 0).boxed().toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
     public void testRepeatNegativeCount() {
         assertThrows(IllegalArgumentException.class, () -> CharStream.repeat('A', -1));
-    }
-
-    @Test
-    public void testRandom() {
-        assertEquals(5, CharStream.random().limit(5).count());
-        CharStream.random().limit(5).forEach(c -> assertTrue(c >= Character.MIN_VALUE && c <= Character.MAX_VALUE));
-    }
-
-    @Test
-    public void testRandomRange() {
-        char start = 'a';
-        char end = 'z';
-        assertEquals(10, CharStream.random(start, end).limit(10).count());
-        CharStream.random(start, end).limit(10).forEach(c -> assertTrue(c >= start && c < end));
     }
 
     @Test
@@ -943,366 +1299,7 @@ public class ArrayCharStreamTest extends TestBase {
     }
 
     @Test
-    public void testRandomCandidates() {
-        char[] candidates = { 'x', 'y', 'z' };
-        assertEquals(10, CharStream.random(candidates).limit(10).count());
-        CharStream.random(candidates).limit(10).forEach(c -> assertTrue(c == 'x' || c == 'y' || c == 'z'));
-
-        CharStream emptyRandom = CharStream.random(new char[] {});
-        assertTrue(emptyRandom.boxed().toList().isEmpty());
-    }
-
-    @Test
-    public void testIterateBooleanSupplierCharSupplier() {
-        AtomicInteger count = new AtomicInteger(0);
-        CharStream iteratedStream = CharStream.iterate(() -> count.get() < 3, () -> (char) ('a' + count.getAndIncrement()));
-        List<Character> result = iteratedStream.boxed().toList();
-        assertEquals(Arrays.asList('a', 'b', 'c'), result);
-
-        result = CharStream.iterate(() -> false, () -> 'x').boxed().toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
     public void testIterateBooleanSupplierCharSupplierNull() {
         assertThrows(IllegalArgumentException.class, () -> CharStream.iterate(null, () -> 'a'));
-    }
-
-    @Test
-    public void testIterateInitBooleanSupplierCharUnaryOperator() {
-        AtomicInteger callCount = new AtomicInteger(0);
-        CharStream iteratedStream = CharStream.iterate('A', () -> callCount.incrementAndGet() <= 3, c -> (char) (c + 1));
-        List<Character> result = iteratedStream.boxed().toList();
-        assertEquals(Arrays.asList('A', 'B', 'C'), result);
-    }
-
-    @Test
-    public void testIterateInitCharPredicateCharUnaryOperator() {
-        CharStream iteratedStream = CharStream.iterate('A', c -> c <= 'C', c -> (char) (c + 1));
-        List<Character> result = iteratedStream.boxed().toList();
-        assertEquals(Arrays.asList('A', 'B', 'C'), result);
-
-        result = CharStream.iterate('Z', c -> false, c -> c).boxed().toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testIterateInitCharUnaryOperator() {
-        List<Character> result = CharStream.iterate('0', c -> (char) (c + 1)).limit(5).boxed().toList();
-        assertEquals(Arrays.asList('0', '1', '2', '3', '4'), result);
-    }
-
-    @Test
-    public void testGenerate() {
-        AtomicInteger counter = new AtomicInteger(0);
-        List<Character> result = CharStream.generate(() -> (char) ('X' + counter.getAndIncrement())).limit(3).boxed().toList();
-        assertEquals(Arrays.asList('X', 'Y', 'Z'), result);
-    }
-
-    @Test
-    public void testConcatCharArrays() {
-        char[] arr1 = { '1', '2' };
-        char[] arr2 = { '3', '4', '5' };
-        List<Character> result = CharStream.concat(arr1, arr2).boxed().toList();
-        assertEquals(Arrays.asList('1', '2', '3', '4', '5'), result);
-
-        result = CharStream.concat(new char[0][0]).boxed().toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testConcatCharIterators() {
-        CharIterator iter1 = CharList.of('a', 'b').iterator();
-        CharIterator iter2 = CharList.of('c', 'd').iterator();
-        List<Character> result = CharStream.concat(iter1, iter2).boxed().toList();
-        assertEquals(Arrays.asList('a', 'b', 'c', 'd'), result);
-    }
-
-    @Test
-    public void testConcatCharStreams() {
-        CharStream stream1 = createCharStream(new char[] { 'x', 'y' });
-        CharStream stream2 = createCharStream(new char[] { 'z' });
-        List<Character> result = CharStream.concat(stream1, stream2).boxed().toList();
-        assertEquals(Arrays.asList('x', 'y', 'z'), result);
-    }
-
-    @Test
-    public void testConcatListOfCharArrays() {
-        List<char[]> listOfArrays = Arrays.asList(new char[] { 'h', 'i' }, new char[] { 'j', 'k' });
-        List<Character> result = CharStream.concat(listOfArrays).boxed().toList();
-        assertEquals(Arrays.asList('h', 'i', 'j', 'k'), result);
-    }
-
-    @Test
-    public void testConcatCollectionOfCharStreams() {
-        Collection<CharStream> streams = Arrays.asList(createCharStream(new char[] { 'o', 'n', 'e' }), createCharStream(new char[] { 't', 'w', 'o' }));
-        List<Character> result = CharStream.concat(streams).boxed().toList();
-        assertEquals(Arrays.asList('o', 'n', 'e', 't', 'w', 'o'), result);
-    }
-
-    @Test
-    public void testConcatCollectionOfCharIterators() {
-        Collection<CharIterator> iterators = Arrays.asList(CharList.of('u', 'v').iterator(), CharList.of('w').iterator());
-        List<Character> result = CharStream.concatIterators(iterators).boxed().toList();
-        assertEquals(Arrays.asList('u', 'v', 'w'), result);
-    }
-
-    @Test
-    public void testZipTwoCharArrays() {
-        char[] arr1 = { '1', '2', '3' };
-        char[] arr2 = { 'a', 'b' };
-        List<Character> result = CharStream.zip(arr1, arr2, (c1, c2) -> (char) (c1 + c2)).boxed().toList();
-        assertEquals(Arrays.asList((char) ('1' + 'a'), (char) ('2' + 'b')), result);
-
-        result = CharStream.zip(new char[] {}, new char[] { 'a' }, (c1, c2) -> c1).boxed().toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testZipThreeCharArrays() {
-        char[] arr1 = { '1', '2', '3' };
-        char[] arr2 = { 'a', 'b' };
-        char[] arr3 = { 'x', 'y', 'z' };
-        List<Character> result = CharStream.zip(arr1, arr2, arr3, (c1, c2, c3) -> (char) (c1 + c2 + c3)).boxed().toList();
-        assertEquals(Arrays.asList((char) ('1' + 'a' + 'x'), (char) ('2' + 'b' + 'y')), result);
-    }
-
-    @Test
-    public void testZipTwoCharIterators() {
-        CharIterator iter1 = CharList.of('A', 'B', 'C').iterator();
-        CharIterator iter2 = CharList.of('D', 'E').iterator();
-        List<Character> result = CharStream.zip(iter1, iter2, (c1, c2) -> (char) (c1 + c2)).boxed().toList();
-        assertEquals(Arrays.asList((char) ('A' + 'D'), (char) ('B' + 'E')), result);
-    }
-
-    @Test
-    public void testZipThreeCharIterators() {
-        CharIterator iter1 = CharList.of('1', '2').iterator();
-        CharIterator iter2 = CharList.of('a', 'b').iterator();
-        CharIterator iter3 = CharList.of('X').iterator();
-        List<Character> result = CharStream.zip(iter1, iter2, iter3, (c1, c2, c3) -> (char) (c1 + c2 + c3)).boxed().toList();
-        assertEquals(Arrays.asList((char) ('1' + 'a' + 'X')), result);
-    }
-
-    @Test
-    public void testZipTwoCharStreams() {
-        CharStream stream1 = createCharStream(new char[] { 'P', 'Q' });
-        CharStream stream2 = createCharStream(new char[] { 'R', 'S', 'T' });
-        List<Character> result = CharStream.zip(stream1, stream2, (c1, c2) -> (char) (c1 + c2)).boxed().toList();
-        assertEquals(Arrays.asList((char) ('P' + 'R'), (char) ('Q' + 'S')), result);
-    }
-
-    @Test
-    public void testZipThreeCharStreams() {
-        CharStream stream1 = createCharStream(new char[] { '1', '2', '3' });
-        CharStream stream2 = createCharStream(new char[] { 'a', 'b' });
-        CharStream stream3 = createCharStream(new char[] { 'x', 'y', 'z' });
-        List<Character> result = CharStream.zip(stream1, stream2, stream3, (c1, c2, c3) -> (char) (c1 + c2 + c3)).boxed().toList();
-        assertEquals(Arrays.asList((char) ('1' + 'a' + 'x'), (char) ('2' + 'b' + 'y')), result);
-    }
-
-    @Test
-    public void testZipCollectionOfCharStreams() {
-        Collection<CharStream> streams = Arrays.asList(createCharStream(new char[] { 'A', 'B' }), createCharStream(new char[] { '1', '2', '3' }));
-        List<Character> result = CharStream.zip(streams, chars -> (char) (chars[0] + chars[1])).boxed().toList();
-        assertEquals(Arrays.asList((char) ('A' + '1'), (char) ('B' + '2')), result);
-    }
-
-    @Test
-    public void testZipTwoCharArraysWithNoneValues() {
-        char[] arr1 = { '1', '2' };
-        char[] arr2 = { 'a', 'b', 'c' };
-        List<Character> result = CharStream.zip(arr1, arr2, 'X', 'Y', (c1, c2) -> (char) (c1 + c2)).boxed().toList();
-        assertEquals(Arrays.asList((char) ('1' + 'a'), (char) ('2' + 'b'), (char) ('X' + 'c')), result);
-    }
-
-    @Test
-    public void testZipThreeCharArraysWithNoneValues() {
-        char[] arr1 = { '1', '2' };
-        char[] arr2 = { 'a', 'b', 'c' };
-        char[] arr3 = { 'x' };
-        List<Character> result = CharStream.zip(arr1, arr2, arr3, 'X', 'Y', 'Z', (c1, c2, c3) -> (char) (c1 + c2 + c3)).boxed().toList();
-        assertEquals(Arrays.asList((char) ('1' + 'a' + 'x'), (char) ('2' + 'b' + 'Z'), (char) ('X' + 'c' + 'Z')), result);
-    }
-
-    @Test
-    public void testZipTwoCharIteratorsWithNoneValues() {
-        CharIterator iter1 = CharList.of('A', 'B').iterator();
-        CharIterator iter2 = CharList.of('C', 'D', 'E').iterator();
-        List<Character> result = CharStream.zip(iter1, iter2, 'X', 'Y', (c1, c2) -> (char) (c1 + c2)).boxed().toList();
-        assertEquals(Arrays.asList((char) ('A' + 'C'), (char) ('B' + 'D'), (char) ('X' + 'E')), result);
-    }
-
-    @Test
-    public void testZipThreeCharIteratorsWithNoneValues() {
-        CharIterator iter1 = CharList.of('1').iterator();
-        CharIterator iter2 = CharList.of('a', 'b').iterator();
-        CharIterator iter3 = CharList.of('x', 'y', 'z').iterator();
-        List<Character> result = CharStream.zip(iter1, iter2, iter3, 'X', 'Y', 'Z', (c1, c2, c3) -> (char) (c1 + c2 + c3)).boxed().toList();
-        assertEquals(Arrays.asList((char) ('1' + 'a' + 'x'), (char) ('X' + 'b' + 'y'), (char) ('X' + 'Y' + 'z')), result);
-    }
-
-    @Test
-    public void testZipTwoCharStreamsWithNoneValues() {
-        CharStream stream1 = createCharStream(new char[] { 'F', 'G' });
-        CharStream stream2 = createCharStream(new char[] { 'H', 'I', 'J' });
-        List<Character> result = CharStream.zip(stream1, stream2, 'U', 'V', (c1, c2) -> (char) (c1 + c2)).boxed().toList();
-        assertEquals(Arrays.asList((char) ('F' + 'H'), (char) ('G' + 'I'), (char) ('U' + 'J')), result);
-    }
-
-    @Test
-    public void testZipThreeCharStreamsWithNoneValues() {
-        CharStream stream1 = createCharStream(new char[] { 'X' });
-        CharStream stream2 = createCharStream(new char[] { 'Y', 'Z' });
-        CharStream stream3 = createCharStream('a', 'b', 'c');
-        List<Character> result = CharStream.zip(stream1, stream2, stream3, 'D', 'E', 'F', (c1, c2, c3) -> (char) (c1 + c2 + c3)).boxed().toList();
-        assertEquals(Arrays.asList((char) ('X' + 'Y' + 'a'), (char) ('D' + 'Z' + 'b'), (char) ('D' + 'E' + 'c')), result);
-    }
-
-    @Test
-    public void testZipCollectionOfCharStreamsWithNoneValues() {
-        Collection<CharStream> streams = Arrays.asList(createCharStream(new char[] { '1' }), createCharStream(new char[] { 'a', 'b' }));
-        char[] valuesForNone = { 'X', 'Y' };
-        List<Character> result = CharStream.zip(streams, valuesForNone, chars -> (char) (chars[0] + chars[1])).boxed().toList();
-        assertEquals(Arrays.asList((char) ('1' + 'a'), (char) ('X' + 'b')), result);
-    }
-
-    @Test
-    public void testMergeTwoCharArrays() {
-        char[] arr1 = { 'a', 'c', 'e' };
-        char[] arr2 = { 'b', 'd', 'f' };
-        List<Character> result = CharStream.merge(arr1, arr2, (c1, c2) -> c1 < c2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).boxed().toList();
-        assertEquals(Arrays.asList('a', 'b', 'c', 'd', 'e', 'f'), result);
-
-        result = CharStream.merge(new char[] { 'x' }, new char[] {}, (c1, c2) -> MergeResult.TAKE_FIRST).boxed().toList();
-        assertEquals(Arrays.asList('x'), result);
-
-        result = CharStream.merge(new char[] {}, new char[] { 'y' }, (c1, c2) -> MergeResult.TAKE_SECOND).boxed().toList();
-        assertEquals(Arrays.asList('y'), result);
-    }
-
-    @Test
-    public void testMergeThreeCharArrays() {
-        char[] arr1 = { '1', '4' };
-        char[] arr2 = { '2', '5' };
-        char[] arr3 = { '3', '6' };
-        List<Character> result = CharStream.merge(arr1, arr2, arr3, (c1, c2) -> c1 < c2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).boxed().toList();
-        assertEquals(Arrays.asList('1', '2', '3', '4', '5', '6'), result);
-    }
-
-    @Test
-    public void testMergeTwoCharIterators() {
-        CharIterator iter1 = CharList.of('A', 'C').iterator();
-        CharIterator iter2 = CharList.of('B', 'D').iterator();
-        List<Character> result = CharStream.merge(iter1, iter2, (c1, c2) -> c1 < c2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).boxed().toList();
-        assertEquals(Arrays.asList('A', 'B', 'C', 'D'), result);
-    }
-
-    @Test
-    public void testMergeThreeCharIterators() {
-        CharIterator iter1 = CharList.of('a', 'd').iterator();
-        CharIterator iter2 = CharList.of('b', 'e').iterator();
-        CharIterator iter3 = CharList.of('c', 'f').iterator();
-        List<Character> result = CharStream.merge(iter1, iter2, iter3, (c1, c2) -> c1 < c2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).boxed().toList();
-        assertEquals(Arrays.asList('a', 'b', 'c', 'd', 'e', 'f'), result);
-    }
-
-    @Test
-    public void testMergeTwoCharStreams() {
-        CharStream stream1 = createCharStream(new char[] { 'X', 'Z' });
-        CharStream stream2 = createCharStream(new char[] { 'Y' });
-        List<Character> result = CharStream.merge(stream1, stream2, (c1, c2) -> c1 < c2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).boxed().toList();
-        assertEquals(Arrays.asList('X', 'Y', 'Z'), result);
-    }
-
-    @Test
-    public void testMergeThreeCharStreams() {
-        CharStream stream1 = createCharStream(new char[] { '1', '2' });
-        CharStream stream2 = createCharStream(new char[] { '3' });
-        CharStream stream3 = createCharStream(new char[] { '4', '5' });
-        List<Character> result = CharStream.merge(stream1, stream2, stream3, (c1, c2) -> c1 < c2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
-                .boxed()
-                .toList();
-        assertEquals(Arrays.asList('1', '2', '3', '4', '5'), result);
-    }
-
-    @Test
-    public void testMergeCollectionOfCharStreams() {
-        Collection<CharStream> streams = Arrays.asList(createCharStream(new char[] { '1', '5' }), createCharStream(new char[] { '2', '6' }),
-                createCharStream(new char[] { '3', '4' }));
-        List<Character> result = CharStream.merge(streams, (c1, c2) -> c1 < c2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).boxed().toList();
-        assertEquals(Arrays.asList('1', '2', '3', '4', '5', '6'), result);
-    }
-
-    @Test
-    public void testSorted() {
-        List<Character> result = createCharStream('c', 'a', 'b', 'e', 'd').sorted().boxed().toList();
-        assertEquals(Arrays.asList('a', 'b', 'c', 'd', 'e'), result);
-
-        result = createCharStream(new char[] {}).sorted().boxed().toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testStep() {
-        List<Character> result = createCharStream('a', 'b', 'c', 'd', 'e').step(2).boxed().toList();
-        assertEquals(Arrays.asList('a', 'c', 'e'), result);
-
-        result = createCharStream('a', 'b', 'c').step(5).boxed().toList();
-        assertEquals(Arrays.asList('a'), result);
-    }
-
-    @Test
-    public void testForEach() {
-        List<Character> result = new ArrayList<>();
-        createCharStream('a', 'b', 'c').forEach(c -> result.add(c));
-        assertEquals(Arrays.asList('a', 'b', 'c'), result);
-    }
-
-    @Test
-    public void testFlatmapToObj() {
-        List<String> result = createCharStream('a', 'b').flatmapToObj(c -> Arrays.asList(String.valueOf(c), String.valueOf(c).toUpperCase())).toList();
-        assertEquals(Arrays.asList("a", "A", "b", "B"), result);
-    }
-
-    @Test
-    public void testBoxed() {
-        List<Character> result = createCharStream('a', 'b', 'c').boxed().toList();
-        assertEquals(Arrays.asList('a', 'b', 'c'), result);
-    }
-
-    @Test
-    public void testParallel() {
-        CharStream pStream = createCharStream('a', 'b', 'c').parallel();
-        assertTrue(pStream.isParallel());
-        assertEquals(3, pStream.count());
-    }
-
-    @Test
-    public void testOnEach() {
-        List<Character> sideEffect = new ArrayList<>();
-        List<Character> result = createCharStream('a', 'b', 'c').onEach(c -> sideEffect.add(c)).boxed().toList();
-        assertEquals(Arrays.asList('a', 'b', 'c'), result);
-        assertEquals(Arrays.asList('a', 'b', 'c'), sideEffect);
-    }
-
-    @Test
-    public void testDistinct() {
-        List<Character> result = createCharStream('a', 'b', 'a', 'c', 'b').distinct().boxed().toList();
-        assertEquals(3, result.size());
-        assertTrue(result.containsAll(Arrays.asList('a', 'b', 'c')));
-    }
-
-    @Test
-    public void testFlatmap() {
-        List<Character> result = createCharStream('a', 'b').flatmap(c -> new char[] { c, Character.toUpperCase(c) }).boxed().toList();
-        assertEquals(Arrays.asList('a', 'A', 'b', 'B'), result);
-    }
-
-    @Test
-    public void testToMapWithMergeFunction() {
-        Map<Character, Integer> result = createCharStream('a', 'b', 'a', 'c').toMap(c -> c, c -> 1, (v1, v2) -> v1 + v2, java.util.LinkedHashMap::new);
-        assertEquals(3, result.size());
-        assertEquals(2, (int) result.get('a'));
     }
 }

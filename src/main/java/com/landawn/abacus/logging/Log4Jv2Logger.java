@@ -19,29 +19,30 @@ import org.apache.logging.log4j.spi.ExtendedLogger;
 
 /**
  * Logger implementation that delegates to Apache Log4j 2.
- * 
- * <p>This implementation provides a bridge to Log4j 2, leveraging its ExtendedLogger
+ *
+ * <p>This implementation provides a bridge to Log4j 2, leveraging its {@link ExtendedLogger}
  * interface for optimal performance and accurate caller location information. The logger
- * uses the logIfEnabled methods which provide efficient level checking.</p>
- * 
+ * uses the {@code logIfEnabled} methods which provide efficient level checking.</p>
+ *
  * <p>Key features:</p>
  * <ul>
- *   <li>Direct integration with Log4j 2's ExtendedLogger</li>
+ *   <li>Direct integration with Log4j 2's {@code ExtendedLogger}</li>
  *   <li>Accurate caller location information using FQCN</li>
- *   <li>Efficient level checking with logIfEnabled</li>
+ *   <li>Efficient level checking with {@code logIfEnabled}</li>
  *   <li>Full support for all logging levels</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Log4Jv2Logger is automatically used by LoggerFactory when Log4j 2 is on classpath
  * Logger logger = LoggerFactory.getLogger(MyClass.class);
+ *
  * int recordCount = 100;
  * logger.debug("Processing {} records", recordCount);
+ *
  * Exception sqlException = new Exception("Connection timeout");
  * logger.error("Database connection failed", sqlException);
  * }</pre>
- * 
  */
 class Log4Jv2Logger extends AbstractLogger {
 
@@ -53,10 +54,10 @@ class Log4Jv2Logger extends AbstractLogger {
     private final ExtendedLogger loggerImpl;
 
     /**
-     * Constructs a Log4Jv2Logger with the specified name.
+     * Constructs a {@code Log4Jv2Logger} with the specified name.
      *
-     * <p>This constructor obtains a Log4j 2 logger instance from the LogManager
-     * and casts it to ExtendedLogger for access to advanced features.</p>
+     * <p>This constructor obtains a Log4j 2 logger instance from the {@code LogManager}
+     * and casts it to {@link ExtendedLogger} for access to advanced features.</p>
      *
      * <p><b>Note:</b> This class is package-private and this constructor should not be called directly
      * from outside the logging package. Use {@link LoggerFactory#getLogger(Class)} or {@link LoggerFactory#getLogger(String)} instead.</p>
@@ -80,11 +81,11 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Checks if TRACE level logging is enabled.
+     * Checks if {@code TRACE} level logging is enabled.
      *
      * <p>Delegates to Log4j 2's level checking mechanism.</p>
      *
-     * @return {@code true} if this Logger is enabled for the TRACE level, {@code false} otherwise
+     * @return {@code true} if this {@code Logger} is enabled for the {@code TRACE} level, {@code false} otherwise
      */
     @Override
     public boolean isTraceEnabled() {
@@ -92,9 +93,9 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Logs a message at TRACE level.
+     * Logs a message at {@code TRACE} level.
      *
-     * <p>Uses logIfEnabled for efficient logging with proper caller location.</p>
+     * <p>Uses {@code logIfEnabled} for efficient logging with proper caller location.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -109,9 +110,9 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Logs a message at TRACE level with an exception.
+     * Logs a message at {@code TRACE} level with an exception.
      *
-     * <p>Uses logIfEnabled for efficient logging with proper caller location.</p>
+     * <p>Uses {@code logIfEnabled} for efficient logging with proper caller location.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -128,11 +129,11 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Checks if DEBUG level logging is enabled.
+     * Checks if {@code DEBUG} level logging is enabled.
      *
      * <p>Delegates to Log4j 2's level checking mechanism.</p>
      *
-     * @return {@code true} if this Logger is enabled for the DEBUG level, {@code false} otherwise
+     * @return {@code true} if this {@code Logger} is enabled for the {@code DEBUG} level, {@code false} otherwise
      */
     @Override
     public boolean isDebugEnabled() {
@@ -140,9 +141,9 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Logs a message at DEBUG level.
+     * Logs a message at {@code DEBUG} level.
      *
-     * <p>Uses logIfEnabled for efficient logging with proper caller location.</p>
+     * <p>Uses {@code logIfEnabled} for efficient logging with proper caller location.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -157,9 +158,9 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Logs a message at DEBUG level with an exception.
+     * Logs a message at {@code DEBUG} level with an exception.
      *
-     * <p>Uses logIfEnabled for efficient logging with proper caller location.</p>
+     * <p>Uses {@code logIfEnabled} for efficient logging with proper caller location.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -176,11 +177,11 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Checks if INFO level logging is enabled.
+     * Checks if {@code INFO} level logging is enabled.
      *
      * <p>Delegates to Log4j 2's level checking mechanism.</p>
      *
-     * @return {@code true} if this Logger is enabled for the INFO level, {@code false} otherwise
+     * @return {@code true} if this {@code Logger} is enabled for the {@code INFO} level, {@code false} otherwise
      */
     @Override
     public boolean isInfoEnabled() {
@@ -188,9 +189,9 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Logs a message at INFO level.
+     * Logs a message at {@code INFO} level.
      *
-     * <p>Uses logIfEnabled for efficient logging with proper caller location.</p>
+     * <p>Uses {@code logIfEnabled} for efficient logging with proper caller location.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -205,9 +206,9 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Logs a message at INFO level with an exception.
+     * Logs a message at {@code INFO} level with an exception.
      *
-     * <p>Uses logIfEnabled for efficient logging with proper caller location.</p>
+     * <p>Uses {@code logIfEnabled} for efficient logging with proper caller location.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -224,11 +225,11 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Checks if WARN level logging is enabled.
+     * Checks if {@code WARN} level logging is enabled.
      *
      * <p>Delegates to Log4j 2's level checking mechanism.</p>
      *
-     * @return {@code true} if this Logger is enabled for the WARN level, {@code false} otherwise
+     * @return {@code true} if this {@code Logger} is enabled for the {@code WARN} level, {@code false} otherwise
      */
     @Override
     public boolean isWarnEnabled() {
@@ -236,9 +237,9 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Logs a message at WARN level.
+     * Logs a message at {@code WARN} level.
      *
-     * <p>Uses logIfEnabled for efficient logging with proper caller location.</p>
+     * <p>Uses {@code logIfEnabled} for efficient logging with proper caller location.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -253,9 +254,9 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Logs a message at WARN level with an exception.
+     * Logs a message at {@code WARN} level with an exception.
      *
-     * <p>Uses logIfEnabled for efficient logging with proper caller location.</p>
+     * <p>Uses {@code logIfEnabled} for efficient logging with proper caller location.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -272,11 +273,11 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Checks if ERROR level logging is enabled.
+     * Checks if {@code ERROR} level logging is enabled.
      *
      * <p>Delegates to Log4j 2's level checking mechanism.</p>
      *
-     * @return {@code true} if this Logger is enabled for the ERROR level, {@code false} otherwise
+     * @return {@code true} if this {@code Logger} is enabled for the {@code ERROR} level, {@code false} otherwise
      */
     @Override
     public boolean isErrorEnabled() {
@@ -284,9 +285,9 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Logs a message at ERROR level.
+     * Logs a message at {@code ERROR} level.
      *
-     * <p>Uses logIfEnabled for efficient logging with proper caller location.</p>
+     * <p>Uses {@code logIfEnabled} for efficient logging with proper caller location.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -301,9 +302,9 @@ class Log4Jv2Logger extends AbstractLogger {
     }
 
     /**
-     * Logs a message at ERROR level with an exception.
+     * Logs a message at {@code ERROR} level with an exception.
      *
-     * <p>Uses logIfEnabled for efficient logging with proper caller location.</p>
+     * <p>Uses {@code logIfEnabled} for efficient logging with proper caller location.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

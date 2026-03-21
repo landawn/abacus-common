@@ -4,23 +4,137 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
 
-import org.junit.jupiter.api.Tag;
+import com.landawn.abacus.exception.ParsingException;
+import com.landawn.abacus.exception.UncheckedIOException;
+
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
 
-@Tag("2025")
 public class JsonStreamReaderTest extends TestBase {
 
     private char[] rbuf = new char[1024];
     private char[] cbuf = new char[256];
+
+    // 5-argument constructor with explicit beginIndex/toIndex (L54-55)
+    @Test
+    public void testConstructorWithRange_ExplicitBeginToIndex() {
+        char[] rbuf = "{}rest".toCharArray();
+        char[] cbuf = new char[256];
+        Reader dummyReader = new StringReader("");
+        JsonStreamReader reader = new JsonStreamReader(dummyReader, rbuf, 0, 2, cbuf);
+        assertEquals(JsonReader.START_BRACE, reader.nextToken());
+        assertEquals(JsonReader.END_BRACE, reader.nextToken());
+    }
+
+    // Incomplete "true" token — stream ends mid-word (also covers L342 saveChar(-1))
+    @Test
+    public void testIncompleteTrueToken_StreamEndsAfterT_ReturnsEOF() {
+        StringReader sr = new StringReader("t");
+        JsonStreamReader reader = new JsonStreamReader(sr, new char[64], new char[64]);
+        assertEquals(-1, reader.nextToken());
+    }
+
+    // Non-standard unquoted token at end of stream (L207-208: endIndexForText/nextEvent=-1)
+    @Test
+    public void testNonStandardUnquotedToken_AtEndOfStream_ReturnsEOF() {
+        StringReader sr = new StringReader("foobar");
+        JsonStreamReader reader = new JsonStreamReader(sr, new char[64], new char[64]);
+        assertEquals(-1, reader.nextToken());
+    }
+
+    // Backspace escape character in stream (L412: case 'b' -> '\b')
+    @Test
+    public void testReadEscapeBackspace_InStream_ReturnsBackspaceChar() {
+        StringReader sr = new StringReader("\"\\b\"");
+        JsonStreamReader reader = new JsonStreamReader(sr, new char[64], new char[64]);
+        reader.nextToken(); // START_DOUBLE_QUOTE
+        reader.nextToken(); // END_DOUBLE_QUOTE
+        assertEquals("\b", reader.getText());
+    }
+
+    // Integer with Float type (no decimal) in stream readNumber -> numValue = (float) ret (L317)
+    @Test
+    public void testReadIntegerWithFloatType_InStream() {
+        StringReader sr = new StringReader("42");
+        JsonStreamReader reader = new JsonStreamReader(sr, new char[64], new char[64]);
+        Type<Float> floatType = N.typeOf(Float.class);
+        reader.nextToken(floatType);
+        Float value = reader.readValue(floatType);
+        assertEquals(42.0f, value, 0.001f);
+    }
+
+    // Integer with Double type (no decimal) in stream readNumber -> numValue = (double) ret (L319)
+    @Test
+    public void testReadIntegerWithDoubleType_InStream() {
+        StringReader sr = new StringReader("100");
+        JsonStreamReader reader = new JsonStreamReader(sr, new char[64], new char[64]);
+        Type<Double> doubleType = N.typeOf(Double.class);
+        reader.nextToken(doubleType);
+        Double value = reader.readValue(doubleType);
+        assertEquals(100.0, value, 0.001);
+    }
+
+    // Very long number (>18 digits) triggers digitCount overflow path (L252)
+    @Test
+    public void testVeryLongNumber_ExceedsMaxParsableLen_FallsBackToCreateNumber() {
+        // 20-digit number — exceeds MAX_PARSABLE_NUM_LEN (18), triggers digitCount += 2
+        StringReader sr = new StringReader("12345678901234567890");
+        JsonStreamReader reader = new JsonStreamReader(sr, new char[64], new char[64]);
+        reader.nextToken();
+        Object value = reader.readValue(N.typeOf(Object.class));
+        assertNotNull(value);
+    }
+
+    // Incomplete unicode that spans a buffer boundary in stream (L385: refill inside unicode loop)
+    @Test
+    public void testUnicodeEscape_SpanningBufferBoundary_ReadsCorrectly() {
+        // backslash-u + 0048 (unicode for 'H') followed by "ello", tiny buffer forces refills
+        StringReader sr = new StringReader("\"" + "\\u0048ello\"");
+        JsonStreamReader reader = new JsonStreamReader(sr, new char[4], new char[64]);
+        reader.nextToken(); // START_DOUBLE_QUOTE
+        reader.nextToken(); // END_DOUBLE_QUOTE
+        String text = reader.getText();
+        assertTrue(text.startsWith("H"));
+    }
+
+    // Incomplete escape at end of stream (L370: refill fails, throws ParsingException)
+    @Test
+    public void testIncompleteEscape_StreamEndsAfterBackslash_ThrowsParsingException() {
+        // String "\test\" — ends with backslash inside a quoted string
+        StringReader sr = new StringReader("\"test\\");
+        JsonStreamReader reader = new JsonStreamReader(sr, new char[64], new char[64]);
+        reader.nextToken(); // START_DOUBLE_QUOTE
+        assertThrows(ParsingException.class, () -> reader.nextToken());
+    }
+
+    // Incomplete unicode escape at end of stream (L385-387)
+    @Test
+    public void testIncompleteUnicodeEscape_StreamEndsEarly_ThrowsParsingException() {
+        // backslash-u followed by only 2 hex digits then end of stream
+        StringReader sr = new StringReader("\"" + "\\u00");
+        JsonStreamReader reader = new JsonStreamReader(sr, new char[64], new char[64]);
+        reader.nextToken(); // START_DOUBLE_QUOTE
+        assertThrows(ParsingException.class, () -> reader.nextToken());
+    }
+
+    // Invalid hex digit in unicode escape (L402)
+    @Test
+    public void testInvalidHexDigitInUnicode_ThrowsParsingException() {
+        StringReader sr = new StringReader("\"\\uXYZW\"");
+        JsonStreamReader reader = new JsonStreamReader(sr, new char[64], new char[64]);
+        reader.nextToken(); // START_DOUBLE_QUOTE
+        assertThrows(ParsingException.class, () -> reader.nextToken());
+    }
 
     @Test
     public void test_parse() {
@@ -29,18 +143,6 @@ public class JsonStreamReaderTest extends TestBase {
         JsonReader reader = JsonStreamReader.parse(stringReader, new char[1024], new char[256]);
         assertNotNull(reader);
         reader.close();
-    }
-
-    @Test
-    public void test_nextToken() {
-        String json = "{\"key\":\"value\"}";
-        StringReader stringReader = new StringReader(json);
-        JsonReader reader = JsonStreamReader.parse(stringReader, new char[1024], new char[256]);
-
-        reader.nextToken();
-
-        reader.close();
-        assertNotNull(reader);
     }
 
     @Test
@@ -441,6 +543,53 @@ public class JsonStreamReaderTest extends TestBase {
         JsonReader reader = JsonStreamReader.parse(stringReader, rbuf, cbuf);
 
         assertEquals(JsonReader.EOF, reader.nextToken());
+    }
+
+    @Test
+    public void test_nextToken() {
+        String json = "{\"key\":\"value\"}";
+        StringReader stringReader = new StringReader(json);
+        JsonReader reader = JsonStreamReader.parse(stringReader, new char[1024], new char[256]);
+
+        reader.nextToken();
+
+        reader.close();
+        assertNotNull(reader);
+    }
+
+    // Incomplete "false" token — stream ends after 'f': saveChar(-1) path (L342)
+    @Test
+    public void testIncompleteFalseToken_StreamEndsAfterF_ReturnsEOF() {
+        StringReader sr = new StringReader("f");
+        JsonStreamReader reader = new JsonStreamReader(sr, new char[64], new char[64]);
+        assertEquals(-1, reader.nextToken());
+    }
+
+    // Non-standard token with small buffer forces refill in while loop (L183, L199, L203)
+    @Test
+    public void testNonStandardToken_SmallBuffer_RefillInWhileLoop() {
+        // "foobar," - 'foobar' is a non-standard token. Small rbuf forces buffer refill.
+        StringReader sr = new StringReader("foobar,");
+        JsonStreamReader reader = new JsonStreamReader(sr, new char[2], new char[64]);
+        int token = reader.nextToken();
+        assertEquals(JsonReader.COMMA, token);
+    }
+
+    // IOException from Reader.close() wrapped as UncheckedIOException (L458)
+    @Test
+    public void testRefill_ReaderThrowsIOException_WrapsAsUncheckedIOException() {
+        Reader failingReader = new Reader() {
+            @Override
+            public int read(final char[] buf, final int off, final int len) throws IOException {
+                throw new IOException("read failed");
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+        JsonStreamReader reader = new JsonStreamReader(failingReader, new char[4], new char[64]);
+        assertThrows(UncheckedIOException.class, () -> reader.nextToken());
     }
 
 }

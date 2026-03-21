@@ -141,56 +141,89 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
         return serialize(obj, (SC) null);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void serialize(final Object obj, final File output) {
         serialize(obj, null, output);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void serialize(final Object obj, final OutputStream output) {
         serialize(obj, null, output);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void serialize(final Object obj, final Writer output) {
         serialize(obj, null, output);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public <T> T deserialize(final String source, final Type<? extends T> targetType) {
         return deserialize(source, null, targetType);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public <T> T deserialize(final String source, final Class<? extends T> targetType) {
         return deserialize(source, null, targetType);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public <T> T deserialize(final File source, final Type<? extends T> targetType) {
         return deserialize(source, null, targetType);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public <T> T deserialize(final File source, final Class<? extends T> targetType) {
         return deserialize(source, null, targetType);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public <T> T deserialize(final InputStream source, final Type<? extends T> targetType) {
         return deserialize(source, null, targetType);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public <T> T deserialize(final InputStream source, final Class<? extends T> targetType) {
         return deserialize(source, null, targetType);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public <T> T deserialize(final Reader source, final Type<? extends T> targetType) {
         return deserialize(source, null, targetType);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public <T> T deserialize(final Reader source, final Class<? extends T> targetType) {
         return deserialize(source, null, targetType);

@@ -20,17 +20,17 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 
 /**
- * Abstract base implementation of the Logger interface providing template-based logging methods.
+ * Abstract base implementation of the {@link Logger} interface providing template-based logging methods.
  *
- * <p>This class implements all the template-based logging methods defined in the Logger interface,
+ * <p>This class implements all the template-based logging methods defined in the {@code Logger} interface,
  * delegating to the abstract methods that must be implemented by concrete logger implementations.
- * It provides efficient string formatting using placeholders ({} or %s) and lazy evaluation
- * through Supplier-based methods.</p>
+ * It provides efficient string formatting using placeholders ({@code {}} or {@code %s}) and lazy evaluation
+ * through {@link Supplier}-based methods.</p>
  *
  * <p>The formatting supports two placeholder styles:</p>
  * <ul>
- *   <li>{} - SLF4J style placeholders</li>
- *   <li>%s - printf style placeholders</li>
+ *   <li>{@code {}} - SLF4J style placeholders</li>
+ *   <li>{@code %s} - printf style placeholders</li>
  * </ul>
  *
  * <p><b>Usage Examples for implementation:</b></p>
@@ -52,21 +52,34 @@ import com.landawn.abacus.util.Objectory;
  */
 public abstract class AbstractLogger implements Logger {
 
+    /**
+     * The name of the logger.
+     */
     protected final String name;
 
+    /**
+     * Constructs an {@code AbstractLogger} with the specified name.
+     *
+     * @param name the name of the logger
+     */
     protected AbstractLogger(final String name) {
         this.name = name;
     }
 
+    /**
+     * Returns the name of this logger.
+     *
+     * @return the name of this logger
+     */
     @Override
     public String getName() {
         return name;
     }
 
     /**
-     * Logs a message at TRACE level with one parameter.
+     * Logs a message at {@code TRACE} level with one parameter.
      *
-     * <p>The message template can use {} or %s as placeholder.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholder.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -84,9 +97,9 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at TRACE level with two parameters.
+     * Logs a message at {@code TRACE} level with two parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -105,9 +118,14 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at TRACE level with three parameters.
+     * Logs a message at {@code TRACE} level with three parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.trace("Method {} called with args: {}, {}", methodName, arg1, arg2);
+     * }</pre>
      *
      * @param template the message template containing three placeholders
      * @param arg1 the first argument
@@ -122,9 +140,9 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at TRACE level with four parameters.
+     * Logs a message at {@code TRACE} level with four parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -145,9 +163,9 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at TRACE level with five parameters.
+     * Logs a message at {@code TRACE} level with five parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -169,9 +187,9 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at TRACE level with six parameters.
+     * Logs a message at {@code TRACE} level with six parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -194,9 +212,9 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at TRACE level with seven parameters.
+     * Logs a message at {@code TRACE} level with seven parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -221,7 +239,9 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at TRACE level with variable number of parameters.
+     * Logs a message at {@code TRACE} level with variable number of parameters.
+     *
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -242,9 +262,14 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs an exception at the TRACE level with an accompanying message.
+     * Logs an exception at the {@code TRACE} level with an accompanying message.
      *
      * <p>This method provides an alternative parameter order for consistency with other exception-handling patterns.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.trace(exception, "Failed to load resource");
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param msg the message to log
@@ -255,9 +280,9 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a formatted message at TRACE level with an exception and one parameter.
+     * Logs a formatted message at {@code TRACE} level with an exception and one parameter.
      *
-     * <p>The message template can use {} or %s as placeholder.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholder.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -276,9 +301,9 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a formatted message at TRACE level with an exception and two parameters.
+     * Logs a formatted message at {@code TRACE} level with an exception and two parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -298,9 +323,9 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a formatted message at TRACE level with an exception and three parameters.
+     * Logs a formatted message at {@code TRACE} level with an exception and three parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -321,9 +346,9 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at TRACE level using a supplier for lazy evaluation.
+     * Logs a message at {@code TRACE} level using a {@link Supplier} for lazy evaluation.
      *
-     * <p>The supplier is only called if TRACE level is enabled.</p>
+     * <p>The supplier is only called if {@code TRACE} level is enabled.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -340,8 +365,13 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at TRACE level with an exception using a supplier.
-     * 
+     * Logs a message at {@code TRACE} level with an exception using a {@link Supplier}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.trace(() -> "Failed to process data", exception);
+     * }</pre>
+     *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
      * @deprecated Use {@link #trace(Throwable, Supplier)} instead
@@ -355,7 +385,12 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at TRACE level with an exception using a supplier for lazy evaluation.
+     * Logs a message at {@code TRACE} level with an exception using a {@link Supplier} for lazy evaluation.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.trace(exception, () -> "Failed to process data");
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
@@ -368,9 +403,9 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at DEBUG level with one parameter.
+     * Logs a message at {@code DEBUG} level with one parameter.
      *
-     * <p>The message template can use {} or %s as placeholder.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholder.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -388,9 +423,14 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at DEBUG level with two parameters.
+     * Logs a message at {@code DEBUG} level with two parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.debug("User {} accessed resource {} ", username, resourceId);
+     * }</pre>
      *
      * @param template the message template containing two placeholders
      * @param arg1 the first argument
@@ -404,9 +444,14 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at DEBUG level with three parameters.
+     * Logs a message at {@code DEBUG} level with three parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.debug("Query {} returned {} results in {}ms", queryId, resultCount, executionTime);
+     * }</pre>
      *
      * @param template the message template containing three placeholders
      * @param arg1 the first argument
@@ -421,9 +466,15 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at DEBUG level with four parameters.
+     * Logs a message at {@code DEBUG} level with four parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.debug("Connection {} to {} established with timeout {}ms and pool size {}",
+     *              connId, host, timeout, poolSize);
+     * }</pre>
      *
      * @param template the message template containing four placeholders
      * @param arg1 the first argument
@@ -439,9 +490,15 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at DEBUG level with five parameters.
+     * Logs a message at {@code DEBUG} level with five parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.debug("Query {} executed on {} with params {} in {}ms returning {} rows",
+     *              queryId, database, params, duration, rowCount);
+     * }</pre>
      *
      * @param template the message template containing five placeholders
      * @param arg1 the first argument
@@ -458,9 +515,15 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at DEBUG level with six parameters.
+     * Logs a message at {@code DEBUG} level with six parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.debug("HTTP {} {} from {} returned {} in {}ms with size {} bytes",
+     *              method, path, clientIp, statusCode, duration, responseSize);
+     * }</pre>
      *
      * @param template the message template containing six placeholders
      * @param arg1 the first argument
@@ -478,9 +541,15 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at DEBUG level with seven parameters.
+     * Logs a message at {@code DEBUG} level with seven parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.debug("API call {} to {} with params {} auth {} returned {} in {}ms status {}",
+     *              callId, endpoint, params, authType, response, duration, status);
+     * }</pre>
      *
      * @param template the message template containing seven placeholders
      * @param arg1 the first argument
@@ -500,9 +569,14 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at DEBUG level with variable number of parameters.
+     * Logs a message at {@code DEBUG} level with variable number of parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.debug("Processing records: id={}, name={}, type={}", id, name, type);
+     * }</pre>
      *
      * @param template the message template
      * @param args the arguments to be substituted in the template
@@ -517,9 +591,14 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs an exception at the DEBUG level with an accompanying message.
+     * Logs an exception at the {@code DEBUG} level with an accompanying message.
      *
      * <p>This method provides an alternative parameter order for consistency with other exception-handling patterns.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.debug(exception, "Failed to connect to database");
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param msg the message accompanying the exception
@@ -530,9 +609,14 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a formatted message at DEBUG level with an exception and one parameter.
+     * Logs a formatted message at {@code DEBUG} level with an exception and one parameter.
      *
-     * <p>The message template can use {} or %s as placeholder.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholder.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.debug(exception, "Failed to parse config file: {}", filename);
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -546,9 +630,14 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a formatted message at DEBUG level with an exception and two parameters.
+     * Logs a formatted message at {@code DEBUG} level with an exception and two parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.debug(exception, "Connection to {} failed on port {}", host, port);
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -563,9 +652,14 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a formatted message at DEBUG level with an exception and three parameters.
+     * Logs a formatted message at {@code DEBUG} level with an exception and three parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.debug(exception, "Failed to execute {} on {} with params {}", operation, target, params);
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -581,7 +675,12 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at DEBUG level using a supplier for lazy evaluation.
+     * Logs a message at {@code DEBUG} level using a {@link Supplier} for lazy evaluation.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.debug(() -> "Complex object state: " + complexObject.debugString());
+     * }</pre>
      *
      * @param supplier the supplier that provides the message
      */
@@ -593,8 +692,13 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at DEBUG level with an exception using a supplier.
-     * 
+     * Logs a message at {@code DEBUG} level with an exception using a {@link Supplier}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.debug(() -> "Failed to process data", exception);
+     * }</pre>
+     *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
      * @deprecated Use {@link #debug(Throwable, Supplier)} instead
@@ -608,7 +712,12 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at DEBUG level with an exception using a supplier for lazy evaluation.
+     * Logs a message at {@code DEBUG} level with an exception using a {@link Supplier} for lazy evaluation.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.debug(exception, () -> "Failed to process data");
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
@@ -621,9 +730,9 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at INFO level with one parameter.
+     * Logs a message at {@code INFO} level with one parameter.
      *
-     * <p>The message template can use {} or %s as placeholder.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholder.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -641,9 +750,14 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at INFO level with two parameters.
+     * Logs a message at {@code INFO} level with two parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.info("Processed {} records in {}ms", recordCount, duration);
+     * }</pre>
      *
      * @param template the message template containing two placeholders
      * @param arg1 the first argument
@@ -657,9 +771,14 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at INFO level with three parameters.
+     * Logs a message at {@code INFO} level with three parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.info("Server {} started on port {} with protocol {}", serverName, port, protocol);
+     * }</pre>
      *
      * @param template the message template containing three placeholders
      * @param arg1 the first argument
@@ -674,9 +793,15 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at INFO level with four parameters.
+     * Logs a message at {@code INFO} level with four parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.info("Service {} started on {} with {} threads and {} MB memory",
+     *             serviceName, host, threadCount, memoryMB);
+     * }</pre>
      *
      * @param template the message template containing four placeholders
      * @param arg1 the first argument
@@ -692,9 +817,15 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at INFO level with five parameters.
+     * Logs a message at {@code INFO} level with five parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.info("Batch {} completed: {} items processed, {} succeeded, {} failed in {}ms",
+     *             batchId, totalItems, successCount, failCount, duration);
+     * }</pre>
      *
      * @param template the message template containing five placeholders
      * @param arg1 the first argument
@@ -711,9 +842,15 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at INFO level with six parameters.
+     * Logs a message at {@code INFO} level with six parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.info("Deploy {} to {} environment: {} instances, {} version, status {} at {}",
+     *             appName, envName, instanceCount, version, status, timestamp);
+     * }</pre>
      *
      * @param template the message template containing six placeholders
      * @param arg1 the first argument
@@ -731,9 +868,15 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at INFO level with seven parameters.
+     * Logs a message at {@code INFO} level with seven parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.info("Migration {} from {} to {}: {} tables, {} rows, {} errors, completed in {}s",
+     *             migrationId, sourceDb, targetDb, tableCount, rowCount, errorCount, duration);
+     * }</pre>
      *
      * @param template the message template containing seven placeholders
      * @param arg1 the first argument
@@ -753,9 +896,15 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at INFO level with variable number of parameters.
+     * Logs a message at {@code INFO} level with variable number of parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.info("Processing batch: id={}, size={}, status={}, timestamp={}",
+     *              batchId, size, status, timestamp);
+     * }</pre>
      *
      * @param template the message template
      * @param args the arguments to be substituted in the template
@@ -770,9 +919,14 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs an exception at the INFO level with an accompanying message.
+     * Logs an exception at the {@code INFO} level with an accompanying message.
      *
      * <p>This method provides an alternative parameter order for consistency with other exception-handling patterns.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.info(exception, "Application started");
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param msg the message accompanying the exception
@@ -783,9 +937,14 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a formatted message at INFO level with an exception and one parameter.
+     * Logs a formatted message at {@code INFO} level with an exception and one parameter.
      *
-     * <p>The message template can use {} or %s as placeholder.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholder.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.info(exception, "Using fallback configuration for {}", componentName);
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -799,9 +958,14 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a formatted message at INFO level with an exception and two parameters.
+     * Logs a formatted message at {@code INFO} level with an exception and two parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.info(exception, "Retrying operation {} after {} seconds", operationName, retryDelay);
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -816,9 +980,14 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a formatted message at INFO level with an exception and three parameters.
+     * Logs a formatted message at {@code INFO} level with an exception and three parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.info(exception, "Switched to backup {} from {} with latency {}ms", backup, primary, latency);
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -834,7 +1003,12 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at INFO level using a supplier for lazy evaluation.
+     * Logs a message at {@code INFO} level using a {@link Supplier} for lazy evaluation.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.info(() -> "Processed " + getProcessedCount() + " records");
+     * }</pre>
      *
      * @param supplier the supplier that provides the message
      */
@@ -846,8 +1020,13 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at INFO level with an exception using a supplier.
-     * 
+     * Logs a message at {@code INFO} level with an exception using a {@link Supplier}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.info(() -> "Application status", exception);
+     * }</pre>
+     *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
      * @deprecated Use {@link #info(Throwable, Supplier)} instead
@@ -861,7 +1040,12 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at INFO level with an exception using a supplier for lazy evaluation.
+     * Logs a message at {@code INFO} level with an exception using a {@link Supplier} for lazy evaluation.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.info(exception, () -> "Application status");
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
@@ -874,9 +1058,9 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at WARN level with one parameter.
+     * Logs a message at {@code WARN} level with one parameter.
      *
-     * <p>The message template can use {} or %s as placeholder.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholder.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -894,9 +1078,14 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at WARN level with two parameters.
+     * Logs a message at {@code WARN} level with two parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.warn("Cache size {} exceeds limit of {}", cacheSize, maxSize);
+     * }</pre>
      *
      * @param template the message template containing two placeholders
      * @param arg1 the first argument
@@ -910,9 +1099,14 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at WARN level with three parameters.
+     * Logs a message at {@code WARN} level with three parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.warn("Retry {} of {} failed for operation {}", attemptNum, maxAttempts, operationId);
+     * }</pre>
      *
      * @param template the message template containing three placeholders
      * @param arg1 the first argument
@@ -927,9 +1121,15 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at WARN level with four parameters.
+     * Logs a message at {@code WARN} level with four parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.warn("Resource {} usage at {}% exceeds threshold of {}% for {}",
+     *             resourceName, currentUsage, threshold, duration);
+     * }</pre>
      *
      * @param template the message template containing four placeholders
      * @param arg1 the first argument
@@ -945,9 +1145,15 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at WARN level with five parameters.
+     * Logs a message at {@code WARN} level with five parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.warn("Queue {} size {} exceeds limit {}, {} messages dropped in {}s",
+     *             queueName, currentSize, maxSize, droppedCount, duration);
+     * }</pre>
      *
      * @param template the message template containing five placeholders
      * @param arg1 the first argument
@@ -964,9 +1170,15 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at WARN level with six parameters.
+     * Logs a message at {@code WARN} level with six parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.warn("Session {} for user {} on {} idle for {}min, will timeout in {}min, limit {}",
+     *             sessionId, userId, host, idleTime, timeoutRemaining, maxIdleTime);
+     * }</pre>
      *
      * @param template the message template containing six placeholders
      * @param arg1 the first argument
@@ -984,9 +1196,15 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at WARN level with seven parameters.
+     * Logs a message at {@code WARN} level with seven parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.warn("Cache {} on {} hit ratio {}% below {}%, size {}, evictions {}, age {}min",
+     *             cacheName, node, hitRatio, threshold, size, evictions, age);
+     * }</pre>
      *
      * @param template the message template containing seven placeholders
      * @param arg1 the first argument
@@ -1006,9 +1224,15 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at WARN level with variable number of parameters.
+     * Logs a message at {@code WARN} level with variable number of parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.warn("Processing batch: id={}, size={}, status={}, timestamp={}",
+     *              batchId, size, status, timestamp);
+     * }</pre>
      *
      * @param template the message template
      * @param args the arguments to be substituted in the template
@@ -1023,9 +1247,14 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs an exception at the WARN level with an accompanying message.
+     * Logs an exception at the {@code WARN} level with an accompanying message.
      *
      * <p>This method provides an alternative parameter order for consistency with other exception-handling patterns.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.warn(exception, "Database connection warning");
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param msg the message accompanying the exception
@@ -1036,9 +1265,14 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a formatted message at WARN level with an exception and one parameter.
+     * Logs a formatted message at {@code WARN} level with an exception and one parameter.
      *
-     * <p>The message template can use {} or %s as placeholder.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholder.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.warn(exception, "Deprecated API used: {}", apiName);
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -1052,9 +1286,14 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a formatted message at WARN level with an exception and two parameters.
+     * Logs a formatted message at {@code WARN} level with an exception and two parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.warn(exception, "Retry attempt {} failed for {}", attemptNumber, operationName);
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -1069,9 +1308,14 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a formatted message at WARN level with an exception and three parameters.
+     * Logs a formatted message at {@code WARN} level with an exception and three parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.warn(exception, "Timeout accessing {} on {} after {}ms", resource, server, timeout);
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -1087,7 +1331,12 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at WARN level using a supplier for lazy evaluation.
+     * Logs a message at {@code WARN} level using a {@link Supplier} for lazy evaluation.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.warn(() -> "Memory usage " + getMemoryUsage() + " exceeds threshold");
+     * }</pre>
      *
      * @param supplier the supplier that provides the message
      */
@@ -1099,8 +1348,13 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at WARN level with an exception using a supplier.
-     * 
+     * Logs a message at {@code WARN} level with an exception using a {@link Supplier}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.warn(() -> "Resource usage warning", exception);
+     * }</pre>
+     *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
      * @deprecated Use {@link #warn(Throwable, Supplier)} instead
@@ -1114,7 +1368,12 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at WARN level with an exception using a supplier for lazy evaluation.
+     * Logs a message at {@code WARN} level with an exception using a {@link Supplier} for lazy evaluation.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.warn(exception, () -> "Resource usage warning");
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
@@ -1127,9 +1386,9 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at ERROR level with one parameter.
+     * Logs a message at {@code ERROR} level with one parameter.
      *
-     * <p>The message template can use {} or %s as placeholder.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholder.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1147,9 +1406,14 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at ERROR level with two parameters.
+     * Logs a message at {@code ERROR} level with two parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.error("Failed to connect to {} on port {}", hostname, port);
+     * }</pre>
      *
      * @param template the message template containing two placeholders
      * @param arg1 the first argument
@@ -1163,9 +1427,14 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at ERROR level with three parameters.
+     * Logs a message at {@code ERROR} level with three parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.error("Transaction {} failed for user {} with error code {}", txnId, userId, errorCode);
+     * }</pre>
      *
      * @param template the message template containing three placeholders
      * @param arg1 the first argument
@@ -1180,9 +1449,15 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at ERROR level with four parameters.
+     * Logs a message at {@code ERROR} level with four parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.error("Critical failure in {} module: {} errors in {} records after {}s",
+     *              moduleName, errorCount, recordCount, duration);
+     * }</pre>
      *
      * @param template the message template containing four placeholders
      * @param arg1 the first argument
@@ -1198,9 +1473,15 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at ERROR level with five parameters.
+     * Logs a message at {@code ERROR} level with five parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.error("Database {} on {} unavailable: {} connections failed, {} transactions lost in {}s",
+     *              dbName, hostname, failedConns, lostTransactions, duration);
+     * }</pre>
      *
      * @param template the message template containing five placeholders
      * @param arg1 the first argument
@@ -1217,9 +1498,15 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at ERROR level with six parameters.
+     * Logs a message at {@code ERROR} level with six parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.error("Payment {} for user {} failed: amount {}, currency {}, gateway {}, code {}",
+     *              paymentId, userId, amount, currency, gateway, errorCode);
+     * }</pre>
      *
      * @param template the message template containing six placeholders
      * @param arg1 the first argument
@@ -1237,9 +1524,15 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at ERROR level with seven parameters.
+     * Logs a message at {@code ERROR} level with seven parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.error("System failure: component {}, host {}, error {}, affected {}, started {}, duration {}s, impact {}",
+     *              component, host, errorType, affectedUsers, startTime, duration, impactLevel);
+     * }</pre>
      *
      * @param template the message template containing seven placeholders
      * @param arg1 the first argument
@@ -1259,9 +1552,15 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at ERROR level with variable number of parameters.
+     * Logs a message at {@code ERROR} level with variable number of parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.error("Processing batch: id={}, size={}, status={}, timestamp={}",
+     *              batchId, size, status, timestamp);
+     * }</pre>
      *
      * @param template the message template
      * @param args the arguments to be substituted in the template
@@ -1276,9 +1575,18 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs an exception at the ERROR level with an accompanying message.
+     * Logs an exception at the {@code ERROR} level with an accompanying message.
      *
      * <p>This method provides an alternative parameter order for consistency with other exception-handling patterns.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try {
+     *     // some operation
+     * } catch (Exception e) {
+     *     logger.error(e, "Operation failed");
+     * }
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param msg the message accompanying the exception
@@ -1289,9 +1597,14 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a formatted message at ERROR level with an exception and one parameter.
+     * Logs a formatted message at {@code ERROR} level with an exception and one parameter.
      *
-     * <p>The message template can use {} or %s as placeholder.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholder.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.error(exception, "Fatal error processing transaction {}", transactionId);
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -1305,9 +1618,14 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a formatted message at ERROR level with an exception and two parameters.
+     * Logs a formatted message at {@code ERROR} level with an exception and two parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.error(exception, "Service {} crashed after {} requests", serviceName, requestCount);
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -1322,9 +1640,14 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a formatted message at ERROR level with an exception and three parameters.
+     * Logs a formatted message at {@code ERROR} level with an exception and three parameters.
      *
-     * <p>The message template can use {} or %s as placeholders.</p>
+     * <p>The message template can use {@code {}} or {@code %s} as placeholders.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.error(exception, "Data corruption in {} table: {} records affected at {}", tableName, count, timestamp);
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -1340,7 +1663,12 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at ERROR level using a supplier for lazy evaluation.
+     * Logs a message at {@code ERROR} level using a {@link Supplier} for lazy evaluation.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.error(() -> "Critical error in module: " + module.getDetailedStatus());
+     * }</pre>
      *
      * @param supplier the supplier that provides the message
      */
@@ -1352,8 +1680,13 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at ERROR level with an exception using a supplier.
-     * 
+     * Logs a message at {@code ERROR} level with an exception using a {@link Supplier}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.error(() -> "Critical system error", exception);
+     * }</pre>
+     *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
      * @deprecated Use {@link #error(Throwable, Supplier)} instead
@@ -1367,7 +1700,12 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Logs a message at ERROR level with an exception using a supplier for lazy evaluation.
+     * Logs a message at {@code ERROR} level with an exception using a {@link Supplier} for lazy evaluation.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * logger.error(exception, () -> "Critical system error");
+     * }</pre>
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
@@ -1382,8 +1720,8 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Formats a message template with one argument.
      *
-     * <p>Supports {} (SLF4J-style) or %s (printf-style) placeholders.
-     * If the template contains {}, that style is used; otherwise %s is tried.
+     * <p>Supports {@code {}} (SLF4J-style) or {@code %s} (printf-style) placeholders.
+     * If the template contains {@code {}}, that style is used; otherwise {@code %s} is tried.
      * The two styles cannot be mixed in a single template.
      * If no placeholder is found, the argument is appended in square brackets.</p>
      *
@@ -1416,7 +1754,7 @@ public abstract class AbstractLogger implements Logger {
         if (placeholderStart >= 0) {
             sb.append(template, 0, placeholderStart);
             sb.append(N.toString(arg));
-            sb.append(template, placeholderStart + 2, template.length());
+            sb.append(template, placeholderStart + placeholder.length(), template.length());
         } else {
             sb.append(template);
             sb.append(" [");
@@ -1434,8 +1772,8 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Formats a message template with two arguments.
      *
-     * <p>Supports {} (SLF4J-style) or %s (printf-style) placeholders.
-     * If the template contains {}, that style is used; otherwise %s is tried.
+     * <p>Supports {@code {}} (SLF4J-style) or {@code %s} (printf-style) placeholders.
+     * If the template contains {@code {}}, that style is used; otherwise {@code %s} is tried.
      * The two styles cannot be mixed in a single template.
      * Extra arguments are appended in square brackets if there are fewer placeholders than arguments.</p>
      *
@@ -1473,14 +1811,14 @@ public abstract class AbstractLogger implements Logger {
             substitutedArgsCount++;
             sb.append(template, templateStart, placeholderStart);
             sb.append(N.toString(arg1));
-            templateStart = placeholderStart + 2;
+            templateStart = placeholderStart + placeholder.length();
             placeholderStart = template.indexOf(placeholder, templateStart);
 
             if (placeholderStart >= 0) {
                 substitutedArgsCount++;
                 sb.append(template, templateStart, placeholderStart);
                 sb.append(N.toString(arg2));
-                templateStart = placeholderStart + 2;
+                templateStart = placeholderStart + placeholder.length();
             }
 
             sb.append(template, templateStart, template.length());
@@ -1509,8 +1847,8 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Formats a message template with three arguments.
      *
-     * <p>Supports {} (SLF4J-style) or %s (printf-style) placeholders.
-     * If the template contains {}, that style is used; otherwise %s is tried.
+     * <p>Supports {@code {}} (SLF4J-style) or {@code %s} (printf-style) placeholders.
+     * If the template contains {@code {}}, that style is used; otherwise {@code %s} is tried.
      * The two styles cannot be mixed in a single template.
      * Extra arguments are appended in square brackets if there are fewer placeholders than arguments.</p>
      *
@@ -1550,21 +1888,21 @@ public abstract class AbstractLogger implements Logger {
             substitutedArgsCount++;
             sb.append(template, templateStart, placeholderStart);
             sb.append(N.toString(arg1));
-            templateStart = placeholderStart + 2;
+            templateStart = placeholderStart + placeholder.length();
             placeholderStart = template.indexOf(placeholder, templateStart);
 
             if (placeholderStart >= 0) {
                 substitutedArgsCount++;
                 sb.append(template, templateStart, placeholderStart);
                 sb.append(N.toString(arg2));
-                templateStart = placeholderStart + 2;
+                templateStart = placeholderStart + placeholder.length();
                 placeholderStart = template.indexOf(placeholder, templateStart);
 
                 if (placeholderStart >= 0) {
                     substitutedArgsCount++;
                     sb.append(template, templateStart, placeholderStart);
                     sb.append(N.toString(arg3));
-                    templateStart = placeholderStart + 2;
+                    templateStart = placeholderStart + placeholder.length();
                 }
             }
 
@@ -1602,8 +1940,8 @@ public abstract class AbstractLogger implements Logger {
     /**
      * Formats a message template with variable number of arguments.
      *
-     * <p>Substitutes each {} or %s in the template with an argument. These are matched by
-     * position: the first placeholder gets args[0], etc. If there are more arguments than
+     * <p>Substitutes each {@code {}} or {@code %s} in the template with an argument. These are matched by
+     * position: the first placeholder gets {@code args[0]}, etc. If there are more arguments than
      * placeholders, the unmatched arguments will be appended to the end of the formatted
      * message in square brackets.</p>
      *
@@ -1613,7 +1951,7 @@ public abstract class AbstractLogger implements Logger {
      *                     username, opCount, duration);
      * }</pre>
      *
-     * @param template the message template containing 0 or more {} or %s placeholders, may be {@code null} (converted to "null")
+     * @param template the message template containing 0 or more {@code {}} or {@code %s} placeholders, may be {@code null} (converted to "null")
      * @param args the arguments to be substituted into the message template. Arguments
      *     are converted to strings using {@code N.toString(Object)}. Arguments can be {@code null}.
      * @return the formatted message
@@ -1642,7 +1980,7 @@ public abstract class AbstractLogger implements Logger {
         while (placeholderStart >= 0 && i < args.length) {
             sb.append(template, templateStart, placeholderStart);
             sb.append(N.toString(args[i++]));
-            templateStart = placeholderStart + 2;
+            templateStart = placeholderStart + placeholder.length();
             placeholderStart = template.indexOf(placeholder, templateStart);
         }
 

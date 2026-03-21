@@ -3,13 +3,15 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class CharBinaryOperatorTest extends TestBase {
+
+    private static char maxChar(char left, char right) {
+        return left > right ? left : right;
+    }
 
     @Test
     public void testApplyAsChar() {
@@ -85,9 +87,5 @@ public class CharBinaryOperatorTest extends TestBase {
     @Test
     public void testFunctionalInterface() {
         assertNotNull(CharBinaryOperator.class.getAnnotation(FunctionalInterface.class));
-    }
-
-    private static char maxChar(char left, char right) {
-        return left > right ? left : right;
     }
 }

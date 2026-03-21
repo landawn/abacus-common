@@ -12,39 +12,16 @@ import java.io.StringWriter;
 import java.io.Writer;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.EscapeUtil.CharSequenceTranslator;
 
-@Tag("2025")
 public class EscapeUtilTest extends TestBase {
 
     @Test
     public void testEscapeJava_BasicString() {
         Assertions.assertEquals("Hello World", EscapeUtil.escapeJava("Hello World"));
-    }
-
-    @Test
-    public void testCharSequenceTranslator_TranslateWrapsIOException() {
-        CharSequenceTranslator translator = new CharSequenceTranslator() {
-            @Override
-            public int translate(CharSequence input, int index, Writer out) throws IOException {
-                throw new IOException("forced");
-            }
-        };
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> translator.translate("boom"));
-
-        assertTrue(exception.getCause() instanceof IOException);
-    }
-
-    @Test
-    public void testUnicodeEscaper_ToUtf16Escape_BasicMultilingualPlane() {
-        EscapeUtil.UnicodeEscaper escaper = new EscapeUtil.UnicodeEscaper();
-
-        assertEquals("\\u41", escaper.toUtf16Escape('A'));
     }
 
     @Test
@@ -68,16 +45,6 @@ public class EscapeUtilTest extends TestBase {
     }
 
     @Test
-    public void testEscapeJava_Null() {
-        Assertions.assertNull(EscapeUtil.escapeJava(null));
-    }
-
-    @Test
-    public void testEscapeJava_EmptyString() {
-        Assertions.assertEquals("", EscapeUtil.escapeJava(""));
-    }
-
-    @Test
     public void testEscapeJava_WithCarriageReturn() {
         Assertions.assertEquals("Line1\\rLine2", EscapeUtil.escapeJava("Line1\rLine2"));
     }
@@ -90,6 +57,183 @@ public class EscapeUtilTest extends TestBase {
     @Test
     public void testEscapeJava_WithBackspace() {
         Assertions.assertEquals("Back\\bSpace", EscapeUtil.escapeJava("Back\bSpace"));
+    }
+
+    @Test
+    public void testEscapeJavaWithSurrogatePairs() {
+        String emoji = "Hello 😀 World";
+        String escaped = EscapeUtil.escapeJava(emoji);
+        assertEquals("Hello \\uD83D\\uDE00 World", escaped);
+        assertEquals(emoji, EscapeUtil.unescapeJava(escaped));
+    }
+
+    @Test
+    public void testUnicodeHandling() {
+        String unicode = "Hello 世界 🌍";
+
+        String javaEscaped = EscapeUtil.escapeJava(unicode);
+        assertEquals(unicode, EscapeUtil.unescapeJava(javaEscaped));
+
+        String jsonEscaped = EscapeUtil.escapeJson(unicode);
+        assertEquals(unicode, EscapeUtil.unescapeJson(jsonEscaped));
+
+        String htmlEscaped = EscapeUtil.escapeHtml4(unicode);
+        assertEquals(unicode, EscapeUtil.unescapeHtml4(htmlEscaped));
+    }
+
+    // =====================================================================
+    // Additional tests for untested methods and edge-case code paths
+    // Ordered to follow source declaration order
+    // =====================================================================
+
+    // --- escapeJava: Unicode escape for non-ASCII within BMP ---
+
+    @Test
+    public void testEscapeJava_NonAsciiCharacters() {
+        // Characters outside printable ASCII (32-127) should be Unicode-escaped
+        assertEquals("\\u00E9", EscapeUtil.escapeJava("\u00E9"));
+        assertEquals("\\u4E16\\u754C", EscapeUtil.escapeJava("\u4E16\u754C")); // Chinese characters
+    }
+
+    @Test
+    public void testEscapeJava_Null() {
+        Assertions.assertNull(EscapeUtil.escapeJava(null));
+    }
+
+    @Test
+    public void testEscapeJava_EmptyString() {
+        Assertions.assertEquals("", EscapeUtil.escapeJava(""));
+    }
+
+    @Test
+    public void testEscapeJava_WithSurrogatePairs() {
+        String emoji = "😀";
+        String escaped = EscapeUtil.escapeJava(emoji);
+        Assertions.assertNotNull(escaped);
+        String unescaped = EscapeUtil.unescapeJava(escaped);
+        Assertions.assertEquals(emoji, unescaped);
+    }
+
+    @Test
+    public void testEscapeJava() {
+        assertNull(EscapeUtil.escapeJava(null), "Escaping null should return null");
+        assertEquals("", EscapeUtil.escapeJava(""), "Escaping an empty string should return an empty string");
+        assertEquals("hello", EscapeUtil.escapeJava("hello"), "String without special characters should remain unchanged");
+        assertEquals("He didn't say, \\\"Stop!\\\"", EscapeUtil.escapeJava("He didn't say, \"Stop!\""), "Double quotes should be escaped");
+        assertEquals("C:\\\\path\\\\to\\\\file", EscapeUtil.escapeJava("C:\\path\\to\\file"), "Backslashes should be escaped");
+        assertEquals("\\n\\t\\b\\r\\f", EscapeUtil.escapeJava("\n\t\b\r\f"), "Control characters should be escaped");
+        assertEquals("\\u00E9", EscapeUtil.escapeJava("\u00E9"), "Non-ASCII characters should be Unicode escaped");
+        assertEquals("\\u0101", EscapeUtil.escapeJava("\u0101"), "Non-ASCII characters should be Unicode escaped");
+    }
+
+    @Test
+    public void testEscapeEcmaScript_BasicString() {
+        Assertions.assertEquals("Hello World", EscapeUtil.escapeEcmaScript("Hello World"));
+    }
+
+    @Test
+    public void testEscapeEcmaScript_WithForwardSlash() {
+        String result = EscapeUtil.escapeEcmaScript("</script>");
+        Assertions.assertTrue(result.contains("\\/"));
+    }
+
+    @Test
+    public void testEscapeEcmaScript_WithDoubleQuote() {
+        Assertions.assertEquals("He said \\\"Hi\\\"", EscapeUtil.escapeEcmaScript("He said \"Hi\""));
+    }
+
+    @Test
+    public void testEscapeEcmaScript_AllSpecialChars() {
+        String result = EscapeUtil.escapeEcmaScript("'\"\\/");
+        Assertions.assertTrue(result.contains("\\'"));
+        Assertions.assertTrue(result.contains("\\\""));
+        Assertions.assertTrue(result.contains("\\/"));
+    }
+
+    // --- escapeEcmaScript: backslash escaping ---
+
+    @Test
+    public void testEscapeEcmaScript_WithBackslash() {
+        assertEquals("C:\\\\temp", EscapeUtil.escapeEcmaScript("C:\\temp"));
+    }
+
+    @Test
+    public void testEscapeEcmaScript_WithSingleQuote() {
+        Assertions.assertEquals("Don\\'t", EscapeUtil.escapeEcmaScript("Don't"));
+    }
+
+    @Test
+    public void testEscapeEcmaScript_Null() {
+        Assertions.assertNull(EscapeUtil.escapeEcmaScript(null));
+    }
+
+    @Test
+    public void testEscapeEcmaScript_EmptyString() {
+        Assertions.assertEquals("", EscapeUtil.escapeEcmaScript(""));
+    }
+
+    @Test
+    public void testEscapeEcmaScript() {
+        assertNull(EscapeUtil.escapeEcmaScript(null));
+        assertEquals("", EscapeUtil.escapeEcmaScript(""));
+        assertEquals("He didn\\'t say, \\\"Stop!\\\"", EscapeUtil.escapeEcmaScript("He didn't say, \"Stop!\""), "Single and double quotes should be escaped");
+        assertEquals("<\\/script>", EscapeUtil.escapeEcmaScript("</script>"), "Forward slash should be escaped");
+    }
+
+    @Test
+    public void testEscapeJson_BasicString() {
+        Assertions.assertEquals("Hello World", EscapeUtil.escapeJson("Hello World"));
+    }
+
+    @Test
+    public void testEscapeJson_WithNewline() {
+        Assertions.assertEquals("Hello\\nWorld", EscapeUtil.escapeJson("Hello\nWorld"));
+    }
+
+    @Test
+    public void testEscapeJson_WithForwardSlash() {
+        String result = EscapeUtil.escapeJson("path/to/file");
+        Assertions.assertTrue(result.contains("\\/"));
+    }
+
+    @Test
+    public void testEscapeJson_WithQuotes() {
+        Assertions.assertEquals("Say \\\"Hello\\\"", EscapeUtil.escapeJson("Say \"Hello\""));
+    }
+
+    @Test
+    public void testEscapeJson_ControlCharacters() {
+        String result = EscapeUtil.escapeJson("Hello\t\n\r\fWorld");
+        Assertions.assertTrue(result.contains("\\t"));
+        Assertions.assertTrue(result.contains("\\n"));
+        Assertions.assertTrue(result.contains("\\r"));
+    }
+
+    // --- escapeJson: backslash escaping ---
+
+    @Test
+    public void testEscapeJson_WithBackslash() {
+        assertEquals("C:\\\\temp", EscapeUtil.escapeJson("C:\\temp"));
+    }
+
+    @Test
+    public void testEscapeJson_Null() {
+        Assertions.assertNull(EscapeUtil.escapeJson(null));
+    }
+
+    @Test
+    public void testEscapeJson_EmptyString() {
+        Assertions.assertEquals("", EscapeUtil.escapeJson(""));
+    }
+
+    @Test
+    public void testEscapeJson() {
+        assertNull(EscapeUtil.escapeJson(null));
+        assertEquals("", EscapeUtil.escapeJson(""));
+        assertEquals("He didn't say, \\\"Stop!\\\"", EscapeUtil.escapeJson("He didn't say, \"Stop!\""), "Double quotes should be escaped");
+        assertEquals("He didn't say", EscapeUtil.escapeJson("He didn't say"), "Single quotes should not be escaped in JSON");
+        assertEquals("<\\/script>", EscapeUtil.escapeJson("</script>"), "Forward slash should be escaped in JSON");
+        assertEquals("\\b\\f\\n\\r\\t", EscapeUtil.escapeJson("\b\f\n\r\t"), "JSON control characters should be escaped");
     }
 
     @Test
@@ -118,6 +262,24 @@ public class EscapeUtilTest extends TestBase {
     }
 
     @Test
+    public void testUnescapeJava_WithUnicodeEscape() {
+        Assertions.assertEquals("Hello", EscapeUtil.unescapeJava("\\u0048\\u0065\\u006C\\u006C\\u006F"));
+    }
+
+    @Test
+    public void testUnescapeJava_WithOctalEscape() {
+        Assertions.assertEquals("A", EscapeUtil.unescapeJava("\\101"));
+    }
+
+    // --- Round-trip tests ---
+
+    @Test
+    public void testEscapeUnescapeJava_RoundTrip() {
+        String original = "Hello\nWorld\t\"quoted\" \\ \u00E9 \u4E16\u754C";
+        assertEquals(original, EscapeUtil.unescapeJava(EscapeUtil.escapeJava(original)));
+    }
+
+    @Test
     public void testUnescapeJava_Null() {
         Assertions.assertNull(EscapeUtil.unescapeJava(null));
     }
@@ -128,44 +290,36 @@ public class EscapeUtilTest extends TestBase {
     }
 
     @Test
-    public void testUnescapeJava_WithUnicodeEscape() {
-        Assertions.assertEquals("Hello", EscapeUtil.unescapeJava("\\u0048\\u0065\\u006C\\u006C\\u006F"));
+    public void testUnescapeJava_TrailingBackslash() {
+        String result = EscapeUtil.unescapeJava("test\\");
+        Assertions.assertNotNull(result);
     }
 
     @Test
-    public void testUnescapeJava_WithOctalEscape() {
-        Assertions.assertEquals("A", EscapeUtil.unescapeJava("\\101"));
+    public void testUnescapeJava() {
+        assertNull(EscapeUtil.unescapeJava(null), "Unescaping null should return null");
+        assertEquals("", EscapeUtil.unescapeJava(""), "Unescaping an empty string should return an empty string");
+        assertEquals("hello", EscapeUtil.unescapeJava("hello"), "String without escapes should remain unchanged");
+        assertEquals("He didn't say, \"Stop!\"", EscapeUtil.unescapeJava("He didn't say, \\\"Stop!\\\""), "Escaped double quotes should be unescaped");
+        assertEquals("C:\\path\\to\\file", EscapeUtil.unescapeJava("C:\\\\path\\\\to\\\\file"), "Escaped backslashes should be unescaped");
+        assertEquals("\n\t\b\r\f", EscapeUtil.unescapeJava("\\n\\t\\b\\r\\f"), "Escaped control characters should be unescaped");
+        assertEquals("\u00E9", EscapeUtil.unescapeJava("\\u00E9"), "Unicode escapes should be unescaped");
+        assertEquals("'", EscapeUtil.unescapeJava("\\'"), "Escaped single quote should be unescaped");
+        assertEquals("\u0025", EscapeUtil.unescapeJava("\\45"), "Octal escapes should be unescaped");
+        assertEquals("test", EscapeUtil.unescapeJava("test\\"), "A single trailing backslash should be removed");
+        assertThrows(IllegalArgumentException.class, () -> EscapeUtil.unescapeJava("\\u123G"),
+                "Invalid hex character in Unicode escape should throw exception");
+        assertThrows(IllegalArgumentException.class, () -> EscapeUtil.unescapeJava("\\u123"), "Incomplete Unicode escape should throw exception");
     }
 
     @Test
-    public void testEscapeEcmaScript_BasicString() {
-        Assertions.assertEquals("Hello World", EscapeUtil.escapeEcmaScript("Hello World"));
+    public void testInvalidUnicodeEscape() {
+        assertThrows(IllegalArgumentException.class, () -> EscapeUtil.unescapeJava("\\uXXXX"));
     }
 
     @Test
-    public void testEscapeEcmaScript_WithSingleQuote() {
-        Assertions.assertEquals("Don\\'t", EscapeUtil.escapeEcmaScript("Don't"));
-    }
-
-    @Test
-    public void testEscapeEcmaScript_WithForwardSlash() {
-        String result = EscapeUtil.escapeEcmaScript("</script>");
-        Assertions.assertTrue(result.contains("\\/"));
-    }
-
-    @Test
-    public void testEscapeEcmaScript_WithDoubleQuote() {
-        Assertions.assertEquals("He said \\\"Hi\\\"", EscapeUtil.escapeEcmaScript("He said \"Hi\""));
-    }
-
-    @Test
-    public void testEscapeEcmaScript_Null() {
-        Assertions.assertNull(EscapeUtil.escapeEcmaScript(null));
-    }
-
-    @Test
-    public void testEscapeEcmaScript_EmptyString() {
-        Assertions.assertEquals("", EscapeUtil.escapeEcmaScript(""));
+    public void testIncompleteUnicodeEscape() {
+        assertThrows(IllegalArgumentException.class, () -> EscapeUtil.unescapeJava("\\u123"));
     }
 
     @Test
@@ -174,13 +328,19 @@ public class EscapeUtilTest extends TestBase {
     }
 
     @Test
-    public void testUnescapeEcmaScript_WithSingleQuote() {
-        Assertions.assertEquals("Don't", EscapeUtil.unescapeEcmaScript("Don\\'t"));
+    public void testUnescapeEcmaScript_WithForwardSlash() {
+        Assertions.assertEquals("</script>", EscapeUtil.unescapeEcmaScript("<\\/script>"));
     }
 
     @Test
-    public void testUnescapeEcmaScript_WithForwardSlash() {
-        Assertions.assertEquals("</script>", EscapeUtil.unescapeEcmaScript("<\\/script>"));
+    public void testEscapeUnescapeEcmaScript_RoundTrip() {
+        String original = "Don't stop / \"go\" \\ \n\t";
+        assertEquals(original, EscapeUtil.unescapeEcmaScript(EscapeUtil.escapeEcmaScript(original)));
+    }
+
+    @Test
+    public void testUnescapeEcmaScript_WithSingleQuote() {
+        Assertions.assertEquals("Don't", EscapeUtil.unescapeEcmaScript("Don\\'t"));
     }
 
     @Test
@@ -194,34 +354,11 @@ public class EscapeUtilTest extends TestBase {
     }
 
     @Test
-    public void testEscapeJson_BasicString() {
-        Assertions.assertEquals("Hello World", EscapeUtil.escapeJson("Hello World"));
-    }
-
-    @Test
-    public void testEscapeJson_WithNewline() {
-        Assertions.assertEquals("Hello\\nWorld", EscapeUtil.escapeJson("Hello\nWorld"));
-    }
-
-    @Test
-    public void testEscapeJson_WithForwardSlash() {
-        String result = EscapeUtil.escapeJson("path/to/file");
-        Assertions.assertTrue(result.contains("\\/"));
-    }
-
-    @Test
-    public void testEscapeJson_WithQuotes() {
-        Assertions.assertEquals("Say \\\"Hello\\\"", EscapeUtil.escapeJson("Say \"Hello\""));
-    }
-
-    @Test
-    public void testEscapeJson_Null() {
-        Assertions.assertNull(EscapeUtil.escapeJson(null));
-    }
-
-    @Test
-    public void testEscapeJson_EmptyString() {
-        Assertions.assertEquals("", EscapeUtil.escapeJson(""));
+    public void testUnescapeEcmaScript() {
+        assertNull(EscapeUtil.unescapeEcmaScript(null));
+        assertEquals("", EscapeUtil.unescapeEcmaScript(""));
+        assertEquals("He didn't say, \"Stop!\"", EscapeUtil.unescapeEcmaScript("He didn\\'t say, \\\"Stop!\\\""));
+        assertEquals("</script>", EscapeUtil.unescapeEcmaScript("<\\/script>"));
     }
 
     @Test
@@ -245,6 +382,19 @@ public class EscapeUtilTest extends TestBase {
     }
 
     @Test
+    public void testUnescapeJson_AllEscapeSequences() {
+        String result = EscapeUtil.unescapeJson("\\t\\n\\r\\f\\b\\\\\\/\\\"");
+        Assertions.assertEquals("\t\n\r\f\b\\/\"", result);
+    }
+
+    // --- unescapeJson: backslash within content ---
+
+    @Test
+    public void testUnescapeJson_WithBackslash() {
+        assertEquals("C:\\temp", EscapeUtil.unescapeJson("C:\\\\temp"));
+    }
+
+    @Test
     public void testUnescapeJson_Null() {
         Assertions.assertNull(EscapeUtil.unescapeJson(null));
     }
@@ -252,6 +402,14 @@ public class EscapeUtilTest extends TestBase {
     @Test
     public void testUnescapeJson_EmptyString() {
         Assertions.assertEquals("", EscapeUtil.unescapeJson(""));
+    }
+
+    @Test
+    public void testUnescapeJson() {
+        assertNull(EscapeUtil.unescapeJson(null));
+        assertEquals("", EscapeUtil.unescapeJson(""));
+        assertEquals("He didn't say, \"Stop!\"", EscapeUtil.unescapeJson("He didn't say, \\\"Stop!\\\""));
+        assertEquals("</script>", EscapeUtil.unescapeJson("<\\/script>"));
     }
 
     @Test
@@ -275,6 +433,26 @@ public class EscapeUtilTest extends TestBase {
     }
 
     @Test
+    public void testEscapeHtml4_WithGreaterThan() {
+        Assertions.assertEquals("&gt;", EscapeUtil.escapeHtml4(">"));
+    }
+
+    @Test
+    public void testEscapeHtml4_AllBasicEntities() {
+        String result = EscapeUtil.escapeHtml4("<>&\"");
+        Assertions.assertEquals("&lt;&gt;&amp;&quot;", result);
+    }
+
+    // --- escapeHtml4: ISO-8859-1 entities ---
+
+    @Test
+    public void testEscapeHtml4_ISO8859_1() {
+        assertEquals("&copy;", EscapeUtil.escapeHtml4("\u00A9"));
+        assertEquals("&reg;", EscapeUtil.escapeHtml4("\u00AE"));
+        assertEquals("&nbsp;", EscapeUtil.escapeHtml4("\u00A0"));
+    }
+
+    @Test
     public void testEscapeHtml4_Null() {
         Assertions.assertNull(EscapeUtil.escapeHtml4(null));
     }
@@ -285,8 +463,60 @@ public class EscapeUtilTest extends TestBase {
     }
 
     @Test
-    public void testEscapeHtml4_WithGreaterThan() {
-        Assertions.assertEquals("&gt;", EscapeUtil.escapeHtml4(">"));
+    public void testEscapeHtml4() {
+        assertNull(EscapeUtil.escapeHtml4(null));
+        assertEquals("", EscapeUtil.escapeHtml4(""));
+        assertEquals("hello", EscapeUtil.escapeHtml4("hello"));
+        assertEquals("&lt;tag&gt;", EscapeUtil.escapeHtml4("<tag>"));
+        assertEquals("&quot;bread&quot; &amp; &quot;butter&quot;", EscapeUtil.escapeHtml4("\"bread\" & \"butter\""));
+        assertEquals("'", EscapeUtil.escapeHtml4("'"), "Apostrophe is not escaped in HTML4");
+        assertEquals("&copy;", EscapeUtil.escapeHtml4("©"), "ISO-8859-1 characters should be escaped");
+        assertEquals("&euro;", EscapeUtil.escapeHtml4("€"), "HTML4 extended entities should be escaped");
+    }
+
+    @Test
+    public void testHtmlEntityEdgeCases() {
+        assertEquals("&lt;&lt;&gt;&gt;", EscapeUtil.escapeHtml4("<<>>"));
+        assertEquals("<<>>", EscapeUtil.unescapeHtml4("&lt;&lt;&gt;&gt;"));
+
+        String mixed = "Normal & <b>bold</b> text";
+        String escaped = EscapeUtil.escapeHtml4(mixed);
+        assertEquals("Normal &amp; &lt;b&gt;bold&lt;/b&gt; text", escaped);
+        assertEquals(mixed, EscapeUtil.unescapeHtml4(escaped));
+    }
+
+    @Test
+    public void testEscapeHtml3_BasicString() {
+        Assertions.assertEquals("Hello World", EscapeUtil.escapeHtml3("Hello World"));
+    }
+
+    @Test
+    public void testEscapeHtml3_WithLessThan() {
+        Assertions.assertEquals("&lt;div&gt;", EscapeUtil.escapeHtml3("<div>"));
+    }
+
+    @Test
+    public void testEscapeHtml3_WithAmpersand() {
+        Assertions.assertEquals("A &amp; B", EscapeUtil.escapeHtml3("A & B"));
+    }
+
+    @Test
+    public void testEscapeHtml3_Null() {
+        Assertions.assertNull(EscapeUtil.escapeHtml3(null));
+    }
+
+    @Test
+    public void testEscapeHtml3_EmptyString() {
+        Assertions.assertEquals("", EscapeUtil.escapeHtml3(""));
+    }
+
+    @Test
+    public void testEscapeHtml3() {
+        assertNull(EscapeUtil.escapeHtml3(null));
+        assertEquals("", EscapeUtil.escapeHtml3(""));
+        assertEquals("&lt;tag&gt;", EscapeUtil.escapeHtml3("<tag>"));
+        assertEquals("&copy;", EscapeUtil.escapeHtml3("©"), "ISO-8859-1 characters should be escaped");
+        assertEquals("€", EscapeUtil.escapeHtml3("€"), "HTML4 extended entities should not be escaped in HTML3");
     }
 
     @Test
@@ -325,6 +555,31 @@ public class EscapeUtilTest extends TestBase {
     }
 
     @Test
+    public void testUnescapeHtml4_UnrecognizedEntity() {
+        Assertions.assertEquals("&unknown;", EscapeUtil.unescapeHtml4("&unknown;"));
+    }
+
+    @Test
+    public void testUnescapeHtml4_DecimalEntity_NoHexDigits() {
+        Assertions.assertEquals("&#65", EscapeUtil.unescapeHtml4("&#65"));
+    }
+
+    // --- unescapeHtml4: ISO-8859-1 entities round-trip ---
+
+    @Test
+    public void testUnescapeHtml4_ISO8859_1_RoundTrip() {
+        assertEquals("\u00A9", EscapeUtil.unescapeHtml4("&copy;"));
+        assertEquals("\u00AE", EscapeUtil.unescapeHtml4("&reg;"));
+        assertEquals("\u00A0", EscapeUtil.unescapeHtml4("&nbsp;"));
+    }
+
+    @Test
+    public void testEscapeUnescapeHtml4_RoundTrip() {
+        String original = "<div class=\"test\">A & B</div>";
+        assertEquals(original, EscapeUtil.unescapeHtml4(EscapeUtil.escapeHtml4(original)));
+    }
+
+    @Test
     public void testUnescapeHtml4_Null() {
         Assertions.assertNull(EscapeUtil.unescapeHtml4(null));
     }
@@ -335,33 +590,27 @@ public class EscapeUtilTest extends TestBase {
     }
 
     @Test
-    public void testUnescapeHtml4_UnrecognizedEntity() {
-        Assertions.assertEquals("&unknown;", EscapeUtil.unescapeHtml4("&unknown;"));
+    public void testUnescapeHtml4_EmptyEntity() {
+        Assertions.assertEquals("&#;", EscapeUtil.unescapeHtml4("&#;"));
     }
 
     @Test
-    public void testEscapeHtml3_BasicString() {
-        Assertions.assertEquals("Hello World", EscapeUtil.escapeHtml3("Hello World"));
+    public void testUnescapeHtml4_EmptyHexEntity() {
+        Assertions.assertEquals("&#x;", EscapeUtil.unescapeHtml4("&#x;"));
     }
 
     @Test
-    public void testEscapeHtml3_WithLessThan() {
-        Assertions.assertEquals("&lt;div&gt;", EscapeUtil.escapeHtml3("<div>"));
-    }
-
-    @Test
-    public void testEscapeHtml3_WithAmpersand() {
-        Assertions.assertEquals("A &amp; B", EscapeUtil.escapeHtml3("A & B"));
-    }
-
-    @Test
-    public void testEscapeHtml3_Null() {
-        Assertions.assertNull(EscapeUtil.escapeHtml3(null));
-    }
-
-    @Test
-    public void testEscapeHtml3_EmptyString() {
-        Assertions.assertEquals("", EscapeUtil.escapeHtml3(""));
+    public void testUnescapeHtml4() {
+        assertNull(EscapeUtil.unescapeHtml4(null));
+        assertEquals("", EscapeUtil.unescapeHtml4(""));
+        assertEquals("<tag>", EscapeUtil.unescapeHtml4("&lt;tag&gt;"));
+        assertEquals("\"bread\" & \"butter\"", EscapeUtil.unescapeHtml4("&quot;bread&quot; &amp; &quot;butter&quot;"));
+        assertEquals("©", EscapeUtil.unescapeHtml4("&copy;"));
+        assertEquals("€", EscapeUtil.unescapeHtml4("&euro;"));
+        assertEquals("<", EscapeUtil.unescapeHtml4("&#60;"), "Decimal numeric entities should be unescaped");
+        assertEquals("€", EscapeUtil.unescapeHtml4("&#x20AC;"), "Hexadecimal numeric entities should be unescaped");
+        assertEquals("&zzzz;", EscapeUtil.unescapeHtml4("&zzzz;"), "Unrecognized entities should be left alone");
+        assertEquals("&#60", EscapeUtil.unescapeHtml4("&#60"), "Numeric entities without a semicolon should not be unescaped by default");
     }
 
     @Test
@@ -390,6 +639,15 @@ public class EscapeUtilTest extends TestBase {
     }
 
     @Test
+    public void testUnescapeHtml3() {
+        assertNull(EscapeUtil.unescapeHtml3(null));
+        assertEquals("", EscapeUtil.unescapeHtml3(""));
+        assertEquals("<tag>", EscapeUtil.unescapeHtml3("&lt;tag&gt;"));
+        assertEquals("©", EscapeUtil.unescapeHtml3("&copy;"));
+        assertEquals("&euro;", EscapeUtil.unescapeHtml3("&euro;"), "HTML4 extended entities should not be unescaped in HTML3");
+    }
+
+    @Test
     public void testEscapeXml10_BasicString() {
         Assertions.assertEquals("Hello World", EscapeUtil.escapeXml10("Hello World"));
     }
@@ -415,6 +673,33 @@ public class EscapeUtilTest extends TestBase {
     }
 
     @Test
+    public void testEscapeXml10_RemovesUnpairedSurrogates() {
+        char highSurrogate = '\uD800';
+        String input = "test" + highSurrogate + "end";
+        String result = EscapeUtil.escapeXml10(input);
+        Assertions.assertFalse(result.contains(String.valueOf(highSurrogate)));
+    }
+
+    @Test
+    public void testXmlControlCharacterHandling() {
+        String withControls = "Text\u0000\u0001\u0002\u0003\u0004";
+        String escaped10 = EscapeUtil.escapeXml10(withControls);
+        assertEquals("Text", escaped10);
+
+        String escaped11 = EscapeUtil.escapeXml11(withControls);
+        assertTrue(escaped11.startsWith("Text"));
+    }
+
+    // --- escapeXml10: numeric escaping for control chars in range 0x7f-0x84 and 0x86-0x9f ---
+
+    @Test
+    public void testEscapeXml10_NumericEscapeControlRange() {
+        // Characters in 0x7f-0x84 and 0x86-0x9f should be numeric-escaped
+        String result = EscapeUtil.escapeXml10("\u007F");
+        assertTrue(result.contains("&#"));
+    }
+
+    @Test
     public void testEscapeXml10_Null() {
         Assertions.assertNull(EscapeUtil.escapeXml10(null));
     }
@@ -428,6 +713,19 @@ public class EscapeUtilTest extends TestBase {
     public void testEscapeXml10_WithInvalidControlChars() {
         String result = EscapeUtil.escapeXml10("Hello\u0000World");
         Assertions.assertFalse(result.contains("\u0000"));
+    }
+
+    @Test
+    public void testEscapeXml10() {
+        assertNull(EscapeUtil.escapeXml10(null));
+        assertEquals("", EscapeUtil.escapeXml10(""));
+        assertEquals("&lt;test&gt;", EscapeUtil.escapeXml10("<test>"));
+        assertEquals("&quot;bread&quot; &amp; &apos;butter&apos;", EscapeUtil.escapeXml10("\"bread\" & 'butter'"));
+        assertEquals("", EscapeUtil.escapeXml10("\u0000\u0001\u0008"), "Invalid XML 1.0 characters should be removed");
+        assertEquals("\u0085", EscapeUtil.escapeXml10("\u0085"), "Certain control characters should be escaped as numeric entities");
+        assertEquals("\t\n\r", EscapeUtil.escapeXml10("\t\n\r"), "Valid XML 1.0 control characters should pass through");
+        assertEquals("", EscapeUtil.escapeXml10("\uD800"), "Unpaired high surrogate should be removed");
+        assertEquals("a", EscapeUtil.escapeXml10("\uD800a"), "Unpaired high surrogate should be removed, leaving following character");
     }
 
     @Test
@@ -445,6 +743,15 @@ public class EscapeUtilTest extends TestBase {
         Assertions.assertEquals("A &amp; B", EscapeUtil.escapeXml11("A & B"));
     }
 
+    // --- escapeXml11: control chars are numeric-escaped ---
+
+    @Test
+    public void testEscapeXml11_ControlCharsNumericEscaped() {
+        // Characters 0x1-0x8 should be numeric-escaped in XML 1.1
+        assertEquals("&#2;", EscapeUtil.escapeXml11("\u0002"));
+        assertEquals("&#8;", EscapeUtil.escapeXml11("\u0008"));
+    }
+
     @Test
     public void testEscapeXml11_Null() {
         Assertions.assertNull(EscapeUtil.escapeXml11(null));
@@ -459,6 +766,25 @@ public class EscapeUtilTest extends TestBase {
     public void testEscapeXml11_WithNullByte() {
         String result = EscapeUtil.escapeXml11("Hello\u0000World");
         Assertions.assertFalse(result.contains("\u0000"));
+    }
+
+    @Test
+    public void testEscapeXml11() {
+        assertNull(EscapeUtil.escapeXml11(null));
+        assertEquals("", EscapeUtil.escapeXml11(""));
+        assertEquals("&lt;test&gt;", EscapeUtil.escapeXml11("<test>"));
+        assertEquals("", EscapeUtil.escapeXml11("\u0000"), "Null character should be removed");
+        assertEquals("&#1;", EscapeUtil.escapeXml11("\u0001"), "Control characters invalid in XML 1.0 but valid in 1.1 should be escaped");
+        assertEquals("&#11;", EscapeUtil.escapeXml11("\u000b"), "Control characters should be escaped");
+        assertEquals("\t", EscapeUtil.escapeXml11("\t"), "Valid control characters should pass through");
+    }
+
+    // --- escapeXml11: 0xFFFE and 0xFFFF should be removed ---
+
+    @Test
+    public void testEscapeXml11_RemovesInvalidChars() {
+        assertEquals("", EscapeUtil.escapeXml11("\uFFFE"));
+        assertEquals("", EscapeUtil.escapeXml11("\uFFFF"));
     }
 
     @Test
@@ -497,6 +823,18 @@ public class EscapeUtilTest extends TestBase {
     }
 
     @Test
+    public void testUnescapeXml_AllBasicEntities() {
+        String result = EscapeUtil.unescapeXml("&lt;&gt;&amp;&quot;&apos;");
+        Assertions.assertEquals("<>&\"'", result);
+    }
+
+    @Test
+    public void testEscapeUnescapeXml10_RoundTrip() {
+        String original = "<root attr=\"val\">'text' & more</root>";
+        assertEquals(original, EscapeUtil.unescapeXml(EscapeUtil.escapeXml10(original)));
+    }
+
+    @Test
     public void testUnescapeXml_Null() {
         Assertions.assertNull(EscapeUtil.unescapeXml(null));
     }
@@ -504,6 +842,16 @@ public class EscapeUtilTest extends TestBase {
     @Test
     public void testUnescapeXml_EmptyString() {
         Assertions.assertEquals("", EscapeUtil.unescapeXml(""));
+    }
+
+    @Test
+    public void testUnescapeXml() {
+        assertNull(EscapeUtil.unescapeXml(null));
+        assertEquals("", EscapeUtil.unescapeXml(""));
+        assertEquals("<test>", EscapeUtil.unescapeXml("&lt;test&gt;"));
+        assertEquals("\"bread\" & 'butter'", EscapeUtil.unescapeXml("&quot;bread&quot; &amp; &apos;butter&apos;"), "Basic 5 XML entities should be unescaped");
+        assertEquals("<", EscapeUtil.unescapeXml("&#60;"), "Numeric entities should be unescaped");
+        assertEquals("&nbsp;", EscapeUtil.unescapeXml("&nbsp;"), "Non-basic XML entities should not be unescaped");
     }
 
     @Test
@@ -534,6 +882,18 @@ public class EscapeUtilTest extends TestBase {
     }
 
     @Test
+    public void testEscapeCsv_NoSpecialChars() {
+        Assertions.assertEquals("normal text", EscapeUtil.escapeCsv("normal text"));
+    }
+
+    // --- escapeCsv: string with only a quote ---
+
+    @Test
+    public void testEscapeCsv_OnlyQuote() {
+        assertEquals("\"\"\"\"", EscapeUtil.escapeCsv("\""));
+    }
+
+    @Test
     public void testEscapeCsv_Null() {
         Assertions.assertNull(EscapeUtil.escapeCsv(null));
     }
@@ -544,8 +904,33 @@ public class EscapeUtilTest extends TestBase {
     }
 
     @Test
-    public void testEscapeCsv_NoSpecialChars() {
-        Assertions.assertEquals("normal text", EscapeUtil.escapeCsv("normal text"));
+    public void testEscapeCsv_MultipleQuotes() {
+        String input = "He said \"Hello\" and \"Goodbye\"";
+        String result = EscapeUtil.escapeCsv(input);
+        Assertions.assertTrue(result.contains("\"\""));
+    }
+
+    @Test
+    public void testEscapeCsv() {
+        assertNull(EscapeUtil.escapeCsv(null));
+        assertEquals("", EscapeUtil.escapeCsv(""));
+        assertEquals("abc", EscapeUtil.escapeCsv("abc"), "String without special CSV chars should be unchanged");
+        assertEquals("\"a,b\"", EscapeUtil.escapeCsv("a,b"), "String with comma should be quoted");
+        assertEquals("\"a\"\"b\"", EscapeUtil.escapeCsv("a\"b"), "String with double quote should be quoted and the quote escaped");
+        assertEquals("\"a\nb\"", EscapeUtil.escapeCsv("a\nb"), "String with newline should be quoted");
+        assertEquals("\"a\rb\"", EscapeUtil.escapeCsv("a\rb"), "String with carriage return should be quoted");
+        assertEquals("\"a,\"\"b\n\"", EscapeUtil.escapeCsv("a,\"b\n"), "String with multiple special chars should be correctly escaped");
+        assertEquals("\"\"\"abc\"\"\"", EscapeUtil.escapeCsv("\"abc\""), "String containing quotes should have them escaped and be quoted");
+    }
+
+    @Test
+    public void testCsvComplexCases() {
+        assertEquals("", EscapeUtil.escapeCsv(""));
+
+        String complex = "Line 1\nLine 2\rLine 3,\"quoted\"";
+        String escaped = EscapeUtil.escapeCsv(complex);
+        assertEquals("\"Line 1\nLine 2\rLine 3,\"\"quoted\"\"\"", escaped);
+        assertEquals(complex, EscapeUtil.unescapeCsv(escaped));
     }
 
     @Test
@@ -569,11 +954,6 @@ public class EscapeUtilTest extends TestBase {
     }
 
     @Test
-    public void testUnescapeCsv_Null() {
-        Assertions.assertNull(EscapeUtil.unescapeCsv(null));
-    }
-
-    @Test
     public void testUnescapeCsv_NotQuoted() {
         Assertions.assertEquals("normal text", EscapeUtil.unescapeCsv("normal text"));
     }
@@ -581,6 +961,81 @@ public class EscapeUtilTest extends TestBase {
     @Test
     public void testUnescapeCsv_QuotedWithoutSpecialChars() {
         Assertions.assertEquals("\"simple\"", EscapeUtil.unescapeCsv("\"simple\""));
+    }
+
+    // --- unescapeCsv: malformed (starts with quote, no end quote) ---
+
+    @Test
+    public void testUnescapeCsv_MalformedStartsWithQuote() {
+        // Starts and doesn't end with quote - should be returned unchanged
+        assertEquals("\"abc", EscapeUtil.unescapeCsv("\"abc"));
+    }
+
+    // --- unescapeCsv: malformed (ends with quote, no start quote) ---
+
+    @Test
+    public void testUnescapeCsv_MalformedEndsWithQuote() {
+        assertEquals("abc\"", EscapeUtil.unescapeCsv("abc\""));
+    }
+
+    @Test
+    public void testEscapeUnescapeCsv_RoundTrip() {
+        String original = "field with, comma and \"quotes\"";
+        assertEquals(original, EscapeUtil.unescapeCsv(EscapeUtil.escapeCsv(original)));
+    }
+
+    @Test
+    public void testUnescapeCsv_Null() {
+        Assertions.assertNull(EscapeUtil.unescapeCsv(null));
+    }
+
+    @Test
+    public void testCsvUnescaper_EmptyString_NoCrash() {
+        Assertions.assertEquals("", EscapeUtil.unescapeCsv(""));
+    }
+
+    @Test
+    public void testCsvUnescaper_SingleChar() {
+        Assertions.assertEquals("a", EscapeUtil.unescapeCsv("a"));
+    }
+
+    @Test
+    public void testUnescapeCsv_QuotedEmptyString() {
+        Assertions.assertEquals("\"\"", EscapeUtil.unescapeCsv("\"\""));
+    }
+
+    @Test
+    public void testUnescapeCsv() {
+        assertNull(EscapeUtil.unescapeCsv(null));
+        assertEquals("", EscapeUtil.unescapeCsv(""));
+        assertEquals("abc", EscapeUtil.unescapeCsv("abc"), "Unquoted string should be unchanged");
+        assertEquals("\"abc\"", EscapeUtil.unescapeCsv("\"abc\""), "Quoted string without special chars should be unchanged");
+        assertEquals("a,b", EscapeUtil.unescapeCsv("\"a,b\""), "Quoted string with comma should have quotes removed");
+        assertEquals("a\"b", EscapeUtil.unescapeCsv("\"a\"\"b\""), "Escaped double quotes should be unescaped");
+        assertEquals("a\nb", EscapeUtil.unescapeCsv("\"a\nb\""), "Quoted string with newline should have quotes removed");
+        assertEquals("\"abc", EscapeUtil.unescapeCsv("\"abc"), "Malformed CSV (only starting quote) should be unchanged");
+        assertEquals("abc\"", EscapeUtil.unescapeCsv("abc\""), "Malformed CSV (only ending quote) should be unchanged");
+    }
+
+    @Test
+    public void testCharSequenceTranslator_TranslateWrapsIOException() {
+        CharSequenceTranslator translator = new CharSequenceTranslator() {
+            @Override
+            public int translate(CharSequence input, int index, Writer out) throws IOException {
+                throw new IOException("forced");
+            }
+        };
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> translator.translate("boom"));
+
+        assertTrue(exception.getCause() instanceof IOException);
+    }
+
+    @Test
+    public void testUnicodeEscaper_ToUtf16Escape_BasicMultilingualPlane() {
+        EscapeUtil.UnicodeEscaper escaper = new EscapeUtil.UnicodeEscaper();
+
+        assertEquals("\\u41", escaper.toUtf16Escape('A'));
     }
 
     @Test
@@ -728,330 +1183,6 @@ public class EscapeUtilTest extends TestBase {
         String[][] input = {};
         String[][] result = EscapeUtil.BeanArrays.invert(input);
         Assertions.assertEquals(0, result.length);
-    }
-
-    @Test
-    public void testUnescapeHtml4_DecimalEntity_NoHexDigits() {
-        Assertions.assertEquals("&#65", EscapeUtil.unescapeHtml4("&#65"));
-    }
-
-    @Test
-    public void testUnescapeHtml4_EmptyEntity() {
-        Assertions.assertEquals("&#;", EscapeUtil.unescapeHtml4("&#;"));
-    }
-
-    @Test
-    public void testUnescapeHtml4_EmptyHexEntity() {
-        Assertions.assertEquals("&#x;", EscapeUtil.unescapeHtml4("&#x;"));
-    }
-
-    @Test
-    public void testCsvUnescaper_EmptyString_NoCrash() {
-        Assertions.assertEquals("", EscapeUtil.unescapeCsv(""));
-    }
-
-    @Test
-    public void testCsvUnescaper_SingleChar() {
-        Assertions.assertEquals("a", EscapeUtil.unescapeCsv("a"));
-    }
-
-    @Test
-    public void testEscapeJava_WithSurrogatePairs() {
-        String emoji = "😀";
-        String escaped = EscapeUtil.escapeJava(emoji);
-        Assertions.assertNotNull(escaped);
-        String unescaped = EscapeUtil.unescapeJava(escaped);
-        Assertions.assertEquals(emoji, unescaped);
-    }
-
-    @Test
-    public void testEscapeXml10_RemovesUnpairedSurrogates() {
-        char highSurrogate = '\uD800';
-        String input = "test" + highSurrogate + "end";
-        String result = EscapeUtil.escapeXml10(input);
-        Assertions.assertFalse(result.contains(String.valueOf(highSurrogate)));
-    }
-
-    @Test
-    public void testUnescapeJava_TrailingBackslash() {
-        String result = EscapeUtil.unescapeJava("test\\");
-        Assertions.assertNotNull(result);
-    }
-
-    @Test
-    public void testEscapeCsv_MultipleQuotes() {
-        String input = "He said \"Hello\" and \"Goodbye\"";
-        String result = EscapeUtil.escapeCsv(input);
-        Assertions.assertTrue(result.contains("\"\""));
-    }
-
-    @Test
-    public void testUnescapeCsv_QuotedEmptyString() {
-        Assertions.assertEquals("\"\"", EscapeUtil.unescapeCsv("\"\""));
-    }
-
-    @Test
-    public void testEscapeHtml4_AllBasicEntities() {
-        String result = EscapeUtil.escapeHtml4("<>&\"");
-        Assertions.assertEquals("&lt;&gt;&amp;&quot;", result);
-    }
-
-    @Test
-    public void testUnescapeXml_AllBasicEntities() {
-        String result = EscapeUtil.unescapeXml("&lt;&gt;&amp;&quot;&apos;");
-        Assertions.assertEquals("<>&\"'", result);
-    }
-
-    @Test
-    public void testEscapeJson_ControlCharacters() {
-        String result = EscapeUtil.escapeJson("Hello\t\n\r\fWorld");
-        Assertions.assertTrue(result.contains("\\t"));
-        Assertions.assertTrue(result.contains("\\n"));
-        Assertions.assertTrue(result.contains("\\r"));
-    }
-
-    @Test
-    public void testUnescapeJson_AllEscapeSequences() {
-        String result = EscapeUtil.unescapeJson("\\t\\n\\r\\f\\b\\\\\\/\\\"");
-        Assertions.assertEquals("\t\n\r\f\b\\/\"", result);
-    }
-
-    @Test
-    public void testEscapeEcmaScript_AllSpecialChars() {
-        String result = EscapeUtil.escapeEcmaScript("'\"\\/");
-        Assertions.assertTrue(result.contains("\\'"));
-        Assertions.assertTrue(result.contains("\\\""));
-        Assertions.assertTrue(result.contains("\\/"));
-    }
-
-    @Test
-    public void testEscapeJava() {
-        assertNull(EscapeUtil.escapeJava(null), "Escaping null should return null");
-        assertEquals("", EscapeUtil.escapeJava(""), "Escaping an empty string should return an empty string");
-        assertEquals("hello", EscapeUtil.escapeJava("hello"), "String without special characters should remain unchanged");
-        assertEquals("He didn't say, \\\"Stop!\\\"", EscapeUtil.escapeJava("He didn't say, \"Stop!\""), "Double quotes should be escaped");
-        assertEquals("C:\\\\path\\\\to\\\\file", EscapeUtil.escapeJava("C:\\path\\to\\file"), "Backslashes should be escaped");
-        assertEquals("\\n\\t\\b\\r\\f", EscapeUtil.escapeJava("\n\t\b\r\f"), "Control characters should be escaped");
-        assertEquals("\\u00E9", EscapeUtil.escapeJava("\u00E9"), "Non-ASCII characters should be Unicode escaped");
-        assertEquals("\\u0101", EscapeUtil.escapeJava("\u0101"), "Non-ASCII characters should be Unicode escaped");
-    }
-
-    @Test
-    public void testUnescapeJava() {
-        assertNull(EscapeUtil.unescapeJava(null), "Unescaping null should return null");
-        assertEquals("", EscapeUtil.unescapeJava(""), "Unescaping an empty string should return an empty string");
-        assertEquals("hello", EscapeUtil.unescapeJava("hello"), "String without escapes should remain unchanged");
-        assertEquals("He didn't say, \"Stop!\"", EscapeUtil.unescapeJava("He didn't say, \\\"Stop!\\\""), "Escaped double quotes should be unescaped");
-        assertEquals("C:\\path\\to\\file", EscapeUtil.unescapeJava("C:\\\\path\\\\to\\\\file"), "Escaped backslashes should be unescaped");
-        assertEquals("\n\t\b\r\f", EscapeUtil.unescapeJava("\\n\\t\\b\\r\\f"), "Escaped control characters should be unescaped");
-        assertEquals("\u00E9", EscapeUtil.unescapeJava("\\u00E9"), "Unicode escapes should be unescaped");
-        assertEquals("'", EscapeUtil.unescapeJava("\\'"), "Escaped single quote should be unescaped");
-        assertEquals("\u0025", EscapeUtil.unescapeJava("\\45"), "Octal escapes should be unescaped");
-        assertEquals("test", EscapeUtil.unescapeJava("test\\"), "A single trailing backslash should be removed");
-        assertThrows(IllegalArgumentException.class, () -> EscapeUtil.unescapeJava("\\u123G"),
-                "Invalid hex character in Unicode escape should throw exception");
-        assertThrows(IllegalArgumentException.class, () -> EscapeUtil.unescapeJava("\\u123"), "Incomplete Unicode escape should throw exception");
-    }
-
-    @Test
-    public void testEscapeEcmaScript() {
-        assertNull(EscapeUtil.escapeEcmaScript(null));
-        assertEquals("", EscapeUtil.escapeEcmaScript(""));
-        assertEquals("He didn\\'t say, \\\"Stop!\\\"", EscapeUtil.escapeEcmaScript("He didn't say, \"Stop!\""), "Single and double quotes should be escaped");
-        assertEquals("<\\/script>", EscapeUtil.escapeEcmaScript("</script>"), "Forward slash should be escaped");
-    }
-
-    @Test
-    public void testUnescapeEcmaScript() {
-        assertNull(EscapeUtil.unescapeEcmaScript(null));
-        assertEquals("", EscapeUtil.unescapeEcmaScript(""));
-        assertEquals("He didn't say, \"Stop!\"", EscapeUtil.unescapeEcmaScript("He didn\\'t say, \\\"Stop!\\\""));
-        assertEquals("</script>", EscapeUtil.unescapeEcmaScript("<\\/script>"));
-    }
-
-    @Test
-    public void testEscapeJson() {
-        assertNull(EscapeUtil.escapeJson(null));
-        assertEquals("", EscapeUtil.escapeJson(""));
-        assertEquals("He didn't say, \\\"Stop!\\\"", EscapeUtil.escapeJson("He didn't say, \"Stop!\""), "Double quotes should be escaped");
-        assertEquals("He didn't say", EscapeUtil.escapeJson("He didn't say"), "Single quotes should not be escaped in JSON");
-        assertEquals("<\\/script>", EscapeUtil.escapeJson("</script>"), "Forward slash should be escaped in JSON");
-        assertEquals("\\b\\f\\n\\r\\t", EscapeUtil.escapeJson("\b\f\n\r\t"), "JSON control characters should be escaped");
-    }
-
-    @Test
-    public void testUnescapeJson() {
-        assertNull(EscapeUtil.unescapeJson(null));
-        assertEquals("", EscapeUtil.unescapeJson(""));
-        assertEquals("He didn't say, \"Stop!\"", EscapeUtil.unescapeJson("He didn't say, \\\"Stop!\\\""));
-        assertEquals("</script>", EscapeUtil.unescapeJson("<\\/script>"));
-    }
-
-    @Test
-    public void testEscapeHtml4() {
-        assertNull(EscapeUtil.escapeHtml4(null));
-        assertEquals("", EscapeUtil.escapeHtml4(""));
-        assertEquals("hello", EscapeUtil.escapeHtml4("hello"));
-        assertEquals("&lt;tag&gt;", EscapeUtil.escapeHtml4("<tag>"));
-        assertEquals("&quot;bread&quot; &amp; &quot;butter&quot;", EscapeUtil.escapeHtml4("\"bread\" & \"butter\""));
-        assertEquals("'", EscapeUtil.escapeHtml4("'"), "Apostrophe is not escaped in HTML4");
-        assertEquals("&copy;", EscapeUtil.escapeHtml4("©"), "ISO-8859-1 characters should be escaped");
-        assertEquals("&euro;", EscapeUtil.escapeHtml4("€"), "HTML4 extended entities should be escaped");
-    }
-
-    @Test
-    public void testUnescapeHtml4() {
-        assertNull(EscapeUtil.unescapeHtml4(null));
-        assertEquals("", EscapeUtil.unescapeHtml4(""));
-        assertEquals("<tag>", EscapeUtil.unescapeHtml4("&lt;tag&gt;"));
-        assertEquals("\"bread\" & \"butter\"", EscapeUtil.unescapeHtml4("&quot;bread&quot; &amp; &quot;butter&quot;"));
-        assertEquals("©", EscapeUtil.unescapeHtml4("&copy;"));
-        assertEquals("€", EscapeUtil.unescapeHtml4("&euro;"));
-        assertEquals("<", EscapeUtil.unescapeHtml4("&#60;"), "Decimal numeric entities should be unescaped");
-        assertEquals("€", EscapeUtil.unescapeHtml4("&#x20AC;"), "Hexadecimal numeric entities should be unescaped");
-        assertEquals("&zzzz;", EscapeUtil.unescapeHtml4("&zzzz;"), "Unrecognized entities should be left alone");
-        assertEquals("&#60", EscapeUtil.unescapeHtml4("&#60"), "Numeric entities without a semicolon should not be unescaped by default");
-    }
-
-    @Test
-    public void testEscapeHtml3() {
-        assertNull(EscapeUtil.escapeHtml3(null));
-        assertEquals("", EscapeUtil.escapeHtml3(""));
-        assertEquals("&lt;tag&gt;", EscapeUtil.escapeHtml3("<tag>"));
-        assertEquals("&copy;", EscapeUtil.escapeHtml3("©"), "ISO-8859-1 characters should be escaped");
-        assertEquals("€", EscapeUtil.escapeHtml3("€"), "HTML4 extended entities should not be escaped in HTML3");
-    }
-
-    @Test
-    public void testUnescapeHtml3() {
-        assertNull(EscapeUtil.unescapeHtml3(null));
-        assertEquals("", EscapeUtil.unescapeHtml3(""));
-        assertEquals("<tag>", EscapeUtil.unescapeHtml3("&lt;tag&gt;"));
-        assertEquals("©", EscapeUtil.unescapeHtml3("&copy;"));
-        assertEquals("&euro;", EscapeUtil.unescapeHtml3("&euro;"), "HTML4 extended entities should not be unescaped in HTML3");
-    }
-
-    @Test
-    public void testEscapeXml10() {
-        assertNull(EscapeUtil.escapeXml10(null));
-        assertEquals("", EscapeUtil.escapeXml10(""));
-        assertEquals("&lt;test&gt;", EscapeUtil.escapeXml10("<test>"));
-        assertEquals("&quot;bread&quot; &amp; &apos;butter&apos;", EscapeUtil.escapeXml10("\"bread\" & 'butter'"));
-        assertEquals("", EscapeUtil.escapeXml10("\u0000\u0001\u0008"), "Invalid XML 1.0 characters should be removed");
-        assertEquals("\u0085", EscapeUtil.escapeXml10("\u0085"), "Certain control characters should be escaped as numeric entities");
-        assertEquals("\t\n\r", EscapeUtil.escapeXml10("\t\n\r"), "Valid XML 1.0 control characters should pass through");
-        assertEquals("", EscapeUtil.escapeXml10("\uD800"), "Unpaired high surrogate should be removed");
-        assertEquals("a", EscapeUtil.escapeXml10("\uD800a"), "Unpaired high surrogate should be removed, leaving following character");
-    }
-
-    @Test
-    public void testEscapeXml11() {
-        assertNull(EscapeUtil.escapeXml11(null));
-        assertEquals("", EscapeUtil.escapeXml11(""));
-        assertEquals("&lt;test&gt;", EscapeUtil.escapeXml11("<test>"));
-        assertEquals("", EscapeUtil.escapeXml11("\u0000"), "Null character should be removed");
-        assertEquals("&#1;", EscapeUtil.escapeXml11("\u0001"), "Control characters invalid in XML 1.0 but valid in 1.1 should be escaped");
-        assertEquals("&#11;", EscapeUtil.escapeXml11("\u000b"), "Control characters should be escaped");
-        assertEquals("\t", EscapeUtil.escapeXml11("\t"), "Valid control characters should pass through");
-    }
-
-    @Test
-    public void testUnescapeXml() {
-        assertNull(EscapeUtil.unescapeXml(null));
-        assertEquals("", EscapeUtil.unescapeXml(""));
-        assertEquals("<test>", EscapeUtil.unescapeXml("&lt;test&gt;"));
-        assertEquals("\"bread\" & 'butter'", EscapeUtil.unescapeXml("&quot;bread&quot; &amp; &apos;butter&apos;"), "Basic 5 XML entities should be unescaped");
-        assertEquals("<", EscapeUtil.unescapeXml("&#60;"), "Numeric entities should be unescaped");
-        assertEquals("&nbsp;", EscapeUtil.unescapeXml("&nbsp;"), "Non-basic XML entities should not be unescaped");
-    }
-
-    @Test
-    public void testEscapeCsv() {
-        assertNull(EscapeUtil.escapeCsv(null));
-        assertEquals("", EscapeUtil.escapeCsv(""));
-        assertEquals("abc", EscapeUtil.escapeCsv("abc"), "String without special CSV chars should be unchanged");
-        assertEquals("\"a,b\"", EscapeUtil.escapeCsv("a,b"), "String with comma should be quoted");
-        assertEquals("\"a\"\"b\"", EscapeUtil.escapeCsv("a\"b"), "String with double quote should be quoted and the quote escaped");
-        assertEquals("\"a\nb\"", EscapeUtil.escapeCsv("a\nb"), "String with newline should be quoted");
-        assertEquals("\"a\rb\"", EscapeUtil.escapeCsv("a\rb"), "String with carriage return should be quoted");
-        assertEquals("\"a,\"\"b\n\"", EscapeUtil.escapeCsv("a,\"b\n"), "String with multiple special chars should be correctly escaped");
-        assertEquals("\"\"\"abc\"\"\"", EscapeUtil.escapeCsv("\"abc\""), "String containing quotes should have them escaped and be quoted");
-    }
-
-    @Test
-    public void testUnescapeCsv() {
-        assertNull(EscapeUtil.unescapeCsv(null));
-        assertEquals("", EscapeUtil.unescapeCsv(""));
-        assertEquals("abc", EscapeUtil.unescapeCsv("abc"), "Unquoted string should be unchanged");
-        assertEquals("\"abc\"", EscapeUtil.unescapeCsv("\"abc\""), "Quoted string without special chars should be unchanged");
-        assertEquals("a,b", EscapeUtil.unescapeCsv("\"a,b\""), "Quoted string with comma should have quotes removed");
-        assertEquals("a\"b", EscapeUtil.unescapeCsv("\"a\"\"b\""), "Escaped double quotes should be unescaped");
-        assertEquals("a\nb", EscapeUtil.unescapeCsv("\"a\nb\""), "Quoted string with newline should have quotes removed");
-        assertEquals("\"abc", EscapeUtil.unescapeCsv("\"abc"), "Malformed CSV (only starting quote) should be unchanged");
-        assertEquals("abc\"", EscapeUtil.unescapeCsv("abc\""), "Malformed CSV (only ending quote) should be unchanged");
-    }
-
-    @Test
-    public void testEscapeJavaWithSurrogatePairs() {
-        String emoji = "Hello 😀 World";
-        String escaped = EscapeUtil.escapeJava(emoji);
-        assertEquals("Hello \\uD83D\\uDE00 World", escaped);
-        assertEquals(emoji, EscapeUtil.unescapeJava(escaped));
-    }
-
-    @Test
-    public void testHtmlEntityEdgeCases() {
-        assertEquals("&lt;&lt;&gt;&gt;", EscapeUtil.escapeHtml4("<<>>"));
-        assertEquals("<<>>", EscapeUtil.unescapeHtml4("&lt;&lt;&gt;&gt;"));
-
-        String mixed = "Normal & <b>bold</b> text";
-        String escaped = EscapeUtil.escapeHtml4(mixed);
-        assertEquals("Normal &amp; &lt;b&gt;bold&lt;/b&gt; text", escaped);
-        assertEquals(mixed, EscapeUtil.unescapeHtml4(escaped));
-    }
-
-    @Test
-    public void testXmlControlCharacterHandling() {
-        String withControls = "Text\u0000\u0001\u0002\u0003\u0004";
-        String escaped10 = EscapeUtil.escapeXml10(withControls);
-        assertEquals("Text", escaped10);
-
-        String escaped11 = EscapeUtil.escapeXml11(withControls);
-        assertTrue(escaped11.startsWith("Text"));
-    }
-
-    @Test
-    public void testCsvComplexCases() {
-        assertEquals("", EscapeUtil.escapeCsv(""));
-
-        String complex = "Line 1\nLine 2\rLine 3,\"quoted\"";
-        String escaped = EscapeUtil.escapeCsv(complex);
-        assertEquals("\"Line 1\nLine 2\rLine 3,\"\"quoted\"\"\"", escaped);
-        assertEquals(complex, EscapeUtil.unescapeCsv(escaped));
-    }
-
-    @Test
-    public void testUnicodeHandling() {
-        String unicode = "Hello 世界 🌍";
-
-        String javaEscaped = EscapeUtil.escapeJava(unicode);
-        assertEquals(unicode, EscapeUtil.unescapeJava(javaEscaped));
-
-        String jsonEscaped = EscapeUtil.escapeJson(unicode);
-        assertEquals(unicode, EscapeUtil.unescapeJson(jsonEscaped));
-
-        String htmlEscaped = EscapeUtil.escapeHtml4(unicode);
-        assertEquals(unicode, EscapeUtil.unescapeHtml4(htmlEscaped));
-    }
-
-    @Test
-    public void testInvalidUnicodeEscape() {
-        assertThrows(IllegalArgumentException.class, () -> EscapeUtil.unescapeJava("\\uXXXX"));
-    }
-
-    @Test
-    public void testIncompleteUnicodeEscape() {
-        assertThrows(IllegalArgumentException.class, () -> EscapeUtil.unescapeJava("\\u123"));
     }
 
     // --- CharSequenceTranslator.with() ---
@@ -1524,107 +1655,6 @@ public class EscapeUtilTest extends TestBase {
         assertEquals("say \"hi\"", writer.toString());
     }
 
-    // =====================================================================
-    // Additional tests for untested methods and edge-case code paths
-    // Ordered to follow source declaration order
-    // =====================================================================
-
-    // --- escapeJava: Unicode escape for non-ASCII within BMP ---
-
-    @Test
-    public void testEscapeJava_NonAsciiCharacters() {
-        // Characters outside printable ASCII (32-127) should be Unicode-escaped
-        assertEquals("\\u00E9", EscapeUtil.escapeJava("\u00E9"));
-        assertEquals("\\u4E16\\u754C", EscapeUtil.escapeJava("\u4E16\u754C")); // Chinese characters
-    }
-
-    // --- escapeEcmaScript: backslash escaping ---
-
-    @Test
-    public void testEscapeEcmaScript_WithBackslash() {
-        assertEquals("C:\\\\temp", EscapeUtil.escapeEcmaScript("C:\\temp"));
-    }
-
-    // --- escapeJson: backslash escaping ---
-
-    @Test
-    public void testEscapeJson_WithBackslash() {
-        assertEquals("C:\\\\temp", EscapeUtil.escapeJson("C:\\temp"));
-    }
-
-    // --- unescapeJson: backslash within content ---
-
-    @Test
-    public void testUnescapeJson_WithBackslash() {
-        assertEquals("C:\\temp", EscapeUtil.unescapeJson("C:\\\\temp"));
-    }
-
-    // --- escapeHtml4: ISO-8859-1 entities ---
-
-    @Test
-    public void testEscapeHtml4_ISO8859_1() {
-        assertEquals("&copy;", EscapeUtil.escapeHtml4("\u00A9"));
-        assertEquals("&reg;", EscapeUtil.escapeHtml4("\u00AE"));
-        assertEquals("&nbsp;", EscapeUtil.escapeHtml4("\u00A0"));
-    }
-
-    // --- unescapeHtml4: ISO-8859-1 entities round-trip ---
-
-    @Test
-    public void testUnescapeHtml4_ISO8859_1_RoundTrip() {
-        assertEquals("\u00A9", EscapeUtil.unescapeHtml4("&copy;"));
-        assertEquals("\u00AE", EscapeUtil.unescapeHtml4("&reg;"));
-        assertEquals("\u00A0", EscapeUtil.unescapeHtml4("&nbsp;"));
-    }
-
-    // --- escapeXml10: numeric escaping for control chars in range 0x7f-0x84 and 0x86-0x9f ---
-
-    @Test
-    public void testEscapeXml10_NumericEscapeControlRange() {
-        // Characters in 0x7f-0x84 and 0x86-0x9f should be numeric-escaped
-        String result = EscapeUtil.escapeXml10("\u007F");
-        assertTrue(result.contains("&#"));
-    }
-
-    // --- escapeXml11: control chars are numeric-escaped ---
-
-    @Test
-    public void testEscapeXml11_ControlCharsNumericEscaped() {
-        // Characters 0x1-0x8 should be numeric-escaped in XML 1.1
-        assertEquals("&#2;", EscapeUtil.escapeXml11("\u0002"));
-        assertEquals("&#8;", EscapeUtil.escapeXml11("\u0008"));
-    }
-
-    // --- escapeXml11: 0xFFFE and 0xFFFF should be removed ---
-
-    @Test
-    public void testEscapeXml11_RemovesInvalidChars() {
-        assertEquals("", EscapeUtil.escapeXml11("\uFFFE"));
-        assertEquals("", EscapeUtil.escapeXml11("\uFFFF"));
-    }
-
-    // --- escapeCsv: string with only a quote ---
-
-    @Test
-    public void testEscapeCsv_OnlyQuote() {
-        assertEquals("\"\"\"\"", EscapeUtil.escapeCsv("\""));
-    }
-
-    // --- unescapeCsv: malformed (starts with quote, no end quote) ---
-
-    @Test
-    public void testUnescapeCsv_MalformedStartsWithQuote() {
-        // Starts and doesn't end with quote - should be returned unchanged
-        assertEquals("\"abc", EscapeUtil.unescapeCsv("\"abc"));
-    }
-
-    // --- unescapeCsv: malformed (ends with quote, no start quote) ---
-
-    @Test
-    public void testUnescapeCsv_MalformedEndsWithQuote() {
-        assertEquals("abc\"", EscapeUtil.unescapeCsv("abc\""));
-    }
-
     // --- CharSequenceTranslator.translate(CharSequence, Writer): surrogate pair handling ---
 
     @Test
@@ -2052,38 +2082,6 @@ public class EscapeUtilTest extends TestBase {
         String[][] second = EscapeUtil.BeanArrays.HTML40_EXTENDED_ESCAPE();
         assertFalse(first == second);
         assertEquals(first.length, second.length);
-    }
-
-    // --- Round-trip tests ---
-
-    @Test
-    public void testEscapeUnescapeJava_RoundTrip() {
-        String original = "Hello\nWorld\t\"quoted\" \\ \u00E9 \u4E16\u754C";
-        assertEquals(original, EscapeUtil.unescapeJava(EscapeUtil.escapeJava(original)));
-    }
-
-    @Test
-    public void testEscapeUnescapeEcmaScript_RoundTrip() {
-        String original = "Don't stop / \"go\" \\ \n\t";
-        assertEquals(original, EscapeUtil.unescapeEcmaScript(EscapeUtil.escapeEcmaScript(original)));
-    }
-
-    @Test
-    public void testEscapeUnescapeHtml4_RoundTrip() {
-        String original = "<div class=\"test\">A & B</div>";
-        assertEquals(original, EscapeUtil.unescapeHtml4(EscapeUtil.escapeHtml4(original)));
-    }
-
-    @Test
-    public void testEscapeUnescapeXml10_RoundTrip() {
-        String original = "<root attr=\"val\">'text' & more</root>";
-        assertEquals(original, EscapeUtil.unescapeXml(EscapeUtil.escapeXml10(original)));
-    }
-
-    @Test
-    public void testEscapeUnescapeCsv_RoundTrip() {
-        String original = "field with, comma and \"quotes\"";
-        assertEquals(original, EscapeUtil.unescapeCsv(EscapeUtil.escapeCsv(original)));
     }
 
 }

@@ -31,23 +31,22 @@ import java.lang.annotation.Target;
  *
  * <p>This annotation is particularly useful for:</p>
  * <ul>
- *   <li>Stream operations that can be parallelized</li>
- *   <li>Collection operations that support concurrent access</li>
- *   <li>Algorithms that can be executed in parallel</li>
- *   <li>Thread-safe utility methods</li>
+ *   <li>Stream operations that can be parallelized.</li>
+ *   <li>Collection operations that support concurrent access.</li>
+ *   <li>Algorithms that can be executed in parallel.</li>
+ *   <li>Thread-safe utility methods.</li>
  * </ul>
  *
  * <p><b>Requirements for parallel-supported operations:</b></p>
  * <ul>
- *   <li>No shared mutable state or proper synchronization</li>
- *   <li>Stateless operations or thread-local state</li>
- *   <li>Associative and non-interfering operations</li>
- *   <li>Thread-safe access to shared resources</li>
+ *   <li>No shared mutable state or proper synchronization.</li>
+ *   <li>Stateless operations or thread-local state.</li>
+ *   <li>Associative and non-interfering operations.</li>
+ *   <li>Thread-safe access to shared resources.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- *
  * public class MathUtils {
  *     @ParallelSupported
  *     public static int square(int n) {

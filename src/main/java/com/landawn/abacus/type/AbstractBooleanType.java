@@ -25,14 +25,14 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Abstract base class for boolean types in the type system.
+ * The abstract base class for boolean types in the type system.
  * This class provides common functionality for handling boolean values,
  * including conversion, database operations, and serialization.
  */
 public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
 
     /**
-     * Constructs an AbstractBooleanType with the specified type name.
+     * Constructs a new {@code AbstractBooleanType} with the specified type name.
      *
      * @param typeName the name of the boolean type (e.g., "Boolean", "boolean")
      */
@@ -41,12 +41,12 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
     }
 
     /**
-     * Converts a Boolean value to its string representation.
+     * Converts the specified {@code Boolean} value to its string representation.
      * Returns {@code null} if the input is {@code null}, otherwise returns
      * the string representation of the boolean value ("true" or "false").
      *
-     * @param b the Boolean value to convert
-     * @return the string representation of the boolean value, or {@code null} if input is {@code null}
+     * @param b the {@code Boolean} value to convert
+     * @return the string representation of the boolean value, or {@code null} if the input is {@code null}
      */
     @Override
     public String stringOf(final Boolean b) {
@@ -54,19 +54,19 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
     }
 
     /**
-     * Converts an object to a Boolean value.
+     * Converts the specified object to a {@code Boolean} value.
      * This method handles various input types:
      * <ul>
-     *   <li>{@code null} returns the default value</li>
-     *   <li>Boolean instances are returned as-is</li>
-     *   <li>Numbers are converted to {@code true} if greater than 0, {@code false} otherwise</li>
-     *   <li>CharSequence instances: single character 'Y', 'y', or '1' returns {@code true};
-     *       otherwise parsed using {@link Boolean#valueOf(String)}</li>
-     *   <li>Other objects are converted via {@code Boolean.valueOf(obj.toString())}</li>
+     *   <li>{@code null} returns the default value.</li>
+     *   <li>{@code Boolean} instances are returned as-is.</li>
+     *   <li>Numbers are converted to {@code true} if greater than 0, {@code false} otherwise.</li>
+     *   <li>{@code CharSequence} instances: single character 'Y', 'y', or '1' returns {@code true};
+     *       otherwise parsed using {@link Boolean#valueOf(String)}.</li>
+     *   <li>Other objects are converted via {@code Boolean.valueOf(obj.toString())}.</li>
      * </ul>
      *
      * @param obj the source object to convert
-     * @return the Boolean value, or default value if input is {@code null}
+     * @return the {@code Boolean} value, or default value if the input is {@code null}
      */
     @Override
     public Boolean valueOf(final Object obj) {
@@ -90,16 +90,16 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
     }
 
     /**
-     * Converts a string to a Boolean value.
+     * Converts the specified string to a {@code Boolean} value.
      * This method handles various string formats:
      * <ul>
-     *   <li>Empty or {@code null} strings return the default value</li>
-     *   <li>Single character strings: 'Y', 'y', or '1' return {@code true}</li>
-     *   <li>Other strings are parsed using {@link Boolean#valueOf(String)}</li>
+     *   <li>Empty or {@code null} strings return the default value.</li>
+     *   <li>Single character strings: 'Y', 'y', or '1' return {@code true}.</li>
+     *   <li>Other strings are parsed using {@link Boolean#valueOf(String)}.</li>
      * </ul>
      *
      * @param str the string to convert
-     * @return the Boolean value, or default value if input is empty or {@code null}
+     * @return the {@code Boolean} value, or default value if the input is empty or {@code null}
      */
     @Override
     public Boolean valueOf(final String str) {
@@ -111,13 +111,13 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
     }
 
     /**
-     * Converts a character array to a Boolean value.
+     * Converts the specified character array to a {@code Boolean} value.
      * Handles the following cases:
      * <ul>
-     *   <li>{@code null} or empty array returns the default value</li>
-     *   <li>Single character 'Y', 'y', or '1' returns {@code true}</li>
-     *   <li>"true" (case-insensitive) returns {@code true}</li>
-     *   <li>Any other value returns {@code false}</li>
+     *   <li>{@code null} or empty array returns the default value.</li>
+     *   <li>Single character 'Y', 'y', or '1' returns {@code true}.</li>
+     *   <li>"true" (case-insensitive) returns {@code true}.</li>
+     *   <li>Any other value returns {@code false}.</li>
      * </ul>
      *
      * @param cbuf the character array to convert
@@ -142,10 +142,9 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
     }
 
     /**
-     * Checks if this type represents a boolean type.
-     * This method always returns {@code true} for boolean types.
+     * Returns {@code true} because this type represents a boolean type.
      *
-     * @return {@code true}, indicating this is a boolean type
+     * @return {@code true}
      */
     @Override
     public boolean isBoolean() {
@@ -153,10 +152,9 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
     }
 
     /**
-     * Indicates whether values of this type require quoting in CSV format.
-     * Boolean values are self-delimiting and do not require quotes in CSV files.
+     * Returns {@code false} because boolean values do not require quoting in CSV format.
      *
-     * @return {@code false}, as boolean values do not require quoting in CSV format
+     * @return {@code false}
      */
     @Override
     public boolean isCsvQuoteRequired() {
@@ -164,13 +162,13 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
     }
 
     /**
-     * Retrieves a boolean value from a ResultSet at the specified column index.
-     * Note: This method uses rs.getBoolean() which returns {@code false} for SQL NULL values.
-     * Therefore, SQL NULL values are converted to Boolean.valueOf(false), not {@code null}.
+     * Retrieves a boolean value from the specified {@code ResultSet} at the given column index.
+     * <p>Note: This method uses {@code rs.getBoolean()} which returns {@code false} for SQL {@code NULL} values.
+     * Therefore, SQL {@code NULL} values are converted to {@code Boolean.valueOf(false)}, not {@code null}.</p>
      *
-     * @param rs the ResultSet to read from
+     * @param rs the {@code ResultSet} to read from
      * @param columnIndex the column index (1-based)
-     * @return the boolean value at the specified column, or Boolean.valueOf(false) if the value is SQL NULL
+     * @return the boolean value at the specified column, or {@code Boolean.valueOf(false)} if the value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -179,13 +177,13 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
     }
 
     /**
-     * Retrieves a boolean value from a ResultSet using the specified column label.
-     * Note: This method uses rs.getBoolean() which returns {@code false} for SQL NULL values.
-     * Therefore, SQL NULL values are converted to Boolean.valueOf(false), not {@code null}.
+     * Retrieves a boolean value from the specified {@code ResultSet} using the given column label.
+     * <p>Note: This method uses {@code rs.getBoolean()} which returns {@code false} for SQL {@code NULL} values.
+     * Therefore, SQL {@code NULL} values are converted to {@code Boolean.valueOf(false)}, not {@code null}.</p>
      *
-     * @param rs the ResultSet to read from
+     * @param rs the {@code ResultSet} to read from
      * @param columnName the column label
-     * @return the boolean value at the specified column, or Boolean.valueOf(false) if the value is SQL NULL
+     * @return the boolean value at the specified column, or {@code Boolean.valueOf(false)} if the value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -194,12 +192,12 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
     }
 
     /**
-     * Sets a boolean parameter in a PreparedStatement at the specified position.
-     * If the value is {@code null}, sets the parameter to SQL NULL.
+     * Sets the specified boolean parameter in a {@code PreparedStatement} at the given position.
+     * If the value is {@code null}, sets the parameter to SQL {@code NULL}.
      *
-     * @param stmt the PreparedStatement to set the parameter on
+     * @param stmt the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the parameter index (1-based)
-     * @param x the boolean value to set, or {@code null} for SQL NULL
+     * @param x the boolean value to set, or {@code null} for SQL {@code NULL}
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -212,12 +210,12 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
     }
 
     /**
-     * Sets a boolean parameter in a CallableStatement using the specified parameter name.
-     * If the value is {@code null}, sets the parameter to SQL NULL.
+     * Sets the specified boolean parameter in a {@code CallableStatement} using the given parameter name.
+     * If the value is {@code null}, sets the parameter to SQL {@code NULL}.
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the parameter name
-     * @param x the boolean value to set, or {@code null} for SQL NULL
+     * @param x the boolean value to set, or {@code null} for SQL {@code NULL}
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -230,10 +228,10 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
     }
 
     /**
-     * Appends the string representation of a boolean value to an Appendable.
+     * Appends the string representation of the specified boolean value to the given {@code Appendable}.
      * Writes "null" if the value is {@code null}, "true" if {@code true}, or "false" if {@code false}.
      *
-     * @param appendable the Appendable to write to
+     * @param appendable the {@code Appendable} to write to
      * @param x the boolean value to append
      * @throws IOException if an I/O error occurs
      */
@@ -243,11 +241,11 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
     }
 
     /**
-     * Writes a boolean value to a CharacterWriter with optional configuration.
+     * Writes the specified boolean value to the given {@code CharacterWriter} with optional configuration.
      * If the configuration specifies {@code writeNullBooleanAsFalse} and the value is {@code null},
      * writes {@code false} instead of {@code null}.
      *
-     * @param writer the CharacterWriter to write to
+     * @param writer the {@code CharacterWriter} to write to
      * @param x the boolean value to write
      * @param config the serialization configuration, may be {@code null}
      * @throws IOException if an I/O error occurs

@@ -19,7 +19,6 @@ import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
@@ -27,53 +26,440 @@ import com.landawn.abacus.util.Difference.BeanDifference;
 import com.landawn.abacus.util.Difference.MapDifference;
 import com.landawn.abacus.util.function.BiPredicate;
 
-@Tag("old-test")
 public class DifferenceTest extends AbstractTest {
 
     @Test
-    public void test_001() {
-        Account a = new Account();
-        a.setLastUpdateTime(Dates.currentTimestampPlus(1, TimeUnit.DAYS));
-        a.setCreatedTime(Dates.currentTimestampPlus(1, TimeUnit.DAYS));
-        Account b = new Account();
-        b.setLastUpdateTime(Dates.currentTimestamp());
-        b.setCreatedTime(Dates.currentTimestamp());
-        var diff = BeanDifference.of(a, b);
+    public void testDifferenceWithDuplicates() {
+        List<String> a = Arrays.asList("a", "a", "a", "b");
+        List<String> b = Arrays.asList("a", "b", "b");
 
-        println(diff);
+        Difference<List<String>, List<String>> diff = Difference.of(a, b);
 
-        assertFalse(diff.differentValues().containsKey("lastUpdateTime"));
-
-        diff = BeanDifference.of(a, b, CommonUtil.toList("lastUpdateTime", "createdTime"));
-        assertTrue(diff.differentValues().containsKey("lastUpdateTime"));
+        assertEquals(Arrays.asList("a", "b"), diff.common());
+        assertEquals(Arrays.asList("a", "a"), diff.onlyOnLeft());
+        assertEquals(Arrays.asList("b"), diff.onlyOnRight());
     }
 
     @Test
-    public void test_002() {
-        List<Account> listA = Beans.newRandomList(Account.class, 10);
-        List<Account> listB = Beans.newRandomList(Account.class, 10);
+    public void testDifference_toString() {
+        Difference<List<String>, List<String>> diff = Difference.of(Arrays.asList("a", "b"), Arrays.asList("b", "c"));
+        String expected = "{areEqual=false, common=[b], onlyOnLeft=[a], onlyOnRight=[c]}";
+        assertEquals(expected, diff.toString());
+    }
 
-        listA.get(0).setGUI(listB.get(3).getGUI());
-        listA.get(5).setGUI(listB.get(7).getGUI());
-        listA.get(7).setGUI(listB.get(1).getGUI());
+    @Test
+    public void testDifferenceWithLargeCollections() {
+        List<Integer> list1 = new ArrayList<>();
+        List<Integer> list2 = new ArrayList<>();
 
-        listA.set(4, Beans.copy(listB.get(2)));
-        listA.set(6, Beans.copy(listB.get(8)));
-
-        BeanDifference<List<Account>, List<Account>, Map<String, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> diff = BeanDifference
-                .of(listA, listB, Account::getGUI);
-
-        println(diff);
-
-        println(diff.differentValues());
-
-        for (int i = 0; i < listA.size(); i++) {
-            listA.set(i, Beans.copy(listB.get(i)));
+        for (int i = 0; i < 10000; i++) {
+            list1.add(i);
+        }
+        for (int i = 5000; i < 15000; i++) {
+            list2.add(i);
         }
 
-        diff = BeanDifference.of(listA, listB, Account::getGUI);
+        Difference<List<Integer>, List<Integer>> diff = Difference.of(list1, list2);
 
+        assertEquals(5000, diff.common().size());
+        assertEquals(5000, diff.onlyOnLeft().size());
+        assertEquals(5000, diff.onlyOnRight().size());
+
+        assertTrue(diff.common().contains(7500));
+        assertTrue(diff.onlyOnLeft().contains(2500));
+        assertTrue(diff.onlyOnRight().contains(12500));
+    }
+
+    @Test
+    public void testDifferenceAllDuplicates() {
+        List<String> list1 = Arrays.asList("a", "a", "a", "a");
+        List<String> list2 = Arrays.asList("a", "a", "b", "b");
+
+        Difference<List<String>, List<String>> diff = Difference.of(list1, list2);
+
+        assertEquals(Arrays.asList("a", "a"), diff.common());
+        assertEquals(Arrays.asList("a", "a"), diff.onlyOnLeft());
+        assertEquals(Arrays.asList("b", "b"), diff.onlyOnRight());
+    }
+
+    @Test
+    public void testDifferenceAreEqual_PrimitiveList() {
+        IntList a = IntList.of(1, 2, 3);
+        IntList b = IntList.of(3, 2, 1);
+
+        Difference<IntList, IntList> diff = Difference.of(a, b);
         assertTrue(diff.areEqual());
+    }
+
+    @Test
+    public void testDifferenceAreEqual_BooleanList() {
+        BooleanList a = BooleanList.of(true, false);
+        BooleanList b = BooleanList.of(false, true);
+
+        Difference<BooleanList, BooleanList> diff = Difference.of(a, b);
+        assertTrue(diff.areEqual());
+    }
+
+    @Test
+    public void testDifferenceWithSingleElement() {
+        List<Integer> a = Arrays.asList(1);
+        List<Integer> b = Arrays.asList(1);
+
+        Difference<List<Integer>, List<Integer>> diff = Difference.of(a, b);
+
+        assertEquals(Arrays.asList(1), diff.common());
+        assertTrue(diff.onlyOnLeft().isEmpty());
+        assertTrue(diff.onlyOnRight().isEmpty());
+        assertTrue(diff.areEqual());
+    }
+
+    @Test
+    public void testDifference_equalsAndHashCode() {
+        Difference<List<String>, List<String>> diff1 = Difference.of(Arrays.asList("a", "b"), Arrays.asList("b", "c"));
+        Difference<List<String>, List<String>> diff2 = Difference.of(Arrays.asList("a", "b"), Arrays.asList("b", "c"));
+        Difference<List<String>, List<String>> diff3 = Difference.of(Arrays.asList("x", "y"), Arrays.asList("y", "z"));
+
+        assertEquals(diff1, diff2);
+        assertEquals(diff1.hashCode(), diff2.hashCode());
+        assertNotEquals(diff1, diff3);
+        assertNotEquals(diff1, null);
+        assertNotEquals(diff1, new Object());
+    }
+
+    @Test
+    public void testOfCharArrays() {
+        char[] a = new char[] { 'a', 'b', 'c', 'b' };
+        char[] b = new char[] { 'b', 'c', 'd', 'c' };
+
+        Difference<CharList, CharList> diff = Difference.of(a, b);
+
+        assertEquals(CharList.of('b', 'c'), diff.common());
+        assertEquals(CharList.of('a', 'b'), diff.onlyOnLeft());
+        assertEquals(CharList.of('c', 'd'), diff.onlyOnRight());
+        assertFalse(diff.areEqual());
+    }
+
+    @Test
+    public void testOfByteArrays() {
+        byte[] a = new byte[] { 1, 2, 3, 2 };
+        byte[] b = new byte[] { 2, 3, 4, 3 };
+
+        Difference<ByteList, ByteList> diff = Difference.of(a, b);
+
+        assertEquals(ByteList.of((byte) 2, (byte) 3), diff.common());
+        assertEquals(ByteList.of((byte) 1, (byte) 2), diff.onlyOnLeft());
+        assertEquals(ByteList.of((byte) 3, (byte) 4), diff.onlyOnRight());
+        assertFalse(diff.areEqual());
+    }
+
+    @Test
+    public void testOfShortArrays() {
+        short[] a = new short[] { 1, 2, 3, 2 };
+        short[] b = new short[] { 2, 3, 4, 3 };
+
+        Difference<ShortList, ShortList> diff = Difference.of(a, b);
+
+        assertEquals(ShortList.of((short) 2, (short) 3), diff.common());
+        assertEquals(ShortList.of((short) 1, (short) 2), diff.onlyOnLeft());
+        assertEquals(ShortList.of((short) 3, (short) 4), diff.onlyOnRight());
+        assertFalse(diff.areEqual());
+    }
+
+    @Test
+    public void testOfIntArrays() {
+        int[] a = new int[] { 1, 2, 3, 2 };
+        int[] b = new int[] { 2, 3, 4, 3 };
+
+        Difference<IntList, IntList> diff = Difference.of(a, b);
+
+        assertEquals(IntList.of(2, 3), diff.common());
+        assertEquals(IntList.of(1, 2), diff.onlyOnLeft());
+        assertEquals(IntList.of(3, 4), diff.onlyOnRight());
+        assertFalse(diff.areEqual());
+    }
+
+    @Test
+    public void testOfLongArrays() {
+        long[] a = new long[] { 1L, 2L, 3L, 2L };
+        long[] b = new long[] { 2L, 3L, 4L, 3L };
+
+        Difference<LongList, LongList> diff = Difference.of(a, b);
+
+        assertEquals(LongList.of(2L, 3L), diff.common());
+        assertEquals(LongList.of(1L, 2L), diff.onlyOnLeft());
+        assertEquals(LongList.of(3L, 4L), diff.onlyOnRight());
+        assertFalse(diff.areEqual());
+    }
+
+    @Test
+    public void testOfFloatArrays() {
+        float[] a = new float[] { 1.0f, 2.0f, 3.0f, 2.0f };
+        float[] b = new float[] { 2.0f, 3.0f, 4.0f, 3.0f };
+
+        Difference<FloatList, FloatList> diff = Difference.of(a, b);
+
+        assertEquals(FloatList.of(2.0f, 3.0f), diff.common());
+        assertEquals(FloatList.of(1.0f, 2.0f), diff.onlyOnLeft());
+        assertEquals(FloatList.of(3.0f, 4.0f), diff.onlyOnRight());
+        assertFalse(diff.areEqual());
+    }
+
+    @Test
+    public void testOfDoubleArrays() {
+        double[] a = new double[] { 1.0, 2.0, 3.0, 2.0 };
+        double[] b = new double[] { 2.0, 3.0, 4.0, 3.0 };
+
+        Difference<DoubleList, DoubleList> diff = Difference.of(a, b);
+
+        assertEquals(DoubleList.of(2.0, 3.0), diff.common());
+        assertEquals(DoubleList.of(1.0, 2.0), diff.onlyOnLeft());
+        assertEquals(DoubleList.of(3.0, 4.0), diff.onlyOnRight());
+        assertFalse(diff.areEqual());
+    }
+
+    @Test
+    public void testOfObjectArrays() {
+        String[] a = new String[] { "a", "b", "c", "b" };
+        String[] b = new String[] { "b", "c", "d", "c" };
+
+        Difference<List<String>, List<String>> diff = Difference.of(a, b);
+
+        assertEquals(Arrays.asList("b", "c"), diff.common());
+        assertEquals(Arrays.asList("a", "b"), diff.onlyOnLeft());
+        assertEquals(Arrays.asList("c", "d"), diff.onlyOnRight());
+        assertFalse(diff.areEqual());
+    }
+
+    @Test
+    public void testOfCollections() {
+        List<String> a = Arrays.asList("a", "b", "c", "b");
+        List<String> b = Arrays.asList("b", "c", "d", "c");
+
+        Difference<List<String>, List<String>> diff = Difference.of(a, b);
+
+        assertEquals(Arrays.asList("b", "c"), diff.common());
+        assertEquals(Arrays.asList("a", "b"), diff.onlyOnLeft());
+        assertEquals(Arrays.asList("c", "d"), diff.onlyOnRight());
+        assertFalse(diff.areEqual());
+    }
+
+    @Test
+    public void testOfCharLists() {
+        CharList a = CharList.of('a', 'b', 'c', 'b');
+        CharList b = CharList.of('b', 'c', 'd', 'c');
+
+        Difference<CharList, CharList> diff = Difference.of(a, b);
+
+        assertEquals(CharList.of('b', 'c'), diff.common());
+        assertEquals(CharList.of('a', 'b'), diff.onlyOnLeft());
+        assertEquals(CharList.of('c', 'd'), diff.onlyOnRight());
+        assertFalse(diff.areEqual());
+    }
+
+    @Test
+    public void testOfByteLists() {
+        ByteList a = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 2);
+        ByteList b = ByteList.of((byte) 2, (byte) 3, (byte) 4, (byte) 3);
+
+        Difference<ByteList, ByteList> diff = Difference.of(a, b);
+
+        assertEquals(ByteList.of((byte) 2, (byte) 3), diff.common());
+        assertEquals(ByteList.of((byte) 1, (byte) 2), diff.onlyOnLeft());
+        assertEquals(ByteList.of((byte) 3, (byte) 4), diff.onlyOnRight());
+        assertFalse(diff.areEqual());
+    }
+
+    @Test
+    public void testOfShortLists() {
+        ShortList a = ShortList.of((short) 1, (short) 2, (short) 3, (short) 2);
+        ShortList b = ShortList.of((short) 2, (short) 3, (short) 4, (short) 3);
+
+        Difference<ShortList, ShortList> diff = Difference.of(a, b);
+
+        assertEquals(ShortList.of((short) 2, (short) 3), diff.common());
+        assertEquals(ShortList.of((short) 1, (short) 2), diff.onlyOnLeft());
+        assertEquals(ShortList.of((short) 3, (short) 4), diff.onlyOnRight());
+        assertFalse(diff.areEqual());
+    }
+
+    @Test
+    public void testOfIntLists() {
+        IntList a = IntList.of(1, 2, 3, 2);
+        IntList b = IntList.of(2, 3, 4, 3);
+
+        Difference<IntList, IntList> diff = Difference.of(a, b);
+
+        assertEquals(IntList.of(2, 3), diff.common());
+        assertEquals(IntList.of(1, 2), diff.onlyOnLeft());
+        assertEquals(IntList.of(3, 4), diff.onlyOnRight());
+        assertFalse(diff.areEqual());
+    }
+
+    @Test
+    public void testOfLongLists() {
+        LongList a = LongList.of(1L, 2L, 3L, 2L);
+        LongList b = LongList.of(2L, 3L, 4L, 3L);
+
+        Difference<LongList, LongList> diff = Difference.of(a, b);
+
+        assertEquals(LongList.of(2L, 3L), diff.common());
+        assertEquals(LongList.of(1L, 2L), diff.onlyOnLeft());
+        assertEquals(LongList.of(3L, 4L), diff.onlyOnRight());
+        assertFalse(diff.areEqual());
+    }
+
+    @Test
+    public void testOfFloatLists() {
+        FloatList a = FloatList.of(1.0f, 2.0f, 3.0f, 2.0f);
+        FloatList b = FloatList.of(2.0f, 3.0f, 4.0f, 3.0f);
+
+        Difference<FloatList, FloatList> diff = Difference.of(a, b);
+
+        assertEquals(FloatList.of(2.0f, 3.0f), diff.common());
+        assertEquals(FloatList.of(1.0f, 2.0f), diff.onlyOnLeft());
+        assertEquals(FloatList.of(3.0f, 4.0f), diff.onlyOnRight());
+        assertFalse(diff.areEqual());
+    }
+
+    @Test
+    public void testOfDoubleLists() {
+        DoubleList a = DoubleList.of(1.0, 2.0, 3.0, 2.0);
+        DoubleList b = DoubleList.of(2.0, 3.0, 4.0, 3.0);
+
+        Difference<DoubleList, DoubleList> diff = Difference.of(a, b);
+
+        assertEquals(DoubleList.of(2.0, 3.0), diff.common());
+        assertEquals(DoubleList.of(1.0, 2.0), diff.onlyOnLeft());
+        assertEquals(DoubleList.of(3.0, 4.0), diff.onlyOnRight());
+        assertFalse(diff.areEqual());
+    }
+
+    @Test
+    public void testAreNotEqual() {
+        List<Integer> a = Arrays.asList(1, 2, 3);
+        List<Integer> b = Arrays.asList(1, 2, 4);
+
+        Difference<List<Integer>, List<Integer>> diff = Difference.of(a, b);
+
+        assertFalse(diff.areEqual());
+    }
+
+    @Test
+    public void testNotEquals() {
+        List<Integer> a1 = Arrays.asList(1, 2, 3);
+        List<Integer> b1 = Arrays.asList(2, 3, 4);
+
+        List<Integer> a2 = Arrays.asList(1, 2, 5);
+        List<Integer> b2 = Arrays.asList(2, 3, 4);
+
+        Difference<List<Integer>, List<Integer>> diff1 = Difference.of(a1, b1);
+        Difference<List<Integer>, List<Integer>> diff2 = Difference.of(a2, b2);
+
+        assertNotEquals(diff1, diff2);
+    }
+
+    @Test
+    public void testFloatListWithNaN() {
+        FloatList a = FloatList.of(1.0f, Float.NaN, 3.0f);
+        FloatList b = FloatList.of(Float.NaN, 3.0f, 4.0f);
+
+        Difference<FloatList, FloatList> diff = Difference.of(a, b);
+
+        assertEquals(FloatList.of(Float.NaN, 3.0f), diff.common());
+        assertEquals(FloatList.of(1.0f), diff.onlyOnLeft());
+        assertEquals(FloatList.of(4.0f), diff.onlyOnRight());
+    }
+
+    @Test
+    public void testOf_charArrays() {
+        Difference<CharList, CharList> diff = Difference.of(new char[] { 'a', 'b', 'c' }, new char[] { 'b', 'c', 'd' });
+        assertEquals(CharList.of('b', 'c'), diff.common());
+        assertEquals(CharList.of('a'), diff.onlyOnLeft());
+        assertEquals(CharList.of('d'), diff.onlyOnRight());
+    }
+
+    @Test
+    public void testOf_byteArrays() {
+        Difference<ByteList, ByteList> diff = Difference.of(new byte[] { 1, 2, 3 }, new byte[] { 2, 3, 4 });
+        assertEquals(ByteList.of((byte) 2, (byte) 3), diff.common());
+        assertEquals(ByteList.of((byte) 1), diff.onlyOnLeft());
+        assertEquals(ByteList.of((byte) 4), diff.onlyOnRight());
+    }
+
+    @Test
+    public void testOf_shortArrays() {
+        Difference<ShortList, ShortList> diff = Difference.of(new short[] { 1, 2, 3 }, new short[] { 2, 3, 4 });
+        assertEquals(ShortList.of((short) 2, (short) 3), diff.common());
+        assertEquals(ShortList.of((short) 1), diff.onlyOnLeft());
+        assertEquals(ShortList.of((short) 4), diff.onlyOnRight());
+    }
+
+    @Test
+    public void testOf_intArrays() {
+        Difference<IntList, IntList> diff = Difference.of(new int[] { 1, 2, 3 }, new int[] { 2, 3, 4 });
+        assertEquals(IntList.of(2, 3), diff.common());
+        assertEquals(IntList.of(1), diff.onlyOnLeft());
+        assertEquals(IntList.of(4), diff.onlyOnRight());
+    }
+
+    @Test
+    public void testOf_longArrays() {
+        Difference<LongList, LongList> diff = Difference.of(new long[] { 1L, 2L, 3L }, new long[] { 2L, 3L, 4L });
+        assertEquals(LongList.of(2L, 3L), diff.common());
+        assertEquals(LongList.of(1L), diff.onlyOnLeft());
+        assertEquals(LongList.of(4L), diff.onlyOnRight());
+    }
+
+    @Test
+    public void testOf_floatArrays() {
+        Difference<FloatList, FloatList> diff = Difference.of(new float[] { 1.0f, 2.0f, 3.0f }, new float[] { 2.0f, 3.0f, 4.0f });
+        assertEquals(FloatList.of(2.0f, 3.0f), diff.common());
+        assertEquals(FloatList.of(1.0f), diff.onlyOnLeft());
+        assertEquals(FloatList.of(4.0f), diff.onlyOnRight());
+    }
+
+    @Test
+    public void testOf_doubleArrays() {
+        Difference<DoubleList, DoubleList> diff = Difference.of(new double[] { 1.0, 2.0, 3.0 }, new double[] { 2.0, 3.0, 4.0 });
+        assertEquals(DoubleList.of(2.0, 3.0), diff.common());
+        assertEquals(DoubleList.of(1.0), diff.onlyOnLeft());
+        assertEquals(DoubleList.of(4.0), diff.onlyOnRight());
+    }
+
+    @Test
+    public void testFloatListsWithNaN() {
+        FloatList list1 = FloatList.of(1.0f, Float.NaN, 3.0f);
+        FloatList list2 = FloatList.of(Float.NaN, 3.0f, 4.0f);
+
+        Difference<FloatList, FloatList> diff = Difference.of(list1, list2);
+
+        assertEquals(FloatList.of(Float.NaN, 3.0f), diff.common());
+        assertEquals(FloatList.of(1.0f), diff.onlyOnLeft());
+        assertEquals(FloatList.of(4.0f), diff.onlyOnRight());
+    }
+
+    @Test
+    public void testOfGenericArrays() {
+        String[] a = { "apple", "banana", "cherry" };
+        String[] b = { "banana", "cherry", "date" };
+
+        Difference<List<String>, List<String>> diff = Difference.of(a, b);
+
+        assertEquals(Arrays.asList("banana", "cherry"), diff.common());
+        assertEquals(Arrays.asList("apple"), diff.onlyOnLeft());
+        assertEquals(Arrays.asList("date"), diff.onlyOnRight());
+    }
+
+    @Test
+    public void testOfCollectionsWithDuplicates() {
+        List<String> a = Arrays.asList("a", "b", "b", "c");
+        List<String> b = Arrays.asList("b", "c", "c", "d");
+
+        Difference<List<String>, List<String>> diff = Difference.of(a, b);
+
+        assertEquals(Arrays.asList("b", "c"), diff.common());
+        assertEquals(Arrays.asList("a", "b"), diff.onlyOnLeft());
+        assertEquals(Arrays.asList("c", "d"), diff.onlyOnRight());
     }
 
     @Test
@@ -113,19 +499,6 @@ public class DifferenceTest extends AbstractTest {
     }
 
     @Test
-    public void testOfCharArrays() {
-        char[] a = new char[] { 'a', 'b', 'c', 'b' };
-        char[] b = new char[] { 'b', 'c', 'd', 'c' };
-
-        Difference<CharList, CharList> diff = Difference.of(a, b);
-
-        assertEquals(CharList.of('b', 'c'), diff.common());
-        assertEquals(CharList.of('a', 'b'), diff.onlyOnLeft());
-        assertEquals(CharList.of('c', 'd'), diff.onlyOnRight());
-        assertFalse(diff.areEqual());
-    }
-
-    @Test
     public void testOfCharArraysEmpty() {
         char[] a = new char[] {};
         char[] b = new char[] {};
@@ -146,19 +519,6 @@ public class DifferenceTest extends AbstractTest {
         assertTrue(diff.onlyOnLeft().isEmpty());
         assertTrue(diff.onlyOnRight().isEmpty());
         assertTrue(diff.areEqual());
-    }
-
-    @Test
-    public void testOfByteArrays() {
-        byte[] a = new byte[] { 1, 2, 3, 2 };
-        byte[] b = new byte[] { 2, 3, 4, 3 };
-
-        Difference<ByteList, ByteList> diff = Difference.of(a, b);
-
-        assertEquals(ByteList.of((byte) 2, (byte) 3), diff.common());
-        assertEquals(ByteList.of((byte) 1, (byte) 2), diff.onlyOnLeft());
-        assertEquals(ByteList.of((byte) 3, (byte) 4), diff.onlyOnRight());
-        assertFalse(diff.areEqual());
     }
 
     @Test
@@ -185,19 +545,6 @@ public class DifferenceTest extends AbstractTest {
     }
 
     @Test
-    public void testOfShortArrays() {
-        short[] a = new short[] { 1, 2, 3, 2 };
-        short[] b = new short[] { 2, 3, 4, 3 };
-
-        Difference<ShortList, ShortList> diff = Difference.of(a, b);
-
-        assertEquals(ShortList.of((short) 2, (short) 3), diff.common());
-        assertEquals(ShortList.of((short) 1, (short) 2), diff.onlyOnLeft());
-        assertEquals(ShortList.of((short) 3, (short) 4), diff.onlyOnRight());
-        assertFalse(diff.areEqual());
-    }
-
-    @Test
     public void testOfShortArraysEmpty() {
         short[] a = new short[] {};
         short[] b = new short[] {};
@@ -218,19 +565,6 @@ public class DifferenceTest extends AbstractTest {
         assertTrue(diff.onlyOnLeft().isEmpty());
         assertTrue(diff.onlyOnRight().isEmpty());
         assertTrue(diff.areEqual());
-    }
-
-    @Test
-    public void testOfIntArrays() {
-        int[] a = new int[] { 1, 2, 3, 2 };
-        int[] b = new int[] { 2, 3, 4, 3 };
-
-        Difference<IntList, IntList> diff = Difference.of(a, b);
-
-        assertEquals(IntList.of(2, 3), diff.common());
-        assertEquals(IntList.of(1, 2), diff.onlyOnLeft());
-        assertEquals(IntList.of(3, 4), diff.onlyOnRight());
-        assertFalse(diff.areEqual());
     }
 
     @Test
@@ -257,19 +591,6 @@ public class DifferenceTest extends AbstractTest {
     }
 
     @Test
-    public void testOfLongArrays() {
-        long[] a = new long[] { 1L, 2L, 3L, 2L };
-        long[] b = new long[] { 2L, 3L, 4L, 3L };
-
-        Difference<LongList, LongList> diff = Difference.of(a, b);
-
-        assertEquals(LongList.of(2L, 3L), diff.common());
-        assertEquals(LongList.of(1L, 2L), diff.onlyOnLeft());
-        assertEquals(LongList.of(3L, 4L), diff.onlyOnRight());
-        assertFalse(diff.areEqual());
-    }
-
-    @Test
     public void testOfLongArraysEmpty() {
         long[] a = new long[] {};
         long[] b = new long[] {};
@@ -290,19 +611,6 @@ public class DifferenceTest extends AbstractTest {
         assertTrue(diff.onlyOnLeft().isEmpty());
         assertTrue(diff.onlyOnRight().isEmpty());
         assertTrue(diff.areEqual());
-    }
-
-    @Test
-    public void testOfFloatArrays() {
-        float[] a = new float[] { 1.0f, 2.0f, 3.0f, 2.0f };
-        float[] b = new float[] { 2.0f, 3.0f, 4.0f, 3.0f };
-
-        Difference<FloatList, FloatList> diff = Difference.of(a, b);
-
-        assertEquals(FloatList.of(2.0f, 3.0f), diff.common());
-        assertEquals(FloatList.of(1.0f, 2.0f), diff.onlyOnLeft());
-        assertEquals(FloatList.of(3.0f, 4.0f), diff.onlyOnRight());
-        assertFalse(diff.areEqual());
     }
 
     @Test
@@ -329,19 +637,6 @@ public class DifferenceTest extends AbstractTest {
     }
 
     @Test
-    public void testOfDoubleArrays() {
-        double[] a = new double[] { 1.0, 2.0, 3.0, 2.0 };
-        double[] b = new double[] { 2.0, 3.0, 4.0, 3.0 };
-
-        Difference<DoubleList, DoubleList> diff = Difference.of(a, b);
-
-        assertEquals(DoubleList.of(2.0, 3.0), diff.common());
-        assertEquals(DoubleList.of(1.0, 2.0), diff.onlyOnLeft());
-        assertEquals(DoubleList.of(3.0, 4.0), diff.onlyOnRight());
-        assertFalse(diff.areEqual());
-    }
-
-    @Test
     public void testOfDoubleArraysEmpty() {
         double[] a = new double[] {};
         double[] b = new double[] {};
@@ -362,19 +657,6 @@ public class DifferenceTest extends AbstractTest {
         assertTrue(diff.onlyOnLeft().isEmpty());
         assertTrue(diff.onlyOnRight().isEmpty());
         assertTrue(diff.areEqual());
-    }
-
-    @Test
-    public void testOfObjectArrays() {
-        String[] a = new String[] { "a", "b", "c", "b" };
-        String[] b = new String[] { "b", "c", "d", "c" };
-
-        Difference<List<String>, List<String>> diff = Difference.of(a, b);
-
-        assertEquals(Arrays.asList("b", "c"), diff.common());
-        assertEquals(Arrays.asList("a", "b"), diff.onlyOnLeft());
-        assertEquals(Arrays.asList("c", "d"), diff.onlyOnRight());
-        assertFalse(diff.areEqual());
     }
 
     @Test
@@ -400,19 +682,6 @@ public class DifferenceTest extends AbstractTest {
         assertEquals(Arrays.asList(null, "b"), diff.common());
         assertEquals(Arrays.asList("a"), diff.onlyOnLeft());
         assertEquals(Arrays.asList("c"), diff.onlyOnRight());
-        assertFalse(diff.areEqual());
-    }
-
-    @Test
-    public void testOfCollections() {
-        List<String> a = Arrays.asList("a", "b", "c", "b");
-        List<String> b = Arrays.asList("b", "c", "d", "c");
-
-        Difference<List<String>, List<String>> diff = Difference.of(a, b);
-
-        assertEquals(Arrays.asList("b", "c"), diff.common());
-        assertEquals(Arrays.asList("a", "b"), diff.onlyOnLeft());
-        assertEquals(Arrays.asList("c", "d"), diff.onlyOnRight());
         assertFalse(diff.areEqual());
     }
 
@@ -491,19 +760,6 @@ public class DifferenceTest extends AbstractTest {
     }
 
     @Test
-    public void testOfCharLists() {
-        CharList a = CharList.of('a', 'b', 'c', 'b');
-        CharList b = CharList.of('b', 'c', 'd', 'c');
-
-        Difference<CharList, CharList> diff = Difference.of(a, b);
-
-        assertEquals(CharList.of('b', 'c'), diff.common());
-        assertEquals(CharList.of('a', 'b'), diff.onlyOnLeft());
-        assertEquals(CharList.of('c', 'd'), diff.onlyOnRight());
-        assertFalse(diff.areEqual());
-    }
-
-    @Test
     public void testOfCharListsEmpty() {
         CharList a = CharList.of();
         CharList b = CharList.of();
@@ -524,19 +780,6 @@ public class DifferenceTest extends AbstractTest {
         assertTrue(diff.onlyOnLeft().isEmpty());
         assertTrue(diff.onlyOnRight().isEmpty());
         assertTrue(diff.areEqual());
-    }
-
-    @Test
-    public void testOfByteLists() {
-        ByteList a = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 2);
-        ByteList b = ByteList.of((byte) 2, (byte) 3, (byte) 4, (byte) 3);
-
-        Difference<ByteList, ByteList> diff = Difference.of(a, b);
-
-        assertEquals(ByteList.of((byte) 2, (byte) 3), diff.common());
-        assertEquals(ByteList.of((byte) 1, (byte) 2), diff.onlyOnLeft());
-        assertEquals(ByteList.of((byte) 3, (byte) 4), diff.onlyOnRight());
-        assertFalse(diff.areEqual());
     }
 
     @Test
@@ -563,19 +806,6 @@ public class DifferenceTest extends AbstractTest {
     }
 
     @Test
-    public void testOfShortLists() {
-        ShortList a = ShortList.of((short) 1, (short) 2, (short) 3, (short) 2);
-        ShortList b = ShortList.of((short) 2, (short) 3, (short) 4, (short) 3);
-
-        Difference<ShortList, ShortList> diff = Difference.of(a, b);
-
-        assertEquals(ShortList.of((short) 2, (short) 3), diff.common());
-        assertEquals(ShortList.of((short) 1, (short) 2), diff.onlyOnLeft());
-        assertEquals(ShortList.of((short) 3, (short) 4), diff.onlyOnRight());
-        assertFalse(diff.areEqual());
-    }
-
-    @Test
     public void testOfShortListsEmpty() {
         ShortList a = ShortList.of();
         ShortList b = ShortList.of();
@@ -596,19 +826,6 @@ public class DifferenceTest extends AbstractTest {
         assertTrue(diff.onlyOnLeft().isEmpty());
         assertTrue(diff.onlyOnRight().isEmpty());
         assertTrue(diff.areEqual());
-    }
-
-    @Test
-    public void testOfIntLists() {
-        IntList a = IntList.of(1, 2, 3, 2);
-        IntList b = IntList.of(2, 3, 4, 3);
-
-        Difference<IntList, IntList> diff = Difference.of(a, b);
-
-        assertEquals(IntList.of(2, 3), diff.common());
-        assertEquals(IntList.of(1, 2), diff.onlyOnLeft());
-        assertEquals(IntList.of(3, 4), diff.onlyOnRight());
-        assertFalse(diff.areEqual());
     }
 
     @Test
@@ -635,19 +852,6 @@ public class DifferenceTest extends AbstractTest {
     }
 
     @Test
-    public void testOfLongLists() {
-        LongList a = LongList.of(1L, 2L, 3L, 2L);
-        LongList b = LongList.of(2L, 3L, 4L, 3L);
-
-        Difference<LongList, LongList> diff = Difference.of(a, b);
-
-        assertEquals(LongList.of(2L, 3L), diff.common());
-        assertEquals(LongList.of(1L, 2L), diff.onlyOnLeft());
-        assertEquals(LongList.of(3L, 4L), diff.onlyOnRight());
-        assertFalse(diff.areEqual());
-    }
-
-    @Test
     public void testOfLongListsEmpty() {
         LongList a = LongList.of();
         LongList b = LongList.of();
@@ -668,19 +872,6 @@ public class DifferenceTest extends AbstractTest {
         assertTrue(diff.onlyOnLeft().isEmpty());
         assertTrue(diff.onlyOnRight().isEmpty());
         assertTrue(diff.areEqual());
-    }
-
-    @Test
-    public void testOfFloatLists() {
-        FloatList a = FloatList.of(1.0f, 2.0f, 3.0f, 2.0f);
-        FloatList b = FloatList.of(2.0f, 3.0f, 4.0f, 3.0f);
-
-        Difference<FloatList, FloatList> diff = Difference.of(a, b);
-
-        assertEquals(FloatList.of(2.0f, 3.0f), diff.common());
-        assertEquals(FloatList.of(1.0f, 2.0f), diff.onlyOnLeft());
-        assertEquals(FloatList.of(3.0f, 4.0f), diff.onlyOnRight());
-        assertFalse(diff.areEqual());
     }
 
     @Test
@@ -707,19 +898,6 @@ public class DifferenceTest extends AbstractTest {
     }
 
     @Test
-    public void testOfDoubleLists() {
-        DoubleList a = DoubleList.of(1.0, 2.0, 3.0, 2.0);
-        DoubleList b = DoubleList.of(2.0, 3.0, 4.0, 3.0);
-
-        Difference<DoubleList, DoubleList> diff = Difference.of(a, b);
-
-        assertEquals(DoubleList.of(2.0, 3.0), diff.common());
-        assertEquals(DoubleList.of(1.0, 2.0), diff.onlyOnLeft());
-        assertEquals(DoubleList.of(3.0, 4.0), diff.onlyOnRight());
-        assertFalse(diff.areEqual());
-    }
-
-    @Test
     public void testOfDoubleListsEmpty() {
         DoubleList a = DoubleList.of();
         DoubleList b = DoubleList.of();
@@ -743,6 +921,248 @@ public class DifferenceTest extends AbstractTest {
     }
 
     @Test
+    public void testDoubleListWithInfinity() {
+        DoubleList a = DoubleList.of(Double.NEGATIVE_INFINITY, 0.0, Double.POSITIVE_INFINITY);
+        DoubleList b = DoubleList.of(Double.NEGATIVE_INFINITY, 1.0, Double.POSITIVE_INFINITY);
+
+        Difference<DoubleList, DoubleList> diff = Difference.of(a, b);
+
+        assertEquals(DoubleList.of(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY), diff.common());
+        assertEquals(DoubleList.of(0.0), diff.onlyOnLeft());
+        assertEquals(DoubleList.of(1.0), diff.onlyOnRight());
+    }
+
+    @Test
+    public void testIntListWithExtremeValues() {
+        IntList a = IntList.of(Integer.MIN_VALUE, -1, 0, 1, Integer.MAX_VALUE);
+        IntList b = IntList.of(Integer.MIN_VALUE, 0, Integer.MAX_VALUE);
+
+        Difference<IntList, IntList> diff = Difference.of(a, b);
+
+        assertEquals(IntList.of(Integer.MIN_VALUE, 0, Integer.MAX_VALUE), diff.common());
+        assertEquals(IntList.of(-1, 1), diff.onlyOnLeft());
+        assertTrue(diff.onlyOnRight().isEmpty());
+    }
+
+    @Test
+    public void testOf_booleanArrays() {
+        Difference<BooleanList, BooleanList> diff = Difference.of(new boolean[] { true, false, true }, new boolean[] { true, true, false, false });
+        assertEquals(BooleanList.of(true, false, true), diff.common());
+        assertTrue(diff.onlyOnLeft().isEmpty());
+        assertEquals(BooleanList.of(false), diff.onlyOnRight());
+        assertFalse(diff.areEqual());
+    }
+
+    @Test
+    public void testOf_ObjectArrays() {
+        Difference<List<String>, List<String>> diff = Difference.of(new String[] { "a", "b", "c" }, new String[] { "b", "c", "d" });
+        assertEquals(Arrays.asList("b", "c"), diff.common());
+        assertEquals(Collections.singletonList("a"), diff.onlyOnLeft());
+        assertEquals(Collections.singletonList("d"), diff.onlyOnRight());
+    }
+
+    @Test
+    public void testOf_Collections() {
+        Collection<String> a = Arrays.asList("a", "b", "c", "c");
+        Collection<String> b = Arrays.asList("b", "c", "d");
+        Difference<List<String>, List<String>> diff = Difference.of(a, b);
+
+        assertEquals(Arrays.asList("b", "c"), diff.common());
+        assertEquals(Arrays.asList("a", "c"), diff.onlyOnLeft());
+        assertEquals(Collections.singletonList("d"), diff.onlyOnRight());
+    }
+
+    @Test
+    public void testOf_Collections_empty() {
+        Difference<List<String>, List<String>> diff1 = Difference.of(new ArrayList<>(), new ArrayList<>());
+        assertTrue(diff1.common().isEmpty());
+        assertTrue(diff1.onlyOnLeft().isEmpty());
+        assertTrue(diff1.onlyOnRight().isEmpty());
+        assertTrue(diff1.areEqual());
+
+        Difference<List<String>, List<String>> diff2 = Difference.of(Arrays.asList("a"), new ArrayList<>());
+        assertTrue(diff2.common().isEmpty());
+        assertEquals(Arrays.asList("a"), diff2.onlyOnLeft());
+        assertTrue(diff2.onlyOnRight().isEmpty());
+
+        Difference<List<String>, List<String>> diff3 = Difference.of(new ArrayList<>(), Arrays.asList("b"));
+        assertTrue(diff3.common().isEmpty());
+        assertTrue(diff3.onlyOnLeft().isEmpty());
+        assertEquals(Arrays.asList("b"), diff3.onlyOnRight());
+    }
+
+    @Test
+    public void testPrimitiveListsWithExtremeValues() {
+        IntList list1 = IntList.of(Integer.MIN_VALUE, -1, 0, 1, Integer.MAX_VALUE);
+        IntList list2 = IntList.of(Integer.MIN_VALUE, 0, Integer.MAX_VALUE);
+
+        Difference<IntList, IntList> diff = Difference.of(list1, list2);
+
+        assertEquals(IntList.of(Integer.MIN_VALUE, 0, Integer.MAX_VALUE), diff.common());
+        assertEquals(IntList.of(-1, 1), diff.onlyOnLeft());
+        assertTrue(diff.onlyOnRight().isEmpty());
+    }
+
+    @Test
+    public void testDoubleListsWithInfinity() {
+        DoubleList list1 = DoubleList.of(Double.NEGATIVE_INFINITY, 0.0, Double.POSITIVE_INFINITY);
+        DoubleList list2 = DoubleList.of(Double.NEGATIVE_INFINITY, 1.0, Double.POSITIVE_INFINITY);
+
+        Difference<DoubleList, DoubleList> diff = Difference.of(list1, list2);
+
+        assertEquals(DoubleList.of(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY), diff.common());
+        assertEquals(DoubleList.of(0.0), diff.onlyOnLeft());
+        assertEquals(DoubleList.of(1.0), diff.onlyOnRight());
+    }
+
+    @Test
+    public void testOfBooleanArraysEqual() {
+        boolean[] a = { true, false, true };
+        boolean[] b = { true, false, true };
+
+        Difference<BooleanList, BooleanList> diff = Difference.of(a, b);
+
+        assertEquals(BooleanList.of(true, false, true), diff.common());
+        assertTrue(diff.onlyOnLeft().isEmpty());
+        assertTrue(diff.onlyOnRight().isEmpty());
+        assertTrue(diff.areEqual());
+    }
+
+    @Test
+    public void testOfOneEmptyCollection() {
+        List<String> a = Arrays.asList("a", "b");
+        List<String> b = new ArrayList<>();
+
+        Difference<List<String>, List<String>> diff = Difference.of(a, b);
+
+        assertTrue(diff.common().isEmpty());
+        assertEquals(Arrays.asList("a", "b"), diff.onlyOnLeft());
+        assertTrue(diff.onlyOnRight().isEmpty());
+        assertFalse(diff.areEqual());
+    }
+
+    // --- Primitive list one-null tests ---
+
+    @Test
+    public void testOfBooleanListsOneNull() {
+        BooleanList a = BooleanList.of(true, false);
+
+        Difference<BooleanList, BooleanList> diff1 = Difference.of(a, (BooleanList) null);
+        assertEquals(BooleanList.of(true, false), diff1.onlyOnLeft());
+        assertTrue(diff1.onlyOnRight().isEmpty());
+        assertFalse(diff1.areEqual());
+
+        Difference<BooleanList, BooleanList> diff2 = Difference.of((BooleanList) null, a);
+        assertTrue(diff2.onlyOnLeft().isEmpty());
+        assertEquals(BooleanList.of(true, false), diff2.onlyOnRight());
+        assertFalse(diff2.areEqual());
+    }
+
+    @Test
+    public void testOfCharListsOneNull() {
+        CharList a = CharList.of('a', 'b');
+
+        Difference<CharList, CharList> diff1 = Difference.of(a, (CharList) null);
+        assertEquals(CharList.of('a', 'b'), diff1.onlyOnLeft());
+        assertTrue(diff1.onlyOnRight().isEmpty());
+
+        Difference<CharList, CharList> diff2 = Difference.of((CharList) null, a);
+        assertTrue(diff2.onlyOnLeft().isEmpty());
+        assertEquals(CharList.of('a', 'b'), diff2.onlyOnRight());
+    }
+
+    @Test
+    public void testOfByteListsOneNull() {
+        ByteList a = ByteList.of((byte) 1, (byte) 2);
+
+        Difference<ByteList, ByteList> diff1 = Difference.of(a, (ByteList) null);
+        assertEquals(ByteList.of((byte) 1, (byte) 2), diff1.onlyOnLeft());
+        assertTrue(diff1.onlyOnRight().isEmpty());
+
+        Difference<ByteList, ByteList> diff2 = Difference.of((ByteList) null, a);
+        assertTrue(diff2.onlyOnLeft().isEmpty());
+        assertEquals(ByteList.of((byte) 1, (byte) 2), diff2.onlyOnRight());
+    }
+
+    @Test
+    public void testOfShortListsOneNull() {
+        ShortList a = ShortList.of((short) 1, (short) 2);
+
+        Difference<ShortList, ShortList> diff1 = Difference.of(a, (ShortList) null);
+        assertEquals(ShortList.of((short) 1, (short) 2), diff1.onlyOnLeft());
+        assertTrue(diff1.onlyOnRight().isEmpty());
+
+        Difference<ShortList, ShortList> diff2 = Difference.of((ShortList) null, a);
+        assertTrue(diff2.onlyOnLeft().isEmpty());
+        assertEquals(ShortList.of((short) 1, (short) 2), diff2.onlyOnRight());
+    }
+
+    @Test
+    public void testOfIntListsOneNull() {
+        IntList a = IntList.of(1, 2);
+
+        Difference<IntList, IntList> diff1 = Difference.of(a, (IntList) null);
+        assertEquals(IntList.of(1, 2), diff1.onlyOnLeft());
+        assertTrue(diff1.onlyOnRight().isEmpty());
+
+        Difference<IntList, IntList> diff2 = Difference.of((IntList) null, a);
+        assertTrue(diff2.onlyOnLeft().isEmpty());
+        assertEquals(IntList.of(1, 2), diff2.onlyOnRight());
+    }
+
+    @Test
+    public void testOfLongListsOneNull() {
+        LongList a = LongList.of(1L, 2L);
+
+        Difference<LongList, LongList> diff1 = Difference.of(a, (LongList) null);
+        assertEquals(LongList.of(1L, 2L), diff1.onlyOnLeft());
+        assertTrue(diff1.onlyOnRight().isEmpty());
+
+        Difference<LongList, LongList> diff2 = Difference.of((LongList) null, a);
+        assertTrue(diff2.onlyOnLeft().isEmpty());
+        assertEquals(LongList.of(1L, 2L), diff2.onlyOnRight());
+    }
+
+    @Test
+    public void testOfFloatListsOneNull() {
+        FloatList a = FloatList.of(1.0f, 2.0f);
+
+        Difference<FloatList, FloatList> diff1 = Difference.of(a, (FloatList) null);
+        assertEquals(FloatList.of(1.0f, 2.0f), diff1.onlyOnLeft());
+        assertTrue(diff1.onlyOnRight().isEmpty());
+
+        Difference<FloatList, FloatList> diff2 = Difference.of((FloatList) null, a);
+        assertTrue(diff2.onlyOnLeft().isEmpty());
+        assertEquals(FloatList.of(1.0f, 2.0f), diff2.onlyOnRight());
+    }
+
+    @Test
+    public void testOfDoubleListsOneNull() {
+        DoubleList a = DoubleList.of(1.0, 2.0);
+
+        Difference<DoubleList, DoubleList> diff1 = Difference.of(a, (DoubleList) null);
+        assertEquals(DoubleList.of(1.0, 2.0), diff1.onlyOnLeft());
+        assertTrue(diff1.onlyOnRight().isEmpty());
+
+        Difference<DoubleList, DoubleList> diff2 = Difference.of((DoubleList) null, a);
+        assertTrue(diff2.onlyOnLeft().isEmpty());
+        assertEquals(DoubleList.of(1.0, 2.0), diff2.onlyOnRight());
+    }
+
+    @Test
+    public void testOfObjectArraysOneNull() {
+        String[] a = { "a", "b" };
+
+        Difference<List<String>, List<String>> diff1 = Difference.of(a, (String[]) null);
+        assertEquals(Arrays.asList("a", "b"), diff1.onlyOnLeft());
+        assertTrue(diff1.onlyOnRight().isEmpty());
+
+        Difference<List<String>, List<String>> diff2 = Difference.of((String[]) null, a);
+        assertTrue(diff2.onlyOnLeft().isEmpty());
+        assertEquals(Arrays.asList("a", "b"), diff2.onlyOnRight());
+    }
+
+    @Test
     public void testCommon() {
         List<Integer> a = Arrays.asList(1, 2, 3, 2);
         List<Integer> b = Arrays.asList(2, 3, 4);
@@ -750,136 +1170,6 @@ public class DifferenceTest extends AbstractTest {
         Difference<List<Integer>, List<Integer>> diff = Difference.of(a, b);
 
         assertEquals(Arrays.asList(2, 3), diff.common());
-    }
-
-    @Test
-    public void testOnlyOnLeft() {
-        List<Integer> a = Arrays.asList(1, 2, 3, 2);
-        List<Integer> b = Arrays.asList(2, 3, 4);
-
-        Difference<List<Integer>, List<Integer>> diff = Difference.of(a, b);
-
-        assertEquals(Arrays.asList(1, 2), diff.onlyOnLeft());
-    }
-
-    @Test
-    public void testOnlyOnRight() {
-        List<Integer> a = Arrays.asList(1, 2, 3, 2);
-        List<Integer> b = Arrays.asList(2, 3, 4);
-
-        Difference<List<Integer>, List<Integer>> diff = Difference.of(a, b);
-
-        assertEquals(Arrays.asList(4), diff.onlyOnRight());
-    }
-
-    @Test
-    public void testAreEqual() {
-        List<Integer> a = Arrays.asList(1, 2, 3);
-        List<Integer> b = Arrays.asList(1, 2, 3);
-
-        Difference<List<Integer>, List<Integer>> diff = Difference.of(a, b);
-
-        assertTrue(diff.areEqual());
-    }
-
-    @Test
-    public void testAreEqualDifferentOrder() {
-        List<Integer> a = Arrays.asList(1, 2, 3);
-        List<Integer> b = Arrays.asList(3, 2, 1);
-
-        Difference<List<Integer>, List<Integer>> diff = Difference.of(a, b);
-
-        assertTrue(diff.areEqual());
-    }
-
-    @Test
-    public void testAreNotEqual() {
-        List<Integer> a = Arrays.asList(1, 2, 3);
-        List<Integer> b = Arrays.asList(1, 2, 4);
-
-        Difference<List<Integer>, List<Integer>> diff = Difference.of(a, b);
-
-        assertFalse(diff.areEqual());
-    }
-
-    @Test
-    public void testEquals() {
-        List<Integer> a = Arrays.asList(1, 2, 3);
-        List<Integer> b = Arrays.asList(2, 3, 4);
-
-        Difference<List<Integer>, List<Integer>> diff1 = Difference.of(a, b);
-        Difference<List<Integer>, List<Integer>> diff2 = Difference.of(a, b);
-
-        assertEquals(diff1, diff2);
-    }
-
-    @Test
-    public void testEqualsSameObject() {
-        List<Integer> a = Arrays.asList(1, 2, 3);
-        List<Integer> b = Arrays.asList(2, 3, 4);
-
-        Difference<List<Integer>, List<Integer>> diff = Difference.of(a, b);
-
-        assertEquals(diff, diff);
-    }
-
-    @Test
-    public void testNotEquals() {
-        List<Integer> a1 = Arrays.asList(1, 2, 3);
-        List<Integer> b1 = Arrays.asList(2, 3, 4);
-
-        List<Integer> a2 = Arrays.asList(1, 2, 5);
-        List<Integer> b2 = Arrays.asList(2, 3, 4);
-
-        Difference<List<Integer>, List<Integer>> diff1 = Difference.of(a1, b1);
-        Difference<List<Integer>, List<Integer>> diff2 = Difference.of(a2, b2);
-
-        assertNotEquals(diff1, diff2);
-    }
-
-    @Test
-    public void testEqualsWithNull() {
-        List<Integer> a = Arrays.asList(1, 2, 3);
-        List<Integer> b = Arrays.asList(2, 3, 4);
-
-        Difference<List<Integer>, List<Integer>> diff = Difference.of(a, b);
-
-        assertNotEquals(diff, null);
-    }
-
-    @Test
-    public void testEqualsWithDifferentClass() {
-        List<Integer> a = Arrays.asList(1, 2, 3);
-        List<Integer> b = Arrays.asList(2, 3, 4);
-
-        Difference<List<Integer>, List<Integer>> diff = Difference.of(a, b);
-
-        assertNotEquals(diff, "not a difference");
-    }
-
-    @Test
-    public void testHashCode() {
-        List<Integer> a = Arrays.asList(1, 2, 3);
-        List<Integer> b = Arrays.asList(2, 3, 4);
-
-        Difference<List<Integer>, List<Integer>> diff1 = Difference.of(a, b);
-        Difference<List<Integer>, List<Integer>> diff2 = Difference.of(a, b);
-
-        assertEquals(diff1.hashCode(), diff2.hashCode());
-    }
-
-    @Test
-    public void testToString() {
-        List<Integer> a = Arrays.asList(1, 2, 3);
-        List<Integer> b = Arrays.asList(2, 3, 4);
-
-        Difference<List<Integer>, List<Integer>> diff = Difference.of(a, b);
-        String str = diff.toString();
-
-        assertTrue(str.contains("areEqual="));
-        assertTrue(str.contains("common="));
-        assertTrue(str.contains("onlyOnLeft="));
-        assertTrue(str.contains("onlyOnRight="));
     }
 
     @Test
@@ -905,6 +1195,153 @@ public class DifferenceTest extends AbstractTest {
         assertEquals(1, diff.differentValues().size());
         assertEquals(Pair.of(3, 4), diff.differentValues().get("c"));
         assertFalse(diff.areEqual());
+    }
+
+    @Test
+    public void testMapDifferenceWithLinkedHashMap() {
+        Map<String, Integer> map1 = new LinkedHashMap<>();
+        map1.put("a", 1);
+        map1.put("b", 2);
+
+        Map<String, Integer> map2 = new LinkedHashMap<>();
+        map2.put("b", 3);
+        map2.put("c", 4);
+
+        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
+
+        assertTrue(diff.common() instanceof LinkedHashMap);
+        assertTrue(diff.onlyOnLeft() instanceof LinkedHashMap);
+        assertTrue(diff.onlyOnRight() instanceof LinkedHashMap);
+        assertTrue(diff.differentValues() instanceof LinkedHashMap);
+    }
+
+    @Test
+    public void testMapDifferenceWithTreeMap() {
+        Map<String, Integer> map1 = new TreeMap<>();
+        map1.put("a", 1);
+        map1.put("b", 2);
+
+        Map<String, Integer> map2 = new TreeMap<>();
+        map2.put("b", 3);
+        map2.put("c", 4);
+
+        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
+
+        assertTrue(diff.common() instanceof LinkedHashMap);
+        assertTrue(diff.onlyOnLeft() instanceof LinkedHashMap);
+        assertTrue(diff.onlyOnRight() instanceof LinkedHashMap);
+        assertTrue(diff.differentValues() instanceof LinkedHashMap);
+    }
+
+    @Test
+    public void testMapDifferenceBasic() {
+        Map<String, Integer> map1 = new HashMap<>();
+        map1.put("a", 1);
+        map1.put("b", 2);
+        map1.put("c", 3);
+
+        Map<String, Integer> map2 = new HashMap<>();
+        map2.put("b", 2);
+        map2.put("c", 4);
+        map2.put("d", 5);
+
+        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
+
+        assertEquals(1, diff.common().size());
+        assertEquals(Integer.valueOf(2), diff.common().get("b"));
+
+        assertEquals(1, diff.onlyOnLeft().size());
+        assertEquals(Integer.valueOf(1), diff.onlyOnLeft().get("a"));
+
+        assertEquals(1, diff.onlyOnRight().size());
+        assertEquals(Integer.valueOf(5), diff.onlyOnRight().get("d"));
+
+        assertEquals(1, diff.differentValues().size());
+        assertEquals(Pair.of(3, 4), diff.differentValues().get("c"));
+
+        assertFalse(diff.areEqual());
+    }
+
+    @Test
+    public void testMapDifferenceLinkedHashMap() {
+        Map<String, Integer> map1 = new LinkedHashMap<>();
+        map1.put("a", 1);
+        map1.put("b", 2);
+
+        Map<String, Integer> map2 = new LinkedHashMap<>();
+        map2.put("b", 2);
+        map2.put("a", 1);
+
+        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
+
+        assertTrue(diff.common() instanceof LinkedHashMap);
+        assertTrue(diff.onlyOnLeft() instanceof LinkedHashMap);
+        assertTrue(diff.onlyOnRight() instanceof LinkedHashMap);
+        assertTrue(diff.differentValues() instanceof LinkedHashMap);
+    }
+
+    // --- Additional BeanDifference tests ---
+
+    @Test
+    public void testBeanDifferenceOf_Basic() {
+        Account a = new Account();
+        a.setFirstName("John");
+        a.setLastName("Doe");
+        a.setStatus(1);
+
+        Account b = new Account();
+        b.setFirstName("John");
+        b.setLastName("Smith");
+        b.setStatus(2);
+
+        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = BeanDifference.of(a, b);
+
+        assertTrue(diff.common().containsKey("firstName"));
+        assertEquals("John", diff.common().get("firstName"));
+        assertTrue(diff.differentValues().containsKey("lastName"));
+        assertEquals(Pair.of("Doe", "Smith"), diff.differentValues().get("lastName"));
+        assertTrue(diff.differentValues().containsKey("status"));
+        assertFalse(diff.areEqual());
+    }
+
+    @Test
+    public void testBeanDifferenceOf_WithPropNamesToCompare() {
+        Account a = new Account();
+        a.setFirstName("John");
+        a.setLastName("Doe");
+        a.setStatus(1);
+
+        Account b = new Account();
+        b.setFirstName("John");
+        b.setLastName("Smith");
+        b.setStatus(2);
+
+        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = BeanDifference.of(a, b,
+                Arrays.asList("firstName", "lastName"));
+
+        assertEquals("John", diff.common().get("firstName"));
+        assertEquals(1, diff.differentValues().size());
+        assertEquals(Pair.of("Doe", "Smith"), diff.differentValues().get("lastName"));
+        // status not compared
+        assertFalse(diff.differentValues().containsKey("status"));
+    }
+
+    @Test
+    public void testBeanDifferenceOf_DiffIgnoreAnnotation() {
+        // Account has @DiffIgnore on lastUpdateTime
+        Account a = new Account();
+        a.setFirstName("John");
+        a.setLastUpdateTime(Dates.currentTimestamp());
+
+        Account b = new Account();
+        b.setFirstName("John");
+        b.setLastUpdateTime(Dates.currentTimestampPlus(1, TimeUnit.DAYS));
+
+        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = BeanDifference.of(a, b);
+
+        // lastUpdateTime should be ignored due to @DiffIgnore
+        assertFalse(diff.common().containsKey("lastUpdateTime"));
+        assertFalse(diff.differentValues().containsKey("lastUpdateTime"));
     }
 
     @Test
@@ -1086,201 +1523,6 @@ public class DifferenceTest extends AbstractTest {
     }
 
     @Test
-    public void testWithDifferentValues() {
-        Map<String, Integer> map1 = new HashMap<>();
-        map1.put("a", 1);
-        map1.put("b", 2);
-
-        Map<String, Integer> map2 = new HashMap<>();
-        map2.put("a", 2);
-        map2.put("b", 2);
-
-        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
-
-        assertEquals(1, diff.differentValues().size());
-        assertEquals(Pair.of(1, 2), diff.differentValues().get("a"));
-    }
-
-    @Test
-    public void testKeyValueDifferenceAreEqual() {
-        Map<String, Integer> map1 = new HashMap<>();
-        map1.put("a", 1);
-        map1.put("b", 2);
-
-        Map<String, Integer> map2 = new HashMap<>();
-        map2.put("a", 1);
-        map2.put("b", 2);
-
-        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
-
-        assertTrue(diff.areEqual());
-    }
-
-    @Test
-    public void testKeyValueDifferenceAreNotEqualWithDifferentValues() {
-        Map<String, Integer> map1 = new HashMap<>();
-        map1.put("a", 1);
-        map1.put("b", 2);
-
-        Map<String, Integer> map2 = new HashMap<>();
-        map2.put("a", 2);
-        map2.put("b", 2);
-
-        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
-
-        assertFalse(diff.areEqual());
-    }
-
-    @Test
-    public void testKeyValueDifferenceEquals() {
-        Map<String, Integer> map1 = new HashMap<>();
-        map1.put("a", 1);
-        map1.put("b", 2);
-
-        Map<String, Integer> map2 = new HashMap<>();
-        map2.put("a", 2);
-        map2.put("b", 2);
-
-        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff1 = MapDifference.of(map1, map2);
-        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff2 = MapDifference.of(map1, map2);
-
-        assertEquals(diff1, diff2);
-    }
-
-    @Test
-    public void testKeyValueDifferenceHashCode() {
-        Map<String, Integer> map1 = new HashMap<>();
-        map1.put("a", 1);
-        map1.put("b", 2);
-
-        Map<String, Integer> map2 = new HashMap<>();
-        map2.put("a", 2);
-        map2.put("b", 2);
-
-        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff1 = MapDifference.of(map1, map2);
-        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff2 = MapDifference.of(map1, map2);
-
-        assertEquals(diff1.hashCode(), diff2.hashCode());
-    }
-
-    @Test
-    public void testKeyValueDifferenceToString() {
-        Map<String, Integer> map1 = new HashMap<>();
-        map1.put("a", 1);
-        map1.put("b", 2);
-
-        Map<String, Integer> map2 = new HashMap<>();
-        map2.put("a", 2);
-        map2.put("b", 2);
-
-        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
-        String str = diff.toString();
-
-        assertTrue(str.contains("areEqual="));
-        assertTrue(str.contains("common="));
-        assertTrue(str.contains("onlyOnLeft="));
-        assertTrue(str.contains("onlyOnRight="));
-        assertTrue(str.contains("differentValues="));
-    }
-
-    @Test
-    public void testDifferenceWithSingleElement() {
-        List<Integer> a = Arrays.asList(1);
-        List<Integer> b = Arrays.asList(1);
-
-        Difference<List<Integer>, List<Integer>> diff = Difference.of(a, b);
-
-        assertEquals(Arrays.asList(1), diff.common());
-        assertTrue(diff.onlyOnLeft().isEmpty());
-        assertTrue(diff.onlyOnRight().isEmpty());
-        assertTrue(diff.areEqual());
-    }
-
-    @Test
-    public void testDifferenceWithDuplicates() {
-        List<String> a = Arrays.asList("a", "a", "a", "b");
-        List<String> b = Arrays.asList("a", "b", "b");
-
-        Difference<List<String>, List<String>> diff = Difference.of(a, b);
-
-        assertEquals(Arrays.asList("a", "b"), diff.common());
-        assertEquals(Arrays.asList("a", "a"), diff.onlyOnLeft());
-        assertEquals(Arrays.asList("b"), diff.onlyOnRight());
-    }
-
-    @Test
-    public void testMapDifferenceWithLinkedHashMap() {
-        Map<String, Integer> map1 = new LinkedHashMap<>();
-        map1.put("a", 1);
-        map1.put("b", 2);
-
-        Map<String, Integer> map2 = new LinkedHashMap<>();
-        map2.put("b", 3);
-        map2.put("c", 4);
-
-        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
-
-        assertTrue(diff.common() instanceof LinkedHashMap);
-        assertTrue(diff.onlyOnLeft() instanceof LinkedHashMap);
-        assertTrue(diff.onlyOnRight() instanceof LinkedHashMap);
-        assertTrue(diff.differentValues() instanceof LinkedHashMap);
-    }
-
-    @Test
-    public void testMapDifferenceWithTreeMap() {
-        Map<String, Integer> map1 = new TreeMap<>();
-        map1.put("a", 1);
-        map1.put("b", 2);
-
-        Map<String, Integer> map2 = new TreeMap<>();
-        map2.put("b", 3);
-        map2.put("c", 4);
-
-        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
-
-        assertTrue(diff.common() instanceof LinkedHashMap);
-        assertTrue(diff.onlyOnLeft() instanceof LinkedHashMap);
-        assertTrue(diff.onlyOnRight() instanceof LinkedHashMap);
-        assertTrue(diff.differentValues() instanceof LinkedHashMap);
-    }
-
-    @Test
-    public void testFloatListWithNaN() {
-        FloatList a = FloatList.of(1.0f, Float.NaN, 3.0f);
-        FloatList b = FloatList.of(Float.NaN, 3.0f, 4.0f);
-
-        Difference<FloatList, FloatList> diff = Difference.of(a, b);
-
-        assertEquals(FloatList.of(Float.NaN, 3.0f), diff.common());
-        assertEquals(FloatList.of(1.0f), diff.onlyOnLeft());
-        assertEquals(FloatList.of(4.0f), diff.onlyOnRight());
-    }
-
-    @Test
-    public void testDoubleListWithInfinity() {
-        DoubleList a = DoubleList.of(Double.NEGATIVE_INFINITY, 0.0, Double.POSITIVE_INFINITY);
-        DoubleList b = DoubleList.of(Double.NEGATIVE_INFINITY, 1.0, Double.POSITIVE_INFINITY);
-
-        Difference<DoubleList, DoubleList> diff = Difference.of(a, b);
-
-        assertEquals(DoubleList.of(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY), diff.common());
-        assertEquals(DoubleList.of(0.0), diff.onlyOnLeft());
-        assertEquals(DoubleList.of(1.0), diff.onlyOnRight());
-    }
-
-    @Test
-    public void testIntListWithExtremeValues() {
-        IntList a = IntList.of(Integer.MIN_VALUE, -1, 0, 1, Integer.MAX_VALUE);
-        IntList b = IntList.of(Integer.MIN_VALUE, 0, Integer.MAX_VALUE);
-
-        Difference<IntList, IntList> diff = Difference.of(a, b);
-
-        assertEquals(IntList.of(Integer.MIN_VALUE, 0, Integer.MAX_VALUE), diff.common());
-        assertEquals(IntList.of(-1, 1), diff.onlyOnLeft());
-        assertTrue(diff.onlyOnRight().isEmpty());
-    }
-
-    @Test
     public void testMapDifferenceAllDifferentValues() {
         Map<String, Integer> map1 = new HashMap<>();
         map1.put("a", 1);
@@ -1299,144 +1541,6 @@ public class DifferenceTest extends AbstractTest {
         assertTrue(diff.onlyOnRight().isEmpty());
         assertEquals(3, diff.differentValues().size());
         assertFalse(diff.areEqual());
-    }
-
-    @Test
-    public void testPairLeftAndRight() {
-        Map<String, Integer> map1 = new HashMap<>();
-        map1.put("a", 1);
-
-        Map<String, Integer> map2 = new HashMap<>();
-        map2.put("a", 2);
-
-        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
-
-        Pair<Integer, Integer> pair = diff.differentValues().get("a");
-        assertEquals(Integer.valueOf(1), pair.left());
-        assertEquals(Integer.valueOf(2), pair.right());
-    }
-
-    @Test
-    public void testOf_booleanArrays() {
-        Difference<BooleanList, BooleanList> diff = Difference.of(new boolean[] { true, false, true }, new boolean[] { true, true, false, false });
-        assertEquals(BooleanList.of(true, false, true), diff.common());
-        assertTrue(diff.onlyOnLeft().isEmpty());
-        assertEquals(BooleanList.of(false), diff.onlyOnRight());
-        assertFalse(diff.areEqual());
-    }
-
-    @Test
-    public void testOf_charArrays() {
-        Difference<CharList, CharList> diff = Difference.of(new char[] { 'a', 'b', 'c' }, new char[] { 'b', 'c', 'd' });
-        assertEquals(CharList.of('b', 'c'), diff.common());
-        assertEquals(CharList.of('a'), diff.onlyOnLeft());
-        assertEquals(CharList.of('d'), diff.onlyOnRight());
-    }
-
-    @Test
-    public void testOf_byteArrays() {
-        Difference<ByteList, ByteList> diff = Difference.of(new byte[] { 1, 2, 3 }, new byte[] { 2, 3, 4 });
-        assertEquals(ByteList.of((byte) 2, (byte) 3), diff.common());
-        assertEquals(ByteList.of((byte) 1), diff.onlyOnLeft());
-        assertEquals(ByteList.of((byte) 4), diff.onlyOnRight());
-    }
-
-    @Test
-    public void testOf_shortArrays() {
-        Difference<ShortList, ShortList> diff = Difference.of(new short[] { 1, 2, 3 }, new short[] { 2, 3, 4 });
-        assertEquals(ShortList.of((short) 2, (short) 3), diff.common());
-        assertEquals(ShortList.of((short) 1), diff.onlyOnLeft());
-        assertEquals(ShortList.of((short) 4), diff.onlyOnRight());
-    }
-
-    @Test
-    public void testOf_intArrays() {
-        Difference<IntList, IntList> diff = Difference.of(new int[] { 1, 2, 3 }, new int[] { 2, 3, 4 });
-        assertEquals(IntList.of(2, 3), diff.common());
-        assertEquals(IntList.of(1), diff.onlyOnLeft());
-        assertEquals(IntList.of(4), diff.onlyOnRight());
-    }
-
-    @Test
-    public void testOf_longArrays() {
-        Difference<LongList, LongList> diff = Difference.of(new long[] { 1L, 2L, 3L }, new long[] { 2L, 3L, 4L });
-        assertEquals(LongList.of(2L, 3L), diff.common());
-        assertEquals(LongList.of(1L), diff.onlyOnLeft());
-        assertEquals(LongList.of(4L), diff.onlyOnRight());
-    }
-
-    @Test
-    public void testOf_floatArrays() {
-        Difference<FloatList, FloatList> diff = Difference.of(new float[] { 1.0f, 2.0f, 3.0f }, new float[] { 2.0f, 3.0f, 4.0f });
-        assertEquals(FloatList.of(2.0f, 3.0f), diff.common());
-        assertEquals(FloatList.of(1.0f), diff.onlyOnLeft());
-        assertEquals(FloatList.of(4.0f), diff.onlyOnRight());
-    }
-
-    @Test
-    public void testOf_doubleArrays() {
-        Difference<DoubleList, DoubleList> diff = Difference.of(new double[] { 1.0, 2.0, 3.0 }, new double[] { 2.0, 3.0, 4.0 });
-        assertEquals(DoubleList.of(2.0, 3.0), diff.common());
-        assertEquals(DoubleList.of(1.0), diff.onlyOnLeft());
-        assertEquals(DoubleList.of(4.0), diff.onlyOnRight());
-    }
-
-    @Test
-    public void testOf_ObjectArrays() {
-        Difference<List<String>, List<String>> diff = Difference.of(new String[] { "a", "b", "c" }, new String[] { "b", "c", "d" });
-        assertEquals(Arrays.asList("b", "c"), diff.common());
-        assertEquals(Collections.singletonList("a"), diff.onlyOnLeft());
-        assertEquals(Collections.singletonList("d"), diff.onlyOnRight());
-    }
-
-    @Test
-    public void testOf_Collections() {
-        Collection<String> a = Arrays.asList("a", "b", "c", "c");
-        Collection<String> b = Arrays.asList("b", "c", "d");
-        Difference<List<String>, List<String>> diff = Difference.of(a, b);
-
-        assertEquals(Arrays.asList("b", "c"), diff.common());
-        assertEquals(Arrays.asList("a", "c"), diff.onlyOnLeft());
-        assertEquals(Collections.singletonList("d"), diff.onlyOnRight());
-    }
-
-    @Test
-    public void testOf_Collections_empty() {
-        Difference<List<String>, List<String>> diff1 = Difference.of(new ArrayList<>(), new ArrayList<>());
-        assertTrue(diff1.common().isEmpty());
-        assertTrue(diff1.onlyOnLeft().isEmpty());
-        assertTrue(diff1.onlyOnRight().isEmpty());
-        assertTrue(diff1.areEqual());
-
-        Difference<List<String>, List<String>> diff2 = Difference.of(Arrays.asList("a"), new ArrayList<>());
-        assertTrue(diff2.common().isEmpty());
-        assertEquals(Arrays.asList("a"), diff2.onlyOnLeft());
-        assertTrue(diff2.onlyOnRight().isEmpty());
-
-        Difference<List<String>, List<String>> diff3 = Difference.of(new ArrayList<>(), Arrays.asList("b"));
-        assertTrue(diff3.common().isEmpty());
-        assertTrue(diff3.onlyOnLeft().isEmpty());
-        assertEquals(Arrays.asList("b"), diff3.onlyOnRight());
-    }
-
-    @Test
-    public void testDifference_equalsAndHashCode() {
-        Difference<List<String>, List<String>> diff1 = Difference.of(Arrays.asList("a", "b"), Arrays.asList("b", "c"));
-        Difference<List<String>, List<String>> diff2 = Difference.of(Arrays.asList("a", "b"), Arrays.asList("b", "c"));
-        Difference<List<String>, List<String>> diff3 = Difference.of(Arrays.asList("x", "y"), Arrays.asList("y", "z"));
-
-        assertEquals(diff1, diff2);
-        assertEquals(diff1.hashCode(), diff2.hashCode());
-        assertNotEquals(diff1, diff3);
-        assertNotEquals(diff1, null);
-        assertNotEquals(diff1, new Object());
-    }
-
-    @Test
-    public void testDifference_toString() {
-        Difference<List<String>, List<String>> diff = Difference.of(Arrays.asList("a", "b"), Arrays.asList("b", "c"));
-        String expected = "{areEqual=false, common=[b], onlyOnLeft=[a], onlyOnRight=[c]}";
-        assertEquals(expected, diff.toString());
     }
 
     @Test
@@ -1479,46 +1583,6 @@ public class DifferenceTest extends AbstractTest {
         assertEquals(Collections.singletonMap("b", "WORLD"), diff.onlyOnLeft());
         assertEquals(Collections.singletonMap("c", "test"), diff.onlyOnRight());
         assertTrue(diff.differentValues().isEmpty());
-    }
-
-    @Test
-    public void testMapDifference_of_collectionOfMaps() {
-        Map<String, String> mapA1 = CommonUtil.asMap("id", "1", "value", "A");
-        Map<String, String> mapA2 = CommonUtil.asMap("id", "2", "value", "B");
-        List<Map<String, String>> listA = Arrays.asList(mapA1, mapA2);
-
-        Map<String, String> mapB1 = CommonUtil.asMap("id", "2", "value", "C");
-        Map<String, String> mapB2 = CommonUtil.asMap("id", "3", "value", "D");
-        List<Map<String, String>> listB = Arrays.asList(mapB1, mapB2);
-
-        MapDifference<List<Map<String, String>>, List<Map<String, String>>, Map<String, MapDifference<Map<String, String>, Map<String, String>, Map<String, Pair<String, String>>>>> diff = MapDifference
-                .of(listA, listB, map -> map.get("id"));
-
-        assertEquals(Collections.singletonList(mapA1), diff.onlyOnLeft());
-        assertEquals(Collections.singletonList(mapB2), diff.onlyOnRight());
-        assertTrue(diff.common().isEmpty());
-        assertEquals(1, diff.differentValues().size());
-        assertEquals(Pair.of("B", "C"), diff.differentValues().get("2").differentValues().get("value"));
-    }
-
-    @Test
-    public void testMapDifference_equalsAndHashCode() {
-        Map<String, Integer> map1 = CommonUtil.asMap("a", 1, "b", 2);
-        Map<String, Integer> map2 = CommonUtil.asMap("b", 3, "c", 4);
-        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff1 = MapDifference.of(map1, map2);
-        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff2 = MapDifference.of(map1, map2);
-
-        assertEquals(diff1, diff2);
-        assertEquals(diff1.hashCode(), diff2.hashCode());
-    }
-
-    @Test
-    public void testMapDifference_toString() {
-        Map<String, Integer> map1 = CommonUtil.asMap("a", 1, "b", 2);
-        Map<String, Integer> map2 = CommonUtil.asMap("b", 3, "c", 4);
-        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
-        String expected = "{areEqual=false, common={}, onlyOnLeft={a=1}, onlyOnRight={c=4}, differentValues={b=(2, 3)}}";
-        assertEquals(expected, diff.toString());
     }
 
     @Test
@@ -1636,37 +1700,6 @@ public class DifferenceTest extends AbstractTest {
     }
 
     @Test
-    public void testMapDifferenceCollectionsOneEmpty() {
-        Map<String, String> map1 = new HashMap<>();
-        map1.put("id", "X");
-        map1.put("value", "test");
-        List<Map<String, String>> list1 = Arrays.asList(map1);
-        List<Map<String, String>> emptyList = new ArrayList<>();
-
-        MapDifference<List<Map<String, String>>, List<Map<String, String>>, Map<String, MapDifference<Map<String, String>, Map<String, String>, Map<String, Pair<String, String>>>>> diff1 = MapDifference
-                .of(list1, emptyList, m -> m.get("id"));
-
-        assertEquals(1, diff1.onlyOnLeft().size());
-        assertTrue(diff1.onlyOnRight().isEmpty());
-        assertFalse(diff1.areEqual());
-
-        MapDifference<List<Map<String, String>>, List<Map<String, String>>, Map<String, MapDifference<Map<String, String>, Map<String, String>, Map<String, Pair<String, String>>>>> diff2 = MapDifference
-                .of(emptyList, list1, m -> m.get("id"));
-
-        assertTrue(diff2.onlyOnLeft().isEmpty());
-        assertEquals(1, diff2.onlyOnRight().size());
-        assertFalse(diff2.areEqual());
-    }
-
-    @Test
-    public void testBeanDifferenceCollectionWithNonBeanClass() {
-        List<String> stringList = Arrays.asList("not a bean");
-        List<String> anotherList = Arrays.asList("also not a bean");
-
-        assertThrows(IllegalArgumentException.class, () -> BeanDifference.of(stringList, anotherList, Function.identity()));
-    }
-
-    @Test
     public void testComplexMapDifferenceScenario() {
         Map<String, Object> map1 = new HashMap<>();
         map1.put("string", "value1");
@@ -1696,179 +1729,6 @@ public class DifferenceTest extends AbstractTest {
         assertEquals(2, diff.differentValues().size());
         assertEquals(Pair.of("value1", "value2"), diff.differentValues().get("string"));
         assertEquals(Pair.of(3.14, 3.14159), diff.differentValues().get("double"));
-    }
-
-    @Test
-    public void testDifferenceWithLargeCollections() {
-        List<Integer> list1 = new ArrayList<>();
-        List<Integer> list2 = new ArrayList<>();
-
-        for (int i = 0; i < 10000; i++) {
-            list1.add(i);
-        }
-        for (int i = 5000; i < 15000; i++) {
-            list2.add(i);
-        }
-
-        Difference<List<Integer>, List<Integer>> diff = Difference.of(list1, list2);
-
-        assertEquals(5000, diff.common().size());
-        assertEquals(5000, diff.onlyOnLeft().size());
-        assertEquals(5000, diff.onlyOnRight().size());
-
-        assertTrue(diff.common().contains(7500));
-        assertTrue(diff.onlyOnLeft().contains(2500));
-        assertTrue(diff.onlyOnRight().contains(12500));
-    }
-
-    @Test
-    public void testDifferenceAllDuplicates() {
-        List<String> list1 = Arrays.asList("a", "a", "a", "a");
-        List<String> list2 = Arrays.asList("a", "a", "b", "b");
-
-        Difference<List<String>, List<String>> diff = Difference.of(list1, list2);
-
-        assertEquals(Arrays.asList("a", "a"), diff.common());
-        assertEquals(Arrays.asList("a", "a"), diff.onlyOnLeft());
-        assertEquals(Arrays.asList("b", "b"), diff.onlyOnRight());
-    }
-
-    @Test
-    public void testPrimitiveListsWithExtremeValues() {
-        IntList list1 = IntList.of(Integer.MIN_VALUE, -1, 0, 1, Integer.MAX_VALUE);
-        IntList list2 = IntList.of(Integer.MIN_VALUE, 0, Integer.MAX_VALUE);
-
-        Difference<IntList, IntList> diff = Difference.of(list1, list2);
-
-        assertEquals(IntList.of(Integer.MIN_VALUE, 0, Integer.MAX_VALUE), diff.common());
-        assertEquals(IntList.of(-1, 1), diff.onlyOnLeft());
-        assertTrue(diff.onlyOnRight().isEmpty());
-    }
-
-    @Test
-    public void testFloatListsWithNaN() {
-        FloatList list1 = FloatList.of(1.0f, Float.NaN, 3.0f);
-        FloatList list2 = FloatList.of(Float.NaN, 3.0f, 4.0f);
-
-        Difference<FloatList, FloatList> diff = Difference.of(list1, list2);
-
-        assertEquals(FloatList.of(Float.NaN, 3.0f), diff.common());
-        assertEquals(FloatList.of(1.0f), diff.onlyOnLeft());
-        assertEquals(FloatList.of(4.0f), diff.onlyOnRight());
-    }
-
-    @Test
-    public void testDoubleListsWithInfinity() {
-        DoubleList list1 = DoubleList.of(Double.NEGATIVE_INFINITY, 0.0, Double.POSITIVE_INFINITY);
-        DoubleList list2 = DoubleList.of(Double.NEGATIVE_INFINITY, 1.0, Double.POSITIVE_INFINITY);
-
-        Difference<DoubleList, DoubleList> diff = Difference.of(list1, list2);
-
-        assertEquals(DoubleList.of(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY), diff.common());
-        assertEquals(DoubleList.of(0.0), diff.onlyOnLeft());
-        assertEquals(DoubleList.of(1.0), diff.onlyOnRight());
-    }
-
-    @Test
-    public void testOfBooleanArraysEqual() {
-        boolean[] a = { true, false, true };
-        boolean[] b = { true, false, true };
-
-        Difference<BooleanList, BooleanList> diff = Difference.of(a, b);
-
-        assertEquals(BooleanList.of(true, false, true), diff.common());
-        assertTrue(diff.onlyOnLeft().isEmpty());
-        assertTrue(diff.onlyOnRight().isEmpty());
-        assertTrue(diff.areEqual());
-    }
-
-    @Test
-    public void testOfGenericArrays() {
-        String[] a = { "apple", "banana", "cherry" };
-        String[] b = { "banana", "cherry", "date" };
-
-        Difference<List<String>, List<String>> diff = Difference.of(a, b);
-
-        assertEquals(Arrays.asList("banana", "cherry"), diff.common());
-        assertEquals(Arrays.asList("apple"), diff.onlyOnLeft());
-        assertEquals(Arrays.asList("date"), diff.onlyOnRight());
-    }
-
-    @Test
-    public void testOfCollectionsWithDuplicates() {
-        List<String> a = Arrays.asList("a", "b", "b", "c");
-        List<String> b = Arrays.asList("b", "c", "c", "d");
-
-        Difference<List<String>, List<String>> diff = Difference.of(a, b);
-
-        assertEquals(Arrays.asList("b", "c"), diff.common());
-        assertEquals(Arrays.asList("a", "b"), diff.onlyOnLeft());
-        assertEquals(Arrays.asList("c", "d"), diff.onlyOnRight());
-    }
-
-    @Test
-    public void testOfOneEmptyCollection() {
-        List<String> a = Arrays.asList("a", "b");
-        List<String> b = new ArrayList<>();
-
-        Difference<List<String>, List<String>> diff = Difference.of(a, b);
-
-        assertTrue(diff.common().isEmpty());
-        assertEquals(Arrays.asList("a", "b"), diff.onlyOnLeft());
-        assertTrue(diff.onlyOnRight().isEmpty());
-        assertFalse(diff.areEqual());
-    }
-
-    @Test
-    public void testEqualsAndHashCode() {
-        List<String> a1 = Arrays.asList("a", "b", "c");
-        List<String> b1 = Arrays.asList("b", "c", "d");
-        Difference<List<String>, List<String>> diff1 = Difference.of(a1, b1);
-
-        List<String> a2 = Arrays.asList("a", "b", "c");
-        List<String> b2 = Arrays.asList("b", "c", "d");
-        Difference<List<String>, List<String>> diff2 = Difference.of(a2, b2);
-
-        assertEquals(diff1, diff2);
-        assertEquals(diff1.hashCode(), diff2.hashCode());
-
-        List<String> a3 = Arrays.asList("a", "b");
-        List<String> b3 = Arrays.asList("b", "c");
-        Difference<List<String>, List<String>> diff3 = Difference.of(a3, b3);
-
-        assertNotEquals(diff1, diff3);
-        assertNotEquals(diff1, null);
-        assertNotEquals(diff1, "not a difference");
-        assertEquals(diff1, diff1);
-    }
-
-    @Test
-    public void testMapDifferenceBasic() {
-        Map<String, Integer> map1 = new HashMap<>();
-        map1.put("a", 1);
-        map1.put("b", 2);
-        map1.put("c", 3);
-
-        Map<String, Integer> map2 = new HashMap<>();
-        map2.put("b", 2);
-        map2.put("c", 4);
-        map2.put("d", 5);
-
-        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
-
-        assertEquals(1, diff.common().size());
-        assertEquals(Integer.valueOf(2), diff.common().get("b"));
-
-        assertEquals(1, diff.onlyOnLeft().size());
-        assertEquals(Integer.valueOf(1), diff.onlyOnLeft().get("a"));
-
-        assertEquals(1, diff.onlyOnRight().size());
-        assertEquals(Integer.valueOf(5), diff.onlyOnRight().get("d"));
-
-        assertEquals(1, diff.differentValues().size());
-        assertEquals(Pair.of(3, 4), diff.differentValues().get("c"));
-
-        assertFalse(diff.areEqual());
     }
 
     @Test
@@ -1937,30 +1797,6 @@ public class DifferenceTest extends AbstractTest {
     }
 
     @Test
-    public void testMapDifferenceWithTriPredicateEquivalence() {
-        Map<String, Integer> map1 = new HashMap<>();
-        map1.put("threshold", 100);
-        map1.put("value", 50);
-
-        Map<String, Integer> map2 = new HashMap<>();
-        map2.put("threshold", 105);
-        map2.put("value", 200);
-
-        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2, (k, v1, v2) -> {
-            if ("threshold".equals(k)) {
-                return Math.abs(v1 - v2) <= 10;
-            }
-            return v1.equals(v2);
-        });
-
-        assertEquals(1, diff.common().size());
-        assertTrue(diff.common().containsKey("threshold"));
-
-        assertEquals(1, diff.differentValues().size());
-        assertEquals(Pair.of(50, 200), diff.differentValues().get("value"));
-    }
-
-    @Test
     public void testMapDifferenceNullValues() {
         Map<String, String> map1 = new HashMap<>();
         map1.put("a", null);
@@ -1977,24 +1813,6 @@ public class DifferenceTest extends AbstractTest {
 
         assertEquals(1, diff.differentValues().size());
         assertEquals(Pair.of("value", null), diff.differentValues().get("b"));
-    }
-
-    @Test
-    public void testMapDifferenceLinkedHashMap() {
-        Map<String, Integer> map1 = new LinkedHashMap<>();
-        map1.put("a", 1);
-        map1.put("b", 2);
-
-        Map<String, Integer> map2 = new LinkedHashMap<>();
-        map2.put("b", 2);
-        map2.put("a", 1);
-
-        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
-
-        assertTrue(diff.common() instanceof LinkedHashMap);
-        assertTrue(diff.onlyOnLeft() instanceof LinkedHashMap);
-        assertTrue(diff.onlyOnRight() instanceof LinkedHashMap);
-        assertTrue(diff.differentValues() instanceof LinkedHashMap);
     }
 
     @Test
@@ -2031,6 +1849,437 @@ public class DifferenceTest extends AbstractTest {
 
         assertEquals(1, diff.differentValues().size());
         assertTrue(diff.differentValues().containsKey(1));
+    }
+
+    @Test
+    public void testBeanDifferenceOf_NullBeans() {
+        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = BeanDifference.of((Account) null, (Account) null);
+
+        assertTrue(diff.common().isEmpty());
+        assertTrue(diff.onlyOnLeft().isEmpty());
+        assertTrue(diff.onlyOnRight().isEmpty());
+        assertTrue(diff.differentValues().isEmpty());
+        assertTrue(diff.areEqual());
+    }
+
+    @Test
+    public void testBeanDifferenceOf_CollectionWithPropNames() {
+        Account a1 = new Account();
+        a1.setGUI("1");
+        a1.setFirstName("John");
+        a1.setLastName("Doe");
+        a1.setStatus(1);
+
+        Account b1 = new Account();
+        b1.setGUI("1");
+        b1.setFirstName("John");
+        b1.setLastName("Smith");
+        b1.setStatus(2);
+
+        List<Account> listA = Arrays.asList(a1);
+        List<Account> listB = Arrays.asList(b1);
+
+        // Compare only firstName and lastName
+        BeanDifference<List<Account>, List<Account>, Map<String, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> diff = BeanDifference
+                .of(listA, listB, Arrays.asList("firstName", "lastName"), Account::getGUI);
+
+        assertTrue(diff.common().isEmpty());
+        assertEquals(1, diff.differentValues().size());
+
+        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> innerDiff = diff.differentValues().get("1");
+        assertEquals("John", innerDiff.common().get("firstName"));
+        assertEquals(Pair.of("Doe", "Smith"), innerDiff.differentValues().get("lastName"));
+        // status should not be compared
+        assertFalse(innerDiff.differentValues().containsKey("status"));
+    }
+
+    @Test
+    public void testBeanDifferenceOf_EmptyCollections() {
+        List<Account> emptyList1 = new ArrayList<>();
+        List<Account> emptyList2 = new ArrayList<>();
+
+        BeanDifference<List<Account>, List<Account>, Map<String, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> diff = BeanDifference
+                .of(emptyList1, emptyList2, Account::getGUI);
+
+        assertTrue(diff.common().isEmpty());
+        assertTrue(diff.onlyOnLeft().isEmpty());
+        assertTrue(diff.onlyOnRight().isEmpty());
+        assertTrue(diff.differentValues().isEmpty());
+        assertTrue(diff.areEqual());
+    }
+
+    @Test
+    public void testMapDifferenceOfWithKeysToCompare_BothNull() {
+        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of((Map<String, Integer>) null,
+                (Map<String, Integer>) null, Arrays.asList("a"));
+
+        assertTrue(diff.common().isEmpty());
+        assertTrue(diff.onlyOnLeft().isEmpty());
+        assertTrue(diff.onlyOnRight().isEmpty());
+        assertTrue(diff.areEqual());
+    }
+
+    @Test
+    public void testOnlyOnLeft() {
+        List<Integer> a = Arrays.asList(1, 2, 3, 2);
+        List<Integer> b = Arrays.asList(2, 3, 4);
+
+        Difference<List<Integer>, List<Integer>> diff = Difference.of(a, b);
+
+        assertEquals(Arrays.asList(1, 2), diff.onlyOnLeft());
+    }
+
+    @Test
+    public void testMapDifference_of_collectionOfMaps() {
+        Map<String, String> mapA1 = CommonUtil.asMap("id", "1", "value", "A");
+        Map<String, String> mapA2 = CommonUtil.asMap("id", "2", "value", "B");
+        List<Map<String, String>> listA = Arrays.asList(mapA1, mapA2);
+
+        Map<String, String> mapB1 = CommonUtil.asMap("id", "2", "value", "C");
+        Map<String, String> mapB2 = CommonUtil.asMap("id", "3", "value", "D");
+        List<Map<String, String>> listB = Arrays.asList(mapB1, mapB2);
+
+        MapDifference<List<Map<String, String>>, List<Map<String, String>>, Map<String, MapDifference<Map<String, String>, Map<String, String>, Map<String, Pair<String, String>>>>> diff = MapDifference
+                .of(listA, listB, map -> map.get("id"));
+
+        assertEquals(Collections.singletonList(mapA1), diff.onlyOnLeft());
+        assertEquals(Collections.singletonList(mapB2), diff.onlyOnRight());
+        assertTrue(diff.common().isEmpty());
+        assertEquals(1, diff.differentValues().size());
+        assertEquals(Pair.of("B", "C"), diff.differentValues().get("2").differentValues().get("value"));
+    }
+
+    @Test
+    public void testMapDifferenceCollectionsOneEmpty() {
+        Map<String, String> map1 = new HashMap<>();
+        map1.put("id", "X");
+        map1.put("value", "test");
+        List<Map<String, String>> list1 = Arrays.asList(map1);
+        List<Map<String, String>> emptyList = new ArrayList<>();
+
+        MapDifference<List<Map<String, String>>, List<Map<String, String>>, Map<String, MapDifference<Map<String, String>, Map<String, String>, Map<String, Pair<String, String>>>>> diff1 = MapDifference
+                .of(list1, emptyList, m -> m.get("id"));
+
+        assertEquals(1, diff1.onlyOnLeft().size());
+        assertTrue(diff1.onlyOnRight().isEmpty());
+        assertFalse(diff1.areEqual());
+
+        MapDifference<List<Map<String, String>>, List<Map<String, String>>, Map<String, MapDifference<Map<String, String>, Map<String, String>, Map<String, Pair<String, String>>>>> diff2 = MapDifference
+                .of(emptyList, list1, m -> m.get("id"));
+
+        assertTrue(diff2.onlyOnLeft().isEmpty());
+        assertEquals(1, diff2.onlyOnRight().size());
+        assertFalse(diff2.areEqual());
+    }
+
+    @Test
+    public void testBeanDifferenceOf_Equal() {
+        Account a = new Account();
+        a.setFirstName("John");
+        a.setLastName("Doe");
+        a.setStatus(1);
+
+        Account b = new Account();
+        b.setFirstName("John");
+        b.setLastName("Doe");
+        b.setStatus(1);
+
+        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = BeanDifference.of(a, b);
+
+        assertTrue(diff.onlyOnLeft().isEmpty());
+        assertTrue(diff.onlyOnRight().isEmpty());
+        assertTrue(diff.differentValues().isEmpty());
+        assertTrue(diff.areEqual());
+    }
+
+    @Test
+    public void testBeanDifferenceOf_OneNullBean() {
+        Account a = new Account();
+        a.setFirstName("John");
+        a.setStatus(1);
+
+        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff1 = BeanDifference.of(a, null);
+        assertFalse(diff1.onlyOnLeft().isEmpty());
+        assertTrue(diff1.onlyOnRight().isEmpty());
+        assertTrue(diff1.common().isEmpty());
+        assertFalse(diff1.areEqual());
+
+        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff2 = BeanDifference.of(null, a);
+        assertTrue(diff2.onlyOnLeft().isEmpty());
+        assertFalse(diff2.onlyOnRight().isEmpty());
+        assertTrue(diff2.common().isEmpty());
+        assertFalse(diff2.areEqual());
+    }
+
+    @Test
+    public void testBeanDifferenceOf_OneEmptyCollection() {
+        Account a1 = new Account();
+        a1.setGUI("1");
+        a1.setFirstName("John");
+        List<Account> listA = Arrays.asList(a1);
+        List<Account> emptyList = new ArrayList<>();
+
+        BeanDifference<List<Account>, List<Account>, Map<String, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> diff1 = BeanDifference
+                .of(listA, emptyList, Account::getGUI);
+
+        assertEquals(1, diff1.onlyOnLeft().size());
+        assertTrue(diff1.onlyOnRight().isEmpty());
+        assertFalse(diff1.areEqual());
+
+        BeanDifference<List<Account>, List<Account>, Map<String, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> diff2 = BeanDifference
+                .of(emptyList, listA, Account::getGUI);
+
+        assertTrue(diff2.onlyOnLeft().isEmpty());
+        assertEquals(1, diff2.onlyOnRight().size());
+        assertFalse(diff2.areEqual());
+    }
+
+    @Test
+    public void testMapDifferenceOfOneNullMap() {
+        Map<String, Integer> map1 = new HashMap<>();
+        map1.put("a", 1);
+        map1.put("b", 2);
+
+        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff1 = MapDifference.of(map1, null);
+        assertEquals(2, diff1.onlyOnLeft().size());
+        assertTrue(diff1.onlyOnRight().isEmpty());
+        assertTrue(diff1.common().isEmpty());
+        assertFalse(diff1.areEqual());
+
+        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff2 = MapDifference.of(null, map1);
+        assertTrue(diff2.onlyOnLeft().isEmpty());
+        assertEquals(2, diff2.onlyOnRight().size());
+        assertTrue(diff2.common().isEmpty());
+        assertFalse(diff2.areEqual());
+    }
+
+    @Test
+    public void testMapDifferenceOfWithKeysToCompare_OneNullMap() {
+        Map<String, Integer> map1 = new HashMap<>();
+        map1.put("a", 1);
+        map1.put("b", 2);
+
+        Collection<String> keys = Arrays.asList("a");
+
+        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff1 = MapDifference.of(map1, null, keys);
+        assertEquals(1, diff1.onlyOnLeft().size());
+        assertTrue(diff1.onlyOnLeft().containsKey("a"));
+        assertFalse(diff1.onlyOnLeft().containsKey("b")); // b not in keysToCompare
+
+        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff2 = MapDifference.of(null, map1, keys);
+        assertEquals(1, diff2.onlyOnRight().size());
+        assertTrue(diff2.onlyOnRight().containsKey("a"));
+    }
+
+    @Test
+    public void testOnlyOnRight() {
+        List<Integer> a = Arrays.asList(1, 2, 3, 2);
+        List<Integer> b = Arrays.asList(2, 3, 4);
+
+        Difference<List<Integer>, List<Integer>> diff = Difference.of(a, b);
+
+        assertEquals(Arrays.asList(4), diff.onlyOnRight());
+    }
+
+    @Test
+    public void test_002() {
+        List<Account> listA = Beans.newRandomList(Account.class, 10);
+        List<Account> listB = Beans.newRandomList(Account.class, 10);
+
+        listA.get(0).setGUI(listB.get(3).getGUI());
+        listA.get(5).setGUI(listB.get(7).getGUI());
+        listA.get(7).setGUI(listB.get(1).getGUI());
+
+        listA.set(4, Beans.copy(listB.get(2)));
+        listA.set(6, Beans.copy(listB.get(8)));
+
+        BeanDifference<List<Account>, List<Account>, Map<String, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> diff = BeanDifference
+                .of(listA, listB, Account::getGUI);
+
+        println(diff);
+
+        println(diff.differentValues());
+
+        for (int i = 0; i < listA.size(); i++) {
+            listA.set(i, Beans.copy(listB.get(i)));
+        }
+
+        diff = BeanDifference.of(listA, listB, Account::getGUI);
+
+        assertTrue(diff.areEqual());
+    }
+
+    @Test
+    public void testAreEqual() {
+        List<Integer> a = Arrays.asList(1, 2, 3);
+        List<Integer> b = Arrays.asList(1, 2, 3);
+
+        Difference<List<Integer>, List<Integer>> diff = Difference.of(a, b);
+
+        assertTrue(diff.areEqual());
+    }
+
+    @Test
+    public void testAreEqualDifferentOrder() {
+        List<Integer> a = Arrays.asList(1, 2, 3);
+        List<Integer> b = Arrays.asList(3, 2, 1);
+
+        Difference<List<Integer>, List<Integer>> diff = Difference.of(a, b);
+
+        assertTrue(diff.areEqual());
+    }
+
+    @Test
+    public void testKeyValueDifferenceAreEqual() {
+        Map<String, Integer> map1 = new HashMap<>();
+        map1.put("a", 1);
+        map1.put("b", 2);
+
+        Map<String, Integer> map2 = new HashMap<>();
+        map2.put("a", 1);
+        map2.put("b", 2);
+
+        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
+
+        assertTrue(diff.areEqual());
+    }
+
+    @Test
+    public void testKeyValueDifferenceAreNotEqualWithDifferentValues() {
+        Map<String, Integer> map1 = new HashMap<>();
+        map1.put("a", 1);
+        map1.put("b", 2);
+
+        Map<String, Integer> map2 = new HashMap<>();
+        map2.put("a", 2);
+        map2.put("b", 2);
+
+        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
+
+        assertFalse(diff.areEqual());
+    }
+
+    @Test
+    public void testDifferentValues_emptyWhenMapsAreEqual() {
+        Map<String, Integer> map1 = new HashMap<>();
+        map1.put("a", 1);
+        map1.put("b", 2);
+        Map<String, Integer> map2 = new HashMap<>();
+        map2.put("a", 1);
+        map2.put("b", 2);
+
+        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
+
+        assertTrue(diff.differentValues().isEmpty());
+        assertTrue(diff.areEqual());
+    }
+
+    @Test
+    public void testDifferentValues_multipleEntries() {
+        Map<String, Integer> map1 = new HashMap<>();
+        map1.put("a", 1);
+        map1.put("b", 2);
+        map1.put("c", 3);
+        Map<String, Integer> map2 = new HashMap<>();
+        map2.put("a", 10);
+        map2.put("b", 20);
+        map2.put("c", 30);
+
+        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
+
+        assertEquals(3, diff.differentValues().size());
+        assertEquals(Pair.of(1, 10), diff.differentValues().get("a"));
+        assertEquals(Pair.of(2, 20), diff.differentValues().get("b"));
+        assertEquals(Pair.of(3, 30), diff.differentValues().get("c"));
+        assertFalse(diff.areEqual());
+    }
+
+    @Test
+    public void testEquals() {
+        List<Integer> a = Arrays.asList(1, 2, 3);
+        List<Integer> b = Arrays.asList(2, 3, 4);
+
+        Difference<List<Integer>, List<Integer>> diff1 = Difference.of(a, b);
+        Difference<List<Integer>, List<Integer>> diff2 = Difference.of(a, b);
+
+        assertEquals(diff1, diff2);
+    }
+
+    @Test
+    public void testEqualsWithDifferentClass() {
+        List<Integer> a = Arrays.asList(1, 2, 3);
+        List<Integer> b = Arrays.asList(2, 3, 4);
+
+        Difference<List<Integer>, List<Integer>> diff = Difference.of(a, b);
+
+        assertNotEquals(diff, "not a difference");
+    }
+
+    @Test
+    public void testMapDifferenceWithTriPredicateEquivalence() {
+        Map<String, Integer> map1 = new HashMap<>();
+        map1.put("threshold", 100);
+        map1.put("value", 50);
+
+        Map<String, Integer> map2 = new HashMap<>();
+        map2.put("threshold", 105);
+        map2.put("value", 200);
+
+        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2, (k, v1, v2) -> {
+            if ("threshold".equals(k)) {
+                return Math.abs(v1 - v2) <= 10;
+            }
+            return v1.equals(v2);
+        });
+
+        assertEquals(1, diff.common().size());
+        assertTrue(diff.common().containsKey("threshold"));
+
+        assertEquals(1, diff.differentValues().size());
+        assertEquals(Pair.of(50, 200), diff.differentValues().get("value"));
+    }
+
+    @Test
+    public void testEqualsSameObject() {
+        List<Integer> a = Arrays.asList(1, 2, 3);
+        List<Integer> b = Arrays.asList(2, 3, 4);
+
+        Difference<List<Integer>, List<Integer>> diff = Difference.of(a, b);
+
+        assertEquals(diff, diff);
+    }
+
+    @Test
+    public void testEqualsWithNull() {
+        List<Integer> a = Arrays.asList(1, 2, 3);
+        List<Integer> b = Arrays.asList(2, 3, 4);
+
+        Difference<List<Integer>, List<Integer>> diff = Difference.of(a, b);
+
+        assertNotEquals(diff, null);
+    }
+
+    @Test
+    public void testEqualsAndHashCode() {
+        List<String> a1 = Arrays.asList("a", "b", "c");
+        List<String> b1 = Arrays.asList("b", "c", "d");
+        Difference<List<String>, List<String>> diff1 = Difference.of(a1, b1);
+
+        List<String> a2 = Arrays.asList("a", "b", "c");
+        List<String> b2 = Arrays.asList("b", "c", "d");
+        Difference<List<String>, List<String>> diff2 = Difference.of(a2, b2);
+
+        assertEquals(diff1, diff2);
+        assertEquals(diff1.hashCode(), diff2.hashCode());
+
+        List<String> a3 = Arrays.asList("a", "b");
+        List<String> b3 = Arrays.asList("b", "c");
+        Difference<List<String>, List<String>> diff3 = Difference.of(a3, b3);
+
+        assertNotEquals(diff1, diff3);
+        assertNotEquals(diff1, null);
+        assertNotEquals(diff1, "not a difference");
+        assertEquals(diff1, diff1);
     }
 
     @Test
@@ -2093,184 +2342,6 @@ public class DifferenceTest extends AbstractTest {
 
         assertEquals(1, diff.differentValues().size());
         assertEquals(Pair.of("NYC", "LA"), diff.differentValues().get("city"));
-    }
-
-    @Test
-    public void testMapDifferenceNullEquivalence() {
-        Map<String, Integer> map1 = new HashMap<>();
-        Map<String, Integer> map2 = new HashMap<>();
-        assertThrows(IllegalArgumentException.class, () -> MapDifference.of(map1, map2, (BiPredicate<Integer, Integer>) null));
-    }
-
-    @Test
-    public void testMapDifferenceEqualsHashCodeToString() {
-        Map<String, Integer> map1a = new HashMap<>();
-        map1a.put("a", 1);
-        Map<String, Integer> map2a = new HashMap<>();
-        map2a.put("a", 2);
-
-        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff1 = MapDifference.of(map1a, map2a);
-
-        Map<String, Integer> map1b = new HashMap<>();
-        map1b.put("a", 1);
-        Map<String, Integer> map2b = new HashMap<>();
-        map2b.put("a", 2);
-
-        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff2 = MapDifference.of(map1b, map2b);
-
-        assertEquals(diff1, diff2);
-        assertEquals(diff1.hashCode(), diff2.hashCode());
-
-        String str = diff1.toString();
-        assertTrue(str.contains("differentValues"));
-        assertTrue(str.contains("areEqual=false"));
-    }
-
-    @Test
-    public void testDifferentValues_emptyWhenMapsAreEqual() {
-        Map<String, Integer> map1 = new HashMap<>();
-        map1.put("a", 1);
-        map1.put("b", 2);
-        Map<String, Integer> map2 = new HashMap<>();
-        map2.put("a", 1);
-        map2.put("b", 2);
-
-        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
-
-        assertTrue(diff.differentValues().isEmpty());
-        assertTrue(diff.areEqual());
-    }
-
-    @Test
-    public void testDifferentValues_multipleEntries() {
-        Map<String, Integer> map1 = new HashMap<>();
-        map1.put("a", 1);
-        map1.put("b", 2);
-        map1.put("c", 3);
-        Map<String, Integer> map2 = new HashMap<>();
-        map2.put("a", 10);
-        map2.put("b", 20);
-        map2.put("c", 30);
-
-        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
-
-        assertEquals(3, diff.differentValues().size());
-        assertEquals(Pair.of(1, 10), diff.differentValues().get("a"));
-        assertEquals(Pair.of(2, 20), diff.differentValues().get("b"));
-        assertEquals(Pair.of(3, 30), diff.differentValues().get("c"));
-        assertFalse(diff.areEqual());
-    }
-
-    @Test
-    public void testDifferentValues_withNullValues() {
-        Map<String, String> map1 = new HashMap<>();
-        map1.put("a", "hello");
-        map1.put("b", null);
-        Map<String, String> map2 = new HashMap<>();
-        map2.put("a", null);
-        map2.put("b", "world");
-
-        MapDifference<Map<String, String>, Map<String, String>, Map<String, Pair<String, String>>> diff = MapDifference.of(map1, map2);
-
-        assertEquals(2, diff.differentValues().size());
-        assertEquals(Pair.of("hello", null), diff.differentValues().get("a"));
-        assertEquals(Pair.of(null, "world"), diff.differentValues().get("b"));
-    }
-
-    // --- Additional BeanDifference tests ---
-
-    @Test
-    public void testBeanDifferenceOf_Basic() {
-        Account a = new Account();
-        a.setFirstName("John");
-        a.setLastName("Doe");
-        a.setStatus(1);
-
-        Account b = new Account();
-        b.setFirstName("John");
-        b.setLastName("Smith");
-        b.setStatus(2);
-
-        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = BeanDifference.of(a, b);
-
-        assertTrue(diff.common().containsKey("firstName"));
-        assertEquals("John", diff.common().get("firstName"));
-        assertTrue(diff.differentValues().containsKey("lastName"));
-        assertEquals(Pair.of("Doe", "Smith"), diff.differentValues().get("lastName"));
-        assertTrue(diff.differentValues().containsKey("status"));
-        assertFalse(diff.areEqual());
-    }
-
-    @Test
-    public void testBeanDifferenceOf_Equal() {
-        Account a = new Account();
-        a.setFirstName("John");
-        a.setLastName("Doe");
-        a.setStatus(1);
-
-        Account b = new Account();
-        b.setFirstName("John");
-        b.setLastName("Doe");
-        b.setStatus(1);
-
-        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = BeanDifference.of(a, b);
-
-        assertTrue(diff.onlyOnLeft().isEmpty());
-        assertTrue(diff.onlyOnRight().isEmpty());
-        assertTrue(diff.differentValues().isEmpty());
-        assertTrue(diff.areEqual());
-    }
-
-    @Test
-    public void testBeanDifferenceOf_NullBeans() {
-        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = BeanDifference.of((Account) null, (Account) null);
-
-        assertTrue(diff.common().isEmpty());
-        assertTrue(diff.onlyOnLeft().isEmpty());
-        assertTrue(diff.onlyOnRight().isEmpty());
-        assertTrue(diff.differentValues().isEmpty());
-        assertTrue(diff.areEqual());
-    }
-
-    @Test
-    public void testBeanDifferenceOf_OneNullBean() {
-        Account a = new Account();
-        a.setFirstName("John");
-        a.setStatus(1);
-
-        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff1 = BeanDifference.of(a, null);
-        assertFalse(diff1.onlyOnLeft().isEmpty());
-        assertTrue(diff1.onlyOnRight().isEmpty());
-        assertTrue(diff1.common().isEmpty());
-        assertFalse(diff1.areEqual());
-
-        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff2 = BeanDifference.of(null, a);
-        assertTrue(diff2.onlyOnLeft().isEmpty());
-        assertFalse(diff2.onlyOnRight().isEmpty());
-        assertTrue(diff2.common().isEmpty());
-        assertFalse(diff2.areEqual());
-    }
-
-    @Test
-    public void testBeanDifferenceOf_WithPropNamesToCompare() {
-        Account a = new Account();
-        a.setFirstName("John");
-        a.setLastName("Doe");
-        a.setStatus(1);
-
-        Account b = new Account();
-        b.setFirstName("John");
-        b.setLastName("Smith");
-        b.setStatus(2);
-
-        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = BeanDifference.of(a, b,
-                Arrays.asList("firstName", "lastName"));
-
-        assertEquals("John", diff.common().get("firstName"));
-        assertEquals(1, diff.differentValues().size());
-        assertEquals(Pair.of("Doe", "Smith"), diff.differentValues().get("lastName"));
-        // status not compared
-        assertFalse(diff.differentValues().containsKey("status"));
     }
 
     @Test
@@ -2352,108 +2423,65 @@ public class DifferenceTest extends AbstractTest {
     }
 
     @Test
-    public void testBeanDifferenceOf_NonBeanClass() {
-        assertThrows(IllegalArgumentException.class, () -> BeanDifference.of("string", "another"));
+    public void testHashCode() {
+        List<Integer> a = Arrays.asList(1, 2, 3);
+        List<Integer> b = Arrays.asList(2, 3, 4);
+
+        Difference<List<Integer>, List<Integer>> diff1 = Difference.of(a, b);
+        Difference<List<Integer>, List<Integer>> diff2 = Difference.of(a, b);
+
+        assertEquals(diff1.hashCode(), diff2.hashCode());
     }
 
     @Test
-    public void testBeanDifferenceOf_NullBiPredicate() {
-        Account a = new Account();
-        assertThrows(IllegalArgumentException.class, () -> BeanDifference.of(a, a, (java.util.function.BiPredicate<Object, Object>) null));
+    public void testKeyValueDifferenceHashCode() {
+        Map<String, Integer> map1 = new HashMap<>();
+        map1.put("a", 1);
+        map1.put("b", 2);
+
+        Map<String, Integer> map2 = new HashMap<>();
+        map2.put("a", 2);
+        map2.put("b", 2);
+
+        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff1 = MapDifference.of(map1, map2);
+        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff2 = MapDifference.of(map1, map2);
+
+        assertEquals(diff1.hashCode(), diff2.hashCode());
     }
 
     @Test
-    public void testBeanDifferenceOf_NullTriPredicate() {
-        Account a = new Account();
-        assertThrows(IllegalArgumentException.class,
-                () -> BeanDifference.of(a, a, (com.landawn.abacus.util.function.TriPredicate<String, Object, Object>) null));
+    public void testMapDifference_equalsAndHashCode() {
+        Map<String, Integer> map1 = CommonUtil.asMap("a", 1, "b", 2);
+        Map<String, Integer> map2 = CommonUtil.asMap("b", 3, "c", 4);
+        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff1 = MapDifference.of(map1, map2);
+        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff2 = MapDifference.of(map1, map2);
+
+        assertEquals(diff1, diff2);
+        assertEquals(diff1.hashCode(), diff2.hashCode());
     }
 
     @Test
-    public void testBeanDifferenceOf_DiffIgnoreAnnotation() {
-        // Account has @DiffIgnore on lastUpdateTime
-        Account a = new Account();
-        a.setFirstName("John");
-        a.setLastUpdateTime(Dates.currentTimestamp());
+    public void testMapDifferenceEqualsHashCodeToString() {
+        Map<String, Integer> map1a = new HashMap<>();
+        map1a.put("a", 1);
+        Map<String, Integer> map2a = new HashMap<>();
+        map2a.put("a", 2);
 
-        Account b = new Account();
-        b.setFirstName("John");
-        b.setLastUpdateTime(Dates.currentTimestampPlus(1, TimeUnit.DAYS));
+        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff1 = MapDifference.of(map1a, map2a);
 
-        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = BeanDifference.of(a, b);
+        Map<String, Integer> map1b = new HashMap<>();
+        map1b.put("a", 1);
+        Map<String, Integer> map2b = new HashMap<>();
+        map2b.put("a", 2);
 
-        // lastUpdateTime should be ignored due to @DiffIgnore
-        assertFalse(diff.common().containsKey("lastUpdateTime"));
-        assertFalse(diff.differentValues().containsKey("lastUpdateTime"));
-    }
+        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff2 = MapDifference.of(map1b, map2b);
 
-    @Test
-    public void testBeanDifferenceOf_CollectionWithPropNames() {
-        Account a1 = new Account();
-        a1.setGUI("1");
-        a1.setFirstName("John");
-        a1.setLastName("Doe");
-        a1.setStatus(1);
+        assertEquals(diff1, diff2);
+        assertEquals(diff1.hashCode(), diff2.hashCode());
 
-        Account b1 = new Account();
-        b1.setGUI("1");
-        b1.setFirstName("John");
-        b1.setLastName("Smith");
-        b1.setStatus(2);
-
-        List<Account> listA = Arrays.asList(a1);
-        List<Account> listB = Arrays.asList(b1);
-
-        // Compare only firstName and lastName
-        BeanDifference<List<Account>, List<Account>, Map<String, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> diff = BeanDifference
-                .of(listA, listB, Arrays.asList("firstName", "lastName"), Account::getGUI);
-
-        assertTrue(diff.common().isEmpty());
-        assertEquals(1, diff.differentValues().size());
-
-        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> innerDiff = diff.differentValues().get("1");
-        assertEquals("John", innerDiff.common().get("firstName"));
-        assertEquals(Pair.of("Doe", "Smith"), innerDiff.differentValues().get("lastName"));
-        // status should not be compared
-        assertFalse(innerDiff.differentValues().containsKey("status"));
-    }
-
-    @Test
-    public void testBeanDifferenceOf_EmptyCollections() {
-        List<Account> emptyList1 = new ArrayList<>();
-        List<Account> emptyList2 = new ArrayList<>();
-
-        BeanDifference<List<Account>, List<Account>, Map<String, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> diff = BeanDifference
-                .of(emptyList1, emptyList2, Account::getGUI);
-
-        assertTrue(diff.common().isEmpty());
-        assertTrue(diff.onlyOnLeft().isEmpty());
-        assertTrue(diff.onlyOnRight().isEmpty());
-        assertTrue(diff.differentValues().isEmpty());
-        assertTrue(diff.areEqual());
-    }
-
-    @Test
-    public void testBeanDifferenceOf_OneEmptyCollection() {
-        Account a1 = new Account();
-        a1.setGUI("1");
-        a1.setFirstName("John");
-        List<Account> listA = Arrays.asList(a1);
-        List<Account> emptyList = new ArrayList<>();
-
-        BeanDifference<List<Account>, List<Account>, Map<String, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> diff1 = BeanDifference
-                .of(listA, emptyList, Account::getGUI);
-
-        assertEquals(1, diff1.onlyOnLeft().size());
-        assertTrue(diff1.onlyOnRight().isEmpty());
-        assertFalse(diff1.areEqual());
-
-        BeanDifference<List<Account>, List<Account>, Map<String, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> diff2 = BeanDifference
-                .of(emptyList, listA, Account::getGUI);
-
-        assertTrue(diff2.onlyOnLeft().isEmpty());
-        assertEquals(1, diff2.onlyOnRight().size());
-        assertFalse(diff2.areEqual());
+        String str = diff1.toString();
+        assertTrue(str.contains("differentValues"));
+        assertTrue(str.contains("areEqual=false"));
     }
 
     @Test
@@ -2472,6 +2500,49 @@ public class DifferenceTest extends AbstractTest {
     }
 
     @Test
+    public void testToString() {
+        List<Integer> a = Arrays.asList(1, 2, 3);
+        List<Integer> b = Arrays.asList(2, 3, 4);
+
+        Difference<List<Integer>, List<Integer>> diff = Difference.of(a, b);
+        String str = diff.toString();
+
+        assertTrue(str.contains("areEqual="));
+        assertTrue(str.contains("common="));
+        assertTrue(str.contains("onlyOnLeft="));
+        assertTrue(str.contains("onlyOnRight="));
+    }
+
+    @Test
+    public void testKeyValueDifferenceToString() {
+        Map<String, Integer> map1 = new HashMap<>();
+        map1.put("a", 1);
+        map1.put("b", 2);
+
+        Map<String, Integer> map2 = new HashMap<>();
+        map2.put("a", 2);
+        map2.put("b", 2);
+
+        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
+        String str = diff.toString();
+
+        assertTrue(str.contains("areEqual="));
+        assertTrue(str.contains("common="));
+        assertTrue(str.contains("onlyOnLeft="));
+        assertTrue(str.contains("onlyOnRight="));
+        assertTrue(str.contains("differentValues="));
+    }
+
+    @Test
+    public void testMapDifference_toString() {
+        Map<String, Integer> map1 = CommonUtil.asMap("a", 1, "b", 2);
+        Map<String, Integer> map2 = CommonUtil.asMap("b", 3, "c", 4);
+        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
+        String expected = "{areEqual=false, common={}, onlyOnLeft={a=1}, onlyOnRight={c=4}, differentValues={b=(2, 3)}}";
+        assertEquals(expected, diff.toString());
+    }
+
+    @Test
     public void testBeanDifferenceToString() {
         Account a = new Account();
         a.setFirstName("John");
@@ -2487,6 +2558,120 @@ public class DifferenceTest extends AbstractTest {
         assertTrue(str.contains("onlyOnLeft="));
         assertTrue(str.contains("onlyOnRight="));
         assertTrue(str.contains("differentValues="));
+    }
+
+    @Test
+    public void test_001() {
+        Account a = new Account();
+        a.setLastUpdateTime(Dates.currentTimestampPlus(1, TimeUnit.DAYS));
+        a.setCreatedTime(Dates.currentTimestampPlus(1, TimeUnit.DAYS));
+        Account b = new Account();
+        b.setLastUpdateTime(Dates.currentTimestamp());
+        b.setCreatedTime(Dates.currentTimestamp());
+        var diff = BeanDifference.of(a, b);
+
+        println(diff);
+
+        assertFalse(diff.differentValues().containsKey("lastUpdateTime"));
+
+        diff = BeanDifference.of(a, b, CommonUtil.toList("lastUpdateTime", "createdTime"));
+        assertTrue(diff.differentValues().containsKey("lastUpdateTime"));
+    }
+
+    @Test
+    public void testWithDifferentValues() {
+        Map<String, Integer> map1 = new HashMap<>();
+        map1.put("a", 1);
+        map1.put("b", 2);
+
+        Map<String, Integer> map2 = new HashMap<>();
+        map2.put("a", 2);
+        map2.put("b", 2);
+
+        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
+
+        assertEquals(1, diff.differentValues().size());
+        assertEquals(Pair.of(1, 2), diff.differentValues().get("a"));
+    }
+
+    @Test
+    public void testKeyValueDifferenceEquals() {
+        Map<String, Integer> map1 = new HashMap<>();
+        map1.put("a", 1);
+        map1.put("b", 2);
+
+        Map<String, Integer> map2 = new HashMap<>();
+        map2.put("a", 2);
+        map2.put("b", 2);
+
+        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff1 = MapDifference.of(map1, map2);
+        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff2 = MapDifference.of(map1, map2);
+
+        assertEquals(diff1, diff2);
+    }
+
+    @Test
+    public void testPairLeftAndRight() {
+        Map<String, Integer> map1 = new HashMap<>();
+        map1.put("a", 1);
+
+        Map<String, Integer> map2 = new HashMap<>();
+        map2.put("a", 2);
+
+        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of(map1, map2);
+
+        Pair<Integer, Integer> pair = diff.differentValues().get("a");
+        assertEquals(Integer.valueOf(1), pair.left());
+        assertEquals(Integer.valueOf(2), pair.right());
+    }
+
+    @Test
+    public void testBeanDifferenceCollectionWithNonBeanClass() {
+        List<String> stringList = Arrays.asList("not a bean");
+        List<String> anotherList = Arrays.asList("also not a bean");
+
+        assertThrows(IllegalArgumentException.class, () -> BeanDifference.of(stringList, anotherList, Function.identity()));
+    }
+
+    @Test
+    public void testMapDifferenceNullEquivalence() {
+        Map<String, Integer> map1 = new HashMap<>();
+        Map<String, Integer> map2 = new HashMap<>();
+        assertThrows(IllegalArgumentException.class, () -> MapDifference.of(map1, map2, (BiPredicate<Integer, Integer>) null));
+    }
+
+    @Test
+    public void testDifferentValues_withNullValues() {
+        Map<String, String> map1 = new HashMap<>();
+        map1.put("a", "hello");
+        map1.put("b", null);
+        Map<String, String> map2 = new HashMap<>();
+        map2.put("a", null);
+        map2.put("b", "world");
+
+        MapDifference<Map<String, String>, Map<String, String>, Map<String, Pair<String, String>>> diff = MapDifference.of(map1, map2);
+
+        assertEquals(2, diff.differentValues().size());
+        assertEquals(Pair.of("hello", null), diff.differentValues().get("a"));
+        assertEquals(Pair.of(null, "world"), diff.differentValues().get("b"));
+    }
+
+    @Test
+    public void testBeanDifferenceOf_NonBeanClass() {
+        assertThrows(IllegalArgumentException.class, () -> BeanDifference.of("string", "another"));
+    }
+
+    @Test
+    public void testBeanDifferenceOf_NullBiPredicate() {
+        Account a = new Account();
+        assertThrows(IllegalArgumentException.class, () -> BeanDifference.of(a, a, (java.util.function.BiPredicate<Object, Object>) null));
+    }
+
+    @Test
+    public void testBeanDifferenceOf_NullTriPredicate() {
+        Account a = new Account();
+        assertThrows(IllegalArgumentException.class,
+                () -> BeanDifference.of(a, a, (com.landawn.abacus.util.function.TriPredicate<String, Object, Object>) null));
     }
 
     @Test
@@ -2516,199 +2701,12 @@ public class DifferenceTest extends AbstractTest {
         assertNotEquals(diff, "not a difference");
     }
 
-    // --- Primitive list one-null tests ---
-
-    @Test
-    public void testOfBooleanListsOneNull() {
-        BooleanList a = BooleanList.of(true, false);
-
-        Difference<BooleanList, BooleanList> diff1 = Difference.of(a, (BooleanList) null);
-        assertEquals(BooleanList.of(true, false), diff1.onlyOnLeft());
-        assertTrue(diff1.onlyOnRight().isEmpty());
-        assertFalse(diff1.areEqual());
-
-        Difference<BooleanList, BooleanList> diff2 = Difference.of((BooleanList) null, a);
-        assertTrue(diff2.onlyOnLeft().isEmpty());
-        assertEquals(BooleanList.of(true, false), diff2.onlyOnRight());
-        assertFalse(diff2.areEqual());
-    }
-
-    @Test
-    public void testOfCharListsOneNull() {
-        CharList a = CharList.of('a', 'b');
-
-        Difference<CharList, CharList> diff1 = Difference.of(a, (CharList) null);
-        assertEquals(CharList.of('a', 'b'), diff1.onlyOnLeft());
-        assertTrue(diff1.onlyOnRight().isEmpty());
-
-        Difference<CharList, CharList> diff2 = Difference.of((CharList) null, a);
-        assertTrue(diff2.onlyOnLeft().isEmpty());
-        assertEquals(CharList.of('a', 'b'), diff2.onlyOnRight());
-    }
-
-    @Test
-    public void testOfByteListsOneNull() {
-        ByteList a = ByteList.of((byte) 1, (byte) 2);
-
-        Difference<ByteList, ByteList> diff1 = Difference.of(a, (ByteList) null);
-        assertEquals(ByteList.of((byte) 1, (byte) 2), diff1.onlyOnLeft());
-        assertTrue(diff1.onlyOnRight().isEmpty());
-
-        Difference<ByteList, ByteList> diff2 = Difference.of((ByteList) null, a);
-        assertTrue(diff2.onlyOnLeft().isEmpty());
-        assertEquals(ByteList.of((byte) 1, (byte) 2), diff2.onlyOnRight());
-    }
-
-    @Test
-    public void testOfShortListsOneNull() {
-        ShortList a = ShortList.of((short) 1, (short) 2);
-
-        Difference<ShortList, ShortList> diff1 = Difference.of(a, (ShortList) null);
-        assertEquals(ShortList.of((short) 1, (short) 2), diff1.onlyOnLeft());
-        assertTrue(diff1.onlyOnRight().isEmpty());
-
-        Difference<ShortList, ShortList> diff2 = Difference.of((ShortList) null, a);
-        assertTrue(diff2.onlyOnLeft().isEmpty());
-        assertEquals(ShortList.of((short) 1, (short) 2), diff2.onlyOnRight());
-    }
-
-    @Test
-    public void testOfIntListsOneNull() {
-        IntList a = IntList.of(1, 2);
-
-        Difference<IntList, IntList> diff1 = Difference.of(a, (IntList) null);
-        assertEquals(IntList.of(1, 2), diff1.onlyOnLeft());
-        assertTrue(diff1.onlyOnRight().isEmpty());
-
-        Difference<IntList, IntList> diff2 = Difference.of((IntList) null, a);
-        assertTrue(diff2.onlyOnLeft().isEmpty());
-        assertEquals(IntList.of(1, 2), diff2.onlyOnRight());
-    }
-
-    @Test
-    public void testOfLongListsOneNull() {
-        LongList a = LongList.of(1L, 2L);
-
-        Difference<LongList, LongList> diff1 = Difference.of(a, (LongList) null);
-        assertEquals(LongList.of(1L, 2L), diff1.onlyOnLeft());
-        assertTrue(diff1.onlyOnRight().isEmpty());
-
-        Difference<LongList, LongList> diff2 = Difference.of((LongList) null, a);
-        assertTrue(diff2.onlyOnLeft().isEmpty());
-        assertEquals(LongList.of(1L, 2L), diff2.onlyOnRight());
-    }
-
-    @Test
-    public void testOfFloatListsOneNull() {
-        FloatList a = FloatList.of(1.0f, 2.0f);
-
-        Difference<FloatList, FloatList> diff1 = Difference.of(a, (FloatList) null);
-        assertEquals(FloatList.of(1.0f, 2.0f), diff1.onlyOnLeft());
-        assertTrue(diff1.onlyOnRight().isEmpty());
-
-        Difference<FloatList, FloatList> diff2 = Difference.of((FloatList) null, a);
-        assertTrue(diff2.onlyOnLeft().isEmpty());
-        assertEquals(FloatList.of(1.0f, 2.0f), diff2.onlyOnRight());
-    }
-
-    @Test
-    public void testOfDoubleListsOneNull() {
-        DoubleList a = DoubleList.of(1.0, 2.0);
-
-        Difference<DoubleList, DoubleList> diff1 = Difference.of(a, (DoubleList) null);
-        assertEquals(DoubleList.of(1.0, 2.0), diff1.onlyOnLeft());
-        assertTrue(diff1.onlyOnRight().isEmpty());
-
-        Difference<DoubleList, DoubleList> diff2 = Difference.of((DoubleList) null, a);
-        assertTrue(diff2.onlyOnLeft().isEmpty());
-        assertEquals(DoubleList.of(1.0, 2.0), diff2.onlyOnRight());
-    }
-
-    @Test
-    public void testOfObjectArraysOneNull() {
-        String[] a = { "a", "b" };
-
-        Difference<List<String>, List<String>> diff1 = Difference.of(a, (String[]) null);
-        assertEquals(Arrays.asList("a", "b"), diff1.onlyOnLeft());
-        assertTrue(diff1.onlyOnRight().isEmpty());
-
-        Difference<List<String>, List<String>> diff2 = Difference.of((String[]) null, a);
-        assertTrue(diff2.onlyOnLeft().isEmpty());
-        assertEquals(Arrays.asList("a", "b"), diff2.onlyOnRight());
-    }
-
-    @Test
-    public void testMapDifferenceOfOneNullMap() {
-        Map<String, Integer> map1 = new HashMap<>();
-        map1.put("a", 1);
-        map1.put("b", 2);
-
-        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff1 = MapDifference.of(map1, null);
-        assertEquals(2, diff1.onlyOnLeft().size());
-        assertTrue(diff1.onlyOnRight().isEmpty());
-        assertTrue(diff1.common().isEmpty());
-        assertFalse(diff1.areEqual());
-
-        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff2 = MapDifference.of(null, map1);
-        assertTrue(diff2.onlyOnLeft().isEmpty());
-        assertEquals(2, diff2.onlyOnRight().size());
-        assertTrue(diff2.common().isEmpty());
-        assertFalse(diff2.areEqual());
-    }
-
-    @Test
-    public void testMapDifferenceOfWithKeysToCompare_OneNullMap() {
-        Map<String, Integer> map1 = new HashMap<>();
-        map1.put("a", 1);
-        map1.put("b", 2);
-
-        Collection<String> keys = Arrays.asList("a");
-
-        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff1 = MapDifference.of(map1, null, keys);
-        assertEquals(1, diff1.onlyOnLeft().size());
-        assertTrue(diff1.onlyOnLeft().containsKey("a"));
-        assertFalse(diff1.onlyOnLeft().containsKey("b")); // b not in keysToCompare
-
-        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff2 = MapDifference.of(null, map1, keys);
-        assertEquals(1, diff2.onlyOnRight().size());
-        assertTrue(diff2.onlyOnRight().containsKey("a"));
-    }
-
-    @Test
-    public void testMapDifferenceOfWithKeysToCompare_BothNull() {
-        MapDifference<Map<String, Integer>, Map<String, Integer>, Map<String, Pair<Integer, Integer>>> diff = MapDifference.of((Map<String, Integer>) null,
-                (Map<String, Integer>) null, Arrays.asList("a"));
-
-        assertTrue(diff.common().isEmpty());
-        assertTrue(diff.onlyOnLeft().isEmpty());
-        assertTrue(diff.onlyOnRight().isEmpty());
-        assertTrue(diff.areEqual());
-    }
-
     @Test
     public void testMapDifferenceNullTriPredicateEquivalence() {
         Map<String, Integer> map1 = new HashMap<>();
         Map<String, Integer> map2 = new HashMap<>();
         assertThrows(IllegalArgumentException.class,
                 () -> MapDifference.of(map1, map2, (com.landawn.abacus.util.function.TriPredicate<String, Integer, Integer>) null));
-    }
-
-    @Test
-    public void testDifferenceAreEqual_PrimitiveList() {
-        IntList a = IntList.of(1, 2, 3);
-        IntList b = IntList.of(3, 2, 1);
-
-        Difference<IntList, IntList> diff = Difference.of(a, b);
-        assertTrue(diff.areEqual());
-    }
-
-    @Test
-    public void testDifferenceAreEqual_BooleanList() {
-        BooleanList a = BooleanList.of(true, false);
-        BooleanList b = BooleanList.of(false, true);
-
-        Difference<BooleanList, BooleanList> diff = Difference.of(a, b);
-        assertTrue(diff.areEqual());
     }
 
 }

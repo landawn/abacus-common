@@ -5,12 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class ImmutableEntryTest extends TestBase {
 
     @Test
@@ -19,6 +17,12 @@ public class ImmutableEntryTest extends TestBase {
 
         Assertions.assertEquals("key", entry.getKey());
         Assertions.assertEquals(42, entry.getValue());
+    }
+
+    @Test
+    public void testImplementsImmutable() {
+        ImmutableEntry<String, Integer> entry = ImmutableEntry.of("key", 42);
+        Assertions.assertTrue(entry instanceof Immutable);
     }
 
     @Test
@@ -43,55 +47,6 @@ public class ImmutableEntryTest extends TestBase {
 
         Assertions.assertNull(entry.getKey());
         Assertions.assertNull(entry.getValue());
-    }
-
-    @Test
-    public void testCopyOf() {
-        Map.Entry<String, Integer> mutableEntry = new AbstractMap.SimpleEntry<>("original", 123);
-        ImmutableEntry<String, Integer> immutableCopy = ImmutableEntry.copyOf(mutableEntry);
-
-        Assertions.assertEquals("original", immutableCopy.getKey());
-        Assertions.assertEquals(123, immutableCopy.getValue());
-
-        mutableEntry.setValue(456);
-        Assertions.assertEquals(123, immutableCopy.getValue());
-    }
-
-    @Test
-    public void testCopyOf_FromMapEntry() {
-        Map<String, Integer> map = new HashMap<>();
-        map.put("test", 789);
-
-        Map.Entry<String, Integer> mapEntry = map.entrySet().iterator().next();
-        ImmutableEntry<String, Integer> immutableCopy = ImmutableEntry.copyOf(mapEntry);
-
-        Assertions.assertEquals("test", immutableCopy.getKey());
-        Assertions.assertEquals(789, immutableCopy.getValue());
-    }
-
-    @Test
-    public void testCopyOf_WithNullEntry() {
-        Assertions.assertThrows(NullPointerException.class, () -> {
-            ImmutableEntry.copyOf(null);
-        });
-    }
-
-    @Test
-    public void testCopyOf_EntryWithNulls() {
-        Map.Entry<String, String> entryWithNulls = new AbstractMap.SimpleEntry<>(null, null);
-        ImmutableEntry<String, String> immutableCopy = ImmutableEntry.copyOf(entryWithNulls);
-
-        Assertions.assertNull(immutableCopy.getKey());
-        Assertions.assertNull(immutableCopy.getValue());
-    }
-
-    @Test
-    public void testSetValue_ThrowsUnsupported() {
-        ImmutableEntry<String, Integer> entry = ImmutableEntry.of("key", 42);
-
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-            entry.setValue(100);
-        });
     }
 
     @Test
@@ -144,9 +99,34 @@ public class ImmutableEntryTest extends TestBase {
     }
 
     @Test
-    public void testImplementsImmutable() {
+    public void testEquals_NotEqualToDifferentType() {
         ImmutableEntry<String, Integer> entry = ImmutableEntry.of("key", 42);
-        Assertions.assertTrue(entry instanceof Immutable);
+        Assertions.assertNotEquals(entry, "not an entry");
+        Assertions.assertNotEquals(entry, null);
+    }
+
+    @Test
+    public void testCopyOf() {
+        Map.Entry<String, Integer> mutableEntry = new AbstractMap.SimpleEntry<>("original", 123);
+        ImmutableEntry<String, Integer> immutableCopy = ImmutableEntry.copyOf(mutableEntry);
+
+        Assertions.assertEquals("original", immutableCopy.getKey());
+        Assertions.assertEquals(123, immutableCopy.getValue());
+
+        mutableEntry.setValue(456);
+        Assertions.assertEquals(123, immutableCopy.getValue());
+    }
+
+    @Test
+    public void testCopyOf_FromMapEntry() {
+        Map<String, Integer> map = new HashMap<>();
+        map.put("test", 789);
+
+        Map.Entry<String, Integer> mapEntry = map.entrySet().iterator().next();
+        ImmutableEntry<String, Integer> immutableCopy = ImmutableEntry.copyOf(mapEntry);
+
+        Assertions.assertEquals("test", immutableCopy.getKey());
+        Assertions.assertEquals(789, immutableCopy.getValue());
     }
 
     @Test
@@ -160,10 +140,28 @@ public class ImmutableEntryTest extends TestBase {
     }
 
     @Test
-    public void testEquals_NotEqualToDifferentType() {
+    public void testCopyOf_EntryWithNulls() {
+        Map.Entry<String, String> entryWithNulls = new AbstractMap.SimpleEntry<>(null, null);
+        ImmutableEntry<String, String> immutableCopy = ImmutableEntry.copyOf(entryWithNulls);
+
+        Assertions.assertNull(immutableCopy.getKey());
+        Assertions.assertNull(immutableCopy.getValue());
+    }
+
+    @Test
+    public void testCopyOf_WithNullEntry() {
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            ImmutableEntry.copyOf(null);
+        });
+    }
+
+    @Test
+    public void testSetValue_ThrowsUnsupported() {
         ImmutableEntry<String, Integer> entry = ImmutableEntry.of("key", 42);
-        Assertions.assertNotEquals(entry, "not an entry");
-        Assertions.assertNotEquals(entry, null);
+
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            entry.setValue(100);
+        });
     }
 
     @Test

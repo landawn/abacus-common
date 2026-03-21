@@ -14,7 +14,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -22,34 +21,13 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.ByteList;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("2025")
 public class PrimitiveByteListTypeTest extends TestBase {
 
     private final PrimitiveByteListType type = new PrimitiveByteListType();
 
     @Test
-    public void test_get_ResultSet_byLabel() throws SQLException {
-        ResultSet rs = mock(ResultSet.class);
-        // Basic get test - actual implementation will vary by type
-        assertDoesNotThrow(() -> type.get(rs, "col"));
-    }
-
-    @Test
-    public void test_set_CallableStatement() throws SQLException {
-        CallableStatement stmt = mock(CallableStatement.class);
-        // Basic set test - actual implementation will vary by type
-        assertDoesNotThrow(() -> type.set(stmt, "param", null));
-    }
-
-    @Test
     public void testClazz() {
         assertEquals(ByteList.class, type.javaType());
-    }
-
-    @Test
-    public void testGetElementType() {
-        Type<?> elementType = type.elementType();
-        assertNotNull(elementType);
     }
 
     @Test
@@ -92,6 +70,19 @@ public class PrimitiveByteListTypeTest extends TestBase {
     }
 
     @Test
+    public void testGetElementType() {
+        Type<?> elementType = type.elementType();
+        assertNotNull(elementType);
+    }
+
+    @Test
+    public void test_get_ResultSet_byLabel() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+        // Basic get test - actual implementation will vary by type
+        assertDoesNotThrow(() -> type.get(rs, "col"));
+    }
+
+    @Test
     public void testGetFromResultSetByIndex() throws SQLException {
         ResultSet rs = mock(ResultSet.class);
         byte[] bytes = { 1, 2, 3 };
@@ -129,6 +120,13 @@ public class PrimitiveByteListTypeTest extends TestBase {
 
         ByteList result = type.get(rs, "column");
         assertNull(result);
+    }
+
+    @Test
+    public void test_set_CallableStatement() throws SQLException {
+        CallableStatement stmt = mock(CallableStatement.class);
+        // Basic set test - actual implementation will vary by type
+        assertDoesNotThrow(() -> type.set(stmt, "param", null));
     }
 
     @Test

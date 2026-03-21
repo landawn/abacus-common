@@ -13,12 +13,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class TimeTypeTest extends TestBase {
 
     private final TimeType type = new TimeType();
@@ -26,11 +24,6 @@ public class TimeTypeTest extends TestBase {
     @Test
     public void test_clazz() {
         assertEquals(Time.class, type.javaType());
-    }
-
-    @Test
-    public void test_name() {
-        assertEquals("Time", type.name());
     }
 
     @Test
@@ -110,5 +103,10 @@ public class TimeTypeTest extends TestBase {
 
         type.set(stmt, "param2", null);
         verify(stmt).setTime("param2", null);
+    }
+
+    @Test
+    public void test_name() {
+        assertEquals("Time", type.name());
     }
 }

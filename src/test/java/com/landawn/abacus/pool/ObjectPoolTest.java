@@ -13,12 +13,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class ObjectPoolTest extends TestBase {
 
     private TestObjectPool pool;
@@ -196,11 +194,9 @@ public class ObjectPoolTest extends TestBase {
             }
         }
 
-        @Override
         public void lock() {
         }
 
-        @Override
         public void unlock() {
         }
 
@@ -279,6 +275,37 @@ public class ObjectPoolTest extends TestBase {
     }
 
     @Test
+    public void testAddToFullPool() {
+        for (int i = 0; i < 5; i++) {
+            assertTrue(pool.add(new TestPoolable("test" + i)));
+        }
+        assertEquals(5, pool.size());
+
+        TestPoolable extra = new TestPoolable("extra");
+        assertFalse(pool.add(extra));
+        assertEquals(5, pool.size());
+    }
+
+    @Test
+    public void testAddWithAutoDestroyFalse() {
+        for (int i = 0; i < 5; i++) {
+            assertTrue(pool.add(new TestPoolable("test" + i)));
+        }
+
+        TestPoolable extra = new TestPoolable("extra");
+        assertFalse(pool.add(extra, false));
+        assertFalse(extra.isDestroyed());
+    }
+
+    @Test
+    public void testAddWithAutoDestroyTrue_Success() {
+        TestPoolable element = new TestPoolable("test");
+        assertTrue(pool.add(element, true));
+        assertFalse(element.isDestroyed());
+        assertEquals(1, pool.size());
+    }
+
+    @Test
     public void testAddNull() {
         assertThrows(IllegalArgumentException.class, () -> pool.add(null));
     }
@@ -291,18 +318,6 @@ public class ObjectPoolTest extends TestBase {
         } catch (InterruptedException e) {
         }
         assertFalse(pool.add(expired));
-    }
-
-    @Test
-    public void testAddToFullPool() {
-        for (int i = 0; i < 5; i++) {
-            assertTrue(pool.add(new TestPoolable("test" + i)));
-        }
-        assertEquals(5, pool.size());
-
-        TestPoolable extra = new TestPoolable("extra");
-        assertFalse(pool.add(extra));
-        assertEquals(5, pool.size());
     }
 
     @Test
@@ -360,6 +375,36 @@ public class ObjectPoolTest extends TestBase {
     }
 
     @Test
+    public void testAddWithTimeoutExpiredElement() throws InterruptedException {
+        TestPoolable expired = new TestPoolable("expired", 1, 1);
+        Thread.sleep(10);
+        assertFalse(pool.add(expired, 100, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void testAddWithTimeoutAndAutoDestroyTrue_Success() throws InterruptedException {
+        TestPoolable element = new TestPoolable("test");
+        assertTrue(pool.add(element, 100, TimeUnit.MILLISECONDS, true));
+        assertFalse(element.isDestroyed());
+    }
+
+    @Test
+    public void testAddWithTimeoutAndAutoDestroyFalse_Failure() throws InterruptedException {
+        for (int i = 0; i < 5; i++) {
+            assertTrue(pool.add(new TestPoolable("test" + i)));
+        }
+        TestPoolable extra = new TestPoolable("extra");
+        assertFalse(pool.add(extra, 50, TimeUnit.MILLISECONDS, false));
+        assertFalse(extra.isDestroyed());
+    }
+
+    @Test
+    public void testAddWithTimeoutOnClosedPool() {
+        pool.close();
+        assertThrows(IllegalStateException.class, () -> pool.add(new TestPoolable("test"), 100, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
     public void testTake() {
         TestPoolable poolable = new TestPoolable("test1");
         assertTrue(pool.add(poolable));
@@ -370,6 +415,44 @@ public class ObjectPoolTest extends TestBase {
         assertEquals(0, pool.size());
 
         assertEquals(1, taken.activityPrint().getAccessCount());
+    }
+
+    @Test
+    public void testMemoryMeasure() {
+        ObjectPool.MemoryMeasure<TestPoolable> measure = e -> 100;
+        TestObjectPool memPool = new TestObjectPool(5, measure);
+
+        TestPoolable poolable1 = new TestPoolable("test1");
+        TestPoolable poolable2 = new TestPoolable("test2");
+
+        assertTrue(memPool.add(poolable1));
+        assertEquals(100, memPool.getTotalMemorySize());
+
+        assertTrue(memPool.add(poolable2));
+        assertEquals(200, memPool.getTotalMemorySize());
+
+        TestPoolable taken = memPool.take();
+        assertNotNull(taken);
+        assertEquals(100, memPool.getTotalMemorySize());
+
+        memPool.clear();
+        assertEquals(0, memPool.getTotalMemorySize());
+    }
+
+    // Additional tests for missing coverage
+
+    @Test
+    public void testIsEmpty() {
+        assertTrue(pool.isEmpty());
+        pool.add(new TestPoolable("test1"));
+        assertFalse(pool.isEmpty());
+        pool.take();
+        assertTrue(pool.isEmpty());
+    }
+
+    @Test
+    public void testTakeFromEmptyPool() {
+        assertNull(pool.take());
     }
 
     @Test
@@ -420,57 +503,6 @@ public class ObjectPoolTest extends TestBase {
         assertEquals("delayed", taken.getId());
 
         latch.await(500, TimeUnit.MILLISECONDS);
-    }
-
-    @Test
-    public void testContains() {
-        TestPoolable poolable1 = new TestPoolable("test1");
-        TestPoolable poolable2 = new TestPoolable("test2");
-        TestPoolable poolable3 = new TestPoolable("test3");
-
-        pool.add(poolable1);
-        pool.add(poolable2);
-
-        assertTrue(pool.contains(poolable1));
-        assertTrue(pool.contains(poolable2));
-        assertFalse(pool.contains(poolable3));
-    }
-
-    @Test
-    public void testContainsOnClosedPool() {
-        pool.close();
-        assertThrows(IllegalStateException.class, () -> pool.contains(new TestPoolable("test")));
-    }
-
-    @Test
-    public void testMemoryMeasure() {
-        ObjectPool.MemoryMeasure<TestPoolable> measure = e -> 100;
-        TestObjectPool memPool = new TestObjectPool(5, measure);
-
-        TestPoolable poolable1 = new TestPoolable("test1");
-        TestPoolable poolable2 = new TestPoolable("test2");
-
-        assertTrue(memPool.add(poolable1));
-        assertEquals(100, memPool.getTotalMemorySize());
-
-        assertTrue(memPool.add(poolable2));
-        assertEquals(200, memPool.getTotalMemorySize());
-
-        TestPoolable taken = memPool.take();
-        assertNotNull(taken);
-        assertEquals(100, memPool.getTotalMemorySize());
-
-        memPool.clear();
-        assertEquals(0, memPool.getTotalMemorySize());
-    }
-
-    @Test
-    public void testMemoryMeasureInterface() {
-        ObjectPool.MemoryMeasure<String> stringMeasure = s -> s.length() * 2;
-
-        assertEquals(10, stringMeasure.sizeOf("hello"));
-        assertEquals(0, stringMeasure.sizeOf(""));
-        assertEquals(20, stringMeasure.sizeOf("ten chars!"));
     }
 
     @Test
@@ -526,6 +558,41 @@ public class ObjectPoolTest extends TestBase {
     }
 
     @Test
+    public void testTakeWithTimeoutOnClosedPool() {
+        pool.close();
+        assertThrows(IllegalStateException.class, () -> pool.take(100, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void testContains() {
+        TestPoolable poolable1 = new TestPoolable("test1");
+        TestPoolable poolable2 = new TestPoolable("test2");
+        TestPoolable poolable3 = new TestPoolable("test3");
+
+        pool.add(poolable1);
+        pool.add(poolable2);
+
+        assertTrue(pool.contains(poolable1));
+        assertTrue(pool.contains(poolable2));
+        assertFalse(pool.contains(poolable3));
+    }
+
+    @Test
+    public void testContainsOnClosedPool() {
+        pool.close();
+        assertThrows(IllegalStateException.class, () -> pool.contains(new TestPoolable("test")));
+    }
+
+    @Test
+    public void testMemoryMeasureInterface() {
+        ObjectPool.MemoryMeasure<String> stringMeasure = s -> s.length() * 2;
+
+        assertEquals(10, stringMeasure.sizeOf("hello"));
+        assertEquals(0, stringMeasure.sizeOf(""));
+        assertEquals(20, stringMeasure.sizeOf("ten chars!"));
+    }
+
+    @Test
     public void testVacate() {
         for (int i = 0; i < 5; i++) {
             assertTrue(pool.add(new TestPoolable("test" + i)));
@@ -567,17 +634,6 @@ public class ObjectPoolTest extends TestBase {
         assertEquals(Poolable.Caller.CLOSE, poolable2.getDestroyedByCaller());
     }
 
-    // Additional tests for missing coverage
-
-    @Test
-    public void testIsEmpty() {
-        assertTrue(pool.isEmpty());
-        pool.add(new TestPoolable("test1"));
-        assertFalse(pool.isEmpty());
-        pool.take();
-        assertTrue(pool.isEmpty());
-    }
-
     @Test
     public void testCapacity() {
         assertEquals(5, pool.capacity());
@@ -588,54 +644,6 @@ public class ObjectPoolTest extends TestBase {
         PoolStats stats = pool.stats();
         assertEquals(5, stats.capacity());
         assertEquals(0, stats.size());
-    }
-
-    @Test
-    public void testAddWithAutoDestroyFalse() {
-        for (int i = 0; i < 5; i++) {
-            assertTrue(pool.add(new TestPoolable("test" + i)));
-        }
-
-        TestPoolable extra = new TestPoolable("extra");
-        assertFalse(pool.add(extra, false));
-        assertFalse(extra.isDestroyed());
-    }
-
-    @Test
-    public void testAddWithAutoDestroyTrue_Success() {
-        TestPoolable element = new TestPoolable("test");
-        assertTrue(pool.add(element, true));
-        assertFalse(element.isDestroyed());
-        assertEquals(1, pool.size());
-    }
-
-    @Test
-    public void testTakeFromEmptyPool() {
-        assertNull(pool.take());
-    }
-
-    @Test
-    public void testAddWithTimeoutExpiredElement() throws InterruptedException {
-        TestPoolable expired = new TestPoolable("expired", 1, 1);
-        Thread.sleep(10);
-        assertFalse(pool.add(expired, 100, TimeUnit.MILLISECONDS));
-    }
-
-    @Test
-    public void testAddWithTimeoutAndAutoDestroyTrue_Success() throws InterruptedException {
-        TestPoolable element = new TestPoolable("test");
-        assertTrue(pool.add(element, 100, TimeUnit.MILLISECONDS, true));
-        assertFalse(element.isDestroyed());
-    }
-
-    @Test
-    public void testAddWithTimeoutAndAutoDestroyFalse_Failure() throws InterruptedException {
-        for (int i = 0; i < 5; i++) {
-            assertTrue(pool.add(new TestPoolable("test" + i)));
-        }
-        TestPoolable extra = new TestPoolable("extra");
-        assertFalse(pool.add(extra, 50, TimeUnit.MILLISECONDS, false));
-        assertFalse(extra.isDestroyed());
     }
 
     @Test
@@ -668,18 +676,6 @@ public class ObjectPoolTest extends TestBase {
 
         memPool.evict();
         assertTrue(memPool.getTotalMemorySize() < 500);
-    }
-
-    @Test
-    public void testTakeWithTimeoutOnClosedPool() {
-        pool.close();
-        assertThrows(IllegalStateException.class, () -> pool.take(100, TimeUnit.MILLISECONDS));
-    }
-
-    @Test
-    public void testAddWithTimeoutOnClosedPool() {
-        pool.close();
-        assertThrows(IllegalStateException.class, () -> pool.add(new TestPoolable("test"), 100, TimeUnit.MILLISECONDS));
     }
 
     @Test

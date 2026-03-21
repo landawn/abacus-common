@@ -5,12 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class DoubleSupplierTest extends TestBase {
 
     @Test
@@ -42,6 +40,49 @@ public class DoubleSupplierTest extends TestBase {
     }
 
     @Test
+    public void testRANDOM() {
+        DoubleSupplier supplier = DoubleSupplier.RANDOM;
+        double result = supplier.getAsDouble();
+        assertTrue(result >= 0.0 && result < 1.0);
+    }
+
+    @Test
+    public void testGetAsDouble_WithCalculation() {
+        DoubleSupplier supplier = () -> 10.0 * 2.5;
+        double result = supplier.getAsDouble();
+        assertEquals(25.0, result, 0.0001);
+    }
+
+    @Test
+    public void testGetAsDouble_WithExternalState() {
+        final double[] counter = { 0.0 };
+        DoubleSupplier supplier = () -> {
+            counter[0] += 1.0;
+            return counter[0];
+        };
+
+        assertEquals(1.0, supplier.getAsDouble(), 0.0001);
+        assertEquals(2.0, supplier.getAsDouble(), 0.0001);
+        assertEquals(3.0, supplier.getAsDouble(), 0.0001);
+    }
+
+    @Test
+    public void testGetAsDouble_WithMathOperations() {
+        DoubleSupplier supplier = () -> Math.PI;
+        double result = supplier.getAsDouble();
+        assertEquals(Math.PI, result, 0.0001);
+    }
+
+    @Test
+    public void testJavaUtilFunctionCompatibility() {
+        DoubleSupplier supplier = () -> 5.5;
+        java.util.function.DoubleSupplier javaSupplier = supplier;
+
+        double result = javaSupplier.getAsDouble();
+        assertEquals(5.5, result, 0.0001);
+    }
+
+    @Test
     public void testZERO() {
         DoubleSupplier supplier = DoubleSupplier.ZERO;
         double result = supplier.getAsDouble();
@@ -54,13 +95,6 @@ public class DoubleSupplierTest extends TestBase {
         assertEquals(0.0, supplier.getAsDouble(), 0.0001);
         assertEquals(0.0, supplier.getAsDouble(), 0.0001);
         assertEquals(0.0, supplier.getAsDouble(), 0.0001);
-    }
-
-    @Test
-    public void testRANDOM() {
-        DoubleSupplier supplier = DoubleSupplier.RANDOM;
-        double result = supplier.getAsDouble();
-        assertTrue(result >= 0.0 && result < 1.0);
     }
 
     @Test
@@ -101,42 +135,6 @@ public class DoubleSupplierTest extends TestBase {
 
         DoubleSupplier nanSupplier = () -> Double.NaN;
         assertTrue(Double.isNaN(nanSupplier.getAsDouble()));
-    }
-
-    @Test
-    public void testGetAsDouble_WithCalculation() {
-        DoubleSupplier supplier = () -> 10.0 * 2.5;
-        double result = supplier.getAsDouble();
-        assertEquals(25.0, result, 0.0001);
-    }
-
-    @Test
-    public void testGetAsDouble_WithExternalState() {
-        final double[] counter = { 0.0 };
-        DoubleSupplier supplier = () -> {
-            counter[0] += 1.0;
-            return counter[0];
-        };
-
-        assertEquals(1.0, supplier.getAsDouble(), 0.0001);
-        assertEquals(2.0, supplier.getAsDouble(), 0.0001);
-        assertEquals(3.0, supplier.getAsDouble(), 0.0001);
-    }
-
-    @Test
-    public void testGetAsDouble_WithMathOperations() {
-        DoubleSupplier supplier = () -> Math.PI;
-        double result = supplier.getAsDouble();
-        assertEquals(Math.PI, result, 0.0001);
-    }
-
-    @Test
-    public void testJavaUtilFunctionCompatibility() {
-        DoubleSupplier supplier = () -> 5.5;
-        java.util.function.DoubleSupplier javaSupplier = supplier;
-
-        double result = javaSupplier.getAsDouble();
-        assertEquals(5.5, result, 0.0001);
     }
 
     @Test

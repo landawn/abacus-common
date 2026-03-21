@@ -6,12 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ObjByteConsumerTest extends TestBase {
 
     @Test
@@ -28,21 +26,6 @@ public class ObjByteConsumerTest extends TestBase {
     }
 
     @Test
-    public void testAcceptWithLambda() {
-        final byte[] byteResult = new byte[1];
-        final String[] stringResult = new String[1];
-        ObjByteConsumer<String> consumer = (t, value) -> {
-            byteResult[0] = (byte) (value * 2);
-            stringResult[0] = t.toUpperCase();
-        };
-
-        consumer.accept("hello", (byte) 7);
-
-        assertEquals((byte) 14, byteResult[0]);
-        assertEquals("HELLO", stringResult[0]);
-    }
-
-    @Test
     public void testAcceptWithAnonymousClass() {
         final List<String> result = new ArrayList<>();
         ObjByteConsumer<String> consumer = new ObjByteConsumer<>() {
@@ -56,6 +39,33 @@ public class ObjByteConsumerTest extends TestBase {
 
         assertEquals(1, result.size());
         assertEquals("test[42]", result.get(0));
+    }
+
+    @Test
+    public void testSideEffects() {
+        final int[] sum = { 0 };
+        ObjByteConsumer<String> consumer = (t, value) -> sum[0] += value;
+
+        consumer.accept("a", (byte) 10);
+        consumer.accept("b", (byte) 20);
+        consumer.accept("c", (byte) 30);
+
+        assertEquals(60, sum[0]);
+    }
+
+    @Test
+    public void testAcceptWithLambda() {
+        final byte[] byteResult = new byte[1];
+        final String[] stringResult = new String[1];
+        ObjByteConsumer<String> consumer = (t, value) -> {
+            byteResult[0] = (byte) (value * 2);
+            stringResult[0] = t.toUpperCase();
+        };
+
+        consumer.accept("hello", (byte) 7);
+
+        assertEquals((byte) 14, byteResult[0]);
+        assertEquals("HELLO", stringResult[0]);
     }
 
     @Test
@@ -95,18 +105,6 @@ public class ObjByteConsumerTest extends TestBase {
 
         assertEquals(1, result.size());
         assertEquals("null:5", result.get(0));
-    }
-
-    @Test
-    public void testSideEffects() {
-        final int[] sum = { 0 };
-        ObjByteConsumer<String> consumer = (t, value) -> sum[0] += value;
-
-        consumer.accept("a", (byte) 10);
-        consumer.accept("b", (byte) 20);
-        consumer.accept("c", (byte) 30);
-
-        assertEquals(60, sum[0]);
     }
 
     @Test

@@ -4,12 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class MediaTypeTest extends TestBase {
 
     @Test
@@ -40,6 +38,18 @@ public class MediaTypeTest extends TestBase {
     @Test
     public void testIntValue_RECORD() {
         assertEquals(5, MediaType.RECORD.intValue());
+    }
+
+    @Test
+    public void testIntValue_uniqueness() {
+        MediaType[] types = MediaType.values();
+        for (int i = 0; i < types.length; i++) {
+            for (int j = i + 1; j < types.length; j++) {
+                if (types[i].intValue() == types[j].intValue()) {
+                    throw new AssertionError("Duplicate int value: " + types[i] + " and " + types[j]);
+                }
+            }
+        }
     }
 
     @Test
@@ -76,21 +86,6 @@ public class MediaTypeTest extends TestBase {
     public void testValueOf_5() {
         MediaType type = MediaType.valueOf(5);
         assertEquals(MediaType.RECORD, type);
-    }
-
-    @Test
-    public void testValueOf_invalid_negative() {
-        assertThrows(IllegalArgumentException.class, () -> MediaType.valueOf(-1));
-    }
-
-    @Test
-    public void testValueOf_invalid_tooLarge() {
-        assertThrows(IllegalArgumentException.class, () -> MediaType.valueOf(6));
-    }
-
-    @Test
-    public void testValueOf_invalid_100() {
-        assertThrows(IllegalArgumentException.class, () -> MediaType.valueOf(100));
     }
 
     @Test
@@ -172,6 +167,31 @@ public class MediaTypeTest extends TestBase {
     }
 
     @Test
+    public void testValueOf_invalid_negative() {
+        assertThrows(IllegalArgumentException.class, () -> MediaType.valueOf(-1));
+    }
+
+    @Test
+    public void testValueOf_invalid_tooLarge() {
+        assertThrows(IllegalArgumentException.class, () -> MediaType.valueOf(6));
+    }
+
+    @Test
+    public void testValueOf_invalid_100() {
+        assertThrows(IllegalArgumentException.class, () -> MediaType.valueOf(100));
+    }
+
+    @Test
+    public void testIntegration_serializationDeserialization() {
+        MediaType[] types = MediaType.values();
+        for (MediaType type : types) {
+            int serialized = type.intValue();
+            MediaType deserialized = MediaType.valueOf(serialized);
+            assertEquals(type, deserialized);
+        }
+    }
+
+    @Test
     public void testValues() {
         MediaType[] types = MediaType.values();
         assertNotNull(types);
@@ -190,18 +210,6 @@ public class MediaTypeTest extends TestBase {
     }
 
     @Test
-    public void testIntValue_uniqueness() {
-        MediaType[] types = MediaType.values();
-        for (int i = 0; i < types.length; i++) {
-            for (int j = i + 1; j < types.length; j++) {
-                if (types[i].intValue() == types[j].intValue()) {
-                    throw new AssertionError("Duplicate int value: " + types[i] + " and " + types[j]);
-                }
-            }
-        }
-    }
-
-    @Test
     public void testSwitchStatement() {
         MediaType type = MediaType.VIDEO;
         String result = switch (type) {
@@ -213,15 +221,5 @@ public class MediaTypeTest extends TestBase {
             case RECORD -> "record";
         };
         assertEquals("video", result);
-    }
-
-    @Test
-    public void testIntegration_serializationDeserialization() {
-        MediaType[] types = MediaType.values();
-        for (MediaType type : types) {
-            int serialized = type.intValue();
-            MediaType deserialized = MediaType.valueOf(serialized);
-            assertEquals(type, deserialized);
-        }
     }
 }

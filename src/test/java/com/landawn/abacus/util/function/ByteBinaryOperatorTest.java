@@ -3,13 +3,15 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ByteBinaryOperatorTest extends TestBase {
+
+    private static byte addBytes(byte left, byte right) {
+        return (byte) (left + right);
+    }
 
     @Test
     public void testApplyAsByte() {
@@ -25,19 +27,6 @@ public class ByteBinaryOperatorTest extends TestBase {
 
         assertEquals((byte) 50, multiply.applyAsByte((byte) 5, (byte) 10));
         assertEquals((byte) -21, multiply.applyAsByte((byte) -3, (byte) 7));
-    }
-
-    @Test
-    public void testApplyAsByteWithAnonymousClass() {
-        ByteBinaryOperator max = new ByteBinaryOperator() {
-            @Override
-            public byte applyAsByte(byte left, byte right) {
-                return left > right ? left : right;
-            }
-        };
-
-        assertEquals((byte) 10, max.applyAsByte((byte) 5, (byte) 10));
-        assertEquals((byte) 7, max.applyAsByte((byte) -3, (byte) 7));
     }
 
     @Test
@@ -74,6 +63,26 @@ public class ByteBinaryOperatorTest extends TestBase {
     }
 
     @Test
+    public void testMethodReference() {
+        ByteBinaryOperator add = ByteBinaryOperatorTest::addBytes;
+
+        assertEquals((byte) 15, add.applyAsByte((byte) 5, (byte) 10));
+    }
+
+    @Test
+    public void testApplyAsByteWithAnonymousClass() {
+        ByteBinaryOperator max = new ByteBinaryOperator() {
+            @Override
+            public byte applyAsByte(byte left, byte right) {
+                return left > right ? left : right;
+            }
+        };
+
+        assertEquals((byte) 10, max.applyAsByte((byte) 5, (byte) 10));
+        assertEquals((byte) 7, max.applyAsByte((byte) -3, (byte) 7));
+    }
+
+    @Test
     public void testMin() {
         ByteBinaryOperator min = (left, right) -> left < right ? left : right;
 
@@ -100,18 +109,7 @@ public class ByteBinaryOperatorTest extends TestBase {
     }
 
     @Test
-    public void testMethodReference() {
-        ByteBinaryOperator add = ByteBinaryOperatorTest::addBytes;
-
-        assertEquals((byte) 15, add.applyAsByte((byte) 5, (byte) 10));
-    }
-
-    @Test
     public void testFunctionalInterface() {
         assertNotNull(ByteBinaryOperator.class.getAnnotation(FunctionalInterface.class));
-    }
-
-    private static byte addBytes(byte left, byte right) {
-        return (byte) (left + right);
     }
 }

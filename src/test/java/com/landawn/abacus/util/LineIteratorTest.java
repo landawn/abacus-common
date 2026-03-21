@@ -23,35 +23,16 @@ import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedIOException;
 
-@Tag("2025")
 public class LineIteratorTest extends TestBase {
 
     @TempDir
     File tempDir;
-
-    @Test
-    @DisplayName("Test LineIterator(Reader) constructor with valid Reader")
-    public void testConstructorWithValidReader() {
-        Reader reader = new StringReader("line1\nline2\nline3");
-        LineIterator iterator = new LineIterator(reader);
-
-        assertNotNull(iterator);
-        assertTrue(iterator.hasNext());
-        iterator.close();
-    }
-
-    @Test
-    @DisplayName("Test LineIterator(Reader) constructor with null Reader throws exception")
-    public void testConstructorWithNullReader() {
-        assertThrows(IllegalArgumentException.class, () -> new LineIterator(null));
-    }
 
     @Test
     @DisplayName("Test that constructor wraps non-BufferedReader")
@@ -75,6 +56,244 @@ public class LineIteratorTest extends TestBase {
         assertEquals("line1", iterator.next());
         assertEquals("line2", iterator.next());
         assertFalse(iterator.hasNext());
+
+        iterator.close();
+    }
+
+    @Test
+    public void testConstructorWithReader() {
+        StringReader reader = new StringReader("line1\nline2\nline3");
+        LineIterator iterator = new LineIterator(reader);
+
+        Assertions.assertTrue(iterator.hasNext());
+        Assertions.assertEquals("line1", iterator.next());
+    }
+
+    @Test
+    @DisplayName("Test LineIterator(Reader) constructor with valid Reader")
+    public void testConstructorWithValidReader() {
+        Reader reader = new StringReader("line1\nline2\nline3");
+        LineIterator iterator = new LineIterator(reader);
+
+        assertNotNull(iterator);
+        assertTrue(iterator.hasNext());
+        iterator.close();
+    }
+
+    @Test
+    public void testEmptyLines() {
+        StringReader reader = new StringReader("\n\nline3\n\n");
+        LineIterator iterator = new LineIterator(reader);
+
+        Assertions.assertEquals("", iterator.next());
+        Assertions.assertEquals("", iterator.next());
+        Assertions.assertEquals("line3", iterator.next());
+        Assertions.assertEquals("", iterator.next());
+        Assertions.assertFalse(iterator.hasNext());
+
+        iterator.close();
+    }
+
+    @Test
+    @DisplayName("Test LineIterator(Reader) constructor with null Reader throws exception")
+    public void testConstructorWithNullReader() {
+        assertThrows(IllegalArgumentException.class, () -> new LineIterator(null));
+    }
+
+    @Test
+    @DisplayName("Test of(InputStream) with valid input stream")
+    public void testOfInputStreamWithValidStream() {
+        InputStream inputStream = new ByteArrayInputStream("line1\nline2\nline3".getBytes(StandardCharsets.UTF_8));
+
+        try (LineIterator iterator = LineIterator.of(inputStream)) {
+            List<String> lines = new ArrayList<>();
+            while (iterator.hasNext()) {
+                lines.add(iterator.next());
+            }
+
+            assertEquals(3, lines.size());
+            assertEquals("line1", lines.get(0));
+            assertEquals("line2", lines.get(1));
+            assertEquals("line3", lines.get(2));
+        }
+    }
+
+    @Test
+    @DisplayName("Test of(InputStream, Charset) with UTF-8 encoding")
+    public void testOfInputStreamWithCharset() {
+        String content = "First Line\nSecond Line\nThird Line";
+        InputStream inputStream = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
+
+        try (LineIterator iterator = LineIterator.of(inputStream, StandardCharsets.UTF_8)) {
+            assertEquals("First Line", iterator.next());
+            assertEquals("Second Line", iterator.next());
+            assertEquals("Third Line", iterator.next());
+            assertFalse(iterator.hasNext());
+        }
+    }
+
+    @Test
+    @DisplayName("Test iteration with while loop")
+    public void testIterationWithWhileLoop() {
+        Reader reader = new StringReader("a\nb\nc\nd\ne");
+        LineIterator iterator = LineIterator.of(reader);
+
+        List<String> lines = new ArrayList<>();
+        while (iterator.hasNext()) {
+            lines.add(iterator.next());
+        }
+
+        assertEquals(5, lines.size());
+        assertEquals("a", lines.get(0));
+        assertEquals("e", lines.get(4));
+
+        iterator.close();
+    }
+
+    @Test
+    @DisplayName("Test forEachRemaining() processes all remaining lines")
+    public void testForEachRemaining() {
+        Reader reader = new StringReader("1\n2\n3\n4\n5");
+        LineIterator iterator = LineIterator.of(reader);
+
+        List<String> lines = new ArrayList<>();
+        iterator.forEachRemaining(lines::add);
+
+        assertEquals(5, lines.size());
+        assertEquals("1", lines.get(0));
+        assertEquals("5", lines.get(4));
+
+        iterator.close();
+    }
+
+    @Test
+    @DisplayName("Test with special characters in lines")
+    public void testWithSpecialCharacters() {
+        Reader reader = new StringReader("line with\ttab\nline with \"quotes\"\nline with 'apostrophe'");
+        LineIterator iterator = LineIterator.of(reader);
+
+        assertEquals("line with\ttab", iterator.next());
+        assertEquals("line with \"quotes\"", iterator.next());
+        assertEquals("line with 'apostrophe'", iterator.next());
+
+        iterator.close();
+    }
+
+    @Test
+    @DisplayName("Test with only newlines file")
+    public void testWithOnlyNewlines() {
+        Reader reader = new StringReader("\n\n\n");
+        LineIterator iterator = LineIterator.of(reader);
+
+        assertEquals("", iterator.next());
+        assertEquals("", iterator.next());
+        assertEquals("", iterator.next());
+        assertFalse(iterator.hasNext());
+
+        iterator.close();
+    }
+
+    @Test
+    @DisplayName("Test stream() method if available")
+    public void testStreamMethod() {
+        Reader reader = new StringReader("a\nb\nc\nd\ne");
+        LineIterator iterator = LineIterator.of(reader);
+
+        List<String> lines = new ArrayList<>();
+        iterator.stream().forEach(lines::add);
+
+        assertEquals(5, lines.size());
+        assertTrue(lines.contains("a"));
+        assertTrue(lines.contains("e"));
+
+        iterator.close();
+    }
+
+    @Test
+    public void testOfInputStream() {
+        String content = "line1\nline2\nline3";
+        ByteArrayInputStream is = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
+
+        try (LineIterator iterator = LineIterator.of(is)) {
+            Assertions.assertTrue(iterator.hasNext());
+            Assertions.assertEquals("line1", iterator.next());
+        }
+    }
+
+    @Test
+    public void testOfReader() {
+        StringReader reader = new StringReader("line1\nline2\nline3");
+
+        try (LineIterator iterator = LineIterator.of(reader)) {
+            Assertions.assertTrue(iterator.hasNext());
+            Assertions.assertEquals("line1", iterator.next());
+        }
+    }
+
+    @Test
+    @DisplayName("Test of(InputStream) with empty stream")
+    public void testOfInputStreamWithEmptyStream() {
+        InputStream inputStream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
+
+        try (LineIterator iterator = LineIterator.of(inputStream)) {
+            assertFalse(iterator.hasNext());
+        }
+    }
+
+    @Test
+    @DisplayName("Test of(InputStream, Charset) with null charset")
+    public void testOfInputStreamWithNullCharset() {
+        InputStream inputStream = new ByteArrayInputStream("test\nline".getBytes(StandardCharsets.UTF_8));
+
+        try (LineIterator iterator = LineIterator.of(inputStream, Charsets.UTF_8)) {
+            assertTrue(iterator.hasNext());
+            assertEquals("test", iterator.next());
+        }
+    }
+
+    @Test
+    @DisplayName("Test of(Reader) with valid reader")
+    public void testOfReaderWithValidReader() {
+        Reader reader = new StringReader("line1\nline2\nline3");
+
+        try (LineIterator iterator = LineIterator.of(reader)) {
+            assertNotNull(iterator);
+
+            List<String> lines = new ArrayList<>();
+            iterator.forEachRemaining(lines::add);
+
+            assertEquals(3, lines.size());
+            assertEquals("line1", lines.get(0));
+            assertEquals("line2", lines.get(1));
+            assertEquals("line3", lines.get(2));
+        }
+    }
+
+    @Test
+    @DisplayName("Test of(Reader) with empty reader")
+    public void testOfReaderWithEmptyReader() {
+        Reader reader = new StringReader("");
+
+        try (LineIterator iterator = LineIterator.of(reader)) {
+            assertFalse(iterator.hasNext());
+        }
+    }
+
+    @Test
+    @DisplayName("Test forEachRemaining() after consuming some lines")
+    public void testForEachRemainingAfterPartialConsumption() {
+        Reader reader = new StringReader("1\n2\n3\n4\n5");
+        LineIterator iterator = LineIterator.of(reader);
+
+        assertEquals("1", iterator.next());
+        assertEquals("2", iterator.next());
+
+        List<String> remainingLines = new ArrayList<>();
+        iterator.forEachRemaining(remainingLines::add);
+
+        assertEquals(3, remainingLines.size());
+        assertEquals("3", remainingLines.get(0));
+        assertEquals("5", remainingLines.get(2));
 
         iterator.close();
     }
@@ -156,62 +375,9 @@ public class LineIteratorTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test of(InputStream) with valid input stream")
-    public void testOfInputStreamWithValidStream() {
-        InputStream inputStream = new ByteArrayInputStream("line1\nline2\nline3".getBytes(StandardCharsets.UTF_8));
-
-        try (LineIterator iterator = LineIterator.of(inputStream)) {
-            List<String> lines = new ArrayList<>();
-            while (iterator.hasNext()) {
-                lines.add(iterator.next());
-            }
-
-            assertEquals(3, lines.size());
-            assertEquals("line1", lines.get(0));
-            assertEquals("line2", lines.get(1));
-            assertEquals("line3", lines.get(2));
-        }
-    }
-
-    @Test
-    @DisplayName("Test of(InputStream) with empty stream")
-    public void testOfInputStreamWithEmptyStream() {
-        InputStream inputStream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
-
-        try (LineIterator iterator = LineIterator.of(inputStream)) {
-            assertFalse(iterator.hasNext());
-        }
-    }
-
-    @Test
     @DisplayName("Test of(InputStream) with null stream throws exception")
     public void testOfInputStream_NullStream() {
         assertThrows(IllegalArgumentException.class, () -> LineIterator.of((InputStream) null));
-    }
-
-    @Test
-    @DisplayName("Test of(InputStream, Charset) with UTF-8 encoding")
-    public void testOfInputStreamWithCharset() {
-        String content = "First Line\nSecond Line\nThird Line";
-        InputStream inputStream = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
-
-        try (LineIterator iterator = LineIterator.of(inputStream, StandardCharsets.UTF_8)) {
-            assertEquals("First Line", iterator.next());
-            assertEquals("Second Line", iterator.next());
-            assertEquals("Third Line", iterator.next());
-            assertFalse(iterator.hasNext());
-        }
-    }
-
-    @Test
-    @DisplayName("Test of(InputStream, Charset) with null charset")
-    public void testOfInputStreamWithNullCharset() {
-        InputStream inputStream = new ByteArrayInputStream("test\nline".getBytes(StandardCharsets.UTF_8));
-
-        try (LineIterator iterator = LineIterator.of(inputStream, Charsets.UTF_8)) {
-            assertTrue(iterator.hasNext());
-            assertEquals("test", iterator.next());
-        }
     }
 
     @Test
@@ -221,217 +387,9 @@ public class LineIteratorTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test of(Reader) with valid reader")
-    public void testOfReaderWithValidReader() {
-        Reader reader = new StringReader("line1\nline2\nline3");
-
-        try (LineIterator iterator = LineIterator.of(reader)) {
-            assertNotNull(iterator);
-
-            List<String> lines = new ArrayList<>();
-            iterator.forEachRemaining(lines::add);
-
-            assertEquals(3, lines.size());
-            assertEquals("line1", lines.get(0));
-            assertEquals("line2", lines.get(1));
-            assertEquals("line3", lines.get(2));
-        }
-    }
-
-    @Test
-    @DisplayName("Test of(Reader) with empty reader")
-    public void testOfReaderWithEmptyReader() {
-        Reader reader = new StringReader("");
-
-        try (LineIterator iterator = LineIterator.of(reader)) {
-            assertFalse(iterator.hasNext());
-        }
-    }
-
-    @Test
     @DisplayName("Test of(Reader) with null reader throws exception")
     public void testOfReaderWithNullReader() {
         assertThrows(IllegalArgumentException.class, () -> LineIterator.of((Reader) null));
-    }
-
-    @Test
-    @DisplayName("Test hasNext() returns true when lines are available")
-    public void testHasNextWithAvailableLines() {
-        Reader reader = new StringReader("line1\nline2");
-        LineIterator iterator = LineIterator.of(reader);
-
-        assertTrue(iterator.hasNext());
-        iterator.next();
-        assertTrue(iterator.hasNext());
-        iterator.next();
-        assertFalse(iterator.hasNext());
-
-        iterator.close();
-    }
-
-    @Test
-    @DisplayName("Test hasNext() returns false when no lines available")
-    public void testHasNextWithNoLines() {
-        Reader reader = new StringReader("");
-        LineIterator iterator = LineIterator.of(reader);
-
-        assertFalse(iterator.hasNext());
-        iterator.close();
-    }
-
-    @Test
-    @DisplayName("Test hasNext() can be called multiple times")
-    public void testHasNextMultipleCalls() {
-        Reader reader = new StringReader("line1");
-        LineIterator iterator = LineIterator.of(reader);
-
-        assertTrue(iterator.hasNext());
-        assertTrue(iterator.hasNext());
-        assertTrue(iterator.hasNext());
-
-        assertEquals("line1", iterator.next());
-        assertFalse(iterator.hasNext());
-        assertFalse(iterator.hasNext());
-
-        iterator.close();
-    }
-
-    @Test
-    @DisplayName("Test next() returns lines in order")
-    public void testNextReturnsLinesInOrder() {
-        Reader reader = new StringReader("first\nsecond\nthird");
-        LineIterator iterator = LineIterator.of(reader);
-
-        assertEquals("first", iterator.next());
-        assertEquals("second", iterator.next());
-        assertEquals("third", iterator.next());
-
-        iterator.close();
-    }
-
-    @Test
-    @DisplayName("Test next() throws NoSuchElementException when no more lines")
-    public void testNextThrowsWhenNoMoreLines() {
-        Reader reader = new StringReader("only one line");
-        LineIterator iterator = LineIterator.of(reader);
-
-        iterator.next();
-        assertThrows(NoSuchElementException.class, () -> iterator.next());
-
-        iterator.close();
-    }
-
-    @Test
-    @DisplayName("Test next() on empty iterator throws NoSuchElementException")
-    public void testNextOnEmptyIterator() {
-        Reader reader = new StringReader("");
-        LineIterator iterator = LineIterator.of(reader);
-
-        assertThrows(NoSuchElementException.class, () -> iterator.next());
-
-        iterator.close();
-    }
-
-    @Test
-    @DisplayName("Test next() handles empty lines correctly")
-    public void testNextHandlesEmptyLines() {
-        Reader reader = new StringReader("line1\n\nline3");
-        LineIterator iterator = LineIterator.of(reader);
-
-        assertEquals("line1", iterator.next());
-        assertEquals("", iterator.next());
-        assertEquals("line3", iterator.next());
-
-        iterator.close();
-    }
-
-    @Test
-    @DisplayName("Test close() closes the underlying reader")
-    public void testCloseClosesUnderlyingReader() {
-        Reader reader = new StringReader("line1\nline2\nline3");
-        LineIterator iterator = LineIterator.of(reader);
-
-        assertTrue(iterator.hasNext());
-        iterator.close();
-
-        assertFalse(iterator.hasNext());
-    }
-
-    @Test
-    @DisplayName("Test close() can be called multiple times safely")
-    public void testCloseMultipleTimes() {
-        Reader reader = new StringReader("line1");
-        LineIterator iterator = LineIterator.of(reader);
-
-        assertDoesNotThrow(() -> {
-            iterator.close();
-            iterator.close();
-            iterator.close();
-        });
-    }
-
-    @Test
-    @DisplayName("Test close() in try-with-resources")
-    public void testCloseWithTryWithResources() {
-        assertDoesNotThrow(() -> {
-            try (LineIterator iterator = LineIterator.of(new StringReader("line1\nline2"))) {
-                assertTrue(iterator.hasNext());
-                iterator.next();
-            }
-        });
-    }
-
-    @Test
-    @DisplayName("Test iteration with while loop")
-    public void testIterationWithWhileLoop() {
-        Reader reader = new StringReader("a\nb\nc\nd\ne");
-        LineIterator iterator = LineIterator.of(reader);
-
-        List<String> lines = new ArrayList<>();
-        while (iterator.hasNext()) {
-            lines.add(iterator.next());
-        }
-
-        assertEquals(5, lines.size());
-        assertEquals("a", lines.get(0));
-        assertEquals("e", lines.get(4));
-
-        iterator.close();
-    }
-
-    @Test
-    @DisplayName("Test forEachRemaining() processes all remaining lines")
-    public void testForEachRemaining() {
-        Reader reader = new StringReader("1\n2\n3\n4\n5");
-        LineIterator iterator = LineIterator.of(reader);
-
-        List<String> lines = new ArrayList<>();
-        iterator.forEachRemaining(lines::add);
-
-        assertEquals(5, lines.size());
-        assertEquals("1", lines.get(0));
-        assertEquals("5", lines.get(4));
-
-        iterator.close();
-    }
-
-    @Test
-    @DisplayName("Test forEachRemaining() after consuming some lines")
-    public void testForEachRemainingAfterPartialConsumption() {
-        Reader reader = new StringReader("1\n2\n3\n4\n5");
-        LineIterator iterator = LineIterator.of(reader);
-
-        assertEquals("1", iterator.next());
-        assertEquals("2", iterator.next());
-
-        List<String> remainingLines = new ArrayList<>();
-        iterator.forEachRemaining(remainingLines::add);
-
-        assertEquals(3, remainingLines.size());
-        assertEquals("3", remainingLines.get(0));
-        assertEquals("5", remainingLines.get(2));
-
-        iterator.close();
     }
 
     @Test
@@ -528,19 +486,6 @@ public class LineIteratorTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test with special characters in lines")
-    public void testWithSpecialCharacters() {
-        Reader reader = new StringReader("line with\ttab\nline with \"quotes\"\nline with 'apostrophe'");
-        LineIterator iterator = LineIterator.of(reader);
-
-        assertEquals("line with\ttab", iterator.next());
-        assertEquals("line with \"quotes\"", iterator.next());
-        assertEquals("line with 'apostrophe'", iterator.next());
-
-        iterator.close();
-    }
-
-    @Test
     @DisplayName("Test with Unicode characters")
     public void testWithUnicodeCharacters() throws IOException {
         File testFile = new File(tempDir, "unicode.txt");
@@ -552,57 +497,6 @@ public class LineIteratorTest extends TestBase {
             assertEquals("Боже мой", iterator.next());
             assertEquals("日本語", iterator.next());
         }
-    }
-
-    @Test
-    @DisplayName("Test with only newlines file")
-    public void testWithOnlyNewlines() {
-        Reader reader = new StringReader("\n\n\n");
-        LineIterator iterator = LineIterator.of(reader);
-
-        assertEquals("", iterator.next());
-        assertEquals("", iterator.next());
-        assertEquals("", iterator.next());
-        assertFalse(iterator.hasNext());
-
-        iterator.close();
-    }
-
-    @Test
-    @DisplayName("Test stream() method if available")
-    public void testStreamMethod() {
-        Reader reader = new StringReader("a\nb\nc\nd\ne");
-        LineIterator iterator = LineIterator.of(reader);
-
-        List<String> lines = new ArrayList<>();
-        iterator.stream().forEach(lines::add);
-
-        assertEquals(5, lines.size());
-        assertTrue(lines.contains("a"));
-        assertTrue(lines.contains("e"));
-
-        iterator.close();
-    }
-
-    @Test
-    @DisplayName("Test concurrent close() calls")
-    public void testConcurrentCloseCalls() throws Exception {
-        Reader reader = new StringReader("line1\nline2\nline3");
-        LineIterator iterator = LineIterator.of(reader);
-
-        Thread t1 = new Thread(() -> iterator.close());
-        Thread t2 = new Thread(() -> iterator.close());
-        Thread t3 = new Thread(() -> iterator.close());
-
-        t1.start();
-        t2.start();
-        t3.start();
-
-        t1.join();
-        t2.join();
-        t3.join();
-
-        assertFalse(iterator.hasNext());
     }
 
     @Test
@@ -632,15 +526,6 @@ public class LineIteratorTest extends TestBase {
     }
 
     @Test
-    public void testConstructorWithReader() {
-        StringReader reader = new StringReader("line1\nline2\nline3");
-        LineIterator iterator = new LineIterator(reader);
-
-        Assertions.assertTrue(iterator.hasNext());
-        Assertions.assertEquals("line1", iterator.next());
-    }
-
-    @Test
     public void testOfFile() throws IOException {
         File tempFile = File.createTempFile("test", ".txt");
         try (FileWriter writer = new FileWriter(tempFile)) {
@@ -656,24 +541,28 @@ public class LineIteratorTest extends TestBase {
     }
 
     @Test
-    public void testOfInputStream() {
-        String content = "line1\nline2\nline3";
-        ByteArrayInputStream is = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
+    @DisplayName("Test hasNext() returns true when lines are available")
+    public void testHasNextWithAvailableLines() {
+        Reader reader = new StringReader("line1\nline2");
+        LineIterator iterator = LineIterator.of(reader);
 
-        try (LineIterator iterator = LineIterator.of(is)) {
-            Assertions.assertTrue(iterator.hasNext());
-            Assertions.assertEquals("line1", iterator.next());
-        }
+        assertTrue(iterator.hasNext());
+        iterator.next();
+        assertTrue(iterator.hasNext());
+        iterator.next();
+        assertFalse(iterator.hasNext());
+
+        iterator.close();
     }
 
     @Test
-    public void testOfReader() {
-        StringReader reader = new StringReader("line1\nline2\nline3");
+    @DisplayName("Test hasNext() returns false when no lines available")
+    public void testHasNextWithNoLines() {
+        Reader reader = new StringReader("");
+        LineIterator iterator = LineIterator.of(reader);
 
-        try (LineIterator iterator = LineIterator.of(reader)) {
-            Assertions.assertTrue(iterator.hasNext());
-            Assertions.assertEquals("line1", iterator.next());
-        }
+        assertFalse(iterator.hasNext());
+        iterator.close();
     }
 
     @Test
@@ -691,6 +580,36 @@ public class LineIteratorTest extends TestBase {
     }
 
     @Test
+    @DisplayName("Test hasNext() can be called multiple times")
+    public void testHasNextMultipleCalls() {
+        Reader reader = new StringReader("line1");
+        LineIterator iterator = LineIterator.of(reader);
+
+        assertTrue(iterator.hasNext());
+        assertTrue(iterator.hasNext());
+        assertTrue(iterator.hasNext());
+
+        assertEquals("line1", iterator.next());
+        assertFalse(iterator.hasNext());
+        assertFalse(iterator.hasNext());
+
+        iterator.close();
+    }
+
+    @Test
+    @DisplayName("Test next() returns lines in order")
+    public void testNextReturnsLinesInOrder() {
+        Reader reader = new StringReader("first\nsecond\nthird");
+        LineIterator iterator = LineIterator.of(reader);
+
+        assertEquals("first", iterator.next());
+        assertEquals("second", iterator.next());
+        assertEquals("third", iterator.next());
+
+        iterator.close();
+    }
+
+    @Test
     public void testNext() {
         StringReader reader = new StringReader("line1\nline2\nline3");
         LineIterator iterator = new LineIterator(reader);
@@ -698,6 +617,42 @@ public class LineIteratorTest extends TestBase {
         Assertions.assertEquals("line1", iterator.next());
         Assertions.assertEquals("line2", iterator.next());
         Assertions.assertEquals("line3", iterator.next());
+
+        iterator.close();
+    }
+
+    @Test
+    @DisplayName("Test next() handles empty lines correctly")
+    public void testNextHandlesEmptyLines() {
+        Reader reader = new StringReader("line1\n\nline3");
+        LineIterator iterator = LineIterator.of(reader);
+
+        assertEquals("line1", iterator.next());
+        assertEquals("", iterator.next());
+        assertEquals("line3", iterator.next());
+
+        iterator.close();
+    }
+
+    @Test
+    @DisplayName("Test next() throws NoSuchElementException when no more lines")
+    public void testNextThrowsWhenNoMoreLines() {
+        Reader reader = new StringReader("only one line");
+        LineIterator iterator = LineIterator.of(reader);
+
+        iterator.next();
+        assertThrows(NoSuchElementException.class, () -> iterator.next());
+
+        iterator.close();
+    }
+
+    @Test
+    @DisplayName("Test next() on empty iterator throws NoSuchElementException")
+    public void testNextOnEmptyIterator() {
+        Reader reader = new StringReader("");
+        LineIterator iterator = LineIterator.of(reader);
+
+        assertThrows(NoSuchElementException.class, () -> iterator.next());
 
         iterator.close();
     }
@@ -717,6 +672,18 @@ public class LineIteratorTest extends TestBase {
     }
 
     @Test
+    @DisplayName("Test close() closes the underlying reader")
+    public void testCloseClosesUnderlyingReader() {
+        Reader reader = new StringReader("line1\nline2\nline3");
+        LineIterator iterator = LineIterator.of(reader);
+
+        assertTrue(iterator.hasNext());
+        iterator.close();
+
+        assertFalse(iterator.hasNext());
+    }
+
+    @Test
     public void testClose() {
         StringReader reader = new StringReader("line1\nline2");
         LineIterator iterator = new LineIterator(reader);
@@ -730,17 +697,48 @@ public class LineIteratorTest extends TestBase {
     }
 
     @Test
-    public void testEmptyLines() {
-        StringReader reader = new StringReader("\n\nline3\n\n");
-        LineIterator iterator = new LineIterator(reader);
+    @DisplayName("Test close() can be called multiple times safely")
+    public void testCloseMultipleTimes() {
+        Reader reader = new StringReader("line1");
+        LineIterator iterator = LineIterator.of(reader);
 
-        Assertions.assertEquals("", iterator.next());
-        Assertions.assertEquals("", iterator.next());
-        Assertions.assertEquals("line3", iterator.next());
-        Assertions.assertEquals("", iterator.next());
-        Assertions.assertFalse(iterator.hasNext());
+        assertDoesNotThrow(() -> {
+            iterator.close();
+            iterator.close();
+            iterator.close();
+        });
+    }
 
-        iterator.close();
+    @Test
+    @DisplayName("Test close() in try-with-resources")
+    public void testCloseWithTryWithResources() {
+        assertDoesNotThrow(() -> {
+            try (LineIterator iterator = LineIterator.of(new StringReader("line1\nline2"))) {
+                assertTrue(iterator.hasNext());
+                iterator.next();
+            }
+        });
+    }
+
+    @Test
+    @DisplayName("Test concurrent close() calls")
+    public void testConcurrentCloseCalls() throws Exception {
+        Reader reader = new StringReader("line1\nline2\nline3");
+        LineIterator iterator = LineIterator.of(reader);
+
+        Thread t1 = new Thread(() -> iterator.close());
+        Thread t2 = new Thread(() -> iterator.close());
+        Thread t3 = new Thread(() -> iterator.close());
+
+        t1.start();
+        t2.start();
+        t3.start();
+
+        t1.join();
+        t2.join();
+        t3.join();
+
+        assertFalse(iterator.hasNext());
     }
 
 }

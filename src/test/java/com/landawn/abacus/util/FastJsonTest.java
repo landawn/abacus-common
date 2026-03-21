@@ -29,7 +29,6 @@ import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -38,7 +37,6 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.TypeReference;
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class FastJsonTest extends TestBase {
 
     @TempDir
@@ -118,23 +116,6 @@ public class FastJsonTest extends TestBase {
     public void tearDown() {
     }
 
-    // ==================== toJson(Object) ====================
-
-    @Test
-    public void testToJson() {
-        String result = FastJson.toJson(testPerson);
-        assertNotNull(result);
-        assertTrue(result.contains("\"name\":\"John\""));
-        assertTrue(result.contains("\"age\":30"));
-        assertTrue(result.contains("\"email\":\"john@example.com\""));
-    }
-
-    @Test
-    public void testToJson_Null() {
-        String result = FastJson.toJson(null);
-        assertEquals("null", result);
-    }
-
     @Test
     public void testToJson_String() {
         String result = FastJson.toJson("test");
@@ -155,6 +136,40 @@ public class FastJsonTest extends TestBase {
     }
 
     @Test
+    public void testToJson_Boolean() {
+        assertEquals("true", FastJson.toJson(true));
+        assertEquals("false", FastJson.toJson(false));
+    }
+
+    // ==================== Round trip tests ====================
+
+    @Test
+    public void testRoundTripSerialization() {
+        String json = FastJson.toJson(testPerson);
+
+        TestPerson result = FastJson.fromJson(json, TestPerson.class);
+
+        assertEquals(testPerson, result);
+    }
+
+    // ==================== toJson(Object) ====================
+
+    @Test
+    public void testToJson() {
+        String result = FastJson.toJson(testPerson);
+        assertNotNull(result);
+        assertTrue(result.contains("\"name\":\"John\""));
+        assertTrue(result.contains("\"age\":30"));
+        assertTrue(result.contains("\"email\":\"john@example.com\""));
+    }
+
+    @Test
+    public void testToJson_Null() {
+        String result = FastJson.toJson(null);
+        assertEquals("null", result);
+    }
+
+    @Test
     public void testToJson_EmptyMap() {
         Map<String, Object> emptyMap = new HashMap<>();
         String result = FastJson.toJson(emptyMap);
@@ -166,12 +181,6 @@ public class FastJsonTest extends TestBase {
         List<Object> emptyList = Collections.emptyList();
         String result = FastJson.toJson(emptyList);
         assertEquals("[]", result);
-    }
-
-    @Test
-    public void testToJson_Boolean() {
-        assertEquals("true", FastJson.toJson(true));
-        assertEquals("false", FastJson.toJson(false));
     }
 
     // ==================== toJson(Object, boolean) ====================
@@ -248,6 +257,37 @@ public class FastJsonTest extends TestBase {
         JSONWriter.Context context = new JSONWriter.Context();
         String result = FastJson.toJson(null, context);
         assertEquals("null", result);
+    }
+
+    @Test
+    public void testRoundTripSerializationWithList() {
+        List<TestPerson> people = Arrays.asList(new TestPerson("John", 30), new TestPerson("Jane", 25), new TestPerson("Bob", 35));
+
+        String json = FastJson.toJson(people);
+
+        List<TestPerson> result = FastJson.fromJson(json, new TypeReference<List<TestPerson>>() {
+        });
+
+        assertNotNull(result);
+        assertEquals(3, result.size());
+        assertEquals(people.get(0), result.get(0));
+        assertEquals(people.get(1), result.get(1));
+        assertEquals(people.get(2), result.get(2));
+    }
+
+    @Test
+    public void testRoundTripWithMap() {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("name", "test");
+        map.put("count", 42);
+
+        String json = FastJson.toJson(map);
+        Map<String, Object> result = FastJson.fromJson(json, new TypeReference<Map<String, Object>>() {
+        });
+
+        assertNotNull(result);
+        assertEquals("test", result.get("name"));
+        assertEquals(42, result.get("count"));
     }
 
     // ==================== toJson(Object, File) ====================
@@ -552,6 +592,35 @@ public class FastJsonTest extends TestBase {
         });
     }
 
+    @Test
+    public void testFileRoundTrip() throws Exception {
+        File jsonFile = tempDir.resolve("roundtrip.json").toFile();
+
+        FastJson.toJson(testPerson, jsonFile);
+
+        try (FileReader reader = new FileReader(jsonFile)) {
+            TestPerson result = FastJson.fromJson(reader, TestPerson.class);
+            assertEquals(testPerson, result);
+        }
+    }
+
+    @Test
+    public void testRoundTripWithOutputStream() throws Exception {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        FastJson.toJson(testPerson, os);
+
+        byte[] bytes = os.toByteArray();
+        TestPerson result = FastJson.fromJson(bytes, TestPerson.class);
+
+        assertEquals(testPerson, result);
+    }
+
+    @Test
+    public void testFromJson_StringToBoolean() {
+        assertEquals(Boolean.TRUE, FastJson.fromJson("true", Boolean.class));
+        assertEquals(Boolean.FALSE, FastJson.fromJson("false", Boolean.class));
+    }
+
     // ==================== fromJson(byte[], Class) ====================
 
     @Test
@@ -678,12 +747,6 @@ public class FastJsonTest extends TestBase {
         assertNotNull(result);
         assertEquals(3, result.size());
         assertEquals("a", result.get(0));
-    }
-
-    @Test
-    public void testFromJson_StringToBoolean() {
-        assertEquals(Boolean.TRUE, FastJson.fromJson("true", Boolean.class));
-        assertEquals(Boolean.FALSE, FastJson.fromJson("false", Boolean.class));
     }
 
     @Test
@@ -962,20 +1025,6 @@ public class FastJsonTest extends TestBase {
         assertNull(result);
     }
 
-    @Test
-    public void testFromJson_ReaderFromFile() throws Exception {
-        File jsonFile = tempDir.resolve("person.json").toFile();
-        Files.writeString(jsonFile.toPath(), "{\"name\":\"FileReader\",\"age\":35}");
-
-        try (FileReader reader = new FileReader(jsonFile)) {
-            TestPerson result = FastJson.fromJson(reader, TestPerson.class);
-
-            assertNotNull(result);
-            assertEquals("FileReader", result.getName());
-            assertEquals(35, result.getAge());
-        }
-    }
-
     // ==================== fromJson(Reader, Class, Feature...) ====================
 
     @Test
@@ -1107,68 +1156,17 @@ public class FastJsonTest extends TestBase {
         assertNull(result);
     }
 
-    // ==================== Round trip tests ====================
-
     @Test
-    public void testRoundTripSerialization() {
-        String json = FastJson.toJson(testPerson);
-
-        TestPerson result = FastJson.fromJson(json, TestPerson.class);
-
-        assertEquals(testPerson, result);
-    }
-
-    @Test
-    public void testRoundTripSerializationWithList() {
-        List<TestPerson> people = Arrays.asList(new TestPerson("John", 30), new TestPerson("Jane", 25), new TestPerson("Bob", 35));
-
-        String json = FastJson.toJson(people);
-
-        List<TestPerson> result = FastJson.fromJson(json, new TypeReference<List<TestPerson>>() {
-        });
-
-        assertNotNull(result);
-        assertEquals(3, result.size());
-        assertEquals(people.get(0), result.get(0));
-        assertEquals(people.get(1), result.get(1));
-        assertEquals(people.get(2), result.get(2));
-    }
-
-    @Test
-    public void testFileRoundTrip() throws Exception {
-        File jsonFile = tempDir.resolve("roundtrip.json").toFile();
-
-        FastJson.toJson(testPerson, jsonFile);
+    public void testFromJson_ReaderFromFile() throws Exception {
+        File jsonFile = tempDir.resolve("person.json").toFile();
+        Files.writeString(jsonFile.toPath(), "{\"name\":\"FileReader\",\"age\":35}");
 
         try (FileReader reader = new FileReader(jsonFile)) {
             TestPerson result = FastJson.fromJson(reader, TestPerson.class);
-            assertEquals(testPerson, result);
+
+            assertNotNull(result);
+            assertEquals("FileReader", result.getName());
+            assertEquals(35, result.getAge());
         }
-    }
-
-    @Test
-    public void testRoundTripWithMap() {
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("name", "test");
-        map.put("count", 42);
-
-        String json = FastJson.toJson(map);
-        Map<String, Object> result = FastJson.fromJson(json, new TypeReference<Map<String, Object>>() {
-        });
-
-        assertNotNull(result);
-        assertEquals("test", result.get("name"));
-        assertEquals(42, result.get("count"));
-    }
-
-    @Test
-    public void testRoundTripWithOutputStream() throws Exception {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        FastJson.toJson(testPerson, os);
-
-        byte[] bytes = os.toByteArray();
-        TestPerson result = FastJson.fromJson(bytes, TestPerson.class);
-
-        assertEquals(testPerson, result);
     }
 }

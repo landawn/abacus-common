@@ -16,12 +16,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class DateTypeTest extends TestBase {
 
     private final DateType type = new DateType();
@@ -29,19 +27,6 @@ public class DateTypeTest extends TestBase {
     @Test
     public void test_clazz() {
         assertEquals(Date.class, type.javaType());
-    }
-
-    @Test
-    public void test_name() {
-        assertEquals("Date", type.name());
-    }
-
-    @Test
-    public void test_stringOf() {
-        Date date = new Date(System.currentTimeMillis());
-        String result = type.stringOf(date);
-        assertNotNull(result);
-        assertNull(type.stringOf(null));
     }
 
     @Test
@@ -153,6 +138,19 @@ public class DateTypeTest extends TestBase {
         // Test with null
         type.set(stmt, "param2", null);
         verify(stmt).setDate("param2", null);
+    }
+
+    @Test
+    public void test_name() {
+        assertEquals("Date", type.name());
+    }
+
+    @Test
+    public void test_stringOf() {
+        Date date = new Date(System.currentTimeMillis());
+        String result = type.stringOf(date);
+        assertNotNull(result);
+        assertNull(type.stringOf(null));
     }
 
     @Test

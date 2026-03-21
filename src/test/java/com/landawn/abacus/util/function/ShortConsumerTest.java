@@ -18,13 +18,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ShortConsumerTest extends TestBase {
+
+    private void acceptHelper(short t) {
+        // Helper method for method reference test
+        assertTrue(t >= Short.MIN_VALUE && t <= Short.MAX_VALUE);
+    }
 
     @Test
     public void test_accept() {
@@ -47,21 +50,6 @@ public class ShortConsumerTest extends TestBase {
     }
 
     @Test
-    public void test_accept_methodReference() {
-        final short[] result = { 0 };
-
-        ShortConsumer consumer = this::acceptHelper;
-
-        consumer.accept((short) 42);
-        assertNotNull(consumer);
-    }
-
-    private void acceptHelper(short t) {
-        // Helper method for method reference test
-        assertTrue(t >= Short.MIN_VALUE && t <= Short.MAX_VALUE);
-    }
-
-    @Test
     public void test_accept_anonymousClass() {
         final short[] squared = { 0 };
 
@@ -77,47 +65,13 @@ public class ShortConsumerTest extends TestBase {
     }
 
     @Test
-    public void test_andThen() {
-        final short[] results = new short[2];
+    public void test_accept_methodReference() {
+        final short[] result = { 0 };
 
-        ShortConsumer first = t -> results[0] = (short) (t + 10);
-        ShortConsumer second = t -> results[1] = (short) (t * 2);
+        ShortConsumer consumer = this::acceptHelper;
 
-        ShortConsumer combined = first.andThen(second);
-        combined.accept((short) 5);
-
-        assertEquals(15, results[0]);
-        assertEquals(10, results[1]);
-    }
-
-    @Test
-    public void test_andThen_multipleChaining() {
-        final short[] results = new short[3];
-
-        ShortConsumer first = t -> results[0] = t;
-        ShortConsumer second = t -> results[1] = (short) (t + 1);
-        ShortConsumer third = t -> results[2] = (short) (t + 2);
-
-        ShortConsumer combined = first.andThen(second).andThen(third);
-        combined.accept((short) 10);
-
-        assertEquals(10, results[0]);
-        assertEquals(11, results[1]);
-        assertEquals(12, results[2]);
-    }
-
-    @Test
-    public void test_andThen_orderOfExecution() {
-        final StringBuilder order = new StringBuilder();
-
-        ShortConsumer first = t -> order.append("A");
-        ShortConsumer second = t -> order.append("B");
-        ShortConsumer third = t -> order.append("C");
-
-        ShortConsumer combined = first.andThen(second).andThen(third);
-        combined.accept((short) 1);
-
-        assertEquals("ABC", order.toString());
+        consumer.accept((short) 42);
+        assertNotNull(consumer);
     }
 
     @Test
@@ -158,5 +112,49 @@ public class ShortConsumerTest extends TestBase {
 
         consumer.accept((short) 0);
         assertEquals(0, result[0]);
+    }
+
+    @Test
+    public void test_andThen() {
+        final short[] results = new short[2];
+
+        ShortConsumer first = t -> results[0] = (short) (t + 10);
+        ShortConsumer second = t -> results[1] = (short) (t * 2);
+
+        ShortConsumer combined = first.andThen(second);
+        combined.accept((short) 5);
+
+        assertEquals(15, results[0]);
+        assertEquals(10, results[1]);
+    }
+
+    @Test
+    public void test_andThen_orderOfExecution() {
+        final StringBuilder order = new StringBuilder();
+
+        ShortConsumer first = t -> order.append("A");
+        ShortConsumer second = t -> order.append("B");
+        ShortConsumer third = t -> order.append("C");
+
+        ShortConsumer combined = first.andThen(second).andThen(third);
+        combined.accept((short) 1);
+
+        assertEquals("ABC", order.toString());
+    }
+
+    @Test
+    public void test_andThen_multipleChaining() {
+        final short[] results = new short[3];
+
+        ShortConsumer first = t -> results[0] = t;
+        ShortConsumer second = t -> results[1] = (short) (t + 1);
+        ShortConsumer third = t -> results[2] = (short) (t + 2);
+
+        ShortConsumer combined = first.andThen(second).andThen(third);
+        combined.accept((short) 10);
+
+        assertEquals(10, results[0]);
+        assertEquals(11, results[1]);
+        assertEquals(12, results[2]);
     }
 }

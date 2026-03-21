@@ -21,16 +21,16 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.SK;
 
 /**
- * Abstract base class for array types in the type system.
+ * The abstract base class for array types in the type system.
  * This class provides common functionality for handling array types,
  * including serialization and conversion operations.
  *
- * @param <T> the array type (e.g., int[], String[], Object[])
+ * @param <T> the type of the array
  */
 public abstract class AbstractArrayType<T> extends AbstractType<T> {
 
     /**
-     * Constructs an AbstractArrayType with the specified type name.
+     * Constructs a new {@code AbstractArrayType} with the specified type name.
      *
      * @param typeName the name of the array type (e.g., "int[]", "String[]", "Object[]")
      */
@@ -39,10 +39,9 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
     }
 
     /**
-     * Checks if this type represents an array type.
-     * This method always returns {@code true} for array types.
+     * Returns {@code true} because this type represents an array type.
      *
-     * @return {@code true}, indicating this is an array type
+     * @return {@code true}
      */
     @Override
     public boolean isArray() {
@@ -50,11 +49,11 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
     }
 
     /**
-     * Gets the serialization type for this array type.
-     * Returns {@link SerializationType#SERIALIZABLE} if the array type is serializable,
+     * Returns the serialization type for this array type.
+     * Returns {@link SerializationType#SERIALIZABLE} if the array type is serializable;
      * otherwise returns {@link SerializationType#ARRAY}.
      *
-     * @return the appropriate {@link SerializationType} for this array type
+     * @return the {@link SerializationType} for this array type
      */
     @Override
     public SerializationType serializationType() {
@@ -62,9 +61,7 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
     }
 
     /**
-     * Converts an array to a collection of the specified type.
-     * Creates a new collection instance of the specified class and populates it
-     * with the elements from the array using the {@link #arrayToCollection(Object, Collection)} method.
+     * Converts the specified array to a collection of the given collection class.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -85,7 +82,7 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
      *
      * @param <E> the element type of the collection
      * @param array the array to convert, may be {@code null}
-     * @param collClass the class of the collection to create (must have a no-arg constructor)
+     * @param collClass the class of the collection to create
      * @return a new collection containing all elements from the array, or {@code null} if the input array is {@code null}
      * @throws IllegalArgumentException if the collection class cannot be instantiated
      */
@@ -104,7 +101,7 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
     }
 
     /**
-     * Splits a string into an array of substrings using predefined delimiters.
+     * Splits the specified string into an array of substrings using predefined delimiters.
      * This method first attempts to split using {@link #ELEMENT_SEPARATOR}, and if that
      * results in a single element and the string contains commas, it splits by comma instead.
      * If the resulting array has elements, it also strips square brackets from the

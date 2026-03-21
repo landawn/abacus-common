@@ -4,146 +4,49 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
+import java.io.IOException;
+import java.io.StringReader;
+
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.exception.ParsingException;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
 
-@Tag("2025")
 public class JsonStringReaderTest extends TestBase {
 
     private char[] cbuf = new char[256];
 
+    private static final class ExposedJsonStringReader extends JsonStringReader {
+        ExposedJsonStringReader(final String str, final char[] cbuf) {
+            super(str, cbuf);
+        }
+
+        void throwUnexpectedNonStringTokenForTest() {
+            throwExceptionDueToUnexpectedNonStringToken();
+        }
+    }
+
+    // Constructor validation and uncovered branch coverage
+
     @Test
-    public void test_parse_string() {
-        String json = "{\"name\":\"John\"}";
-        JsonReader reader = JsonStringReader.parse(json, new char[256]);
-        assertNotNull(reader);
-        reader.close();
+    public void testConstructor_InvalidRange_ToIndexLessThanBeginIndex_ThrowsIllegalArgument() {
+        assertThrows(IllegalArgumentException.class, () -> new JsonStringReader(new char[10], 5, 3, new char[256], null));
     }
 
     @Test
-    public void test_parse_stringWithRange() {
-        String json = "prefix{\"name\":\"John\"}suffix";
-        JsonReader reader = JsonStringReader.parse(json, 6, 20, new char[256]);
-        assertNotNull(reader);
-        reader.close();
+    public void testConstructor_NegativeBeginIndex_ThrowsIllegalArgument() {
+        assertThrows(IllegalArgumentException.class, () -> new JsonStringReader(new char[10], -1, 5, new char[256], null));
     }
 
     @Test
-    public void test_nextToken() {
-        String json = "{\"key\":\"value\"}";
-        JsonReader reader = JsonStringReader.parse(json, new char[256]);
-
-        int token = reader.nextToken();
-        assertEquals(JsonReader.START_BRACE, token);
-
-        reader.close();
-    }
-
-    @Test
-    public void test_nextToken_withType() {
-        String json = "123";
-        JsonReader reader = JsonStringReader.parse(json, new char[256]);
-
-        Type<Integer> intType = Type.of(Integer.class);
-        int token = reader.nextToken(intType);
-
-        reader.close();
-        assertNotNull(token);
-    }
-
-    @Test
-    public void test_lastToken() {
-        String json = "{}";
-        JsonReader reader = JsonStringReader.parse(json, new char[256]);
-
-        reader.nextToken();
-        int lastToken = reader.lastToken();
-
-        reader.close();
-        assertNotNull(lastToken);
-    }
-
-    @Test
-    public void test_hasText_true() {
-        String json = "\"test\"";
-        JsonReader reader = JsonStringReader.parse(json, new char[256]);
-
-        reader.nextToken();
-        reader.nextToken();
-        boolean hasText = reader.hasText();
-        assertTrue(hasText);
-
-        reader.close();
-    }
-
-    @Test
-    public void test_hasText_false() {
-        String json = "{}";
-        JsonReader reader = JsonStringReader.parse(json, new char[256]);
-
-        reader.nextToken();
-        boolean hasText = reader.hasText();
-        assertFalse(hasText);
-
-        reader.close();
-    }
-
-    @Test
-    public void test_getText() {
-        String json = "\"hello\"";
-        JsonReader reader = JsonStringReader.parse(json, new char[256]);
-
-        reader.nextToken();
-        reader.nextToken();
-        String text = reader.getText();
-        assertEquals("hello", text);
-
-        reader.close();
-    }
-
-    @Test
-    public void test_readValue() {
-        String json = "123";
-        JsonReader reader = JsonStringReader.parse(json, new char[256]);
-
-        reader.nextToken();
-        Type<Integer> intType = Type.of(Integer.class);
-        Integer value = reader.readValue(intType);
-        assertEquals(123, value);
-
-        reader.close();
-    }
-
-    @Test
-    public void test_close() {
-        String json = "{}";
-        JsonReader reader = JsonStringReader.parse(json, new char[256]);
-        reader.close();
-        assertNotNull(reader);
-    }
-
-    @Test
-    public void testParseString() {
-        String json = "{\"key\":\"value\"}";
-        JsonReader reader = JsonStringReader.parse(json, cbuf);
-
-        assertNotNull(reader);
-        assertEquals(JsonReader.START_BRACE, reader.nextToken());
-    }
-
-    @Test
-    public void testParseSubstring() {
-        String json = "prefix{\"key\":\"value\"}suffix";
-        JsonReader reader = JsonStringReader.parse(json, 6, json.length() - 6, cbuf);
-
-        assertNotNull(reader);
-        assertEquals(JsonReader.START_BRACE, reader.nextToken());
+    public void testConstructor_NegativeToIndex_ThrowsIllegalArgument() {
+        assertThrows(IllegalArgumentException.class, () -> new JsonStringReader(new char[10], 0, -1, new char[256], null));
     }
 
     @Test
@@ -214,17 +117,6 @@ public class JsonStringReaderTest extends TestBase {
     }
 
     @Test
-    public void testReadNull() {
-        String json = "null";
-        JsonReader reader = JsonStringReader.parse(json, cbuf);
-
-        reader.nextToken();
-        assertEquals("null", reader.getText());
-        Type<String> stringType = N.typeOf(String.class);
-        assertNull(reader.readValue(stringType));
-    }
-
-    @Test
     public void testReadEscapedCharacters() {
         String json = "\"\\n\\r\\t\\b\\f\\\\\\/\\\"\"";
         JsonReader reader = JsonStringReader.parse(json, cbuf);
@@ -242,16 +134,6 @@ public class JsonStringReaderTest extends TestBase {
         assertEquals(JsonReader.START_DOUBLE_QUOTE, reader.nextToken());
         assertEquals(JsonReader.END_DOUBLE_QUOTE, reader.nextToken());
         assertEquals("Hello", reader.getText());
-    }
-
-    @Test
-    public void testReadEmptyString() {
-        String json = "\"\"";
-        JsonReader reader = JsonStringReader.parse(json, cbuf);
-
-        assertEquals(JsonReader.START_DOUBLE_QUOTE, reader.nextToken());
-        assertEquals(JsonReader.END_DOUBLE_QUOTE, reader.nextToken());
-        assertEquals("", reader.getText());
     }
 
     @Test
@@ -283,24 +165,6 @@ public class JsonStringReaderTest extends TestBase {
         assertEquals(90.12d, reader.readValue(doubleType), 0.001);
 
         assertEquals(JsonReader.EOF, reader.nextToken());
-    }
-
-    @Test
-    public void testReadSingleQuotedString() {
-        String json = "{'key':'value'}";
-        JsonReader reader = JsonStringReader.parse(json, cbuf);
-
-        assertEquals(JsonReader.START_BRACE, reader.nextToken());
-        assertEquals(JsonReader.START_SINGLE_QUOTE, reader.nextToken());
-        assertEquals(JsonReader.END_SINGLE_QUOTE, reader.nextToken());
-        assertEquals("key", reader.getText());
-
-        assertEquals(JsonReader.COLON, reader.nextToken());
-        assertEquals(JsonReader.START_SINGLE_QUOTE, reader.nextToken());
-        assertEquals(JsonReader.END_SINGLE_QUOTE, reader.nextToken());
-        assertEquals("value", reader.getText());
-
-        assertEquals(JsonReader.END_BRACE, reader.nextToken());
     }
 
     @Test
@@ -337,6 +201,152 @@ public class JsonStringReaderTest extends TestBase {
         assertEquals("3", reader.getText());
 
         assertEquals(JsonReader.EOF, reader.nextToken());
+    }
+
+    @Test
+    public void testReadVeryLongString() {
+        StringBuilder sb = new StringBuilder("\"");
+        for (int i = 0; i < 1000; i++) {
+            sb.append("a");
+        }
+        sb.append("\"");
+
+        JsonReader reader = JsonStringReader.parse(sb.toString(), new char[512]);
+
+        assertEquals(JsonReader.START_DOUBLE_QUOTE, reader.nextToken());
+        assertEquals(JsonReader.END_DOUBLE_QUOTE, reader.nextToken());
+        assertEquals(1000, reader.getText().length());
+    }
+
+    @Test
+    public void testReadSpecialNumbers() {
+        String json = "[0, -0, 0.0, -0.0]";
+        JsonReader reader = JsonStringReader.parse(json, cbuf);
+
+        assertEquals(JsonReader.START_BRACKET, reader.nextToken());
+
+        reader.nextToken();
+        assertEquals("0", reader.getText());
+
+        assertEquals(JsonReader.COMMA, reader.nextToken());
+        assertEquals("-0", reader.getText());
+
+        assertEquals(JsonReader.COMMA, reader.nextToken());
+        assertEquals("0.0", reader.getText());
+
+        assertEquals(JsonReader.END_BRACKET, reader.nextToken());
+        assertEquals("-0.0", reader.getText());
+
+        assertEquals(JsonReader.EOF, reader.nextToken());
+    }
+
+    @Test
+    public void testReadDecimalWithLeadingDot() {
+        String json = "[.5, -.5]";
+        JsonReader reader = JsonStringReader.parse(json, cbuf);
+
+        assertEquals(JsonReader.START_BRACKET, reader.nextToken());
+
+        reader.nextToken();
+        assertEquals(".5", reader.getText());
+
+        assertEquals(JsonReader.END_BRACKET, reader.nextToken());
+        assertEquals("-.5", reader.getText());
+
+        assertEquals(JsonReader.EOF, reader.nextToken());
+    }
+
+    // readNumber: integer with Float type (no decimal point) -> numValue = (float) ret
+    @Test
+    public void testReadIntegerWithFloatType_NumValueCastToFloat() {
+        String json = "42";
+        JsonReader reader = JsonStringReader.parse(json, cbuf);
+        reader.nextToken(N.typeOf(Float.class));
+        Float value = reader.readValue(N.typeOf(Float.class));
+        assertEquals(42.0f, value, 0.001f);
+    }
+
+    // readNumber: integer with Double type (no decimal point) -> numValue = (double) ret
+    @Test
+    public void testReadIntegerWithDoubleType_NumValueCastToDouble() {
+        String json = "100";
+        JsonReader reader = JsonStringReader.parse(json, cbuf);
+        reader.nextToken(N.typeOf(Double.class));
+        Double value = reader.readValue(N.typeOf(Double.class));
+        assertEquals(100.0, value, 0.001);
+    }
+
+    @Test
+    public void test_parse_string() {
+        String json = "{\"name\":\"John\"}";
+        JsonReader reader = JsonStringReader.parse(json, new char[256]);
+        assertNotNull(reader);
+        reader.close();
+    }
+
+    @Test
+    public void test_parse_stringWithRange() {
+        String json = "prefix{\"name\":\"John\"}suffix";
+        JsonReader reader = JsonStringReader.parse(json, 6, 20, new char[256]);
+        assertNotNull(reader);
+        reader.close();
+    }
+
+    @Test
+    public void testParseString() {
+        String json = "{\"key\":\"value\"}";
+        JsonReader reader = JsonStringReader.parse(json, cbuf);
+
+        assertNotNull(reader);
+        assertEquals(JsonReader.START_BRACE, reader.nextToken());
+    }
+
+    @Test
+    public void testParseSubstring() {
+        String json = "prefix{\"key\":\"value\"}suffix";
+        JsonReader reader = JsonStringReader.parse(json, 6, json.length() - 6, cbuf);
+
+        assertNotNull(reader);
+        assertEquals(JsonReader.START_BRACE, reader.nextToken());
+    }
+
+    @Test
+    public void testReadNull() {
+        String json = "null";
+        JsonReader reader = JsonStringReader.parse(json, cbuf);
+
+        reader.nextToken();
+        assertEquals("null", reader.getText());
+        Type<String> stringType = N.typeOf(String.class);
+        assertNull(reader.readValue(stringType));
+    }
+
+    @Test
+    public void testReadEmptyString() {
+        String json = "\"\"";
+        JsonReader reader = JsonStringReader.parse(json, cbuf);
+
+        assertEquals(JsonReader.START_DOUBLE_QUOTE, reader.nextToken());
+        assertEquals(JsonReader.END_DOUBLE_QUOTE, reader.nextToken());
+        assertEquals("", reader.getText());
+    }
+
+    @Test
+    public void testReadSingleQuotedString() {
+        String json = "{'key':'value'}";
+        JsonReader reader = JsonStringReader.parse(json, cbuf);
+
+        assertEquals(JsonReader.START_BRACE, reader.nextToken());
+        assertEquals(JsonReader.START_SINGLE_QUOTE, reader.nextToken());
+        assertEquals(JsonReader.END_SINGLE_QUOTE, reader.nextToken());
+        assertEquals("key", reader.getText());
+
+        assertEquals(JsonReader.COLON, reader.nextToken());
+        assertEquals(JsonReader.START_SINGLE_QUOTE, reader.nextToken());
+        assertEquals(JsonReader.END_SINGLE_QUOTE, reader.nextToken());
+        assertEquals("value", reader.getText());
+
+        assertEquals(JsonReader.END_BRACE, reader.nextToken());
     }
 
     @Test
@@ -391,77 +401,12 @@ public class JsonStringReaderTest extends TestBase {
     }
 
     @Test
-    public void testReadVeryLongString() {
-        StringBuilder sb = new StringBuilder("\"");
-        for (int i = 0; i < 1000; i++) {
-            sb.append("a");
-        }
-        sb.append("\"");
-
-        JsonReader reader = JsonStringReader.parse(sb.toString(), new char[512]);
-
-        assertEquals(JsonReader.START_DOUBLE_QUOTE, reader.nextToken());
-        assertEquals(JsonReader.END_DOUBLE_QUOTE, reader.nextToken());
-        assertEquals(1000, reader.getText().length());
-    }
-
-    @Test
-    public void testReadSpecialNumbers() {
-        String json = "[0, -0, 0.0, -0.0]";
-        JsonReader reader = JsonStringReader.parse(json, cbuf);
-
-        assertEquals(JsonReader.START_BRACKET, reader.nextToken());
-
-        reader.nextToken();
-        assertEquals("0", reader.getText());
-
-        assertEquals(JsonReader.COMMA, reader.nextToken());
-        assertEquals("-0", reader.getText());
-
-        assertEquals(JsonReader.COMMA, reader.nextToken());
-        assertEquals("0.0", reader.getText());
-
-        assertEquals(JsonReader.END_BRACKET, reader.nextToken());
-        assertEquals("-0.0", reader.getText());
-
-        assertEquals(JsonReader.EOF, reader.nextToken());
-    }
-
-    @Test
     public void testEmptyInput() {
         String json = "";
         JsonReader reader = JsonStringReader.parse(json, cbuf);
 
         assertEquals(JsonReader.EOF, reader.nextToken());
         assertFalse(reader.hasText());
-    }
-
-    @Test
-    public void testReadValueAsObject() {
-        String json = "123";
-        JsonReader reader = JsonStringReader.parse(json, cbuf);
-
-        reader.nextToken();
-        Type<Object> objType = N.typeOf(Object.class);
-        Object value = reader.readValue(objType);
-        assertTrue(value instanceof Integer);
-        assertEquals(123, value);
-    }
-
-    @Test
-    public void testReadDecimalWithLeadingDot() {
-        String json = "[.5, -.5]";
-        JsonReader reader = JsonStringReader.parse(json, cbuf);
-
-        assertEquals(JsonReader.START_BRACKET, reader.nextToken());
-
-        reader.nextToken();
-        assertEquals(".5", reader.getText());
-
-        assertEquals(JsonReader.END_BRACKET, reader.nextToken());
-        assertEquals("-.5", reader.getText());
-
-        assertEquals(JsonReader.EOF, reader.nextToken());
     }
 
     @Test
@@ -481,13 +426,162 @@ public class JsonStringReaderTest extends TestBase {
     }
 
     @Test
-    public void testReadValueNullForStringType() {
-        String json = "null";
-        JsonReader reader = JsonStringReader.parse(json, cbuf);
-        reader.nextToken();
+    public void testReadNegativeNumber() {
+        String json = "-42";
+        JsonReader reader = JsonStringReader.parse(json, new char[256]);
 
-        Type<String> strType = N.typeOf(String.class);
-        assertNull(reader.readValue(strType));
+        Type<Integer> intType = N.typeOf(Integer.class);
+        reader.nextToken(intType);
+        Integer value = reader.readValue(intType);
+        assertEquals(-42, value);
+    }
+
+    @Test
+    public void testReadPositiveSignNumber() {
+        String json = "+42";
+        JsonReader reader = JsonStringReader.parse(json, new char[256]);
+
+        Type<Integer> intType = N.typeOf(Integer.class);
+        reader.nextToken(intType);
+        Integer value = reader.readValue(intType);
+        assertEquals(42, value);
+    }
+
+    @Test
+    public void testLastTokenInitially() {
+        String json = "{}";
+        JsonReader reader = JsonStringReader.parse(json, cbuf);
+
+        assertEquals(-1, reader.lastToken());
+    }
+
+    @Test
+    public void test_lastToken() {
+        String json = "{}";
+        JsonReader reader = JsonStringReader.parse(json, new char[256]);
+
+        reader.nextToken();
+        int lastToken = reader.lastToken();
+
+        reader.close();
+        assertNotNull(lastToken);
+    }
+
+    @Test
+    public void testLastTokenAfterMultipleReads() {
+        String json = "{\"a\":1}";
+        JsonReader reader = JsonStringReader.parse(json, cbuf);
+
+        reader.nextToken(); // START_BRACE
+        assertEquals(-1, reader.lastToken());
+
+        reader.nextToken(); // START_DOUBLE_QUOTE
+        assertEquals(JsonReader.START_BRACE, reader.lastToken());
+    }
+
+    @Test
+    public void test_nextToken() {
+        String json = "{\"key\":\"value\"}";
+        JsonReader reader = JsonStringReader.parse(json, new char[256]);
+
+        int token = reader.nextToken();
+        assertEquals(JsonReader.START_BRACE, token);
+
+        reader.close();
+    }
+
+    @Test
+    public void test_nextToken_withType() {
+        String json = "123";
+        JsonReader reader = JsonStringReader.parse(json, new char[256]);
+
+        Type<Integer> intType = Type.of(Integer.class);
+        int token = reader.nextToken(intType);
+
+        reader.close();
+        assertNotNull(token);
+    }
+
+    @Test
+    public void test_hasText_true() {
+        String json = "\"test\"";
+        JsonReader reader = JsonStringReader.parse(json, new char[256]);
+
+        reader.nextToken();
+        reader.nextToken();
+        boolean hasText = reader.hasText();
+        assertTrue(hasText);
+
+        reader.close();
+    }
+
+    @Test
+    public void test_hasText_false() {
+        String json = "{}";
+        JsonReader reader = JsonStringReader.parse(json, new char[256]);
+
+        reader.nextToken();
+        boolean hasText = reader.hasText();
+        assertFalse(hasText);
+
+        reader.close();
+    }
+
+    // enlargeCharBuffer: buffer overflow in saveToBuffer -> enlarges when prefix content > cbuf size
+    @Test
+    public void testReadString_PrefixLargerThanCbuf_TriggersEnlargement() {
+        // Tiny cbuf=4, prefix "abcd" (4 chars) then escape forces saveToBuffer + enlargeCharBuffer
+        String json = "\"abcd\\nend\"";
+        JsonReader reader = JsonStringReader.parse(json, new char[4]);
+        reader.nextToken(); // START_DOUBLE_QUOTE
+        reader.nextToken(); // END_DOUBLE_QUOTE - saveToBuffer enlarges cbuf
+        assertTrue(reader.getText().length() > 0);
+    }
+
+    @Test
+    public void testThrowExceptionDueToUnexpectedNonStringToken() {
+        ExposedJsonStringReader reader = new ExposedJsonStringReader("{invalid", new char[32]);
+
+        ParsingException exception = assertThrows(ParsingException.class, reader::throwUnexpectedNonStringTokenForTest);
+        assertTrue(exception.getMessage().contains("expected"));
+    }
+
+    @Test
+    public void test_getText() {
+        String json = "\"hello\"";
+        JsonReader reader = JsonStringReader.parse(json, new char[256]);
+
+        reader.nextToken();
+        reader.nextToken();
+        String text = reader.getText();
+        assertEquals("hello", text);
+
+        reader.close();
+    }
+
+    @Test
+    public void test_readValue() {
+        String json = "123";
+        JsonReader reader = JsonStringReader.parse(json, new char[256]);
+
+        reader.nextToken();
+        Type<Integer> intType = Type.of(Integer.class);
+        Integer value = reader.readValue(intType);
+        assertEquals(123, value);
+
+        reader.close();
+    }
+
+    @Test
+    public void testReadValueAsObject() {
+        String json = "123";
+        JsonReader reader = JsonStringReader.parse(json, cbuf);
+
+        reader.nextToken();
+        Type<Object> objType = N.typeOf(Object.class);
+        Object value = reader.readValue(objType);
+        assertTrue(value instanceof Integer);
+        assertEquals(123, value);
     }
 
     @Test
@@ -578,25 +672,63 @@ public class JsonStringReaderTest extends TestBase {
     }
 
     @Test
-    public void testReadNegativeNumber() {
-        String json = "-42";
-        JsonReader reader = JsonStringReader.parse(json, new char[256]);
+    public void testReadValueStringFromNumberToken() {
+        JsonReader reader = JsonStringReader.parse("42", new char[256]);
 
-        Type<Integer> intType = N.typeOf(Integer.class);
-        reader.nextToken(intType);
-        Integer value = reader.readValue(intType);
-        assertEquals(-42, value);
+        reader.nextToken(N.typeOf(Integer.class));
+        String value = reader.readValue(N.typeOf(String.class));
+
+        assertEquals("42", value);
+    }
+
+    // readValue text branch: text == TRUE but type is not boolean/object -> type.valueOf(text)
+    @Test
+    public void testReadValue_TrueTokenAsStringType_ReturnsStringTrue() {
+        String json = "true";
+        JsonReader reader = JsonStringReader.parse(json, cbuf);
+        reader.nextToken();
+        String value = reader.readValue(N.typeOf(String.class));
+        assertEquals("true", value);
     }
 
     @Test
-    public void testReadPositiveSignNumber() {
-        String json = "+42";
-        JsonReader reader = JsonStringReader.parse(json, new char[256]);
+    public void testReadValue_FalseTokenAsStringType_ReturnsStringFalse() {
+        String json = "false";
+        JsonReader reader = JsonStringReader.parse(json, cbuf);
+        reader.nextToken();
+        String value = reader.readValue(N.typeOf(String.class));
+        assertEquals("false", value);
+    }
 
-        Type<Integer> intType = N.typeOf(Integer.class);
-        reader.nextToken(intType);
-        Integer value = reader.readValue(intType);
-        assertEquals(42, value);
+    @Test
+    public void testReadValueNullForStringType() {
+        String json = "null";
+        JsonReader reader = JsonStringReader.parse(json, cbuf);
+        reader.nextToken();
+
+        Type<String> strType = N.typeOf(String.class);
+        assertNull(reader.readValue(strType));
+    }
+
+    // readValue as Object for a float-producing number string (createNumber -> Float -> L631-632)
+    @Test
+    public void testReadValue_ObjectForFloatSuffixString_ReturnsNumericValue() {
+        // A number without type hint that looks like a float but fails fast parse
+        // "9.9e38" — very large, might produce Float from createNumber
+        String json = "9.9e38";
+        JsonReader reader = JsonStringReader.parse(json, cbuf);
+        reader.nextToken();
+        Type<Object> objType = N.typeOf(Object.class);
+        Object value = reader.readValue(objType);
+        assertNotNull(value);
+    }
+
+    @Test
+    public void test_close() {
+        String json = "{}";
+        JsonReader reader = JsonStringReader.parse(json, new char[256]);
+        reader.close();
+        assertNotNull(reader);
     }
 
     @Test
@@ -608,24 +740,53 @@ public class JsonStringReaderTest extends TestBase {
         assertNotNull(reader);
     }
 
+    // close(): reader != null and reader.close() throws IOException -> UncheckedIOException
     @Test
-    public void testLastTokenInitially() {
-        String json = "{}";
-        JsonReader reader = JsonStringReader.parse(json, cbuf);
+    public void testClose_ReaderThrowsIOException_WrapsAsUncheckedIOException() {
+        java.io.Reader failingReader = new java.io.Reader() {
+            @Override
+            public int read(final char[] buf, final int off, final int len) throws IOException {
+                return -1;
+            }
 
-        assertEquals(-1, reader.lastToken());
+            @Override
+            public void close() throws IOException {
+                throw new IOException("simulated close failure");
+            }
+        };
+        char[] content = "{}".toCharArray();
+        JsonStringReader reader = new JsonStringReader(content, 0, content.length, new char[256], failingReader);
+        assertThrows(UncheckedIOException.class, reader::close);
     }
 
+    // readEscapeCharacter: backslash at end of string -> throws ParsingException
     @Test
-    public void testLastTokenAfterMultipleReads() {
-        String json = "{\"a\":1}";
+    public void testReadEscapeCharacter_AtEndOfInput_ThrowsParsingException() {
+        // JSON string: "\  (one double-quote + one backslash, no closing quote)
+        String json = "\"\\";
         JsonReader reader = JsonStringReader.parse(json, cbuf);
-
-        reader.nextToken(); // START_BRACE
-        assertEquals(-1, reader.lastToken());
-
         reader.nextToken(); // START_DOUBLE_QUOTE
-        assertEquals(JsonReader.START_BRACE, reader.lastToken());
+        assertThrows(ParsingException.class, () -> reader.nextToken());
+    }
+
+    // readEscapeCharacter: incomplete unicode (backslash-u with only 2 hex digits then end) -> L740
+    @Test
+    public void testReadEscapeCharacter_IncompleteUnicode_AtEndOfString_ThrowsParsingException() {
+        // JSON string ends before 4 hex digits of unicode escape: backslash + u + 0 + 0 (no closing quote)
+        String json = "\"" + "\\u00";
+        JsonReader reader = JsonStringReader.parse(json, cbuf);
+        reader.nextToken(); // START_DOUBLE_QUOTE
+        assertThrows(ParsingException.class, () -> reader.nextToken());
+    }
+
+    // readEscapeCharacter: invalid hex digit in unicode escape -> L754
+    @Test
+    public void testReadEscapeCharacter_InvalidHexDigit_ThrowsParsingException() {
+        // backslash-u followed by XYZW — X is not a valid hex digit
+        String json = "\"" + "\\uXYZW\"";
+        JsonReader reader = JsonStringReader.parse(json, cbuf);
+        reader.nextToken(); // START_DOUBLE_QUOTE
+        assertThrows(ParsingException.class, () -> reader.nextToken());
     }
 
 }

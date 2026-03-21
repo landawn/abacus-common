@@ -1,13 +1,112 @@
 package com.landawn.abacus.util;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class MutableByteTest extends TestBase {
+
+    @Test
+    public void testComplexArithmeticSequence() {
+        MutableByte num = MutableByte.of((byte) 10);
+        num.add((byte) 5);
+        num.increment();
+        num.subtract((byte) 3);
+        num.decrement();
+        num.add((byte) -2);
+        Assertions.assertEquals((byte) 10, num.value());
+    }
+
+    @Test
+    public void testAllGetterSetterCombinations() {
+        MutableByte num = MutableByte.of((byte) 5);
+
+        Assertions.assertEquals((byte) 5, num.value());
+
+        num.setValue((byte) 10);
+        Assertions.assertEquals((byte) 10, num.getValue());
+
+        byte old = num.getAndSet((byte) 15);
+        Assertions.assertEquals((byte) 10, old);
+        Assertions.assertEquals((byte) 15, num.value());
+
+        byte newVal = num.setAndGet((byte) 20);
+        Assertions.assertEquals((byte) 20, newVal);
+        Assertions.assertEquals((byte) 20, num.value());
+    }
+
+    @Test
+    public void testAllIncrementDecrementVariations() {
+        MutableByte num = MutableByte.of((byte) 10);
+
+        Assertions.assertEquals((byte) 10, num.getAndIncrement());
+        Assertions.assertEquals((byte) 11, num.value());
+
+        Assertions.assertEquals((byte) 12, num.incrementAndGet());
+        Assertions.assertEquals((byte) 12, num.value());
+
+        Assertions.assertEquals((byte) 12, num.getAndDecrement());
+        Assertions.assertEquals((byte) 11, num.value());
+
+        Assertions.assertEquals((byte) 10, num.decrementAndGet());
+        Assertions.assertEquals((byte) 10, num.value());
+    }
+
+    @Test
+    public void testAllAddVariations() {
+        MutableByte num = MutableByte.of((byte) 10);
+
+        num.add((byte) 5);
+        Assertions.assertEquals((byte) 15, num.value());
+
+        byte old = num.getAndAdd((byte) 10);
+        Assertions.assertEquals((byte) 15, old);
+        Assertions.assertEquals((byte) 25, num.value());
+
+        byte result = num.addAndGet((byte) 5);
+        Assertions.assertEquals((byte) 30, result);
+        Assertions.assertEquals((byte) 30, num.value());
+    }
+
+    @Test
+    public void testAllNumberConversions() {
+        MutableByte num = MutableByte.of((byte) 100);
+
+        Assertions.assertEquals((byte) 100, num.byteValue());
+        Assertions.assertEquals((short) 100, num.shortValue());
+        Assertions.assertEquals(100, num.intValue());
+        Assertions.assertEquals(100L, num.longValue());
+        Assertions.assertEquals(100.0f, num.floatValue(), 0.0f);
+        Assertions.assertEquals(100.0, num.doubleValue(), 0.0);
+    }
+
+    @Test
+    public void testMutabilityVerification() {
+        MutableByte num = MutableByte.of((byte) 1);
+
+        num.increment();
+        Assertions.assertEquals((byte) 2, num.value());
+
+        num.setValue((byte) 10);
+        Assertions.assertEquals((byte) 10, num.value());
+
+        num.add((byte) 5);
+        Assertions.assertEquals((byte) 15, num.value());
+
+        Assertions.assertNotEquals((byte) 1, num.value());
+    }
+
+    @Test
+    public void testOverflowBehavior() {
+        MutableByte mutableByte = MutableByte.of((byte) 127);
+        mutableByte.increment();
+        Assertions.assertEquals((byte) -128, mutableByte.value());
+
+        mutableByte.setValue((byte) -128);
+        mutableByte.decrement();
+        Assertions.assertEquals((byte) 127, mutableByte.value());
+    }
 
     @Test
     public void testOf() {
@@ -38,6 +137,24 @@ public class MutableByteTest extends TestBase {
     public void testOfWithNegativeValue() {
         MutableByte num = MutableByte.of((byte) -50);
         Assertions.assertEquals((byte) -50, num.value());
+    }
+
+    @Test
+    public void testOverflowUnderflowCombined() {
+        MutableByte num = MutableByte.of(Byte.MAX_VALUE);
+        num.increment();
+        Assertions.assertEquals(Byte.MIN_VALUE, num.value());
+        num.decrement();
+        Assertions.assertEquals(Byte.MAX_VALUE, num.value());
+    }
+
+    @Test
+    public void testBoundaryValues() {
+        MutableByte mutableByte = MutableByte.of(Byte.MIN_VALUE);
+        Assertions.assertEquals(Byte.MIN_VALUE, mutableByte.value());
+
+        mutableByte.setValue(Byte.MAX_VALUE);
+        Assertions.assertEquals(Byte.MAX_VALUE, mutableByte.value());
     }
 
     @Test
@@ -105,14 +222,6 @@ public class MutableByteTest extends TestBase {
     }
 
     @Test
-    public void testGetAndSetWithSameValue() {
-        MutableByte num = MutableByte.of((byte) 15);
-        byte oldValue = num.getAndSet((byte) 15);
-        Assertions.assertEquals((byte) 15, oldValue);
-        Assertions.assertEquals((byte) 15, num.value());
-    }
-
-    @Test
     public void testGetAndSetChained() {
         MutableByte num = MutableByte.of((byte) 1);
         byte val1 = num.getAndSet((byte) 2);
@@ -122,6 +231,14 @@ public class MutableByteTest extends TestBase {
         Assertions.assertEquals((byte) 2, val2);
         Assertions.assertEquals((byte) 3, val3);
         Assertions.assertEquals((byte) 4, num.value());
+    }
+
+    @Test
+    public void testGetAndSetWithSameValue() {
+        MutableByte num = MutableByte.of((byte) 15);
+        byte oldValue = num.getAndSet((byte) 15);
+        Assertions.assertEquals((byte) 15, oldValue);
+        Assertions.assertEquals((byte) 15, num.value());
     }
 
     @Test
@@ -188,6 +305,19 @@ public class MutableByteTest extends TestBase {
         Assertions.assertTrue(updated1);
         Assertions.assertFalse(updated2);
         Assertions.assertEquals((byte) 20, num.value());
+    }
+
+    @Test
+    public void testSetIf() throws Exception {
+        MutableByte mutableByte = MutableByte.of((byte) 10);
+
+        boolean updated = mutableByte.setIf(v -> v < 15, (byte) 20);
+        Assertions.assertTrue(updated);
+        Assertions.assertEquals((byte) 20, mutableByte.value());
+
+        updated = mutableByte.setIf(v -> v < 15, (byte) 30);
+        Assertions.assertFalse(updated);
+        Assertions.assertEquals((byte) 20, mutableByte.value());
     }
 
     @Test
@@ -483,15 +613,15 @@ public class MutableByteTest extends TestBase {
     }
 
     @Test
-    public void testShortValueNegative() {
-        MutableByte num = MutableByte.of((byte) -1);
-        Assertions.assertEquals((short) -1, num.shortValue());
-    }
-
-    @Test
     public void testShortValueSignExtension() {
         MutableByte num = MutableByte.of((byte) -128);
         Assertions.assertEquals((short) -128, num.shortValue());
+    }
+
+    @Test
+    public void testShortValueNegative() {
+        MutableByte num = MutableByte.of((byte) -1);
+        Assertions.assertEquals((short) -1, num.shortValue());
     }
 
     @Test
@@ -501,15 +631,15 @@ public class MutableByteTest extends TestBase {
     }
 
     @Test
-    public void testIntValueNegative() {
-        MutableByte num = MutableByte.of((byte) -50);
-        Assertions.assertEquals(-50, num.intValue());
-    }
-
-    @Test
     public void testIntValueSignExtension() {
         MutableByte num = MutableByte.of((byte) -128);
         Assertions.assertEquals(-128, num.intValue());
+    }
+
+    @Test
+    public void testIntValueNegative() {
+        MutableByte num = MutableByte.of((byte) -50);
+        Assertions.assertEquals(-50, num.intValue());
     }
 
     @Test
@@ -588,18 +718,18 @@ public class MutableByteTest extends TestBase {
     }
 
     @Test
-    public void testCompareToNegativeValues() {
-        MutableByte a = MutableByte.of((byte) -10);
-        MutableByte b = MutableByte.of((byte) -5);
-        Assertions.assertTrue(a.compareTo(b) < 0);
-    }
-
-    @Test
     public void testCompareToMixedSigns() {
         MutableByte a = MutableByte.of((byte) -10);
         MutableByte b = MutableByte.of((byte) 10);
         Assertions.assertTrue(a.compareTo(b) < 0);
         Assertions.assertTrue(b.compareTo(a) > 0);
+    }
+
+    @Test
+    public void testCompareToNegativeValues() {
+        MutableByte a = MutableByte.of((byte) -10);
+        MutableByte b = MutableByte.of((byte) -5);
+        Assertions.assertTrue(a.compareTo(b) < 0);
     }
 
     @Test
@@ -618,12 +748,6 @@ public class MutableByteTest extends TestBase {
     }
 
     @Test
-    public void testEqualsSameInstance() {
-        MutableByte a = MutableByte.of((byte) 15);
-        Assertions.assertTrue(a.equals(a));
-    }
-
-    @Test
     public void testEqualsNotEqual() {
         MutableByte a = MutableByte.of((byte) 10);
         MutableByte b = MutableByte.of((byte) 20);
@@ -631,16 +755,22 @@ public class MutableByteTest extends TestBase {
     }
 
     @Test
-    public void testEqualsNull() {
-        MutableByte a = MutableByte.of((byte) 10);
-        Assertions.assertFalse(a.equals(null));
-    }
-
-    @Test
     public void testEqualsDifferentType() {
         MutableByte a = MutableByte.of((byte) 10);
         Assertions.assertFalse(a.equals("10"));
         Assertions.assertFalse(a.equals(Integer.valueOf(10)));
+    }
+
+    @Test
+    public void testEqualsSameInstance() {
+        MutableByte a = MutableByte.of((byte) 15);
+        Assertions.assertTrue(a.equals(a));
+    }
+
+    @Test
+    public void testEqualsNull() {
+        MutableByte a = MutableByte.of((byte) 10);
+        Assertions.assertFalse(a.equals(null));
     }
 
     @Test
@@ -676,18 +806,6 @@ public class MutableByteTest extends TestBase {
     }
 
     @Test
-    public void testHashCodeNegative() {
-        MutableByte num = MutableByte.of((byte) -10);
-        Assertions.assertEquals(-10, num.hashCode());
-    }
-
-    @Test
-    public void testHashCodeZero() {
-        MutableByte num = MutableByte.of((byte) 0);
-        Assertions.assertEquals(0, num.hashCode());
-    }
-
-    @Test
     public void testHashCodeConsistency() {
         MutableByte num = MutableByte.of((byte) 25);
         int hash1 = num.hashCode();
@@ -704,6 +822,18 @@ public class MutableByteTest extends TestBase {
     }
 
     @Test
+    public void testHashCodeNegative() {
+        MutableByte num = MutableByte.of((byte) -10);
+        Assertions.assertEquals(-10, num.hashCode());
+    }
+
+    @Test
+    public void testHashCodeZero() {
+        MutableByte num = MutableByte.of((byte) 0);
+        Assertions.assertEquals(0, num.hashCode());
+    }
+
+    @Test
     public void testHashCodeMinMax() {
         MutableByte min = MutableByte.of(Byte.MIN_VALUE);
         MutableByte max = MutableByte.of(Byte.MAX_VALUE);
@@ -715,6 +845,13 @@ public class MutableByteTest extends TestBase {
     public void testToString() {
         MutableByte num = MutableByte.of((byte) 42);
         Assertions.assertEquals("42", num.toString());
+    }
+
+    @Test
+    public void testToStringAfterModification() {
+        MutableByte num = MutableByte.of((byte) 10);
+        num.setValue((byte) 20);
+        Assertions.assertEquals("20", num.toString());
     }
 
     @Test
@@ -735,145 +872,6 @@ public class MutableByteTest extends TestBase {
         MutableByte max = MutableByte.of(Byte.MAX_VALUE);
         Assertions.assertEquals("-128", min.toString());
         Assertions.assertEquals("127", max.toString());
-    }
-
-    @Test
-    public void testToStringAfterModification() {
-        MutableByte num = MutableByte.of((byte) 10);
-        num.setValue((byte) 20);
-        Assertions.assertEquals("20", num.toString());
-    }
-
-    @Test
-    public void testOverflowUnderflowCombined() {
-        MutableByte num = MutableByte.of(Byte.MAX_VALUE);
-        num.increment();
-        Assertions.assertEquals(Byte.MIN_VALUE, num.value());
-        num.decrement();
-        Assertions.assertEquals(Byte.MAX_VALUE, num.value());
-    }
-
-    @Test
-    public void testComplexArithmeticSequence() {
-        MutableByte num = MutableByte.of((byte) 10);
-        num.add((byte) 5);
-        num.increment();
-        num.subtract((byte) 3);
-        num.decrement();
-        num.add((byte) -2);
-        Assertions.assertEquals((byte) 10, num.value());
-    }
-
-    @Test
-    public void testAllGetterSetterCombinations() {
-        MutableByte num = MutableByte.of((byte) 5);
-
-        Assertions.assertEquals((byte) 5, num.value());
-
-        num.setValue((byte) 10);
-        Assertions.assertEquals((byte) 10, num.getValue());
-
-        byte old = num.getAndSet((byte) 15);
-        Assertions.assertEquals((byte) 10, old);
-        Assertions.assertEquals((byte) 15, num.value());
-
-        byte newVal = num.setAndGet((byte) 20);
-        Assertions.assertEquals((byte) 20, newVal);
-        Assertions.assertEquals((byte) 20, num.value());
-    }
-
-    @Test
-    public void testAllIncrementDecrementVariations() {
-        MutableByte num = MutableByte.of((byte) 10);
-
-        Assertions.assertEquals((byte) 10, num.getAndIncrement());
-        Assertions.assertEquals((byte) 11, num.value());
-
-        Assertions.assertEquals((byte) 12, num.incrementAndGet());
-        Assertions.assertEquals((byte) 12, num.value());
-
-        Assertions.assertEquals((byte) 12, num.getAndDecrement());
-        Assertions.assertEquals((byte) 11, num.value());
-
-        Assertions.assertEquals((byte) 10, num.decrementAndGet());
-        Assertions.assertEquals((byte) 10, num.value());
-    }
-
-    @Test
-    public void testAllAddVariations() {
-        MutableByte num = MutableByte.of((byte) 10);
-
-        num.add((byte) 5);
-        Assertions.assertEquals((byte) 15, num.value());
-
-        byte old = num.getAndAdd((byte) 10);
-        Assertions.assertEquals((byte) 15, old);
-        Assertions.assertEquals((byte) 25, num.value());
-
-        byte result = num.addAndGet((byte) 5);
-        Assertions.assertEquals((byte) 30, result);
-        Assertions.assertEquals((byte) 30, num.value());
-    }
-
-    @Test
-    public void testAllNumberConversions() {
-        MutableByte num = MutableByte.of((byte) 100);
-
-        Assertions.assertEquals((byte) 100, num.byteValue());
-        Assertions.assertEquals((short) 100, num.shortValue());
-        Assertions.assertEquals(100, num.intValue());
-        Assertions.assertEquals(100L, num.longValue());
-        Assertions.assertEquals(100.0f, num.floatValue(), 0.0f);
-        Assertions.assertEquals(100.0, num.doubleValue(), 0.0);
-    }
-
-    @Test
-    public void testMutabilityVerification() {
-        MutableByte num = MutableByte.of((byte) 1);
-
-        num.increment();
-        Assertions.assertEquals((byte) 2, num.value());
-
-        num.setValue((byte) 10);
-        Assertions.assertEquals((byte) 10, num.value());
-
-        num.add((byte) 5);
-        Assertions.assertEquals((byte) 15, num.value());
-
-        Assertions.assertNotEquals((byte) 1, num.value());
-    }
-
-    @Test
-    public void testSetIf() throws Exception {
-        MutableByte mutableByte = MutableByte.of((byte) 10);
-
-        boolean updated = mutableByte.setIf(v -> v < 15, (byte) 20);
-        Assertions.assertTrue(updated);
-        Assertions.assertEquals((byte) 20, mutableByte.value());
-
-        updated = mutableByte.setIf(v -> v < 15, (byte) 30);
-        Assertions.assertFalse(updated);
-        Assertions.assertEquals((byte) 20, mutableByte.value());
-    }
-
-    @Test
-    public void testOverflowBehavior() {
-        MutableByte mutableByte = MutableByte.of((byte) 127);
-        mutableByte.increment();
-        Assertions.assertEquals((byte) -128, mutableByte.value());
-
-        mutableByte.setValue((byte) -128);
-        mutableByte.decrement();
-        Assertions.assertEquals((byte) 127, mutableByte.value());
-    }
-
-    @Test
-    public void testBoundaryValues() {
-        MutableByte mutableByte = MutableByte.of(Byte.MIN_VALUE);
-        Assertions.assertEquals(Byte.MIN_VALUE, mutableByte.value());
-
-        mutableByte.setValue(Byte.MAX_VALUE);
-        Assertions.assertEquals(Byte.MAX_VALUE, mutableByte.value());
     }
 
 }

@@ -4,13 +4,41 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 
-@Tag("old-test")
 public class StringWriterTest extends AbstractTest {
+
+    @Test
+    public void testDefaultConstructor() {
+        StringWriter writer = new StringWriter();
+        assertNotNull(writer);
+        assertEquals("", writer.toString());
+    }
+
+    @Test
+    public void testConstructorWithInitialSize() {
+        StringWriter writer = new StringWriter(100);
+        assertNotNull(writer);
+        assertEquals("", writer.toString());
+    }
+
+    @Test
+    public void testConstructorWithStringBuilder() {
+        StringBuilder sb = new StringBuilder("Existing content");
+        StringWriter writer = new StringWriter(sb);
+        assertNotNull(writer);
+        assertEquals("Existing content", writer.toString());
+        assertSame(sb, writer.stringBuilder());
+    }
+
+    @Test
+    public void testEmptyWriter() {
+        StringWriter writer = new StringWriter();
+        assertEquals("", writer.toString());
+        assertEquals(0, writer.toString().length());
+    }
 
     @Test
     public void test_0() throws Exception {
@@ -39,26 +67,44 @@ public class StringWriterTest extends AbstractTest {
     }
 
     @Test
-    public void testDefaultConstructor() {
+    public void testStringBuilder() throws Exception {
         StringWriter writer = new StringWriter();
-        assertNotNull(writer);
-        assertEquals("", writer.toString());
+        writer.write("Hello");
+        StringBuilder sb = writer.stringBuilder();
+        assertNotNull(sb);
+        assertEquals("Hello", sb.toString());
+
+        // Modifying StringBuilder affects writer
+        sb.append(" World");
+        assertEquals("Hello World", writer.toString());
     }
 
     @Test
-    public void testConstructorWithInitialSize() {
-        StringWriter writer = new StringWriter(100);
-        assertNotNull(writer);
-        assertEquals("", writer.toString());
+    public void testAppend_char() throws Exception {
+        StringWriter writer = new StringWriter();
+        writer.append('H').append('i').append('!');
+        assertEquals("Hi!", writer.toString());
     }
 
     @Test
-    public void testConstructorWithStringBuilder() {
-        StringBuilder sb = new StringBuilder("Existing content");
-        StringWriter writer = new StringWriter(sb);
-        assertNotNull(writer);
-        assertEquals("Existing content", writer.toString());
-        assertSame(sb, writer.stringBuilder());
+    public void testAppend_charSequence() throws Exception {
+        StringWriter writer = new StringWriter();
+        writer.append("Hello").append(" ").append("World");
+        assertEquals("Hello World", writer.toString());
+    }
+
+    @Test
+    public void testAppend_nullCharSequence() throws Exception {
+        StringWriter writer = new StringWriter();
+        writer.append((CharSequence) null);
+        assertEquals("null", writer.toString());
+    }
+
+    @Test
+    public void testAppend_charSequenceSubset() throws Exception {
+        StringWriter writer = new StringWriter();
+        writer.append("Hello World", 0, 5);
+        assertEquals("Hello", writer.toString());
     }
 
     @Test
@@ -101,47 +147,6 @@ public class StringWriterTest extends AbstractTest {
     }
 
     @Test
-    public void testAppend_char() throws Exception {
-        StringWriter writer = new StringWriter();
-        writer.append('H').append('i').append('!');
-        assertEquals("Hi!", writer.toString());
-    }
-
-    @Test
-    public void testAppend_charSequence() throws Exception {
-        StringWriter writer = new StringWriter();
-        writer.append("Hello").append(" ").append("World");
-        assertEquals("Hello World", writer.toString());
-    }
-
-    @Test
-    public void testAppend_nullCharSequence() throws Exception {
-        StringWriter writer = new StringWriter();
-        writer.append((CharSequence) null);
-        assertEquals("null", writer.toString());
-    }
-
-    @Test
-    public void testAppend_charSequenceSubset() throws Exception {
-        StringWriter writer = new StringWriter();
-        writer.append("Hello World", 0, 5);
-        assertEquals("Hello", writer.toString());
-    }
-
-    @Test
-    public void testStringBuilder() throws Exception {
-        StringWriter writer = new StringWriter();
-        writer.write("Hello");
-        StringBuilder sb = writer.stringBuilder();
-        assertNotNull(sb);
-        assertEquals("Hello", sb.toString());
-
-        // Modifying StringBuilder affects writer
-        sb.append(" World");
-        assertEquals("Hello World", writer.toString());
-    }
-
-    @Test
     public void testFlush() throws Exception {
         StringWriter writer = new StringWriter();
         writer.write("Test");
@@ -161,14 +166,6 @@ public class StringWriterTest extends AbstractTest {
     }
 
     @Test
-    public void testMethodChaining() throws Exception {
-        StringWriter writer = new StringWriter();
-        StringWriter result = writer.append("Hello").append(' ').append("World").append("!", 0, 1);
-        assertSame(writer, result);
-        assertEquals("Hello World!", writer.toString());
-    }
-
-    @Test
     public void testToString() {
         StringWriter writer = new StringWriter();
         writer.write("Test Content");
@@ -176,10 +173,11 @@ public class StringWriterTest extends AbstractTest {
     }
 
     @Test
-    public void testEmptyWriter() {
+    public void testMethodChaining() throws Exception {
         StringWriter writer = new StringWriter();
-        assertEquals("", writer.toString());
-        assertEquals(0, writer.toString().length());
+        StringWriter result = writer.append("Hello").append(' ').append("World").append("!", 0, 1);
+        assertSame(writer, result);
+        assertEquals("Hello World!", writer.toString());
     }
 
 }

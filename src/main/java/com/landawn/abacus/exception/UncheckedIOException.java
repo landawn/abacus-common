@@ -20,19 +20,19 @@ import java.io.Serial;
 /**
  * A runtime exception that wraps {@link IOException}, allowing I/O exceptions to be thrown
  * without being declared in method signatures.
- * 
- * <p>This exception is particularly useful in contexts where IOException cannot be declared, such as:</p>
+ *
+ * <p>This exception is particularly useful in contexts where {@code IOException} cannot be declared, such as:</p>
  * <ul>
- *   <li>Lambda expressions and functional interfaces</li>
- *   <li>Stream operations</li>
- *   <li>Implementing interfaces that don't declare IOException</li>
- *   <li>Simplifying exception handling in I/O-heavy code</li>
+ *   <li>Lambda expressions and functional interfaces.</li>
+ *   <li>Stream operations.</li>
+ *   <li>Implementing interfaces that don't declare {@code IOException}.</li>
+ *   <li>Simplifying exception handling in I/O-heavy code.</li>
  * </ul>
- * 
+ *
  * <p><strong>Note:</strong> Java 8+ includes its own {@link java.io.UncheckedIOException}.
  * This class predates the Java 8 version and may be retained for backward compatibility
  * or to maintain consistency with other unchecked exceptions in this framework.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // In a stream operation
@@ -45,7 +45,7 @@ import java.io.Serial;
  *         }
  *     })
  *     .forEach(System.out::println);
- * 
+ *
  * // In a lambda expression
  * Supplier<String> fileReader = () -> {
  *     try {
@@ -55,7 +55,7 @@ import java.io.Serial;
  *     }
  * };
  * }</pre>
- * 
+ *
  * @see UncheckedException
  * @see IOException
  * @see java.io.UncheckedIOException
@@ -75,7 +75,7 @@ public class UncheckedIOException extends UncheckedException {
     /**
      * Constructs a new {@code UncheckedIOException} by wrapping the specified {@link IOException}.
      *
-     * <p>This constructor preserves all information from the original IOException including
+     * <p>This constructor preserves all information from the original {@code IOException} including
      * its message, stack trace, and any suppressed exceptions.</p>
      *
      * <p><b>Usage Examples:</b></p>

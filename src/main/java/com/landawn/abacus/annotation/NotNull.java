@@ -23,35 +23,35 @@ import java.lang.annotation.Target;
 /**
  * Indicates that the annotated element must not be {@code null}.
  * This annotation documents and enforces null-safety contracts, helping prevent
- * NullPointerExceptions and making code more robust and self-documenting.
- * 
+ * {@code NullPointerException}s and making code more robust and self-documenting.
+ *
  * <p><b>When applied to parameters:</b></p>
  * <ul>
- *   <li>The parameter must not be {@code null} when the method/constructor is called</li>
- *   <li>Passing {@code null} will likely result in NullPointerException or IllegalArgumentException</li>
- *   <li>Callers should validate {@code non-null} before invoking</li>
+ *   <li>The parameter must not be {@code null} when the method/constructor is called.</li>
+ *   <li>Passing {@code null} will likely result in {@code NullPointerException} or {@code IllegalArgumentException}.</li>
+ *   <li>Callers should validate {@code non-null} before invoking.</li>
  * </ul>
- * 
+ *
  * <p><b>When applied to methods:</b></p>
  * <ul>
- *   <li>The method guarantees it will never return null</li>
- *   <li>Callers can safely use the return value without {@code null} checks</li>
- *   <li>The method must ensure a {@code non-null} return value in all code paths</li>
+ *   <li>The method guarantees it will never return {@code null}.</li>
+ *   <li>Callers can safely use the return value without {@code null} checks.</li>
+ *   <li>The method must ensure a {@code non-null} return value in all code paths.</li>
  * </ul>
- * 
+ *
  * <p><b>When applied to constructors:</b></p>
  * <ul>
- *   <li>Documents null-safety requirements for constructor parameters</li>
- *   <li>May indicate that the constructor validates against {@code null} inputs</li>
+ *   <li>Documents null-safety requirements for constructor parameters.</li>
+ *   <li>May indicate that the constructor validates against {@code null} inputs.</li>
  * </ul>
- * 
+ *
  * <p><b>Tool support:</b></p>
  * <ul>
- *   <li>IDEs can warn about potential {@code null} pointer issues</li>
- *   <li>Static analysis tools can verify null-safety contracts</li>
- *   <li>Some frameworks may perform runtime {@code null} checks</li>
+ *   <li>IDEs can warn about potential {@code null} pointer issues.</li>
+ *   <li>Static analysis tools can verify null-safety contracts.</li>
+ *   <li>Some frameworks may perform runtime {@code null} checks.</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * public class UserService {
@@ -61,13 +61,13 @@ import java.lang.annotation.Target;
  *         User user = userRepository.find(username);
  *         return user != null ? user : User.anonymous();
  *     }
- *     
+ *
  *     public UserService(@NotNull DataSource dataSource) {
  *         this.dataSource = Objects.requireNonNull(dataSource, "dataSource cannot be null");
  *     }
  * }
  * }</pre>
- * 
+ *
  * @see MayReturnNull
  * @see NullSafe
  */

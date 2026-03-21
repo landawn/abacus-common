@@ -16,13 +16,11 @@ package com.landawn.abacus.util.function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Pair;
 
-@Tag("2025")
 public class IntBiConsumerTest extends TestBase {
 
     @Test
@@ -65,36 +63,6 @@ public class IntBiConsumerTest extends TestBase {
     }
 
     @Test
-    public void test_andThen() {
-        final Pair<Integer, Integer> result = Pair.of(0, 0);
-
-        IntBiConsumer first = (t, u) -> result.setLeft(t + u);
-        IntBiConsumer second = (t, u) -> result.setRight(t * u);
-
-        IntBiConsumer combined = first.andThen(second);
-        combined.accept(3, 4);
-
-        assertEquals(7, result.left().intValue());
-        assertEquals(12, result.right().intValue());
-    }
-
-    @Test
-    public void test_andThen_multipleChaining() {
-        final int[] results = new int[3];
-
-        IntBiConsumer first = (t, u) -> results[0] = t + u;
-        IntBiConsumer second = (t, u) -> results[1] = t - u;
-        IntBiConsumer third = (t, u) -> results[2] = t * u;
-
-        IntBiConsumer combined = first.andThen(second).andThen(third);
-        combined.accept(10, 3);
-
-        assertEquals(13, results[0]);
-        assertEquals(7, results[1]);
-        assertEquals(30, results[2]);
-    }
-
-    @Test
     public void test_accept_withNegativeValues() {
         final int[] result = { 0 };
 
@@ -126,5 +94,35 @@ public class IntBiConsumerTest extends TestBase {
 
         consumer.accept(0, 100);
         assertEquals(0, result[0]);
+    }
+
+    @Test
+    public void test_andThen() {
+        final Pair<Integer, Integer> result = Pair.of(0, 0);
+
+        IntBiConsumer first = (t, u) -> result.setLeft(t + u);
+        IntBiConsumer second = (t, u) -> result.setRight(t * u);
+
+        IntBiConsumer combined = first.andThen(second);
+        combined.accept(3, 4);
+
+        assertEquals(7, result.left().intValue());
+        assertEquals(12, result.right().intValue());
+    }
+
+    @Test
+    public void test_andThen_multipleChaining() {
+        final int[] results = new int[3];
+
+        IntBiConsumer first = (t, u) -> results[0] = t + u;
+        IntBiConsumer second = (t, u) -> results[1] = t - u;
+        IntBiConsumer third = (t, u) -> results[2] = t * u;
+
+        IntBiConsumer combined = first.andThen(second).andThen(third);
+        combined.accept(10, 3);
+
+        assertEquals(13, results[0]);
+        assertEquals(7, results[1]);
+        assertEquals(30, results[2]);
     }
 }

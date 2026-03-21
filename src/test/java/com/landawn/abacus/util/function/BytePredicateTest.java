@@ -5,22 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BytePredicateTest extends TestBase {
-
-    @Test
-    public void testTest() {
-        BytePredicate isPositive = b -> b > 0;
-
-        assertTrue(isPositive.test((byte) 5));
-        assertFalse(isPositive.test((byte) -5));
-        assertFalse(isPositive.test((byte) 0));
-    }
 
     @Test
     public void testTestWithLambda() {
@@ -45,74 +34,6 @@ public class BytePredicateTest extends TestBase {
     }
 
     @Test
-    public void testOf() {
-        BytePredicate original = b -> b > 0;
-        BytePredicate returned = BytePredicate.of(original);
-
-        assertSame(original, returned);
-    }
-
-    @Test
-    public void testNegate() {
-        BytePredicate isPositive = b -> b > 0;
-        BytePredicate isNotPositive = isPositive.negate();
-
-        assertFalse(isNotPositive.test((byte) 5));
-        assertTrue(isNotPositive.test((byte) -5));
-        assertTrue(isNotPositive.test((byte) 0));
-    }
-
-    @Test
-    public void testAnd() {
-        BytePredicate isPositive = b -> b > 0;
-        BytePredicate lessThan10 = b -> b < 10;
-        BytePredicate combined = isPositive.and(lessThan10);
-
-        assertTrue(combined.test((byte) 5));
-        assertFalse(combined.test((byte) -5));
-        assertFalse(combined.test((byte) 15));
-    }
-
-    @Test
-    public void testAndShortCircuit() {
-        final boolean[] secondCalled = { false };
-        BytePredicate alwaysFalse = b -> false;
-        BytePredicate checkCalled = b -> {
-            secondCalled[0] = true;
-            return true;
-        };
-
-        BytePredicate combined = alwaysFalse.and(checkCalled);
-        assertFalse(combined.test((byte) 5));
-        assertFalse(secondCalled[0]);
-    }
-
-    @Test
-    public void testOr() {
-        BytePredicate isNegative = b -> b < 0;
-        BytePredicate isGreaterThan10 = b -> b > 10;
-        BytePredicate combined = isNegative.or(isGreaterThan10);
-
-        assertTrue(combined.test((byte) -5));
-        assertTrue(combined.test((byte) 15));
-        assertFalse(combined.test((byte) 5));
-    }
-
-    @Test
-    public void testOrShortCircuit() {
-        final boolean[] secondCalled = { false };
-        BytePredicate alwaysTrue = b -> true;
-        BytePredicate checkCalled = b -> {
-            secondCalled[0] = true;
-            return false;
-        };
-
-        BytePredicate combined = alwaysTrue.or(checkCalled);
-        assertTrue(combined.test((byte) 5));
-        assertFalse(secondCalled[0]);
-    }
-
-    @Test
     public void testAlwaysTrue() {
         assertTrue(BytePredicate.ALWAYS_TRUE.test((byte) 5));
         assertTrue(BytePredicate.ALWAYS_TRUE.test((byte) -5));
@@ -124,6 +45,15 @@ public class BytePredicateTest extends TestBase {
         assertFalse(BytePredicate.ALWAYS_FALSE.test((byte) 5));
         assertFalse(BytePredicate.ALWAYS_FALSE.test((byte) -5));
         assertFalse(BytePredicate.ALWAYS_FALSE.test((byte) 0));
+    }
+
+    @Test
+    public void testTest() {
+        BytePredicate isPositive = b -> b > 0;
+
+        assertTrue(isPositive.test((byte) 5));
+        assertFalse(isPositive.test((byte) -5));
+        assertFalse(isPositive.test((byte) 0));
     }
 
     @Test
@@ -169,12 +99,89 @@ public class BytePredicateTest extends TestBase {
     }
 
     @Test
+    public void testOf() {
+        BytePredicate original = b -> b > 0;
+        BytePredicate returned = BytePredicate.of(original);
+
+        assertSame(original, returned);
+    }
+
+    @Test
+    public void testNegate() {
+        BytePredicate isPositive = b -> b > 0;
+        BytePredicate isNotPositive = isPositive.negate();
+
+        assertFalse(isNotPositive.test((byte) 5));
+        assertTrue(isNotPositive.test((byte) -5));
+        assertTrue(isNotPositive.test((byte) 0));
+    }
+
+    @Test
+    public void testAndShortCircuit() {
+        final boolean[] secondCalled = { false };
+        BytePredicate alwaysFalse = b -> false;
+        BytePredicate checkCalled = b -> {
+            secondCalled[0] = true;
+            return true;
+        };
+
+        BytePredicate combined = alwaysFalse.and(checkCalled);
+        assertFalse(combined.test((byte) 5));
+        assertFalse(secondCalled[0]);
+    }
+
+    @Test
+    public void testAnd() {
+        BytePredicate isPositive = b -> b > 0;
+        BytePredicate lessThan10 = b -> b < 10;
+        BytePredicate combined = isPositive.and(lessThan10);
+
+        assertTrue(combined.test((byte) 5));
+        assertFalse(combined.test((byte) -5));
+        assertFalse(combined.test((byte) 15));
+    }
+
+    @Test
+    public void testOrShortCircuit() {
+        final boolean[] secondCalled = { false };
+        BytePredicate alwaysTrue = b -> true;
+        BytePredicate checkCalled = b -> {
+            secondCalled[0] = true;
+            return false;
+        };
+
+        BytePredicate combined = alwaysTrue.or(checkCalled);
+        assertTrue(combined.test((byte) 5));
+        assertFalse(secondCalled[0]);
+    }
+
+    @Test
+    public void testOr() {
+        BytePredicate isNegative = b -> b < 0;
+        BytePredicate isGreaterThan10 = b -> b > 10;
+        BytePredicate combined = isNegative.or(isGreaterThan10);
+
+        assertTrue(combined.test((byte) -5));
+        assertTrue(combined.test((byte) 15));
+        assertFalse(combined.test((byte) 5));
+    }
+
+    @Test
     public void testEqual() {
         BytePredicate equalTo5 = BytePredicate.equal((byte) 5);
 
         assertTrue(equalTo5.test((byte) 5));
         assertFalse(equalTo5.test((byte) 6));
         assertFalse(equalTo5.test((byte) -5));
+    }
+
+    @Test
+    public void testBoundaryValues() {
+        BytePredicate isMax = BytePredicate.equal(Byte.MAX_VALUE);
+        BytePredicate isMin = BytePredicate.equal(Byte.MIN_VALUE);
+
+        assertTrue(isMax.test(Byte.MAX_VALUE));
+        assertTrue(isMin.test(Byte.MIN_VALUE));
     }
 
     @Test
@@ -231,15 +238,6 @@ public class BytePredicateTest extends TestBase {
         assertFalse(between5And10.test((byte) 10));
         assertFalse(between5And10.test((byte) 3));
         assertFalse(between5And10.test((byte) 12));
-    }
-
-    @Test
-    public void testBoundaryValues() {
-        BytePredicate isMax = BytePredicate.equal(Byte.MAX_VALUE);
-        BytePredicate isMin = BytePredicate.equal(Byte.MIN_VALUE);
-
-        assertTrue(isMax.test(Byte.MAX_VALUE));
-        assertTrue(isMin.test(Byte.MIN_VALUE));
     }
 
     @Test

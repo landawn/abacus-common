@@ -12,7 +12,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.hash.Funnel;
@@ -20,7 +19,6 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.PrimitiveSink;
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class HasherTest extends TestBase {
 
     private Hasher hasher;
@@ -28,6 +26,16 @@ public class HasherTest extends TestBase {
     @BeforeEach
     public void setUp() {
         hasher = Hashing.sha256().newHasher();
+    }
+
+    private static class Person {
+        final String name;
+        final int age;
+
+        Person(String name, int age) {
+            this.name = name;
+            this.age = age;
+        }
     }
 
     @Test
@@ -46,85 +54,6 @@ public class HasherTest extends TestBase {
         Hasher hasher3 = Hashing.sha256().newHasher();
         hasher3.put((byte) 0xFF).put((byte) 0x00).put((byte) 0x42);
         assertNotNull(hasher3.hash());
-    }
-
-    @Test
-    public void testPutByteArray() {
-        byte[] data = "Hello".getBytes(StandardCharsets.UTF_8);
-        Hasher result = hasher.put(data);
-        assertSame(hasher, result);
-
-        HashCode hash1 = hasher.hash();
-
-        Hasher hasher2 = Hashing.sha256().newHasher();
-        hasher2.put(data);
-        HashCode hash2 = hasher2.hash();
-
-        assertEquals(hash1, hash2);
-
-        Hasher hasher3 = Hashing.sha256().newHasher();
-        hasher3.put(new byte[0]);
-        assertNotNull(hasher3.hash());
-
-        Hasher hasher4 = Hashing.sha256().newHasher();
-        assertThrows(NullPointerException.class, () -> hasher4.put((byte[]) null));
-    }
-
-    @Test
-    public void testPutByteArrayWithOffsetAndLength() {
-        byte[] buffer = "Hello World".getBytes();
-
-        Hasher hasher1 = Hashing.sha256().newHasher();
-        hasher1.put(buffer, 0, 5);
-        HashCode hash1 = hasher1.hash();
-
-        Hasher hasher2 = Hashing.sha256().newHasher();
-        hasher2.put(buffer, 6, 5);
-        HashCode hash2 = hasher2.hash();
-
-        assertNotEquals(hash1, hash2);
-
-        Hasher hasher3 = Hashing.sha256().newHasher();
-        Hasher result = hasher3.put(buffer, 0, 5);
-        assertSame(hasher3, result);
-
-        Hasher hasher4 = Hashing.sha256().newHasher();
-        hasher4.put(buffer, 0, 0);
-        assertNotNull(hasher4.hash());
-
-        Hasher hasher5 = Hashing.sha256().newHasher();
-        assertThrows(IndexOutOfBoundsException.class, () -> hasher5.put(buffer, -1, 5));
-        assertThrows(IndexOutOfBoundsException.class, () -> hasher5.put(buffer, 0, -1));
-        assertThrows(IndexOutOfBoundsException.class, () -> hasher5.put(buffer, 0, buffer.length + 1));
-        assertThrows(IndexOutOfBoundsException.class, () -> hasher5.put(buffer, buffer.length, 1));
-        assertThrows(NullPointerException.class, () -> hasher5.put((byte[]) null, 0, 0));
-    }
-
-    @Test
-    public void testPutByteBuffer() {
-        byte[] data = "test data".getBytes();
-        ByteBuffer buffer = ByteBuffer.wrap(data);
-
-        Hasher result = hasher.put(buffer);
-        assertSame(hasher, result);
-        assertEquals(data.length, buffer.position());
-
-        HashCode hash1 = hasher.hash();
-
-        Hasher hasher2 = Hashing.sha256().newHasher();
-        hasher2.put(data);
-        HashCode hash2 = hasher2.hash();
-
-        assertEquals(hash1, hash2);
-
-        ByteBuffer buffer2 = ByteBuffer.wrap(data);
-        buffer2.position(5);
-        Hasher hasher3 = Hashing.sha256().newHasher();
-        hasher3.put(buffer2);
-        assertNotNull(hasher3.hash());
-
-        Hasher hasher4 = Hashing.sha256().newHasher();
-        assertThrows(NullPointerException.class, () -> hasher4.put((ByteBuffer) null));
     }
 
     @Test
@@ -306,6 +235,85 @@ public class HasherTest extends TestBase {
     }
 
     @Test
+    public void testPutByteArray() {
+        byte[] data = "Hello".getBytes(StandardCharsets.UTF_8);
+        Hasher result = hasher.put(data);
+        assertSame(hasher, result);
+
+        HashCode hash1 = hasher.hash();
+
+        Hasher hasher2 = Hashing.sha256().newHasher();
+        hasher2.put(data);
+        HashCode hash2 = hasher2.hash();
+
+        assertEquals(hash1, hash2);
+
+        Hasher hasher3 = Hashing.sha256().newHasher();
+        hasher3.put(new byte[0]);
+        assertNotNull(hasher3.hash());
+
+        Hasher hasher4 = Hashing.sha256().newHasher();
+        assertThrows(NullPointerException.class, () -> hasher4.put((byte[]) null));
+    }
+
+    @Test
+    public void testPutByteArrayWithOffsetAndLength() {
+        byte[] buffer = "Hello World".getBytes();
+
+        Hasher hasher1 = Hashing.sha256().newHasher();
+        hasher1.put(buffer, 0, 5);
+        HashCode hash1 = hasher1.hash();
+
+        Hasher hasher2 = Hashing.sha256().newHasher();
+        hasher2.put(buffer, 6, 5);
+        HashCode hash2 = hasher2.hash();
+
+        assertNotEquals(hash1, hash2);
+
+        Hasher hasher3 = Hashing.sha256().newHasher();
+        Hasher result = hasher3.put(buffer, 0, 5);
+        assertSame(hasher3, result);
+
+        Hasher hasher4 = Hashing.sha256().newHasher();
+        hasher4.put(buffer, 0, 0);
+        assertNotNull(hasher4.hash());
+
+        Hasher hasher5 = Hashing.sha256().newHasher();
+        assertThrows(IndexOutOfBoundsException.class, () -> hasher5.put(buffer, -1, 5));
+        assertThrows(IndexOutOfBoundsException.class, () -> hasher5.put(buffer, 0, -1));
+        assertThrows(IndexOutOfBoundsException.class, () -> hasher5.put(buffer, 0, buffer.length + 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> hasher5.put(buffer, buffer.length, 1));
+        assertThrows(NullPointerException.class, () -> hasher5.put((byte[]) null, 0, 0));
+    }
+
+    @Test
+    public void testPutByteBuffer() {
+        byte[] data = "test data".getBytes();
+        ByteBuffer buffer = ByteBuffer.wrap(data);
+
+        Hasher result = hasher.put(buffer);
+        assertSame(hasher, result);
+        assertEquals(data.length, buffer.position());
+
+        HashCode hash1 = hasher.hash();
+
+        Hasher hasher2 = Hashing.sha256().newHasher();
+        hasher2.put(data);
+        HashCode hash2 = hasher2.hash();
+
+        assertEquals(hash1, hash2);
+
+        ByteBuffer buffer2 = ByteBuffer.wrap(data);
+        buffer2.position(5);
+        Hasher hasher3 = Hashing.sha256().newHasher();
+        hasher3.put(buffer2);
+        assertNotNull(hasher3.hash());
+
+        Hasher hasher4 = Hashing.sha256().newHasher();
+        assertThrows(NullPointerException.class, () -> hasher4.put((ByteBuffer) null));
+    }
+
+    @Test
     public void testPutCharArrayWithOffsetAndLength() {
         char[] buffer = "Hello World".toCharArray();
 
@@ -414,6 +422,24 @@ public class HasherTest extends TestBase {
     }
 
     @Test
+    public void testConsistencyAcrossDataTypes() {
+
+        HashCode hashTrue1 = Hashing.sha256().newHasher().put(true).hash();
+        HashCode hashTrue2 = Hashing.sha256().newHasher().put((byte) 1).hash();
+        assertEquals(hashTrue1, hashTrue2);
+
+        float f = 123.456f;
+        HashCode hashFloat = Hashing.sha256().newHasher().put(f).hash();
+        HashCode hashIntBits = Hashing.sha256().newHasher().put(Float.floatToRawIntBits(f)).hash();
+        assertEquals(hashFloat, hashIntBits);
+
+        double d = 123.456789;
+        HashCode hashDouble = Hashing.sha256().newHasher().put(d).hash();
+        HashCode hashLongBits = Hashing.sha256().newHasher().put(Double.doubleToRawLongBits(d)).hash();
+        assertEquals(hashDouble, hashLongBits);
+    }
+
+    @Test
     public void testHash() {
         hasher.put("test data".getBytes());
         HashCode hash1 = hasher.hash();
@@ -451,33 +477,5 @@ public class HasherTest extends TestBase {
                 .hash();
 
         assertNotNull(hash);
-    }
-
-    @Test
-    public void testConsistencyAcrossDataTypes() {
-
-        HashCode hashTrue1 = Hashing.sha256().newHasher().put(true).hash();
-        HashCode hashTrue2 = Hashing.sha256().newHasher().put((byte) 1).hash();
-        assertEquals(hashTrue1, hashTrue2);
-
-        float f = 123.456f;
-        HashCode hashFloat = Hashing.sha256().newHasher().put(f).hash();
-        HashCode hashIntBits = Hashing.sha256().newHasher().put(Float.floatToRawIntBits(f)).hash();
-        assertEquals(hashFloat, hashIntBits);
-
-        double d = 123.456789;
-        HashCode hashDouble = Hashing.sha256().newHasher().put(d).hash();
-        HashCode hashLongBits = Hashing.sha256().newHasher().put(Double.doubleToRawLongBits(d)).hash();
-        assertEquals(hashDouble, hashLongBits);
-    }
-
-    private static class Person {
-        final String name;
-        final int age;
-
-        Person(String name, int age) {
-            this.name = name;
-            this.age = age;
-        }
     }
 }

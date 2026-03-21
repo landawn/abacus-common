@@ -24,24 +24,24 @@ import java.lang.annotation.Target;
  * Indicates that the annotated method may return {@code null} values under certain conditions.
  * This annotation explicitly documents that {@code null} is a legitimate return value,
  * warning callers to perform {@code null} checks before using the returned value.
- * 
+ *
  * <p><b>Purpose and benefits:</b></p>
  * <ul>
  *   <li>Makes null-return contracts explicit and visible</li>
- *   <li>Helps prevent NullPointerException in calling code</li>
+ *   <li>Helps prevent {@code NullPointerException} in calling code</li>
  *   <li>Enables better IDE support with null-safety warnings</li>
  *   <li>Documents API behavior clearly for users</li>
  *   <li>Facilitates static analysis for null-safety verification</li>
  * </ul>
- * 
+ *
  * <p><b>Best practices:</b></p>
  * <ul>
- *   <li>Always document in JavaDoc when and why {@code null} might be returned</li>
- *   <li>Consider returning Optional instead for new APIs</li>
- *   <li>Use consistently with @NotNull to establish complete null-safety contracts</li>
+ *   <li>Always document in Javadoc when and why {@code null} might be returned</li>
+ *   <li>Consider returning {@code Optional} instead for new APIs</li>
+ *   <li>Use consistently with {@link NotNull} to establish complete null-safety contracts</li>
  *   <li>Ensure calling code handles the {@code null} case appropriately</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * public class UserRepository {
@@ -54,7 +54,7 @@ import java.lang.annotation.Target;
  *     public User findByUsername(String username) {
  *         return database.query("SELECT * FROM users WHERE username = ?", username);
  *     }
- *     
+ *
  *     // Caller must check for null:
  *     User user = repository.findByUsername("john");
  *     if (user != null) {
@@ -62,7 +62,7 @@ import java.lang.annotation.Target;
  *     }
  * }
  * }</pre>
- * 
+ *
  * @see NotNull
  * @see NullSafe
  */

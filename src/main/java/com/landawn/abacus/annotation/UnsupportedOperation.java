@@ -24,7 +24,7 @@ import java.lang.annotation.Target;
  * Marks methods that represent unsupported operations in an implementation.
  * This annotation indicates that the annotated method will throw an {@link UnsupportedOperationException}
  * when invoked, typically used in partial implementations or read-only views of data structures.
- * 
+ *
  * <p>Common use cases include:</p>
  * <ul>
  *   <li>Immutable collection implementations where modification methods are unsupported</li>
@@ -32,10 +32,10 @@ import java.lang.annotation.Target;
  *   <li>Interface implementations where certain operations are not applicable</li>
  *   <li>Abstract base classes with optional operations that subclasses may not support</li>
  * </ul>
- * 
+ *
  * <p>This annotation serves as documentation for API users, making it clear at compile-time
  * which operations are not supported, rather than discovering it at runtime.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * public class ImmutableList<E> implements List<E> {
@@ -44,7 +44,7 @@ import java.lang.annotation.Target;
  *     public boolean add(E element) {
  *         throw new UnsupportedOperationException("Cannot modify an immutable list");
  *     }
- *     
+ *
  *     @UnsupportedOperation
  *     @Override
  *     public E remove(int index) {

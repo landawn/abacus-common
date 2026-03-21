@@ -28,7 +28,6 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -39,7 +38,6 @@ import com.esotericsoftware.kryo.io.Output;
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Strings;
 
-@Tag("new-test")
 public class KryoParserTest extends TestBase {
 
     private KryoParser parser;
@@ -112,167 +110,34 @@ public class KryoParserTest extends TestBase {
     }
 
     @Test
+    public void testSerializePrimitiveTypes() {
+        assertEquals(123, (int) parser.decode(parser.encode(123)));
+        assertEquals(123L, (long) parser.decode(parser.encode(123L)));
+        assertEquals(123.45f, (float) parser.decode(parser.encode(123.45f)), 0.001);
+        assertEquals(123.45, (double) parser.decode(parser.encode(123.45)), 0.001);
+        assertEquals(true, parser.decode(parser.encode(true)));
+        assertEquals('A', (char) parser.decode(parser.encode('A')));
+        assertEquals("test", parser.decode(parser.encode("test")));
+    }
+
+    @Test
+    public void testSerializeBigNumbers() {
+        BigInteger bigInt = new BigInteger("12345678901234567890");
+        BigDecimal bigDec = new BigDecimal("123456789.0123456789");
+
+        BigInteger decodedInt = parser.decode(parser.encode(bigInt));
+        BigDecimal decodedDec = parser.decode(parser.encode(bigDec));
+
+        assertEquals(bigInt, decodedInt);
+        assertEquals(bigDec, decodedDec);
+    }
+
+    @Test
     public void testSerializeToString() {
         TestObject obj = new TestObject("test", 123);
         String result = parser.serialize(obj, (KryoSerConfig) null);
         assertNotNull(result);
         assertTrue(Strings.base64Decode(result).length > 0);
-    }
-
-    @Test
-    public void testSerializeNull() {
-        assertThrows(IllegalArgumentException.class, () -> parser.serialize(null, (KryoSerConfig) null));
-    }
-
-    @Test
-    public void testSerializeToFile() throws IOException {
-        TestObject obj = new TestObject("test", 123);
-        File file = tempDir.resolve("test.kryo").toFile();
-
-        parser.serialize(obj, null, file);
-
-        assertTrue(file.exists());
-        assertTrue(file.length() > 0);
-    }
-
-    @Test
-    public void testSerializeToOutputStream() throws IOException {
-        TestObject obj = new TestObject("test", 123);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        parser.serialize(obj, null, baos);
-
-        byte[] bytes = baos.toByteArray();
-        assertTrue(bytes.length > 0);
-    }
-
-    @Test
-    public void testSerializeToWriter() throws IOException {
-        TestObject obj = new TestObject("test", 123);
-        StringWriter writer = new StringWriter();
-
-        parser.serialize(obj, null, writer);
-
-        String result = writer.toString();
-        assertNotNull(result);
-        assertTrue(result.length() > 0);
-    }
-
-    @Test
-    public void testDeserializeFromString() {
-        TestObject original = new TestObject("test", 123);
-        String serialized = parser.serialize(original, (KryoSerConfig) null);
-
-        TestObject result = parser.deserialize(serialized, null, TestObject.class);
-
-        assertEquals(original, result);
-    }
-
-    @Test
-    public void testDeserializeNullString() {
-        assertThrows(IllegalArgumentException.class, () -> parser.deserialize((String) null, null, TestObject.class));
-    }
-
-    @Test
-    public void testDeserializeFromFile() throws IOException {
-        TestObject original = new TestObject("test", 123);
-        File file = tempDir.resolve("test.kryo").toFile();
-        parser.serialize(original, null, file);
-
-        TestObject result = parser.deserialize(file, null, TestObject.class);
-
-        assertEquals(original, result);
-    }
-
-    @Test
-    public void testDeserializeFromInputStream() throws IOException {
-        TestObject original = new TestObject("test", 123);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        parser.serialize(original, null, baos);
-
-        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        TestObject result = parser.deserialize(bais, null, TestObject.class);
-
-        assertEquals(original, result);
-    }
-
-    @Test
-    public void testDeserializeFromReader() throws IOException {
-        TestObject original = new TestObject("test", 123);
-        StringWriter writer = new StringWriter();
-        parser.serialize(original, null, writer);
-
-        StringReader reader = new StringReader(writer.toString());
-        TestObject result = parser.deserialize(reader, null, TestObject.class);
-
-        assertEquals(original, result);
-    }
-
-    @Test
-    public void testShallowCopy() {
-        TestObject original = new TestObject("test", 123);
-        TestObject copy = parser.shallowCopy(original);
-
-        assertEquals(original, copy);
-        assertNotSame(original, copy);
-    }
-
-    @Test
-    public void testDeepCopy() {
-        TestObject original = new TestObject("test", 123);
-        TestObject cloned = parser.deepCopy(original);
-
-        assertEquals(original, cloned);
-        assertNotSame(original, cloned);
-    }
-
-    @Test
-    public void testEncode() {
-        TestObject obj = new TestObject("test", 123);
-        byte[] encoded = parser.encode(obj);
-
-        assertNotNull(encoded);
-        assertTrue(encoded.length > 0);
-    }
-
-    @Test
-    public void testDecode() {
-        TestObject original = new TestObject("test", 123);
-        byte[] encoded = parser.encode(original);
-
-        TestObject decoded = parser.decode(encoded);
-
-        assertEquals(original, decoded);
-    }
-
-    @Test
-    public void testRegisterClass() {
-        assertDoesNotThrow(() -> parser.register(TestObject.class));
-    }
-
-    @Test
-    public void testRegisterClassWithId() {
-        assertDoesNotThrow(() -> parser.register(TestObject.class, 100));
-    }
-
-    @Test
-    public void testRegisterClassWithSerializer() {
-        assertDoesNotThrow(() -> parser.register(TestObject.class, new CustomSerializer()));
-    }
-
-    @Test
-    public void testRegisterClassWithSerializerAndId() {
-        assertDoesNotThrow(() -> parser.register(TestObject.class, new CustomSerializer(), 200));
-    }
-
-    @Test
-    public void testRegisterNullClass() {
-        assertThrows(IllegalArgumentException.class, () -> parser.register(null));
-    }
-
-    @Test
-    public void testRegisterNullSerializer() {
-        assertThrows(IllegalArgumentException.class, () -> parser.register(TestObject.class, null));
     }
 
     @Test
@@ -332,97 +197,6 @@ public class KryoParserTest extends TestBase {
     }
 
     @Test
-    public void testSerializePrimitiveTypes() {
-        assertEquals(123, (int) parser.decode(parser.encode(123)));
-        assertEquals(123L, (long) parser.decode(parser.encode(123L)));
-        assertEquals(123.45f, (float) parser.decode(parser.encode(123.45f)), 0.001);
-        assertEquals(123.45, (double) parser.decode(parser.encode(123.45)), 0.001);
-        assertEquals(true, parser.decode(parser.encode(true)));
-        assertEquals('A', (char) parser.decode(parser.encode('A')));
-        assertEquals("test", parser.decode(parser.encode("test")));
-    }
-
-    @Test
-    public void testSerializeBigNumbers() {
-        BigInteger bigInt = new BigInteger("12345678901234567890");
-        BigDecimal bigDec = new BigDecimal("123456789.0123456789");
-
-        BigInteger decodedInt = parser.decode(parser.encode(bigInt));
-        BigDecimal decodedDec = parser.decode(parser.encode(bigDec));
-
-        assertEquals(bigInt, decodedInt);
-        assertEquals(bigDec, decodedDec);
-    }
-
-    @Test
-    public void testComplexNestedObject() {
-        Map<String, List<TestObject>> complex = new HashMap<>();
-        complex.put("list1", Arrays.asList(new TestObject("a", 1), new TestObject("b", 2)));
-        complex.put("list2", Arrays.asList(new TestObject("c", 3), new TestObject("d", 4)));
-
-        byte[] encoded = parser.encode(complex);
-        Map<String, List<TestObject>> decoded = parser.decode(encoded);
-
-        assertEquals(complex, decoded);
-    }
-
-    @Test
-    public void testEmptyCollections() {
-        List<String> emptyList = new ArrayList<>();
-        Map<String, String> emptyMap = new HashMap<>();
-        Set<String> emptySet = new HashSet<>();
-
-        assertEquals(emptyList, parser.decode(parser.encode(emptyList)));
-        assertEquals(emptyMap, parser.decode(parser.encode(emptyMap)));
-        assertEquals(emptySet, parser.decode(parser.encode(emptySet)));
-    }
-
-    @Test
-    public void testDeserializeWithTypeParameter() {
-        TestObject original = new TestObject("typeTest", 42);
-        String serialized = parser.serialize(original, (KryoSerConfig) null);
-
-        com.landawn.abacus.type.Type<TestObject> type = com.landawn.abacus.type.Type.of(TestObject.class);
-        TestObject result = parser.deserialize(serialized, null, type);
-        assertEquals(original, result);
-    }
-
-    @Test
-    public void testDeserializeFromFileWithTypeParameter() throws IOException {
-        TestObject original = new TestObject("fileType", 99);
-        File file = tempDir.resolve("test-type.kryo").toFile();
-        parser.serialize(original, null, file);
-
-        com.landawn.abacus.type.Type<TestObject> type = com.landawn.abacus.type.Type.of(TestObject.class);
-        TestObject result = parser.deserialize(file, null, type);
-        assertEquals(original, result);
-    }
-
-    @Test
-    public void testDeserializeFromInputStreamWithTypeParameter() throws IOException {
-        TestObject original = new TestObject("streamType", 77);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        parser.serialize(original, null, baos);
-
-        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        com.landawn.abacus.type.Type<TestObject> type = com.landawn.abacus.type.Type.of(TestObject.class);
-        TestObject result = parser.deserialize(bais, null, type);
-        assertEquals(original, result);
-    }
-
-    @Test
-    public void testDeserializeFromReaderWithTypeParameter() throws IOException {
-        TestObject original = new TestObject("readerType", 55);
-        StringWriter writer = new StringWriter();
-        parser.serialize(original, null, writer);
-
-        StringReader reader = new StringReader(writer.toString());
-        com.landawn.abacus.type.Type<TestObject> type = com.landawn.abacus.type.Type.of(TestObject.class);
-        TestObject result = parser.deserialize(reader, null, type);
-        assertEquals(original, result);
-    }
-
-    @Test
     public void testSerializeWithWriteClassConfig() {
         TestObject obj = new TestObject("writeClass", 100);
         KryoSerConfig config = new KryoSerConfig();
@@ -434,6 +208,53 @@ public class KryoParserTest extends TestBase {
         KryoDeserConfig deserConfig = new KryoDeserConfig();
         TestObject result = parser.deserialize(serialized, deserConfig, (Class<TestObject>) null);
         assertEquals(obj, result);
+    }
+
+    @Test
+    public void testSerializeNullString() {
+        String serialized = parser.serialize("hello", (KryoSerConfig) null);
+        assertNotNull(serialized);
+        String result = parser.deserialize(serialized, null, String.class);
+        assertEquals("hello", result);
+    }
+
+    @Test
+    public void testSerializeNull() {
+        assertThrows(IllegalArgumentException.class, () -> parser.serialize(null, (KryoSerConfig) null));
+    }
+
+    @Test
+    public void testSerializeToFile() throws IOException {
+        TestObject obj = new TestObject("test", 123);
+        File file = tempDir.resolve("test.kryo").toFile();
+
+        parser.serialize(obj, null, file);
+
+        assertTrue(file.exists());
+        assertTrue(file.length() > 0);
+    }
+
+    @Test
+    public void testSerializeToOutputStream() throws IOException {
+        TestObject obj = new TestObject("test", 123);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        parser.serialize(obj, null, baos);
+
+        byte[] bytes = baos.toByteArray();
+        assertTrue(bytes.length > 0);
+    }
+
+    @Test
+    public void testSerializeToWriter() throws IOException {
+        TestObject obj = new TestObject("test", 123);
+        StringWriter writer = new StringWriter();
+
+        parser.serialize(obj, null, writer);
+
+        String result = writer.toString();
+        assertNotNull(result);
+        assertTrue(result.length() > 0);
     }
 
     @Test
@@ -474,6 +295,140 @@ public class KryoParserTest extends TestBase {
     }
 
     @Test
+    public void testDeserializeFromString() {
+        TestObject original = new TestObject("test", 123);
+        String serialized = parser.serialize(original, (KryoSerConfig) null);
+
+        TestObject result = parser.deserialize(serialized, null, TestObject.class);
+
+        assertEquals(original, result);
+    }
+
+    @Test
+    public void testDeserializeWithTypeParameter() {
+        TestObject original = new TestObject("typeTest", 42);
+        String serialized = parser.serialize(original, (KryoSerConfig) null);
+
+        com.landawn.abacus.type.Type<TestObject> type = com.landawn.abacus.type.Type.of(TestObject.class);
+        TestObject result = parser.deserialize(serialized, null, type);
+        assertEquals(original, result);
+    }
+
+    @Test
+    public void testDeserializeNullString() {
+        assertThrows(IllegalArgumentException.class, () -> parser.deserialize((String) null, null, TestObject.class));
+    }
+
+    @Test
+    public void testDeserializeFromFile() throws IOException {
+        TestObject original = new TestObject("test", 123);
+        File file = tempDir.resolve("test.kryo").toFile();
+        parser.serialize(original, null, file);
+
+        TestObject result = parser.deserialize(file, null, TestObject.class);
+
+        assertEquals(original, result);
+    }
+
+    @Test
+    public void testDeserializeFromInputStream() throws IOException {
+        TestObject original = new TestObject("test", 123);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        parser.serialize(original, null, baos);
+
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        TestObject result = parser.deserialize(bais, null, TestObject.class);
+
+        assertEquals(original, result);
+    }
+
+    @Test
+    public void testDeserializeFromReader() throws IOException {
+        TestObject original = new TestObject("test", 123);
+        StringWriter writer = new StringWriter();
+        parser.serialize(original, null, writer);
+
+        StringReader reader = new StringReader(writer.toString());
+        TestObject result = parser.deserialize(reader, null, TestObject.class);
+
+        assertEquals(original, result);
+    }
+
+    @Test
+    public void testDeserializeFromFileWithTypeParameter() throws IOException {
+        TestObject original = new TestObject("fileType", 99);
+        File file = tempDir.resolve("test-type.kryo").toFile();
+        parser.serialize(original, null, file);
+
+        com.landawn.abacus.type.Type<TestObject> type = com.landawn.abacus.type.Type.of(TestObject.class);
+        TestObject result = parser.deserialize(file, null, type);
+        assertEquals(original, result);
+    }
+
+    @Test
+    public void testDeserializeFromInputStreamWithTypeParameter() throws IOException {
+        TestObject original = new TestObject("streamType", 77);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        parser.serialize(original, null, baos);
+
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        com.landawn.abacus.type.Type<TestObject> type = com.landawn.abacus.type.Type.of(TestObject.class);
+        TestObject result = parser.deserialize(bais, null, type);
+        assertEquals(original, result);
+    }
+
+    @Test
+    public void testDeserializeFromReaderWithTypeParameter() throws IOException {
+        TestObject original = new TestObject("readerType", 55);
+        StringWriter writer = new StringWriter();
+        parser.serialize(original, null, writer);
+
+        StringReader reader = new StringReader(writer.toString());
+        com.landawn.abacus.type.Type<TestObject> type = com.landawn.abacus.type.Type.of(TestObject.class);
+        TestObject result = parser.deserialize(reader, null, type);
+        assertEquals(original, result);
+    }
+
+    @Test
+    public void testShallowCopy() {
+        TestObject original = new TestObject("test", 123);
+        TestObject copy = parser.shallowCopy(original);
+
+        assertEquals(original, copy);
+        assertNotSame(original, copy);
+    }
+
+    @Test
+    public void testDeepCopy() {
+        TestObject original = new TestObject("test", 123);
+        TestObject cloned = parser.deepCopy(original);
+
+        assertEquals(original, cloned);
+        assertNotSame(original, cloned);
+    }
+
+    @Test
+    public void testEncode() {
+        TestObject obj = new TestObject("test", 123);
+        byte[] encoded = parser.encode(obj);
+
+        assertNotNull(encoded);
+        assertTrue(encoded.length > 0);
+    }
+
+    @Test
+    public void testComplexNestedObject() {
+        Map<String, List<TestObject>> complex = new HashMap<>();
+        complex.put("list1", Arrays.asList(new TestObject("a", 1), new TestObject("b", 2)));
+        complex.put("list2", Arrays.asList(new TestObject("c", 3), new TestObject("d", 4)));
+
+        byte[] encoded = parser.encode(complex);
+        Map<String, List<TestObject>> decoded = parser.decode(encoded);
+
+        assertEquals(complex, decoded);
+    }
+
+    @Test
     public void testEncodeNull() {
         byte[] result = parser.encode(null);
         // assertThrows(Exception.class, () -> parser.encode(null));
@@ -481,11 +436,24 @@ public class KryoParserTest extends TestBase {
     }
 
     @Test
-    public void testSerializeNullString() {
-        String serialized = parser.serialize("hello", (KryoSerConfig) null);
-        assertNotNull(serialized);
-        String result = parser.deserialize(serialized, null, String.class);
-        assertEquals("hello", result);
+    public void testDecode() {
+        TestObject original = new TestObject("test", 123);
+        byte[] encoded = parser.encode(original);
+
+        TestObject decoded = parser.decode(encoded);
+
+        assertEquals(original, decoded);
+    }
+
+    @Test
+    public void testEmptyCollections() {
+        List<String> emptyList = new ArrayList<>();
+        Map<String, String> emptyMap = new HashMap<>();
+        Set<String> emptySet = new HashSet<>();
+
+        assertEquals(emptyList, parser.decode(parser.encode(emptyList)));
+        assertEquals(emptyMap, parser.decode(parser.encode(emptyMap)));
+        assertEquals(emptySet, parser.decode(parser.encode(emptySet)));
     }
 
     @Test
@@ -496,5 +464,35 @@ public class KryoParserTest extends TestBase {
         byte[] encoded = parser.encode(original);
         TestObject decoded = parser.decode(encoded);
         assertEquals(original, decoded);
+    }
+
+    @Test
+    public void testRegisterClass() {
+        assertDoesNotThrow(() -> parser.register(TestObject.class));
+    }
+
+    @Test
+    public void testRegisterClassWithId() {
+        assertDoesNotThrow(() -> parser.register(TestObject.class, 100));
+    }
+
+    @Test
+    public void testRegisterClassWithSerializer() {
+        assertDoesNotThrow(() -> parser.register(TestObject.class, new CustomSerializer()));
+    }
+
+    @Test
+    public void testRegisterClassWithSerializerAndId() {
+        assertDoesNotThrow(() -> parser.register(TestObject.class, new CustomSerializer(), 200));
+    }
+
+    @Test
+    public void testRegisterNullClass() {
+        assertThrows(IllegalArgumentException.class, () -> parser.register(null));
+    }
+
+    @Test
+    public void testRegisterNullSerializer() {
+        assertThrows(IllegalArgumentException.class, () -> parser.register(TestObject.class, null));
     }
 }

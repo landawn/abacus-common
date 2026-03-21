@@ -5,12 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BooleanTriPredicateTest extends TestBase {
 
     @Test
@@ -43,6 +41,29 @@ public class BooleanTriPredicateTest extends TestBase {
     public void testAlwaysFalse() {
         assertFalse(BooleanTriPredicate.ALWAYS_FALSE.test(true, true, true));
         assertFalse(BooleanTriPredicate.ALWAYS_FALSE.test(false, false, false));
+    }
+
+    @Test
+    public void testAnonymousClass() {
+        BooleanTriPredicate predicate = new BooleanTriPredicate() {
+            @Override
+            public boolean test(boolean a, boolean b, boolean c) {
+                return (a && b) || c;
+            }
+        };
+
+        assertTrue(predicate.test(true, true, false));
+        assertTrue(predicate.test(false, false, true));
+        assertFalse(predicate.test(false, false, false));
+    }
+
+    @Test
+    public void testTestWithException() {
+        BooleanTriPredicate predicate = (a, b, c) -> {
+            throw new RuntimeException("Test exception");
+        };
+
+        assertThrows(RuntimeException.class, () -> predicate.test(true, false, true));
     }
 
     @Test
@@ -99,29 +120,6 @@ public class BooleanTriPredicateTest extends TestBase {
         BooleanTriPredicate combined = firstTrue.or(shouldNotExecute);
 
         assertTrue(combined.test(true, true, true)); // Should not throw exception
-    }
-
-    @Test
-    public void testTestWithException() {
-        BooleanTriPredicate predicate = (a, b, c) -> {
-            throw new RuntimeException("Test exception");
-        };
-
-        assertThrows(RuntimeException.class, () -> predicate.test(true, false, true));
-    }
-
-    @Test
-    public void testAnonymousClass() {
-        BooleanTriPredicate predicate = new BooleanTriPredicate() {
-            @Override
-            public boolean test(boolean a, boolean b, boolean c) {
-                return (a && b) || c;
-            }
-        };
-
-        assertTrue(predicate.test(true, true, false));
-        assertTrue(predicate.test(false, false, true));
-        assertFalse(predicate.test(false, false, false));
     }
 
     @Test

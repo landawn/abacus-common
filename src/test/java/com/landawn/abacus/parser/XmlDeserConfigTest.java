@@ -16,14 +16,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
 
-@Tag("2025")
 public class XmlDeserConfigTest extends TestBase {
 
     private XmlDeserConfig config;
@@ -31,6 +29,136 @@ public class XmlDeserConfigTest extends TestBase {
     @BeforeEach
     public void setUp() {
         config = new XmlDeserConfig();
+    }
+
+    // =====================================================================
+    // hashCode
+    // =====================================================================
+
+    @Test
+    public void testHashCode_defaultConfigs() {
+        XmlDeserConfig config1 = new XmlDeserConfig();
+        XmlDeserConfig config2 = new XmlDeserConfig();
+        assertEquals(config1.hashCode(), config2.hashCode());
+    }
+
+    @Test
+    public void testHashCode_withDifferentSettings() {
+        XmlDeserConfig config1 = new XmlDeserConfig();
+        config1.setElementType(String.class);
+
+        XmlDeserConfig config2 = new XmlDeserConfig();
+        config2.setElementType(Integer.class);
+
+        assertNotEquals(config1.hashCode(), config2.hashCode());
+    }
+
+    @Test
+    public void testEquals_defaultConfigs() {
+        XmlDeserConfig config1 = new XmlDeserConfig();
+        XmlDeserConfig config2 = new XmlDeserConfig();
+        assertTrue(config1.equals(config2));
+    }
+
+    @Test
+    public void testEquals_withDifferentIgnoreUnmatchedProperty() {
+        XmlDeserConfig config1 = new XmlDeserConfig();
+        config1.setIgnoreUnmatchedProperty(true);
+
+        XmlDeserConfig config2 = new XmlDeserConfig();
+        config2.setIgnoreUnmatchedProperty(false);
+
+        assertFalse(config1.equals(config2));
+    }
+
+    @Test
+    public void testEquals_withDifferentElementType() {
+        XmlDeserConfig config1 = new XmlDeserConfig();
+        config1.setElementType(String.class);
+
+        XmlDeserConfig config2 = new XmlDeserConfig();
+        config2.setElementType(Integer.class);
+
+        assertFalse(config1.equals(config2));
+    }
+
+    @Test
+    public void testEquals_withDifferentMapKeyType() {
+        XmlDeserConfig config1 = new XmlDeserConfig();
+        config1.setMapKeyType(String.class);
+
+        XmlDeserConfig config2 = new XmlDeserConfig();
+        config2.setMapKeyType(Integer.class);
+
+        assertFalse(config1.equals(config2));
+    }
+
+    @Test
+    public void testEquals_withDifferentMapValueType() {
+        XmlDeserConfig config1 = new XmlDeserConfig();
+        config1.setMapValueType(String.class);
+
+        XmlDeserConfig config2 = new XmlDeserConfig();
+        config2.setMapValueType(Integer.class);
+
+        assertFalse(config1.equals(config2));
+    }
+
+    // =====================================================================
+    // isIgnoreUnmatchedProperty / setIgnoreUnmatchedProperty
+    // =====================================================================
+
+    @Test
+    public void test_ignoreUnmatchedProperty() {
+        XmlDeserConfig config = new XmlDeserConfig();
+        XmlDeserConfig result = config.setIgnoreUnmatchedProperty(true);
+        assertSame(config, result);
+        assertEquals(true, config.isIgnoreUnmatchedProperty());
+
+        config.setIgnoreUnmatchedProperty(false);
+        assertEquals(false, config.isIgnoreUnmatchedProperty());
+    }
+
+    // =====================================================================
+    // setIgnoredPropNames
+    // =====================================================================
+
+    @Test
+    public void test_setIgnoredPropNames() {
+        XmlDeserConfig config = new XmlDeserConfig();
+        Map<Class<?>, Set<String>> ignoredPropNames = new HashMap<>();
+        Set<String> props = new HashSet<>();
+        props.add("prop1");
+        props.add("prop2");
+        ignoredPropNames.put(String.class, props);
+
+        XmlDeserConfig result = config.setIgnoredPropNames(ignoredPropNames);
+        assertSame(config, result);
+        assertNotNull(config.getIgnoredPropNames());
+    }
+
+    @Test
+    public void testHashCode_withSameSettings() {
+        XmlDeserConfig config1 = new XmlDeserConfig();
+        config1.setElementType(String.class);
+        config1.setIgnoreUnmatchedProperty(false);
+
+        XmlDeserConfig config2 = new XmlDeserConfig();
+        config2.setElementType(String.class);
+        config2.setIgnoreUnmatchedProperty(false);
+
+        assertEquals(config1.hashCode(), config2.hashCode());
+    }
+
+    @Test
+    public void testEquals_withSameElementType() {
+        XmlDeserConfig config1 = new XmlDeserConfig();
+        config1.setElementType(String.class);
+
+        XmlDeserConfig config2 = new XmlDeserConfig();
+        config2.setElementType(String.class);
+
+        assertTrue(config1.equals(config2));
     }
 
     // =====================================================================
@@ -55,21 +183,6 @@ public class XmlDeserConfigTest extends TestBase {
         assertNull(config.getIgnoredPropNames());
     }
 
-    // =====================================================================
-    // isIgnoreUnmatchedProperty / setIgnoreUnmatchedProperty
-    // =====================================================================
-
-    @Test
-    public void test_ignoreUnmatchedProperty() {
-        XmlDeserConfig config = new XmlDeserConfig();
-        XmlDeserConfig result = config.setIgnoreUnmatchedProperty(true);
-        assertSame(config, result);
-        assertEquals(true, config.isIgnoreUnmatchedProperty());
-
-        config.setIgnoreUnmatchedProperty(false);
-        assertEquals(false, config.isIgnoreUnmatchedProperty());
-    }
-
     @Test
     public void testIgnoreUnmatchedProperty_defaultTrue() {
         assertTrue(config.isIgnoreUnmatchedProperty());
@@ -88,24 +201,6 @@ public class XmlDeserConfigTest extends TestBase {
 
         config.setIgnoreUnmatchedProperty(true);
         assertTrue(config.isIgnoreUnmatchedProperty());
-    }
-
-    // =====================================================================
-    // setIgnoredPropNames
-    // =====================================================================
-
-    @Test
-    public void test_setIgnoredPropNames() {
-        XmlDeserConfig config = new XmlDeserConfig();
-        Map<Class<?>, Set<String>> ignoredPropNames = new HashMap<>();
-        Set<String> props = new HashSet<>();
-        props.add("prop1");
-        props.add("prop2");
-        ignoredPropNames.put(String.class, props);
-
-        XmlDeserConfig result = config.setIgnoredPropNames(ignoredPropNames);
-        assertSame(config, result);
-        assertNotNull(config.getIgnoredPropNames());
     }
 
     @Test
@@ -345,54 +440,12 @@ public class XmlDeserConfigTest extends TestBase {
     }
 
     // =====================================================================
-    // hashCode
-    // =====================================================================
-
-    @Test
-    public void testHashCode_defaultConfigs() {
-        XmlDeserConfig config1 = new XmlDeserConfig();
-        XmlDeserConfig config2 = new XmlDeserConfig();
-        assertEquals(config1.hashCode(), config2.hashCode());
-    }
-
-    @Test
-    public void testHashCode_withSameSettings() {
-        XmlDeserConfig config1 = new XmlDeserConfig();
-        config1.setElementType(String.class);
-        config1.setIgnoreUnmatchedProperty(false);
-
-        XmlDeserConfig config2 = new XmlDeserConfig();
-        config2.setElementType(String.class);
-        config2.setIgnoreUnmatchedProperty(false);
-
-        assertEquals(config1.hashCode(), config2.hashCode());
-    }
-
-    @Test
-    public void testHashCode_withDifferentSettings() {
-        XmlDeserConfig config1 = new XmlDeserConfig();
-        config1.setElementType(String.class);
-
-        XmlDeserConfig config2 = new XmlDeserConfig();
-        config2.setElementType(Integer.class);
-
-        assertNotEquals(config1.hashCode(), config2.hashCode());
-    }
-
-    // =====================================================================
     // equals
     // =====================================================================
 
     @Test
     public void testEquals_sameInstance() {
         assertTrue(config.equals(config));
-    }
-
-    @Test
-    public void testEquals_defaultConfigs() {
-        XmlDeserConfig config1 = new XmlDeserConfig();
-        XmlDeserConfig config2 = new XmlDeserConfig();
-        assertTrue(config1.equals(config2));
     }
 
     @Test
@@ -403,61 +456,6 @@ public class XmlDeserConfigTest extends TestBase {
     @Test
     public void testEquals_withDifferentType() {
         assertFalse(config.equals("not a config"));
-    }
-
-    @Test
-    public void testEquals_withDifferentIgnoreUnmatchedProperty() {
-        XmlDeserConfig config1 = new XmlDeserConfig();
-        config1.setIgnoreUnmatchedProperty(true);
-
-        XmlDeserConfig config2 = new XmlDeserConfig();
-        config2.setIgnoreUnmatchedProperty(false);
-
-        assertFalse(config1.equals(config2));
-    }
-
-    @Test
-    public void testEquals_withDifferentElementType() {
-        XmlDeserConfig config1 = new XmlDeserConfig();
-        config1.setElementType(String.class);
-
-        XmlDeserConfig config2 = new XmlDeserConfig();
-        config2.setElementType(Integer.class);
-
-        assertFalse(config1.equals(config2));
-    }
-
-    @Test
-    public void testEquals_withSameElementType() {
-        XmlDeserConfig config1 = new XmlDeserConfig();
-        config1.setElementType(String.class);
-
-        XmlDeserConfig config2 = new XmlDeserConfig();
-        config2.setElementType(String.class);
-
-        assertTrue(config1.equals(config2));
-    }
-
-    @Test
-    public void testEquals_withDifferentMapKeyType() {
-        XmlDeserConfig config1 = new XmlDeserConfig();
-        config1.setMapKeyType(String.class);
-
-        XmlDeserConfig config2 = new XmlDeserConfig();
-        config2.setMapKeyType(Integer.class);
-
-        assertFalse(config1.equals(config2));
-    }
-
-    @Test
-    public void testEquals_withDifferentMapValueType() {
-        XmlDeserConfig config1 = new XmlDeserConfig();
-        config1.setMapValueType(String.class);
-
-        XmlDeserConfig config2 = new XmlDeserConfig();
-        config2.setMapValueType(Integer.class);
-
-        assertFalse(config1.equals(config2));
     }
 
     // =====================================================================

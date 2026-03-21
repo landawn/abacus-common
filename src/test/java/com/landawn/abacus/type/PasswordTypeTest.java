@@ -17,12 +17,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class PasswordTypeTest extends TestBase {
 
     private PasswordType passwordType;
@@ -32,18 +30,6 @@ public class PasswordTypeTest extends TestBase {
     public void setUp() {
         passwordType = (PasswordType) createType("Password");
         customPasswordType = (PasswordType) createType("Password(MD5)");
-    }
-
-    @Test
-    public void testDefaultConstructor() {
-        assertNotNull(passwordType);
-        assertEquals("Password", passwordType.name());
-    }
-
-    @Test
-    public void testConstructorWithAlgorithm() {
-        assertNotNull(customPasswordType);
-        assertEquals("Password", customPasswordType.name());
     }
 
     @Test
@@ -120,6 +106,18 @@ public class PasswordTypeTest extends TestBase {
         passwordType.set(stmt, "pwd_param", null);
 
         verify(stmt).setString(eq("pwd_param"), any());
+    }
+
+    @Test
+    public void testDefaultConstructor() {
+        assertNotNull(passwordType);
+        assertEquals("Password", passwordType.name());
+    }
+
+    @Test
+    public void testConstructorWithAlgorithm() {
+        assertNotNull(customPasswordType);
+        assertEquals("Password", customPasswordType.name());
     }
 
     @Test

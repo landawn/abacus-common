@@ -4,12 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class CharToBooleanFunctionTest extends TestBase {
 
     @Test
@@ -31,19 +29,6 @@ public class CharToBooleanFunctionTest extends TestBase {
     }
 
     @Test
-    public void testApplyAsBooleanWithAnonymousClass() {
-        CharToBooleanFunction isUpperCase = new CharToBooleanFunction() {
-            @Override
-            public boolean applyAsBoolean(char value) {
-                return Character.isUpperCase(value);
-            }
-        };
-
-        assertTrue(isUpperCase.applyAsBoolean('A'));
-        assertFalse(isUpperCase.applyAsBoolean('a'));
-    }
-
-    @Test
     public void testDefault() {
         assertTrue(CharToBooleanFunction.DEFAULT.applyAsBoolean('Y'));
         assertTrue(CharToBooleanFunction.DEFAULT.applyAsBoolean('y'));
@@ -52,12 +37,6 @@ public class CharToBooleanFunctionTest extends TestBase {
         assertFalse(CharToBooleanFunction.DEFAULT.applyAsBoolean('n'));
         assertFalse(CharToBooleanFunction.DEFAULT.applyAsBoolean('0'));
         assertFalse(CharToBooleanFunction.DEFAULT.applyAsBoolean('x'));
-    }
-
-    @Test
-    public void testDefaultWithBoundaryValues() {
-        assertFalse(CharToBooleanFunction.DEFAULT.applyAsBoolean(Character.MAX_VALUE));
-        assertFalse(CharToBooleanFunction.DEFAULT.applyAsBoolean(Character.MIN_VALUE));
     }
 
     @Test
@@ -91,26 +70,6 @@ public class CharToBooleanFunctionTest extends TestBase {
     }
 
     @Test
-    public void testIsUpperCase() {
-        CharToBooleanFunction isUpperCase = Character::isUpperCase;
-
-        assertTrue(isUpperCase.applyAsBoolean('A'));
-        assertTrue(isUpperCase.applyAsBoolean('Z'));
-        assertFalse(isUpperCase.applyAsBoolean('a'));
-        assertFalse(isUpperCase.applyAsBoolean('5'));
-    }
-
-    @Test
-    public void testIsLowerCase() {
-        CharToBooleanFunction isLowerCase = Character::isLowerCase;
-
-        assertTrue(isLowerCase.applyAsBoolean('a'));
-        assertTrue(isLowerCase.applyAsBoolean('z'));
-        assertFalse(isLowerCase.applyAsBoolean('A'));
-        assertFalse(isLowerCase.applyAsBoolean('5'));
-    }
-
-    @Test
     public void testInRange() {
         CharToBooleanFunction inRange = value -> value >= 'a' && value <= 'z';
 
@@ -131,20 +90,59 @@ public class CharToBooleanFunctionTest extends TestBase {
     }
 
     @Test
+    public void testMethodReference() {
+        CharToBooleanFunction isLetter = Character::isLetter;
+
+        assertTrue(isLetter.applyAsBoolean('a'));
+        assertFalse(isLetter.applyAsBoolean('5'));
+    }
+
+    @Test
+    public void testApplyAsBooleanWithAnonymousClass() {
+        CharToBooleanFunction isUpperCase = new CharToBooleanFunction() {
+            @Override
+            public boolean applyAsBoolean(char value) {
+                return Character.isUpperCase(value);
+            }
+        };
+
+        assertTrue(isUpperCase.applyAsBoolean('A'));
+        assertFalse(isUpperCase.applyAsBoolean('a'));
+    }
+
+    @Test
+    public void testDefaultWithBoundaryValues() {
+        assertFalse(CharToBooleanFunction.DEFAULT.applyAsBoolean(Character.MAX_VALUE));
+        assertFalse(CharToBooleanFunction.DEFAULT.applyAsBoolean(Character.MIN_VALUE));
+    }
+
+    @Test
+    public void testIsUpperCase() {
+        CharToBooleanFunction isUpperCase = Character::isUpperCase;
+
+        assertTrue(isUpperCase.applyAsBoolean('A'));
+        assertTrue(isUpperCase.applyAsBoolean('Z'));
+        assertFalse(isUpperCase.applyAsBoolean('a'));
+        assertFalse(isUpperCase.applyAsBoolean('5'));
+    }
+
+    @Test
+    public void testIsLowerCase() {
+        CharToBooleanFunction isLowerCase = Character::isLowerCase;
+
+        assertTrue(isLowerCase.applyAsBoolean('a'));
+        assertTrue(isLowerCase.applyAsBoolean('z'));
+        assertFalse(isLowerCase.applyAsBoolean('A'));
+        assertFalse(isLowerCase.applyAsBoolean('5'));
+    }
+
+    @Test
     public void testWithBoundaryValues() {
         CharToBooleanFunction isMax = value -> value == Character.MAX_VALUE;
         CharToBooleanFunction isMin = value -> value == Character.MIN_VALUE;
 
         assertTrue(isMax.applyAsBoolean(Character.MAX_VALUE));
         assertTrue(isMin.applyAsBoolean(Character.MIN_VALUE));
-    }
-
-    @Test
-    public void testMethodReference() {
-        CharToBooleanFunction isLetter = Character::isLetter;
-
-        assertTrue(isLetter.applyAsBoolean('a'));
-        assertFalse(isLetter.applyAsBoolean('5'));
     }
 
     @Test

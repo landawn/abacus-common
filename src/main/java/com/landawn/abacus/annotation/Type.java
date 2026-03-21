@@ -29,27 +29,26 @@ import com.landawn.abacus.util.EnumType;
  * This powerful annotation provides fine-grained control over how values are converted between
  * different representations in contexts such as JSON/XML serialization, database persistence,
  * and data transformation.
- * 
- * <p><b>Key capabilities:</b></p>
+ *
+ * <p>Key capabilities:</p>
  * <ul>
  *   <li>Override default type conversion behavior</li>
  *   <li>Specify custom type converters for complex transformations</li>
  *   <li>Control enum representation (name, ordinal, or code)</li>
  *   <li>Scope type handling to specific contexts (serialization, persistence, or both)</li>
  * </ul>
- * 
- * <p><b>Common use cases:</b></p>
+ *
+ * <p>Common use cases:</p>
  * <ul>
  *   <li>Custom date/time formatting for serialization</li>
  *   <li>Encrypting/decrypting sensitive data during persistence</li>
- *   <li>Converting between different representations (e.g., storing JSON as String in DB)</li>
+ *   <li>Converting between different representations (e.g., storing JSON as {@code String} in DB)</li>
  *   <li>Handling legacy data formats</li>
  *   <li>Custom enum mappings</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- *
  * public class User {
  *     @Type(name = "EncryptedString", scope = Scope.PERSISTENCE)
  *     private String password;  // Encrypted when saved to DB
@@ -88,10 +87,10 @@ public @interface Type {
      *
      * <p>Common built-in type names include:</p>
      * <ul>
-     *   <li>"String", "Integer", "Long", etc. - basic types</li>
-     *   <li>"Date", "LocalDateTime", "Instant" - temporal types</li>
-     *   <li>"BigDecimal", "BigInteger" - precise numeric types</li>
-     *   <li>Custom type names registered with TypeFactory</li>
+     *   <li>{@code "String"}, {@code "Integer"}, {@code "Long"}, etc. - basic types</li>
+     *   <li>{@code "Date"}, {@code "LocalDateTime"}, {@code "Instant"} - temporal types</li>
+     *   <li>{@code "BigDecimal"}, {@code "BigInteger"} - precise numeric types</li>
+     *   <li>Custom type names registered with {@code TypeFactory}</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -108,7 +107,7 @@ public @interface Type {
     String name() default "";
 
     /**
-     * Specifies a custom Type class to handle value conversion.
+     * Specifies a custom {@code Type} class to handle value conversion.
      * The specified class must implement {@link com.landawn.abacus.type.Type} and
      * provide the necessary conversion methods.
      *
@@ -138,7 +137,7 @@ public @interface Type {
      * private String sensitiveData;
      * }</pre>
      *
-     * @return the custom Type implementation class, or base {@code Type.class} for default handling
+     * @return the custom {@code Type} implementation class, or base {@link com.landawn.abacus.type.Type Type.class} for default handling
      */
     @SuppressWarnings("rawtypes")
     Class<? extends com.landawn.abacus.type.Type> clazz() default com.landawn.abacus.type.Type.class;
@@ -147,7 +146,7 @@ public @interface Type {
      * Specifies how enum values should be represented during conversion.
      * This affects both serialization and persistence operations.
      *
-     * <p><b>EnumType.NAME (default):</b></p>
+     * <p>{@link EnumType#NAME} (default):</p>
      * <ul>
      *   <li>Uses the enum constant name as a string</li>
      *   <li>More readable and maintainable</li>
@@ -155,7 +154,7 @@ public @interface Type {
      *   <li>Larger storage size</li>
      * </ul>
      *
-     * <p><b>EnumType.ORDINAL:</b></p>
+     * <p>{@link EnumType#ORDINAL}:</p>
      * <ul>
      *   <li>Uses the enum ordinal position as an integer</li>
      *   <li>Smaller storage size</li>
@@ -163,7 +162,7 @@ public @interface Type {
      *   <li>Less readable in raw data</li>
      * </ul>
      *
-     * <p><b>EnumType.CODE:</b></p>
+     * <p>{@link EnumType#CODE}:</p>
      * <ul>
      *   <li>Uses a predefined integer code from the enum (for example, via {@code public int code()})</li>
      *   <li>Compact representation with stable code values</li>
@@ -183,7 +182,7 @@ public @interface Type {
      * private Priority priority;
      * }</pre>
      *
-     * @return the enum representation strategy, defaults to EnumType.NAME
+     * @return the enum representation strategy, defaults to {@link EnumType#NAME}
      */
     EnumType enumerated() default EnumType.NAME;
 
@@ -191,11 +190,11 @@ public @interface Type {
      * Specifies the scope where this type conversion should apply.
      * This allows different type handling for different contexts.
      *
-     * <p><b>Scope options:</b></p>
+     * <p>Scope options:</p>
      * <ul>
-     *   <li>SERIALIZATION - Only for JSON/XML/etc. serialization</li>
-     *   <li>PERSISTENCE - Only for database operations</li>
-     *   <li>ALL (default) - Applies to both contexts</li>
+     *   <li>{@link Scope#SERIALIZATION} - Only for JSON/XML/etc. serialization</li>
+     *   <li>{@link Scope#PERSISTENCE} - Only for database operations</li>
+     *   <li>{@link Scope#ALL} (default) - Applies to both contexts</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -215,7 +214,7 @@ public @interface Type {
      * }
      * }</pre>
      *
-     * @return the scope of type conversion, defaults to Scope.ALL
+     * @return the scope of type conversion, defaults to {@link Scope#ALL}
      */
     Scope scope() default Scope.ALL;
 
@@ -249,7 +248,7 @@ public @interface Type {
          * <p>Useful for controlling how data appears in API responses, configuration files,
          * or when transferring data between systems.</p>
          *
-         * <p><b>Use cases:</b></p>
+         * <p>Use cases:</p>
          * <ul>
          *   <li>Custom date formats for REST APIs</li>
          *   <li>Simplified representations for external consumers</li>
@@ -272,7 +271,7 @@ public @interface Type {
          * <p>Useful for custom database mappings, encryption, compression, or adapting
          * to legacy database schemas.</p>
          *
-         * <p><b>Use cases:</b></p>
+         * <p>Use cases:</p>
          * <ul>
          *   <li>Encrypting sensitive data before storage</li>
          *   <li>Compressing large text fields</li>
@@ -295,7 +294,7 @@ public @interface Type {
          * <p>Use this when the same conversion logic should apply everywhere,
          * providing uniform behavior regardless of the operation type.</p>
          *
-         * <p><b>Use cases:</b></p>
+         * <p>Use cases:</p>
          * <ul>
          *   <li>Consistent date/time formatting</li>
          *   <li>Standard enum representations</li>

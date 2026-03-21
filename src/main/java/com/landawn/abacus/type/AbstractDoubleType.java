@@ -27,16 +27,18 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Abstract base class for double types in the type system.
- * This class provides common functionality for handling double values,
+ * The Abstract base class for {@code double} types in the type system.
+ * <p>
+ * This class provides common functionality for handling {@code double} values,
  * including conversion, database operations, and serialization.
- * Note that this class uses Number as its generic type to allow for both
- * primitive double and Double wrapper handling.
+ * Note that this class uses {@code Number} as its generic type to allow for both
+ * primitive {@code double} and {@code Double} wrapper handling.
+ * </p>
  */
 public abstract class AbstractDoubleType extends NumberType<Number> {
 
     /**
-     * Constructs an AbstractDoubleType with the specified type name.
+     * Constructs an {@code AbstractDoubleType} with the specified type name.
      *
      * @param typeName the name of the double type (e.g., "Double", "double")
      */
@@ -45,12 +47,14 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
     }
 
     /**
-     * Converts a Number value to its string representation as a double.
+     * Converts a {@code Number} value to its string representation as a {@code double}.
+     * <p>
      * Returns {@code null} if the input is {@code null}, otherwise returns
-     * the string representation obtained from the Number's toString() method.
+     * the string representation obtained from the {@code Number}'s {@code toString()} method.
+     * </p>
      *
-     * @param x the Number value to convert
-     * @return the string representation of the double value, or {@code null} if input is {@code null}
+     * @param x the {@code Number} value to convert
+     * @return the string representation of the {@code double} value, or {@code null} if input is {@code null}
      */
     @Override
     public String stringOf(final Number x) {
@@ -62,15 +66,17 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
     }
 
     /**
-     * Converts a string to a Double value.
+     * Converts a string to a {@code Double} value.
+     * <p>
      * This method handles various string formats:
+     * </p>
      * <ul>
      *   <li>Empty or {@code null} strings return the default value</li>
      *   <li>Strings ending with 'l', 'L', 'f', 'F', 'd', or 'D' have the suffix stripped before parsing</li>
-     *   <li>Valid numeric strings are parsed to double values</li>
+     *   <li>Valid numeric strings are parsed to {@code double} values</li>
      * </ul>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * Type<Double> type = TypeFactory.getType(Double.class);
      * Double value1 = type.valueOf("3.14159");   // returns 3.14159
@@ -80,8 +86,8 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      * }</pre>
      *
      * @param str the string to convert
-     * @return the Double value
-     * @throws NumberFormatException if the string cannot be parsed as a double
+     * @return the {@code Double} value
+     * @throws NumberFormatException if the string cannot be parsed as a {@code double}
      */
     @Override
     public Double valueOf(final String str) {
@@ -106,10 +112,12 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
     }
 
     /**
-     * Checks if this type represents a double type.
-     * This method always returns {@code true} for double types.
+     * Checks if this type represents a {@code double} type.
+     * <p>
+     * This method always returns {@code true} for {@code double} types.
+     * </p>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * Type<Double> type = TypeFactory.getType(Double.class);
      * if (type.isDouble()) {
@@ -118,7 +126,7 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      * }
      * }</pre>
      *
-     * @return {@code true}, indicating this is a double type
+     * @return {@code true}, indicating this is a {@code double} type
      */
     @Override
     public boolean isDouble() {
@@ -126,11 +134,13 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
     }
 
     /**
-     * Retrieves a double value from a ResultSet at the specified column index.
-     * This method uses rs.getDouble() which returns 0.0 for SQL NULL values.
-     * Subclasses may override this to return {@code null} for SQL NULL values.
+     * Retrieves a {@code double} value from a {@code ResultSet} at the specified column index.
+     * <p>
+     * This method uses {@code rs.getDouble()} which returns {@code 0.0} for SQL {@code NULL} values.
+     * Subclasses may override this to return {@code null} for SQL {@code NULL} values.
+     * </p>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * // For primitive double types
      * Type<Double> type = TypeFactory.getType(double.class);
@@ -141,10 +151,10 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      * Double value = type.get(rs, 1);   // Returns null for SQL NULL (overridden in subclass)
      * }</pre>
      *
-     * @param rs the ResultSet to read from
+     * @param rs the {@code ResultSet} to read from
      * @param columnIndex the column index (1-based)
-     * @return the double value at the specified column; returns 0.0 if SQL NULL (may be overridden by subclasses to return null)
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @return the {@code double} value at the specified column; returns {@code 0.0} if SQL {@code NULL} (may be overridden by subclasses to return {@code null})
+     * @throws SQLException if a database access error occurs or the {@code columnIndex} is invalid
      */
     @Override
     public Double get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -152,11 +162,13 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
     }
 
     /**
-     * Retrieves a double value from a ResultSet using the specified column label.
-     * This method uses rs.getDouble() which returns 0.0 for SQL NULL values.
-     * Subclasses may override this to return {@code null} for SQL NULL values.
+     * Retrieves a {@code double} value from a {@code ResultSet} using the specified column label.
+     * <p>
+     * This method uses {@code rs.getDouble()} which returns {@code 0.0} for SQL {@code NULL} values.
+     * Subclasses may override this to return {@code null} for SQL {@code NULL} values.
+     * </p>
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * // For primitive double types
      * Type<Double> type = TypeFactory.getType(double.class);
@@ -167,10 +179,10 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      * Double value = type.get(rs, "price");   // Returns null for SQL NULL (overridden in subclass)
      * }</pre>
      *
-     * @param rs the ResultSet to read from
+     * @param rs the {@code ResultSet} to read from
      * @param columnName the column label
-     * @return the double value at the specified column; returns 0.0 if SQL NULL (may be overridden by subclasses to return null)
-     * @throws SQLException if a database access error occurs or the columnName is not found
+     * @return the {@code double} value at the specified column; returns {@code 0.0} if SQL {@code NULL} (may be overridden by subclasses to return {@code null})
+     * @throws SQLException if a database access error occurs or the {@code columnName} is not found
      */
     @Override
     public Double get(final ResultSet rs, final String columnName) throws SQLException {
@@ -178,13 +190,15 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
     }
 
     /**
-     * Sets a double parameter in a PreparedStatement at the specified position.
-     * If the value is {@code null}, sets the parameter to SQL NULL.
-     * Otherwise, converts the Number to a double value using {@link Numbers#toDouble(Object)}.
+     * Sets a {@code double} parameter in a {@code PreparedStatement} at the specified position.
+     * <p>
+     * If the value is {@code null}, sets the parameter to SQL {@code NULL}.
+     * Otherwise, converts the {@code Number} to a {@code double} value using {@link Numbers#toDouble(Object)}.
+     * </p>
      *
-     * @param stmt the PreparedStatement to set the parameter on
+     * @param stmt the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the parameter index (1-based)
-     * @param x the Number value to set as double, or {@code null} for SQL NULL
+     * @param x the {@code Number} value to set as {@code double}, or {@code null} for SQL {@code NULL}
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -197,13 +211,15 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
     }
 
     /**
-     * Sets a double parameter in a CallableStatement using the specified parameter name.
-     * If the value is {@code null}, sets the parameter to SQL NULL.
-     * Otherwise, converts the Number to a double value using {@link Numbers#toDouble(Object)}.
+     * Sets a {@code double} parameter in a {@code CallableStatement} using the specified parameter name.
+     * <p>
+     * If the value is {@code null}, sets the parameter to SQL {@code NULL}.
+     * Otherwise, converts the {@code Number} to a {@code double} value using {@link Numbers#toDouble(Object)}.
+     * </p>
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the parameter name
-     * @param x the Number value to set as double, or {@code null} for SQL NULL
+     * @param x the {@code Number} value to set as {@code double}, or {@code null} for SQL {@code NULL}
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -216,12 +232,14 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
     }
 
     /**
-     * Appends the string representation of a double value to an Appendable.
+     * Appends the string representation of a {@code double} value to an {@code Appendable}.
+     * <p>
      * Writes "null" if the value is {@code null}, otherwise writes the numeric value
-     * using its toString() representation.
+     * using its {@code toString()} representation.
+     * </p>
      *
-     * @param appendable the Appendable to write to
-     * @param x the Number value to append as double
+     * @param appendable the {@code Appendable} to write to
+     * @param x the {@code Number} value to append as {@code double}
      * @throws IOException if an I/O error occurs
      */
     @Override
@@ -234,12 +252,14 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
     }
 
     /**
-     * Writes a double value to a CharacterWriter with optional configuration.
+     * Writes a {@code double} value to a {@code CharacterWriter} with optional configuration.
+     * <p>
      * If the configuration specifies {@code writeNullNumberAsZero} and the value is {@code null},
-     * writes 0.0 instead of {@code null}.
+     * writes {@code 0.0} instead of {@code null}.
+     * </p>
      *
-     * @param writer the CharacterWriter to write to
-     * @param x the Number value to write as double
+     * @param writer the {@code CharacterWriter} to write to
+     * @param x the {@code Number} value to write as {@code double}
      * @param config the serialization configuration, may be {@code null}
      * @throws IOException if an I/O error occurs
      */

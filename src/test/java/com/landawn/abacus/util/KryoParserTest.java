@@ -22,7 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractParserTest;
@@ -183,7 +182,6 @@ public class KryoParserTest extends AbstractParserTest {
     }
 
     @Test
-    @Tag("slow-test")
     public void testPerformanceForBigBean() throws Exception {
         kryoParser.deserialize(kryoParser.serialize(createBigXBean(1)), XBean.class);
         File file = new File("./src/test/resources/bigBean.txt");

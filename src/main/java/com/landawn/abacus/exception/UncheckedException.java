@@ -22,22 +22,22 @@ import com.landawn.abacus.util.cs;
 /**
  * A runtime exception that wraps checked exceptions, allowing them to be thrown without being declared.
  * This is the base class for all unchecked exception wrappers in the framework.
- * 
+ *
  * <p>This exception is designed to preserve the original checked exception's information including:</p>
  * <ul>
- *   <li>The complete stack trace of the original exception</li>
- *   <li>All suppressed exceptions from the original exception</li>
- *   <li>The cause chain of the original exception</li>
+ *   <li>The complete stack trace of the original exception.</li>
+ *   <li>All suppressed exceptions from the original exception.</li>
+ *   <li>The cause chain of the original exception.</li>
  * </ul>
- * 
+ *
  * <p>This class serves as the parent for more specific unchecked wrappers like:</p>
  * <ul>
- *   <li>{@link UncheckedIOException} for IOException</li>
- *   <li>{@link UncheckedSQLException} for SQLException</li>
- *   <li>{@link UncheckedInterruptedException} for InterruptedException</li>
+ *   <li>{@link UncheckedIOException} for {@link java.io.IOException}</li>
+ *   <li>{@link UncheckedSQLException} for {@link java.sql.SQLException}</li>
+ *   <li>{@link UncheckedInterruptedException} for {@link InterruptedException}</li>
  *   <li>And other checked exception wrappers</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Wrapping a generic checked exception
@@ -46,13 +46,15 @@ import com.landawn.abacus.util.cs;
  * } catch (SomeCheckedException e) {
  *     throw new UncheckedException(e);
  * }
- * 
+ *
  * // With custom message
- * catch (CheckedException e) {
+ * try {
+ *     someMethodThatThrowsCheckedException();
+ * } catch (CheckedException e) {
  *     throw new UncheckedException("Operation failed during processing", e);
  * }
  * }</pre>
- * 
+ *
  * @see RuntimeException
  * @see UncheckedIOException
  * @see UncheckedSQLException
@@ -66,14 +68,12 @@ public class UncheckedException extends RuntimeException {
     @Serial
     private static final long serialVersionUID = -1973552812345999717L;
 
-    // private final Throwable checkedException;
-
     /**
      * Constructs a new {@code UncheckedException} by wrapping the specified checked exception.
      * This constructor preserves all information from the original exception including its
      * stack trace and any suppressed exceptions.
      *
-     * <p>The wrapped exception becomes the cause of this UncheckedException, allowing the
+     * <p>The wrapped exception becomes the cause of this {@code UncheckedException}, allowing the
      * original exception information to be preserved and accessed via {@link #getCause()}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -90,11 +90,10 @@ public class UncheckedException extends RuntimeException {
      */
     public UncheckedException(final Throwable cause) {
         super(getCause(cause));
-        // this.checkedException = cause;
 
         final Throwable[] suppressedExceptions = cause.getSuppressed();
         if (N.notEmpty(suppressedExceptions)) {
-            for (Throwable suppressedException : suppressedExceptions) {
+            for (final Throwable suppressedException : suppressedExceptions) {
                 this.addSuppressed(suppressedException);
             }
         }
@@ -109,7 +108,7 @@ public class UncheckedException extends RuntimeException {
      * while the original exception's message and stack trace remain accessible through the cause.</p>
      *
      * <p>All suppressed exceptions from the original exception are also preserved and added to
-     * this UncheckedException.</p>
+     * this {@code UncheckedException}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -127,11 +126,10 @@ public class UncheckedException extends RuntimeException {
      */
     public UncheckedException(final String message, final Throwable cause) {
         super(message, getCause(cause));
-        // this.checkedException = cause;
 
         final Throwable[] suppressedExceptions = cause.getSuppressed();
         if (N.notEmpty(suppressedExceptions)) {
-            for (Throwable suppressedException : suppressedExceptions) {
+            for (final Throwable suppressedException : suppressedExceptions) {
                 this.addSuppressed(suppressedException);
             }
         }
@@ -147,9 +145,6 @@ public class UncheckedException extends RuntimeException {
      */
     private static Throwable getCause(final Throwable cause) {
         N.checkArgNotNull(cause, cs.cause);
-
-        // Refer to ExceptionUtil.tryToGetOriginalCheckedException(Throwable e). It should/must be the original checked exception.
-        // return cause.getCause() == null ? cause : cause.getCause();
 
         return cause;
     }

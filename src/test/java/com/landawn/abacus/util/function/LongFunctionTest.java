@@ -4,13 +4,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class LongFunctionTest extends TestBase {
+
+    private String convertToString(final long value) {
+        return "Value is " + value;
+    }
 
     @Test
     public void testApply() {
@@ -40,39 +42,46 @@ public class LongFunctionTest extends TestBase {
     }
 
     @Test
-    public void testAndThen() {
-        final LongFunction<String> function = val -> String.valueOf(val);
-        final java.util.function.Function<String, Integer> after = String::length;
-
-        final LongFunction<Integer> composed = function.andThen(after);
-        final Integer result = composed.apply(12345L);
-
-        assertEquals(5, result);
-    }
-
-    @Test
-    public void testAndThen_multipleChains() {
-        final LongFunction<Long> function = val -> val * 2;
-        final java.util.function.Function<Long, String> toString = Object::toString;
-        final java.util.function.Function<String, Integer> toLength = String::length;
-
-        final LongFunction<Integer> composed = function.andThen(toString).andThen(toLength);
-        final Integer result = composed.apply(5L); // 5 * 2 = 10, "10".length() = 2
-
-        assertEquals(2, result);
-    }
-
-    @Test
     public void testBOX() {
         final Long result = LongFunction.BOX.apply(42L);
         assertEquals(42L, result);
     }
 
     @Test
-    public void testIdentity() {
-        final LongFunction<Long> identity = LongFunction.identity();
-        final Long result = identity.apply(123L);
-        assertEquals(123L, result);
+    public void testApply_returningDifferentType() {
+        final LongFunction<Double> function = val -> val / 2.0;
+        final Double result = function.apply(10L);
+        assertEquals(5.0, result, 0.001);
+    }
+
+    @Test
+    public void testApply_complexObject() {
+        final LongFunction<String> function = val -> String.format("ID: %d", val);
+        final String result = function.apply(12345L);
+        assertEquals("ID: 12345", result);
+    }
+
+    @Test
+    public void testMethodReference() {
+        final LongFunction<String> function = this::convertToString;
+        final String result = function.apply(42L);
+        assertEquals("Value is 42", result);
+    }
+
+    @Test
+    public void testBOX_identity() {
+        final Long value = 42L;
+        final Long result = LongFunction.BOX.apply(value);
+        assertEquals(value, result);
+    }
+
+    @Test
+    public void testCompatibilityWithJavaUtilFunction() {
+        final java.util.function.LongFunction<String> javaFunction = String::valueOf;
+        final LongFunction<String> abacusFunction = javaFunction::apply;
+
+        final String result = abacusFunction.apply(42L);
+        assertEquals("42", result);
     }
 
     @Test
@@ -111,17 +120,20 @@ public class LongFunctionTest extends TestBase {
     }
 
     @Test
-    public void testApply_returningDifferentType() {
-        final LongFunction<Double> function = val -> val / 2.0;
-        final Double result = function.apply(10L);
-        assertEquals(5.0, result, 0.001);
+    public void testFunctionalInterfaceContract() {
+        final LongFunction<String> function = val -> "test";
+        assertNotNull(function.apply(1L));
     }
 
     @Test
-    public void testApply_complexObject() {
-        final LongFunction<String> function = val -> String.format("ID: %d", val);
-        final String result = function.apply(12345L);
-        assertEquals("ID: 12345", result);
+    public void testAndThen() {
+        final LongFunction<String> function = val -> String.valueOf(val);
+        final java.util.function.Function<String, Integer> after = String::length;
+
+        final LongFunction<Integer> composed = function.andThen(after);
+        final Integer result = composed.apply(12345L);
+
+        assertEquals(5, result);
     }
 
     @Test
@@ -136,27 +148,22 @@ public class LongFunctionTest extends TestBase {
     }
 
     @Test
-    public void testFunctionalInterfaceContract() {
-        final LongFunction<String> function = val -> "test";
-        assertNotNull(function.apply(1L));
+    public void testAndThen_multipleChains() {
+        final LongFunction<Long> function = val -> val * 2;
+        final java.util.function.Function<Long, String> toString = Object::toString;
+        final java.util.function.Function<String, Integer> toLength = String::length;
+
+        final LongFunction<Integer> composed = function.andThen(toString).andThen(toLength);
+        final Integer result = composed.apply(5L); // 5 * 2 = 10, "10".length() = 2
+
+        assertEquals(2, result);
     }
 
     @Test
-    public void testMethodReference() {
-        final LongFunction<String> function = this::convertToString;
-        final String result = function.apply(42L);
-        assertEquals("Value is 42", result);
-    }
-
-    private String convertToString(final long value) {
-        return "Value is " + value;
-    }
-
-    @Test
-    public void testBOX_identity() {
-        final Long value = 42L;
-        final Long result = LongFunction.BOX.apply(value);
-        assertEquals(value, result);
+    public void testIdentity() {
+        final LongFunction<Long> identity = LongFunction.identity();
+        final Long result = identity.apply(123L);
+        assertEquals(123L, result);
     }
 
     @Test
@@ -165,14 +172,5 @@ public class LongFunctionTest extends TestBase {
         assertEquals(0L, identity.apply(0L));
         assertEquals(-100L, identity.apply(-100L));
         assertEquals(Long.MAX_VALUE, identity.apply(Long.MAX_VALUE));
-    }
-
-    @Test
-    public void testCompatibilityWithJavaUtilFunction() {
-        final java.util.function.LongFunction<String> javaFunction = String::valueOf;
-        final LongFunction<String> abacusFunction = javaFunction::apply;
-
-        final String result = abacusFunction.apply(42L);
-        assertEquals("42", result);
     }
 }

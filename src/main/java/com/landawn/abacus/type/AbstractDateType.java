@@ -23,16 +23,18 @@ import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.Dates;
 
 /**
- * Abstract base class for Date types in the type system.
- * This class provides common functionality for handling Date objects and their subclasses,
+ * The Abstract base class for {@code Date} types in the type system.
+ * <p>
+ * This class provides common functionality for handling {@code Date} objects and their subclasses,
  * including serialization, formatting, and type checking operations.
+ * </p>
  *
- * @param <T> the specific Date type (e.g., java.util.Date, java.sql.Date, java.sql.Timestamp)
+ * @param <T> the specific {@code Date} type (e.g., {@link java.util.Date}, {@link java.sql.Date}, {@link java.sql.Timestamp})
  */
 public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
 
     /**
-     * Constructs an AbstractDateType with the specified type name.
+     * Constructs an {@code AbstractDateType} with the specified type name.
      *
      * @param typeName the name of the date type (e.g., "Date", "Time", "Timestamp")
      */
@@ -41,10 +43,12 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
     }
 
     /**
-     * Checks if this type represents a Date type.
+     * Checks if this type represents a {@code Date} type.
+     * <p>
      * This method always returns {@code true} for Date types.
+     * </p>
      *
-     * @return {@code true}, indicating this is a Date type
+     * @return {@code true}, indicating this is a {@code Date} type
      */
     @Override
     public boolean isDate() {
@@ -53,9 +57,11 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
 
     /**
      * Checks if this type is comparable.
+     * <p>
      * Date types are comparable based on their time values.
+     * </p>
      *
-     * @return {@code true}, indicating that Date types support comparison
+     * @return {@code true}, indicating that {@code Date} types support comparison
      */
     @Override
     public boolean isComparable() {
@@ -64,7 +70,9 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
 
     /**
      * Indicates whether values of this type require quoting in CSV format.
+     * <p>
      * Date values are typically formatted as date strings that do not require quotes.
+     * </p>
      *
      * @return {@code false}, as date values do not require quoting in CSV format
      */
@@ -74,10 +82,12 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
     }
 
     /**
-     * Converts a Date value to its string representation.
+     * Converts a {@code Date} value to its string representation.
+     * <p>
      * Uses the default date format provided by {@link Dates#format(Date)}.
+     * </p>
      *
-     * @param x the Date value to convert
+     * @param x the {@code Date} value to convert
      * @return the formatted string representation of the date, or {@code null} if input is {@code null}
      */
     @Override
@@ -86,11 +96,13 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
     }
 
     /**
-     * Appends the string representation of a Date value to an Appendable.
+     * Appends the string representation of a {@code Date} value to an {@code Appendable}.
+     * <p>
      * Writes "null" if the value is {@code null}, otherwise writes the formatted date string.
+     * </p>
      *
-     * @param appendable the Appendable to write to
-     * @param x the Date value to append
+     * @param appendable the {@code Appendable} to write to
+     * @param x the {@code Date} value to append
      * @throws IOException if an I/O error occurs
      */
     @Override
@@ -103,21 +115,25 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
     }
 
     /**
-     * Writes a Date value to a CharacterWriter with optional configuration.
+     * Writes a {@code Date} value to a {@code CharacterWriter} with optional configuration.
+     * <p>
      * The output format depends on the configuration:
+     * </p>
      * <ul>
      *   <li>{@link DateTimeFormat#LONG} - writes the time in milliseconds since epoch</li>
      *   <li>{@link DateTimeFormat#ISO_8601_DATE_TIME} - writes ISO 8601 date-time format</li>
      *   <li>{@link DateTimeFormat#ISO_8601_TIMESTAMP} - writes ISO 8601 timestamp format</li>
      *   <li>Default - uses the standard date format</li>
      * </ul>
-     * String quotation is applied based on configuration unless using LONG format.
+     * <p>
+     * String quotation is applied based on configuration unless using {@code LONG} format.
+     * </p>
      *
-     * @param writer the CharacterWriter to write to
-     * @param x the Date value to write
+     * @param writer the {@code CharacterWriter} to write to
+     * @param x the {@code Date} value to write
      * @param config the serialization configuration, may be {@code null}
      * @throws IOException if an I/O error occurs
-     * @throws RuntimeException if an unsupported DateTimeFormat is specified
+     * @throws RuntimeException if an unsupported {@code DateTimeFormat} is specified
      */
     @SuppressWarnings("null")
     @Override

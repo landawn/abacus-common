@@ -14,14 +14,12 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class GregorianCalendarTypeTest extends TestBase {
 
     private GregorianCalendarType gregorianCalendarType;

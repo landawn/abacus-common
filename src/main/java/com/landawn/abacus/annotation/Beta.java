@@ -24,8 +24,8 @@ import java.lang.annotation.Target;
  * Indicates that the annotated API element is in beta stage and subject to change or removal in future versions.
  * This annotation serves as a warning to developers that the API is not yet stable and should be used
  * with caution in production code.
- * 
- * <p>Beta APIs are provided to allow early access and gather feedback from developers. They may have:
+ *
+ * <p>Beta APIs are provided to allow early access and gather feedback from developers. They may have:</p>
  * <ul>
  *   <li>Incomplete or evolving documentation</li>
  *   <li>Limited testing coverage</li>
@@ -41,7 +41,7 @@ import java.lang.annotation.Target;
  *   <li>Fields</li>
  *   <li>Other annotations</li>
  * </ul>
- * 
+ *
  * <p><b>Usage recommendations:</b></p>
  * <ul>
  *   <li>Use beta APIs for experimentation and evaluation</li>
@@ -49,7 +49,7 @@ import java.lang.annotation.Target;
  *   <li>Be prepared to update your code when the API changes</li>
  *   <li>Avoid using beta APIs in critical production systems</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * @Beta
@@ -57,7 +57,7 @@ import java.lang.annotation.Target;
  *     // This class may change significantly
  * }
  * }</pre>
- * 
+ *
  * @see Internal
  * @see Deprecated
  */

@@ -3,12 +3,10 @@ package com.landawn.abacus.util;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class SmoothRateLimiterTest extends TestBase {
 
     @Test
@@ -20,25 +18,6 @@ public class SmoothRateLimiterTest extends TestBase {
 
         Assertions.assertEquals(10.0, limiter.maxPermits);
         Assertions.assertEquals(0.0, limiter.storedPermits);
-    }
-
-    @Test
-    public void testSmoothBurstyStoredPermitsToWaitTime() {
-        RateLimiter.SleepingStopwatch stopwatch = RateLimiter.SleepingStopwatch.createFromSystemTimer();
-        SmoothRateLimiter.SmoothBursty limiter = new SmoothRateLimiter.SmoothBursty(stopwatch, 1.0);
-
-        long waitTime = limiter.storedPermitsToWaitTime(5.0, 2.0);
-        Assertions.assertEquals(0L, waitTime);
-    }
-
-    @Test
-    public void testSmoothBurstyCoolDownIntervalMicros() {
-        RateLimiter.SleepingStopwatch stopwatch = RateLimiter.SleepingStopwatch.createFromSystemTimer();
-        SmoothRateLimiter.SmoothBursty limiter = new SmoothRateLimiter.SmoothBursty(stopwatch, 1.0);
-        limiter.stableIntervalMicros = 100000;
-
-        double coolDown = limiter.coolDownIntervalMicros();
-        Assertions.assertEquals(100000, coolDown);
     }
 
     @Test
@@ -69,6 +48,25 @@ public class SmoothRateLimiterTest extends TestBase {
 
         double coolDown = limiter.coolDownIntervalMicros();
         Assertions.assertTrue(coolDown > 0);
+    }
+
+    @Test
+    public void testSmoothBurstyStoredPermitsToWaitTime() {
+        RateLimiter.SleepingStopwatch stopwatch = RateLimiter.SleepingStopwatch.createFromSystemTimer();
+        SmoothRateLimiter.SmoothBursty limiter = new SmoothRateLimiter.SmoothBursty(stopwatch, 1.0);
+
+        long waitTime = limiter.storedPermitsToWaitTime(5.0, 2.0);
+        Assertions.assertEquals(0L, waitTime);
+    }
+
+    @Test
+    public void testSmoothBurstyCoolDownIntervalMicros() {
+        RateLimiter.SleepingStopwatch stopwatch = RateLimiter.SleepingStopwatch.createFromSystemTimer();
+        SmoothRateLimiter.SmoothBursty limiter = new SmoothRateLimiter.SmoothBursty(stopwatch, 1.0);
+        limiter.stableIntervalMicros = 100000;
+
+        double coolDown = limiter.coolDownIntervalMicros();
+        Assertions.assertEquals(100000, coolDown);
     }
 
     @Test

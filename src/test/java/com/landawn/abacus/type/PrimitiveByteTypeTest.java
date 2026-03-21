@@ -16,12 +16,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class PrimitiveByteTypeTest extends TestBase {
 
     private final PrimitiveByteType type = new PrimitiveByteType();
@@ -37,13 +35,20 @@ public class PrimitiveByteTypeTest extends TestBase {
     }
 
     @Test
-    public void test_name() {
-        assertEquals("byte", type.name());
+    public void test_defaultValue() {
+        assertEquals(Byte.valueOf((byte) 0), type.defaultValue());
     }
 
     @Test
-    public void test_defaultValue() {
-        assertEquals(Byte.valueOf((byte) 0), type.defaultValue());
+    public void testDefaultValue() {
+        Byte defaultValue = type.defaultValue();
+        assertNotNull(defaultValue);
+        assertEquals((byte) 0, defaultValue);
+    }
+
+    @Test
+    public void test_name() {
+        assertEquals("byte", type.name());
     }
 
     @Test
@@ -156,13 +161,6 @@ public class PrimitiveByteTypeTest extends TestBase {
     @Test
     public void test_isComparable() {
         assertTrue(type.isComparable());
-    }
-
-    @Test
-    public void testDefaultValue() {
-        Byte defaultValue = type.defaultValue();
-        assertNotNull(defaultValue);
-        assertEquals((byte) 0, defaultValue);
     }
 
 }

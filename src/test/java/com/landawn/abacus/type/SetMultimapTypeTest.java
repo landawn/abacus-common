@@ -7,12 +7,10 @@ import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class SetMultimapTypeTest extends TestBase {
 
     private final SetMultimapType type = new SetMultimapType(com.landawn.abacus.util.SetMultimap.class, "String", "String");

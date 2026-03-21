@@ -18,25 +18,23 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BlobTypeTest extends TestBase {
 
     private final BlobType type = new BlobType();
 
     @Test
-    public void test_clazz() {
-        assertNotNull(type.javaType());
+    public void testClazz() {
+        Class<Blob> result = type.javaType();
+        assertEquals(Blob.class, result);
     }
 
     @Test
-    public void test_name() {
-        assertNotNull(type.name());
-        assertFalse(type.name().isEmpty());
+    public void test_clazz() {
+        assertNotNull(type.javaType());
     }
 
     @Test
@@ -46,42 +44,15 @@ public class BlobTypeTest extends TestBase {
     }
 
     @Test
-    public void test_valueOf_String() {
-        // Test with null
-        assertThrows(UnsupportedOperationException.class, () -> type.valueOf((String) null));
-    }
-
-    @Test
-    public void test_appendTo() throws IOException {
-        StringWriter sw = new StringWriter();
-        type.appendTo(sw, null);
-        assertNotNull(sw.toString());
-    }
-
-    @Test
-    public void test_get_ResultSet_byLabel() throws SQLException {
-        ResultSet rs = mock(ResultSet.class);
-        // Basic get test - actual implementation will vary by type
-        assertDoesNotThrow(() -> type.get(rs, "col"));
-    }
-
-    @Test
-    public void test_set_CallableStatement() throws SQLException {
-        CallableStatement stmt = mock(CallableStatement.class);
-        // Basic set test - actual implementation will vary by type
-        assertDoesNotThrow(() -> type.set(stmt, "param", null));
-    }
-
-    @Test
-    public void testClazz() {
-        Class<Blob> result = type.javaType();
-        assertEquals(Blob.class, result);
-    }
-
-    @Test
     public void testStringOf() {
         Blob blob = mock(Blob.class);
         Assertions.assertThrows(UnsupportedOperationException.class, () -> type.stringOf(blob));
+    }
+
+    @Test
+    public void test_valueOf_String() {
+        // Test with null
+        assertThrows(UnsupportedOperationException.class, () -> type.valueOf((String) null));
     }
 
     @Test
@@ -92,6 +63,13 @@ public class BlobTypeTest extends TestBase {
     @Test
     public void testValueOf_Null() {
         Assertions.assertThrows(UnsupportedOperationException.class, () -> type.valueOf(null));
+    }
+
+    @Test
+    public void test_get_ResultSet_byLabel() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+        // Basic get test - actual implementation will vary by type
+        assertDoesNotThrow(() -> type.get(rs, "col"));
     }
 
     @Test
@@ -141,6 +119,13 @@ public class BlobTypeTest extends TestBase {
     }
 
     @Test
+    public void test_set_CallableStatement() throws SQLException {
+        CallableStatement stmt = mock(CallableStatement.class);
+        // Basic set test - actual implementation will vary by type
+        assertDoesNotThrow(() -> type.set(stmt, "param", null));
+    }
+
+    @Test
     public void testSet_PreparedStatement_Int() throws SQLException {
         PreparedStatement stmt = mock(PreparedStatement.class);
         Blob blob = mock(Blob.class);
@@ -176,6 +161,19 @@ public class BlobTypeTest extends TestBase {
         type.set(stmt, "paramName", null);
 
         verify(stmt).setBlob("paramName", (Blob) null);
+    }
+
+    @Test
+    public void test_name() {
+        assertNotNull(type.name());
+        assertFalse(type.name().isEmpty());
+    }
+
+    @Test
+    public void test_appendTo() throws IOException {
+        StringWriter sw = new StringWriter();
+        type.appendTo(sw, null);
+        assertNotNull(sw.toString());
     }
 
 }

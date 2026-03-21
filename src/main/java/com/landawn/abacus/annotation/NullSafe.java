@@ -24,32 +24,31 @@ import java.lang.annotation.Target;
  * Indicates that the annotated element gracefully handles {@code null} values without throwing exceptions.
  * This annotation documents that the code has been specifically designed to be defensive against
  * {@code null} inputs, providing predictable behavior even when {@code null} values are encountered.
- * 
+ *
  * <p><b>When applied to methods or constructors:</b></p>
  * <ul>
- *   <li>The method/constructor can accept {@code null} arguments without throwing NullPointerException</li>
- *   <li>Null inputs are handled with sensible default behavior or early returns</li>
- *   <li>The implementation includes proper {@code null} checks and defensive programming</li>
+ *   <li>The method/constructor can accept {@code null} arguments without throwing {@code NullPointerException}.</li>
+ *   <li>Null inputs are handled with sensible default behavior or early returns.</li>
+ *   <li>The implementation includes proper {@code null} checks and defensive programming.</li>
  * </ul>
- * 
+ *
  * <p><b>When applied to parameters:</b></p>
  * <ul>
- *   <li>Null is an acceptable and expected value for this parameter</li>
- *   <li>The method logic properly handles the {@code null} case</li>
- *   <li>No NullPointerException will occur from passing null</li>
+ *   <li>{@code null} is an acceptable and expected value for this parameter.</li>
+ *   <li>The method logic properly handles the {@code null} case.</li>
+ *   <li>No {@code NullPointerException} will occur from passing {@code null}.</li>
  * </ul>
- * 
+ *
  * <p><b>Common null-safe patterns:</b></p>
  * <ul>
- *   <li>Returning empty collections instead of null</li>
- *   <li>Using default values when {@code null} is provided</li>
- *   <li>Gracefully skipping operations on {@code null} inputs</li>
- *   <li>Implementing the Null Object pattern</li>
+ *   <li>Returning empty collections instead of {@code null}.</li>
+ *   <li>Using default values when {@code null} is provided.</li>
+ *   <li>Gracefully skipping operations on {@code null} inputs.</li>
+ *   <li>Implementing the Null Object pattern.</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- *
  * public class StringUtils {
  *     @NullSafe
  *     public static String trim(@NullSafe String input) {

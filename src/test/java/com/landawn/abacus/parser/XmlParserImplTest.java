@@ -22,7 +22,6 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.w3c.dom.Document;
@@ -38,7 +37,6 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.Objectory;
 
-@Tag("new-test")
 public class XmlParserImplTest extends TestBase {
 
     private XmlParserImpl staxParser;
@@ -330,25 +328,6 @@ public class XmlParserImplTest extends TestBase {
     }
 
     @Test
-    public void testSerializeWithCircularReference() {
-        CircularRefBean bean1 = new CircularRefBean();
-        bean1.setName("Bean1");
-        CircularRefBean bean2 = new CircularRefBean();
-        bean2.setName("Bean2");
-        bean1.setReference(bean2);
-        bean2.setReference(bean1);
-
-        Assertions.assertThrows(StackOverflowError.class, () -> {
-            staxParser.serialize(bean1);
-        });
-
-        XmlSerConfig config = new XmlSerConfig();
-        config.setSupportCircularReference(true);
-        String xml = staxParser.serialize(bean1, config);
-        Assertions.assertNotNull(xml);
-    }
-
-    @Test
     public void testSerializeArray() {
         int[] intArray = { 1, 2, 3, 4, 5 };
         String xml = staxParser.serialize(intArray);
@@ -456,20 +435,6 @@ public class XmlParserImplTest extends TestBase {
     }
 
     @Test
-    public void testSerializeEmptyBean() {
-        EmptyBean bean = new EmptyBean();
-
-        Assertions.assertThrows(ParsingException.class, () -> {
-            staxParser.serialize(bean);
-        });
-
-        XmlSerConfig config = new XmlSerConfig();
-        config.setFailOnEmptyBean(false);
-        String xml = staxParser.serialize(bean, config);
-        Assertions.assertEquals("", xml);
-    }
-
-    @Test
     public void testSerializePrimitiveTypes() {
         PrimitiveBean bean = new PrimitiveBean();
         bean.setByteVal((byte) 127);
@@ -491,6 +456,143 @@ public class XmlParserImplTest extends TestBase {
         Assertions.assertTrue(xml.contains("2.71828"));
         Assertions.assertTrue(xml.contains("true"));
         Assertions.assertTrue(xml.contains("A"));
+    }
+
+    @Test
+    public void testSerializeNullProperties() {
+        TestBean bean = new TestBean();
+        bean.setName(null);
+        bean.setAge(0);
+        bean.setTags(null);
+
+        String xml = staxParser.serialize(bean);
+        Assertions.assertNotNull(xml);
+
+        XmlSerConfig config = new XmlSerConfig();
+        config.setExclusion(Exclusion.NONE);
+        xml = staxParser.serialize(bean, config);
+        Assertions.assertNotNull(xml);
+        Assertions.assertTrue(xml.contains("<tags"));
+    }
+
+    @Test
+    public void testSerializeWithNamingPolicy() {
+        TestBean bean = new TestBean("Test", 20);
+
+        XmlSerConfig config = new XmlSerConfig();
+        config.setPropNamingPolicy(NamingPolicy.SCREAMING_SNAKE_CASE);
+
+        String xml = staxParser.serialize(bean, config);
+        Assertions.assertNotNull(xml);
+        Assertions.assertTrue(xml.contains("NAME") || xml.contains("name"));
+    }
+
+    @Test
+    public void testRoundTripSerialization() {
+        TestBean original = new TestBean("RoundTrip", 45);
+        original.setActive(true);
+        original.setTags(Arrays.asList("tag1", "tag2"));
+        Map<String, String> attrs = new HashMap<>();
+        attrs.put("key", "value");
+        original.setAttributes(attrs);
+
+        String xml = staxParser.serialize(original);
+
+        TestBean restored = staxParser.deserialize(xml, null, TestBean.class);
+
+        Assertions.assertNotNull(restored);
+        Assertions.assertEquals(original.getName(), restored.getName());
+        Assertions.assertEquals(original.getAge(), restored.getAge());
+        Assertions.assertEquals(original.isActive(), restored.isActive());
+        Assertions.assertEquals(original.getTags().size(), restored.getTags().size());
+        Assertions.assertEquals(original.getAttributes().get("key"), restored.getAttributes().get("key"));
+    }
+
+    @Test
+    public void testDOMParserRoundTrip() {
+        TestBean original = new TestBean("DOMTest", 55);
+        original.setActive(false);
+
+        String xml = domParser.serialize(original);
+
+        TestBean restored = domParser.deserialize(xml, null, TestBean.class);
+
+        Assertions.assertNotNull(restored);
+        Assertions.assertEquals(original.getName(), restored.getName());
+        Assertions.assertEquals(original.getAge(), restored.getAge());
+        Assertions.assertEquals(original.isActive(), restored.isActive());
+    }
+
+    @Test
+    public void testLargeDataSerialization() {
+        TestBean bean = new TestBean("LargeData", 100);
+        List<String> largeTags = new ArrayList<>();
+        for (int i = 0; i < 1000; i++) {
+            largeTags.add("tag" + i);
+        }
+        bean.setTags(largeTags);
+
+        Map<String, String> largeAttrs = new HashMap<>();
+        for (int i = 0; i < 100; i++) {
+            largeAttrs.put("key" + i, "value" + i);
+        }
+        bean.setAttributes(largeAttrs);
+
+        String xml = staxParser.serialize(bean);
+        Assertions.assertNotNull(xml);
+        Assertions.assertTrue(xml.length() > 10000);
+
+        TestBean restored = staxParser.deserialize(xml, null, TestBean.class);
+        Assertions.assertNotNull(restored);
+        Assertions.assertEquals(1000, restored.getTags().size());
+        Assertions.assertEquals(100, restored.getAttributes().size());
+    }
+
+    @Test
+    public void testRoundTrip_domParser_withCollections() {
+        TestBean original = new TestBean("DOMColl", 50);
+        original.setTags(Arrays.asList("x", "y", "z"));
+
+        String xml = domParser.serialize(original);
+        TestBean restored = domParser.deserialize(xml, null, TestBean.class);
+
+        Assertions.assertNotNull(restored);
+        Assertions.assertEquals(original.getName(), restored.getName());
+        Assertions.assertEquals(original.getAge(), restored.getAge());
+        Assertions.assertEquals(3, restored.getTags().size());
+    }
+
+    @Test
+    public void testSerializeWithCircularReference() {
+        CircularRefBean bean1 = new CircularRefBean();
+        bean1.setName("Bean1");
+        CircularRefBean bean2 = new CircularRefBean();
+        bean2.setName("Bean2");
+        bean1.setReference(bean2);
+        bean2.setReference(bean1);
+
+        Assertions.assertThrows(StackOverflowError.class, () -> {
+            staxParser.serialize(bean1);
+        });
+
+        XmlSerConfig config = new XmlSerConfig();
+        config.setSupportCircularReference(true);
+        String xml = staxParser.serialize(bean1, config);
+        Assertions.assertNotNull(xml);
+    }
+
+    @Test
+    public void testSerializeEmptyBean() {
+        EmptyBean bean = new EmptyBean();
+
+        Assertions.assertThrows(ParsingException.class, () -> {
+            staxParser.serialize(bean);
+        });
+
+        XmlSerConfig config = new XmlSerConfig();
+        config.setFailOnEmptyBean(false);
+        String xml = staxParser.serialize(bean, config);
+        Assertions.assertEquals("", xml);
     }
 
     @Test
@@ -553,6 +655,193 @@ public class XmlParserImplTest extends TestBase {
         } finally {
             Objectory.recycle(bw);
         }
+    }
+
+    @Test
+    public void testWriteBean() throws IOException {
+        TestBean bean = new TestBean("WriteTest", 50);
+        BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
+
+        try {
+            staxParser.writeBean(bean, XmlSerConfig.create(), null, null, N.typeOf(bean.getClass()), bw);
+            String xml = bw.toString();
+            Assertions.assertTrue(xml.contains("WriteTest"));
+            Assertions.assertTrue(xml.contains("50"));
+        } finally {
+            Objectory.recycle(bw);
+        }
+    }
+
+    @Test
+    public void testWriteProperties_withPrettyFormatAndTypeInfo() throws IOException {
+        TestBean bean = new TestBean("PropTest", 77);
+        bean.setActive(true);
+
+        XmlSerConfig config = XmlSerConfig.create().setPrettyFormat(true).setWriteTypeInfo(true);
+        BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
+        try {
+            staxParser.writeProperties(bean, config, "  ", null, N.typeOf(TestBean.class), bw);
+            String xml = bw.toString();
+            Assertions.assertTrue(xml.contains("PropTest"));
+            Assertions.assertTrue(xml.contains("77"));
+        } finally {
+            Objectory.recycle(bw);
+        }
+    }
+
+    @Test
+    public void testWriteProperties_tagByPropertyName() throws IOException {
+        TestBean bean = new TestBean("TagProp", 88);
+
+        XmlSerConfig config = XmlSerConfig.create().setTagByPropertyName(true);
+        BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
+        try {
+            staxParser.writeProperties(bean, config, null, null, N.typeOf(TestBean.class), bw);
+            String xml = bw.toString();
+            Assertions.assertTrue(xml.contains("TagProp"));
+            Assertions.assertTrue(xml.contains("88"));
+        } finally {
+            Objectory.recycle(bw);
+        }
+    }
+
+    @Test
+    public void testWriteMap() throws IOException {
+        Map<String, String> map = new HashMap<>();
+        map.put("key1", "value1");
+        map.put("key2", "value2");
+
+        BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
+
+        try {
+            staxParser.writeMap(map, XmlSerConfig.create(), null, null, N.typeOf(map.getClass()), bw);
+            String xml = bw.toString();
+            Assertions.assertTrue(xml.contains("key1"));
+            Assertions.assertTrue(xml.contains("value1"));
+            Assertions.assertTrue(xml.contains("key2"));
+            Assertions.assertTrue(xml.contains("value2"));
+        } finally {
+            Objectory.recycle(bw);
+        }
+    }
+
+    @Test
+    public void testWriteMapEntity() throws IOException {
+        MapEntity entity = new MapEntity("TestEntity");
+        entity.set("prop1", "value1");
+        entity.set("prop2", 123);
+
+        BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
+
+        try {
+            staxParser.writeMapEntity(entity, XmlSerConfig.create(), null, null, N.typeOf(entity.getClass()), bw);
+            String xml = bw.toString();
+            Assertions.assertTrue(xml.contains("TestEntity"));
+            Assertions.assertTrue(xml.contains("prop1"));
+            Assertions.assertTrue(xml.contains("value1"));
+        } finally {
+            Objectory.recycle(bw);
+        }
+    }
+
+    @Test
+    public void testWriteMapEntity_withPrettyFormat() throws IOException {
+        MapEntity entity = new MapEntity("PrettyEntity");
+        entity.set("field1", "value1");
+        entity.set("field2", null);
+
+        XmlSerConfig config = XmlSerConfig.create().setPrettyFormat(true).setWriteTypeInfo(true);
+        BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
+        try {
+            staxParser.writeMapEntity(entity, config, "  ", null, N.typeOf(entity.getClass()), bw);
+            String xml = bw.toString();
+            Assertions.assertTrue(xml.contains("PrettyEntity"));
+            Assertions.assertTrue(xml.contains("value1"));
+        } finally {
+            Objectory.recycle(bw);
+        }
+    }
+
+    @Test
+    public void testWriteArray() throws IOException {
+        String[] array = { "one", "two", "three" };
+        BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
+
+        try {
+            staxParser.writeArray(array, XmlSerConfig.create(), null, null, N.typeOf(array.getClass()), bw);
+            String xml = bw.toString();
+            Assertions.assertTrue(xml.contains("one"));
+            Assertions.assertTrue(xml.contains("two"));
+            Assertions.assertTrue(xml.contains("three"));
+        } finally {
+            Objectory.recycle(bw);
+        }
+    }
+
+    @Test
+    public void testWriteArray_withBeans() throws IOException {
+        TestBean[] array = { new TestBean("X", 10), new TestBean("Y", 20) };
+        BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
+        try {
+            staxParser.writeArray(array, XmlSerConfig.create(), null, null, N.typeOf(array.getClass()), bw);
+            String xml = bw.toString();
+            Assertions.assertNotNull(xml);
+        } finally {
+            Objectory.recycle(bw);
+        }
+    }
+
+    @Test
+    public void testWriteCollection() throws IOException {
+        List<String> list = Arrays.asList("apple", "banana", "cherry");
+        BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
+
+        try {
+            staxParser.writeCollection(list, XmlSerConfig.create(), null, null, N.typeOf(list.getClass()), bw);
+            String xml = bw.toString();
+            Assertions.assertTrue(xml.contains("apple"));
+            Assertions.assertTrue(xml.contains("banana"));
+            Assertions.assertTrue(xml.contains("cherry"));
+        } finally {
+            Objectory.recycle(bw);
+        }
+    }
+
+    @Test
+    public void testWriteCollection_withBeans() throws IOException {
+        List<TestBean> list = Arrays.asList(new TestBean("A", 1), new TestBean("B", 2));
+        BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
+        try {
+            staxParser.writeCollection(list, XmlSerConfig.create(), null, null, N.typeOf(list.getClass()), bw);
+            String xml = bw.toString();
+            Assertions.assertTrue(xml.contains("A") || xml.length() > 0);
+        } finally {
+            Objectory.recycle(bw);
+        }
+    }
+
+    @Test
+    public void testIsSerializableByJSONArray() {
+        Integer[] intArray = { 1, 2, 3 };
+        Assertions.assertTrue(staxParser.isSerializableByJson(intArray));
+
+        Object[] objArray = { "string", 123, true };
+        Assertions.assertTrue(staxParser.isSerializableByJson(objArray));
+
+        Object[] beanArray = { new TestBean(), new TestBean() };
+        Assertions.assertFalse(staxParser.isSerializableByJson(beanArray));
+    }
+
+    @Test
+    public void testIsSerializableByJSONCollection() {
+        List<String> stringList = Arrays.asList("a", "b", "c");
+        Assertions.assertTrue(staxParser.isSerializableByJson(stringList));
+
+        List<TestBean> beanList = Arrays.asList(new TestBean(), new TestBean());
+        Assertions.assertFalse(staxParser.isSerializableByJson(beanList));
+
+        List<Object> mixedList = Arrays.asList("string", new TestBean());
+        Assertions.assertFalse(staxParser.isSerializableByJson(mixedList));
     }
 
     @Test
@@ -666,21 +955,6 @@ public class XmlParserImplTest extends TestBase {
     }
 
     @Test
-    public void testDeserializeWithIgnoreUnmatchedProperty() {
-        String xml = "<TestBean><name>John</name><age>30</age><unknownProp>value</unknownProp></TestBean>";
-
-        Assertions.assertThrows(ParsingException.class, () -> {
-            staxParser.deserialize(xml, XmlDeserConfig.create().setIgnoreUnmatchedProperty(false), TestBean.class);
-        });
-
-        XmlDeserConfig config = XmlDeserConfig.create().setIgnoreUnmatchedProperty(true);
-        TestBean result = staxParser.deserialize(xml, config, TestBean.class);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals("John", result.getName());
-        Assertions.assertEquals(30, result.getAge());
-    }
-
-    @Test
     public void testDeserializePrimitiveTypes() {
         String xml = "<PrimitiveBean>" + "<byteVal>127</byteVal>" + "<shortVal>32767</shortVal>" + "<intVal>2147483647</intVal>"
                 + "<longVal>9223372036854775807</longVal>" + "<floatVal>3.14</floatVal>" + "<doubleVal>2.71828</doubleVal>" + "<booleanVal>true</booleanVal>"
@@ -696,6 +970,30 @@ public class XmlParserImplTest extends TestBase {
         Assertions.assertEquals(2.71828, result.getDoubleVal(), 0.00001);
         Assertions.assertTrue(result.isBooleanVal());
         Assertions.assertEquals('A', result.getCharVal());
+    }
+
+    @Test
+    public void testDeserializeWithTypeAnnotation_stax() {
+        String xml = "<TestBean><name>TypeAnnot</name><age>99</age></TestBean>";
+        TestBean result = staxParser.deserialize(xml, null, TestBean.class);
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("TypeAnnot", result.getName());
+        Assertions.assertEquals(99, result.getAge());
+    }
+
+    @Test
+    public void testDeserializeWithIgnoreUnmatchedProperty() {
+        String xml = "<TestBean><name>John</name><age>30</age><unknownProp>value</unknownProp></TestBean>";
+
+        Assertions.assertThrows(ParsingException.class, () -> {
+            staxParser.deserialize(xml, XmlDeserConfig.create().setIgnoreUnmatchedProperty(false), TestBean.class);
+        });
+
+        XmlDeserConfig config = XmlDeserConfig.create().setIgnoreUnmatchedProperty(true);
+        TestBean result = staxParser.deserialize(xml, config, TestBean.class);
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("John", result.getName());
+        Assertions.assertEquals(30, result.getAge());
     }
 
     @Test
@@ -828,116 +1126,6 @@ public class XmlParserImplTest extends TestBase {
     }
 
     @Test
-    public void testWriteBean() throws IOException {
-        TestBean bean = new TestBean("WriteTest", 50);
-        BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
-
-        try {
-            staxParser.writeBean(bean, XmlSerConfig.create(), null, null, N.typeOf(bean.getClass()), bw);
-            String xml = bw.toString();
-            Assertions.assertTrue(xml.contains("WriteTest"));
-            Assertions.assertTrue(xml.contains("50"));
-        } finally {
-            Objectory.recycle(bw);
-        }
-    }
-
-    @Test
-    public void testWriteMap() throws IOException {
-        Map<String, String> map = new HashMap<>();
-        map.put("key1", "value1");
-        map.put("key2", "value2");
-
-        BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
-
-        try {
-            staxParser.writeMap(map, XmlSerConfig.create(), null, null, N.typeOf(map.getClass()), bw);
-            String xml = bw.toString();
-            Assertions.assertTrue(xml.contains("key1"));
-            Assertions.assertTrue(xml.contains("value1"));
-            Assertions.assertTrue(xml.contains("key2"));
-            Assertions.assertTrue(xml.contains("value2"));
-        } finally {
-            Objectory.recycle(bw);
-        }
-    }
-
-    @Test
-    public void testWriteMapEntity() throws IOException {
-        MapEntity entity = new MapEntity("TestEntity");
-        entity.set("prop1", "value1");
-        entity.set("prop2", 123);
-
-        BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
-
-        try {
-            staxParser.writeMapEntity(entity, XmlSerConfig.create(), null, null, N.typeOf(entity.getClass()), bw);
-            String xml = bw.toString();
-            Assertions.assertTrue(xml.contains("TestEntity"));
-            Assertions.assertTrue(xml.contains("prop1"));
-            Assertions.assertTrue(xml.contains("value1"));
-        } finally {
-            Objectory.recycle(bw);
-        }
-    }
-
-    @Test
-    public void testWriteArray() throws IOException {
-        String[] array = { "one", "two", "three" };
-        BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
-
-        try {
-            staxParser.writeArray(array, XmlSerConfig.create(), null, null, N.typeOf(array.getClass()), bw);
-            String xml = bw.toString();
-            Assertions.assertTrue(xml.contains("one"));
-            Assertions.assertTrue(xml.contains("two"));
-            Assertions.assertTrue(xml.contains("three"));
-        } finally {
-            Objectory.recycle(bw);
-        }
-    }
-
-    @Test
-    public void testWriteCollection() throws IOException {
-        List<String> list = Arrays.asList("apple", "banana", "cherry");
-        BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
-
-        try {
-            staxParser.writeCollection(list, XmlSerConfig.create(), null, null, N.typeOf(list.getClass()), bw);
-            String xml = bw.toString();
-            Assertions.assertTrue(xml.contains("apple"));
-            Assertions.assertTrue(xml.contains("banana"));
-            Assertions.assertTrue(xml.contains("cherry"));
-        } finally {
-            Objectory.recycle(bw);
-        }
-    }
-
-    @Test
-    public void testIsSerializableByJSONArray() {
-        Integer[] intArray = { 1, 2, 3 };
-        Assertions.assertTrue(staxParser.isSerializableByJson(intArray));
-
-        Object[] objArray = { "string", 123, true };
-        Assertions.assertTrue(staxParser.isSerializableByJson(objArray));
-
-        Object[] beanArray = { new TestBean(), new TestBean() };
-        Assertions.assertFalse(staxParser.isSerializableByJson(beanArray));
-    }
-
-    @Test
-    public void testIsSerializableByJSONCollection() {
-        List<String> stringList = Arrays.asList("a", "b", "c");
-        Assertions.assertTrue(staxParser.isSerializableByJson(stringList));
-
-        List<TestBean> beanList = Arrays.asList(new TestBean(), new TestBean());
-        Assertions.assertFalse(staxParser.isSerializableByJson(beanList));
-
-        List<Object> mixedList = Arrays.asList("string", new TestBean());
-        Assertions.assertFalse(staxParser.isSerializableByJson(mixedList));
-    }
-
-    @Test
     public void testDeserializeInvalidXML() {
         String invalidXml = "<TestBean><name>Unclosed";
 
@@ -957,96 +1145,6 @@ public class XmlParserImplTest extends TestBase {
         Assertions.assertThrows(ParsingException.class, () -> {
             staxParser.deserialize(xml, null, AtomicInteger.class);
         });
-    }
-
-    @Test
-    public void testSerializeNullProperties() {
-        TestBean bean = new TestBean();
-        bean.setName(null);
-        bean.setAge(0);
-        bean.setTags(null);
-
-        String xml = staxParser.serialize(bean);
-        Assertions.assertNotNull(xml);
-
-        XmlSerConfig config = new XmlSerConfig();
-        config.setExclusion(Exclusion.NONE);
-        xml = staxParser.serialize(bean, config);
-        Assertions.assertNotNull(xml);
-        Assertions.assertTrue(xml.contains("<tags"));
-    }
-
-    @Test
-    public void testSerializeWithNamingPolicy() {
-        TestBean bean = new TestBean("Test", 20);
-
-        XmlSerConfig config = new XmlSerConfig();
-        config.setPropNamingPolicy(NamingPolicy.SCREAMING_SNAKE_CASE);
-
-        String xml = staxParser.serialize(bean, config);
-        Assertions.assertNotNull(xml);
-        Assertions.assertTrue(xml.contains("NAME") || xml.contains("name"));
-    }
-
-    @Test
-    public void testRoundTripSerialization() {
-        TestBean original = new TestBean("RoundTrip", 45);
-        original.setActive(true);
-        original.setTags(Arrays.asList("tag1", "tag2"));
-        Map<String, String> attrs = new HashMap<>();
-        attrs.put("key", "value");
-        original.setAttributes(attrs);
-
-        String xml = staxParser.serialize(original);
-
-        TestBean restored = staxParser.deserialize(xml, null, TestBean.class);
-
-        Assertions.assertNotNull(restored);
-        Assertions.assertEquals(original.getName(), restored.getName());
-        Assertions.assertEquals(original.getAge(), restored.getAge());
-        Assertions.assertEquals(original.isActive(), restored.isActive());
-        Assertions.assertEquals(original.getTags().size(), restored.getTags().size());
-        Assertions.assertEquals(original.getAttributes().get("key"), restored.getAttributes().get("key"));
-    }
-
-    @Test
-    public void testDOMParserRoundTrip() {
-        TestBean original = new TestBean("DOMTest", 55);
-        original.setActive(false);
-
-        String xml = domParser.serialize(original);
-
-        TestBean restored = domParser.deserialize(xml, null, TestBean.class);
-
-        Assertions.assertNotNull(restored);
-        Assertions.assertEquals(original.getName(), restored.getName());
-        Assertions.assertEquals(original.getAge(), restored.getAge());
-        Assertions.assertEquals(original.isActive(), restored.isActive());
-    }
-
-    @Test
-    public void testLargeDataSerialization() {
-        TestBean bean = new TestBean("LargeData", 100);
-        List<String> largeTags = new ArrayList<>();
-        for (int i = 0; i < 1000; i++) {
-            largeTags.add("tag" + i);
-        }
-        bean.setTags(largeTags);
-
-        Map<String, String> largeAttrs = new HashMap<>();
-        for (int i = 0; i < 100; i++) {
-            largeAttrs.put("key" + i, "value" + i);
-        }
-        bean.setAttributes(largeAttrs);
-
-        String xml = staxParser.serialize(bean);
-        Assertions.assertNotNull(xml);
-        Assertions.assertTrue(xml.length() > 10000);
-
-        TestBean restored = staxParser.deserialize(xml, null, TestBean.class);
-        Assertions.assertNotNull(restored);
-        Assertions.assertEquals(1000, restored.getTags().size());
-        Assertions.assertEquals(100, restored.getAttributes().size());
     }
 
     @Test
@@ -1077,4 +1175,114 @@ public class XmlParserImplTest extends TestBase {
         Assertions.assertEquals("TypedRoot", ((TestBean) staxResult).getName());
         Assertions.assertEquals("42", ((MapEntity) domResult).get("age"));
     }
+
+    @Test
+    public void testDeserializeFromInputStream_withNodeClasses_stax() throws IOException {
+        String xml = "<testBean><name>NodeClassTest</name><age>22</age></testBean>";
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
+        nodeClasses.put("testBean", Type.of(TestBean.class));
+
+        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
+        TestBean result = staxParser.deserialize(bais, null, nodeClasses);
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("NodeClassTest", result.getName());
+        Assertions.assertEquals(22, result.getAge());
+    }
+
+    @Test
+    public void testDeserializeFromInputStream_withNodeClasses_dom() throws IOException {
+        String xml = "<testBean><name>DomNodeClass</name><age>33</age></testBean>";
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
+        nodeClasses.put("testBean", Type.of(TestBean.class));
+
+        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
+        TestBean result = domParser.deserialize(bais, null, nodeClasses);
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("DomNodeClass", result.getName());
+        Assertions.assertEquals(33, result.getAge());
+    }
+
+    @Test
+    public void testDeserializeFromReader_withNodeClasses_dom() throws IOException {
+        String xml = "<testBean><name>ReaderDomNode</name><age>44</age></testBean>";
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
+        nodeClasses.put("testBean", Type.of(TestBean.class));
+
+        StringReader reader = new StringReader(xml);
+        TestBean result = domParser.deserialize(reader, null, nodeClasses);
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("ReaderDomNode", result.getName());
+        Assertions.assertEquals(44, result.getAge());
+    }
+
+    @Test
+    public void testReadByStreamParser_beanType() throws Exception {
+        String xml = "<TestBean><name>StreamBean</name><age>55</age><active>true</active></TestBean>";
+        XMLStreamReader xmlReader = XMLInputFactory.newFactory().createXMLStreamReader(new StringReader(xml));
+        while (xmlReader.hasNext() && xmlReader.getEventType() != XMLStreamConstants.START_ELEMENT) {
+            xmlReader.next();
+        }
+
+        TestBean result = staxParser.readByStreamParser(xmlReader, new XmlDeserConfig(), Type.of(TestBean.class));
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("StreamBean", result.getName());
+        Assertions.assertEquals(55, result.getAge());
+        Assertions.assertTrue(result.isActive());
+    }
+
+    @Test
+    public void testReadByStreamParser_mapType() throws Exception {
+        String xml = "<map><key1>val1</key1><key2>val2</key2></map>";
+        XMLStreamReader xmlReader = XMLInputFactory.newFactory().createXMLStreamReader(new StringReader(xml));
+        while (xmlReader.hasNext() && xmlReader.getEventType() != XMLStreamConstants.START_ELEMENT) {
+            xmlReader.next();
+        }
+
+        Map result = staxParser.readByStreamParser(xmlReader, new XmlDeserConfig(), Type.of(Map.class));
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("val1", result.get("key1"));
+        Assertions.assertEquals("val2", result.get("key2"));
+    }
+
+    @Test
+    public void testReadByDOMParser_beanType() throws Exception {
+        String xml = "<TestBean><name>DOMBean</name><age>66</age></TestBean>";
+        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes()));
+        Node node = doc.getDocumentElement();
+
+        TestBean result = domParser.readByDOMParser(node, new XmlDeserConfig(), Type.of(TestBean.class));
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("DOMBean", result.getName());
+        Assertions.assertEquals(66, result.getAge());
+    }
+
+    @Test
+    public void testReadByDOMParser_mapType() throws Exception {
+        String xml = "<map><alpha>1</alpha><beta>2</beta></map>";
+        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes()));
+        Node node = doc.getDocumentElement();
+
+        Map result = domParser.readByDOMParser(node, new XmlDeserConfig(), Type.of(Map.class));
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("1", result.get("alpha"));
+        Assertions.assertEquals("2", result.get("beta"));
+    }
+
+    @Test
+    public void testDeserializeFromInputStream_withNodeClasses_stax_EdgeCase() throws IOException {
+        String xml = "<testBean><name>StaxNodeClass</name><age>36</age></testBean>";
+        Map<String, Type<?>> nodeClasses = new HashMap<>();
+        nodeClasses.put("testBean", Type.of(TestBean.class));
+
+        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
+        TestBean result = staxParser.deserialize(bais, null, nodeClasses);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("StaxNodeClass", result.getName());
+        Assertions.assertEquals(36, result.getAge());
+    }
+
+    // TODO: Remaining XmlParserImpl coverage gaps are in internal stream/DOM recursion branches that require synthetic XML reader states and target-type resolution not exposed as stable public fixtures.
 }

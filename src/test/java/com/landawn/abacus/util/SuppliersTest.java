@@ -31,13 +31,11 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.function.Supplier;
 
-@Tag("new-test")
 public class SuppliersTest extends TestBase {
 
     // --- of(Supplier) ---
@@ -69,6 +67,231 @@ public class SuppliersTest extends TestBase {
         Assertions.assertEquals("result", supplier.get());
     }
 
+    @Test
+    public void testOfEmptyArrays() {
+        Assertions.assertArrayEquals(new boolean[0], Suppliers.ofEmptyBooleanArray().get());
+        Assertions.assertArrayEquals(new char[0], Suppliers.ofEmptyCharArray().get());
+        Assertions.assertArrayEquals(new byte[0], Suppliers.ofEmptyByteArray().get());
+        Assertions.assertArrayEquals(new short[0], Suppliers.ofEmptyShortArray().get());
+        Assertions.assertArrayEquals(new int[0], Suppliers.ofEmptyIntArray().get());
+        Assertions.assertArrayEquals(new long[0], Suppliers.ofEmptyLongArray().get());
+        Assertions.assertArrayEquals(new float[0], Suppliers.ofEmptyFloatArray().get(), 0.0f);
+        Assertions.assertArrayEquals(new double[0], Suppliers.ofEmptyDoubleArray().get(), 0.0);
+        Assertions.assertArrayEquals(new String[0], Suppliers.ofEmptyStringArray().get());
+        Assertions.assertArrayEquals(new Object[0], Suppliers.ofEmptyObjectArray().get());
+
+        Assertions.assertSame(Suppliers.ofEmptyIntArray().get(), Suppliers.ofEmptyIntArray().get());
+    }
+
+    @Test
+    public void testOfPrimitiveLists() {
+        BooleanList boolList = Suppliers.ofBooleanList().get();
+        Assertions.assertNotNull(boolList);
+        Assertions.assertTrue(boolList.isEmpty());
+
+        CharList charList = Suppliers.ofCharList().get();
+        Assertions.assertNotNull(charList);
+        Assertions.assertTrue(charList.isEmpty());
+
+        ByteList byteList = Suppliers.ofByteList().get();
+        Assertions.assertNotNull(byteList);
+        Assertions.assertTrue(byteList.isEmpty());
+
+        ShortList shortList = Suppliers.ofShortList().get();
+        Assertions.assertNotNull(shortList);
+        Assertions.assertTrue(shortList.isEmpty());
+
+        IntList intList = Suppliers.ofIntList().get();
+        Assertions.assertNotNull(intList);
+        Assertions.assertTrue(intList.isEmpty());
+
+        LongList longList = Suppliers.ofLongList().get();
+        Assertions.assertNotNull(longList);
+        Assertions.assertTrue(longList.isEmpty());
+
+        FloatList floatList = Suppliers.ofFloatList().get();
+        Assertions.assertNotNull(floatList);
+        Assertions.assertTrue(floatList.isEmpty());
+
+        DoubleList doubleList = Suppliers.ofDoubleList().get();
+        Assertions.assertNotNull(doubleList);
+        Assertions.assertTrue(doubleList.isEmpty());
+
+        Assertions.assertNotSame(Suppliers.ofIntList().get(), Suppliers.ofIntList().get());
+    }
+
+    @Test
+    public void testOfCollections() {
+        List<String> list = Suppliers.<String> ofList().get();
+        Assertions.assertNotNull(list);
+        Assertions.assertTrue(list instanceof ArrayList);
+        Assertions.assertTrue(list.isEmpty());
+
+        LinkedList<Integer> linkedList = Suppliers.<Integer> ofLinkedList().get();
+        Assertions.assertNotNull(linkedList);
+        Assertions.assertTrue(linkedList.isEmpty());
+
+        Set<String> set = Suppliers.<String> ofSet().get();
+        Assertions.assertNotNull(set);
+        Assertions.assertTrue(set instanceof HashSet);
+        Assertions.assertTrue(set.isEmpty());
+
+        Set<String> linkedHashSet = Suppliers.<String> ofLinkedHashSet().get();
+        Assertions.assertNotNull(linkedHashSet);
+        Assertions.assertTrue(linkedHashSet instanceof LinkedHashSet);
+
+        TreeSet<String> treeSet = Suppliers.<String> ofTreeSet().get();
+        Assertions.assertNotNull(treeSet);
+        Assertions.assertTrue(treeSet.isEmpty());
+
+        SortedSet<String> sortedSet = Suppliers.<String> ofSortedSet().get();
+        Assertions.assertNotNull(sortedSet);
+        Assertions.assertTrue(sortedSet instanceof TreeSet);
+
+        NavigableSet<String> navigableSet = Suppliers.<String> ofNavigableSet().get();
+        Assertions.assertNotNull(navigableSet);
+        Assertions.assertTrue(navigableSet instanceof TreeSet);
+    }
+
+    @Test
+    public void testOfQueuesAndDeques() {
+        Queue<String> queue = Suppliers.<String> ofQueue().get();
+        Assertions.assertNotNull(queue);
+        Assertions.assertTrue(queue instanceof LinkedList);
+        Assertions.assertTrue(queue.isEmpty());
+
+        Deque<String> deque = Suppliers.<String> ofDeque().get();
+        Assertions.assertNotNull(deque);
+        Assertions.assertTrue(deque instanceof LinkedList);
+
+        ArrayDeque<String> arrayDeque = Suppliers.<String> ofArrayDeque().get();
+        Assertions.assertNotNull(arrayDeque);
+        Assertions.assertTrue(arrayDeque.isEmpty());
+
+        LinkedBlockingQueue<String> lbq = Suppliers.<String> ofLinkedBlockingQueue().get();
+        Assertions.assertNotNull(lbq);
+        Assertions.assertTrue(lbq.isEmpty());
+
+        LinkedBlockingDeque<String> lbd = Suppliers.<String> ofLinkedBlockingDeque().get();
+        Assertions.assertNotNull(lbd);
+        Assertions.assertTrue(lbd.isEmpty());
+
+        ConcurrentLinkedQueue<String> clq = Suppliers.<String> ofConcurrentLinkedQueue().get();
+        Assertions.assertNotNull(clq);
+        Assertions.assertTrue(clq.isEmpty());
+
+        PriorityQueue<String> pq = Suppliers.<String> ofPriorityQueue().get();
+        Assertions.assertNotNull(pq);
+        Assertions.assertTrue(pq.isEmpty());
+    }
+
+    @Test
+    public void testOfSpecialCollections() {
+        BiMap<String, Integer> biMap = Suppliers.<String, Integer> ofBiMap().get();
+        Assertions.assertNotNull(biMap);
+        Assertions.assertTrue(biMap.isEmpty());
+
+        Multiset<String> multiset = Suppliers.<String> ofMultiset().get();
+        Assertions.assertNotNull(multiset);
+        Assertions.assertTrue(multiset.isEmpty());
+
+        Multiset<String> linkedMultiset = Suppliers.<String> ofMultiset(LinkedHashMap.class).get();
+        Assertions.assertNotNull(linkedMultiset);
+        Assertions.assertTrue(linkedMultiset.isEmpty());
+
+        Multiset<String> customMultiset = Suppliers.<String> ofMultiset(TreeMap::new).get();
+        Assertions.assertNotNull(customMultiset);
+        Assertions.assertTrue(customMultiset.isEmpty());
+    }
+
+    @Test
+    public void testOfMultimaps() {
+        ListMultimap<String, Integer> listMultimap = Suppliers.<String, Integer> ofListMultimap().get();
+        Assertions.assertNotNull(listMultimap);
+        Assertions.assertTrue(listMultimap.isEmpty());
+
+        SetMultimap<String, Integer> setMultimap = Suppliers.<String, Integer> ofSetMultimap().get();
+        Assertions.assertNotNull(setMultimap);
+        Assertions.assertTrue(setMultimap.isEmpty());
+
+        ListMultimap<String, Integer> customListMultimap = Suppliers.<String, Integer> ofListMultimap(TreeMap.class).get();
+        Assertions.assertNotNull(customListMultimap);
+
+        SetMultimap<String, Integer> customSetMultimap = Suppliers.<String, Integer> ofSetMultimap(LinkedHashMap.class).get();
+        Assertions.assertNotNull(customSetMultimap);
+
+        ListMultimap<String, Integer> typedListMultimap = Suppliers.<String, Integer> ofListMultimap(HashMap.class, ArrayList.class).get();
+        Assertions.assertNotNull(typedListMultimap);
+
+        SetMultimap<String, Integer> typedSetMultimap = Suppliers.<String, Integer> ofSetMultimap(TreeMap.class, TreeSet.class).get();
+        Assertions.assertNotNull(typedSetMultimap);
+
+        ListMultimap<String, Integer> supplierListMultimap = Suppliers.<String, Integer> ofListMultimap(HashMap::new, ArrayList::new).get();
+        Assertions.assertNotNull(supplierListMultimap);
+
+        SetMultimap<String, Integer> supplierSetMultimap = Suppliers.<String, Integer> ofSetMultimap(LinkedHashMap::new, HashSet::new).get();
+        Assertions.assertNotNull(supplierSetMultimap);
+
+        Multimap<String, Integer, List<Integer>> generalMultimap = Suppliers.<String, Integer, List<Integer>> ofMultimap(TreeMap::new, ArrayList::new).get();
+        Assertions.assertNotNull(generalMultimap);
+    }
+
+    @Test
+    public void testOfMaps() {
+        Map<String, Object> map = Suppliers.<String, Object> ofMap().get();
+        Assertions.assertNotNull(map);
+        Assertions.assertTrue(map instanceof HashMap);
+        Assertions.assertTrue(map.isEmpty());
+
+        Map<String, Object> linkedHashMap = Suppliers.<String, Object> ofLinkedHashMap().get();
+        Assertions.assertNotNull(linkedHashMap);
+        Assertions.assertTrue(linkedHashMap instanceof LinkedHashMap);
+
+        IdentityHashMap<String, Object> identityHashMap = Suppliers.<String, Object> ofIdentityHashMap().get();
+        Assertions.assertNotNull(identityHashMap);
+        Assertions.assertTrue(identityHashMap.isEmpty());
+
+        TreeMap<String, Object> treeMap = Suppliers.<String, Object> ofTreeMap().get();
+        Assertions.assertNotNull(treeMap);
+        Assertions.assertTrue(treeMap.isEmpty());
+
+        SortedMap<String, Object> sortedMap = Suppliers.<String, Object> ofSortedMap().get();
+        Assertions.assertNotNull(sortedMap);
+        Assertions.assertTrue(sortedMap instanceof TreeMap);
+
+        NavigableMap<String, Object> navigableMap = Suppliers.<String, Object> ofNavigableMap().get();
+        Assertions.assertNotNull(navigableMap);
+        Assertions.assertTrue(navigableMap instanceof TreeMap);
+
+        ConcurrentMap<String, Object> concurrentMap = Suppliers.<String, Object> ofConcurrentMap().get();
+        Assertions.assertNotNull(concurrentMap);
+        Assertions.assertTrue(concurrentMap instanceof ConcurrentHashMap);
+
+        ConcurrentHashMap<String, Object> concurrentHashMap = Suppliers.<String, Object> ofConcurrentHashMap().get();
+        Assertions.assertNotNull(concurrentHashMap);
+        Assertions.assertTrue(concurrentHashMap.isEmpty());
+
+        ConcurrentNavigableMap<String, Object> concurrentNavigableMap = Suppliers.<String, Object> ofConcurrentNavigableMap().get();
+        Assertions.assertNotNull(concurrentNavigableMap);
+        Assertions.assertTrue(concurrentNavigableMap instanceof ConcurrentSkipListMap);
+
+        Map<String, Object> concurrentMapFromType = Suppliers.<String, Object> ofMap(ConcurrentMap.class).get();
+        Assertions.assertTrue(concurrentMapFromType instanceof ConcurrentHashMap);
+
+        Map<String, Object> concurrentNavigableMapFromType = Suppliers.<String, Object> ofMap(ConcurrentNavigableMap.class).get();
+        Assertions.assertTrue(concurrentNavigableMapFromType instanceof ConcurrentSkipListMap);
+
+        Map<String, Object> concurrentSkipListMapFromType = Suppliers.<String, Object> ofMap(ConcurrentSkipListMap.class).get();
+        Assertions.assertTrue(concurrentSkipListMapFromType instanceof ConcurrentSkipListMap);
+    }
+
+    @Test
+    public void testOfSupplier_ReturnsSameInstance() {
+        Supplier<String> original = () -> "hello";
+        Supplier<String> result = Suppliers.of(original);
+        Assertions.assertSame(original, result);
+    }
+
     // --- ofInstance ---
 
     @Test
@@ -90,6 +313,23 @@ public class SuppliersTest extends TestBase {
         Assertions.assertSame(supplier.get(), supplier.get());
     }
 
+    @Test
+    public void testOfInstance_Null() {
+        Supplier<Object> supplier = Suppliers.ofInstance(null);
+        Assertions.assertNull(supplier.get());
+        Assertions.assertNull(supplier.get());
+    }
+
+    @Test
+    public void testOfUuid_UniqueEachTime() {
+        Supplier<String> uuidSupplier = Suppliers.ofUuid();
+        java.util.Set<String> uuids = new java.util.HashSet<>();
+        for (int i = 0; i < 100; i++) {
+            uuids.add(uuidSupplier.get());
+        }
+        Assertions.assertEquals(100, uuids.size());
+    }
+
     // --- ofUuid ---
 
     @Test
@@ -102,6 +342,14 @@ public class SuppliersTest extends TestBase {
         Assertions.assertNotNull(uuid2);
         Assertions.assertNotEquals(uuid1, uuid2);
         Assertions.assertEquals(36, uuid1.length());
+    }
+
+    @Test
+    public void testOfUuidWithoutHyphens_NoHyphens() {
+        Supplier<String> guidSupplier = Suppliers.ofUuidWithoutHyphens();
+        String guid = guidSupplier.get();
+        Assertions.assertFalse(guid.contains("-"));
+        Assertions.assertEquals(32, guid.length());
     }
 
     // --- ofUuidWithoutHyphens ---
@@ -118,19 +366,14 @@ public class SuppliersTest extends TestBase {
     }
 
     @Test
-    public void testOfUuidWithoutHyphens_NoHyphens() {
+    public void testOfUuidWithoutHyphens_Format() {
         Supplier<String> guidSupplier = Suppliers.ofUuidWithoutHyphens();
         String guid = guidSupplier.get();
-        Assertions.assertFalse(guid.contains("-"));
+        Assertions.assertNotNull(guid);
         Assertions.assertEquals(32, guid.length());
-    }
-
-    // --- ofEmptyBooleanArray through ofEmptyObjectArray ---
-
-    @Test
-    public void testOfEmptyBooleanArray() {
-        Assertions.assertArrayEquals(new boolean[0], Suppliers.ofEmptyBooleanArray().get());
-        Assertions.assertSame(Suppliers.ofEmptyBooleanArray().get(), Suppliers.ofEmptyBooleanArray().get());
+        Assertions.assertFalse(guid.contains("-"));
+        // All characters should be hex digits
+        Assertions.assertTrue(guid.matches("[0-9a-f]+"));
     }
 
     @Test
@@ -181,26 +424,18 @@ public class SuppliersTest extends TestBase {
         Assertions.assertSame(Suppliers.ofEmptyStringArray().get(), Suppliers.ofEmptyStringArray().get());
     }
 
+    // --- ofEmptyBooleanArray through ofEmptyObjectArray ---
+
+    @Test
+    public void testOfEmptyBooleanArray() {
+        Assertions.assertArrayEquals(new boolean[0], Suppliers.ofEmptyBooleanArray().get());
+        Assertions.assertSame(Suppliers.ofEmptyBooleanArray().get(), Suppliers.ofEmptyBooleanArray().get());
+    }
+
     @Test
     public void testOfEmptyObjectArray() {
         Assertions.assertArrayEquals(new Object[0], Suppliers.ofEmptyObjectArray().get());
         Assertions.assertSame(Suppliers.ofEmptyObjectArray().get(), Suppliers.ofEmptyObjectArray().get());
-    }
-
-    @Test
-    public void testOfEmptyArrays() {
-        Assertions.assertArrayEquals(new boolean[0], Suppliers.ofEmptyBooleanArray().get());
-        Assertions.assertArrayEquals(new char[0], Suppliers.ofEmptyCharArray().get());
-        Assertions.assertArrayEquals(new byte[0], Suppliers.ofEmptyByteArray().get());
-        Assertions.assertArrayEquals(new short[0], Suppliers.ofEmptyShortArray().get());
-        Assertions.assertArrayEquals(new int[0], Suppliers.ofEmptyIntArray().get());
-        Assertions.assertArrayEquals(new long[0], Suppliers.ofEmptyLongArray().get());
-        Assertions.assertArrayEquals(new float[0], Suppliers.ofEmptyFloatArray().get(), 0.0f);
-        Assertions.assertArrayEquals(new double[0], Suppliers.ofEmptyDoubleArray().get(), 0.0);
-        Assertions.assertArrayEquals(new String[0], Suppliers.ofEmptyStringArray().get());
-        Assertions.assertArrayEquals(new Object[0], Suppliers.ofEmptyObjectArray().get());
-
-        Assertions.assertSame(Suppliers.ofEmptyIntArray().get(), Suppliers.ofEmptyIntArray().get());
     }
 
     // --- ofEmptyString ---
@@ -212,14 +447,12 @@ public class SuppliersTest extends TestBase {
         Assertions.assertSame(emptyStringSupplier.get(), emptyStringSupplier.get());
     }
 
-    // --- ofBooleanList through ofDoubleList ---
-
     @Test
-    public void testOfBooleanList() {
-        BooleanList boolList = Suppliers.ofBooleanList().get();
-        Assertions.assertNotNull(boolList);
-        Assertions.assertTrue(boolList.isEmpty());
-        Assertions.assertNotSame(Suppliers.ofBooleanList().get(), Suppliers.ofBooleanList().get());
+    public void testOfEmptyString_ReturnsEmptyString() {
+        Supplier<String> supplier = Suppliers.ofEmptyString();
+        Assertions.assertEquals("", supplier.get());
+        // Should return same instance
+        Assertions.assertSame(supplier.get(), supplier.get());
     }
 
     @Test
@@ -270,49 +503,22 @@ public class SuppliersTest extends TestBase {
         Assertions.assertNotSame(Suppliers.ofFloatList().get(), Suppliers.ofFloatList().get());
     }
 
+    // --- ofBooleanList through ofDoubleList ---
+
+    @Test
+    public void testOfBooleanList() {
+        BooleanList boolList = Suppliers.ofBooleanList().get();
+        Assertions.assertNotNull(boolList);
+        Assertions.assertTrue(boolList.isEmpty());
+        Assertions.assertNotSame(Suppliers.ofBooleanList().get(), Suppliers.ofBooleanList().get());
+    }
+
     @Test
     public void testOfDoubleList() {
         DoubleList doubleList = Suppliers.ofDoubleList().get();
         Assertions.assertNotNull(doubleList);
         Assertions.assertTrue(doubleList.isEmpty());
         Assertions.assertNotSame(Suppliers.ofDoubleList().get(), Suppliers.ofDoubleList().get());
-    }
-
-    @Test
-    public void testOfPrimitiveLists() {
-        BooleanList boolList = Suppliers.ofBooleanList().get();
-        Assertions.assertNotNull(boolList);
-        Assertions.assertTrue(boolList.isEmpty());
-
-        CharList charList = Suppliers.ofCharList().get();
-        Assertions.assertNotNull(charList);
-        Assertions.assertTrue(charList.isEmpty());
-
-        ByteList byteList = Suppliers.ofByteList().get();
-        Assertions.assertNotNull(byteList);
-        Assertions.assertTrue(byteList.isEmpty());
-
-        ShortList shortList = Suppliers.ofShortList().get();
-        Assertions.assertNotNull(shortList);
-        Assertions.assertTrue(shortList.isEmpty());
-
-        IntList intList = Suppliers.ofIntList().get();
-        Assertions.assertNotNull(intList);
-        Assertions.assertTrue(intList.isEmpty());
-
-        LongList longList = Suppliers.ofLongList().get();
-        Assertions.assertNotNull(longList);
-        Assertions.assertTrue(longList.isEmpty());
-
-        FloatList floatList = Suppliers.ofFloatList().get();
-        Assertions.assertNotNull(floatList);
-        Assertions.assertTrue(floatList.isEmpty());
-
-        DoubleList doubleList = Suppliers.ofDoubleList().get();
-        Assertions.assertNotNull(doubleList);
-        Assertions.assertTrue(doubleList.isEmpty());
-
-        Assertions.assertNotSame(Suppliers.ofIntList().get(), Suppliers.ofIntList().get());
     }
 
     // --- ofList ---
@@ -451,69 +657,71 @@ public class SuppliersTest extends TestBase {
         Assertions.assertTrue(pq.isEmpty());
     }
 
+    // --- ofMap(Class) ---
+
     @Test
-    public void testOfCollections() {
-        List<String> list = Suppliers.<String> ofList().get();
-        Assertions.assertNotNull(list);
-        Assertions.assertTrue(list instanceof ArrayList);
-        Assertions.assertTrue(list.isEmpty());
+    public void testOfMap() {
+        Supplier<? extends Map<String, Object>> mapSupplier = Suppliers.ofMap(HashMap.class);
+        Map<String, Object> map = mapSupplier.get();
+        Assertions.assertTrue(map instanceof HashMap);
 
-        LinkedList<Integer> linkedList = Suppliers.<Integer> ofLinkedList().get();
-        Assertions.assertNotNull(linkedList);
-        Assertions.assertTrue(linkedList.isEmpty());
+        Supplier<? extends Map<String, Object>> treeMapSupplier = Suppliers.ofMap(TreeMap.class);
+        Map<String, Object> treeMap = treeMapSupplier.get();
+        Assertions.assertTrue(treeMap instanceof TreeMap);
 
-        Set<String> set = Suppliers.<String> ofSet().get();
-        Assertions.assertNotNull(set);
-        Assertions.assertTrue(set instanceof HashSet);
-        Assertions.assertTrue(set.isEmpty());
+        Supplier<? extends Map<String, Object>> linkedMapSupplier = Suppliers.ofMap(LinkedHashMap.class);
+        Map<String, Object> linkedMap = linkedMapSupplier.get();
+        Assertions.assertTrue(linkedMap instanceof LinkedHashMap);
 
-        Set<String> linkedHashSet = Suppliers.<String> ofLinkedHashSet().get();
-        Assertions.assertNotNull(linkedHashSet);
-        Assertions.assertTrue(linkedHashSet instanceof LinkedHashSet);
+        Supplier<? extends Map<String, Object>> concurrentMapSupplier = Suppliers.ofMap(ConcurrentHashMap.class);
+        Map<String, Object> concurrentMap = concurrentMapSupplier.get();
+        Assertions.assertTrue(concurrentMap instanceof ConcurrentHashMap);
 
-        TreeSet<String> treeSet = Suppliers.<String> ofTreeSet().get();
-        Assertions.assertNotNull(treeSet);
-        Assertions.assertTrue(treeSet.isEmpty());
+        Supplier<? extends Map<String, Object>> mapInterfaceSupplier = Suppliers.ofMap(Map.class);
+        Map<String, Object> mapInterface = mapInterfaceSupplier.get();
+        Assertions.assertTrue(mapInterface instanceof HashMap);
 
-        SortedSet<String> sortedSet = Suppliers.<String> ofSortedSet().get();
-        Assertions.assertNotNull(sortedSet);
-        Assertions.assertTrue(sortedSet instanceof TreeSet);
+        Supplier<? extends Map<String, Object>> sortedMapSupplier = Suppliers.ofMap(SortedMap.class);
+        Map<String, Object> sortedMap = sortedMapSupplier.get();
+        Assertions.assertTrue(sortedMap instanceof TreeMap);
 
-        NavigableSet<String> navigableSet = Suppliers.<String> ofNavigableSet().get();
-        Assertions.assertNotNull(navigableSet);
-        Assertions.assertTrue(navigableSet instanceof TreeSet);
+        Supplier<? extends Map<String, Object>> concurrentNavigableMapSupplier = Suppliers.ofMap(ConcurrentNavigableMap.class);
+        Map<String, Object> concurrentNavigableMap = concurrentNavigableMapSupplier.get();
+        Assertions.assertTrue(concurrentNavigableMap instanceof ConcurrentSkipListMap);
+
+        Supplier<? extends Map<String, Object>> concurrentSkipListMapSupplier = Suppliers.ofMap(ConcurrentSkipListMap.class);
+        Map<String, Object> concurrentSkipListMap = concurrentSkipListMapSupplier.get();
+        Assertions.assertTrue(concurrentSkipListMap instanceof ConcurrentSkipListMap);
     }
 
     @Test
-    public void testOfQueuesAndDeques() {
-        Queue<String> queue = Suppliers.<String> ofQueue().get();
-        Assertions.assertNotNull(queue);
-        Assertions.assertTrue(queue instanceof LinkedList);
-        Assertions.assertTrue(queue.isEmpty());
+    public void testOfMap_ConcurrentMapInterface() {
+        Supplier<? extends Map<String, Object>> supplier = Suppliers.ofMap(ConcurrentMap.class);
+        Map<String, Object> result = supplier.get();
+        Assertions.assertTrue(result instanceof ConcurrentHashMap);
+    }
 
-        Deque<String> deque = Suppliers.<String> ofDeque().get();
-        Assertions.assertNotNull(deque);
-        Assertions.assertTrue(deque instanceof LinkedList);
+    @Test
+    public void testOfMap_NavigableMap() {
+        Supplier<? extends Map<String, Object>> supplier = Suppliers.ofMap(NavigableMap.class);
+        Map<String, Object> result = supplier.get();
+        Assertions.assertTrue(result instanceof TreeMap);
+    }
 
-        ArrayDeque<String> arrayDeque = Suppliers.<String> ofArrayDeque().get();
-        Assertions.assertNotNull(arrayDeque);
-        Assertions.assertTrue(arrayDeque.isEmpty());
+    // --- Additional coverage tests for ofMap(Class) ---
 
-        LinkedBlockingQueue<String> lbq = Suppliers.<String> ofLinkedBlockingQueue().get();
-        Assertions.assertNotNull(lbq);
-        Assertions.assertTrue(lbq.isEmpty());
+    @Test
+    public void testOfMap_AbstractMap() {
+        Supplier<? extends Map<String, Object>> supplier = Suppliers.ofMap(java.util.AbstractMap.class);
+        Map<String, Object> result = supplier.get();
+        Assertions.assertTrue(result instanceof HashMap);
+    }
 
-        LinkedBlockingDeque<String> lbd = Suppliers.<String> ofLinkedBlockingDeque().get();
-        Assertions.assertNotNull(lbd);
-        Assertions.assertTrue(lbd.isEmpty());
-
-        ConcurrentLinkedQueue<String> clq = Suppliers.<String> ofConcurrentLinkedQueue().get();
-        Assertions.assertNotNull(clq);
-        Assertions.assertTrue(clq.isEmpty());
-
-        PriorityQueue<String> pq = Suppliers.<String> ofPriorityQueue().get();
-        Assertions.assertNotNull(pq);
-        Assertions.assertTrue(pq.isEmpty());
+    @Test
+    public void testOfMap_ImmutableMap() {
+        Supplier<? extends Map<String, Object>> supplier = Suppliers.ofMap(ImmutableMap.class);
+        Map<String, Object> result = supplier.get();
+        Assertions.assertTrue(result instanceof HashMap);
     }
 
     // --- ofMap ---
@@ -524,6 +732,29 @@ public class SuppliersTest extends TestBase {
         Assertions.assertNotNull(map);
         Assertions.assertTrue(map instanceof HashMap);
         Assertions.assertTrue(map.isEmpty());
+    }
+
+    @Test
+    public void testOfMap_IdentityHashMap() {
+        Supplier<? extends Map<String, Object>> supplier = Suppliers.ofMap(IdentityHashMap.class);
+        Map<String, Object> result = supplier.get();
+        Assertions.assertTrue(result instanceof IdentityHashMap);
+        Assertions.assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testOfMap_BiMap() {
+        Supplier<? extends Map<String, Object>> supplier = Suppliers.ofMap(BiMap.class);
+        Map<String, Object> result = supplier.get();
+        Assertions.assertNotNull(result);
+    }
+
+    @Test
+    public void testInvalidMapType() {
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Suppliers.ofMap((Class) String.class);
+        });
     }
 
     // --- ofLinkedHashMap ---
@@ -716,57 +947,6 @@ public class SuppliersTest extends TestBase {
         Assertions.assertTrue(generalMultimap.isEmpty());
     }
 
-    @Test
-    public void testOfSpecialCollections() {
-        BiMap<String, Integer> biMap = Suppliers.<String, Integer> ofBiMap().get();
-        Assertions.assertNotNull(biMap);
-        Assertions.assertTrue(biMap.isEmpty());
-
-        Multiset<String> multiset = Suppliers.<String> ofMultiset().get();
-        Assertions.assertNotNull(multiset);
-        Assertions.assertTrue(multiset.isEmpty());
-
-        Multiset<String> linkedMultiset = Suppliers.<String> ofMultiset(LinkedHashMap.class).get();
-        Assertions.assertNotNull(linkedMultiset);
-        Assertions.assertTrue(linkedMultiset.isEmpty());
-
-        Multiset<String> customMultiset = Suppliers.<String> ofMultiset(TreeMap::new).get();
-        Assertions.assertNotNull(customMultiset);
-        Assertions.assertTrue(customMultiset.isEmpty());
-    }
-
-    @Test
-    public void testOfMultimaps() {
-        ListMultimap<String, Integer> listMultimap = Suppliers.<String, Integer> ofListMultimap().get();
-        Assertions.assertNotNull(listMultimap);
-        Assertions.assertTrue(listMultimap.isEmpty());
-
-        SetMultimap<String, Integer> setMultimap = Suppliers.<String, Integer> ofSetMultimap().get();
-        Assertions.assertNotNull(setMultimap);
-        Assertions.assertTrue(setMultimap.isEmpty());
-
-        ListMultimap<String, Integer> customListMultimap = Suppliers.<String, Integer> ofListMultimap(TreeMap.class).get();
-        Assertions.assertNotNull(customListMultimap);
-
-        SetMultimap<String, Integer> customSetMultimap = Suppliers.<String, Integer> ofSetMultimap(LinkedHashMap.class).get();
-        Assertions.assertNotNull(customSetMultimap);
-
-        ListMultimap<String, Integer> typedListMultimap = Suppliers.<String, Integer> ofListMultimap(HashMap.class, ArrayList.class).get();
-        Assertions.assertNotNull(typedListMultimap);
-
-        SetMultimap<String, Integer> typedSetMultimap = Suppliers.<String, Integer> ofSetMultimap(TreeMap.class, TreeSet.class).get();
-        Assertions.assertNotNull(typedSetMultimap);
-
-        ListMultimap<String, Integer> supplierListMultimap = Suppliers.<String, Integer> ofListMultimap(HashMap::new, ArrayList::new).get();
-        Assertions.assertNotNull(supplierListMultimap);
-
-        SetMultimap<String, Integer> supplierSetMultimap = Suppliers.<String, Integer> ofSetMultimap(LinkedHashMap::new, HashSet::new).get();
-        Assertions.assertNotNull(supplierSetMultimap);
-
-        Multimap<String, Integer, List<Integer>> generalMultimap = Suppliers.<String, Integer, List<Integer>> ofMultimap(TreeMap::new, ArrayList::new).get();
-        Assertions.assertNotNull(generalMultimap);
-    }
-
     // --- ofStringBuilder ---
 
     @Test
@@ -777,6 +957,16 @@ public class SuppliersTest extends TestBase {
 
         StringBuilder sb2 = Suppliers.ofStringBuilder().get();
         Assertions.assertNotSame(sb, sb2);
+    }
+
+    @Test
+    public void testOfStringBuilder_NewInstanceEachCall() {
+        Supplier<StringBuilder> supplier = Suppliers.ofStringBuilder();
+        StringBuilder sb1 = supplier.get();
+        StringBuilder sb2 = supplier.get();
+        Assertions.assertNotSame(sb1, sb2);
+        Assertions.assertEquals(0, sb1.length());
+        Assertions.assertEquals(0, sb2.length());
     }
 
     // --- ofCollection(Class) ---
@@ -827,6 +1017,76 @@ public class SuppliersTest extends TestBase {
     }
 
     @Test
+    public void testOfCollection_PriorityQueue() {
+        Supplier<? extends Collection<String>> supplier = Suppliers.ofCollection(PriorityQueue.class);
+        Collection<String> result = supplier.get();
+        Assertions.assertTrue(result instanceof PriorityQueue);
+    }
+
+    @Test
+    public void testOfCollection_ConcurrentLinkedQueue() {
+        Supplier<? extends Collection<String>> supplier = Suppliers.ofCollection(ConcurrentLinkedQueue.class);
+        Collection<String> result = supplier.get();
+        Assertions.assertTrue(result instanceof ConcurrentLinkedQueue);
+    }
+
+    @Test
+    public void testOfCollection_NavigableSet() {
+        Supplier<? extends Collection<String>> supplier = Suppliers.ofCollection(NavigableSet.class);
+        Collection<String> result = supplier.get();
+        Assertions.assertTrue(result instanceof TreeSet);
+    }
+
+    @Test
+    public void testOfCollection_LinkedBlockingQueue() {
+        Supplier<? extends Collection<String>> supplier = Suppliers.ofCollection(LinkedBlockingQueue.class);
+        Collection<String> result = supplier.get();
+        Assertions.assertTrue(result instanceof LinkedBlockingQueue);
+    }
+
+    @Test
+    public void testOfCollection_LinkedBlockingDeque() {
+        Supplier<? extends Collection<String>> supplier = Suppliers.ofCollection(LinkedBlockingDeque.class);
+        Collection<String> result = supplier.get();
+        Assertions.assertTrue(result instanceof LinkedBlockingDeque);
+    }
+
+    @Test
+    public void testOfCollection_ImmutableList() {
+        Supplier<? extends Collection<String>> supplier = Suppliers.ofCollection(ImmutableList.class);
+        Collection<String> result = supplier.get();
+        Assertions.assertTrue(result instanceof java.util.ArrayList);
+    }
+
+    @Test
+    public void testOfCollection_ImmutableSet() {
+        Supplier<? extends Collection<String>> supplier = Suppliers.ofCollection(ImmutableSet.class);
+        Collection<String> result = supplier.get();
+        Assertions.assertTrue(result instanceof java.util.HashSet);
+    }
+
+    @Test
+    public void testOfCollection_AbstractCollection() {
+        Supplier<? extends Collection<String>> supplier = Suppliers.ofCollection(java.util.AbstractCollection.class);
+        Collection<String> result = supplier.get();
+        Assertions.assertTrue(result instanceof java.util.ArrayList);
+    }
+
+    @Test
+    public void testOfCollection_AbstractList() {
+        Supplier<? extends Collection<String>> supplier = Suppliers.ofCollection(java.util.AbstractList.class);
+        Collection<String> result = supplier.get();
+        Assertions.assertTrue(result instanceof java.util.ArrayList);
+    }
+
+    @Test
+    public void testOfCollection_AbstractSet() {
+        Supplier<? extends Collection<String>> supplier = Suppliers.ofCollection(java.util.AbstractSet.class);
+        Collection<String> result = supplier.get();
+        Assertions.assertTrue(result instanceof java.util.HashSet);
+    }
+
+    @Test
     public void testOfCollection_Queue() {
         Supplier<? extends Collection<String>> supplier = Suppliers.ofCollection(Queue.class);
         Collection<String> result = supplier.get();
@@ -841,117 +1101,37 @@ public class SuppliersTest extends TestBase {
     }
 
     @Test
-    public void testOfCollection_PriorityQueue() {
-        Supplier<? extends Collection<String>> supplier = Suppliers.ofCollection(PriorityQueue.class);
+    public void testOfCollection_ArrayDeque() {
+        Supplier<? extends Collection<String>> supplier = Suppliers.ofCollection(ArrayDeque.class);
         Collection<String> result = supplier.get();
-        Assertions.assertTrue(result instanceof PriorityQueue);
+        Assertions.assertTrue(result instanceof ArrayDeque);
+        Assertions.assertTrue(result.isEmpty());
     }
 
+    // --- Additional coverage tests for ofCollection(Class) ---
+
     @Test
-    public void testOfCollection_ConcurrentLinkedQueue() {
-        Supplier<? extends Collection<String>> supplier = Suppliers.ofCollection(ConcurrentLinkedQueue.class);
+    public void testOfCollection_BlockingQueue() {
+        Supplier<? extends Collection<String>> supplier = Suppliers.ofCollection(java.util.concurrent.BlockingQueue.class);
         Collection<String> result = supplier.get();
-        Assertions.assertTrue(result instanceof ConcurrentLinkedQueue);
-    }
-
-    // --- ofMap(Class) ---
-
-    @Test
-    public void testOfMap() {
-        Supplier<? extends Map<String, Object>> mapSupplier = Suppliers.ofMap(HashMap.class);
-        Map<String, Object> map = mapSupplier.get();
-        Assertions.assertTrue(map instanceof HashMap);
-
-        Supplier<? extends Map<String, Object>> treeMapSupplier = Suppliers.ofMap(TreeMap.class);
-        Map<String, Object> treeMap = treeMapSupplier.get();
-        Assertions.assertTrue(treeMap instanceof TreeMap);
-
-        Supplier<? extends Map<String, Object>> linkedMapSupplier = Suppliers.ofMap(LinkedHashMap.class);
-        Map<String, Object> linkedMap = linkedMapSupplier.get();
-        Assertions.assertTrue(linkedMap instanceof LinkedHashMap);
-
-        Supplier<? extends Map<String, Object>> concurrentMapSupplier = Suppliers.ofMap(ConcurrentHashMap.class);
-        Map<String, Object> concurrentMap = concurrentMapSupplier.get();
-        Assertions.assertTrue(concurrentMap instanceof ConcurrentHashMap);
-
-        Supplier<? extends Map<String, Object>> mapInterfaceSupplier = Suppliers.ofMap(Map.class);
-        Map<String, Object> mapInterface = mapInterfaceSupplier.get();
-        Assertions.assertTrue(mapInterface instanceof HashMap);
-
-        Supplier<? extends Map<String, Object>> sortedMapSupplier = Suppliers.ofMap(SortedMap.class);
-        Map<String, Object> sortedMap = sortedMapSupplier.get();
-        Assertions.assertTrue(sortedMap instanceof TreeMap);
-
-        Supplier<? extends Map<String, Object>> concurrentNavigableMapSupplier = Suppliers.ofMap(ConcurrentNavigableMap.class);
-        Map<String, Object> concurrentNavigableMap = concurrentNavigableMapSupplier.get();
-        Assertions.assertTrue(concurrentNavigableMap instanceof ConcurrentSkipListMap);
-
-        Supplier<? extends Map<String, Object>> concurrentSkipListMapSupplier = Suppliers.ofMap(ConcurrentSkipListMap.class);
-        Map<String, Object> concurrentSkipListMap = concurrentSkipListMapSupplier.get();
-        Assertions.assertTrue(concurrentSkipListMap instanceof ConcurrentSkipListMap);
+        Assertions.assertNotNull(result);
     }
 
     @Test
-    public void testOfMap_ConcurrentMapInterface() {
-        Supplier<? extends Map<String, Object>> supplier = Suppliers.ofMap(ConcurrentMap.class);
-        Map<String, Object> result = supplier.get();
-        Assertions.assertTrue(result instanceof ConcurrentHashMap);
+    public void testOfCollection_BlockingDeque() {
+        Supplier<? extends Collection<String>> supplier = Suppliers.ofCollection(java.util.concurrent.BlockingDeque.class);
+        Collection<String> result = supplier.get();
+        Assertions.assertNotNull(result);
     }
 
-    @Test
-    public void testOfMap_NavigableMap() {
-        Supplier<? extends Map<String, Object>> supplier = Suppliers.ofMap(NavigableMap.class);
-        Map<String, Object> result = supplier.get();
-        Assertions.assertTrue(result instanceof TreeMap);
-    }
+    // --- error cases ---
 
     @Test
-    public void testOfMaps() {
-        Map<String, Object> map = Suppliers.<String, Object> ofMap().get();
-        Assertions.assertNotNull(map);
-        Assertions.assertTrue(map instanceof HashMap);
-        Assertions.assertTrue(map.isEmpty());
+    public void testInvalidCollectionType() {
 
-        Map<String, Object> linkedHashMap = Suppliers.<String, Object> ofLinkedHashMap().get();
-        Assertions.assertNotNull(linkedHashMap);
-        Assertions.assertTrue(linkedHashMap instanceof LinkedHashMap);
-
-        IdentityHashMap<String, Object> identityHashMap = Suppliers.<String, Object> ofIdentityHashMap().get();
-        Assertions.assertNotNull(identityHashMap);
-        Assertions.assertTrue(identityHashMap.isEmpty());
-
-        TreeMap<String, Object> treeMap = Suppliers.<String, Object> ofTreeMap().get();
-        Assertions.assertNotNull(treeMap);
-        Assertions.assertTrue(treeMap.isEmpty());
-
-        SortedMap<String, Object> sortedMap = Suppliers.<String, Object> ofSortedMap().get();
-        Assertions.assertNotNull(sortedMap);
-        Assertions.assertTrue(sortedMap instanceof TreeMap);
-
-        NavigableMap<String, Object> navigableMap = Suppliers.<String, Object> ofNavigableMap().get();
-        Assertions.assertNotNull(navigableMap);
-        Assertions.assertTrue(navigableMap instanceof TreeMap);
-
-        ConcurrentMap<String, Object> concurrentMap = Suppliers.<String, Object> ofConcurrentMap().get();
-        Assertions.assertNotNull(concurrentMap);
-        Assertions.assertTrue(concurrentMap instanceof ConcurrentHashMap);
-
-        ConcurrentHashMap<String, Object> concurrentHashMap = Suppliers.<String, Object> ofConcurrentHashMap().get();
-        Assertions.assertNotNull(concurrentHashMap);
-        Assertions.assertTrue(concurrentHashMap.isEmpty());
-
-        ConcurrentNavigableMap<String, Object> concurrentNavigableMap = Suppliers.<String, Object> ofConcurrentNavigableMap().get();
-        Assertions.assertNotNull(concurrentNavigableMap);
-        Assertions.assertTrue(concurrentNavigableMap instanceof ConcurrentSkipListMap);
-
-        Map<String, Object> concurrentMapFromType = Suppliers.<String, Object> ofMap(ConcurrentMap.class).get();
-        Assertions.assertTrue(concurrentMapFromType instanceof ConcurrentHashMap);
-
-        Map<String, Object> concurrentNavigableMapFromType = Suppliers.<String, Object> ofMap(ConcurrentNavigableMap.class).get();
-        Assertions.assertTrue(concurrentNavigableMapFromType instanceof ConcurrentSkipListMap);
-
-        Map<String, Object> concurrentSkipListMapFromType = Suppliers.<String, Object> ofMap(ConcurrentSkipListMap.class).get();
-        Assertions.assertTrue(concurrentSkipListMapFromType instanceof ConcurrentSkipListMap);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Suppliers.ofCollection((Class) String.class);
+        });
     }
 
     // --- registerForCollection ---
@@ -970,6 +1150,18 @@ public class SuppliersTest extends TestBase {
         });
     }
 
+    // --- Additional coverage tests for registerForCollection ---
+
+    @Test
+    public void testRegisterForCollection_NullClass() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.registerForCollection(null, ArrayList::new));
+    }
+
+    @Test
+    public void testRegisterForCollection_NullSupplier() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.registerForCollection(ArrayList.class, null));
+    }
+
     // --- registerForMap ---
 
     @Test
@@ -983,6 +1175,33 @@ public class SuppliersTest extends TestBase {
     public void testRegisterForMap_NullArgs() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Suppliers.registerForMap(null, HashMap::new);
+        });
+    }
+
+    // --- Additional coverage tests for registerForMap ---
+
+    @Test
+    public void testRegisterForMap_NullClass() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.registerForMap(null, HashMap::new));
+    }
+
+    @Test
+    public void testRegisterForMap_NullSupplier() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.registerForMap(HashMap.class, null));
+    }
+
+    @Test
+    public void testUnsupportedImmutableOperations() {
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            Suppliers.ofImmutableList();
+        });
+
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            Suppliers.ofImmutableSet();
+        });
+
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            Suppliers.ofImmutableMap();
         });
     }
 
@@ -1009,21 +1228,6 @@ public class SuppliersTest extends TestBase {
         });
     }
 
-    @Test
-    public void testUnsupportedImmutableOperations() {
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-            Suppliers.ofImmutableList();
-        });
-
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-            Suppliers.ofImmutableSet();
-        });
-
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-            Suppliers.ofImmutableMap();
-        });
-    }
-
     // --- newException ---
 
     @Test
@@ -1035,6 +1239,15 @@ public class SuppliersTest extends TestBase {
         Assertions.assertNotNull(ex1);
         Assertions.assertNotNull(ex2);
         Assertions.assertNotSame(ex1, ex2);
+    }
+
+    @Test
+    public void testNewException_ReturnsNewInstances() {
+        Supplier<Exception> supplier = Suppliers.newException();
+        Exception e1 = supplier.get();
+        Exception e2 = supplier.get();
+        Assertions.assertNotSame(e1, e2);
+        Assertions.assertTrue(e1 instanceof Exception);
     }
 
     // --- newRuntimeException ---
@@ -1050,6 +1263,15 @@ public class SuppliersTest extends TestBase {
         Assertions.assertNotSame(ex1, ex2);
     }
 
+    @Test
+    public void testNewRuntimeException_ReturnsNewInstances() {
+        Supplier<RuntimeException> supplier = Suppliers.newRuntimeException();
+        RuntimeException e1 = supplier.get();
+        RuntimeException e2 = supplier.get();
+        Assertions.assertNotSame(e1, e2);
+        Assertions.assertTrue(e1 instanceof RuntimeException);
+    }
+
     // --- newNoSuchElementException ---
 
     @Test
@@ -1061,118 +1283,6 @@ public class SuppliersTest extends TestBase {
         Assertions.assertNotNull(ex1);
         Assertions.assertNotNull(ex2);
         Assertions.assertNotSame(ex1, ex2);
-    }
-
-    // --- error cases ---
-
-    @Test
-    public void testInvalidCollectionType() {
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Suppliers.ofCollection((Class) String.class);
-        });
-    }
-
-    @Test
-    public void testInvalidMapType() {
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Suppliers.ofMap((Class) String.class);
-        });
-    }
-
-    @Test
-    public void testOfSupplier_ReturnsSameInstance() {
-        Supplier<String> original = () -> "hello";
-        Supplier<String> result = Suppliers.of(original);
-        Assertions.assertSame(original, result);
-    }
-
-    @Test
-    public void testOfInstance_Null() {
-        Supplier<Object> supplier = Suppliers.ofInstance(null);
-        Assertions.assertNull(supplier.get());
-        Assertions.assertNull(supplier.get());
-    }
-
-    @Test
-    public void testOfUuid_UniqueEachTime() {
-        Supplier<String> uuidSupplier = Suppliers.ofUuid();
-        java.util.Set<String> uuids = new java.util.HashSet<>();
-        for (int i = 0; i < 100; i++) {
-            uuids.add(uuidSupplier.get());
-        }
-        Assertions.assertEquals(100, uuids.size());
-    }
-
-    @Test
-    public void testOfUuidWithoutHyphens_Format() {
-        Supplier<String> guidSupplier = Suppliers.ofUuidWithoutHyphens();
-        String guid = guidSupplier.get();
-        Assertions.assertNotNull(guid);
-        Assertions.assertEquals(32, guid.length());
-        Assertions.assertFalse(guid.contains("-"));
-        // All characters should be hex digits
-        Assertions.assertTrue(guid.matches("[0-9a-f]+"));
-    }
-
-    @Test
-    public void testOfStringBuilder_NewInstanceEachCall() {
-        Supplier<StringBuilder> supplier = Suppliers.ofStringBuilder();
-        StringBuilder sb1 = supplier.get();
-        StringBuilder sb2 = supplier.get();
-        Assertions.assertNotSame(sb1, sb2);
-        Assertions.assertEquals(0, sb1.length());
-        Assertions.assertEquals(0, sb2.length());
-    }
-
-    @Test
-    public void testOfEmptyString_ReturnsEmptyString() {
-        Supplier<String> supplier = Suppliers.ofEmptyString();
-        Assertions.assertEquals("", supplier.get());
-        // Should return same instance
-        Assertions.assertSame(supplier.get(), supplier.get());
-    }
-
-    @Test
-    public void testOfCollection_ArrayDeque() {
-        Supplier<? extends Collection<String>> supplier = Suppliers.ofCollection(ArrayDeque.class);
-        Collection<String> result = supplier.get();
-        Assertions.assertTrue(result instanceof ArrayDeque);
-        Assertions.assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testOfCollection_NavigableSet() {
-        Supplier<? extends Collection<String>> supplier = Suppliers.ofCollection(NavigableSet.class);
-        Collection<String> result = supplier.get();
-        Assertions.assertTrue(result instanceof TreeSet);
-    }
-
-    @Test
-    public void testOfMap_IdentityHashMap() {
-        Supplier<? extends Map<String, Object>> supplier = Suppliers.ofMap(IdentityHashMap.class);
-        Map<String, Object> result = supplier.get();
-        Assertions.assertTrue(result instanceof IdentityHashMap);
-        Assertions.assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testNewException_ReturnsNewInstances() {
-        Supplier<Exception> supplier = Suppliers.newException();
-        Exception e1 = supplier.get();
-        Exception e2 = supplier.get();
-        Assertions.assertNotSame(e1, e2);
-        Assertions.assertTrue(e1 instanceof Exception);
-    }
-
-    @Test
-    public void testNewRuntimeException_ReturnsNewInstances() {
-        Supplier<RuntimeException> supplier = Suppliers.newRuntimeException();
-        RuntimeException e1 = supplier.get();
-        RuntimeException e2 = supplier.get();
-        Assertions.assertNotSame(e1, e2);
-        Assertions.assertTrue(e1 instanceof RuntimeException);
     }
 
     @Test

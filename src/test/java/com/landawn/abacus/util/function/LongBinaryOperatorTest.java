@@ -3,13 +3,15 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class LongBinaryOperatorTest extends TestBase {
+
+    private long sum(final long a, final long b) {
+        return a + b;
+    }
 
     @Test
     public void testApplyAsLong() {
@@ -69,20 +71,6 @@ public class LongBinaryOperatorTest extends TestBase {
     }
 
     @Test
-    public void testApplyAsLong_max() {
-        final LongBinaryOperator max = Math::max;
-        assertEquals(20L, max.applyAsLong(10L, 20L));
-        assertEquals(20L, max.applyAsLong(20L, 10L));
-    }
-
-    @Test
-    public void testApplyAsLong_min() {
-        final LongBinaryOperator min = Math::min;
-        assertEquals(10L, min.applyAsLong(10L, 20L));
-        assertEquals(10L, min.applyAsLong(20L, 10L));
-    }
-
-    @Test
     public void testApplyAsLong_bitwiseAnd() {
         final LongBinaryOperator and = (a, b) -> a & b;
         assertEquals(8L, and.applyAsLong(12L, 10L)); // 1100 & 1010 = 1000
@@ -98,6 +86,37 @@ public class LongBinaryOperatorTest extends TestBase {
     public void testApplyAsLong_bitwiseXor() {
         final LongBinaryOperator xor = (a, b) -> a ^ b;
         assertEquals(6L, xor.applyAsLong(12L, 10L)); // 1100 ^ 1010 = 0110
+    }
+
+    @Test
+    public void testMethodReference() {
+        final LongBinaryOperator operator = this::sum;
+        assertEquals(15L, operator.applyAsLong(5L, 10L));
+    }
+
+    @Test
+    public void testStreamReduction() {
+        final LongBinaryOperator sum = Long::sum;
+        final long[] values = { 1L, 2L, 3L, 4L, 5L };
+        long result = 0L;
+        for (final long value : values) {
+            result = sum.applyAsLong(result, value);
+        }
+        assertEquals(15L, result);
+    }
+
+    @Test
+    public void testApplyAsLong_max() {
+        final LongBinaryOperator max = Math::max;
+        assertEquals(20L, max.applyAsLong(10L, 20L));
+        assertEquals(20L, max.applyAsLong(20L, 10L));
+    }
+
+    @Test
+    public void testApplyAsLong_min() {
+        final LongBinaryOperator min = Math::min;
+        assertEquals(10L, min.applyAsLong(10L, 20L));
+        assertEquals(10L, min.applyAsLong(20L, 10L));
     }
 
     @Test
@@ -133,26 +152,5 @@ public class LongBinaryOperatorTest extends TestBase {
         final LongBinaryOperator operator = (a, b) -> a + b;
         assertNotNull(operator);
         assertEquals(30L, operator.applyAsLong(10L, 20L));
-    }
-
-    @Test
-    public void testMethodReference() {
-        final LongBinaryOperator operator = this::sum;
-        assertEquals(15L, operator.applyAsLong(5L, 10L));
-    }
-
-    private long sum(final long a, final long b) {
-        return a + b;
-    }
-
-    @Test
-    public void testStreamReduction() {
-        final LongBinaryOperator sum = Long::sum;
-        final long[] values = { 1L, 2L, 3L, 4L, 5L };
-        long result = 0L;
-        for (final long value : values) {
-            result = sum.applyAsLong(result, value);
-        }
-        assertEquals(15L, result);
     }
 }

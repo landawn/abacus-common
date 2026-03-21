@@ -3,13 +3,19 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class CharNFunctionTest extends TestBase {
+
+    private static class TestObject {
+        final char[] values;
+
+        TestObject(char... values) {
+            this.values = values;
+        }
+    }
 
     @Test
     public void testApply() {
@@ -31,6 +37,35 @@ public class CharNFunctionTest extends TestBase {
 
         assertEquals(3, count.apply('a', 'b', 'c'));
         assertEquals(5, count.apply('v', 'w', 'x', 'y', 'z'));
+    }
+
+    @Test
+    public void testApplyManyElements() {
+        CharNFunction<Integer> count = args -> args.length;
+
+        assertEquals(7, count.apply('a', 'b', 'c', 'd', 'e', 'f', 'g'));
+    }
+
+    @Test
+    public void testReturningComplexObject() {
+        CharNFunction<TestObject> createObject = args -> new TestObject(args);
+
+        TestObject obj = createObject.apply('a', 'b', 'c');
+        assertEquals(3, obj.values.length);
+        assertEquals('a', obj.values[0]);
+    }
+
+    @Test
+    public void testWithSpecialCharacters() {
+        CharNFunction<String> toString = args -> {
+            StringBuilder sb = new StringBuilder();
+            for (char c : args) {
+                sb.append(c);
+            }
+            return sb.toString();
+        };
+
+        assertEquals("\n\t", toString.apply('\n', '\t'));
     }
 
     @Test
@@ -65,10 +100,19 @@ public class CharNFunctionTest extends TestBase {
     }
 
     @Test
-    public void testApplyManyElements() {
-        CharNFunction<Integer> count = args -> args.length;
+    public void testWithBoundaryValues() {
+        CharNFunction<String> toString = args -> {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < args.length; i++) {
+                if (i > 0)
+                    sb.append(",");
+                sb.append((int) args[i]);
+            }
+            return sb.toString();
+        };
 
-        assertEquals(7, count.apply('a', 'b', 'c', 'd', 'e', 'f', 'g'));
+        String result = toString.apply(Character.MIN_VALUE, 'M', Character.MAX_VALUE);
+        assertEquals((int) Character.MIN_VALUE + "," + (int) 'M' + "," + (int) Character.MAX_VALUE, result);
     }
 
     @Test
@@ -106,53 +150,7 @@ public class CharNFunctionTest extends TestBase {
     }
 
     @Test
-    public void testReturningComplexObject() {
-        CharNFunction<TestObject> createObject = args -> new TestObject(args);
-
-        TestObject obj = createObject.apply('a', 'b', 'c');
-        assertEquals(3, obj.values.length);
-        assertEquals('a', obj.values[0]);
-    }
-
-    @Test
-    public void testWithSpecialCharacters() {
-        CharNFunction<String> toString = args -> {
-            StringBuilder sb = new StringBuilder();
-            for (char c : args) {
-                sb.append(c);
-            }
-            return sb.toString();
-        };
-
-        assertEquals("\n\t", toString.apply('\n', '\t'));
-    }
-
-    @Test
-    public void testWithBoundaryValues() {
-        CharNFunction<String> toString = args -> {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < args.length; i++) {
-                if (i > 0)
-                    sb.append(",");
-                sb.append((int) args[i]);
-            }
-            return sb.toString();
-        };
-
-        String result = toString.apply(Character.MIN_VALUE, 'M', Character.MAX_VALUE);
-        assertEquals((int) Character.MIN_VALUE + "," + (int) 'M' + "," + (int) Character.MAX_VALUE, result);
-    }
-
-    @Test
     public void testFunctionalInterface() {
         assertNotNull(CharNFunction.class.getAnnotation(FunctionalInterface.class));
-    }
-
-    private static class TestObject {
-        final char[] values;
-
-        TestObject(char... values) {
-            this.values = values;
-        }
     }
 }

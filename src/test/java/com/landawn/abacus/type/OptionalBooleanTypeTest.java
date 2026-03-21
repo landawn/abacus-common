@@ -17,7 +17,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -25,7 +24,6 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.u.OptionalBoolean;
 
-@Tag("new-test")
 public class OptionalBooleanTypeTest extends TestBase {
 
     private OptionalBooleanType optionalBooleanType;
@@ -55,6 +53,18 @@ public class OptionalBooleanTypeTest extends TestBase {
     }
 
     @Test
+    public void testStringOfWithTrue() {
+        OptionalBoolean optTrue = OptionalBoolean.of(true);
+        assertEquals("true", optionalBooleanType.stringOf(optTrue));
+    }
+
+    @Test
+    public void testStringOfWithFalse() {
+        OptionalBoolean optFalse = OptionalBoolean.of(false);
+        assertEquals("false", optionalBooleanType.stringOf(optFalse));
+    }
+
+    @Test
     public void testStringOfWithNull() {
         assertNull(optionalBooleanType.stringOf(null));
     }
@@ -66,15 +76,19 @@ public class OptionalBooleanTypeTest extends TestBase {
     }
 
     @Test
-    public void testStringOfWithTrue() {
-        OptionalBoolean optTrue = OptionalBoolean.of(true);
-        assertEquals("true", optionalBooleanType.stringOf(optTrue));
-    }
+    public void testValueOfWithOtherValues() {
+        assertTrue(optionalBooleanType.valueOf("TRUE").get());
+        assertTrue(optionalBooleanType.valueOf("True").get());
+        assertTrue(optionalBooleanType.valueOf("1").get());
+        assertFalse(optionalBooleanType.valueOf("yes").get());
+        assertTrue(optionalBooleanType.valueOf("Y").get());
+        assertTrue(optionalBooleanType.valueOf("y").get());
 
-    @Test
-    public void testStringOfWithFalse() {
-        OptionalBoolean optFalse = OptionalBoolean.of(false);
-        assertEquals("false", optionalBooleanType.stringOf(optFalse));
+        assertFalse(optionalBooleanType.valueOf("FALSE").get());
+        assertFalse(optionalBooleanType.valueOf("False").get());
+        assertFalse(optionalBooleanType.valueOf("0").get());
+        assertFalse(optionalBooleanType.valueOf("no").get());
+        assertFalse(optionalBooleanType.valueOf("N").get());
     }
 
     @Test
@@ -105,22 +119,6 @@ public class OptionalBooleanTypeTest extends TestBase {
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertFalse(result.get());
-    }
-
-    @Test
-    public void testValueOfWithOtherValues() {
-        assertTrue(optionalBooleanType.valueOf("TRUE").get());
-        assertTrue(optionalBooleanType.valueOf("True").get());
-        assertTrue(optionalBooleanType.valueOf("1").get());
-        assertFalse(optionalBooleanType.valueOf("yes").get());
-        assertTrue(optionalBooleanType.valueOf("Y").get());
-        assertTrue(optionalBooleanType.valueOf("y").get());
-
-        assertFalse(optionalBooleanType.valueOf("FALSE").get());
-        assertFalse(optionalBooleanType.valueOf("False").get());
-        assertFalse(optionalBooleanType.valueOf("0").get());
-        assertFalse(optionalBooleanType.valueOf("no").get());
-        assertFalse(optionalBooleanType.valueOf("N").get());
     }
 
     @Test

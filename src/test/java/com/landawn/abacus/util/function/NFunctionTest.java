@@ -4,12 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class NFunctionTest extends TestBase {
 
     @Test
@@ -25,28 +23,6 @@ public class NFunctionTest extends TestBase {
         Integer result = function.apply(1, 2, 3, 4, 5);
 
         assertEquals(15, result);
-    }
-
-    @Test
-    public void testApplyWithNoArguments() {
-        NFunction<String, String> function = args -> {
-            return "empty";
-        };
-
-        String result = function.apply();
-
-        assertEquals("empty", result);
-    }
-
-    @Test
-    public void testApplyWithSingleArgument() {
-        NFunction<String, String> function = args -> {
-            return args.length > 0 ? args[0].toUpperCase() : "";
-        };
-
-        String result = function.apply("hello");
-
-        assertEquals("HELLO", result);
     }
 
     @Test
@@ -81,41 +57,6 @@ public class NFunctionTest extends TestBase {
     }
 
     @Test
-    public void testAndThen() {
-        NFunction<Integer, Integer> function = args -> {
-            int sum = 0;
-            for (Integer n : args) {
-                sum += n;
-            }
-            return sum;
-        };
-        java.util.function.Function<Integer, String> after = n -> "Total: " + n;
-
-        NFunction<Integer, String> combined = function.andThen(after);
-        String result = combined.apply(10, 20, 30);
-
-        assertEquals("Total: 60", result);
-    }
-
-    @Test
-    public void testAndThenChaining() {
-        NFunction<Integer, Integer> function = args -> {
-            int sum = 0;
-            for (Integer n : args) {
-                sum += n;
-            }
-            return sum;
-        };
-        java.util.function.Function<Integer, Integer> after1 = n -> n * 2;
-        java.util.function.Function<Integer, String> after2 = n -> "Result: " + n;
-
-        NFunction<Integer, String> combined = function.andThen(after1).andThen(after2);
-        String result = combined.apply(5, 10, 15);
-
-        assertEquals("Result: 60", result);
-    }
-
-    @Test
     public void testWithDifferentTypes() {
         NFunction<String, Integer> function = args -> {
             int totalLength = 0;
@@ -128,6 +69,46 @@ public class NFunctionTest extends TestBase {
         Integer result = function.apply("hello", "world", "!");
 
         assertEquals(11, result);
+    }
+
+    @Test
+    public void testStringManipulation() {
+        NFunction<String, String> function = args -> {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < args.length; i++) {
+                sb.append(i).append(":").append(args[i]);
+                if (i < args.length - 1) {
+                    sb.append(", ");
+                }
+            }
+            return sb.toString();
+        };
+
+        String result = function.apply("a", "b", "c");
+
+        assertEquals("0:a, 1:b, 2:c", result);
+    }
+
+    @Test
+    public void testApplyWithNoArguments() {
+        NFunction<String, String> function = args -> {
+            return "empty";
+        };
+
+        String result = function.apply();
+
+        assertEquals("empty", result);
+    }
+
+    @Test
+    public void testApplyWithSingleArgument() {
+        NFunction<String, String> function = args -> {
+            return args.length > 0 ? args[0].toUpperCase() : "";
+        };
+
+        String result = function.apply("hello");
+
+        assertEquals("HELLO", result);
     }
 
     @Test
@@ -174,21 +155,38 @@ public class NFunctionTest extends TestBase {
     }
 
     @Test
-    public void testStringManipulation() {
-        NFunction<String, String> function = args -> {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < args.length; i++) {
-                sb.append(i).append(":").append(args[i]);
-                if (i < args.length - 1) {
-                    sb.append(", ");
-                }
+    public void testAndThen() {
+        NFunction<Integer, Integer> function = args -> {
+            int sum = 0;
+            for (Integer n : args) {
+                sum += n;
             }
-            return sb.toString();
+            return sum;
         };
+        java.util.function.Function<Integer, String> after = n -> "Total: " + n;
 
-        String result = function.apply("a", "b", "c");
+        NFunction<Integer, String> combined = function.andThen(after);
+        String result = combined.apply(10, 20, 30);
 
-        assertEquals("0:a, 1:b, 2:c", result);
+        assertEquals("Total: 60", result);
+    }
+
+    @Test
+    public void testAndThenChaining() {
+        NFunction<Integer, Integer> function = args -> {
+            int sum = 0;
+            for (Integer n : args) {
+                sum += n;
+            }
+            return sum;
+        };
+        java.util.function.Function<Integer, Integer> after1 = n -> n * 2;
+        java.util.function.Function<Integer, String> after2 = n -> "Result: " + n;
+
+        NFunction<Integer, String> combined = function.andThen(after1).andThen(after2);
+        String result = combined.apply(5, 10, 15);
+
+        assertEquals("Result: 60", result);
     }
 
     @Test

@@ -14,12 +14,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ParserConfigTest extends TestBase {
 
     private TestParserConfig config;
@@ -34,6 +32,29 @@ public class ParserConfigTest extends TestBase {
     }
 
     @Test
+    public void test_getIgnoredPropNames_forClass_returnsClassSpecific() {
+        Set<String> globalProps = new HashSet<>();
+        globalProps.add("field1");
+        config.setIgnoredPropNames(globalProps);
+
+        Set<String> stringProps = new HashSet<>();
+        stringProps.add("password");
+        config.setIgnoredPropNames(String.class, stringProps);
+
+        Collection<String> result = config.getIgnoredPropNames(String.class);
+        assertEquals(stringProps, result);
+    }
+
+    @Test
+    public void testGetIgnoredPropNamesFallbackToGlobal() {
+        Set<String> globalProps = new HashSet<>();
+        globalProps.add("globalProp");
+        config.setIgnoredPropNames(globalProps);
+
+        assertEquals(globalProps, config.getIgnoredPropNames(String.class));
+    }
+
+    @Test
     public void test_getIgnoredPropNames_defaultNull() {
         assertNull(config.getIgnoredPropNames());
     }
@@ -44,28 +65,39 @@ public class ParserConfigTest extends TestBase {
     }
 
     @Test
-    public void test_setIgnoredPropNames_global() {
-        Set<String> props = new HashSet<>();
-        props.add("field1");
-        props.add("field2");
+    public void test_getIgnoredPropNames_forClass_returnsGlobalWhenClassNotFound() {
+        Set<String> globalProps = new HashSet<>();
+        globalProps.add("field1");
 
-        config.setIgnoredPropNames(props);
+        config.setIgnoredPropNames(globalProps);
 
-        assertNotNull(config.getIgnoredPropNames());
-        assertTrue(config.getIgnoredPropNames().containsKey(Object.class));
-        assertEquals(props, config.getIgnoredPropNames().get(Object.class));
+        Collection<String> result = config.getIgnoredPropNames(String.class);
+        assertNotNull(result);
+        assertEquals(globalProps, result);
     }
 
     @Test
-    public void test_setIgnoredPropNames_forSpecificClass() {
-        Set<String> props = new HashSet<>();
-        props.add("password");
+    public void testGetIgnoredPropNames() {
+        assertNull(config.getIgnoredPropNames());
 
-        config.setIgnoredPropNames(String.class, props);
+        Set<String> ignoredProps = new HashSet<>();
+        ignoredProps.add("prop1");
+        config.setIgnoredPropNames(ignoredProps);
 
         assertNotNull(config.getIgnoredPropNames());
-        assertTrue(config.getIgnoredPropNames().containsKey(String.class));
-        assertEquals(props, config.getIgnoredPropNames().get(String.class));
+        assertTrue(config.getIgnoredPropNames().containsKey(Object.class));
+    }
+
+    @Test
+    public void testGetIgnoredPropNamesForClass() {
+        assertNull(config.getIgnoredPropNames(String.class));
+
+        Set<String> ignoredProps = new HashSet<>();
+        ignoredProps.add("prop1");
+        config.setIgnoredPropNames(String.class, ignoredProps);
+
+        assertEquals(ignoredProps, config.getIgnoredPropNames(String.class));
+        assertNull(config.getIgnoredPropNames(Integer.class));
     }
 
     @Test
@@ -83,32 +115,6 @@ public class ParserConfigTest extends TestBase {
         config.setIgnoredPropNames(map);
 
         assertEquals(map, config.getIgnoredPropNames());
-    }
-
-    @Test
-    public void test_getIgnoredPropNames_forClass_returnsGlobalWhenClassNotFound() {
-        Set<String> globalProps = new HashSet<>();
-        globalProps.add("field1");
-
-        config.setIgnoredPropNames(globalProps);
-
-        Collection<String> result = config.getIgnoredPropNames(String.class);
-        assertNotNull(result);
-        assertEquals(globalProps, result);
-    }
-
-    @Test
-    public void test_getIgnoredPropNames_forClass_returnsClassSpecific() {
-        Set<String> globalProps = new HashSet<>();
-        globalProps.add("field1");
-        config.setIgnoredPropNames(globalProps);
-
-        Set<String> stringProps = new HashSet<>();
-        stringProps.add("password");
-        config.setIgnoredPropNames(String.class, stringProps);
-
-        Collection<String> result = config.getIgnoredPropNames(String.class);
-        assertEquals(stringProps, result);
     }
 
     @Test
@@ -137,34 +143,28 @@ public class ParserConfigTest extends TestBase {
     }
 
     @Test
-    public void test_copy_createsNewInstance() {
-        TestParserConfig copy = config.copy();
-        assertNotNull(copy);
-        assertNotSame(config, copy);
+    public void test_setIgnoredPropNames_global() {
+        Set<String> props = new HashSet<>();
+        props.add("field1");
+        props.add("field2");
+
+        config.setIgnoredPropNames(props);
+
+        assertNotNull(config.getIgnoredPropNames());
+        assertTrue(config.getIgnoredPropNames().containsKey(Object.class));
+        assertEquals(props, config.getIgnoredPropNames().get(Object.class));
     }
 
     @Test
-    public void test_copy_copiesIgnoredPropNames() {
+    public void test_setIgnoredPropNames_forSpecificClass() {
         Set<String> props = new HashSet<>();
-        props.add("field1");
-        config.setIgnoredPropNames(props);
+        props.add("password");
 
-        TestParserConfig copy = config.copy();
+        config.setIgnoredPropNames(String.class, props);
 
-        assertNotNull(copy.getIgnoredPropNames());
-        assertEquals(config.getIgnoredPropNames(), copy.getIgnoredPropNames());
-    }
-
-    @Test
-    public void test_copy_shallowCopy() {
-        Set<String> props = new HashSet<>();
-        props.add("field1");
-        config.setIgnoredPropNames(props);
-
-        TestParserConfig copy = config.copy();
-
-        // Shallow copy - they share the same map and sets
-        assertEquals(config.getIgnoredPropNames(), copy.getIgnoredPropNames());
+        assertNotNull(config.getIgnoredPropNames());
+        assertTrue(config.getIgnoredPropNames().containsKey(String.class));
+        assertEquals(props, config.getIgnoredPropNames().get(String.class));
     }
 
     @Test
@@ -189,30 +189,6 @@ public class ParserConfigTest extends TestBase {
 
         assertNotNull(config.getIgnoredPropNames());
         assertTrue(config.getIgnoredPropNames().get(Object.class).isEmpty());
-    }
-
-    @Test
-    public void testGetIgnoredPropNames() {
-        assertNull(config.getIgnoredPropNames());
-
-        Set<String> ignoredProps = new HashSet<>();
-        ignoredProps.add("prop1");
-        config.setIgnoredPropNames(ignoredProps);
-
-        assertNotNull(config.getIgnoredPropNames());
-        assertTrue(config.getIgnoredPropNames().containsKey(Object.class));
-    }
-
-    @Test
-    public void testGetIgnoredPropNamesForClass() {
-        assertNull(config.getIgnoredPropNames(String.class));
-
-        Set<String> ignoredProps = new HashSet<>();
-        ignoredProps.add("prop1");
-        config.setIgnoredPropNames(String.class, ignoredProps);
-
-        assertEquals(ignoredProps, config.getIgnoredPropNames(String.class));
-        assertNull(config.getIgnoredPropNames(Integer.class));
     }
 
     @Test
@@ -256,6 +232,37 @@ public class ParserConfigTest extends TestBase {
     }
 
     @Test
+    public void test_copy_createsNewInstance() {
+        TestParserConfig copy = config.copy();
+        assertNotNull(copy);
+        assertNotSame(config, copy);
+    }
+
+    @Test
+    public void test_copy_copiesIgnoredPropNames() {
+        Set<String> props = new HashSet<>();
+        props.add("field1");
+        config.setIgnoredPropNames(props);
+
+        TestParserConfig copy = config.copy();
+
+        assertNotNull(copy.getIgnoredPropNames());
+        assertEquals(config.getIgnoredPropNames(), copy.getIgnoredPropNames());
+    }
+
+    @Test
+    public void test_copy_shallowCopy() {
+        Set<String> props = new HashSet<>();
+        props.add("field1");
+        config.setIgnoredPropNames(props);
+
+        TestParserConfig copy = config.copy();
+
+        // Shallow copy - they share the same map and sets
+        assertEquals(config.getIgnoredPropNames(), copy.getIgnoredPropNames());
+    }
+
+    @Test
     public void testCopy() {
         Set<String> ignoredProps = new HashSet<>();
         ignoredProps.add("prop1");
@@ -264,15 +271,6 @@ public class ParserConfigTest extends TestBase {
         TestParserConfig copy = config.copy();
         assertNotSame(config, copy);
         assertEquals(config.getIgnoredPropNames(), copy.getIgnoredPropNames());
-    }
-
-    @Test
-    public void testGetIgnoredPropNamesFallbackToGlobal() {
-        Set<String> globalProps = new HashSet<>();
-        globalProps.add("globalProp");
-        config.setIgnoredPropNames(globalProps);
-
-        assertEquals(globalProps, config.getIgnoredPropNames(String.class));
     }
 
 }

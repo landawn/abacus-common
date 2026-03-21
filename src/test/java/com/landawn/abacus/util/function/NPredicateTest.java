@@ -4,12 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class NPredicateTest extends TestBase {
 
     @Test
@@ -35,6 +33,64 @@ public class NPredicateTest extends TestBase {
     }
 
     @Test
+    public void testTestWithAnonymousClass() {
+        NPredicate<Integer> predicate = new NPredicate<>() {
+            @Override
+            public boolean test(Integer... args) {
+                int sum = 0;
+                for (Integer n : args) {
+                    sum += n;
+                }
+                return sum > 10;
+            }
+        };
+
+        assertTrue(predicate.test(5, 6, 7));
+        assertFalse(predicate.test(1, 2, 3));
+    }
+
+    @Test
+    public void testComplexCombination() {
+        NPredicate<Integer> p1 = args -> args.length > 0;
+        NPredicate<Integer> p2 = args -> args[0] > 5;
+        NPredicate<Integer> p3 = args -> args.length < 10;
+
+        NPredicate<Integer> combined = p1.and(p2).or(p3);
+
+        assertTrue(combined.test(10, 20));
+        assertTrue(combined.test(1, 2));
+        assertTrue(combined.test());
+    }
+
+    @Test
+    public void testAllMatch() {
+        NPredicate<String> predicate = args -> {
+            for (String s : args) {
+                if (s.length() <= 3)
+                    return false;
+            }
+            return true;
+        };
+
+        assertTrue(predicate.test("hello", "world", "test"));
+        assertFalse(predicate.test("hello", "hi", "test"));
+    }
+
+    @Test
+    public void testAnyMatch() {
+        NPredicate<Integer> predicate = args -> {
+            for (Integer n : args) {
+                if (n > 100)
+                    return true;
+            }
+            return false;
+        };
+
+        assertTrue(predicate.test(10, 20, 150, 30));
+        assertFalse(predicate.test(10, 20, 30));
+    }
+
+    @Test
     public void testTestWithSingleArgument() {
         NPredicate<String> predicate = args -> args.length == 1 && args[0].length() > 3;
 
@@ -57,20 +113,17 @@ public class NPredicateTest extends TestBase {
     }
 
     @Test
-    public void testTestWithAnonymousClass() {
-        NPredicate<Integer> predicate = new NPredicate<>() {
-            @Override
-            public boolean test(Integer... args) {
-                int sum = 0;
-                for (Integer n : args) {
-                    sum += n;
-                }
-                return sum > 10;
+    public void testWithNullValues() {
+        NPredicate<String> predicate = args -> {
+            for (String s : args) {
+                if (s == null)
+                    return true;
             }
+            return false;
         };
 
-        assertTrue(predicate.test(5, 6, 7));
-        assertFalse(predicate.test(1, 2, 3));
+        assertTrue(predicate.test("a", null, "b"));
+        assertFalse(predicate.test("a", "b", "c"));
     }
 
     @Test
@@ -127,6 +180,20 @@ public class NPredicateTest extends TestBase {
     }
 
     @Test
+    public void testOrShortCircuit() {
+        final boolean[] secondCalled = { false };
+        NPredicate<String> predicate1 = args -> true;
+        NPredicate<String> predicate2 = args -> {
+            secondCalled[0] = true;
+            return false;
+        };
+
+        NPredicate<String> combined = predicate1.or(predicate2);
+        assertTrue(combined.test("a", "b"));
+        assertFalse(secondCalled[0]);
+    }
+
+    @Test
     public void testOr() {
         NPredicate<String> predicate1 = args -> {
             for (String s : args) {
@@ -142,75 +209,6 @@ public class NPredicateTest extends TestBase {
         assertTrue(combined.test("hello", "", "world"));
         assertTrue(combined.test("a", "b", "c", "d", "e", "f"));
         assertFalse(combined.test("hello", "world"));
-    }
-
-    @Test
-    public void testOrShortCircuit() {
-        final boolean[] secondCalled = { false };
-        NPredicate<String> predicate1 = args -> true;
-        NPredicate<String> predicate2 = args -> {
-            secondCalled[0] = true;
-            return false;
-        };
-
-        NPredicate<String> combined = predicate1.or(predicate2);
-        assertTrue(combined.test("a", "b"));
-        assertFalse(secondCalled[0]);
-    }
-
-    @Test
-    public void testComplexCombination() {
-        NPredicate<Integer> p1 = args -> args.length > 0;
-        NPredicate<Integer> p2 = args -> args[0] > 5;
-        NPredicate<Integer> p3 = args -> args.length < 10;
-
-        NPredicate<Integer> combined = p1.and(p2).or(p3);
-
-        assertTrue(combined.test(10, 20));
-        assertTrue(combined.test(1, 2));
-        assertTrue(combined.test());
-    }
-
-    @Test
-    public void testWithNullValues() {
-        NPredicate<String> predicate = args -> {
-            for (String s : args) {
-                if (s == null)
-                    return true;
-            }
-            return false;
-        };
-
-        assertTrue(predicate.test("a", null, "b"));
-        assertFalse(predicate.test("a", "b", "c"));
-    }
-
-    @Test
-    public void testAllMatch() {
-        NPredicate<String> predicate = args -> {
-            for (String s : args) {
-                if (s.length() <= 3)
-                    return false;
-            }
-            return true;
-        };
-
-        assertTrue(predicate.test("hello", "world", "test"));
-        assertFalse(predicate.test("hello", "hi", "test"));
-    }
-
-    @Test
-    public void testAnyMatch() {
-        NPredicate<Integer> predicate = args -> {
-            for (Integer n : args) {
-                if (n > 100)
-                    return true;
-            }
-            return false;
-        };
-
-        assertTrue(predicate.test(10, 20, 150, 30));
-        assertFalse(predicate.test(10, 20, 30));
     }
 
     @Test

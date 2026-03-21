@@ -19,7 +19,6 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -41,7 +40,6 @@ import com.landawn.abacus.util.StringWriter;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.XmlUtil;
 
-@Tag("old-test")
 public class AbacusXmlParserTest extends AbstractXmlParserTest {
     @Override
     protected Parser<?, ?> getParser() {

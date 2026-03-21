@@ -265,7 +265,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<long[]> type = TypeFactory.getType(long[].class);
-     * List&lt;Long&gt; list = Arrays.asList(1L, 2L, 3L, 4L);
+     * List<Long> list = Arrays.asList(1L, 2L, 3L, 4L);
      * long[] arr = type.collectionToArray(list);
      * // arr equals {1L, 2L, 3L, 4L}
      *
@@ -303,7 +303,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * <pre>{@code
      * Type<long[]> type = TypeFactory.getType(long[].class);
      * long[] arr = {1L, 2L, 3L};
-     * List&lt;Long&gt; list = new ArrayList&lt;&gt;();
+     * List<Long> list = new ArrayList<>();
      * type.arrayToCollection(arr, list);
      * // list now contains [1L, 2L, 3L]
      *

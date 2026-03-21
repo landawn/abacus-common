@@ -19,14 +19,12 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("new-test")
 public class JdkOptionalTypeTest extends TestBase {
 
     private JdkOptionalType<String> optionalStringType;
@@ -41,27 +39,15 @@ public class JdkOptionalTypeTest extends TestBase {
     }
 
     @Test
-    public void testClazz() {
-        assertEquals(Optional.class, optionalStringType.javaType());
-        assertEquals(Optional.class, optionalIntegerType.javaType());
-    }
-
-    @Test
     public void testDeclaringName() {
         assertNotNull(optionalStringType.declaringName());
         assertTrue(optionalStringType.declaringName().contains("JdkOptional"));
     }
 
     @Test
-    public void testGetElementType() {
-        assertNotNull(optionalStringType.elementType());
-    }
-
-    @Test
-    public void testGetParameterTypes() {
-        Type<?>[] paramTypes = optionalStringType.parameterTypes();
-        assertNotNull(paramTypes);
-        assertEquals(1, paramTypes.length);
+    public void testClazz() {
+        assertEquals(Optional.class, optionalStringType.javaType());
+        assertEquals(Optional.class, optionalIntegerType.javaType());
     }
 
     @Test
@@ -96,6 +82,18 @@ public class JdkOptionalTypeTest extends TestBase {
         Optional<String> result = optionalStringType.valueOf("test");
         assertNotNull(result);
         assertTrue(result.isPresent());
+    }
+
+    @Test
+    public void testGetElementType() {
+        assertNotNull(optionalStringType.elementType());
+    }
+
+    @Test
+    public void testGetParameterTypes() {
+        Type<?>[] paramTypes = optionalStringType.parameterTypes();
+        assertNotNull(paramTypes);
+        assertEquals(1, paramTypes.length);
     }
 
     @Test

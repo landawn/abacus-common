@@ -41,7 +41,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<MutableDouble> type = TypeFactory.getType(MutableDouble.class);
-     * Class&lt;MutableDouble&gt; clazz = type.javaType();
+     * Class<MutableDouble> clazz = type.javaType();
      * // clazz equals MutableDouble.class
      * }</pre>
      *

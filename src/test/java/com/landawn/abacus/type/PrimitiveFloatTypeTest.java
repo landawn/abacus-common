@@ -15,12 +15,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class PrimitiveFloatTypeTest extends TestBase {
 
     private final PrimitiveFloatType type = new PrimitiveFloatType();
@@ -31,13 +29,20 @@ public class PrimitiveFloatTypeTest extends TestBase {
     }
 
     @Test
-    public void test_name() {
-        assertEquals("float", type.name());
+    public void test_defaultValue() {
+        assertEquals(Float.valueOf(0.0f), type.defaultValue());
     }
 
     @Test
-    public void test_defaultValue() {
-        assertEquals(Float.valueOf(0.0f), type.defaultValue());
+    public void testDefaultValue() {
+        Float defaultValue = type.defaultValue();
+        assertNotNull(defaultValue);
+        assertEquals(0.0f, defaultValue);
+    }
+
+    @Test
+    public void test_name() {
+        assertEquals("float", type.name());
     }
 
     @Test
@@ -146,13 +151,6 @@ public class PrimitiveFloatTypeTest extends TestBase {
     @Test
     public void test_isComparable() {
         assertTrue(type.isComparable());
-    }
-
-    @Test
-    public void testDefaultValue() {
-        Float defaultValue = type.defaultValue();
-        assertNotNull(defaultValue);
-        assertEquals(0.0f, defaultValue);
     }
 
 }

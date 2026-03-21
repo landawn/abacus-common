@@ -16,41 +16,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ClobTypeTest extends TestBase {
 
     private final ClobType type = new ClobType();
-
-    @Test
-    public void test_name() {
-        assertNotNull(type.name());
-        assertFalse(type.name().isEmpty());
-    }
-
-    @Test
-    public void test_valueOf_String() {
-        // Test with null
-        assertThrows(UnsupportedOperationException.class, () -> type.valueOf((String) null));
-    }
-
-    @Test
-    public void test_get_ResultSet_byLabel() throws SQLException {
-        ResultSet rs = mock(ResultSet.class);
-        // Basic get test - actual implementation will vary by type
-        assertDoesNotThrow(() -> type.get(rs, "col"));
-    }
-
-    @Test
-    public void test_set_CallableStatement() throws SQLException {
-        CallableStatement stmt = mock(CallableStatement.class);
-        // Basic set test - actual implementation will vary by type
-        assertDoesNotThrow(() -> type.set(stmt, "param", null));
-    }
 
     @Test
     public void testClazz() {
@@ -66,6 +38,12 @@ public class ClobTypeTest extends TestBase {
     }
 
     @Test
+    public void test_valueOf_String() {
+        // Test with null
+        assertThrows(UnsupportedOperationException.class, () -> type.valueOf((String) null));
+    }
+
+    @Test
     public void testValueOf_Null() {
         Assertions.assertThrows(UnsupportedOperationException.class, () -> type.valueOf(null));
     }
@@ -73,6 +51,13 @@ public class ClobTypeTest extends TestBase {
     @Test
     public void testValueOf_EmptyString() {
         Assertions.assertThrows(UnsupportedOperationException.class, () -> type.valueOf(""));
+    }
+
+    @Test
+    public void test_get_ResultSet_byLabel() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+        // Basic get test - actual implementation will vary by type
+        assertDoesNotThrow(() -> type.get(rs, "col"));
     }
 
     @Test
@@ -122,6 +107,13 @@ public class ClobTypeTest extends TestBase {
     }
 
     @Test
+    public void test_set_CallableStatement() throws SQLException {
+        CallableStatement stmt = mock(CallableStatement.class);
+        // Basic set test - actual implementation will vary by type
+        assertDoesNotThrow(() -> type.set(stmt, "param", null));
+    }
+
+    @Test
     public void testSet_PreparedStatement_Int() throws SQLException {
         PreparedStatement stmt = mock(PreparedStatement.class);
         Clob clob = mock(Clob.class);
@@ -157,6 +149,12 @@ public class ClobTypeTest extends TestBase {
         type.set(stmt, "paramName", null);
 
         verify(stmt).setClob("paramName", (Clob) null);
+    }
+
+    @Test
+    public void test_name() {
+        assertNotNull(type.name());
+        assertFalse(type.name().isEmpty());
     }
 
     @Test

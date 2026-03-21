@@ -20,12 +20,10 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ImmutableSortedSetTest extends TestBase {
 
     @Test
@@ -41,6 +39,33 @@ public class ImmutableSortedSetTest extends TestBase {
         ImmutableSortedSet<String> empty1 = ImmutableSortedSet.empty();
         ImmutableSortedSet<Integer> empty2 = ImmutableSortedSet.empty();
         assertSame(empty1, empty2);
+    }
+
+    @Test
+    public void test_size_operations() {
+        ImmutableSortedSet<Integer> empty = ImmutableSortedSet.empty();
+        assertEquals(0, empty.size());
+
+        ImmutableSortedSet<Integer> withElements = ImmutableSortedSet.of(1, 2, 3, 4, 5);
+        assertEquals(5, withElements.size());
+    }
+
+    @Test
+    public void test_isEmpty_operations() {
+        ImmutableSortedSet<String> empty = ImmutableSortedSet.empty();
+        assertTrue(empty.isEmpty());
+
+        ImmutableSortedSet<String> nonEmpty = ImmutableSortedSet.of("test");
+        assertFalse(nonEmpty.isEmpty());
+    }
+
+    @Test
+    public void testEmpty() {
+        ImmutableSortedSet<String> emptySet = ImmutableSortedSet.empty();
+        Assertions.assertTrue(emptySet.isEmpty());
+        Assertions.assertEquals(0, emptySet.size());
+        Assertions.assertThrows(NoSuchElementException.class, () -> emptySet.first());
+        Assertions.assertThrows(NoSuchElementException.class, () -> emptySet.last());
     }
 
     //
@@ -150,235 +175,6 @@ public class ImmutableSortedSetTest extends TestBase {
     }
 
     @Test
-    public void test_copyOf_withList() {
-        List<String> list = Arrays.asList("c", "a", "b");
-        ImmutableSortedSet<String> set = ImmutableSortedSet.copyOf(list);
-        assertEquals(3, set.size());
-        assertEquals("a", set.first());
-        assertEquals("c", set.last());
-    }
-
-    @Test
-    public void test_copyOf_withEmptyCollection() {
-        List<String> emptyList = new ArrayList<>();
-        ImmutableSortedSet<String> set = ImmutableSortedSet.copyOf(emptyList);
-        assertSame(ImmutableSortedSet.empty(), set);
-    }
-
-    @Test
-    public void test_copyOf_withNull() {
-        ImmutableSortedSet<String> set = ImmutableSortedSet.copyOf((Collection<String>) null);
-        assertSame(ImmutableSortedSet.empty(), set);
-    }
-
-    @Test
-    public void test_copyOf_withImmutableSortedSet() {
-        ImmutableSortedSet<Integer> original = ImmutableSortedSet.of(1, 2, 3);
-        ImmutableSortedSet<Integer> copy = ImmutableSortedSet.copyOf(original);
-        assertSame(original, copy);
-    }
-
-    @Test
-    public void test_copyOf_withSortedSet() {
-        SortedSet<String> sortedSet = new TreeSet<>(Arrays.asList("c", "a", "b"));
-        ImmutableSortedSet<String> set = ImmutableSortedSet.copyOf(sortedSet);
-        assertEquals(3, set.size());
-        assertEquals("a", set.first());
-        assertEquals("c", set.last());
-    }
-
-    @Test
-    public void test_copyOf_withDuplicates() {
-        List<Integer> listWithDuplicates = Arrays.asList(1, 2, 2, 3, 3, 3);
-        ImmutableSortedSet<Integer> set = ImmutableSortedSet.copyOf(listWithDuplicates);
-        assertEquals(3, set.size());
-        assertTrue(set.contains(1));
-        assertTrue(set.contains(2));
-        assertTrue(set.contains(3));
-    }
-
-    @Test
-    public void test_wrap_withSortedSet() {
-        SortedSet<String> sortedSet = new TreeSet<>(Arrays.asList("b", "a", "c"));
-        ImmutableSortedSet<String> wrapped = ImmutableSortedSet.wrap(sortedSet);
-        assertNotNull(wrapped);
-        assertEquals(3, wrapped.size());
-    }
-
-    @Test
-    public void test_wrap_withNull() {
-        ImmutableSortedSet<String> wrapped = ImmutableSortedSet.wrap((SortedSet<String>) null);
-        assertSame(ImmutableSortedSet.empty(), wrapped);
-    }
-
-    @Test
-    public void test_wrap_withImmutableSortedSet() {
-        ImmutableSortedSet<Integer> original = ImmutableSortedSet.of(1, 2, 3);
-        ImmutableSortedSet<Integer> wrapped = ImmutableSortedSet.wrap(original);
-        assertSame(original, wrapped);
-    }
-
-    @Test
-    public void test_wrap_reflectsChanges() {
-        TreeSet<Integer> mutableSet = new TreeSet<>(Arrays.asList(1, 2, 3));
-        ImmutableSortedSet<Integer> wrapped = ImmutableSortedSet.wrap(mutableSet);
-        assertEquals(3, wrapped.size());
-
-        mutableSet.add(4);
-        assertEquals(4, wrapped.size());
-        assertTrue(wrapped.contains(4));
-    }
-
-    @Test
-    public void test_wrap_Set_throwsUnsupportedOperationException() {
-        assertThrows(UnsupportedOperationException.class, () -> {
-            ImmutableSortedSet.wrap(new HashSet<>());
-        });
-    }
-
-    @Test
-    public void test_comparator_naturalOrdering() {
-        ImmutableSortedSet<String> set = ImmutableSortedSet.of("a", "b", "c");
-        assertNull(set.comparator());
-    }
-
-    @Test
-    public void test_comparator_customOrdering() {
-        Comparator<String> reverseOrder = Comparator.reverseOrder();
-        TreeSet<String> treeSet = new TreeSet<>(reverseOrder);
-        treeSet.addAll(Arrays.asList("a", "b", "c"));
-        ImmutableSortedSet<String> set = ImmutableSortedSet.wrap(treeSet);
-        assertSame(reverseOrder, set.comparator());
-    }
-
-    @Test
-    public void test_subSet_validRange() {
-        ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(1, 2, 3, 4, 5);
-        ImmutableSortedSet<Integer> subset = set.subSet(2, 4);
-        assertEquals(2, subset.size());
-        assertTrue(subset.contains(2));
-        assertTrue(subset.contains(3));
-        assertFalse(subset.contains(4));
-    }
-
-    @Test
-    public void test_subSet_emptyRange() {
-        ImmutableSortedSet<String> set = ImmutableSortedSet.of("a", "b", "c", "d");
-        ImmutableSortedSet<String> subset = set.subSet("b", "b");
-        assertTrue(subset.isEmpty());
-    }
-
-    @Test
-    public void test_subSet_invalidRange_throwsException() {
-        ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(1, 2, 3, 4, 5);
-        assertThrows(IllegalArgumentException.class, () -> {
-            set.subSet(4, 2);
-        });
-    }
-
-    @Test
-    public void test_subSet_immutability() {
-        ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(1, 2, 3, 4, 5);
-        ImmutableSortedSet<Integer> subset = set.subSet(2, 4);
-        assertThrows(UnsupportedOperationException.class, () -> {
-            java.util.Iterator<Integer> iter = subset.iterator();
-            iter.next();
-            iter.remove();
-        });
-    }
-
-    @Test
-    public void test_headSet_validElement() {
-        ImmutableSortedSet<String> set = ImmutableSortedSet.of("a", "b", "c", "d");
-        ImmutableSortedSet<String> headSet = set.headSet("c");
-        assertEquals(2, headSet.size());
-        assertTrue(headSet.contains("a"));
-        assertTrue(headSet.contains("b"));
-        assertFalse(headSet.contains("c"));
-    }
-
-    @Test
-    public void test_headSet_firstElement() {
-        ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(1, 2, 3, 4, 5);
-        ImmutableSortedSet<Integer> headSet = set.headSet(1);
-        assertTrue(headSet.isEmpty());
-    }
-
-    @Test
-    public void test_headSet_immutability() {
-        ImmutableSortedSet<String> set = ImmutableSortedSet.of("a", "b", "c");
-        ImmutableSortedSet<String> headSet = set.headSet("b");
-        assertThrows(UnsupportedOperationException.class, () -> {
-            java.util.Iterator<String> iter = headSet.iterator();
-            iter.next();
-            iter.remove();
-        });
-    }
-
-    @Test
-    public void test_tailSet_validElement() {
-        ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(1, 2, 3, 4, 5);
-        ImmutableSortedSet<Integer> tailSet = set.tailSet(3);
-        assertEquals(3, tailSet.size());
-        assertTrue(tailSet.contains(3));
-        assertTrue(tailSet.contains(4));
-        assertTrue(tailSet.contains(5));
-    }
-
-    @Test
-    public void test_tailSet_lastElement() {
-        ImmutableSortedSet<String> set = ImmutableSortedSet.of("a", "b", "c");
-        ImmutableSortedSet<String> tailSet = set.tailSet("c");
-        assertEquals(1, tailSet.size());
-        assertTrue(tailSet.contains("c"));
-    }
-
-    @Test
-    public void test_tailSet_immutability() {
-        ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(1, 2, 3, 4, 5);
-        ImmutableSortedSet<Integer> tailSet = set.tailSet(3);
-        assertThrows(UnsupportedOperationException.class, () -> {
-            java.util.Iterator<Integer> iter = tailSet.iterator();
-            iter.next();
-            iter.remove();
-        });
-    }
-
-    @Test
-    public void test_first_nonEmptySet() {
-        ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(5, 3, 1, 4, 2);
-        assertEquals(1, set.first());
-    }
-
-    @Test
-    public void test_first_emptySet_throwsException() {
-        ImmutableSortedSet<String> emptySet = ImmutableSortedSet.empty();
-        assertThrows(NoSuchElementException.class, () -> {
-            emptySet.first();
-        });
-    }
-
-    @Test
-    public void test_last_nonEmptySet() {
-        ImmutableSortedSet<String> set = ImmutableSortedSet.of("a", "c", "b", "e", "d");
-        assertEquals("e", set.last());
-    }
-
-    @Test
-    public void test_last_emptySet_throwsException() {
-        ImmutableSortedSet<Integer> emptySet = ImmutableSortedSet.empty();
-        assertThrows(NoSuchElementException.class, () -> {
-            emptySet.last();
-        });
-    }
-
-    @Test
-    public void test_last_singleElement() {
-        ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(42);
-        assertEquals(42, set.last());
-    }
-
-    @Test
     public void test_sorted_order_preserved() {
         ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(5, 2, 8, 1, 9, 3);
         List<Integer> sortedList = new ArrayList<>(set);
@@ -387,52 +183,10 @@ public class ImmutableSortedSetTest extends TestBase {
     }
 
     @Test
-    public void test_immutability_add() {
-        ImmutableSortedSet<String> set = ImmutableSortedSet.of("a", "b", "c");
-        assertThrows(UnsupportedOperationException.class, () -> {
-            set.add("d");
-        });
-    }
-
-    @Test
-    public void test_immutability_remove() {
-        ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(1, 2, 3);
-        assertThrows(UnsupportedOperationException.class, () -> {
-            set.remove(2);
-        });
-    }
-
-    @Test
-    public void test_immutability_clear() {
-        ImmutableSortedSet<String> set = ImmutableSortedSet.of("x", "y", "z");
-        assertThrows(UnsupportedOperationException.class, () -> {
-            set.clear();
-        });
-    }
-
-    @Test
     public void test_contains_operations() {
         ImmutableSortedSet<String> set = ImmutableSortedSet.of("apple", "banana", "cherry");
         assertTrue(set.contains("banana"));
         assertFalse(set.contains("orange"));
-    }
-
-    @Test
-    public void test_size_operations() {
-        ImmutableSortedSet<Integer> empty = ImmutableSortedSet.empty();
-        assertEquals(0, empty.size());
-
-        ImmutableSortedSet<Integer> withElements = ImmutableSortedSet.of(1, 2, 3, 4, 5);
-        assertEquals(5, withElements.size());
-    }
-
-    @Test
-    public void test_isEmpty_operations() {
-        ImmutableSortedSet<String> empty = ImmutableSortedSet.empty();
-        assertTrue(empty.isEmpty());
-
-        ImmutableSortedSet<String> nonEmpty = ImmutableSortedSet.of("test");
-        assertFalse(nonEmpty.isEmpty());
     }
 
     @Test
@@ -456,24 +210,6 @@ public class ImmutableSortedSetTest extends TestBase {
         assertEquals("a", array[0]);
         assertEquals("b", array[1]);
         assertEquals("c", array[2]);
-    }
-
-    @Test
-    public void testEmpty() {
-        ImmutableSortedSet<String> emptySet = ImmutableSortedSet.empty();
-        Assertions.assertTrue(emptySet.isEmpty());
-        Assertions.assertEquals(0, emptySet.size());
-        Assertions.assertThrows(NoSuchElementException.class, () -> emptySet.first());
-        Assertions.assertThrows(NoSuchElementException.class, () -> emptySet.last());
-    }
-
-    @Test
-    public void testOf_SingleElement() {
-        ImmutableSortedSet<String> set = ImmutableSortedSet.of("single");
-        Assertions.assertEquals(1, set.size());
-        Assertions.assertTrue(set.contains("single"));
-        Assertions.assertEquals("single", set.first());
-        Assertions.assertEquals("single", set.last());
     }
 
     @Test
@@ -550,6 +286,99 @@ public class ImmutableSortedSetTest extends TestBase {
     }
 
     @Test
+    public void testWithDuplicates() {
+        ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(1, 2, 2, 3, 3, 3);
+        Assertions.assertEquals(3, set.size());
+        Assertions.assertTrue(set.contains(1));
+        Assertions.assertTrue(set.contains(2));
+        Assertions.assertTrue(set.contains(3));
+    }
+
+    @Test
+    public void testIteratorOrder() {
+        ImmutableSortedSet<String> set = ImmutableSortedSet.of("dog", "cat", "bird", "ant");
+        Iterator<String> iter = set.iterator();
+        Assertions.assertEquals("ant", iter.next());
+        Assertions.assertEquals("bird", iter.next());
+        Assertions.assertEquals("cat", iter.next());
+        Assertions.assertEquals("dog", iter.next());
+        Assertions.assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testOf_SingleElement() {
+        ImmutableSortedSet<String> set = ImmutableSortedSet.of("single");
+        Assertions.assertEquals(1, set.size());
+        Assertions.assertTrue(set.contains("single"));
+        Assertions.assertEquals("single", set.first());
+        Assertions.assertEquals("single", set.last());
+    }
+
+    @Test
+    public void test_immutability_add() {
+        ImmutableSortedSet<String> set = ImmutableSortedSet.of("a", "b", "c");
+        assertThrows(UnsupportedOperationException.class, () -> {
+            set.add("d");
+        });
+    }
+
+    @Test
+    public void test_immutability_remove() {
+        ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(1, 2, 3);
+        assertThrows(UnsupportedOperationException.class, () -> {
+            set.remove(2);
+        });
+    }
+
+    @Test
+    public void test_immutability_clear() {
+        ImmutableSortedSet<String> set = ImmutableSortedSet.of("x", "y", "z");
+        assertThrows(UnsupportedOperationException.class, () -> {
+            set.clear();
+        });
+    }
+
+    @Test
+    public void testMutationMethods_ThrowUnsupported() {
+        ImmutableSortedSet<String> set = ImmutableSortedSet.of("a", "b");
+
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> set.add("c"));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> set.remove("a"));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> set.clear());
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> set.addAll(Arrays.asList("d", "e")));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> set.removeAll(Arrays.asList("a")));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> set.retainAll(Arrays.asList("a")));
+    }
+
+    @Test
+    public void test_copyOf_withList() {
+        List<String> list = Arrays.asList("c", "a", "b");
+        ImmutableSortedSet<String> set = ImmutableSortedSet.copyOf(list);
+        assertEquals(3, set.size());
+        assertEquals("a", set.first());
+        assertEquals("c", set.last());
+    }
+
+    @Test
+    public void test_copyOf_withSortedSet() {
+        SortedSet<String> sortedSet = new TreeSet<>(Arrays.asList("c", "a", "b"));
+        ImmutableSortedSet<String> set = ImmutableSortedSet.copyOf(sortedSet);
+        assertEquals(3, set.size());
+        assertEquals("a", set.first());
+        assertEquals("c", set.last());
+    }
+
+    @Test
+    public void test_copyOf_withDuplicates() {
+        List<Integer> listWithDuplicates = Arrays.asList(1, 2, 2, 3, 3, 3);
+        ImmutableSortedSet<Integer> set = ImmutableSortedSet.copyOf(listWithDuplicates);
+        assertEquals(3, set.size());
+        assertTrue(set.contains(1));
+        assertTrue(set.contains(2));
+        assertTrue(set.contains(3));
+    }
+
+    @Test
     public void testCopyOf() {
         List<String> list = Arrays.asList("charlie", "alpha", "beta", "alpha");
         ImmutableSortedSet<String> set = ImmutableSortedSet.copyOf(list);
@@ -559,6 +388,26 @@ public class ImmutableSortedSetTest extends TestBase {
         Assertions.assertEquals("alpha", iter.next());
         Assertions.assertEquals("beta", iter.next());
         Assertions.assertEquals("charlie", iter.next());
+    }
+
+    @Test
+    public void test_copyOf_withEmptyCollection() {
+        List<String> emptyList = new ArrayList<>();
+        ImmutableSortedSet<String> set = ImmutableSortedSet.copyOf(emptyList);
+        assertSame(ImmutableSortedSet.empty(), set);
+    }
+
+    @Test
+    public void test_copyOf_withNull() {
+        ImmutableSortedSet<String> set = ImmutableSortedSet.copyOf((Collection<String>) null);
+        assertSame(ImmutableSortedSet.empty(), set);
+    }
+
+    @Test
+    public void test_copyOf_withImmutableSortedSet() {
+        ImmutableSortedSet<Integer> original = ImmutableSortedSet.of(1, 2, 3);
+        ImmutableSortedSet<Integer> copy = ImmutableSortedSet.copyOf(original);
+        assertSame(original, copy);
     }
 
     @Test
@@ -581,6 +430,17 @@ public class ImmutableSortedSetTest extends TestBase {
     }
 
     @Test
+    public void test_wrap_reflectsChanges() {
+        TreeSet<Integer> mutableSet = new TreeSet<>(Arrays.asList(1, 2, 3));
+        ImmutableSortedSet<Integer> wrapped = ImmutableSortedSet.wrap(mutableSet);
+        assertEquals(3, wrapped.size());
+
+        mutableSet.add(4);
+        assertEquals(4, wrapped.size());
+        assertTrue(wrapped.contains(4));
+    }
+
+    @Test
     public void testWrap() {
         SortedSet<String> mutable = new TreeSet<>();
         mutable.add("b");
@@ -593,6 +453,27 @@ public class ImmutableSortedSetTest extends TestBase {
         Assertions.assertEquals(3, wrapped.size());
         Assertions.assertTrue(wrapped.contains("c"));
         Assertions.assertEquals("c", wrapped.last());
+    }
+
+    @Test
+    public void test_wrap_withSortedSet() {
+        SortedSet<String> sortedSet = new TreeSet<>(Arrays.asList("b", "a", "c"));
+        ImmutableSortedSet<String> wrapped = ImmutableSortedSet.wrap(sortedSet);
+        assertNotNull(wrapped);
+        assertEquals(3, wrapped.size());
+    }
+
+    @Test
+    public void test_wrap_withNull() {
+        ImmutableSortedSet<String> wrapped = ImmutableSortedSet.wrap((SortedSet<String>) null);
+        assertSame(ImmutableSortedSet.empty(), wrapped);
+    }
+
+    @Test
+    public void test_wrap_withImmutableSortedSet() {
+        ImmutableSortedSet<Integer> original = ImmutableSortedSet.of(1, 2, 3);
+        ImmutableSortedSet<Integer> wrapped = ImmutableSortedSet.wrap(original);
+        assertSame(original, wrapped);
     }
 
     @Test
@@ -609,10 +490,32 @@ public class ImmutableSortedSetTest extends TestBase {
     }
 
     @Test
+    public void test_wrap_Set_throwsUnsupportedOperationException() {
+        assertThrows(UnsupportedOperationException.class, () -> {
+            ImmutableSortedSet.wrap(new HashSet<>());
+        });
+    }
+
+    @Test
     public void testWrap_Set_Deprecated() {
         Assertions.assertThrows(UnsupportedOperationException.class, () -> {
             ImmutableSortedSet.wrap(new HashSet<String>());
         });
+    }
+
+    @Test
+    public void test_comparator_naturalOrdering() {
+        ImmutableSortedSet<String> set = ImmutableSortedSet.of("a", "b", "c");
+        assertNull(set.comparator());
+    }
+
+    @Test
+    public void test_comparator_customOrdering() {
+        Comparator<String> reverseOrder = Comparator.reverseOrder();
+        TreeSet<String> treeSet = new TreeSet<>(reverseOrder);
+        treeSet.addAll(Arrays.asList("a", "b", "c"));
+        ImmutableSortedSet<String> set = ImmutableSortedSet.wrap(treeSet);
+        assertSame(reverseOrder, set.comparator());
     }
 
     @Test
@@ -625,6 +528,16 @@ public class ImmutableSortedSetTest extends TestBase {
         customOrder.add("b");
         ImmutableSortedSet<String> withComparator = ImmutableSortedSet.wrap(customOrder);
         Assertions.assertNotNull(withComparator.comparator());
+    }
+
+    @Test
+    public void test_subSet_validRange() {
+        ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(1, 2, 3, 4, 5);
+        ImmutableSortedSet<Integer> subset = set.subSet(2, 4);
+        assertEquals(2, subset.size());
+        assertTrue(subset.contains(2));
+        assertTrue(subset.contains(3));
+        assertFalse(subset.contains(4));
     }
 
     @Test
@@ -641,6 +554,13 @@ public class ImmutableSortedSetTest extends TestBase {
     }
 
     @Test
+    public void test_subSet_emptyRange() {
+        ImmutableSortedSet<String> set = ImmutableSortedSet.of("a", "b", "c", "d");
+        ImmutableSortedSet<String> subset = set.subSet("b", "b");
+        assertTrue(subset.isEmpty());
+    }
+
+    @Test
     public void testSubSet_Empty() {
         ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(1, 2, 3, 4, 5);
         ImmutableSortedSet<Integer> sub = set.subSet(2, 2);
@@ -648,9 +568,38 @@ public class ImmutableSortedSetTest extends TestBase {
     }
 
     @Test
+    public void test_subSet_invalidRange_throwsException() {
+        ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(1, 2, 3, 4, 5);
+        assertThrows(IllegalArgumentException.class, () -> {
+            set.subSet(4, 2);
+        });
+    }
+
+    @Test
+    public void test_subSet_immutability() {
+        ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(1, 2, 3, 4, 5);
+        ImmutableSortedSet<Integer> subset = set.subSet(2, 4);
+        assertThrows(UnsupportedOperationException.class, () -> {
+            java.util.Iterator<Integer> iter = subset.iterator();
+            iter.next();
+            iter.remove();
+        });
+    }
+
+    @Test
     public void testSubSet_IllegalArgument() {
         ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(1, 2, 3);
         Assertions.assertThrows(IllegalArgumentException.class, () -> set.subSet(3, 1));
+    }
+
+    @Test
+    public void test_headSet_validElement() {
+        ImmutableSortedSet<String> set = ImmutableSortedSet.of("a", "b", "c", "d");
+        ImmutableSortedSet<String> headSet = set.headSet("c");
+        assertEquals(2, headSet.size());
+        assertTrue(headSet.contains("a"));
+        assertTrue(headSet.contains("b"));
+        assertFalse(headSet.contains("c"));
     }
 
     @Test
@@ -666,10 +615,46 @@ public class ImmutableSortedSetTest extends TestBase {
     }
 
     @Test
+    public void test_headSet_firstElement() {
+        ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(1, 2, 3, 4, 5);
+        ImmutableSortedSet<Integer> headSet = set.headSet(1);
+        assertTrue(headSet.isEmpty());
+    }
+
+    @Test
     public void testHeadSet_Empty() {
         ImmutableSortedSet<String> set = ImmutableSortedSet.of("b", "c", "d");
         ImmutableSortedSet<String> head = set.headSet("a");
         Assertions.assertTrue(head.isEmpty());
+    }
+
+    @Test
+    public void test_headSet_immutability() {
+        ImmutableSortedSet<String> set = ImmutableSortedSet.of("a", "b", "c");
+        ImmutableSortedSet<String> headSet = set.headSet("b");
+        assertThrows(UnsupportedOperationException.class, () -> {
+            java.util.Iterator<String> iter = headSet.iterator();
+            iter.next();
+            iter.remove();
+        });
+    }
+
+    @Test
+    public void test_tailSet_validElement() {
+        ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(1, 2, 3, 4, 5);
+        ImmutableSortedSet<Integer> tailSet = set.tailSet(3);
+        assertEquals(3, tailSet.size());
+        assertTrue(tailSet.contains(3));
+        assertTrue(tailSet.contains(4));
+        assertTrue(tailSet.contains(5));
+    }
+
+    @Test
+    public void test_tailSet_lastElement() {
+        ImmutableSortedSet<String> set = ImmutableSortedSet.of("a", "b", "c");
+        ImmutableSortedSet<String> tailSet = set.tailSet("c");
+        assertEquals(1, tailSet.size());
+        assertTrue(tailSet.contains("c"));
     }
 
     @Test
@@ -692,9 +677,34 @@ public class ImmutableSortedSetTest extends TestBase {
     }
 
     @Test
+    public void test_tailSet_immutability() {
+        ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(1, 2, 3, 4, 5);
+        ImmutableSortedSet<Integer> tailSet = set.tailSet(3);
+        assertThrows(UnsupportedOperationException.class, () -> {
+            java.util.Iterator<Integer> iter = tailSet.iterator();
+            iter.next();
+            iter.remove();
+        });
+    }
+
+    @Test
     public void testFirst() {
         ImmutableSortedSet<String> set = ImmutableSortedSet.of("banana", "apple", "cherry");
         Assertions.assertEquals("apple", set.first());
+    }
+
+    @Test
+    public void test_first_nonEmptySet() {
+        ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(5, 3, 1, 4, 2);
+        assertEquals(1, set.first());
+    }
+
+    @Test
+    public void test_first_emptySet_throwsException() {
+        ImmutableSortedSet<String> emptySet = ImmutableSortedSet.empty();
+        assertThrows(NoSuchElementException.class, () -> {
+            emptySet.first();
+        });
     }
 
     @Test
@@ -704,35 +714,23 @@ public class ImmutableSortedSetTest extends TestBase {
     }
 
     @Test
-    public void testWithDuplicates() {
-        ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(1, 2, 2, 3, 3, 3);
-        Assertions.assertEquals(3, set.size());
-        Assertions.assertTrue(set.contains(1));
-        Assertions.assertTrue(set.contains(2));
-        Assertions.assertTrue(set.contains(3));
+    public void test_last_nonEmptySet() {
+        ImmutableSortedSet<String> set = ImmutableSortedSet.of("a", "c", "b", "e", "d");
+        assertEquals("e", set.last());
     }
 
     @Test
-    public void testIteratorOrder() {
-        ImmutableSortedSet<String> set = ImmutableSortedSet.of("dog", "cat", "bird", "ant");
-        Iterator<String> iter = set.iterator();
-        Assertions.assertEquals("ant", iter.next());
-        Assertions.assertEquals("bird", iter.next());
-        Assertions.assertEquals("cat", iter.next());
-        Assertions.assertEquals("dog", iter.next());
-        Assertions.assertFalse(iter.hasNext());
+    public void test_last_singleElement() {
+        ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(42);
+        assertEquals(42, set.last());
     }
 
     @Test
-    public void testMutationMethods_ThrowUnsupported() {
-        ImmutableSortedSet<String> set = ImmutableSortedSet.of("a", "b");
-
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> set.add("c"));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> set.remove("a"));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> set.clear());
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> set.addAll(Arrays.asList("d", "e")));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> set.removeAll(Arrays.asList("a")));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> set.retainAll(Arrays.asList("a")));
+    public void test_last_emptySet_throwsException() {
+        ImmutableSortedSet<Integer> emptySet = ImmutableSortedSet.empty();
+        assertThrows(NoSuchElementException.class, () -> {
+            emptySet.last();
+        });
     }
 
 }

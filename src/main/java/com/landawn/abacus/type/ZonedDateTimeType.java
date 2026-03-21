@@ -96,7 +96,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<ZonedDateTime> type = TypeFactory.getType(ZonedDateTime.class);
-     * Class&lt;ZonedDateTime&gt; clazz = type.javaType();   // Returns ZonedDateTime.class
+     * Class<ZonedDateTime> clazz = type.javaType();   // Returns ZonedDateTime.class
      * }</pre>
      *
      * @return the Class object for ZonedDateTime.class

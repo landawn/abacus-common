@@ -18,14 +18,12 @@ import java.sql.SQLException;
 import java.util.OptionalLong;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("new-test")
 public class JdkOptionalLongTypeTest extends TestBase {
 
     private JdkOptionalLongType optionalLongType;
@@ -53,14 +51,14 @@ public class JdkOptionalLongTypeTest extends TestBase {
     }
 
     @Test
-    public void testStringOf_Empty() {
-        assertNull(optionalLongType.stringOf(OptionalLong.empty()));
-    }
-
-    @Test
     public void testStringOf_Present() {
         OptionalLong opt = OptionalLong.of(42L);
         assertEquals("42", optionalLongType.stringOf(opt));
+    }
+
+    @Test
+    public void testStringOf_Empty() {
+        assertNull(optionalLongType.stringOf(OptionalLong.empty()));
     }
 
     @Test

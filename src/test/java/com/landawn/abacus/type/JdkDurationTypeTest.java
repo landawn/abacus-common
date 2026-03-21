@@ -16,50 +16,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Duration;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class JdkDurationTypeTest extends TestBase {
 
     private final JdkDurationType type = new JdkDurationType();
     private final JdkDurationType durationType = type;
-
-    @Test
-    public void test_get_ResultSet_byIndex() throws SQLException {
-        ResultSet rs = mock(ResultSet.class);
-        when(rs.getLong(1)).thenReturn(1000L);
-        assertDoesNotThrow(() -> type.get(rs, 1));
-    }
-
-    @Test
-    public void test_get_ResultSet_byLabel() throws SQLException {
-        ResultSet rs = mock(ResultSet.class);
-        when(rs.getLong("col")).thenReturn(1000L);
-        assertDoesNotThrow(() -> type.get(rs, "col"));
-    }
-
-    @Test
-    public void test_set_PreparedStatement() throws SQLException {
-        PreparedStatement stmt = mock(PreparedStatement.class);
-        assertDoesNotThrow(() -> type.set(stmt, 1, Duration.ofMillis(1000)));
-        verify(stmt).setLong(1, 1000L);
-
-        assertDoesNotThrow(() -> type.set(stmt, 2, null));
-        verify(stmt).setNull(2, java.sql.Types.BIGINT);
-    }
-
-    @Test
-    public void test_set_CallableStatement() throws SQLException {
-        CallableStatement stmt = mock(CallableStatement.class);
-        assertDoesNotThrow(() -> type.set(stmt, "param", Duration.ofMillis(1000)));
-        verify(stmt).setLong("param", 1000L);
-
-        assertDoesNotThrow(() -> type.set(stmt, "param2", null));
-        verify(stmt).setNull("param2", java.sql.Types.BIGINT);
-    }
 
     @Test
     public void testClazz() {
@@ -72,14 +36,14 @@ public class JdkDurationTypeTest extends TestBase {
     }
 
     @Test
-    public void testStringOf_Null() {
-        assertNull(durationType.stringOf(null));
-    }
-
-    @Test
     public void testStringOf_ValidDuration() {
         Duration duration = Duration.ofMillis(1000);
         assertEquals("1000", durationType.stringOf(duration));
+    }
+
+    @Test
+    public void testStringOf_Null() {
+        assertNull(durationType.stringOf(null));
     }
 
     @Test
@@ -126,6 +90,20 @@ public class JdkDurationTypeTest extends TestBase {
     }
 
     @Test
+    public void test_get_ResultSet_byIndex() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+        when(rs.getLong(1)).thenReturn(1000L);
+        assertDoesNotThrow(() -> type.get(rs, 1));
+    }
+
+    @Test
+    public void test_get_ResultSet_byLabel() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+        when(rs.getLong("col")).thenReturn(1000L);
+        assertDoesNotThrow(() -> type.get(rs, "col"));
+    }
+
+    @Test
     public void testGet_ResultSet_ByIndex() throws SQLException {
         ResultSet rs = mock(ResultSet.class);
         when(rs.getLong(1)).thenReturn(1000L);
@@ -153,6 +131,26 @@ public class JdkDurationTypeTest extends TestBase {
         Duration result = durationType.get(rs, "duration_column");
         assertNotNull(result);
         assertEquals(1000, result.toMillis());
+    }
+
+    @Test
+    public void test_set_PreparedStatement() throws SQLException {
+        PreparedStatement stmt = mock(PreparedStatement.class);
+        assertDoesNotThrow(() -> type.set(stmt, 1, Duration.ofMillis(1000)));
+        verify(stmt).setLong(1, 1000L);
+
+        assertDoesNotThrow(() -> type.set(stmt, 2, null));
+        verify(stmt).setNull(2, java.sql.Types.BIGINT);
+    }
+
+    @Test
+    public void test_set_CallableStatement() throws SQLException {
+        CallableStatement stmt = mock(CallableStatement.class);
+        assertDoesNotThrow(() -> type.set(stmt, "param", Duration.ofMillis(1000)));
+        verify(stmt).setLong("param", 1000L);
+
+        assertDoesNotThrow(() -> type.set(stmt, "param2", null));
+        verify(stmt).setNull("param2", java.sql.Types.BIGINT);
     }
 
     @Test

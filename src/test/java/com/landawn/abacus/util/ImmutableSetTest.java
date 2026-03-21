@@ -18,12 +18,10 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ImmutableSetTest extends TestBase {
 
     @Test
@@ -41,17 +39,115 @@ public class ImmutableSetTest extends TestBase {
     }
 
     @Test
-    public void test_of_single() {
-        ImmutableSet<String> set = ImmutableSet.of("test");
-        assertNotNull(set);
-        assertEquals(1, set.size());
-        assertTrue(set.contains("test"));
+    public void testEmpty() {
+        ImmutableSet<String> emptySet = ImmutableSet.empty();
+        Assertions.assertTrue(emptySet.isEmpty());
+        Assertions.assertEquals(0, emptySet.size());
+        Assertions.assertFalse(emptySet.contains("anything"));
+    }
 
-        ImmutableSet<Integer> setWithNull = ImmutableSet.of((Integer) null);
-        assertEquals(1, setWithNull.size());
-        assertTrue(setWithNull.contains(null));
+    @Test
+    public void testSize() {
+        Assertions.assertEquals(0, ImmutableSet.empty().size());
+        Assertions.assertEquals(1, ImmutableSet.of("a").size());
+        Assertions.assertEquals(3, ImmutableSet.of("a", "b", "c").size());
+    }
 
-        assertThrows(UnsupportedOperationException.class, () -> set.add("new"));
+    @Test
+    public void testIsEmpty() {
+        Assertions.assertTrue(ImmutableSet.empty().isEmpty());
+        Assertions.assertFalse(ImmutableSet.of("a").isEmpty());
+    }
+
+    @Test
+    public void test_equals_hashCode() {
+        ImmutableSet<String> set1 = ImmutableSet.of("a", "b", "c");
+        ImmutableSet<String> set2 = ImmutableSet.of("a", "b", "c");
+        ImmutableSet<String> set3 = ImmutableSet.of("a", "b", "d");
+
+        assertEquals(set1, set2);
+        assertFalse(set1.equals(set3));
+
+        assertEquals(set1.hashCode(), set2.hashCode());
+
+        Set<String> hashSet = new HashSet<>(Arrays.asList("a", "b", "c"));
+        assertEquals(set1, hashSet);
+        assertEquals(hashSet, set1);
+    }
+
+    @Test
+    public void testOf_TwoElements() {
+        ImmutableSet<String> set = ImmutableSet.of("a", "b");
+        Assertions.assertEquals(2, set.size());
+        Assertions.assertTrue(set.contains("a"));
+        Assertions.assertTrue(set.contains("b"));
+    }
+
+    @Test
+    public void testOf_ThreeElements() {
+        ImmutableSet<Integer> set = ImmutableSet.of(1, 2, 3);
+        Assertions.assertEquals(3, set.size());
+        Assertions.assertTrue(set.contains(1));
+        Assertions.assertTrue(set.contains(2));
+        Assertions.assertTrue(set.contains(3));
+    }
+
+    @Test
+    public void testOf_FourElements() {
+        ImmutableSet<String> set = ImmutableSet.of("a", "b", "c", "d");
+        Assertions.assertEquals(4, set.size());
+        Assertions.assertTrue(set.contains("d"));
+    }
+
+    @Test
+    public void testOf_FiveElements() {
+        ImmutableSet<Integer> set = ImmutableSet.of(1, 2, 3, 4, 5);
+        Assertions.assertEquals(5, set.size());
+        Assertions.assertTrue(set.contains(5));
+    }
+
+    @Test
+    public void testOf_SixElements() {
+        ImmutableSet<String> set = ImmutableSet.of("a", "b", "c", "d", "e", "f");
+        Assertions.assertEquals(6, set.size());
+        Assertions.assertTrue(set.contains("f"));
+    }
+
+    @Test
+    public void testOf_SevenElements() {
+        ImmutableSet<Integer> set = ImmutableSet.of(1, 2, 3, 4, 5, 6, 7);
+        Assertions.assertEquals(7, set.size());
+        Assertions.assertTrue(set.contains(7));
+    }
+
+    @Test
+    public void testOf_EightElements() {
+        ImmutableSet<String> set = ImmutableSet.of("a", "b", "c", "d", "e", "f", "g", "h");
+        Assertions.assertEquals(8, set.size());
+        Assertions.assertTrue(set.contains("h"));
+    }
+
+    @Test
+    public void testOf_NineElements() {
+        ImmutableSet<Integer> set = ImmutableSet.of(1, 2, 3, 4, 5, 6, 7, 8, 9);
+        Assertions.assertEquals(9, set.size());
+        Assertions.assertTrue(set.contains(9));
+    }
+
+    @Test
+    public void testIterator() {
+        ImmutableSet<String> set = ImmutableSet.of("a", "b", "c");
+        ObjIterator<String> iter = set.iterator();
+
+        Set<String> collected = new HashSet<>();
+        while (iter.hasNext()) {
+            collected.add(iter.next());
+        }
+
+        Assertions.assertEquals(3, collected.size());
+        Assertions.assertTrue(collected.contains("a"));
+        Assertions.assertTrue(collected.contains("b"));
+        Assertions.assertTrue(collected.contains("c"));
     }
 
     @Test
@@ -147,6 +243,242 @@ public class ImmutableSetTest extends TestBase {
         assertTrue(set.contains(9));
     }
 
+    @Test
+    public void test_setOperations() {
+        ImmutableSet<String> set = ImmutableSet.of("a", "b", "c");
+
+        assertTrue(set.contains("a"));
+        assertTrue(set.contains("b"));
+        assertFalse(set.contains("d"));
+        assertFalse(set.contains(null));
+
+        assertTrue(set.containsAll(Arrays.asList("a", "b")));
+        assertFalse(set.containsAll(Arrays.asList("a", "d")));
+        assertTrue(set.containsAll(new ArrayList<>()));
+
+        assertEquals(3, set.size());
+        assertFalse(set.isEmpty());
+
+        ImmutableSet<String> emptySet = ImmutableSet.empty();
+        assertEquals(0, emptySet.size());
+        assertTrue(emptySet.isEmpty());
+
+        Object[] array = set.toArray();
+        assertEquals(3, array.length);
+
+        String[] stringArray = set.toArray(new String[0]);
+        assertEquals(3, stringArray.length);
+
+        String[] largerArray = set.toArray(new String[5]);
+        assertEquals(5, largerArray.length);
+
+        Iterator<String> iter = set.iterator();
+        int count = 0;
+        while (iter.hasNext()) {
+            assertNotNull(iter.next());
+            count++;
+        }
+        assertEquals(3, count);
+    }
+
+    @Test
+    public void test_toString() {
+        ImmutableSet<String> set = ImmutableSet.of("a", "b");
+        String str = set.toString();
+        assertNotNull(str);
+        assertTrue(str.contains("a"));
+        assertTrue(str.contains("b"));
+
+        ImmutableSet<String> empty = ImmutableSet.empty();
+        assertNotNull(empty.toString());
+    }
+
+    @Test
+    public void test_nullElementSupport() {
+        ImmutableSet<String> setWithNull = ImmutableSet.of((String) null);
+        assertTrue(setWithNull.contains(null));
+        assertEquals(1, setWithNull.size());
+
+        ImmutableSet<String> setWithNullAndOthers = ImmutableSet.of("a", null, "b");
+        assertTrue(setWithNullAndOthers.contains(null));
+        assertTrue(setWithNullAndOthers.contains("a"));
+        assertEquals(3, setWithNullAndOthers.size());
+
+        ImmutableSet<String> setFromArray = ImmutableSet.of("x", null, "y");
+        assertTrue(setFromArray.contains(null));
+        assertEquals(3, setFromArray.size());
+
+        List<String> listWithNull = Arrays.asList("m", null, "n");
+        ImmutableSet<String> setFromList = ImmutableSet.copyOf(listWithNull);
+        assertTrue(setFromList.contains(null));
+        assertEquals(3, setFromList.size());
+
+        ImmutableSet<String> setFromBuilder = ImmutableSet.<String> builder().add("p").add((String) null).add("q").build();
+        assertTrue(setFromBuilder.contains(null));
+        assertEquals(3, setFromBuilder.size());
+    }
+
+    @Test
+    public void test_multipleNullElements() {
+        ImmutableSet<String> set = ImmutableSet.of(null, null, "a", null);
+        assertEquals(2, set.size());
+        assertTrue(set.contains(null));
+        assertTrue(set.contains("a"));
+    }
+
+    @Test
+    public void testOf_SingleElement() {
+        ImmutableSet<Integer> set = ImmutableSet.of(42);
+        Assertions.assertEquals(1, set.size());
+        Assertions.assertTrue(set.contains(42));
+    }
+
+    @Test
+    public void testOf_TwoElements_Duplicates() {
+        ImmutableSet<String> set = ImmutableSet.of("same", "same");
+        Assertions.assertEquals(1, set.size());
+        Assertions.assertTrue(set.contains("same"));
+    }
+
+    @Test
+    public void testContains() {
+        ImmutableSet<String> set = ImmutableSet.of("a", "b", "c");
+
+        Assertions.assertTrue(set.contains("a"));
+        Assertions.assertFalse(set.contains("d"));
+        Assertions.assertFalse(set.contains(null));
+    }
+
+    @Test
+    public void testToArray_TypedArray() {
+        ImmutableSet<String> set = ImmutableSet.of("a", "b", "c");
+        String[] array = set.toArray(new String[0]);
+        Assertions.assertEquals(3, array.length);
+
+        String[] largerArray = set.toArray(new String[5]);
+        Assertions.assertEquals(5, largerArray.length);
+        Assertions.assertNull(largerArray[3]);
+    }
+
+    @Test
+    public void test_of_single() {
+        ImmutableSet<String> set = ImmutableSet.of("test");
+        assertNotNull(set);
+        assertEquals(1, set.size());
+        assertTrue(set.contains("test"));
+
+        ImmutableSet<Integer> setWithNull = ImmutableSet.of((Integer) null);
+        assertEquals(1, setWithNull.size());
+        assertTrue(setWithNull.contains(null));
+
+        assertThrows(UnsupportedOperationException.class, () -> set.add("new"));
+    }
+
+    @Test
+    public void test_immutability() {
+        ImmutableSet<String> set = ImmutableSet.of("a", "b", "c");
+
+        assertThrows(UnsupportedOperationException.class, () -> set.add("d"));
+        assertThrows(UnsupportedOperationException.class, () -> set.remove("a"));
+        assertThrows(UnsupportedOperationException.class, () -> set.clear());
+        assertThrows(UnsupportedOperationException.class, () -> set.addAll(Arrays.asList("x", "y")));
+        assertThrows(UnsupportedOperationException.class, () -> set.removeAll(Arrays.asList("a", "b")));
+        assertThrows(UnsupportedOperationException.class, () -> set.retainAll(Arrays.asList("a")));
+
+        Iterator<String> iterator = set.iterator();
+        assertTrue(iterator.hasNext());
+        iterator.next();
+        assertThrows(UnsupportedOperationException.class, () -> iterator.remove());
+    }
+
+    @Test
+    public void testMutationMethods_ThrowUnsupported() {
+        ImmutableSet<String> set = ImmutableSet.of("a", "b");
+
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> set.add("c"));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> set.remove("a"));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> set.addAll(Arrays.asList("d", "e")));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> set.removeAll(Arrays.asList("a")));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> set.retainAll(Arrays.asList("a")));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> set.clear());
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> set.removeIf(s -> s.equals("a")));
+    }
+
+    @Test
+    public void testCopyOf_Array_WithDuplicates() {
+        String[] array = { "x", "y", "x", "z" };
+        ImmutableSet<String> set = ImmutableSet.copyOf(array);
+        Assertions.assertEquals(3, set.size());
+        Assertions.assertTrue(set.contains("x"));
+        Assertions.assertTrue(set.contains("y"));
+        Assertions.assertTrue(set.contains("z"));
+    }
+
+    @Test
+    public void test_orderPreservation() {
+        List<String> list = Arrays.asList("first", "second", "third", "fourth");
+        ImmutableSet<String> setFromList = ImmutableSet.copyOf(list);
+
+        List<String> resultList = new ArrayList<>(setFromList);
+        assertEquals("first", resultList.get(0));
+        assertEquals("second", resultList.get(1));
+        assertEquals("third", resultList.get(2));
+        assertEquals("fourth", resultList.get(3));
+
+        Set<String> linkedHashSet = new LinkedHashSet<>(Arrays.asList("one", "two", "three"));
+        ImmutableSet<String> setFromLinkedHashSet = ImmutableSet.copyOf(linkedHashSet);
+
+        List<String> resultList2 = new ArrayList<>(setFromLinkedHashSet);
+        assertEquals("one", resultList2.get(0));
+        assertEquals("two", resultList2.get(1));
+        assertEquals("three", resultList2.get(2));
+
+        ImmutableSet<String> orderedSet = ImmutableSet.of("alpha", "beta", "gamma");
+        List<String> orderedList = new ArrayList<>(orderedSet);
+        assertEquals("alpha", orderedList.get(0));
+        assertEquals("beta", orderedList.get(1));
+        assertEquals("gamma", orderedList.get(2));
+    }
+
+    //
+    //
+    //
+    @Test
+    public void testCopyOf_Collection() {
+        List<String> list = Arrays.asList("a", "b", "c", "b");
+        ImmutableSet<String> set = ImmutableSet.copyOf(list);
+        Assertions.assertEquals(3, set.size());
+        Assertions.assertTrue(set.contains("a"));
+        Assertions.assertTrue(set.contains("b"));
+        Assertions.assertTrue(set.contains("c"));
+    }
+
+    @Test
+    public void testCopyOf_PreservesOrder() {
+        LinkedHashSet<String> linkedSet = new LinkedHashSet<>();
+        linkedSet.add("first");
+        linkedSet.add("second");
+        linkedSet.add("third");
+
+        ImmutableSet<String> set = ImmutableSet.copyOf(linkedSet);
+        Iterator<String> iter = set.iterator();
+        Assertions.assertEquals("first", iter.next());
+        Assertions.assertEquals("second", iter.next());
+        Assertions.assertEquals("third", iter.next());
+    }
+
+    @Test
+    public void testCopyOf_FromSortedSet() {
+        java.util.SortedSet<Integer> sortedSet = new TreeSet<>(Arrays.asList(3, 1, 2));
+        ImmutableSet<Integer> set = ImmutableSet.copyOf(sortedSet);
+        Assertions.assertEquals(3, set.size());
+        // Should preserve sorted order
+        Iterator<Integer> iter = set.iterator();
+        Assertions.assertEquals(1, iter.next());
+        Assertions.assertEquals(2, iter.next());
+        Assertions.assertEquals(3, iter.next());
+    }
+
     //    @Test
     //    public void test_of_varargs() {
     //        String[] array = { "a", "b", "c", "d" };
@@ -214,16 +546,6 @@ public class ImmutableSetTest extends TestBase {
     }
 
     @Test
-    public void testCopyOf_Array_WithDuplicates() {
-        String[] array = { "x", "y", "x", "z" };
-        ImmutableSet<String> set = ImmutableSet.copyOf(array);
-        Assertions.assertEquals(3, set.size());
-        Assertions.assertTrue(set.contains("x"));
-        Assertions.assertTrue(set.contains("y"));
-        Assertions.assertTrue(set.contains("z"));
-    }
-
-    @Test
     public void testCopyOf_Array_SingleElement() {
         String[] array = { "only" };
         ImmutableSet<String> set = ImmutableSet.copyOf(array);
@@ -280,6 +602,62 @@ public class ImmutableSetTest extends TestBase {
     }
 
     @Test
+    public void testCopyOf_AlreadyImmutable() {
+        ImmutableSet<String> original = ImmutableSet.of("a", "b");
+        ImmutableSet<String> copy = ImmutableSet.copyOf(original);
+        Assertions.assertSame(original, copy);
+    }
+
+    @Test
+    public void testCopyOf_EmptyCollection() {
+        ImmutableSet<String> set = ImmutableSet.copyOf(new ArrayList<>());
+        Assertions.assertTrue(set.isEmpty());
+    }
+
+    @Test
+    public void testCopyOf_NullCollection() {
+        ImmutableSet<String> set = ImmutableSet.copyOf((Collection<String>) null);
+        Assertions.assertTrue(set.isEmpty());
+    }
+
+    @Test
+    public void testContainsWithNull() {
+        Set<String> setWithNull = new HashSet<>();
+        setWithNull.add("a");
+        setWithNull.add(null);
+
+        ImmutableSet<String> set = ImmutableSet.copyOf(setWithNull);
+        Assertions.assertTrue(set.contains(null));
+        Assertions.assertTrue(set.contains("a"));
+    }
+
+    @Test
+    public void testWrap() {
+        Set<String> mutableSet = new HashSet<>();
+        mutableSet.add("initial");
+
+        ImmutableSet<String> wrapped = ImmutableSet.wrap(mutableSet);
+        Assertions.assertEquals(1, wrapped.size());
+
+        mutableSet.add("added");
+        Assertions.assertEquals(2, wrapped.size());
+        Assertions.assertTrue(wrapped.contains("added"));
+    }
+
+    @Test
+    public void testWrap_AlreadyImmutable() {
+        ImmutableSet<String> original = ImmutableSet.of("a");
+        ImmutableSet<String> wrapped = ImmutableSet.wrap(original);
+        Assertions.assertSame(original, wrapped);
+    }
+
+    @Test
+    public void testWrap_Null() {
+        ImmutableSet<String> wrapped = ImmutableSet.wrap((Set<String>) null);
+        Assertions.assertTrue(wrapped.isEmpty());
+    }
+
+    @Test
     public void test_wrap() {
         Set<String> mutableSet = new HashSet<>(Arrays.asList("a", "b", "c"));
         ImmutableSet<String> wrapped = ImmutableSet.wrap(mutableSet);
@@ -311,18 +689,10 @@ public class ImmutableSetTest extends TestBase {
     }
 
     @Test
-    public void test_builder_default() {
-        ImmutableSet.Builder<String> builder = ImmutableSet.builder();
-        assertNotNull(builder);
-
-        ImmutableSet<String> emptySet = ImmutableSet.<String> builder().build();
-        assertNotNull(emptySet);
-        assertTrue(emptySet.isEmpty());
-
-        ImmutableSet<String> set = ImmutableSet.<String> builder().add("a").add("b").add("c").build();
-        assertEquals(3, set.size());
-        assertTrue(set.contains("a"));
-        assertTrue(set.contains("c"));
+    public void testWrap_Collection_Deprecated() {
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            ImmutableSet.wrap(Arrays.asList("a", "b"));
+        });
     }
 
     @Test
@@ -341,6 +711,54 @@ public class ImmutableSetTest extends TestBase {
         assertEquals(3, setFromPrePopulated.size());
         assertTrue(setFromPrePopulated.contains(1));
         assertTrue(setFromPrePopulated.contains(3));
+    }
+
+    @Test
+    public void testBuilder() {
+        ImmutableSet<String> set = ImmutableSet.<String> builder().add("one").add("two", "three").addAll(Arrays.asList("four", "five")).build();
+
+        Assertions.assertEquals(5, set.size());
+        Assertions.assertTrue(set.contains("one"));
+        Assertions.assertTrue(set.contains("five"));
+    }
+
+    @Test
+    public void testBuilder_WithDuplicates() {
+        ImmutableSet<Integer> set = ImmutableSet.<Integer> builder().add(1).add(1).add(2, 2, 3).build();
+
+        Assertions.assertEquals(3, set.size());
+    }
+
+    @Test
+    public void testBuilder_WithIterator() {
+        List<String> list = Arrays.asList("a", "b", "c");
+        ImmutableSet<String> set = ImmutableSet.<String> builder().addAll(list.iterator()).build();
+
+        Assertions.assertEquals(3, set.size());
+    }
+
+    @Test
+    public void testBuilder_WithBackingSet() {
+        Set<String> backingSet = new LinkedHashSet<>();
+        ImmutableSet<String> set = ImmutableSet.builder(backingSet).add("a").add("b").build();
+
+        Assertions.assertEquals(2, set.size());
+        Assertions.assertEquals(2, backingSet.size());
+    }
+
+    @Test
+    public void test_builder_default() {
+        ImmutableSet.Builder<String> builder = ImmutableSet.builder();
+        assertNotNull(builder);
+
+        ImmutableSet<String> emptySet = ImmutableSet.<String> builder().build();
+        assertNotNull(emptySet);
+        assertTrue(emptySet.isEmpty());
+
+        ImmutableSet<String> set = ImmutableSet.<String> builder().add("a").add("b").add("c").build();
+        assertEquals(3, set.size());
+        assertTrue(set.contains("a"));
+        assertTrue(set.contains("c"));
     }
 
     @Test
@@ -438,6 +856,13 @@ public class ImmutableSetTest extends TestBase {
     }
 
     @Test
+    public void testBuilder_WithNullIterator() {
+        ImmutableSet<String> set = ImmutableSet.<String> builder().addAll((Iterator<String>) null).build();
+
+        Assertions.assertTrue(set.isEmpty());
+    }
+
+    @Test
     public void test_builder_build() {
         ImmutableSet<String> set = ImmutableSet.<String> builder().add("a").add("b", "c").addAll(Arrays.asList("d", "e")).build();
 
@@ -456,148 +881,6 @@ public class ImmutableSetTest extends TestBase {
     }
 
     @Test
-    public void test_immutability() {
-        ImmutableSet<String> set = ImmutableSet.of("a", "b", "c");
-
-        assertThrows(UnsupportedOperationException.class, () -> set.add("d"));
-        assertThrows(UnsupportedOperationException.class, () -> set.remove("a"));
-        assertThrows(UnsupportedOperationException.class, () -> set.clear());
-        assertThrows(UnsupportedOperationException.class, () -> set.addAll(Arrays.asList("x", "y")));
-        assertThrows(UnsupportedOperationException.class, () -> set.removeAll(Arrays.asList("a", "b")));
-        assertThrows(UnsupportedOperationException.class, () -> set.retainAll(Arrays.asList("a")));
-
-        Iterator<String> iterator = set.iterator();
-        assertTrue(iterator.hasNext());
-        iterator.next();
-        assertThrows(UnsupportedOperationException.class, () -> iterator.remove());
-    }
-
-    @Test
-    public void test_setOperations() {
-        ImmutableSet<String> set = ImmutableSet.of("a", "b", "c");
-
-        assertTrue(set.contains("a"));
-        assertTrue(set.contains("b"));
-        assertFalse(set.contains("d"));
-        assertFalse(set.contains(null));
-
-        assertTrue(set.containsAll(Arrays.asList("a", "b")));
-        assertFalse(set.containsAll(Arrays.asList("a", "d")));
-        assertTrue(set.containsAll(new ArrayList<>()));
-
-        assertEquals(3, set.size());
-        assertFalse(set.isEmpty());
-
-        ImmutableSet<String> emptySet = ImmutableSet.empty();
-        assertEquals(0, emptySet.size());
-        assertTrue(emptySet.isEmpty());
-
-        Object[] array = set.toArray();
-        assertEquals(3, array.length);
-
-        String[] stringArray = set.toArray(new String[0]);
-        assertEquals(3, stringArray.length);
-
-        String[] largerArray = set.toArray(new String[5]);
-        assertEquals(5, largerArray.length);
-
-        Iterator<String> iter = set.iterator();
-        int count = 0;
-        while (iter.hasNext()) {
-            assertNotNull(iter.next());
-            count++;
-        }
-        assertEquals(3, count);
-    }
-
-    @Test
-    public void test_equals_hashCode() {
-        ImmutableSet<String> set1 = ImmutableSet.of("a", "b", "c");
-        ImmutableSet<String> set2 = ImmutableSet.of("a", "b", "c");
-        ImmutableSet<String> set3 = ImmutableSet.of("a", "b", "d");
-
-        assertEquals(set1, set2);
-        assertFalse(set1.equals(set3));
-
-        assertEquals(set1.hashCode(), set2.hashCode());
-
-        Set<String> hashSet = new HashSet<>(Arrays.asList("a", "b", "c"));
-        assertEquals(set1, hashSet);
-        assertEquals(hashSet, set1);
-    }
-
-    @Test
-    public void test_toString() {
-        ImmutableSet<String> set = ImmutableSet.of("a", "b");
-        String str = set.toString();
-        assertNotNull(str);
-        assertTrue(str.contains("a"));
-        assertTrue(str.contains("b"));
-
-        ImmutableSet<String> empty = ImmutableSet.empty();
-        assertNotNull(empty.toString());
-    }
-
-    @Test
-    public void test_orderPreservation() {
-        List<String> list = Arrays.asList("first", "second", "third", "fourth");
-        ImmutableSet<String> setFromList = ImmutableSet.copyOf(list);
-
-        List<String> resultList = new ArrayList<>(setFromList);
-        assertEquals("first", resultList.get(0));
-        assertEquals("second", resultList.get(1));
-        assertEquals("third", resultList.get(2));
-        assertEquals("fourth", resultList.get(3));
-
-        Set<String> linkedHashSet = new LinkedHashSet<>(Arrays.asList("one", "two", "three"));
-        ImmutableSet<String> setFromLinkedHashSet = ImmutableSet.copyOf(linkedHashSet);
-
-        List<String> resultList2 = new ArrayList<>(setFromLinkedHashSet);
-        assertEquals("one", resultList2.get(0));
-        assertEquals("two", resultList2.get(1));
-        assertEquals("three", resultList2.get(2));
-
-        ImmutableSet<String> orderedSet = ImmutableSet.of("alpha", "beta", "gamma");
-        List<String> orderedList = new ArrayList<>(orderedSet);
-        assertEquals("alpha", orderedList.get(0));
-        assertEquals("beta", orderedList.get(1));
-        assertEquals("gamma", orderedList.get(2));
-    }
-
-    @Test
-    public void test_nullElementSupport() {
-        ImmutableSet<String> setWithNull = ImmutableSet.of((String) null);
-        assertTrue(setWithNull.contains(null));
-        assertEquals(1, setWithNull.size());
-
-        ImmutableSet<String> setWithNullAndOthers = ImmutableSet.of("a", null, "b");
-        assertTrue(setWithNullAndOthers.contains(null));
-        assertTrue(setWithNullAndOthers.contains("a"));
-        assertEquals(3, setWithNullAndOthers.size());
-
-        ImmutableSet<String> setFromArray = ImmutableSet.of("x", null, "y");
-        assertTrue(setFromArray.contains(null));
-        assertEquals(3, setFromArray.size());
-
-        List<String> listWithNull = Arrays.asList("m", null, "n");
-        ImmutableSet<String> setFromList = ImmutableSet.copyOf(listWithNull);
-        assertTrue(setFromList.contains(null));
-        assertEquals(3, setFromList.size());
-
-        ImmutableSet<String> setFromBuilder = ImmutableSet.<String> builder().add("p").add((String) null).add("q").build();
-        assertTrue(setFromBuilder.contains(null));
-        assertEquals(3, setFromBuilder.size());
-    }
-
-    @Test
-    public void test_multipleNullElements() {
-        ImmutableSet<String> set = ImmutableSet.of(null, null, "a", null);
-        assertEquals(2, set.size());
-        assertTrue(set.contains(null));
-        assertTrue(set.contains("a"));
-    }
-
-    @Test
     public void test_largeSet() {
         ImmutableSet.Builder<Integer> builder = ImmutableSet.builder();
         for (int i = 0; i < 100; i++) {
@@ -611,291 +894,6 @@ public class ImmutableSetTest extends TestBase {
         assertFalse(largeSet.contains(100));
 
         assertThrows(UnsupportedOperationException.class, () -> largeSet.add(100));
-    }
-
-    @Test
-    public void testEmpty() {
-        ImmutableSet<String> emptySet = ImmutableSet.empty();
-        Assertions.assertTrue(emptySet.isEmpty());
-        Assertions.assertEquals(0, emptySet.size());
-        Assertions.assertFalse(emptySet.contains("anything"));
-    }
-
-    @Test
-    public void testOf_SingleElement() {
-        ImmutableSet<Integer> set = ImmutableSet.of(42);
-        Assertions.assertEquals(1, set.size());
-        Assertions.assertTrue(set.contains(42));
-    }
-
-    @Test
-    public void testOf_TwoElements() {
-        ImmutableSet<String> set = ImmutableSet.of("a", "b");
-        Assertions.assertEquals(2, set.size());
-        Assertions.assertTrue(set.contains("a"));
-        Assertions.assertTrue(set.contains("b"));
-    }
-
-    @Test
-    public void testOf_TwoElements_Duplicates() {
-        ImmutableSet<String> set = ImmutableSet.of("same", "same");
-        Assertions.assertEquals(1, set.size());
-        Assertions.assertTrue(set.contains("same"));
-    }
-
-    @Test
-    public void testOf_ThreeElements() {
-        ImmutableSet<Integer> set = ImmutableSet.of(1, 2, 3);
-        Assertions.assertEquals(3, set.size());
-        Assertions.assertTrue(set.contains(1));
-        Assertions.assertTrue(set.contains(2));
-        Assertions.assertTrue(set.contains(3));
-    }
-
-    @Test
-    public void testOf_FourElements() {
-        ImmutableSet<String> set = ImmutableSet.of("a", "b", "c", "d");
-        Assertions.assertEquals(4, set.size());
-        Assertions.assertTrue(set.contains("d"));
-    }
-
-    @Test
-    public void testOf_FiveElements() {
-        ImmutableSet<Integer> set = ImmutableSet.of(1, 2, 3, 4, 5);
-        Assertions.assertEquals(5, set.size());
-        Assertions.assertTrue(set.contains(5));
-    }
-
-    @Test
-    public void testOf_SixElements() {
-        ImmutableSet<String> set = ImmutableSet.of("a", "b", "c", "d", "e", "f");
-        Assertions.assertEquals(6, set.size());
-        Assertions.assertTrue(set.contains("f"));
-    }
-
-    @Test
-    public void testOf_SevenElements() {
-        ImmutableSet<Integer> set = ImmutableSet.of(1, 2, 3, 4, 5, 6, 7);
-        Assertions.assertEquals(7, set.size());
-        Assertions.assertTrue(set.contains(7));
-    }
-
-    @Test
-    public void testOf_EightElements() {
-        ImmutableSet<String> set = ImmutableSet.of("a", "b", "c", "d", "e", "f", "g", "h");
-        Assertions.assertEquals(8, set.size());
-        Assertions.assertTrue(set.contains("h"));
-    }
-
-    @Test
-    public void testOf_NineElements() {
-        ImmutableSet<Integer> set = ImmutableSet.of(1, 2, 3, 4, 5, 6, 7, 8, 9);
-        Assertions.assertEquals(9, set.size());
-        Assertions.assertTrue(set.contains(9));
-    }
-
-    //
-    //
-    //
-    @Test
-    public void testCopyOf_Collection() {
-        List<String> list = Arrays.asList("a", "b", "c", "b");
-        ImmutableSet<String> set = ImmutableSet.copyOf(list);
-        Assertions.assertEquals(3, set.size());
-        Assertions.assertTrue(set.contains("a"));
-        Assertions.assertTrue(set.contains("b"));
-        Assertions.assertTrue(set.contains("c"));
-    }
-
-    @Test
-    public void testCopyOf_AlreadyImmutable() {
-        ImmutableSet<String> original = ImmutableSet.of("a", "b");
-        ImmutableSet<String> copy = ImmutableSet.copyOf(original);
-        Assertions.assertSame(original, copy);
-    }
-
-    @Test
-    public void testCopyOf_EmptyCollection() {
-        ImmutableSet<String> set = ImmutableSet.copyOf(new ArrayList<>());
-        Assertions.assertTrue(set.isEmpty());
-    }
-
-    @Test
-    public void testCopyOf_NullCollection() {
-        ImmutableSet<String> set = ImmutableSet.copyOf((Collection<String>) null);
-        Assertions.assertTrue(set.isEmpty());
-    }
-
-    @Test
-    public void testCopyOf_PreservesOrder() {
-        LinkedHashSet<String> linkedSet = new LinkedHashSet<>();
-        linkedSet.add("first");
-        linkedSet.add("second");
-        linkedSet.add("third");
-
-        ImmutableSet<String> set = ImmutableSet.copyOf(linkedSet);
-        Iterator<String> iter = set.iterator();
-        Assertions.assertEquals("first", iter.next());
-        Assertions.assertEquals("second", iter.next());
-        Assertions.assertEquals("third", iter.next());
-    }
-
-    @Test
-    public void testWrap() {
-        Set<String> mutableSet = new HashSet<>();
-        mutableSet.add("initial");
-
-        ImmutableSet<String> wrapped = ImmutableSet.wrap(mutableSet);
-        Assertions.assertEquals(1, wrapped.size());
-
-        mutableSet.add("added");
-        Assertions.assertEquals(2, wrapped.size());
-        Assertions.assertTrue(wrapped.contains("added"));
-    }
-
-    @Test
-    public void testWrap_AlreadyImmutable() {
-        ImmutableSet<String> original = ImmutableSet.of("a");
-        ImmutableSet<String> wrapped = ImmutableSet.wrap(original);
-        Assertions.assertSame(original, wrapped);
-    }
-
-    @Test
-    public void testWrap_Null() {
-        ImmutableSet<String> wrapped = ImmutableSet.wrap((Set<String>) null);
-        Assertions.assertTrue(wrapped.isEmpty());
-    }
-
-    @Test
-    public void testWrap_Collection_Deprecated() {
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-            ImmutableSet.wrap(Arrays.asList("a", "b"));
-        });
-    }
-
-    @Test
-    public void testBuilder() {
-        ImmutableSet<String> set = ImmutableSet.<String> builder().add("one").add("two", "three").addAll(Arrays.asList("four", "five")).build();
-
-        Assertions.assertEquals(5, set.size());
-        Assertions.assertTrue(set.contains("one"));
-        Assertions.assertTrue(set.contains("five"));
-    }
-
-    @Test
-    public void testBuilder_WithDuplicates() {
-        ImmutableSet<Integer> set = ImmutableSet.<Integer> builder().add(1).add(1).add(2, 2, 3).build();
-
-        Assertions.assertEquals(3, set.size());
-    }
-
-    @Test
-    public void testBuilder_WithIterator() {
-        List<String> list = Arrays.asList("a", "b", "c");
-        ImmutableSet<String> set = ImmutableSet.<String> builder().addAll(list.iterator()).build();
-
-        Assertions.assertEquals(3, set.size());
-    }
-
-    @Test
-    public void testBuilder_WithNullIterator() {
-        ImmutableSet<String> set = ImmutableSet.<String> builder().addAll((Iterator<String>) null).build();
-
-        Assertions.assertTrue(set.isEmpty());
-    }
-
-    @Test
-    public void testBuilder_WithBackingSet() {
-        Set<String> backingSet = new LinkedHashSet<>();
-        ImmutableSet<String> set = ImmutableSet.builder(backingSet).add("a").add("b").build();
-
-        Assertions.assertEquals(2, set.size());
-        Assertions.assertEquals(2, backingSet.size());
-    }
-
-    @Test
-    public void testIterator() {
-        ImmutableSet<String> set = ImmutableSet.of("a", "b", "c");
-        ObjIterator<String> iter = set.iterator();
-
-        Set<String> collected = new HashSet<>();
-        while (iter.hasNext()) {
-            collected.add(iter.next());
-        }
-
-        Assertions.assertEquals(3, collected.size());
-        Assertions.assertTrue(collected.contains("a"));
-        Assertions.assertTrue(collected.contains("b"));
-        Assertions.assertTrue(collected.contains("c"));
-    }
-
-    @Test
-    public void testContains() {
-        ImmutableSet<String> set = ImmutableSet.of("a", "b", "c");
-
-        Assertions.assertTrue(set.contains("a"));
-        Assertions.assertFalse(set.contains("d"));
-        Assertions.assertFalse(set.contains(null));
-    }
-
-    @Test
-    public void testContainsWithNull() {
-        Set<String> setWithNull = new HashSet<>();
-        setWithNull.add("a");
-        setWithNull.add(null);
-
-        ImmutableSet<String> set = ImmutableSet.copyOf(setWithNull);
-        Assertions.assertTrue(set.contains(null));
-        Assertions.assertTrue(set.contains("a"));
-    }
-
-    @Test
-    public void testMutationMethods_ThrowUnsupported() {
-        ImmutableSet<String> set = ImmutableSet.of("a", "b");
-
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> set.add("c"));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> set.remove("a"));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> set.addAll(Arrays.asList("d", "e")));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> set.removeAll(Arrays.asList("a")));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> set.retainAll(Arrays.asList("a")));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> set.clear());
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> set.removeIf(s -> s.equals("a")));
-    }
-
-    @Test
-    public void testToArray_TypedArray() {
-        ImmutableSet<String> set = ImmutableSet.of("a", "b", "c");
-        String[] array = set.toArray(new String[0]);
-        Assertions.assertEquals(3, array.length);
-
-        String[] largerArray = set.toArray(new String[5]);
-        Assertions.assertEquals(5, largerArray.length);
-        Assertions.assertNull(largerArray[3]);
-    }
-
-    @Test
-    public void testCopyOf_FromSortedSet() {
-        java.util.SortedSet<Integer> sortedSet = new TreeSet<>(Arrays.asList(3, 1, 2));
-        ImmutableSet<Integer> set = ImmutableSet.copyOf(sortedSet);
-        Assertions.assertEquals(3, set.size());
-        // Should preserve sorted order
-        Iterator<Integer> iter = set.iterator();
-        Assertions.assertEquals(1, iter.next());
-        Assertions.assertEquals(2, iter.next());
-        Assertions.assertEquals(3, iter.next());
-    }
-
-    @Test
-    public void testSize() {
-        Assertions.assertEquals(0, ImmutableSet.empty().size());
-        Assertions.assertEquals(1, ImmutableSet.of("a").size());
-        Assertions.assertEquals(3, ImmutableSet.of("a", "b", "c").size());
-    }
-
-    @Test
-    public void testIsEmpty() {
-        Assertions.assertTrue(ImmutableSet.empty().isEmpty());
-        Assertions.assertFalse(ImmutableSet.of("a").isEmpty());
     }
 
 }

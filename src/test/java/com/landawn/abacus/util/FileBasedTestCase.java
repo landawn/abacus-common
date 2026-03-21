@@ -1,5 +1,8 @@
 package com.landawn.abacus.util;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -16,10 +19,11 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
+import com.landawn.abacus.TestBase;
 
-public abstract class FileBasedTestCase extends TestCase {
+import junit.framework.AssertionFailedError;
+
+public abstract class FileBasedTestCase extends TestBase {
 
     private static volatile File testDir;
 

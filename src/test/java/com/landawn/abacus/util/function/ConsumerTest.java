@@ -8,12 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ConsumerTest extends TestBase {
 
     @Test
@@ -39,6 +37,18 @@ public class ConsumerTest extends TestBase {
     }
 
     @Test
+    public void testJavaUtilFunctionCompatibility() {
+        List<String> results = new ArrayList<>();
+        Consumer<String> consumer = s -> results.add(s);
+        java.util.function.Consumer<String> javaConsumer = consumer;
+
+        javaConsumer.accept("test");
+
+        assertEquals(1, results.size());
+        assertEquals("test", results.get(0));
+    }
+
+    @Test
     public void testAccept_WithAnonymousClass() {
         List<String> results = new ArrayList<>();
         Consumer<String> consumer = new Consumer<>() {
@@ -55,6 +65,14 @@ public class ConsumerTest extends TestBase {
     }
 
     @Test
+    public void testFunctionalInterfaceContract() {
+        Consumer<String> lambda = s -> {
+        };
+        assertNotNull(lambda);
+        assertDoesNotThrow(() -> lambda.accept("test"));
+    }
+
+    @Test
     public void testAndThen() {
         List<String> results = new ArrayList<>();
         Consumer<String> consumer1 = s -> results.add("first:" + s);
@@ -66,14 +84,6 @@ public class ConsumerTest extends TestBase {
         assertEquals(2, results.size());
         assertEquals("first:test", results.get(0));
         assertEquals("second:test", results.get(1));
-    }
-
-    @Test
-    public void testAndThenRejectsNullConsumerImmediately() {
-        Consumer<String> consumer = s -> {
-        };
-
-        assertThrows(NullPointerException.class, () -> consumer.andThen(null));
     }
 
     @Test
@@ -93,30 +103,18 @@ public class ConsumerTest extends TestBase {
     }
 
     @Test
+    public void testAndThenRejectsNullConsumerImmediately() {
+        Consumer<String> consumer = s -> {
+        };
+
+        assertThrows(NullPointerException.class, () -> consumer.andThen(null));
+    }
+
+    @Test
     public void testToThrowable() {
         Consumer<String> consumer = s -> {
         };
         com.landawn.abacus.util.Throwables.Consumer<String, ?> throwableConsumer = consumer.toThrowable();
         assertNotNull(throwableConsumer);
-    }
-
-    @Test
-    public void testJavaUtilFunctionCompatibility() {
-        List<String> results = new ArrayList<>();
-        Consumer<String> consumer = s -> results.add(s);
-        java.util.function.Consumer<String> javaConsumer = consumer;
-
-        javaConsumer.accept("test");
-
-        assertEquals(1, results.size());
-        assertEquals("test", results.get(0));
-    }
-
-    @Test
-    public void testFunctionalInterfaceContract() {
-        Consumer<String> lambda = s -> {
-        };
-        assertNotNull(lambda);
-        assertDoesNotThrow(() -> lambda.accept("test"));
     }
 }

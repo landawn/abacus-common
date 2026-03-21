@@ -25,14 +25,14 @@ import java.lang.annotation.Target;
  * Specifies that a field represents a database column in an entity class.
  * This annotation is used in ORM (Object-Relational Mapping) contexts to explicitly define
  * the mapping between Java entity fields and database table columns.
- * 
+ *
  * <p>By default, if this annotation is not present or if the name attribute is not specified,
  * the field name is used as the column name. Use the {@link #name()} attribute to specify
  * a different column name when the database column name differs from the field name.</p>
- * 
+ *
  * <p>This annotation is typically used in conjunction with {@link Entity} annotation on the class level
  * to create complete ORM mappings.</p>
- * 
+ *
  * <p><b>Common use cases:</b></p>
  * <ul>
  *   <li>Mapping fields to columns with different naming conventions (e.g., camelCase to snake_case)</li>
@@ -40,22 +40,22 @@ import java.lang.annotation.Target;
  *   <li>Working with legacy database schemas</li>
  *   <li>Explicitly documenting field-to-column mappings</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * @Entity
  * public class User {
  *     @Column(name = "user_id")
  *     private Long id;
- *     
+ *
  *     @Column(name = "user_name")
  *     private String userName;
- *     
+ *
  *     @Column  // Uses field name "email" as column name
  *     private String email;
  * }
  * }</pre>
- * 
+ *
  * @see Entity
  * @see Table
  * @see Id
@@ -77,7 +77,7 @@ public @interface Column {
     /**
      * The name of the database column this field maps to.
      * If not specified (empty string), the field name is used as the column name.
-     * 
+     *
      * <p>Column names should follow the naming conventions of your database system.
      * Common conventions include:</p>
      * <ul>
@@ -85,13 +85,13 @@ public @interface Column {
      *   <li>UPPER_CASE for Oracle (default for unquoted identifiers)</li>
      *   <li>PascalCase or mixed case for SQL Server</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @Column(name = "created_date")
      * private LocalDateTime createdDate;
      * }</pre>
-     * 
+     *
      * @return the column name, or empty string to use the field name as default
      */
     String name() default "";

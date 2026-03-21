@@ -4,12 +4,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BrotliInputStreamTest extends TestBase {
 
     @Test
@@ -125,6 +123,19 @@ public class BrotliInputStreamTest extends TestBase {
     }
 
     @Test
+    public void testMark() throws IOException {
+        byte[] data = new byte[] {};
+        ByteArrayInputStream bais = new ByteArrayInputStream(data);
+        try {
+            BrotliInputStream bis = new BrotliInputStream(bais);
+            bis.mark(1024);
+            Assertions.assertTrue(true);
+            bis.close();
+        } catch (Exception e) {
+        }
+    }
+
+    @Test
     public void testMarkSupported() throws IOException {
         byte[] data = new byte[] {};
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
@@ -149,19 +160,6 @@ public class BrotliInputStreamTest extends TestBase {
             Assertions.assertTrue(true);
         } catch (Exception e) {
             // Brotli may fail on invalid data, but close should work
-        }
-    }
-
-    @Test
-    public void testMark() throws IOException {
-        byte[] data = new byte[] {};
-        ByteArrayInputStream bais = new ByteArrayInputStream(data);
-        try {
-            BrotliInputStream bis = new BrotliInputStream(bais);
-            bis.mark(1024);
-            Assertions.assertTrue(true);
-            bis.close();
-        } catch (Exception e) {
         }
     }
 }

@@ -17,7 +17,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -25,7 +24,6 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.u.Nullable;
 
-@Tag("new-test")
 public class NullableTypeTest extends TestBase {
 
     private NullableType<String> nullableStringType;
@@ -52,20 +50,6 @@ public class NullableTypeTest extends TestBase {
     public void testClazz() {
         assertEquals(Nullable.class, nullableStringType.javaType());
         assertEquals(Nullable.class, nullableIntType.javaType());
-    }
-
-    @Test
-    public void testGetElementType() {
-        assertNotNull(nullableStringType.elementType());
-        assertEquals("String", nullableStringType.elementType().name());
-    }
-
-    @Test
-    public void testGetParameterTypes() {
-        Type<?>[] paramTypes = nullableStringType.parameterTypes();
-        assertNotNull(paramTypes);
-        assertEquals(1, paramTypes.length);
-        assertEquals("String", paramTypes[0].name());
     }
 
     @Test
@@ -112,6 +96,20 @@ public class NullableTypeTest extends TestBase {
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertEquals("test", result.get());
+    }
+
+    @Test
+    public void testGetElementType() {
+        assertNotNull(nullableStringType.elementType());
+        assertEquals("String", nullableStringType.elementType().name());
+    }
+
+    @Test
+    public void testGetParameterTypes() {
+        Type<?>[] paramTypes = nullableStringType.parameterTypes();
+        assertNotNull(paramTypes);
+        assertEquals(1, paramTypes.length);
+        assertEquals("String", paramTypes[0].name());
     }
 
     @Test

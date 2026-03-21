@@ -12,7 +12,6 @@ import static org.mockito.Mockito.verify;
 import java.io.IOException;
 import java.io.StringWriter;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -20,20 +19,9 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("2025")
 public class ShortArrayTypeTest extends TestBase {
 
     private final ShortArrayType shortArrayType = new ShortArrayType();
-
-    @Test
-    public void test_clazz() {
-        assertEquals(Short[].class, shortArrayType.javaType());
-    }
-
-    @Test
-    public void test_name() {
-        assertNotNull(shortArrayType.name());
-    }
 
     @Test
     public void test_stringOf() {
@@ -77,6 +65,16 @@ public class ShortArrayTypeTest extends TestBase {
         reset(writer);
         shortArrayType.writeCharacter(writer, null, config);
         verify(writer).write(NULL_CHAR_ARRAY);
+    }
+
+    @Test
+    public void test_clazz() {
+        assertEquals(Short[].class, shortArrayType.javaType());
+    }
+
+    @Test
+    public void test_name() {
+        assertNotNull(shortArrayType.name());
     }
 
 }

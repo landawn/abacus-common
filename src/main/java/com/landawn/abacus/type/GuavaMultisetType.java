@@ -26,8 +26,8 @@ import com.google.common.collect.TreeMultiset;
 import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Strings;
 
 /**
  * Type handler for Google Guava Multiset implementations.
@@ -225,7 +225,7 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      */
     @Override
     public T valueOf(final String str) {
-        if (Strings.isEmpty(str)) {
+        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
         }
 

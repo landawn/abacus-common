@@ -3484,6 +3484,10 @@ public final class ParserUtil {
         @SuppressWarnings("unchecked")
         @Override
         public <T> T getPropValue(final Object obj) {
+            if (isImmutableBean && obj instanceof Object[]) {
+                return (T) ((Object[]) obj)[fieldOrder];
+            }
+
             return (T) ((fieldAccessIndex > -1) ? fieldAccess.get(obj, fieldAccessIndex) : getMethodAccess.invoke(obj, getMethodAccessIndex));
         }
 

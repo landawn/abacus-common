@@ -4,21 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ByteToBooleanFunctionTest extends TestBase {
 
-    @Test
-    public void testApplyAsBoolean() {
-        ByteToBooleanFunction isPositive = value -> value > 0;
-
-        assertTrue(isPositive.applyAsBoolean((byte) 5));
-        assertFalse(isPositive.applyAsBoolean((byte) -5));
-        assertFalse(isPositive.applyAsBoolean((byte) 0));
+    private static boolean checkPositive(byte value) {
+        return value > 0;
     }
 
     @Test
@@ -51,6 +44,26 @@ public class ByteToBooleanFunctionTest extends TestBase {
     }
 
     @Test
+    public void testInRange() {
+        ByteToBooleanFunction inRange = value -> value >= 10 && value <= 20;
+
+        assertTrue(inRange.applyAsBoolean((byte) 15));
+        assertTrue(inRange.applyAsBoolean((byte) 10));
+        assertTrue(inRange.applyAsBoolean((byte) 20));
+        assertFalse(inRange.applyAsBoolean((byte) 5));
+        assertFalse(inRange.applyAsBoolean((byte) 25));
+    }
+
+    @Test
+    public void testApplyAsBoolean() {
+        ByteToBooleanFunction isPositive = value -> value > 0;
+
+        assertTrue(isPositive.applyAsBoolean((byte) 5));
+        assertFalse(isPositive.applyAsBoolean((byte) -5));
+        assertFalse(isPositive.applyAsBoolean((byte) 0));
+    }
+
+    @Test
     public void testDefaultWithBoundaryValues() {
         assertTrue(ByteToBooleanFunction.DEFAULT.applyAsBoolean(Byte.MAX_VALUE));
         assertFalse(ByteToBooleanFunction.DEFAULT.applyAsBoolean(Byte.MIN_VALUE));
@@ -75,17 +88,6 @@ public class ByteToBooleanFunctionTest extends TestBase {
     }
 
     @Test
-    public void testInRange() {
-        ByteToBooleanFunction inRange = value -> value >= 10 && value <= 20;
-
-        assertTrue(inRange.applyAsBoolean((byte) 15));
-        assertTrue(inRange.applyAsBoolean((byte) 10));
-        assertTrue(inRange.applyAsBoolean((byte) 20));
-        assertFalse(inRange.applyAsBoolean((byte) 5));
-        assertFalse(inRange.applyAsBoolean((byte) 25));
-    }
-
-    @Test
     public void testWithBoundaryValues() {
         ByteToBooleanFunction isMax = value -> value == Byte.MAX_VALUE;
         ByteToBooleanFunction isMin = value -> value == Byte.MIN_VALUE;
@@ -105,9 +107,5 @@ public class ByteToBooleanFunctionTest extends TestBase {
     @Test
     public void testFunctionalInterface() {
         assertNotNull(ByteToBooleanFunction.class.getAnnotation(FunctionalInterface.class));
-    }
-
-    private static boolean checkPositive(byte value) {
-        return value > 0;
     }
 }

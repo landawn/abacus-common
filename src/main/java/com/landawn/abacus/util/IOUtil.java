@@ -7055,8 +7055,11 @@ public final class IOUtil {
     }
 
     /**
-     * Closes the provided AutoCloseable object.
-     * if the object is {@code null}, this method does nothing.
+     * Closes the provided {@code AutoCloseable} object.
+     * <p>
+     * If an exception occurs during the close operation, it is wrapped in a {@code RuntimeException}
+     * and rethrown. If the object is {@code null}, this method does nothing.
+     * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7064,10 +7067,13 @@ public final class IOUtil {
      * try {
      *     // Use the stream
      * } finally {
-     *     IOUtil.close(is);  // Safely closes and handles exceptions
+     *     IOUtil.close(is);  // Safely closes and throws RuntimeException if an error occurs
      * }
      * }</pre>
+     *
      * @param closeable the AutoCloseable object to be closed. It can be {@code null}.
+     * @throws RuntimeException if an I/O error occurs during the close operation.
+     * @see #closeQuietly(AutoCloseable)
      */
     public static void close(final AutoCloseable closeable) {
         if (closeable != null) {
@@ -7080,10 +7086,11 @@ public final class IOUtil {
     }
 
     /**
-     * Closes the provided AutoCloseable object and handles any exceptions that occur during the closing operation.
-     * The provided Consumer is used to handle any exceptions that are thrown.
-     *
-     * @param closeable        the AutoCloseable object to be closed, may be {@code null}.
+     * Closes the provided {@code AutoCloseable} object and handles any exceptions that occur during the closing operation
+     * using the specified {@code exceptionHandler}.
+     * <p>
+     * If the object is {@code null}, this method does nothing.
+     * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7091,12 +7098,17 @@ public final class IOUtil {
      * try {
      *     // Use the stream
      * } finally {
-     *     IOUtil.close(is);  // Safely closes and handles exceptions
+     *     IOUtil.close(is, e -> logger.error("Failed to close stream", e));
      * }
      * }</pre>
-     * @param exceptionHandler the Consumer to handle any exceptions thrown during the close operation, must not be {@code null}.
+     *
+     * @param closeable        the AutoCloseable object to be closed. It can be {@code null}.
+     * @param exceptionHandler the Consumer to handle any exceptions thrown during the close operation. Must not be {@code null}.
+     * @throws IllegalArgumentException if {@code exceptionHandler} is {@code null}.
      */
     public static void close(final AutoCloseable closeable, final Consumer<Exception> exceptionHandler) {
+        N.checkArgNotNull(exceptionHandler, cs.exceptionHandler);
+
         if (closeable != null) {
             try {
                 closeable.close();
@@ -7107,10 +7119,15 @@ public final class IOUtil {
     }
 
     /**
-     * Closes all provided AutoCloseable objects.
-     * If an AutoCloseable object is {@code null}, it will be ignored.
+     * Closes all provided {@code AutoCloseable} objects.
+     * <p>
+     * If an exception occurs while closing any of the objects, the first exception encountered
+     * is wrapped in a {@code RuntimeException} and rethrown, with any subsequent exceptions
+     * added as suppressed exceptions. If an object is {@code null}, it is ignored.
+     * </p>
      *
      * @param closeables the AutoCloseable objects to be closed. It may contain {@code null} elements.
+     * @throws RuntimeException if an I/O error occurs during any of the close operations.
      */
     public static void closeAll(final AutoCloseable... closeables) {
         if (N.isEmpty(closeables)) {
@@ -7121,10 +7138,15 @@ public final class IOUtil {
     }
 
     /**
-     * Closes all provided AutoCloseable objects in the Iterable.
-     * If an AutoCloseable object is {@code null}, it will be ignored.
+     * Closes all provided {@code AutoCloseable} objects in the {@code Iterable}.
+     * <p>
+     * If an exception occurs while closing any of the objects, the first exception encountered
+     * is wrapped in a {@code RuntimeException} and rethrown, with any subsequent exceptions
+     * added as suppressed exceptions. If an object is {@code null}, it is ignored.
+     * </p>
      *
      * @param closeables the Iterable of AutoCloseable objects to be closed. It may contain {@code null} elements.
+     * @throws RuntimeException if an I/O error occurs during any of the close operations.
      */
     public static void closeAll(final Iterable<? extends AutoCloseable> closeables) {
         if (N.isEmpty(closeables)) {
@@ -7153,8 +7175,11 @@ public final class IOUtil {
     }
 
     /**
-     * Closes the provided AutoCloseable object quietly.
-     * Any exceptions that occur during the closing operation are ignored.
+     * Closes the provided {@code AutoCloseable} object quietly, suppressing any exceptions.
+     * <p>
+     * If an exception occurs during the close operation, it is logged at error level but not rethrown.
+     * If the object is {@code null}, this method does nothing.
+     * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7163,10 +7188,12 @@ public final class IOUtil {
      *     is = new FileInputStream("file.txt");
      *     // Use the stream
      * } finally {
-     *     IOUtil.closeQuietly(is);  // Closes silently, ignoring exceptions
+     *     IOUtil.closeQuietly(is);  // Closes silently, ignoring exceptions but logging them
      * }
      * }</pre>
+     *
      * @param closeable the AutoCloseable object to be closed. It can be {@code null}.
+     * @see #close(AutoCloseable)
      */
     public static void closeQuietly(final AutoCloseable closeable) {
         if (closeable != null) {

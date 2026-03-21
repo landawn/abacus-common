@@ -17,13 +17,26 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ShortTriPredicateTest extends TestBase {
+
+    @Test
+    public void test_test_anonymousClass() {
+        ShortTriPredicate allEqual = new ShortTriPredicate() {
+            @Override
+            public boolean test(short a, short b, short c) {
+                return a == b && b == c;
+            }
+        };
+
+        assertTrue(allEqual.test((short) 5, (short) 5, (short) 5));
+        assertTrue(allEqual.test((short) 0, (short) 0, (short) 0));
+        assertFalse(allEqual.test((short) 1, (short) 2, (short) 3));
+        assertFalse(allEqual.test((short) 5, (short) 5, (short) 6));
+    }
 
     @Test
     public void test_ALWAYS_TRUE() {
@@ -50,21 +63,6 @@ public class ShortTriPredicateTest extends TestBase {
     }
 
     @Test
-    public void test_test_anonymousClass() {
-        ShortTriPredicate allEqual = new ShortTriPredicate() {
-            @Override
-            public boolean test(short a, short b, short c) {
-                return a == b && b == c;
-            }
-        };
-
-        assertTrue(allEqual.test((short) 5, (short) 5, (short) 5));
-        assertTrue(allEqual.test((short) 0, (short) 0, (short) 0));
-        assertFalse(allEqual.test((short) 1, (short) 2, (short) 3));
-        assertFalse(allEqual.test((short) 5, (short) 5, (short) 6));
-    }
-
-    @Test
     public void test_negate() {
         ShortTriPredicate allPositive = (a, b, c) -> a > 0 && b > 0 && c > 0;
         ShortTriPredicate notAllPositive = allPositive.negate();
@@ -76,14 +74,16 @@ public class ShortTriPredicateTest extends TestBase {
     }
 
     @Test
-    public void test_and() {
-        ShortTriPredicate allPositive = (a, b, c) -> a > 0 && b > 0 && c > 0;
-        ShortTriPredicate sumGreaterThanTen = (a, b, c) -> (a + b + c) > 10;
-        ShortTriPredicate combined = allPositive.and(sumGreaterThanTen);
+    public void test_complexCombination() {
+        ShortTriPredicate allEven = (a, b, c) -> a % 2 == 0 && b % 2 == 0 && c % 2 == 0;
+        ShortTriPredicate sumLessThanHundred = (a, b, c) -> (a + b + c) < 100;
+        ShortTriPredicate firstPositive = (a, b, c) -> a > 0;
 
-        assertTrue(combined.test((short) 4, (short) 5, (short) 6)); // all positive and sum > 10
-        assertFalse(combined.test((short) 1, (short) 1, (short) 1)); // all positive but sum not > 10
-        assertFalse(combined.test((short) -1, (short) 10, (short) 10)); // sum > 10 but not all positive
+        ShortTriPredicate complex = allEven.and(sumLessThanHundred).or(firstPositive.negate());
+
+        assertTrue(complex.test((short) 2, (short) 4, (short) 6)); // all even and sum < 100
+        assertTrue(complex.test((short) -5, (short) 1, (short) 2)); // first not positive
+        assertFalse(complex.test((short) 10, (short) 50, (short) 50)); // even but sum >= 100, and first is positive
     }
 
     @Test
@@ -102,15 +102,14 @@ public class ShortTriPredicateTest extends TestBase {
     }
 
     @Test
-    public void test_or() {
-        ShortTriPredicate anyZero = (a, b, c) -> a == 0 || b == 0 || c == 0;
-        ShortTriPredicate sumIsEven = (a, b, c) -> (a + b + c) % 2 == 0;
-        ShortTriPredicate combined = anyZero.or(sumIsEven);
+    public void test_and() {
+        ShortTriPredicate allPositive = (a, b, c) -> a > 0 && b > 0 && c > 0;
+        ShortTriPredicate sumGreaterThanTen = (a, b, c) -> (a + b + c) > 10;
+        ShortTriPredicate combined = allPositive.and(sumGreaterThanTen);
 
-        assertTrue(combined.test((short) 0, (short) 1, (short) 2)); // has zero
-        assertTrue(combined.test((short) 1, (short) 2, (short) 3)); // sum is even
-        assertTrue(combined.test((short) 0, (short) 2, (short) 4)); // both conditions
-        assertFalse(combined.test((short) 1, (short) 2, (short) 4)); // neither condition
+        assertTrue(combined.test((short) 4, (short) 5, (short) 6)); // all positive and sum > 10
+        assertFalse(combined.test((short) 1, (short) 1, (short) 1)); // all positive but sum not > 10
+        assertFalse(combined.test((short) -1, (short) 10, (short) 10)); // sum > 10 but not all positive
     }
 
     @Test
@@ -129,15 +128,14 @@ public class ShortTriPredicateTest extends TestBase {
     }
 
     @Test
-    public void test_complexCombination() {
-        ShortTriPredicate allEven = (a, b, c) -> a % 2 == 0 && b % 2 == 0 && c % 2 == 0;
-        ShortTriPredicate sumLessThanHundred = (a, b, c) -> (a + b + c) < 100;
-        ShortTriPredicate firstPositive = (a, b, c) -> a > 0;
+    public void test_or() {
+        ShortTriPredicate anyZero = (a, b, c) -> a == 0 || b == 0 || c == 0;
+        ShortTriPredicate sumIsEven = (a, b, c) -> (a + b + c) % 2 == 0;
+        ShortTriPredicate combined = anyZero.or(sumIsEven);
 
-        ShortTriPredicate complex = allEven.and(sumLessThanHundred).or(firstPositive.negate());
-
-        assertTrue(complex.test((short) 2, (short) 4, (short) 6)); // all even and sum < 100
-        assertTrue(complex.test((short) -5, (short) 1, (short) 2)); // first not positive
-        assertFalse(complex.test((short) 10, (short) 50, (short) 50)); // even but sum >= 100, and first is positive
+        assertTrue(combined.test((short) 0, (short) 1, (short) 2)); // has zero
+        assertTrue(combined.test((short) 1, (short) 2, (short) 3)); // sum is even
+        assertTrue(combined.test((short) 0, (short) 2, (short) 4)); // both conditions
+        assertFalse(combined.test((short) 1, (short) 2, (short) 4)); // neither condition
     }
 }

@@ -15,17 +15,17 @@
 package com.landawn.abacus.type;
 
 /**
- * Abstract base class for atomic types in the type system.
+ * The abstract base class for atomic types in the type system.
  * Atomic types are types that represent single, indivisible values that can be
  * safely used in concurrent operations without additional synchronization.
- * Examples include AtomicInteger, AtomicLong, AtomicBoolean, etc.
+ * Examples include {@code AtomicInteger}, {@code AtomicLong}, {@code AtomicBoolean}, etc.
  *
- * @param <T> the atomic type (e.g., AtomicInteger, AtomicLong, AtomicBoolean)
+ * @param <T> the atomic type (e.g., {@code AtomicInteger}, {@code AtomicLong}, {@code AtomicBoolean})
  */
 public abstract class AbstractAtomicType<T> extends AbstractType<T> {
 
     /**
-     * Constructs an AbstractAtomicType with the specified type name.
+     * Constructs a new {@code AbstractAtomicType} with the specified type name.
      *
      * @param typeName the name of the atomic type (e.g., "AtomicInteger", "AtomicLong", "AtomicBoolean")
      */
@@ -34,11 +34,10 @@ public abstract class AbstractAtomicType<T> extends AbstractType<T> {
     }
 
     /**
-     * Indicates whether values of this type require quoting in CSV format.
-     * Atomic types represent numeric or boolean values that are self-delimiting
-     * and do not require quotation marks.
+     * Returns {@code false} because atomic types represent numeric or boolean values that are self-delimiting
+     * and do not require quotation marks in CSV format.
      *
-     * @return {@code false}, as atomic type values do not require quoting in CSV format
+     * @return {@code false}
      */
     @Override
     public boolean isCsvQuoteRequired() {

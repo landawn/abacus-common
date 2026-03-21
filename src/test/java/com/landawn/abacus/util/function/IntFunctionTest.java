@@ -20,25 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class IntFunctionTest extends TestBase {
-
-    @Test
-    public void test_BOX() {
-        Integer result = IntFunction.BOX.apply(42);
-        assertEquals(Integer.valueOf(42), result);
-
-        result = IntFunction.BOX.apply(0);
-        assertEquals(Integer.valueOf(0), result);
-
-        result = IntFunction.BOX.apply(Integer.MAX_VALUE);
-        assertEquals(Integer.valueOf(Integer.MAX_VALUE), result);
-    }
 
     @Test
     public void test_apply() {
@@ -59,6 +45,18 @@ public class IntFunctionTest extends TestBase {
     }
 
     @Test
+    public void test_BOX() {
+        Integer result = IntFunction.BOX.apply(42);
+        assertEquals(Integer.valueOf(42), result);
+
+        result = IntFunction.BOX.apply(0);
+        assertEquals(Integer.valueOf(0), result);
+
+        result = IntFunction.BOX.apply(Integer.MAX_VALUE);
+        assertEquals(Integer.valueOf(Integer.MAX_VALUE), result);
+    }
+
+    @Test
     public void test_apply_anonymousClass() {
         IntFunction<Boolean> isPositive = new IntFunction<>() {
             @Override
@@ -70,6 +68,28 @@ public class IntFunctionTest extends TestBase {
         assertTrue(isPositive.apply(5));
         assertFalse(isPositive.apply(-5));
         assertFalse(isPositive.apply(0));
+    }
+
+    @Test
+    public void test_apply_withMaxValue() {
+        IntFunction<Long> toLong = value -> (long) value;
+
+        assertEquals(Integer.MAX_VALUE, toLong.apply(Integer.MAX_VALUE));
+    }
+
+    @Test
+    public void test_apply_withMinValue() {
+        IntFunction<Long> toLong = value -> (long) value;
+
+        assertEquals(Integer.MIN_VALUE, toLong.apply(Integer.MIN_VALUE));
+    }
+
+    @Test
+    public void test_returnsNull() {
+        IntFunction<String> alwaysNull = value -> null;
+
+        assertNull(alwaysNull.apply(100));
+        assertNull(alwaysNull.apply(0));
     }
 
     @Test
@@ -117,27 +137,5 @@ public class IntFunctionTest extends TestBase {
         Integer result1 = identity.apply(127);
         Integer result2 = identity.apply(127);
         assertSame(result1, result2);
-    }
-
-    @Test
-    public void test_apply_withMaxValue() {
-        IntFunction<Long> toLong = value -> (long) value;
-
-        assertEquals(Integer.MAX_VALUE, toLong.apply(Integer.MAX_VALUE));
-    }
-
-    @Test
-    public void test_apply_withMinValue() {
-        IntFunction<Long> toLong = value -> (long) value;
-
-        assertEquals(Integer.MIN_VALUE, toLong.apply(Integer.MIN_VALUE));
-    }
-
-    @Test
-    public void test_returnsNull() {
-        IntFunction<String> alwaysNull = value -> null;
-
-        assertNull(alwaysNull.apply(100));
-        assertNull(alwaysNull.apply(0));
     }
 }

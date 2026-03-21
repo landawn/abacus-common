@@ -15,12 +15,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class HttpHeadersTest extends TestBase {
 
     // --- create ---
@@ -32,6 +30,32 @@ public class HttpHeadersTest extends TestBase {
         assertTrue(headers.isEmpty());
     }
 
+    @Test
+    public void testOfWithTwoHeaders() {
+        HttpHeaders headers = HttpHeaders.of("Content-Type", "application/json", "Accept", "text/plain");
+        assertEquals("application/json", headers.get("Content-Type"));
+        assertEquals("text/plain", headers.get("Accept"));
+    }
+
+    @Test
+    public void testOfWithThreeHeaders() {
+        HttpHeaders headers = HttpHeaders.of("Content-Type", "application/json", "Accept", "text/plain", "Authorization", "Bearer token");
+        assertEquals("application/json", headers.get("Content-Type"));
+        assertEquals("text/plain", headers.get("Accept"));
+        assertEquals("Bearer token", headers.get("Authorization"));
+    }
+
+    @Test
+    public void testOfWithMap() {
+        Map<String, String> map = new HashMap<>();
+        map.put("Content-Type", "application/json");
+        map.put("Accept", "text/plain");
+
+        HttpHeaders headers = HttpHeaders.of(map);
+        assertEquals("application/json", headers.get("Content-Type"));
+        assertEquals("text/plain", headers.get("Accept"));
+    }
+
     // --- of(String, Object) ---
 
     @Test
@@ -39,11 +63,6 @@ public class HttpHeadersTest extends TestBase {
         HttpHeaders headers = HttpHeaders.of("Content-Type", "application/json");
         assertNotNull(headers);
         assertEquals("application/json", headers.get("Content-Type"));
-    }
-
-    @Test
-    public void testOfSingleHeaderWithNull() {
-        assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of(null, "value"));
     }
 
     // --- of(String, Object, String, Object) ---
@@ -56,29 +75,6 @@ public class HttpHeadersTest extends TestBase {
         assertEquals("text/plain", headers.get("Accept"));
     }
 
-    @Test
-    public void testOfTwoHeadersWithNullName1() {
-        assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of(null, "value1", "name2", "value2"));
-    }
-
-    @Test
-    public void testOfTwoHeadersWithNullName2() {
-        assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of("name1", "value1", null, "value2"));
-    }
-
-    @Test
-    public void testOfWithTwoHeaders() {
-        HttpHeaders headers = HttpHeaders.of("Content-Type", "application/json", "Accept", "text/plain");
-        assertEquals("application/json", headers.get("Content-Type"));
-        assertEquals("text/plain", headers.get("Accept"));
-    }
-
-    @Test
-    public void testOfWithTwoHeadersNullNames() {
-        assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of(null, "value1", "name2", "value2"));
-        assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of("name1", "value1", null, "value2"));
-    }
-
     // --- of(String, Object, String, Object, String, Object) ---
 
     @Test
@@ -88,26 +84,6 @@ public class HttpHeadersTest extends TestBase {
         assertEquals("value1", headers.get("Header1"));
         assertEquals("value2", headers.get("Header2"));
         assertEquals("value3", headers.get("Header3"));
-    }
-
-    @Test
-    public void testOfThreeHeadersWithNullName() {
-        assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of("name1", "value1", null, "value2", "name3", "value3"));
-    }
-
-    @Test
-    public void testOfWithThreeHeaders() {
-        HttpHeaders headers = HttpHeaders.of("Content-Type", "application/json", "Accept", "text/plain", "Authorization", "Bearer token");
-        assertEquals("application/json", headers.get("Content-Type"));
-        assertEquals("text/plain", headers.get("Accept"));
-        assertEquals("Bearer token", headers.get("Authorization"));
-    }
-
-    @Test
-    public void testOfWithThreeHeadersNullNames() {
-        assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of(null, "value1", "name2", "value2", "name3", "value3"));
-        assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of("name1", "value1", null, "value2", "name3", "value3"));
-        assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of("name1", "value1", "name2", "value2", null, "value3"));
     }
 
     // --- of(Map) ---
@@ -125,19 +101,41 @@ public class HttpHeadersTest extends TestBase {
     }
 
     @Test
-    public void testOfMapWithNull() {
-        assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of((Map<String, ?>) null));
+    public void testOfSingleHeaderWithNull() {
+        assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of(null, "value"));
     }
 
     @Test
-    public void testOfWithMap() {
-        Map<String, String> map = new HashMap<>();
-        map.put("Content-Type", "application/json");
-        map.put("Accept", "text/plain");
+    public void testOfTwoHeadersWithNullName1() {
+        assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of(null, "value1", "name2", "value2"));
+    }
 
-        HttpHeaders headers = HttpHeaders.of(map);
-        assertEquals("application/json", headers.get("Content-Type"));
-        assertEquals("text/plain", headers.get("Accept"));
+    @Test
+    public void testOfTwoHeadersWithNullName2() {
+        assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of("name1", "value1", null, "value2"));
+    }
+
+    @Test
+    public void testOfWithTwoHeadersNullNames() {
+        assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of(null, "value1", "name2", "value2"));
+        assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of("name1", "value1", null, "value2"));
+    }
+
+    @Test
+    public void testOfThreeHeadersWithNullName() {
+        assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of("name1", "value1", null, "value2", "name3", "value3"));
+    }
+
+    @Test
+    public void testOfWithThreeHeadersNullNames() {
+        assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of(null, "value1", "name2", "value2", "name3", "value3"));
+        assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of("name1", "value1", null, "value2", "name3", "value3"));
+        assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of("name1", "value1", "name2", "value2", null, "value3"));
+    }
+
+    @Test
+    public void testOfMapWithNull() {
+        assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of((Map<String, ?>) null));
     }
 
     // --- copyOf ---
@@ -183,6 +181,19 @@ public class HttpHeadersTest extends TestBase {
     }
 
     @Test
+    public void testValueOfOther() {
+        Integer number = 42;
+        String value = HttpHeaders.valueOf(number);
+        assertEquals("42", value);
+    }
+
+    @Test
+    public void testValueOfObject() {
+        Integer num = 42;
+        assertEquals("42", HttpHeaders.valueOf(num));
+    }
+
+    @Test
     public void testValueOfDate() {
         Date date = new Date(0);
         String value = HttpHeaders.valueOf(date);
@@ -196,19 +207,6 @@ public class HttpHeadersTest extends TestBase {
         String value = HttpHeaders.valueOf(instant);
         assertNotNull(value);
         assertTrue(value.contains("1970"));
-    }
-
-    @Test
-    public void testValueOfOther() {
-        Integer number = 42;
-        String value = HttpHeaders.valueOf(number);
-        assertEquals("42", value);
-    }
-
-    @Test
-    public void testValueOfObject() {
-        Integer num = 42;
-        assertEquals("42", HttpHeaders.valueOf(num));
     }
 
     @Test

@@ -7,12 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class DoubleTriConsumerTest extends TestBase {
 
     @Test
@@ -43,6 +41,14 @@ public class DoubleTriConsumerTest extends TestBase {
     }
 
     @Test
+    public void testFunctionalInterfaceContract() {
+        DoubleTriConsumer lambda = (a, b, c) -> {
+        };
+        assertNotNull(lambda);
+        assertDoesNotThrow(() -> lambda.accept(1.0, 2.0, 3.0));
+    }
+
+    @Test
     public void testAndThen() {
         List<String> results = new ArrayList<>();
         DoubleTriConsumer consumer1 = (a, b, c) -> results.add("first:" + (a + b + c));
@@ -70,13 +76,5 @@ public class DoubleTriConsumerTest extends TestBase {
         assertEquals(1, results.get(0));
         assertEquals(2, results.get(1));
         assertEquals(3, results.get(2));
-    }
-
-    @Test
-    public void testFunctionalInterfaceContract() {
-        DoubleTriConsumer lambda = (a, b, c) -> {
-        };
-        assertNotNull(lambda);
-        assertDoesNotThrow(() -> lambda.accept(1.0, 2.0, 3.0));
     }
 }

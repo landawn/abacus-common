@@ -8,12 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class UUIDTypeTest extends TestBase {
 
     private UUIDType uuidType;
@@ -65,17 +63,17 @@ public class UUIDTypeTest extends TestBase {
     }
 
     @Test
-    public void testValueOfInvalidUUID() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            uuidType.valueOf("not-a-valid-uuid");
-        });
-    }
-
-    @Test
     public void testValueOfRandomUUID() {
         String randomUUIDString = UUID.randomUUID().toString();
         UUID result = uuidType.valueOf(randomUUIDString);
         assertNotNull(result);
         assertEquals(randomUUIDString, result.toString());
+    }
+
+    @Test
+    public void testValueOfInvalidUUID() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            uuidType.valueOf("not-a-valid-uuid");
+        });
     }
 }

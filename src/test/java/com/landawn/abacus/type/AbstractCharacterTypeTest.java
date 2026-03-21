@@ -13,7 +13,6 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -22,7 +21,6 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("new-test")
 public class AbstractCharacterTypeTest extends TestBase {
     private Type<Character> type;
     private CharacterWriter characterWriter;
@@ -56,6 +54,31 @@ public class AbstractCharacterTypeTest extends TestBase {
     }
 
     @Test
+    public void testValueOf_String_NumericCode() {
+        assertEquals('A', type.valueOf("65"));
+        assertEquals('a', type.valueOf("97"));
+        assertEquals('0', type.valueOf("48"));
+    }
+
+    @Test
+    public void testValueOf_CharArray_NumericCode() {
+        char[] cbuf = "65".toCharArray();
+        assertEquals('A', type.valueOf(cbuf, 0, 2));
+
+        cbuf = "97".toCharArray();
+        assertEquals('a', type.valueOf(cbuf, 0, 2));
+    }
+
+    @Test
+    public void testValueOf_CharArray_WithOffset() {
+        char[] cbuf = "abcde".toCharArray();
+        assertEquals('c', type.valueOf(cbuf, 2, 1));
+
+        cbuf = "xx65yy".toCharArray();
+        assertEquals('A', type.valueOf(cbuf, 2, 2));
+    }
+
+    @Test
     public void testValueOf_String_Null() {
         Character result = type.valueOf((String) null);
         assertNull(result);
@@ -76,13 +99,6 @@ public class AbstractCharacterTypeTest extends TestBase {
     }
 
     @Test
-    public void testValueOf_String_NumericCode() {
-        assertEquals('A', type.valueOf("65"));
-        assertEquals('a', type.valueOf("97"));
-        assertEquals('0', type.valueOf("48"));
-    }
-
-    @Test
     public void testValueOf_CharArray_Null() {
         Character result = type.valueOf(null, 0, 0);
         assertNull(result);
@@ -99,24 +115,6 @@ public class AbstractCharacterTypeTest extends TestBase {
     public void testValueOf_CharArray_SingleChar() {
         char[] cbuf = { 'x' };
         assertEquals('x', type.valueOf(cbuf, 0, 1));
-    }
-
-    @Test
-    public void testValueOf_CharArray_NumericCode() {
-        char[] cbuf = "65".toCharArray();
-        assertEquals('A', type.valueOf(cbuf, 0, 2));
-
-        cbuf = "97".toCharArray();
-        assertEquals('a', type.valueOf(cbuf, 0, 2));
-    }
-
-    @Test
-    public void testValueOf_CharArray_WithOffset() {
-        char[] cbuf = "abcde".toCharArray();
-        assertEquals('c', type.valueOf(cbuf, 2, 1));
-
-        cbuf = "xx65yy".toCharArray();
-        assertEquals('A', type.valueOf(cbuf, 2, 2));
     }
 
     @Test

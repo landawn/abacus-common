@@ -17,30 +17,23 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Duration;
 
-@Tag("2025")
 public class DurationTypeTest extends TestBase {
 
     private final DurationType type = new DurationType();
 
     @Test
-    public void test_clazz() {
-        assertEquals(Duration.class, type.javaType());
-    }
-
-    @Test
-    public void test_name() {
-        assertEquals("Duration", type.name());
-    }
-
-    @Test
     public void test_isComparable() {
         assertTrue(type.isComparable());
+    }
+
+    @Test
+    public void test_clazz() {
+        assertEquals(Duration.class, type.javaType());
     }
 
     @Test
@@ -103,6 +96,11 @@ public class DurationTypeTest extends TestBase {
         sw = new StringWriter();
         type.appendTo(sw, null);
         assertEquals("null", sw.toString());
+    }
+
+    @Test
+    public void test_name() {
+        assertEquals("Duration", type.name());
     }
 
 }

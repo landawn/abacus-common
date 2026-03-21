@@ -5,13 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 import com.landawn.abacus.util.DateTimeFormat;
 
-@Tag("old-test")
 public class ConfigTest extends AbstractTest {
 
     @Test

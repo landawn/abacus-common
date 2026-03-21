@@ -6,12 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class NConsumerTest extends TestBase {
 
     @Test
@@ -46,6 +44,44 @@ public class NConsumerTest extends TestBase {
     }
 
     @Test
+    public void testAcceptWithLambda() {
+        final int[] sum = { 0 };
+        NConsumer<Integer> consumer = args -> {
+            for (Integer n : args) {
+                sum[0] += n;
+            }
+        };
+
+        consumer.accept(1, 2, 3, 4, 5);
+
+        assertEquals(15, sum[0]);
+    }
+
+    @Test
+    public void testSideEffects() {
+        final int[] counter = { 0 };
+        NConsumer<String> consumer = args -> counter[0] = args.length;
+
+        consumer.accept("a", "b", "c", "d", "e");
+
+        assertEquals(5, counter[0]);
+    }
+
+    @Test
+    public void testMethodReference() {
+        final List<String> result = new ArrayList<>();
+        NConsumer<String> consumer = args -> {
+            for (String s : args) {
+                result.add(s);
+            }
+        };
+
+        consumer.accept("test1", "test2");
+
+        assertEquals(2, result.size());
+    }
+
+    @Test
     public void testAcceptWithSingleArgument() {
         final List<String> result = new ArrayList<>();
         NConsumer<String> consumer = args -> {
@@ -58,20 +94,6 @@ public class NConsumerTest extends TestBase {
 
         assertEquals(1, result.size());
         assertEquals("single", result.get(0));
-    }
-
-    @Test
-    public void testAcceptWithLambda() {
-        final int[] sum = { 0 };
-        NConsumer<Integer> consumer = args -> {
-            for (Integer n : args) {
-                sum[0] += n;
-            }
-        };
-
-        consumer.accept(1, 2, 3, 4, 5);
-
-        assertEquals(15, sum[0]);
     }
 
     @Test
@@ -91,36 +113,6 @@ public class NConsumerTest extends TestBase {
         assertEquals(2, result.size());
         assertEquals("HELLO", result.get(0));
         assertEquals("WORLD", result.get(1));
-    }
-
-    @Test
-    public void testAndThen() {
-        final List<String> result = new ArrayList<>();
-        NConsumer<String> first = args -> result.add("first:" + args.length);
-        NConsumer<String> second = args -> result.add("second:" + args.length);
-
-        NConsumer<String> combined = first.andThen(second);
-        combined.accept("a", "b", "c");
-
-        assertEquals(2, result.size());
-        assertEquals("first:3", result.get(0));
-        assertEquals("second:3", result.get(1));
-    }
-
-    @Test
-    public void testAndThenChaining() {
-        final List<String> result = new ArrayList<>();
-        NConsumer<String> first = args -> result.add("first");
-        NConsumer<String> second = args -> result.add("second");
-        NConsumer<String> third = args -> result.add("third");
-
-        NConsumer<String> combined = first.andThen(second).andThen(third);
-        combined.accept("a");
-
-        assertEquals(3, result.size());
-        assertEquals("first", result.get(0));
-        assertEquals("second", result.get(1));
-        assertEquals("third", result.get(2));
     }
 
     @Test
@@ -159,27 +151,33 @@ public class NConsumerTest extends TestBase {
     }
 
     @Test
-    public void testSideEffects() {
-        final int[] counter = { 0 };
-        NConsumer<String> consumer = args -> counter[0] = args.length;
+    public void testAndThen() {
+        final List<String> result = new ArrayList<>();
+        NConsumer<String> first = args -> result.add("first:" + args.length);
+        NConsumer<String> second = args -> result.add("second:" + args.length);
 
-        consumer.accept("a", "b", "c", "d", "e");
+        NConsumer<String> combined = first.andThen(second);
+        combined.accept("a", "b", "c");
 
-        assertEquals(5, counter[0]);
+        assertEquals(2, result.size());
+        assertEquals("first:3", result.get(0));
+        assertEquals("second:3", result.get(1));
     }
 
     @Test
-    public void testMethodReference() {
+    public void testAndThenChaining() {
         final List<String> result = new ArrayList<>();
-        NConsumer<String> consumer = args -> {
-            for (String s : args) {
-                result.add(s);
-            }
-        };
+        NConsumer<String> first = args -> result.add("first");
+        NConsumer<String> second = args -> result.add("second");
+        NConsumer<String> third = args -> result.add("third");
 
-        consumer.accept("test1", "test2");
+        NConsumer<String> combined = first.andThen(second).andThen(third);
+        combined.accept("a");
 
-        assertEquals(2, result.size());
+        assertEquals(3, result.size());
+        assertEquals("first", result.get(0));
+        assertEquals("second", result.get(1));
+        assertEquals("third", result.get(2));
     }
 
     @Test

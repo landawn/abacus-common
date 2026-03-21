@@ -19,7 +19,6 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -27,41 +26,9 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("2025")
 public class BooleanCharTypeTest extends TestBase {
 
     private final BooleanCharType type = new BooleanCharType();
-
-    @Test
-    public void test_valueOf_String() {
-        // Test with null
-        Object result = type.valueOf((String) null);
-        // Result may be null or default value depending on type
-        assertNotNull(result);
-    }
-
-    @Test
-    public void test_writeCharacter() throws IOException {
-        CharacterWriter writer = mock(BufferedJsonWriter.class);
-        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
-
-        type.writeCharacter(writer, null, config);
-        verify(writer, atLeastOnce()).write(any(String.class));
-    }
-
-    @Test
-    public void test_get_ResultSet_byLabel() throws SQLException {
-        ResultSet rs = mock(ResultSet.class);
-        // Basic get test - actual implementation will vary by type
-        assertDoesNotThrow(() -> type.get(rs, "col"));
-    }
-
-    @Test
-    public void test_set_CallableStatement() throws SQLException {
-        CallableStatement stmt = mock(CallableStatement.class);
-        // Basic set test - actual implementation will vary by type
-        assertDoesNotThrow(() -> type.set(stmt, "param", null));
-    }
 
     @Test
     public void testClazz() {
@@ -100,18 +67,6 @@ public class BooleanCharTypeTest extends TestBase {
     }
 
     @Test
-    public void testValueOf_Y_Uppercase() {
-        Boolean result = type.valueOf("Y");
-        assertEquals(Boolean.TRUE, result);
-    }
-
-    @Test
-    public void testValueOf_Y_Lowercase() {
-        Boolean result = type.valueOf("y");
-        assertEquals(Boolean.TRUE, result);
-    }
-
-    @Test
     public void testValueOf_N() {
         Boolean result = type.valueOf("N");
         assertEquals(Boolean.FALSE, result);
@@ -121,6 +76,33 @@ public class BooleanCharTypeTest extends TestBase {
     public void testValueOf_Other() {
         Boolean result = type.valueOf("X");
         assertEquals(Boolean.FALSE, result);
+    }
+
+    @Test
+    public void testValueOf_CharArray_N() {
+        char[] chars = { 'N' };
+        Boolean result = type.valueOf(chars, 0, 1);
+        assertEquals(Boolean.FALSE, result);
+    }
+
+    @Test
+    public void test_valueOf_String() {
+        // Test with null
+        Object result = type.valueOf((String) null);
+        // Result may be null or default value depending on type
+        assertNotNull(result);
+    }
+
+    @Test
+    public void testValueOf_Y_Uppercase() {
+        Boolean result = type.valueOf("Y");
+        assertEquals(Boolean.TRUE, result);
+    }
+
+    @Test
+    public void testValueOf_Y_Lowercase() {
+        Boolean result = type.valueOf("y");
+        assertEquals(Boolean.TRUE, result);
     }
 
     @Test
@@ -144,13 +126,6 @@ public class BooleanCharTypeTest extends TestBase {
     }
 
     @Test
-    public void testValueOf_CharArray_N() {
-        char[] chars = { 'N' };
-        Boolean result = type.valueOf(chars, 0, 1);
-        assertEquals(Boolean.FALSE, result);
-    }
-
-    @Test
     public void testValueOf_CharArray_Null() {
         Boolean result = type.valueOf(null, 0, 0);
         assertEquals(Boolean.FALSE, result);
@@ -168,6 +143,13 @@ public class BooleanCharTypeTest extends TestBase {
         char[] chars = { 'Y', 'E', 'S' };
         Boolean result = type.valueOf(chars, 0, 3);
         assertEquals(Boolean.FALSE, result);
+    }
+
+    @Test
+    public void test_get_ResultSet_byLabel() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+        // Basic get test - actual implementation will vary by type
+        assertDoesNotThrow(() -> type.get(rs, "col"));
     }
 
     @Test
@@ -201,6 +183,13 @@ public class BooleanCharTypeTest extends TestBase {
 
         assertEquals(Boolean.TRUE, result);
         verify(rs).getString("columnName");
+    }
+
+    @Test
+    public void test_set_CallableStatement() throws SQLException {
+        CallableStatement stmt = mock(CallableStatement.class);
+        // Basic set test - actual implementation will vary by type
+        assertDoesNotThrow(() -> type.set(stmt, "param", null));
     }
 
     @Test
@@ -270,6 +259,15 @@ public class BooleanCharTypeTest extends TestBase {
         sw = new StringWriter();
         type.appendTo(sw, null);
         assertEquals("N", sw.toString());
+    }
+
+    @Test
+    public void test_writeCharacter() throws IOException {
+        CharacterWriter writer = mock(BufferedJsonWriter.class);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
+
+        type.writeCharacter(writer, null, config);
+        verify(writer, atLeastOnce()).write(any(String.class));
     }
 
     @Test

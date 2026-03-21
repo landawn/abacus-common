@@ -541,16 +541,15 @@ public final class Iterators {
      * @return the index of the first occurrence of the specified value in the iterator, or {@code -1} if the value is not found or {@code iter} is {@code null}.
      */
     public static long indexOf(final Iterator<?> iter, final Object valueToFind, final long fromIndex) {
-        N.checkArgument(fromIndex >= 0, "'fromIndex' cannot be negative: %s", fromIndex);
-
         if (iter == null) {
             return N.INDEX_NOT_FOUND;
         }
 
+        final long startIndex = N.max(fromIndex, 0);
         long index = 0;
 
-        if (fromIndex > 0) {
-            while (index < fromIndex && iter.hasNext()) {
+        if (startIndex > 0) {
+            while (index < startIndex && iter.hasNext()) {
                 iter.next();
                 index++;
             }
@@ -4048,6 +4047,12 @@ public final class Iterators {
     /**
      * Transforms the elements of the given {@code Iterable} into {@code Iterable}s using the provided {@code Function} and flattens the result into an {@code ObjIterator}.
      *
+     * <p><b>Naming Convention:</b> This library uses specific naming for {@code flatMap} variants in {@code Iterators} and {@code N}:
+     * <ul>
+     *   <li>{@link #flatMap(Iterable, Function) flatMap} (uppercase 'M') - transforms elements into an {@link java.lang.Iterable Iterable} or {@link java.util.Iterator Iterator}.</li>
+     *   <li>{@link #flatmap(Iterable, Function) flatmap} (lowercase 'm') - transforms elements into an array.</li>
+     * </ul></p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a,b", "c,d");
@@ -4134,6 +4139,12 @@ public final class Iterators {
 
     /**
      * Transforms the elements of the given {@code Iterable} into arrays using the provided {@code Function} and flattens the result into an {@code ObjIterator}.
+     *
+     * <p><b>Naming Convention:</b> This library uses specific naming for {@code flatMap} variants in {@code Iterators} and {@code N}:
+     * <ul>
+     *   <li>{@link #flatMap(Iterable, Function) flatMap} (uppercase 'M') - transforms elements into an {@link java.lang.Iterable Iterable} or {@link java.util.Iterator Iterator}.</li>
+     *   <li>{@link #flatmap(Iterable, Function) flatmap} (lowercase 'm') - transforms elements into an array.</li>
+     * </ul></p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

@@ -3,13 +3,15 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ByteToIntFunctionTest extends TestBase {
+
+    private static int byteToInt(byte value) {
+        return value;
+    }
 
     @Test
     public void testApplyAsInt() {
@@ -50,12 +52,6 @@ public class ByteToIntFunctionTest extends TestBase {
     }
 
     @Test
-    public void testDefaultWithBoundaryValues() {
-        assertEquals(127, ByteToIntFunction.DEFAULT.applyAsInt(Byte.MAX_VALUE));
-        assertEquals(-128, ByteToIntFunction.DEFAULT.applyAsInt(Byte.MIN_VALUE));
-    }
-
-    @Test
     public void testWideningConversion() {
         ByteToIntFunction widen = value -> value;
 
@@ -82,6 +78,19 @@ public class ByteToIntFunctionTest extends TestBase {
     }
 
     @Test
+    public void testMethodReference() {
+        ByteToIntFunction toInt = ByteToIntFunctionTest::byteToInt;
+
+        assertEquals(5, toInt.applyAsInt((byte) 5));
+    }
+
+    @Test
+    public void testDefaultWithBoundaryValues() {
+        assertEquals(127, ByteToIntFunction.DEFAULT.applyAsInt(Byte.MAX_VALUE));
+        assertEquals(-128, ByteToIntFunction.DEFAULT.applyAsInt(Byte.MIN_VALUE));
+    }
+
+    @Test
     public void testWithBoundaryValues() {
         ByteToIntFunction toInt = value -> (int) value;
 
@@ -90,18 +99,7 @@ public class ByteToIntFunctionTest extends TestBase {
     }
 
     @Test
-    public void testMethodReference() {
-        ByteToIntFunction toInt = ByteToIntFunctionTest::byteToInt;
-
-        assertEquals(5, toInt.applyAsInt((byte) 5));
-    }
-
-    @Test
     public void testFunctionalInterface() {
         assertNotNull(ByteToIntFunction.class.getAnnotation(FunctionalInterface.class));
-    }
-
-    private static int byteToInt(byte value) {
-        return value;
     }
 }

@@ -11,12 +11,10 @@ import java.util.Properties;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class EmailUtilTest extends TestBase {
 
     private Properties props;
@@ -85,6 +83,69 @@ public class EmailUtilTest extends TestBase {
                     "password", props);
         });
         assertTrue(exception.getMessage().contains("Failed to send email"));
+    }
+
+    @Test
+    public void test_sendEmail_withAuthenticationEnabled() {
+        Properties authProps = new Properties();
+        authProps.put("mail.smtp.host", "smtp.gmail.com");
+        authProps.put("mail.smtp.port", "587");
+        authProps.put("mail.smtp.auth", "true");
+        authProps.put("mail.smtp.starttls.enable", "true");
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            EmailUtil.sendEmail(new String[] { "test@example.com" }, "sender@gmail.com", "Test with Auth", "Testing SMTP authentication", "real_username",
+                    "real_password", authProps);
+        });
+        assertTrue(exception.getMessage().contains("Failed to send email"));
+    }
+
+    @Test
+    public void test_sendEmail_withSSL() {
+        Properties sslProps = new Properties();
+        sslProps.put("mail.smtp.host", "smtp.gmail.com");
+        sslProps.put("mail.smtp.port", "465");
+        sslProps.put("mail.smtp.auth", "true");
+        sslProps.put("mail.smtp.socketFactory.port", "465");
+        sslProps.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            EmailUtil.sendEmail(new String[] { "test@example.com" }, "sender@gmail.com", "Test with SSL", "Testing SSL connection", "username", "password",
+                    sslProps);
+        });
+        assertTrue(exception.getMessage().contains("Failed to send email"));
+    }
+
+    @Test
+    public void test_sendEmail_veryLongContent() {
+        StringBuilder longContent = new StringBuilder();
+        for (int i = 0; i < 10000; i++) {
+            longContent.append("This is line ").append(i).append(". ");
+        }
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            EmailUtil.sendEmail(new String[] { "test@example.com" }, "sender@example.com", "Very Long Email", longContent.toString(), "username", "password",
+                    props);
+        });
+        assertTrue(exception.getMessage().contains("Failed to send email"));
+    }
+
+    @Test
+    public void test_sendEmail_specialEmailAddresses() {
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            EmailUtil.sendEmail(new String[] { "user+tag@example.com", "user.name@example.co.uk" }, "sender.name+tag@example.com", "Special Email Addresses",
+                    "Testing special characters in email addresses", "username", "password", props);
+        });
+        assertTrue(exception.getMessage().contains("Failed to send email"));
+    }
+
+    @Test
+    public void testSendEmail() {
+        try {
+            EmailUtil.sendEmail(new String[] { "test@example.com" }, "sender@example.com", "Test Subject", "Test Content", "username", "password", props);
+        } catch (RuntimeException e) {
+            Assertions.assertTrue(e.getMessage().contains("Failed to send email"));
+        }
     }
 
     @Test
@@ -166,6 +227,43 @@ public class EmailUtilTest extends TestBase {
     }
 
     @Test
+    public void test_sendEmailWithAttachment_filenameWithoutPath() {
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            EmailUtil.sendEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "Test Simple Filename",
+                    "Testing filename without path", new String[] { "simple_file.txt" }, "username", "password", props);
+        });
+        assertTrue(exception.getMessage().contains("Failed to send email"));
+    }
+
+    @Test
+    public void test_sendEmailWithAttachment_filenameExtractionWindows() {
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            EmailUtil.sendEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "Test Filename Extraction",
+                    "Testing filename extraction from path", new String[] { "C:\\Users\\Documents\\My Files\\report.pdf" }, "username", "password", props);
+        });
+        assertTrue(exception.getMessage().contains("Failed to send email"));
+    }
+
+    @Test
+    public void test_sendEmailWithAttachment_filenameExtractionUnix() {
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            EmailUtil.sendEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "Test Filename Extraction Unix",
+                    "Testing filename extraction from Unix path", new String[] { "/home/user/documents/my files/report.pdf" }, "username", "password", props);
+        });
+        assertTrue(exception.getMessage().contains("Failed to send email"));
+    }
+
+    @Test
+    public void testSendEmailWithAttachment() {
+        try {
+            EmailUtil.sendEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "Test Subject", "Test Content",
+                    new String[] { "test.txt" }, "username", "password", props);
+        } catch (RuntimeException e) {
+            Assertions.assertTrue(e.getMessage().contains("Failed to send email"));
+        }
+    }
+
+    @Test
     public void test_sendHtmlEmail_basicHTML() {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             EmailUtil.sendHtmlEmail(new String[] { "test@example.com" }, "sender@example.com", "HTML Email Test",
@@ -212,6 +310,27 @@ public class EmailUtilTest extends TestBase {
             EmailUtil.sendHtmlEmail(new String[] { "test@example.com" }, "sender@example.com", "Empty HTML", "", "username", "password", props);
         });
         assertTrue(exception.getMessage().contains("Failed to send email"));
+    }
+
+    @Test
+    public void test_sendHtmlEmail_scriptTags() {
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            String htmlWithScript = "<html><body>" + "<h1>Test</h1>" + "<script>alert('test');</script>" + "<p>Content</p>" + "</body></html>";
+
+            EmailUtil.sendHtmlEmail(new String[] { "test@example.com" }, "sender@example.com", "HTML with Script", htmlWithScript, "username", "password",
+                    props);
+        });
+        assertTrue(exception.getMessage().contains("Failed to send email"));
+    }
+
+    @Test
+    public void testSendHTMLEmail() {
+        try {
+            EmailUtil.sendHtmlEmail(new String[] { "test@example.com" }, "sender@example.com", "Test Subject", "<h1>Test HTML</h1>", "username", "password",
+                    props);
+        } catch (RuntimeException e) {
+            Assertions.assertTrue(e.getMessage().contains("Failed to send email"));
+        }
     }
 
     @Test
@@ -292,127 +411,6 @@ public class EmailUtilTest extends TestBase {
                 pdfFile.delete();
             if (excelFile.exists())
                 excelFile.delete();
-        }
-    }
-
-    @Test
-    public void test_sendEmail_withAuthenticationEnabled() {
-        Properties authProps = new Properties();
-        authProps.put("mail.smtp.host", "smtp.gmail.com");
-        authProps.put("mail.smtp.port", "587");
-        authProps.put("mail.smtp.auth", "true");
-        authProps.put("mail.smtp.starttls.enable", "true");
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendEmail(new String[] { "test@example.com" }, "sender@gmail.com", "Test with Auth", "Testing SMTP authentication", "real_username",
-                    "real_password", authProps);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void test_sendEmail_withSSL() {
-        Properties sslProps = new Properties();
-        sslProps.put("mail.smtp.host", "smtp.gmail.com");
-        sslProps.put("mail.smtp.port", "465");
-        sslProps.put("mail.smtp.auth", "true");
-        sslProps.put("mail.smtp.socketFactory.port", "465");
-        sslProps.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendEmail(new String[] { "test@example.com" }, "sender@gmail.com", "Test with SSL", "Testing SSL connection", "username", "password",
-                    sslProps);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void test_sendEmail_veryLongContent() {
-        StringBuilder longContent = new StringBuilder();
-        for (int i = 0; i < 10000; i++) {
-            longContent.append("This is line ").append(i).append(". ");
-        }
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendEmail(new String[] { "test@example.com" }, "sender@example.com", "Very Long Email", longContent.toString(), "username", "password",
-                    props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void test_sendEmail_specialEmailAddresses() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendEmail(new String[] { "user+tag@example.com", "user.name@example.co.uk" }, "sender.name+tag@example.com", "Special Email Addresses",
-                    "Testing special characters in email addresses", "username", "password", props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void test_sendHtmlEmail_scriptTags() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            String htmlWithScript = "<html><body>" + "<h1>Test</h1>" + "<script>alert('test');</script>" + "<p>Content</p>" + "</body></html>";
-
-            EmailUtil.sendHtmlEmail(new String[] { "test@example.com" }, "sender@example.com", "HTML with Script", htmlWithScript, "username", "password",
-                    props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void test_sendEmailWithAttachment_filenameWithoutPath() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "Test Simple Filename",
-                    "Testing filename without path", new String[] { "simple_file.txt" }, "username", "password", props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void test_sendEmailWithAttachment_filenameExtractionWindows() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "Test Filename Extraction",
-                    "Testing filename extraction from path", new String[] { "C:\\Users\\Documents\\My Files\\report.pdf" }, "username", "password", props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void test_sendEmailWithAttachment_filenameExtractionUnix() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "Test Filename Extraction Unix",
-                    "Testing filename extraction from Unix path", new String[] { "/home/user/documents/my files/report.pdf" }, "username", "password", props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void testSendEmail() {
-        try {
-            EmailUtil.sendEmail(new String[] { "test@example.com" }, "sender@example.com", "Test Subject", "Test Content", "username", "password", props);
-        } catch (RuntimeException e) {
-            Assertions.assertTrue(e.getMessage().contains("Failed to send email"));
-        }
-    }
-
-    @Test
-    public void testSendEmailWithAttachment() {
-        try {
-            EmailUtil.sendEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "Test Subject", "Test Content",
-                    new String[] { "test.txt" }, "username", "password", props);
-        } catch (RuntimeException e) {
-            Assertions.assertTrue(e.getMessage().contains("Failed to send email"));
-        }
-    }
-
-    @Test
-    public void testSendHTMLEmail() {
-        try {
-            EmailUtil.sendHtmlEmail(new String[] { "test@example.com" }, "sender@example.com", "Test Subject", "<h1>Test HTML</h1>", "username", "password",
-                    props);
-        } catch (RuntimeException e) {
-            Assertions.assertTrue(e.getMessage().contains("Failed to send email"));
         }
     }
 

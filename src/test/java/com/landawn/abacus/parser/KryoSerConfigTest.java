@@ -16,12 +16,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class KryoSerConfigTest extends TestBase {
 
     private KryoSerConfig config;
@@ -31,18 +29,78 @@ public class KryoSerConfigTest extends TestBase {
         config = new KryoSerConfig();
     }
 
-    // isWriteClass
     @Test
-    public void test_writeClass() {
+    public void test_skipTransientField() {
         KryoSerConfig config = new KryoSerConfig();
-        assertFalse(config.isWriteClass());
+        config.setSkipTransientField(true);
+        assertTrue(config.isSkipTransientField());
 
-        KryoSerConfig result = config.setWriteClass(true);
+        config.setSkipTransientField(false);
+        assertFalse(config.isSkipTransientField());
+    }
+
+    @Test
+    public void testEqualityWithDifferentConfigurations() {
+        KryoSerConfig config1 = new KryoSerConfig();
+        KryoSerConfig config2 = new KryoSerConfig();
+
+        config1.setWriteClass(true).setSkipTransientField(true);
+        config2.setWriteClass(true).setSkipTransientField(false);
+        assertNotEquals(config1, config2);
+
+        config2.setSkipTransientField(true);
+        assertEquals(config1, config2);
+
+        Map<Class<?>, Set<String>> ignoredProps1 = new HashMap<>();
+        ignoredProps1.put(String.class, new HashSet<>(Arrays.asList("prop1")));
+        config1.setIgnoredPropNames(ignoredProps1);
+
+        assertNotEquals(config1, config2);
+
+        config2.setIgnoredPropNames(ignoredProps1);
+        assertEquals(config1, config2);
+    }
+
+    // constructor
+    @Test
+    public void test_constructor() {
+        KryoSerConfig config = new KryoSerConfig();
+        assertNotNull(config);
+        assertFalse(config.isWriteClass());
+    }
+
+    @Test
+    public void test_setExclusion() {
+        KryoSerConfig config = new KryoSerConfig();
+        config.setExclusion(Exclusion.NULL);
+        assertEquals(Exclusion.NULL, config.getExclusion());
+
+        config.setExclusion(Exclusion.DEFAULT);
+        assertEquals(Exclusion.DEFAULT, config.getExclusion());
+    }
+
+    @Test
+    public void test_setIgnoredPropNames() {
+        KryoSerConfig config = new KryoSerConfig();
+        Map<Class<?>, Set<String>> ignoredPropNames = new HashMap<>();
+        Set<String> props = new HashSet<>();
+        props.add("prop1");
+        props.add("prop2");
+        ignoredPropNames.put(String.class, props);
+
+        KryoSerConfig result = config.setIgnoredPropNames(ignoredPropNames);
         assertSame(config, result);
-        assertTrue(config.isWriteClass());
+        assertNotNull(config.getIgnoredPropNames());
+    }
 
-        config.setWriteClass(false);
-        assertFalse(config.isWriteClass());
+    @Test
+    public void testDefaultValues() {
+        KryoSerConfig newConfig = new KryoSerConfig();
+
+        assertFalse(newConfig.isWriteClass());
+        assertNull(newConfig.getExclusion());
+        assertTrue(newConfig.isSkipTransientField());
+        assertNull(newConfig.getIgnoredPropNames(String.class));
     }
 
     @Test
@@ -63,12 +121,41 @@ public class KryoSerConfigTest extends TestBase {
         assertTrue(config.isWriteClass());
     }
 
+    // isWriteClass
+    @Test
+    public void test_writeClass() {
+        KryoSerConfig config = new KryoSerConfig();
+        assertFalse(config.isWriteClass());
+
+        KryoSerConfig result = config.setWriteClass(true);
+        assertSame(config, result);
+        assertTrue(config.isWriteClass());
+
+        config.setWriteClass(false);
+        assertFalse(config.isWriteClass());
+    }
+
     // setWriteClass
     @Test
     public void testSetWriteClass() {
         KryoSerConfig result = config.setWriteClass(true);
         assertSame(config, result);
         assertTrue(config.isWriteClass());
+    }
+
+    // copy
+    @Test
+    public void testCopy() {
+        config.setWriteClass(true);
+        config.setExclusion(Exclusion.NULL);
+        config.setSkipTransientField(false);
+
+        KryoSerConfig copy = config.copy();
+        assertNotNull(copy);
+        assertNotSame(config, copy);
+        assertTrue(copy.isWriteClass());
+        assertEquals(Exclusion.NULL, copy.getExclusion());
+        assertFalse(copy.isSkipTransientField());
     }
 
     // hashCode
@@ -162,6 +249,31 @@ public class KryoSerConfigTest extends TestBase {
         assertTrue(str.contains("writeClass=true"));
     }
 
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testKSCOf() {
+        KryoSerConfig config1 = KryoSerConfig.create().setWriteClass(true);
+        assertTrue(config1.isWriteClass());
+
+        KryoSerConfig config2 = KryoSerConfig.create().setWriteClass(false);
+        assertFalse(config2.isWriteClass());
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testKSCOfWithAllParams() {
+        Map<Class<?>, Set<String>> ignoredProps = new HashMap<>();
+        Set<String> props = new HashSet<>();
+        props.add("prop1");
+        ignoredProps.put(String.class, props);
+
+        KryoSerConfig config = KryoSerConfig.create().setWriteClass(true).setExclusion(Exclusion.DEFAULT).setIgnoredPropNames(ignoredProps);
+
+        assertTrue(config.isWriteClass());
+        assertEquals(Exclusion.DEFAULT, config.getExclusion());
+        assertEquals(props, config.getIgnoredPropNames(String.class));
+    }
+
     // create
     @Test
     public void test_KSC_create() {
@@ -176,45 +288,6 @@ public class KryoSerConfigTest extends TestBase {
         assertNotNull(newConfig);
         assertNotSame(config, newConfig);
         assertFalse(newConfig.isWriteClass());
-    }
-
-    // copy
-    @Test
-    public void testCopy() {
-        config.setWriteClass(true);
-        config.setExclusion(Exclusion.NULL);
-        config.setSkipTransientField(false);
-
-        KryoSerConfig copy = config.copy();
-        assertNotNull(copy);
-        assertNotSame(config, copy);
-        assertTrue(copy.isWriteClass());
-        assertEquals(Exclusion.NULL, copy.getExclusion());
-        assertFalse(copy.isSkipTransientField());
-    }
-
-    // getExclusion
-    @Test
-    public void testGetExclusion() {
-        assertNull(config.getExclusion());
-        config.setExclusion(Exclusion.NULL);
-        assertEquals(Exclusion.NULL, config.getExclusion());
-    }
-
-    // isSkipTransientField
-    @Test
-    public void testIsSkipTransientField() {
-        assertTrue(config.isSkipTransientField());
-        config.setSkipTransientField(false);
-        assertFalse(config.isSkipTransientField());
-    }
-
-    // constructor
-    @Test
-    public void test_constructor() {
-        KryoSerConfig config = new KryoSerConfig();
-        assertNotNull(config);
-        assertFalse(config.isWriteClass());
     }
 
     // combined config tests
@@ -256,50 +329,6 @@ public class KryoSerConfigTest extends TestBase {
     }
 
     @Test
-    public void test_setExclusion() {
-        KryoSerConfig config = new KryoSerConfig();
-        config.setExclusion(Exclusion.NULL);
-        assertEquals(Exclusion.NULL, config.getExclusion());
-
-        config.setExclusion(Exclusion.DEFAULT);
-        assertEquals(Exclusion.DEFAULT, config.getExclusion());
-    }
-
-    @Test
-    public void test_skipTransientField() {
-        KryoSerConfig config = new KryoSerConfig();
-        config.setSkipTransientField(true);
-        assertTrue(config.isSkipTransientField());
-
-        config.setSkipTransientField(false);
-        assertFalse(config.isSkipTransientField());
-    }
-
-    @Test
-    public void test_setIgnoredPropNames() {
-        KryoSerConfig config = new KryoSerConfig();
-        Map<Class<?>, Set<String>> ignoredPropNames = new HashMap<>();
-        Set<String> props = new HashSet<>();
-        props.add("prop1");
-        props.add("prop2");
-        ignoredPropNames.put(String.class, props);
-
-        KryoSerConfig result = config.setIgnoredPropNames(ignoredPropNames);
-        assertSame(config, result);
-        assertNotNull(config.getIgnoredPropNames());
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void testKSCOf() {
-        KryoSerConfig config1 = KryoSerConfig.create().setWriteClass(true);
-        assertTrue(config1.isWriteClass());
-
-        KryoSerConfig config2 = KryoSerConfig.create().setWriteClass(false);
-        assertFalse(config2.isWriteClass());
-    }
-
-    @Test
     @SuppressWarnings("deprecation")
     public void testKSCOfWithExclusion() {
         Map<Class<?>, Set<String>> ignoredProps = new HashMap<>();
@@ -314,21 +343,6 @@ public class KryoSerConfigTest extends TestBase {
     }
 
     @Test
-    @SuppressWarnings("deprecation")
-    public void testKSCOfWithAllParams() {
-        Map<Class<?>, Set<String>> ignoredProps = new HashMap<>();
-        Set<String> props = new HashSet<>();
-        props.add("prop1");
-        ignoredProps.put(String.class, props);
-
-        KryoSerConfig config = KryoSerConfig.create().setWriteClass(true).setExclusion(Exclusion.DEFAULT).setIgnoredPropNames(ignoredProps);
-
-        assertTrue(config.isWriteClass());
-        assertEquals(Exclusion.DEFAULT, config.getExclusion());
-        assertEquals(props, config.getIgnoredPropNames(String.class));
-    }
-
-    @Test
     public void testMethodChaining() {
         KryoSerConfig result = config.setWriteClass(true).setExclusion(Exclusion.NULL).setSkipTransientField(true);
 
@@ -336,6 +350,22 @@ public class KryoSerConfigTest extends TestBase {
         assertTrue(config.isWriteClass());
         assertEquals(Exclusion.NULL, config.getExclusion());
         assertTrue(config.isSkipTransientField());
+    }
+
+    // getExclusion
+    @Test
+    public void testGetExclusion() {
+        assertNull(config.getExclusion());
+        config.setExclusion(Exclusion.NULL);
+        assertEquals(Exclusion.NULL, config.getExclusion());
+    }
+
+    // isSkipTransientField
+    @Test
+    public void testIsSkipTransientField() {
+        assertTrue(config.isSkipTransientField());
+        config.setSkipTransientField(false);
+        assertFalse(config.isSkipTransientField());
     }
 
     @Test
@@ -350,38 +380,6 @@ public class KryoSerConfigTest extends TestBase {
         ignoredProps.add("password");
         config.setIgnoredPropNames(String.class, ignoredProps);
         assertEquals(ignoredProps, config.getIgnoredPropNames(String.class));
-    }
-
-    @Test
-    public void testDefaultValues() {
-        KryoSerConfig newConfig = new KryoSerConfig();
-
-        assertFalse(newConfig.isWriteClass());
-        assertNull(newConfig.getExclusion());
-        assertTrue(newConfig.isSkipTransientField());
-        assertNull(newConfig.getIgnoredPropNames(String.class));
-    }
-
-    @Test
-    public void testEqualityWithDifferentConfigurations() {
-        KryoSerConfig config1 = new KryoSerConfig();
-        KryoSerConfig config2 = new KryoSerConfig();
-
-        config1.setWriteClass(true).setSkipTransientField(true);
-        config2.setWriteClass(true).setSkipTransientField(false);
-        assertNotEquals(config1, config2);
-
-        config2.setSkipTransientField(true);
-        assertEquals(config1, config2);
-
-        Map<Class<?>, Set<String>> ignoredProps1 = new HashMap<>();
-        ignoredProps1.put(String.class, new HashSet<>(Arrays.asList("prop1")));
-        config1.setIgnoredPropNames(ignoredProps1);
-
-        assertNotEquals(config1, config2);
-
-        config2.setIgnoredPropNames(ignoredProps1);
-        assertEquals(config1, config2);
     }
 
 }

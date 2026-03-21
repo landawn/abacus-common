@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Tag;
-
 import com.landawn.abacus.entity.extendDirty.basic.AclGroup;
 import com.landawn.abacus.entity.extendDirty.basic.AclUser;
 import com.landawn.abacus.entity.extendDirty.basic.ExtendDirtyBasicPNL.AccountContactPNL;
@@ -28,7 +26,6 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Profiler;
 import com.landawn.abacus.util.Strings;
 
-@Tag("old-test")
 public abstract class AbstractTest extends TestBase {
     protected static final Logger logger = LoggerFactory.getLogger(AbstractTest.class);
     protected static final String FIRST_NAME = "firstName";

@@ -1,12 +1,10 @@
 package com.landawn.abacus.util;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class NameUtilTest extends TestBase {
 
     @Test
@@ -67,31 +65,6 @@ public class NameUtilTest extends TestBase {
     }
 
     @Test
-    public void testGetParentName() {
-        Assertions.assertEquals("com.example.Person", NameUtil.getParentName("com.example.Person.firstName"));
-        Assertions.assertEquals("com.example", NameUtil.getParentName("com.example.Person"));
-
-        Assertions.assertEquals("", NameUtil.getParentName("simpleName"));
-
-        Assertions.assertEquals("", NameUtil.getParentName(".hidden"));
-
-        Assertions.assertEquals("a", NameUtil.getParentName("a.b"));
-        Assertions.assertEquals("ab", NameUtil.getParentName("ab.c"));
-    }
-
-    @Test
-    public void testCachingBehavior() {
-        String name = "com.test.CachedName";
-        String simple1 = NameUtil.getSimpleName(name);
-        String simple2 = NameUtil.getSimpleName(name);
-        Assertions.assertSame(simple1, simple2);
-
-        String parent1 = NameUtil.getParentName(name);
-        String parent2 = NameUtil.getParentName(name);
-        Assertions.assertSame(parent1, parent2);
-    }
-
-    @Test
     public void testComplexHierarchy() {
         String fullName = "com.landawn.abacus.util.Person.address.street.name";
 
@@ -110,6 +83,18 @@ public class NameUtilTest extends TestBase {
     }
 
     @Test
+    public void testCachingBehavior() {
+        String name = "com.test.CachedName";
+        String simple1 = NameUtil.getSimpleName(name);
+        String simple2 = NameUtil.getSimpleName(name);
+        Assertions.assertSame(simple1, simple2);
+
+        String parent1 = NameUtil.getParentName(name);
+        String parent2 = NameUtil.getParentName(name);
+        Assertions.assertSame(parent1, parent2);
+    }
+
+    @Test
     public void testEdgeCases() {
         Assertions.assertEquals("", NameUtil.getSimpleName(""));
         Assertions.assertEquals("", NameUtil.getParentName(""));
@@ -119,5 +104,18 @@ public class NameUtilTest extends TestBase {
 
         Assertions.assertEquals("", NameUtil.getSimpleName("com.example."));
         Assertions.assertEquals("com.example", NameUtil.getParentName("com.example."));
+    }
+
+    @Test
+    public void testGetParentName() {
+        Assertions.assertEquals("com.example.Person", NameUtil.getParentName("com.example.Person.firstName"));
+        Assertions.assertEquals("com.example", NameUtil.getParentName("com.example.Person"));
+
+        Assertions.assertEquals("", NameUtil.getParentName("simpleName"));
+
+        Assertions.assertEquals("", NameUtil.getParentName(".hidden"));
+
+        Assertions.assertEquals("a", NameUtil.getParentName("a.b"));
+        Assertions.assertEquals("ab", NameUtil.getParentName("ab.c"));
     }
 }

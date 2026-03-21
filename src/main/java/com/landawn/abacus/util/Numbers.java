@@ -3550,6 +3550,41 @@ public final class Numbers {
         return isConvertibleToNumber(str);
     }
 
+    /**
+     * Checks if the given string represents a valid integer value (signed or unsigned).
+     *
+     * <p>A valid integer is a string that consists of an optional leading sign ({@code +} or {@code -})
+     * followed by one or more digit characters ({@code 0-9}). The entire string must match this pattern —
+     * no surrounding whitespace or extra characters are allowed.</p>
+     *
+     * <p><b>Note:</b> This method only validates the format of the string. It does <em>not</em> check
+     * whether the numeric value falls within the range of any specific integer type (e.g., {@code int}
+     * or {@code long}). Use {@link Integer#parseInt(String)} or {@link Long#parseLong(String)} for
+     * range-validated parsing.</p>
+     *
+     * <p>Examples:</p>
+     * <ul>
+     *   <li>{@code isInteger("123")}  → {@code true}</li>
+     *   <li>{@code isInteger("-456")} → {@code true}</li>
+     *   <li>{@code isInteger("+7")}   → {@code true}</li>
+     *   <li>{@code isInteger("0")}    → {@code true}</li>
+     *   <li>{@code isInteger("12.3")} → {@code false} (decimal point not allowed)</li>
+     *   <li>{@code isInteger("abc")}  → {@code false}</li>
+     *   <li>{@code isInteger("")}     → {@code false}</li>
+     *   <li>{@code isInteger(null)}   → {@code false}</li>
+     * </ul>
+     *
+     * @param str the string to check, may be {@code null}
+     * @return {@code true} if the string is a valid integer representation, {@code false} otherwise
+     * @see RegExUtil#INTEGER_MATCHER
+     * @see RegExUtil#POSITIVE_INTEGER_MATCHER
+     * @see RegExUtil#NEGATIVE_INTEGER_MATCHER
+     * @see RegExUtil#NUMBER_MATCHER
+     */
+    public static boolean isInteger(final String str) {
+        return RegExUtil.matches(str, RegExUtil.INTEGER_MATCHER);
+    }
+
     private static final boolean[] alphanumerics = new boolean[128];
 
     static {

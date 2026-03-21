@@ -129,7 +129,7 @@ interface JsonReader {
     int lastToken();
 
     /**
-     * Reads and returns the next token from the JSON input.
+     * Reads and returns the next token identifier from the JSON input.
      * This method advances the reader position and identifies the next
      * structural token in the JSON stream.
      * 
@@ -150,7 +150,7 @@ interface JsonReader {
     int nextToken() throws UncheckedIOException;
 
     /**
-     * Reads the next token of a specific type from the JSON input.
+     * Reads and returns the next token identifier of a specific type from the JSON input.
      * This method allows reading tokens that match a specific type,
      * which can be useful for parsing structured data.
      * 
@@ -165,7 +165,6 @@ interface JsonReader {
      * @throws UncheckedIOException if an I/O error occurs during reading
      */
     int nextToken(Type<?> nextTokenValueType) throws UncheckedIOException;
-
     // int nextNameToken() throws UncheckedIOException;
 
     /**

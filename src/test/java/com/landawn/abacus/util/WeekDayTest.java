@@ -5,13 +5,37 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class WeekDayTest extends TestBase {
+
+    @Test
+    public void testWeekdaySequence() {
+        WeekDay[] days = WeekDay.values();
+        for (int i = 0; i < days.length; i++) {
+            Assertions.assertEquals(i, days[i].intValue());
+            Assertions.assertEquals(days[i], WeekDay.valueOf(i));
+        }
+    }
+
+    @Test
+    public void testWeekdayArithmetic() {
+        WeekDay monday = WeekDay.MONDAY;
+        int nextDayValue = (monday.intValue() + 1) % 7;
+        WeekDay tuesday = WeekDay.valueOf(nextDayValue);
+        Assertions.assertEquals(WeekDay.TUESDAY, tuesday);
+
+        int prevDayValue = (monday.intValue() - 1 + 7) % 7;
+        WeekDay sunday = WeekDay.valueOf(prevDayValue);
+        Assertions.assertEquals(WeekDay.SUNDAY, sunday);
+
+        WeekDay saturday = WeekDay.SATURDAY;
+        int nextAfterSaturday = (saturday.intValue() + 1) % 7;
+        WeekDay sundayAgain = WeekDay.valueOf(nextAfterSaturday);
+        Assertions.assertEquals(WeekDay.SUNDAY, sundayAgain);
+    }
 
     @Test
     public void testIntValue_SUNDAY() {
@@ -46,6 +70,60 @@ public class WeekDayTest extends TestBase {
     @Test
     public void testIntValue_SATURDAY() {
         assertEquals(6, WeekDay.SATURDAY.intValue());
+    }
+
+    @Test
+    public void testIntValue_sequential() {
+        WeekDay[] days = WeekDay.values();
+        for (int i = 0; i < days.length; i++) {
+            assertEquals(i, days[i].intValue());
+        }
+    }
+
+    @Test
+    public void testIntValue() {
+        Assertions.assertEquals(0, WeekDay.SUNDAY.intValue());
+        Assertions.assertEquals(1, WeekDay.MONDAY.intValue());
+        Assertions.assertEquals(2, WeekDay.TUESDAY.intValue());
+        Assertions.assertEquals(3, WeekDay.WEDNESDAY.intValue());
+        Assertions.assertEquals(4, WeekDay.THURSDAY.intValue());
+        Assertions.assertEquals(5, WeekDay.FRIDAY.intValue());
+        Assertions.assertEquals(6, WeekDay.SATURDAY.intValue());
+    }
+
+    @Test
+    public void testRoundTripConversion() {
+        for (WeekDay day : WeekDay.values()) {
+            int value = day.intValue();
+            WeekDay converted = WeekDay.valueOf(value);
+            Assertions.assertEquals(day, converted);
+        }
+    }
+
+    @Test
+    public void testUsageInCalendarContext() {
+        WeekDay startOfWeek = WeekDay.SUNDAY;
+        WeekDay endOfWorkWeek = WeekDay.FRIDAY;
+
+        int daysUntilFriday = endOfWorkWeek.intValue() - startOfWeek.intValue();
+        Assertions.assertEquals(5, daysUntilFriday);
+
+        WeekDay saturday = WeekDay.valueOf(6);
+        WeekDay sunday = WeekDay.valueOf(0);
+        Assertions.assertEquals(WeekDay.SATURDAY, saturday);
+        Assertions.assertEquals(WeekDay.SUNDAY, sunday);
+    }
+
+    @Test
+    public void testIntValue_uniqueness() {
+        WeekDay[] days = WeekDay.values();
+        for (int i = 0; i < days.length; i++) {
+            for (int j = i + 1; j < days.length; j++) {
+                if (days[i].intValue() == days[j].intValue()) {
+                    throw new AssertionError("Duplicate int value: " + days[i] + " and " + days[j]);
+                }
+            }
+        }
     }
 
     @Test
@@ -84,21 +162,6 @@ public class WeekDayTest extends TestBase {
     }
 
     @Test
-    public void testValueOf_invalid_negative() {
-        assertThrows(IllegalArgumentException.class, () -> WeekDay.valueOf(-1));
-    }
-
-    @Test
-    public void testValueOf_invalid_7() {
-        assertThrows(IllegalArgumentException.class, () -> WeekDay.valueOf(7));
-    }
-
-    @Test
-    public void testValueOf_invalid_100() {
-        assertThrows(IllegalArgumentException.class, () -> WeekDay.valueOf(100));
-    }
-
-    @Test
     public void testValueOf_byName_SUNDAY() {
         assertEquals(WeekDay.SUNDAY, WeekDay.valueOf("SUNDAY"));
     }
@@ -114,95 +177,6 @@ public class WeekDayTest extends TestBase {
     }
 
     @Test
-    public void testValues() {
-        WeekDay[] days = WeekDay.values();
-        assertNotNull(days);
-        assertEquals(7, days.length);
-    }
-
-    @Test
-    public void testValues_order() {
-        WeekDay[] days = WeekDay.values();
-        assertEquals(WeekDay.SUNDAY, days[0]);
-        assertEquals(WeekDay.MONDAY, days[1]);
-        assertEquals(WeekDay.TUESDAY, days[2]);
-        assertEquals(WeekDay.WEDNESDAY, days[3]);
-        assertEquals(WeekDay.THURSDAY, days[4]);
-        assertEquals(WeekDay.FRIDAY, days[5]);
-        assertEquals(WeekDay.SATURDAY, days[6]);
-    }
-
-    @Test
-    public void testIntValue_sequential() {
-        WeekDay[] days = WeekDay.values();
-        for (int i = 0; i < days.length; i++) {
-            assertEquals(i, days[i].intValue());
-        }
-    }
-
-    @Test
-    public void testIntValue_uniqueness() {
-        WeekDay[] days = WeekDay.values();
-        for (int i = 0; i < days.length; i++) {
-            for (int j = i + 1; j < days.length; j++) {
-                if (days[i].intValue() == days[j].intValue()) {
-                    throw new AssertionError("Duplicate int value: " + days[i] + " and " + days[j]);
-                }
-            }
-        }
-    }
-
-    @Test
-    public void testSwitchStatement() {
-        WeekDay day = WeekDay.FRIDAY;
-        boolean isWeekend = switch (day) {
-            case SATURDAY, SUNDAY -> true;
-            default -> false;
-        };
-        assertEquals(false, isWeekend);
-    }
-
-    @Test
-    public void testSwitchStatement_weekend() {
-        WeekDay day = WeekDay.SATURDAY;
-        boolean isWeekend = switch (day) {
-            case SATURDAY, SUNDAY -> true;
-            default -> false;
-        };
-        assertEquals(true, isWeekend);
-    }
-
-    @Test
-    public void testIntegration_allDaysRoundTrip() {
-        WeekDay[] days = WeekDay.values();
-        for (WeekDay day : days) {
-            int value = day.intValue();
-            WeekDay decoded = WeekDay.valueOf(value);
-            assertEquals(day, decoded);
-        }
-    }
-
-    @Test
-    public void testIntegration_weekRange() {
-        for (int i = 0; i < 7; i++) {
-            WeekDay day = WeekDay.valueOf(i);
-            assertNotNull(day);
-            assertEquals(i, day.intValue());
-        }
-    }
-
-    @Test
-    public void testIntValue() {
-        Assertions.assertEquals(0, WeekDay.SUNDAY.intValue());
-        Assertions.assertEquals(1, WeekDay.MONDAY.intValue());
-        Assertions.assertEquals(2, WeekDay.TUESDAY.intValue());
-        Assertions.assertEquals(3, WeekDay.WEDNESDAY.intValue());
-        Assertions.assertEquals(4, WeekDay.THURSDAY.intValue());
-        Assertions.assertEquals(5, WeekDay.FRIDAY.intValue());
-        Assertions.assertEquals(6, WeekDay.SATURDAY.intValue());
-    }
-
-    @Test
     public void testValueOf() {
         Assertions.assertEquals(WeekDay.SUNDAY, WeekDay.valueOf(0));
         Assertions.assertEquals(WeekDay.MONDAY, WeekDay.valueOf(1));
@@ -214,6 +188,21 @@ public class WeekDayTest extends TestBase {
 
         Assertions.assertSame(WeekDay.MONDAY, WeekDay.valueOf(1));
         Assertions.assertSame(WeekDay.SUNDAY, WeekDay.valueOf(0));
+    }
+
+    @Test
+    public void testValueOf_invalid_negative() {
+        assertThrows(IllegalArgumentException.class, () -> WeekDay.valueOf(-1));
+    }
+
+    @Test
+    public void testValueOf_invalid_7() {
+        assertThrows(IllegalArgumentException.class, () -> WeekDay.valueOf(7));
+    }
+
+    @Test
+    public void testValueOf_invalid_100() {
+        assertThrows(IllegalArgumentException.class, () -> WeekDay.valueOf(100));
     }
 
     @Test
@@ -241,6 +230,64 @@ public class WeekDayTest extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             WeekDay.valueOf(100);
         });
+    }
+
+    @Test
+    public void testIntegration_allDaysRoundTrip() {
+        WeekDay[] days = WeekDay.values();
+        for (WeekDay day : days) {
+            int value = day.intValue();
+            WeekDay decoded = WeekDay.valueOf(value);
+            assertEquals(day, decoded);
+        }
+    }
+
+    @Test
+    public void testIntegration_weekRange() {
+        for (int i = 0; i < 7; i++) {
+            WeekDay day = WeekDay.valueOf(i);
+            assertNotNull(day);
+            assertEquals(i, day.intValue());
+        }
+    }
+
+    @Test
+    public void testValues() {
+        WeekDay[] days = WeekDay.values();
+        assertNotNull(days);
+        assertEquals(7, days.length);
+    }
+
+    @Test
+    public void testValues_order() {
+        WeekDay[] days = WeekDay.values();
+        assertEquals(WeekDay.SUNDAY, days[0]);
+        assertEquals(WeekDay.MONDAY, days[1]);
+        assertEquals(WeekDay.TUESDAY, days[2]);
+        assertEquals(WeekDay.WEDNESDAY, days[3]);
+        assertEquals(WeekDay.THURSDAY, days[4]);
+        assertEquals(WeekDay.FRIDAY, days[5]);
+        assertEquals(WeekDay.SATURDAY, days[6]);
+    }
+
+    @Test
+    public void testSwitchStatement() {
+        WeekDay day = WeekDay.FRIDAY;
+        boolean isWeekend = switch (day) {
+            case SATURDAY, SUNDAY -> true;
+            default -> false;
+        };
+        assertEquals(false, isWeekend);
+    }
+
+    @Test
+    public void testSwitchStatement_weekend() {
+        WeekDay day = WeekDay.SATURDAY;
+        boolean isWeekend = switch (day) {
+            case SATURDAY, SUNDAY -> true;
+            default -> false;
+        };
+        assertEquals(true, isWeekend);
     }
 
     @Test
@@ -279,29 +326,6 @@ public class WeekDayTest extends TestBase {
     }
 
     @Test
-    public void testRoundTripConversion() {
-        for (WeekDay day : WeekDay.values()) {
-            int value = day.intValue();
-            WeekDay converted = WeekDay.valueOf(value);
-            Assertions.assertEquals(day, converted);
-        }
-    }
-
-    @Test
-    public void testUsageInCalendarContext() {
-        WeekDay startOfWeek = WeekDay.SUNDAY;
-        WeekDay endOfWorkWeek = WeekDay.FRIDAY;
-
-        int daysUntilFriday = endOfWorkWeek.intValue() - startOfWeek.intValue();
-        Assertions.assertEquals(5, daysUntilFriday);
-
-        WeekDay saturday = WeekDay.valueOf(6);
-        WeekDay sunday = WeekDay.valueOf(0);
-        Assertions.assertEquals(WeekDay.SATURDAY, saturday);
-        Assertions.assertEquals(WeekDay.SUNDAY, sunday);
-    }
-
-    @Test
     public void testComparison() {
         Assertions.assertTrue(WeekDay.SUNDAY.compareTo(WeekDay.MONDAY) < 0);
         Assertions.assertTrue(WeekDay.SATURDAY.compareTo(WeekDay.FRIDAY) > 0);
@@ -320,32 +344,6 @@ public class WeekDayTest extends TestBase {
         Assertions.assertEquals("THURSDAY", WeekDay.THURSDAY.toString());
         Assertions.assertEquals("FRIDAY", WeekDay.FRIDAY.toString());
         Assertions.assertEquals("SATURDAY", WeekDay.SATURDAY.toString());
-    }
-
-    @Test
-    public void testWeekdaySequence() {
-        WeekDay[] days = WeekDay.values();
-        for (int i = 0; i < days.length; i++) {
-            Assertions.assertEquals(i, days[i].intValue());
-            Assertions.assertEquals(days[i], WeekDay.valueOf(i));
-        }
-    }
-
-    @Test
-    public void testWeekdayArithmetic() {
-        WeekDay monday = WeekDay.MONDAY;
-        int nextDayValue = (monday.intValue() + 1) % 7;
-        WeekDay tuesday = WeekDay.valueOf(nextDayValue);
-        Assertions.assertEquals(WeekDay.TUESDAY, tuesday);
-
-        int prevDayValue = (monday.intValue() - 1 + 7) % 7;
-        WeekDay sunday = WeekDay.valueOf(prevDayValue);
-        Assertions.assertEquals(WeekDay.SUNDAY, sunday);
-
-        WeekDay saturday = WeekDay.SATURDAY;
-        int nextAfterSaturday = (saturday.intValue() + 1) % 7;
-        WeekDay sundayAgain = WeekDay.valueOf(nextAfterSaturday);
-        Assertions.assertEquals(WeekDay.SUNDAY, sundayAgain);
     }
 
 }

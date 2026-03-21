@@ -4,12 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BooleanTernaryOperatorTest extends TestBase {
     @Test
     public void testAlwaysTrue() {
@@ -25,15 +23,6 @@ public class BooleanTernaryOperatorTest extends TestBase {
 
         assertFalse(operator.applyAsBoolean(true, true, true));
         assertFalse(operator.applyAsBoolean(false, false, false));
-    }
-
-    @Test
-    public void testApplyAsBooleanWithException() {
-        BooleanTernaryOperator operator = (a, b, c) -> {
-            throw new RuntimeException("Test exception");
-        };
-
-        assertThrows(RuntimeException.class, () -> operator.applyAsBoolean(true, false, true));
     }
 
     @Test
@@ -61,5 +50,14 @@ public class BooleanTernaryOperatorTest extends TestBase {
         assertTrue(operator.applyAsBoolean(true, true, false)); // 2 trues
         assertFalse(operator.applyAsBoolean(true, true, true)); // 3 trues
         assertTrue(operator.applyAsBoolean(false, false, false)); // 0 trues
+    }
+
+    @Test
+    public void testApplyAsBooleanWithException() {
+        BooleanTernaryOperator operator = (a, b, c) -> {
+            throw new RuntimeException("Test exception");
+        };
+
+        assertThrows(RuntimeException.class, () -> operator.applyAsBoolean(true, false, true));
     }
 }

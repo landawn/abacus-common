@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -28,7 +27,6 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("2025")
 public class PrimitiveLongArrayTypeTest extends TestBase {
 
     private final PrimitiveLongArrayType type = new PrimitiveLongArrayType();
@@ -39,8 +37,9 @@ public class PrimitiveLongArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void test_isPrimitiveArray() {
-        assertTrue(type.isPrimitiveArray());
+    public void testGetElementType() {
+        Type<Long> elementType = type.elementType();
+        assertNotNull(elementType);
     }
 
     @Test
@@ -50,47 +49,6 @@ public class PrimitiveLongArrayTypeTest extends TestBase {
         assertNotNull(result);
 
         assertNull(type.stringOf(null));
-    }
-
-    @Test
-    public void test_valueOf_String() {
-        long[] result = type.valueOf("[1, 2]");
-        assertNotNull(result);
-
-        assertNull(type.valueOf((String) null));
-    }
-
-    @Test
-    public void test_appendTo() throws IOException {
-        StringWriter sw = new StringWriter();
-
-        long[] arr = new long[] { 1L, 2L };
-        type.appendTo(sw, arr);
-        assertNotNull(sw.toString());
-
-        sw = new StringWriter();
-        type.appendTo(sw, null);
-        assertEquals("null", sw.toString());
-    }
-
-    @Test
-    public void test_writeCharacter() throws IOException {
-        CharacterWriter writer = mock(BufferedJsonWriter.class);
-        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
-
-        long[] arr = new long[] { 1L, 2L };
-        type.writeCharacter(writer, arr, config);
-        verify(writer, atLeastOnce()).write(any(String.class));
-
-        reset(writer);
-        type.writeCharacter(writer, null, config);
-        verify(writer).write(NULL_CHAR_ARRAY);
-    }
-
-    @Test
-    public void testGetElementType() {
-        Type<Long> elementType = type.elementType();
-        assertNotNull(elementType);
     }
 
     @Test
@@ -109,6 +67,14 @@ public class PrimitiveLongArrayTypeTest extends TestBase {
     public void testStringOfSingleElement() {
         long[] array = { 42L };
         assertEquals("[42]", type.stringOf(array));
+    }
+
+    @Test
+    public void test_valueOf_String() {
+        long[] result = type.valueOf("[1, 2]");
+        assertNotNull(result);
+
+        assertNull(type.valueOf((String) null));
     }
 
     @Test
@@ -139,6 +105,19 @@ public class PrimitiveLongArrayTypeTest extends TestBase {
     }
 
     @Test
+    public void test_appendTo() throws IOException {
+        StringWriter sw = new StringWriter();
+
+        long[] arr = new long[] { 1L, 2L };
+        type.appendTo(sw, arr);
+        assertNotNull(sw.toString());
+
+        sw = new StringWriter();
+        type.appendTo(sw, null);
+        assertEquals("null", sw.toString());
+    }
+
+    @Test
     public void testAppendToEmptyArray() throws IOException {
         StringBuilder sb = new StringBuilder();
         type.appendTo(sb, new long[0]);
@@ -150,6 +129,20 @@ public class PrimitiveLongArrayTypeTest extends TestBase {
         StringBuilder sb = new StringBuilder();
         type.appendTo(sb, new long[] { 1L, 2L, 3L });
         assertEquals("[1, 2, 3]", sb.toString());
+    }
+
+    @Test
+    public void test_writeCharacter() throws IOException {
+        CharacterWriter writer = mock(BufferedJsonWriter.class);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
+
+        long[] arr = new long[] { 1L, 2L };
+        type.writeCharacter(writer, arr, config);
+        verify(writer, atLeastOnce()).write(any(String.class));
+
+        reset(writer);
+        type.writeCharacter(writer, null, config);
+        verify(writer).write(NULL_CHAR_ARRAY);
     }
 
     @Test
@@ -225,18 +218,6 @@ public class PrimitiveLongArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void testEqualsOneNull() {
-        assertFalse(type.equals(new long[] { 1L }, null));
-        assertFalse(type.equals(null, new long[] { 1L }));
-    }
-
-    @Test
-    public void testEqualsSame() {
-        long[] array = { 1L, 2L, 3L };
-        assertTrue(type.equals(array, array));
-    }
-
-    @Test
     public void testEqualsEqual() {
         long[] array1 = { 1L, 2L, 3L };
         long[] array2 = { 1L, 2L, 3L };
@@ -255,6 +236,23 @@ public class PrimitiveLongArrayTypeTest extends TestBase {
         long[] array1 = { 1L, 2L, 3L };
         long[] array2 = { 1L, 2L, 4L };
         assertFalse(type.equals(array1, array2));
+    }
+
+    @Test
+    public void testEqualsOneNull() {
+        assertFalse(type.equals(new long[] { 1L }, null));
+        assertFalse(type.equals(null, new long[] { 1L }));
+    }
+
+    @Test
+    public void testEqualsSame() {
+        long[] array = { 1L, 2L, 3L };
+        assertTrue(type.equals(array, array));
+    }
+
+    @Test
+    public void test_isPrimitiveArray() {
+        assertTrue(type.isPrimitiveArray());
     }
 
 }

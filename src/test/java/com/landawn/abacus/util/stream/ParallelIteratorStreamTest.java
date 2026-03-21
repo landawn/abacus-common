@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -26,7 +27,6 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -52,9 +52,11 @@ import com.landawn.abacus.util.function.ToShortFunction;
 import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
 import com.landawn.abacus.util.stream.BaseStream.Splitor;
+import com.landawn.abacus.util.stream.ByteStream;
+import com.landawn.abacus.util.stream.CharStream;
+import com.landawn.abacus.util.stream.ShortStream;
 
 @ExtendWith(MockitoExtension.class)
-@Tag("new-test")
 public class ParallelIteratorStreamTest extends TestBase {
 
     private List<Integer> TEST_DATA;
@@ -86,24 +88,6 @@ public class ParallelIteratorStreamTest extends TestBase {
     }
 
     @Test
-    public void testConstructorWithStream() {
-        Stream<Integer> sourceStream = Stream.of(1, 2, 3, 4, 5);
-        Stream<Integer> parallelStream = sourceStream.parallel();
-
-        List<Integer> result = parallelStream.toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
-    }
-
-    @Test
-    public void testConstructorWithSortedStream() {
-        Stream<Integer> sourceStream = Stream.of(5, 3, 1, 4, 2).sorted();
-        Stream<Integer> parallelStream = sourceStream.parallel();
-
-        List<Integer> result = parallelStream.toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
-    }
-
-    @Test
     public void testComplexChainedOperations() {
         List<String> result = stream.filter(n -> n % 2 == 0)
                 .map(n -> n * 10)
@@ -114,244 +98,6 @@ public class ParallelIteratorStreamTest extends TestBase {
 
         assertTrue(result.size() > 0);
         assertTrue(result.stream().allMatch(s -> s.contains("2")));
-    }
-
-    @Test
-    public void testWithNullElements() {
-        List<String> dataWithNulls = Arrays.asList("a", null, "b", null, "c");
-        try (Stream<String> nullStream = createStream(dataWithNulls)) {
-            List<String> result = nullStream.filter(Objects::nonNull).map(String::toUpperCase).toList();
-
-            assertHaveSameElements(Arrays.asList("A", "B", "C"), result);
-        }
-    }
-
-    @Test
-    public void testExceptionPropagation() {
-        try {
-            stream.map(n -> {
-                if (n == 7) {
-                    throw new IllegalArgumentException("Test error at 7");
-                }
-                return n;
-            }).toList();
-
-            fail("Expected exception to be thrown");
-        } catch (RuntimeException e) {
-            assertTrue(e.getMessage().contains("Test error at 7") || e.getCause().getMessage().contains("Test error at 7"));
-        }
-    }
-
-    @Test
-    public void testPrimitiveStreamOperations() {
-        int[] intResult = stream.limit(3).flatMapToInt(n -> IntStream.range(n, n + 3)).sorted().toArray();
-
-        assertEquals(9, intResult.length);
-        assertEquals(1, intResult[0]);
-        assertEquals(5, intResult[8]);
-
-        double sum = stream2.flatMapToDouble(n -> DoubleStream.of(n * 0.1, n * 0.2)).sum();
-
-        assertTrue(sum > 0);
-    }
-
-    @Test
-    public void testParallelGroupingOperations() throws Exception {
-        Map<String, List<String>> grouped = stream.groupTo(n -> n % 2 == 0 ? "even" : "odd", n -> "Value:" + n);
-
-        assertEquals(2, grouped.size());
-        assertEquals(5, grouped.get("even").size());
-        assertEquals(5, grouped.get("odd").size());
-    }
-
-    @Test
-    public void testParallelGroupingOperations2() throws Exception {
-        Map<Integer, List<Integer>> flatGrouped = stream.limit(3).flatGroupTo(n -> Arrays.asList(n, n + 10), (k, v) -> v * 100);
-
-        assertTrue(flatGrouped.containsKey(1));
-        assertTrue(flatGrouped.containsKey(11));
-        assertEquals(Arrays.asList(100), flatGrouped.get(1));
-    }
-
-    @Test
-    public void testParallelCollectOperations() {
-        Set<Integer> concurrentSet = stream.collect(Collectors.toConcurrentMap(n -> n, n -> n * 2, (a, b) -> a, ConcurrentHashMap::new)).keySet();
-
-        assertEquals(10, concurrentSet.size());
-    }
-
-    @Test
-    public void testParallelCollectOperations2() {
-
-        String joined = stream.map(String::valueOf).collect(Collectors.joining(","));
-
-        String[] parts = joined.split(",");
-        assertEquals(10, parts.length);
-    }
-
-    @Test
-    public void testOrderPreservation() {
-        List<Integer> sortedData = Arrays.asList(1, 2, 3, 4, 5);
-        try (Stream<Integer> sortedStream = Stream.of(sortedData.toArray(new Integer[0])).parallel().sorted()) {
-
-            List<Integer> result = sortedStream.toList();
-            assertEquals(sortedData, result);
-        }
-    }
-
-    @Test
-    public void testFilterPreservesEncounterOrder() {
-        try (Stream<Integer> local = createIteratorParallelStream(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8))) {
-            List<Integer> result = local.filter(n -> {
-                if ((n & 1) == 0) {
-                    N.sleep(2);
-                }
-
-                return n % 3 != 0;
-            }).toList();
-
-            assertHaveSameElements(Arrays.asList(1, 2, 4, 5, 7, 8), result);
-        }
-    }
-
-    @Test
-    public void testMapPreservesEncounterOrder() {
-        List<Integer> source = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8);
-
-        try (Stream<Integer> local = createIteratorParallelStream(source)) {
-            List<Integer> result = local.map(n -> {
-                if ((n & 1) == 0) {
-                    N.sleep(2);
-                }
-
-                return n;
-            }).toList();
-
-            assertHaveSameElements(source, result);
-        }
-    }
-
-    //    @Test
-    //    public void testTakeWhilePreservesPrefixSemantics() {
-    //        try (Stream<Integer> local = createIteratorParallelStream(Arrays.asList(3, 1, 2))) {
-    //            List<Integer> result = local.takeWhile(n -> n < 3).toList();
-    //            assertHaveSameElements(Collections.emptyList(), result);
-    //        }
-    //    }
-
-    //
-
-    @Test
-    public void testDropWhilePreservesPrefixSemantics() {
-        try (Stream<Integer> local = createIteratorParallelStream(Arrays.asList(1, 2, 3, 4, 1, 2))) {
-            List<Integer> result = local.dropWhile(n -> n < 3).toList();
-            assertHaveSameElements(Arrays.asList(3, 4, 1, 2), result);
-        }
-    }
-
-    @Test
-    public void testMemoryEfficientOperations() {
-        Iterator<Integer> largeIterator = new Iterator<>() {
-            private int current = 0;
-            private final int max = 10000;
-
-            @Override
-            public boolean hasNext() {
-                return current < max;
-            }
-
-            @Override
-            public Integer next() {
-                return current++;
-            }
-        };
-
-        try (Stream<Integer> largeStream = Stream.of(N.toList(largeIterator).toArray(Integer[]::new)).parallel()) {
-
-            long sum = largeStream.filter(n -> n % 2 == 0).mapToLong(Integer::longValue).sum();
-
-            assertEquals(24995000L, sum);
-        }
-    }
-
-    @Test
-    public void testThreadLocalBehavior() {
-        ThreadLocal<Integer> threadLocal = new ThreadLocal<>();
-        Set<Integer> threadIds = N.newConcurrentHashSet();
-
-        List<Integer> result = stream.map(n -> {
-            if (threadLocal.get() == null) {
-                threadLocal.set(Thread.currentThread().hashCode());
-            }
-            threadIds.add(threadLocal.get());
-            return n;
-        }).toList();
-
-        assertEquals(10, result.size());
-        assertTrue(threadIds.size() >= 1);
-    }
-
-    @Test
-    public void testSingleElementStream() {
-        try (Stream<Integer> singleStream = createStream(Collections.singletonList(42))) {
-
-            assertEquals(Integer.valueOf(42), singleStream.min(Integer::compare).get());
-        }
-        try (Stream<Integer> singleStream = createStream(Collections.singletonList(42))) {
-
-            assertEquals(Integer.valueOf(42), singleStream.max(Integer::compare).get());
-        }
-        try (Stream<Integer> singleStream = createStream(Collections.singletonList(42))) {
-
-            assertEquals(Integer.valueOf(42), singleStream.findFirst(n -> true).get());
-        }
-    }
-
-    @Test
-    public void testInterruptibility() throws InterruptedException {
-        CountDownLatch latch = new CountDownLatch(1);
-        AtomicBoolean wasInterrupted = new AtomicBoolean(false);
-
-        Thread thread = new Thread(() -> {
-            try (Stream<Integer> interruptibleStream = createStream(Arrays.asList(1, 2, 3, 4, 5))) {
-
-                latch.countDown();
-                interruptibleStream.forEach(n -> {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        wasInterrupted.set(true);
-                        Thread.currentThread().interrupt();
-                    }
-                });
-            }
-        });
-
-        thread.start();
-        latch.await();
-        Thread.sleep(100);
-        thread.interrupt();
-        thread.join(2000);
-
-        assertTrue(wasInterrupted.get() || !thread.isAlive());
-    }
-
-    @Test
-    public void testPerformanceCharacteristics() {
-        long startTime = System.currentTimeMillis();
-
-        List<Double> result = stream.map(n -> {
-            double sum = 0;
-            for (int i = 0; i < 1000; i++) {
-                sum += Math.sqrt(n * i);
-            }
-            return sum;
-        }).toList();
-
-        long duration = System.currentTimeMillis() - startTime;
-
-        assertEquals(10, result.size());
-        assertTrue(duration < 5000, "Operation took too long: " + duration + "ms");
     }
 
     @Test
@@ -381,6 +127,56 @@ public class ParallelIteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testWithNullElements() {
+        List<String> dataWithNulls = Arrays.asList("a", null, "b", null, "c");
+        try (Stream<String> nullStream = createStream(dataWithNulls)) {
+            List<String> result = nullStream.filter(Objects::nonNull).map(String::toUpperCase).toList();
+
+            assertHaveSameElements(Arrays.asList("A", "B", "C"), result);
+        }
+    }
+
+    @Test
+    public void testFilterPreservesEncounterOrder() {
+        try (Stream<Integer> local = createIteratorParallelStream(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8))) {
+            List<Integer> result = local.filter(n -> {
+                if ((n & 1) == 0) {
+                    N.sleep(2);
+                }
+
+                return n % 3 != 0;
+            }).toList();
+
+            assertHaveSameElements(Arrays.asList(1, 2, 4, 5, 7, 8), result);
+        }
+    }
+
+    @Test
+    public void testMemoryEfficientOperations() {
+        Iterator<Integer> largeIterator = new Iterator<>() {
+            private int current = 0;
+            private final int max = 10000;
+
+            @Override
+            public boolean hasNext() {
+                return current < max;
+            }
+
+            @Override
+            public Integer next() {
+                return current++;
+            }
+        };
+
+        try (Stream<Integer> largeStream = Stream.of(N.toList(largeIterator).toArray(Integer[]::new)).parallel()) {
+
+            long sum = largeStream.filter(n -> n % 2 == 0).mapToLong(Integer::longValue).sum();
+
+            assertEquals(24995000L, sum);
+        }
+    }
+
+    @Test
     public void testTakeWhile() {
         List<Integer> result = stream.takeWhile(n -> n < 5).sorted().toList();
 
@@ -401,6 +197,24 @@ public class ParallelIteratorStreamTest extends TestBase {
         assertEquals(Arrays.asList(5, 6, 7, 8, 9, 10), result);
     }
 
+    //    @Test
+    //    public void testTakeWhilePreservesPrefixSemantics() {
+    //        try (Stream<Integer> local = createIteratorParallelStream(Arrays.asList(3, 1, 2))) {
+    //            List<Integer> result = local.takeWhile(n -> n < 3).toList();
+    //            assertHaveSameElements(Collections.emptyList(), result);
+    //        }
+    //    }
+
+    //
+
+    @Test
+    public void testDropWhilePreservesPrefixSemantics() {
+        try (Stream<Integer> local = createIteratorParallelStream(Arrays.asList(1, 2, 3, 4, 1, 2))) {
+            List<Integer> result = local.dropWhile(n -> n < 3).toList();
+            assertHaveSameElements(Arrays.asList(3, 4, 1, 2), result);
+        }
+    }
+
     @Test
     public void testDropWhileAll() {
         List<Integer> result = stream.dropWhile(n -> n > 0).toList();
@@ -417,6 +231,33 @@ public class ParallelIteratorStreamTest extends TestBase {
         assertEquals(10, result.size());
         assertTrue(result.contains("Number: 1"));
         assertTrue(result.contains("Number: 10"));
+    }
+
+    // map parallel path with a larger stream
+    @Test
+    public void testMap_FullParallelPath() {
+        List<Integer> data = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        List<Integer> result = createIteratorParallelStream(data).map(n -> n * 2).sorted().toList();
+        assertEquals(10, result.size());
+        assertEquals(2, result.get(0));
+        assertEquals(20, result.get(9));
+    }
+
+    @Test
+    public void testMapPreservesEncounterOrder() {
+        List<Integer> source = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8);
+
+        try (Stream<Integer> local = createIteratorParallelStream(source)) {
+            List<Integer> result = local.map(n -> {
+                if ((n & 1) == 0) {
+                    N.sleep(2);
+                }
+
+                return n;
+            }).toList();
+
+            assertHaveSameElements(source, result);
+        }
     }
 
     @Test
@@ -459,6 +300,46 @@ public class ParallelIteratorStreamTest extends TestBase {
 
         assertEquals(8, result.size());
         assertEquals("1+2+3", result.get(0));
+    }
+
+    @Test
+    public void testSlidingMap_BiFunction_MultiThread() {
+        List<Integer> bigData = new java.util.ArrayList<>();
+        for (int i = 1; i <= 20; i++)
+            bigData.add(i);
+        List<Integer> result = createIteratorParallelStream(bigData).slidingMap(1, false, (a, b) -> a + (b == null ? 0 : b)).sorted().toList();
+        assertEquals(19, result.size());
+        assertTrue(result.contains(3)); // 1+2
+        assertTrue(result.contains(39)); // 19+20
+    }
+
+    @Test
+    public void testSlidingMap_TriFunction_MultiThread() {
+        List<Integer> bigData = new java.util.ArrayList<>();
+        for (int i = 1; i <= 20; i++)
+            bigData.add(i);
+        List<Integer> result = createIteratorParallelStream(bigData).slidingMap(1, false, (a, b, c) -> a + (b == null ? 0 : b) + (c == null ? 0 : c))
+                .sorted()
+                .toList();
+        assertEquals(18, result.size());
+        assertTrue(result.contains(6)); // 1+2+3
+    }
+
+    @Test
+    public void testSlidingMap_BiFunction_MultiThread_v2() {
+        List<Integer> bigData = new java.util.ArrayList<>();
+        for (int i = 1; i <= 20; i++)
+            bigData.add(i);
+        List<Integer> result = createIteratorParallelStream(bigData).slidingMap(1, false, (a, b) -> a + (b == null ? 0 : b)).sorted().toList();
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+    }
+
+    @Test
+    public void testSlidingMap_BiFunction_SequentialFallback() {
+        List<Integer> result = Stream.of(1, 2, 3, 4).parallel(PS.create(Splitor.ITERATOR).maxThreadNum(1)).slidingMap(2, true, Integer::sum).toList();
+
+        assertEquals(Arrays.asList(3, 7), result);
     }
 
     @Test
@@ -534,6 +415,20 @@ public class ParallelIteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testLargeDataProcessing() {
+        List<Integer> largeData = new ArrayList<>();
+        for (int i = 1; i <= 1000; i++) {
+            largeData.add(i);
+        }
+
+        try (Stream<Integer> largeStream = createStream(largeData)) {
+            long sum = largeStream.mapToLong(Integer::longValue).sum();
+
+            assertEquals(500500L, sum);
+        }
+    }
+
+    @Test
     public void testMapToFloat() {
         ToFloatFunction<Integer> mapper = n -> n / 2.0f;
 
@@ -560,6 +455,43 @@ public class ParallelIteratorStreamTest extends TestBase {
         assertEquals(6, result.size());
         assertTrue(result.contains("A1"));
         assertTrue(result.contains("B3"));
+    }
+
+    // flatMapToInt/Long/Double parallel paths require stream not limited to tiny size
+    @Test
+    public void testFlatMapToInt_FullParallelPath() {
+        List<Integer> data = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        int[] result = createIteratorParallelStream(data).flatMapToInt(n -> IntStream.of(n, n * 10)).sorted().toArray();
+        assertEquals(20, result.length);
+        assertEquals(1, result[0]);
+        assertEquals(100, result[19]);
+    }
+
+    // flatmap(Function<T, Collection>) parallel path
+    @Test
+    public void testFlatmap_FullParallelPath() {
+        List<Integer> data = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        List<Integer> result = createIteratorParallelStream(data).flatmap(n -> Arrays.asList(n, n * 10)).sorted().toList();
+        assertEquals(20, result.size());
+        assertEquals(1, result.get(0));
+    }
+
+    @Test
+    public void testFlatMap_MultiThread() {
+        List<Integer> bigData = new java.util.ArrayList<>();
+        for (int i = 1; i <= 50; i++)
+            bigData.add(i);
+        List<Integer> result = createIteratorParallelStream(bigData).flatMap(n -> Stream.of(n, n * 10)).toList();
+        assertEquals(100, result.size());
+    }
+
+    @Test
+    public void testFlatMap_Parallel() {
+        List<Integer> data = N.asList(1, 2, 3);
+        List<Integer> result = createIteratorParallelStream(data).flatMap(n -> Stream.of(n, n * 10)).sorted().toList();
+        assertEquals(6, result.size());
+        assertTrue(result.contains(10));
+        assertTrue(result.contains(30));
     }
 
     @Test
@@ -599,6 +531,23 @@ public class ParallelIteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testFlatMapToChar_MultiThread() {
+        List<Integer> bigData = new java.util.ArrayList<>();
+        for (int i = 65; i <= 90; i++)
+            bigData.add(i);
+        long count = createIteratorParallelStream(bigData).flatMapToChar(n -> CharStream.of((char) n.intValue())).count();
+        assertEquals(26, count);
+    }
+
+    @Test
+    public void testFlatMapToChar_Parallel() {
+        List<String> data = N.asList("ab", "cd", "ef");
+        char[] result = createIteratorParallelStream(data).flatMapToChar(s -> CharStream.of(s.toCharArray())).sorted().toArray();
+        assertEquals(6, result.length);
+        assertEquals('a', result[0]);
+    }
+
+    @Test
     public void testFlatMapToByte() {
         Function<Integer, ByteStream> mapper = n -> ByteStream.of((byte) n.intValue(), (byte) (n + 10));
 
@@ -608,12 +557,57 @@ public class ParallelIteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testFlatMapToByte_MultiThread() {
+        List<Integer> bigData = new java.util.ArrayList<>();
+        for (int i = 1; i <= 50; i++)
+            bigData.add(i);
+        long count = createIteratorParallelStream(bigData).flatMapToByte(n -> ByteStream.of((byte) n.intValue())).count();
+        assertEquals(50, count);
+    }
+
+    @Test
+    public void testFlatMapToByte_Parallel() {
+        List<Integer> data = N.asList(1, 2, 3);
+        byte[] result = createIteratorParallelStream(data).flatMapToByte(n -> ByteStream.of(n.byteValue(), (byte) (n * 2))).sorted().toArray();
+        assertEquals(6, result.length);
+    }
+
+    @Test
+    public void testFlatMapToShort_MultiThread() {
+        List<Integer> bigData = new java.util.ArrayList<>();
+        for (int i = 1; i <= 50; i++)
+            bigData.add(i);
+        long count = createIteratorParallelStream(bigData).flatMapToShort(n -> ShortStream.of((short) n.intValue())).count();
+        assertEquals(50, count);
+    }
+
+    @Test
+    public void testFlatMapToShort_Parallel() {
+        List<Integer> data = N.asList(1, 2, 3);
+        short[] result = createIteratorParallelStream(data).flatMapToShort(n -> ShortStream.of(n.shortValue(), (short) (n * 2))).sorted().toArray();
+        assertEquals(6, result.length);
+    }
+
+    @Test
     public void testFlatMapToShort() {
         Function<Integer, ShortStream> mapper = n -> ShortStream.of(n.shortValue(), (short) (n * 10));
 
         short[] result = stream.limit(2).flatMapToShort(mapper).sorted().toArray();
 
         assertHaveSameElements(N.toList((short) 1, (short) 2, (short) 10, (short) 20), N.toList(result));
+    }
+
+    @Test
+    public void testPrimitiveStreamOperations() {
+        int[] intResult = stream.limit(3).flatMapToInt(n -> IntStream.range(n, n + 3)).sorted().toArray();
+
+        assertEquals(9, intResult.length);
+        assertEquals(1, intResult[0]);
+        assertEquals(5, intResult[8]);
+
+        double sum = stream2.flatMapToDouble(n -> DoubleStream.of(n * 0.1, n * 0.2)).sum();
+
+        assertTrue(sum > 0);
     }
 
     @Test
@@ -635,12 +629,30 @@ public class ParallelIteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testFlatMapToLong_FullParallelPath() {
+        List<Integer> data = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        long[] result = createIteratorParallelStream(data).flatMapToLong(n -> LongStream.of(n.longValue(), n * 100L)).sorted().toArray();
+        assertEquals(20, result.length);
+        assertEquals(1L, result[0]);
+        assertEquals(1000L, result[19]);
+    }
+
+    @Test
     public void testFlatMapToFloat() {
         Function<Integer, FloatStream> mapper = n -> FloatStream.of(n * 0.1f, n * 0.2f);
 
         float[] result = stream.limit(2).flatMapToFloat(mapper).sorted().toArray();
 
         assertArrayEquals(new float[] { 0.1f, 0.2f, 0.2f, 0.4f }, result, 0.001f);
+    }
+
+    @Test
+    public void testFlatMapToFloat_MultiThread() {
+        List<Integer> bigData = new java.util.ArrayList<>();
+        for (int i = 1; i <= 50; i++)
+            bigData.add(i);
+        long count = createIteratorParallelStream(bigData).flatMapToFloat(n -> FloatStream.of((float) n.intValue())).count();
+        assertEquals(50, count);
     }
 
     @Test
@@ -653,6 +665,14 @@ public class ParallelIteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testFlatMapToDouble_FullParallelPath() {
+        List<Integer> data = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        double[] result = createIteratorParallelStream(data).flatMapToDouble(n -> DoubleStream.of(n.doubleValue(), n * 0.5)).sorted().toArray();
+        assertEquals(20, result.length);
+        assertEquals(0.5, result[0], 0.001);
+    }
+
+    @Test
     public void testOnEach() {
         List<Integer> sideEffectList = new CopyOnWriteArrayList<>();
 
@@ -660,6 +680,73 @@ public class ParallelIteratorStreamTest extends TestBase {
 
         assertHaveSameElements(TEST_DATA, result);
         assertHaveSameElements(TEST_DATA, sideEffectList);
+    }
+
+    @Test
+    @DisplayName("forEach with flatMapper should apply action to each element")
+    public void test_forEach() {
+        {
+            List<Integer> results = new ArrayList<>();
+
+            createStream(TEST_DATA).parallel(PS.create(Splitor.ITERATOR)).forEach(it -> N.toList(it * 2, it * 2), Fn.sc(results, (a, b) -> results.add(a)));
+
+            assertHaveSameElements(N.cycle(TEST_DATA, 2), results);
+        }
+        {
+            List<Integer> results = new ArrayList<>();
+
+            createStream(TEST_DATA).parallel(PS.create(Splitor.ARRAY)).forEach(it -> N.toList(it * 2, it * 2), Fn.sc(results, (a, b) -> results.add(a)));
+
+            assertHaveSameElements(N.cycle(TEST_DATA, 2), results);
+
+        }
+
+        {
+            List<Integer> results = new ArrayList<>();
+
+            createStream(TEST_DATA).parallel(PS.create(Splitor.ITERATOR))
+                    .forEach(it -> N.toList(it * 2, it * 2), it -> N.toList(it * 3, it * 3), Fn.sc(results, (a, b, c) -> results.add(a)));
+
+            assertHaveSameElements(N.cycle(TEST_DATA, 4), results);
+        }
+
+        {
+            List<Integer> results = new ArrayList<>();
+
+            createStream(TEST_DATA).parallel(PS.create(Splitor.ARRAY))
+                    .forEach(it -> N.toList(it * 2, it * 2), it -> N.toList(it * 3, it * 3), Fn.sc(results, (a, b, c) -> results.add(a)));
+
+            assertHaveSameElements(N.cycle(TEST_DATA, 4), results);
+        }
+    }
+
+    @Test
+    public void testInterruptibility() throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicBoolean wasInterrupted = new AtomicBoolean(false);
+
+        Thread thread = new Thread(() -> {
+            try (Stream<Integer> interruptibleStream = createStream(Arrays.asList(1, 2, 3, 4, 5))) {
+
+                latch.countDown();
+                interruptibleStream.forEach(n -> {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        wasInterrupted.set(true);
+                        Thread.currentThread().interrupt();
+                    }
+                });
+            }
+        });
+
+        thread.start();
+        latch.await();
+        Thread.sleep(100);
+        thread.interrupt();
+        thread.join(2000);
+
+        assertTrue(wasInterrupted.get() || !thread.isAlive());
     }
 
     @Test
@@ -686,12 +773,54 @@ public class ParallelIteratorStreamTest extends TestBase {
     }
 
     @Test
-    public void testForEachTriple() throws Exception {
-        List<String> result = new CopyOnWriteArrayList<>();
+    public void testConcurrentModification() {
+        ConcurrentHashMap<Integer, Integer> map = new ConcurrentHashMap<>();
 
-        stream.limit(5).forEach(n -> Arrays.asList("X" + n, "Y" + n), s -> Arrays.asList(s + "1", s + "2"), (n, s, t) -> result.add(n + "-" + s + "-" + t));
+        stream.forEach(n -> {
+            map.put(n, n * n);
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
 
-        assertTrue(result.size() > 0);
+        assertEquals(10, map.size());
+        assertEquals(Integer.valueOf(100), map.get(10));
+    }
+
+    // forEach lambda$forEach$0 - covers the Throwables.Consumer path
+    @Test
+    public void testForEach_ThrowablesConsumer() throws Exception {
+        CopyOnWriteArrayList<Integer> collected = new CopyOnWriteArrayList<>();
+        createIteratorParallelStream(TEST_DATA).forEach((com.landawn.abacus.util.Throwables.Consumer<Integer, Exception>) collected::add);
+        assertHaveSameElements(TEST_DATA, collected);
+    }
+
+    @Test
+    @DisplayName("forEachPair")
+    public void test_forEachPair() {
+        {
+            List<String> results = new ArrayList<>();
+
+            createStream(TEST_DATA).limit(5).parallel(PS.create(Splitor.ITERATOR)).forEachPair(Fn.sc(results, (a, b) -> results.add(a + "->" + b)));
+
+            assertHaveSameElements(N.toList("1->2", "2->3", "3->4", "4->5"), results);
+        }
+        {
+            List<String> results = new ArrayList<>();
+
+            createStream(TEST_DATA).limit(5).parallel(PS.create(Splitor.ARRAY)).forEachPair(Fn.sc(results, (a, b) -> results.add(a + "->" + b)));
+
+            assertHaveSameElements(N.toList("1->2", "2->3", "3->4", "4->5"), results);
+        }
+        {
+            List<String> results = new ArrayList<>();
+
+            createStream(TEST_DATA).limit(5).parallel(PS.create(Splitor.ITERATOR)).forEachPair(2, Fn.sc(results, (a, b) -> results.add(a + "->" + b)));
+
+            assertHaveSameElements(N.toList("1->2", "3->4", "5->null"), results);
+        }
     }
 
     @Test
@@ -710,6 +839,47 @@ public class ParallelIteratorStreamTest extends TestBase {
     }
 
     @Test
+    @DisplayName("forEachTriple")
+    public void test_forEachTriple() {
+        {
+            List<String> results = new ArrayList<>();
+
+            createStream(TEST_DATA).limit(5)
+                    .parallel(PS.create(Splitor.ITERATOR))
+                    .forEachTriple(Fn.sc(results, (a, b, c) -> results.add(a + "->" + b + "->" + c)));
+
+            assertHaveSameElements(N.toList("1->2->3", "2->3->4", "3->4->5"), results);
+        }
+        {
+            List<String> results = new ArrayList<>();
+
+            createStream(TEST_DATA).limit(5)
+                    .parallel(PS.create(Splitor.ARRAY))
+                    .forEachTriple(Fn.sc(results, (a, b, c) -> results.add(a + "->" + b + "->" + c)));
+
+            assertHaveSameElements(N.toList("1->2->3", "2->3->4", "3->4->5"), results);
+        }
+        {
+            List<String> results = new ArrayList<>();
+
+            createStream(TEST_DATA).limit(5)
+                    .parallel(PS.create(Splitor.ARRAY))
+                    .forEachTriple(2, Fn.sc(results, (a, b, c) -> results.add(a + "->" + b + "->" + c)));
+
+            assertHaveSameElements(N.toList("1->2->3", "3->4->5"), results);
+        }
+    }
+
+    @Test
+    public void testForEachTriple() throws Exception {
+        List<String> result = new CopyOnWriteArrayList<>();
+
+        stream.limit(5).forEach(n -> Arrays.asList("X" + n, "Y" + n), s -> Arrays.asList(s + "1", s + "2"), (n, s, t) -> result.add(n + "-" + s + "-" + t));
+
+        assertTrue(result.size() > 0);
+    }
+
+    @Test
     public void testForEachTripleConsumer() throws Exception {
         List<String> result = new CopyOnWriteArrayList<>();
 
@@ -721,6 +891,26 @@ public class ParallelIteratorStreamTest extends TestBase {
 
         assertEquals(8, result.size());
         assertTrue(result.contains("1+2+3"));
+    }
+
+    @Test
+    public void testToMap_WithMergeAndSupplier_MultiThread() {
+        List<Integer> bigData = new java.util.ArrayList<>();
+        for (int i = 1; i <= 50; i++)
+            bigData.add(i);
+        java.util.TreeMap<Integer, Integer> result = createIteratorParallelStream(bigData).toMap(n -> n % 5, n -> n, Integer::sum, java.util.TreeMap::new);
+        assertNotNull(result);
+        assertEquals(5, result.size()); // 0..4 mod 5
+    }
+
+    @Test
+    public void testToMap_WithBinaryOperatorAndMapFactory_Parallel() {
+        List<Integer> data = N.asList(1, 2, 3, 4, 5);
+        java.util.TreeMap<Integer, Integer> result = createIteratorParallelStream(data).toMap(n -> n, n -> n * 2, (a, b) -> a + b, java.util.TreeMap::new);
+        assertNotNull(result);
+        assertEquals(5, result.size());
+        assertEquals(Integer.valueOf(2), result.get(1));
+        assertEquals(Integer.valueOf(10), result.get(5));
     }
 
     @Test
@@ -747,6 +937,24 @@ public class ParallelIteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testGroupTo_WithDownstreamAndMapFactory_Parallel() {
+        List<Integer> data = N.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        java.util.Map<Integer, Long> result = createIteratorParallelStream(data).groupTo(n -> n % 3, n -> n,
+                com.landawn.abacus.util.stream.Collectors.counting(), java.util.LinkedHashMap::new);
+        assertNotNull(result);
+        assertEquals(3, result.size());
+    }
+
+    @Test
+    public void testParallelGroupingOperations() throws Exception {
+        Map<String, List<String>> grouped = stream.groupTo(n -> n % 2 == 0 ? "even" : "odd", n -> "Value:" + n);
+
+        assertEquals(2, grouped.size());
+        assertEquals(5, grouped.get("even").size());
+        assertEquals(5, grouped.get("odd").size());
+    }
+
+    @Test
     public void testGroupTo() throws Exception {
         Map<Integer, List<Integer>> result = stream.groupTo(n -> n % 3);
 
@@ -766,6 +974,36 @@ public class ParallelIteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testGroupTo_WithCollectorAndSupplier_MultiThread() throws Exception {
+        List<Integer> bigData = new java.util.ArrayList<>();
+        for (int i = 1; i <= 50; i++)
+            bigData.add(i);
+        java.util.TreeMap<Integer, Long> result = createIteratorParallelStream(bigData).groupTo(n -> n % 5, n -> n, Collectors.counting(),
+                java.util.TreeMap::new);
+        assertNotNull(result);
+        assertEquals(5, result.size());
+    }
+
+    @Test
+    public void testFlatGroupTo_WithDownstreamAndMapFactory_Parallel() {
+        List<String> data = N.asList("apple", "apricot", "banana", "cherry");
+        // flatKeyExtractor returns Collection<K>
+        java.util.Map<Character, Long> result = createIteratorParallelStream(data).flatGroupTo(s -> N.asList(s.charAt(0)), (k, v) -> v,
+                com.landawn.abacus.util.stream.Collectors.counting(), java.util.LinkedHashMap::new);
+        assertNotNull(result);
+        assertTrue(result.containsKey('a'));
+    }
+
+    @Test
+    public void testParallelGroupingOperations2() throws Exception {
+        Map<Integer, List<Integer>> flatGrouped = stream.limit(3).flatGroupTo(n -> Arrays.asList(n, n + 10), (k, v) -> v * 100);
+
+        assertTrue(flatGrouped.containsKey(1));
+        assertTrue(flatGrouped.containsKey(11));
+        assertEquals(Arrays.asList(100), flatGrouped.get(1));
+    }
+
+    @Test
     public void testFlatGroupTo() throws Exception {
         Map<Integer, List<Integer>> result = stream.limit(3).flatGroupTo(n -> Arrays.asList(n, n + 10));
 
@@ -775,6 +1013,28 @@ public class ParallelIteratorStreamTest extends TestBase {
         assertEquals(Arrays.asList(1), result.get(1));
     }
 
+    // flatGroupTo 4-arg variant: flatKeyExtractor, valueMapper, downstream, mapFactory
+    @Test
+    public void testFlatGroupTo_FourArg() throws Exception {
+        Map<Integer, List<String>> result = createIteratorParallelStream(Arrays.asList(1, 2, 3, 4, 5)).flatGroupTo(n -> Arrays.asList(n % 2), (k, v) -> "v" + v,
+                Collectors.toList(), java.util.HashMap::new);
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertTrue(result.get(0).contains("v2"));
+        assertTrue(result.get(1).contains("v1"));
+    }
+
+    @Test
+    public void testFlatGroupTo_WithCollectorAndSupplier_MultiThread() throws Exception {
+        List<Integer> bigData = new java.util.ArrayList<>();
+        for (int i = 1; i <= 50; i++)
+            bigData.add(i);
+        java.util.TreeMap<Integer, Long> result = createIteratorParallelStream(bigData).flatGroupTo(n -> Arrays.asList(n % 5), (k, v) -> v,
+                Collectors.counting(), java.util.TreeMap::new);
+        assertNotNull(result);
+        assertEquals(5, result.size());
+    }
+
     @Test
     public void testToMultimap() throws Exception {
         ListMultimap<Integer, Integer> result = stream.toMultimap(n -> n % 3, n -> n);
@@ -782,6 +1042,17 @@ public class ParallelIteratorStreamTest extends TestBase {
         assertEquals(3, result.keySet().size());
         assertTrue(result.get(0).containsAll(Arrays.asList(3, 6, 9)));
         assertTrue(result.get(1).containsAll(Arrays.asList(1, 4, 7, 10)));
+    }
+
+    @Test
+    public void testToMultimap_WithSupplier_MultiThread() throws Exception {
+        List<Integer> bigData = new java.util.ArrayList<>();
+        for (int i = 1; i <= 50; i++)
+            bigData.add(i);
+        // Use 2-arg toMultimap(keyMapper, valueMapper) that returns ListMultimap
+        com.landawn.abacus.util.ListMultimap<Integer, Integer> result = createIteratorParallelStream(bigData).toMultimap(n -> n % 5, n -> n);
+        assertNotNull(result);
+        assertEquals(5, result.size());
     }
 
     @Test
@@ -797,6 +1068,60 @@ public class ParallelIteratorStreamTest extends TestBase {
         Integer result = stream.reduce(0, Integer::sum, Integer::sum);
 
         assertEquals(Integer.valueOf(55), result);
+    }
+
+    @Test
+    public void testReduce_BinaryOperator_MultiThread() {
+        List<Integer> bigData = new java.util.ArrayList<>();
+        for (int i = 1; i <= 100; i++)
+            bigData.add(i);
+        u.Optional<Integer> result = createIteratorParallelStream(bigData).reduce(Integer::sum);
+        assertTrue(result.isPresent());
+        assertEquals(Integer.valueOf(5050), result.get());
+    }
+
+    @Test
+    public void testReduce_WithCombiner_MultiThread() {
+        List<Integer> bigData = new java.util.ArrayList<>();
+        for (int i = 1; i <= 100; i++)
+            bigData.add(i);
+        Integer result = createIteratorParallelStream(bigData).reduce(0, (acc, t) -> acc + t, Integer::sum);
+        assertEquals(Integer.valueOf(5050), result);
+    }
+
+    @Test
+    public void testReduce_BinaryOperator_Parallel() {
+        u.Optional<Integer> result = createIteratorParallelStream(N.asList(1, 2, 3, 4, 5)).reduce((a, b) -> a + b);
+        assertTrue(result.isPresent());
+        assertEquals(15, (int) result.get());
+    }
+
+    @Test
+    public void testReduce_WithIdentity_Parallel() {
+        Integer result = createIteratorParallelStream(N.asList(1, 2, 3, 4, 5)).reduce(0, (Integer a, Integer b) -> a + b, (a, b) -> a + b);
+        assertEquals(15, (int) result);
+    }
+
+    @Test
+    public void testReduce_BinaryOperator_Empty() {
+        u.Optional<Integer> result = createIteratorParallelStream(new ArrayList<Integer>()).reduce((a, b) -> a + b);
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testParallelCollectOperations() {
+        Set<Integer> concurrentSet = stream.collect(Collectors.toConcurrentMap(n -> n, n -> n * 2, (a, b) -> a, ConcurrentHashMap::new)).keySet();
+
+        assertEquals(10, concurrentSet.size());
+    }
+
+    @Test
+    public void testParallelCollectOperations2() {
+
+        String joined = stream.map(String::valueOf).collect(Collectors.joining(","));
+
+        String[] parts = joined.split(",");
+        assertEquals(10, parts.length);
     }
 
     @Test
@@ -817,9 +1142,36 @@ public class ParallelIteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testCollect_WithCollector_MultiThread() {
+        List<Integer> bigData = new java.util.ArrayList<>();
+        for (int i = 1; i <= 100; i++)
+            bigData.add(i);
+        java.util.Set<Integer> result = createIteratorParallelStream(bigData).collect(Collectors.toSet());
+        assertEquals(100, result.size());
+    }
+
+    @Test
+    public void testCollect_WithCollector_Parallel() {
+        List<Integer> data = N.asList(1, 2, 3, 4, 5);
+        List<Integer> result = createIteratorParallelStream(data).collect(com.landawn.abacus.util.stream.Collectors.toList());
+        assertNotNull(result);
+        assertEquals(5, result.size());
+    }
+
+    @Test
     public void testMin() {
         u.Optional<Integer> result = stream.min(Integer::compare);
 
+        assertTrue(result.isPresent());
+        assertEquals(Integer.valueOf(1), result.get());
+    }
+
+    @Test
+    public void testMin_MultiThread() {
+        List<Integer> bigData = new java.util.ArrayList<>();
+        for (int i = 1; i <= 100; i++)
+            bigData.add(i);
+        u.Optional<Integer> result = createIteratorParallelStream(bigData).min(Integer::compare);
         assertTrue(result.isPresent());
         assertEquals(Integer.valueOf(1), result.get());
     }
@@ -830,6 +1182,29 @@ public class ParallelIteratorStreamTest extends TestBase {
 
         assertTrue(result.isPresent());
         assertEquals(Integer.valueOf(10), result.get());
+    }
+
+    @Test
+    public void testMax_MultiThread() {
+        List<Integer> bigData = new java.util.ArrayList<>();
+        for (int i = 1; i <= 100; i++)
+            bigData.add(i);
+        u.Optional<Integer> result = createIteratorParallelStream(bigData).max(Integer::compare);
+        assertTrue(result.isPresent());
+        assertEquals(Integer.valueOf(100), result.get());
+    }
+
+    @Test
+    public void testMax_Parallel() {
+        u.Optional<Integer> result = createIteratorParallelStream(N.asList(3, 1, 4, 1, 5, 9, 2, 6)).max((a, b) -> a.compareTo(b));
+        assertTrue(result.isPresent());
+        assertEquals(9, (int) result.get());
+    }
+
+    @Test
+    public void testMax_Empty() {
+        u.Optional<Integer> result = createIteratorParallelStream(new ArrayList<Integer>()).max((a, b) -> a.compareTo(b));
+        assertFalse(result.isPresent());
     }
 
     @Test
@@ -879,6 +1254,22 @@ public class ParallelIteratorStreamTest extends TestBase {
         boolean result = stream.hasMatchCountBetween(3, 5, n -> n % 2 == 0);
 
         assertTrue(result);
+    }
+
+    @Test
+    public void testSingleElementStream() {
+        try (Stream<Integer> singleStream = createStream(Collections.singletonList(42))) {
+
+            assertEquals(Integer.valueOf(42), singleStream.min(Integer::compare).get());
+        }
+        try (Stream<Integer> singleStream = createStream(Collections.singletonList(42))) {
+
+            assertEquals(Integer.valueOf(42), singleStream.max(Integer::compare).get());
+        }
+        try (Stream<Integer> singleStream = createStream(Collections.singletonList(42))) {
+
+            assertEquals(Integer.valueOf(42), singleStream.findFirst(n -> true).get());
+        }
     }
 
     @Test
@@ -954,6 +1345,15 @@ public class ParallelIteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testMergeWith_Stream_Parallel() {
+        List<Integer> result = createIteratorParallelStream(N.asList(1, 3, 5))
+                .mergeWith(Stream.of(2, 4, 6), (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+                .sorted()
+                .toList();
+        assertEquals(6, result.size());
+    }
+
+    @Test
     public void testZipWith() {
         List<String> letters = Arrays.asList("A", "B", "C");
 
@@ -1013,6 +1413,40 @@ public class ParallelIteratorStreamTest extends TestBase {
     }
 
     @Test
+    @DisplayName("zipWith() stream should zip with other streams")
+    public void testZipWithStream() {
+        {
+            Collection<String> other = Arrays.asList("a", "b", "c", "d", "e");
+            BiFunction<Integer, String, String> zipFunction = (i, s) -> i + s;
+
+            List<String> result = stream.limit(5).zipWith(Stream.of(other), zipFunction).toList();
+
+            assertTrue(N.isEqualCollection(Arrays.asList("1a", "2b", "3c", "4d", "5e"), result));
+        }
+        {
+            Collection<String> other = Arrays.asList("a", "b", "c", "d", "e");
+            Collection<String> other2 = Arrays.asList("a", "b", "c", "d", "e");
+            TriFunction<Integer, String, String, String> zipFunction = (i, s, c) -> i + s + c;
+
+            List<String> result = createStream(TEST_DATA).limit(5).zipWith(Stream.of(other), Stream.of(other2), zipFunction).toList();
+
+            assertTrue(N.isEqualCollection(Arrays.asList("1aa", "2bb", "3cc", "4dd", "5ee"), result));
+        }
+    }
+
+    // zipWith(Collection, Collection, O, O, O, TriFunction) - 3 streams with defaults
+    @Test
+    public void testZipWithThreeCollections_WithDefaults() {
+        List<Integer> a = Arrays.asList(1, 2);
+        List<Integer> b = Arrays.asList(10, 20, 30);
+        List<Integer> c = Arrays.asList(100, 200, 300, 400);
+        List<Integer> result = createIteratorParallelStream(a).zipWith(b, c, 0, 0, 0, (x, y, z) -> x + y + z).sorted().toList();
+        assertEquals(4, result.size());
+        assertEquals(111, result.get(0));
+        assertEquals(222, result.get(1));
+    }
+
+    @Test
     @DisplayName("zipWith() collection with defaults should use defaults for missing values")
     public void testZipWithCollectionDefaults() {
         {
@@ -1041,28 +1475,6 @@ public class ParallelIteratorStreamTest extends TestBase {
             assertTrue(result.contains("1aa"));
             assertTrue(result.contains("2bz"));
             assertTrue(result.contains("3xz"));
-        }
-    }
-
-    @Test
-    @DisplayName("zipWith() stream should zip with other streams")
-    public void testZipWithStream() {
-        {
-            Collection<String> other = Arrays.asList("a", "b", "c", "d", "e");
-            BiFunction<Integer, String, String> zipFunction = (i, s) -> i + s;
-
-            List<String> result = stream.limit(5).zipWith(Stream.of(other), zipFunction).toList();
-
-            assertTrue(N.isEqualCollection(Arrays.asList("1a", "2b", "3c", "4d", "5e"), result));
-        }
-        {
-            Collection<String> other = Arrays.asList("a", "b", "c", "d", "e");
-            Collection<String> other2 = Arrays.asList("a", "b", "c", "d", "e");
-            TriFunction<Integer, String, String, String> zipFunction = (i, s, c) -> i + s + c;
-
-            List<String> result = createStream(TEST_DATA).limit(5).zipWith(Stream.of(other), Stream.of(other2), zipFunction).toList();
-
-            assertTrue(N.isEqualCollection(Arrays.asList("1aa", "2bb", "3cc", "4dd", "5ee"), result));
         }
     }
 
@@ -1101,102 +1513,6 @@ public class ParallelIteratorStreamTest extends TestBase {
     }
 
     @Test
-    @DisplayName("forEach with flatMapper should apply action to each element")
-    public void test_forEach() {
-        {
-            List<Integer> results = new ArrayList<>();
-
-            createStream(TEST_DATA).parallel(PS.create(Splitor.ITERATOR)).forEach(it -> N.toList(it * 2, it * 2), Fn.sc(results, (a, b) -> results.add(a)));
-
-            assertHaveSameElements(N.cycle(TEST_DATA, 2), results);
-        }
-        {
-            List<Integer> results = new ArrayList<>();
-
-            createStream(TEST_DATA).parallel(PS.create(Splitor.ARRAY)).forEach(it -> N.toList(it * 2, it * 2), Fn.sc(results, (a, b) -> results.add(a)));
-
-            assertHaveSameElements(N.cycle(TEST_DATA, 2), results);
-
-        }
-
-        {
-            List<Integer> results = new ArrayList<>();
-
-            createStream(TEST_DATA).parallel(PS.create(Splitor.ITERATOR))
-                    .forEach(it -> N.toList(it * 2, it * 2), it -> N.toList(it * 3, it * 3), Fn.sc(results, (a, b, c) -> results.add(a)));
-
-            assertHaveSameElements(N.cycle(TEST_DATA, 4), results);
-        }
-
-        {
-            List<Integer> results = new ArrayList<>();
-
-            createStream(TEST_DATA).parallel(PS.create(Splitor.ARRAY))
-                    .forEach(it -> N.toList(it * 2, it * 2), it -> N.toList(it * 3, it * 3), Fn.sc(results, (a, b, c) -> results.add(a)));
-
-            assertHaveSameElements(N.cycle(TEST_DATA, 4), results);
-        }
-    }
-
-    @Test
-    @DisplayName("forEachPair")
-    public void test_forEachPair() {
-        {
-            List<String> results = new ArrayList<>();
-
-            createStream(TEST_DATA).limit(5).parallel(PS.create(Splitor.ITERATOR)).forEachPair(Fn.sc(results, (a, b) -> results.add(a + "->" + b)));
-
-            assertHaveSameElements(N.toList("1->2", "2->3", "3->4", "4->5"), results);
-        }
-        {
-            List<String> results = new ArrayList<>();
-
-            createStream(TEST_DATA).limit(5).parallel(PS.create(Splitor.ARRAY)).forEachPair(Fn.sc(results, (a, b) -> results.add(a + "->" + b)));
-
-            assertHaveSameElements(N.toList("1->2", "2->3", "3->4", "4->5"), results);
-        }
-        {
-            List<String> results = new ArrayList<>();
-
-            createStream(TEST_DATA).limit(5).parallel(PS.create(Splitor.ITERATOR)).forEachPair(2, Fn.sc(results, (a, b) -> results.add(a + "->" + b)));
-
-            assertHaveSameElements(N.toList("1->2", "3->4", "5->null"), results);
-        }
-    }
-
-    @Test
-    @DisplayName("forEachTriple")
-    public void test_forEachTriple() {
-        {
-            List<String> results = new ArrayList<>();
-
-            createStream(TEST_DATA).limit(5)
-                    .parallel(PS.create(Splitor.ITERATOR))
-                    .forEachTriple(Fn.sc(results, (a, b, c) -> results.add(a + "->" + b + "->" + c)));
-
-            assertHaveSameElements(N.toList("1->2->3", "2->3->4", "3->4->5"), results);
-        }
-        {
-            List<String> results = new ArrayList<>();
-
-            createStream(TEST_DATA).limit(5)
-                    .parallel(PS.create(Splitor.ARRAY))
-                    .forEachTriple(Fn.sc(results, (a, b, c) -> results.add(a + "->" + b + "->" + c)));
-
-            assertHaveSameElements(N.toList("1->2->3", "2->3->4", "3->4->5"), results);
-        }
-        {
-            List<String> results = new ArrayList<>();
-
-            createStream(TEST_DATA).limit(5)
-                    .parallel(PS.create(Splitor.ARRAY))
-                    .forEachTriple(2, Fn.sc(results, (a, b, c) -> results.add(a + "->" + b + "->" + c)));
-
-            assertHaveSameElements(N.toList("1->2->3", "3->4->5"), results);
-        }
-    }
-
-    @Test
     public void testIsParallel() {
         assertTrue(stream.isParallel());
     }
@@ -1209,6 +1525,98 @@ public class ParallelIteratorStreamTest extends TestBase {
 
         List<Integer> result = seqStream.toList();
         assertEquals(TEST_DATA, result);
+    }
+
+    @Test
+    public void testSequential_MultiThread() {
+        List<Integer> bigData = new java.util.ArrayList<>();
+        for (int i = 1; i <= 50; i++)
+            bigData.add(i);
+        Stream<Integer> parallelS = createIteratorParallelStream(bigData);
+        assertTrue(parallelS.isParallel());
+        Stream<Integer> seqStream = parallelS.sequential();
+        assertFalse(seqStream.isParallel());
+        int sum = seqStream.mapToInt(Integer::intValue).sum();
+        assertEquals(1275, sum);
+    }
+
+    @Test
+    public void testConstructorWithStream() {
+        Stream<Integer> sourceStream = Stream.of(1, 2, 3, 4, 5);
+        Stream<Integer> parallelStream = sourceStream.parallel();
+
+        List<Integer> result = parallelStream.toList();
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
+    }
+
+    @Test
+    public void testConstructorWithSortedStream() {
+        Stream<Integer> sourceStream = Stream.of(5, 3, 1, 4, 2).sorted();
+        Stream<Integer> parallelStream = sourceStream.parallel();
+
+        List<Integer> result = parallelStream.toList();
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
+    }
+
+    @Test
+    public void testExceptionPropagation() {
+        try {
+            stream.map(n -> {
+                if (n == 7) {
+                    throw new IllegalArgumentException("Test error at 7");
+                }
+                return n;
+            }).toList();
+
+            fail("Expected exception to be thrown");
+        } catch (RuntimeException e) {
+            assertTrue(e.getMessage().contains("Test error at 7") || e.getCause().getMessage().contains("Test error at 7"));
+        }
+    }
+
+    @Test
+    public void testOrderPreservation() {
+        List<Integer> sortedData = Arrays.asList(1, 2, 3, 4, 5);
+        try (Stream<Integer> sortedStream = Stream.of(sortedData.toArray(new Integer[0])).parallel().sorted()) {
+
+            List<Integer> result = sortedStream.toList();
+            assertEquals(sortedData, result);
+        }
+    }
+
+    @Test
+    public void testThreadLocalBehavior() {
+        ThreadLocal<Integer> threadLocal = new ThreadLocal<>();
+        Set<Integer> threadIds = N.newConcurrentHashSet();
+
+        List<Integer> result = stream.map(n -> {
+            if (threadLocal.get() == null) {
+                threadLocal.set(Thread.currentThread().hashCode());
+            }
+            threadIds.add(threadLocal.get());
+            return n;
+        }).toList();
+
+        assertEquals(10, result.size());
+        assertTrue(threadIds.size() >= 1);
+    }
+
+    @Test
+    public void testPerformanceCharacteristics() {
+        long startTime = System.currentTimeMillis();
+
+        List<Double> result = stream.map(n -> {
+            double sum = 0;
+            for (int i = 0; i < 1000; i++) {
+                sum += Math.sqrt(n * i);
+            }
+            return sum;
+        }).toList();
+
+        long duration = System.currentTimeMillis() - startTime;
+
+        assertEquals(10, result.size());
+        assertTrue(duration < 5000, "Operation took too long: " + duration + "ms");
     }
 
     @Test
@@ -1235,23 +1643,6 @@ public class ParallelIteratorStreamTest extends TestBase {
     }
 
     @Test
-    public void testConcurrentModification() {
-        ConcurrentHashMap<Integer, Integer> map = new ConcurrentHashMap<>();
-
-        stream.forEach(n -> {
-            map.put(n, n * n);
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        });
-
-        assertEquals(10, map.size());
-        assertEquals(Integer.valueOf(100), map.get(10));
-    }
-
-    @Test
     public void testOperationAfterClose() {
         stream.close();
         assertThrows(IllegalStateException.class, () -> stream.toList());
@@ -1265,20 +1656,6 @@ public class ParallelIteratorStreamTest extends TestBase {
 
             u.Optional<Integer> min = createStream(Collections.<Integer> emptyList()).min(Integer::compare);
             assertFalse(min.isPresent());
-        }
-    }
-
-    @Test
-    public void testLargeDataProcessing() {
-        List<Integer> largeData = new ArrayList<>();
-        for (int i = 1; i <= 1000; i++) {
-            largeData.add(i);
-        }
-
-        try (Stream<Integer> largeStream = createStream(largeData)) {
-            long sum = largeStream.mapToLong(Integer::longValue).sum();
-
-            assertEquals(500500L, sum);
         }
     }
 
@@ -1299,6 +1676,16 @@ public class ParallelIteratorStreamTest extends TestBase {
         } catch (RuntimeException e) {
             assertTrue(e.getMessage().contains("Test exception"));
         }
+    }
+
+    @Test
+    public void testSlidingMapTriFunction_SequentialFallback() {
+        List<Integer> result = Stream.of(1, 2, 3, 4, 5)
+                .parallel(PS.create(Splitor.ITERATOR).maxThreadNum(1))
+                .slidingMap(3, true, (a, b, c) -> a + b + c)
+                .toList();
+
+        assertEquals(Arrays.asList(6), result);
     }
 
 }

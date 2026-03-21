@@ -4,33 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BiObjIntFunctionTest extends TestBase {
-    @Test
-    public void testAndThenWithException() {
-        BiObjIntFunction<String, String, String> function = (t, u, i) -> t + u;
-        java.util.function.Function<String, Integer> afterFunction = s -> {
-            throw new RuntimeException("Test exception");
-        };
-
-        BiObjIntFunction<String, String, Integer> chainedFunction = function.andThen(afterFunction);
-
-        assertThrows(RuntimeException.class, () -> chainedFunction.apply("test", "value", 5));
-    }
-
-    @Test
-    public void testApplyWithException() {
-        BiObjIntFunction<String, String, String> function = (t, u, i) -> {
-            throw new RuntimeException("Apply exception");
-        };
-
-        assertThrows(RuntimeException.class, () -> function.apply("test", "value", 5));
-    }
 
     @Test
     public void testAnonymousClass() {
@@ -44,6 +22,23 @@ public class BiObjIntFunctionTest extends TestBase {
         String result = function.apply("foo", "bar", 99);
 
         assertEquals("foo-bar-99", result);
+    }
+
+    @Test
+    public void testWithDifferentTypes() {
+        BiObjIntFunction<Integer, Double, String> function = (t, u, i) -> "sum=" + (t + u + i);
+
+        String result = function.apply(10, 5.5, 20);
+
+        assertEquals("sum=35.5", result);
+    }
+
+    @Test
+    public void testReturningDifferentType() {
+        BiObjIntFunction<String, String, Boolean> function = (t, u, i) -> (t.length() + u.length()) == i;
+
+        assertEquals(true, function.apply("Hello", "World", 10));
+        assertEquals(false, function.apply("Hi", "There", 10));
     }
 
     @Test
@@ -74,6 +69,15 @@ public class BiObjIntFunctionTest extends TestBase {
     }
 
     @Test
+    public void testApplyWithException() {
+        BiObjIntFunction<String, String, String> function = (t, u, i) -> {
+            throw new RuntimeException("Apply exception");
+        };
+
+        assertThrows(RuntimeException.class, () -> function.apply("test", "value", 5));
+    }
+
+    @Test
     public void testComplexOperation() {
         BiObjIntFunction<String, String, String> function = (t, u, i) -> {
             if (t == null || u == null) {
@@ -94,19 +98,14 @@ public class BiObjIntFunctionTest extends TestBase {
     }
 
     @Test
-    public void testWithDifferentTypes() {
-        BiObjIntFunction<Integer, Double, String> function = (t, u, i) -> "sum=" + (t + u + i);
+    public void testAndThenWithException() {
+        BiObjIntFunction<String, String, String> function = (t, u, i) -> t + u;
+        java.util.function.Function<String, Integer> afterFunction = s -> {
+            throw new RuntimeException("Test exception");
+        };
 
-        String result = function.apply(10, 5.5, 20);
+        BiObjIntFunction<String, String, Integer> chainedFunction = function.andThen(afterFunction);
 
-        assertEquals("sum=35.5", result);
-    }
-
-    @Test
-    public void testReturningDifferentType() {
-        BiObjIntFunction<String, String, Boolean> function = (t, u, i) -> (t.length() + u.length()) == i;
-
-        assertEquals(true, function.apply("Hello", "World", 10));
-        assertEquals(false, function.apply("Hi", "There", 10));
+        assertThrows(RuntimeException.class, () -> chainedFunction.apply("test", "value", 5));
     }
 }

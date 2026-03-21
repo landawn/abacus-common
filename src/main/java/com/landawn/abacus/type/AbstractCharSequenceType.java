@@ -15,35 +15,32 @@
 package com.landawn.abacus.type;
 
 /**
- * Abstract base class for CharSequence types in the type system.
- * This class provides common functionality for handling CharSequence implementations
- * such as String, StringBuilder, StringBuffer, and other custom CharSequence types.
- * CharSequence types are treated as primary types that can be directly serialized
+ * The abstract base class for {@code CharSequence} types in the type system.
+ * This class provides common functionality for handling {@code CharSequence} implementations
+ * such as {@code String}, {@code StringBuilder}, {@code StringBuffer}, and other custom {@code CharSequence} types.
+ * {@code CharSequence} types are treated as primary types that can be directly serialized
  * and compared.
  *
- * @param <T> the specific CharSequence type (e.g., String, StringBuilder, StringBuffer)
+ * @param <T> the specific {@code CharSequence} type (e.g., {@code String}, {@code StringBuilder}, {@code StringBuffer})
  */
 public abstract class AbstractCharSequenceType<T extends CharSequence> extends AbstractPrimaryType<T> {
 
     /**
-     * Constructs an AbstractCharSequenceType with the specified type name.
+     * Constructs a new {@code AbstractCharSequenceType} with the specified type name.
      *
-     * @param typeName the name of the CharSequence type (e.g., "String", "StringBuilder")
+     * @param typeName the name of the {@code CharSequence} type (e.g., "String", "StringBuilder")
      */
-    protected AbstractCharSequenceType(String typeName) {
+    protected AbstractCharSequenceType(final String typeName) {
         super(typeName);
     }
 
     /**
-     * Checks if this type represents a CharSequence type.
-     * This method always returns {@code true} for CharSequence types,
-     * indicating that the type handles objects that implement the CharSequence interface.
+     * Returns {@code true} because this type represents a {@code CharSequence} type.
      *
-     * @return {@code true}, indicating this is a CharSequence type
+     * @return {@code true}
      */
     @Override
     public boolean isCharSequence() {
         return true;
     }
-
 }

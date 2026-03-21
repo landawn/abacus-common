@@ -7,13 +7,30 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class MutableIntTest extends TestBase {
+
+    @Test
+    public void testChainedOperations() {
+        MutableInt num = MutableInt.of(10);
+        num.increment();
+        num.add(5);
+        num.decrement();
+        num.subtract(2);
+        assertEquals(13, num.value());
+    }
+
+    @Test
+    public void testUseInLoop() {
+        MutableInt counter = MutableInt.of(0);
+        for (int i = 0; i < 10; i++) {
+            counter.increment();
+        }
+        assertEquals(10, counter.value());
+    }
 
     @Test
     public void testOf() {
@@ -44,6 +61,31 @@ public class MutableIntTest extends TestBase {
     public void testOfMinValue() {
         MutableInt num = MutableInt.of(Integer.MIN_VALUE);
         assertEquals(Integer.MIN_VALUE, num.value());
+    }
+
+    @Test
+    public void testOverflow() {
+        MutableInt num = MutableInt.of(Integer.MAX_VALUE);
+        num.increment();
+        assertEquals(Integer.MIN_VALUE, num.value());
+    }
+
+    @Test
+    public void testUnderflow() {
+        MutableInt num = MutableInt.of(Integer.MIN_VALUE);
+        num.decrement();
+        assertEquals(Integer.MAX_VALUE, num.value());
+    }
+
+    @Test
+    public void testOverflowBehavior() {
+        MutableInt mutableInt = MutableInt.of(Integer.MAX_VALUE);
+        mutableInt.increment();
+        Assertions.assertEquals(Integer.MIN_VALUE, mutableInt.value());
+
+        mutableInt.setValue(Integer.MIN_VALUE);
+        mutableInt.decrement();
+        Assertions.assertEquals(Integer.MAX_VALUE, mutableInt.value());
     }
 
     @Test
@@ -95,6 +137,14 @@ public class MutableIntTest extends TestBase {
     }
 
     @Test
+    public void testGetAndSetChain() {
+        MutableInt num = MutableInt.of(1);
+        int val = num.getAndSet(num.getAndSet(num.getAndSet(10)));
+        assertEquals(1, val);
+        assertEquals(10, num.value());
+    }
+
+    @Test
     public void testGetAndSetMultiple() {
         MutableInt num = MutableInt.of(5);
         assertEquals(5, num.getAndSet(10));
@@ -140,6 +190,19 @@ public class MutableIntTest extends TestBase {
         boolean result = num.setIf(v -> v == 10, 20);
         assertTrue(result);
         assertEquals(20, num.value());
+    }
+
+    @Test
+    public void testSetIf() throws Exception {
+        MutableInt mutableInt = MutableInt.of(10);
+
+        boolean updated = mutableInt.setIf(v -> v < 15, 20);
+        Assertions.assertTrue(updated);
+        Assertions.assertEquals(20, mutableInt.value());
+
+        updated = mutableInt.setIf(v -> v < 15, 30);
+        Assertions.assertFalse(updated);
+        Assertions.assertEquals(20, mutableInt.value());
     }
 
     @Test
@@ -210,6 +273,13 @@ public class MutableIntTest extends TestBase {
     }
 
     @Test
+    public void testAddLarge() {
+        MutableInt num = MutableInt.of(100);
+        num.add(900);
+        assertEquals(1000, num.value());
+    }
+
+    @Test
     public void testAddZero() {
         MutableInt num = MutableInt.of(10);
         num.add(0);
@@ -221,13 +291,6 @@ public class MutableIntTest extends TestBase {
         MutableInt num = MutableInt.of(10);
         num.add(-3);
         assertEquals(7, num.value());
-    }
-
-    @Test
-    public void testAddLarge() {
-        MutableInt num = MutableInt.of(100);
-        num.add(900);
-        assertEquals(1000, num.value());
     }
 
     @Test
@@ -468,6 +531,17 @@ public class MutableIntTest extends TestBase {
     }
 
     @Test
+    public void testCompareTo() {
+        MutableInt a = MutableInt.of(10);
+        MutableInt b = MutableInt.of(20);
+        MutableInt c = MutableInt.of(10);
+
+        Assertions.assertTrue(a.compareTo(b) < 0);
+        Assertions.assertTrue(b.compareTo(a) > 0);
+        Assertions.assertEquals(0, a.compareTo(c));
+    }
+
+    @Test
     public void testCompareToNegative() {
         MutableInt num1 = MutableInt.of(-10);
         MutableInt num2 = MutableInt.of(-5);
@@ -496,6 +570,13 @@ public class MutableIntTest extends TestBase {
     }
 
     @Test
+    public void testEqualsDifferentType() {
+        MutableInt num = MutableInt.of(42);
+        assertFalse(num.equals("42"));
+        assertFalse(num.equals(Integer.valueOf(42)));
+    }
+
+    @Test
     public void testEqualsSameInstance() {
         MutableInt num = MutableInt.of(42);
         assertTrue(num.equals(num));
@@ -505,13 +586,6 @@ public class MutableIntTest extends TestBase {
     public void testEqualsNull() {
         MutableInt num = MutableInt.of(42);
         assertFalse(num.equals(null));
-    }
-
-    @Test
-    public void testEqualsDifferentType() {
-        MutableInt num = MutableInt.of(42);
-        assertFalse(num.equals("42"));
-        assertFalse(num.equals(Integer.valueOf(42)));
     }
 
     @Test
@@ -529,21 +603,21 @@ public class MutableIntTest extends TestBase {
     }
 
     @Test
+    public void testEquals() {
+        MutableInt a = MutableInt.of(10);
+        MutableInt b = MutableInt.of(10);
+        MutableInt c = MutableInt.of(20);
+
+        Assertions.assertTrue(a.equals(b));
+        Assertions.assertFalse(a.equals(c));
+        Assertions.assertFalse(a.equals(null));
+        Assertions.assertFalse(a.equals("10"));
+    }
+
+    @Test
     public void testHashCode() {
         MutableInt num = MutableInt.of(42);
         assertEquals(42, num.hashCode());
-    }
-
-    @Test
-    public void testHashCodeZero() {
-        MutableInt num = MutableInt.of(0);
-        assertEquals(0, num.hashCode());
-    }
-
-    @Test
-    public void testHashCodeNegative() {
-        MutableInt num = MutableInt.of(-100);
-        assertEquals(-100, num.hashCode());
     }
 
     @Test
@@ -561,6 +635,18 @@ public class MutableIntTest extends TestBase {
         int hash2 = num.hashCode();
         assertNotEquals(hash1, hash2);
         assertEquals(20, hash2);
+    }
+
+    @Test
+    public void testHashCodeZero() {
+        MutableInt num = MutableInt.of(0);
+        assertEquals(0, num.hashCode());
+    }
+
+    @Test
+    public void testHashCodeNegative() {
+        MutableInt num = MutableInt.of(-100);
+        assertEquals(-100, num.hashCode());
     }
 
     @Test
@@ -591,94 +677,6 @@ public class MutableIntTest extends TestBase {
     public void testToStringMinValue() {
         MutableInt num = MutableInt.of(Integer.MIN_VALUE);
         assertEquals(String.valueOf(Integer.MIN_VALUE), num.toString());
-    }
-
-    @Test
-    public void testChainedOperations() {
-        MutableInt num = MutableInt.of(10);
-        num.increment();
-        num.add(5);
-        num.decrement();
-        num.subtract(2);
-        assertEquals(13, num.value());
-    }
-
-    @Test
-    public void testUseInLoop() {
-        MutableInt counter = MutableInt.of(0);
-        for (int i = 0; i < 10; i++) {
-            counter.increment();
-        }
-        assertEquals(10, counter.value());
-    }
-
-    @Test
-    public void testGetAndSetChain() {
-        MutableInt num = MutableInt.of(1);
-        int val = num.getAndSet(num.getAndSet(num.getAndSet(10)));
-        assertEquals(1, val);
-        assertEquals(10, num.value());
-    }
-
-    @Test
-    public void testOverflow() {
-        MutableInt num = MutableInt.of(Integer.MAX_VALUE);
-        num.increment();
-        assertEquals(Integer.MIN_VALUE, num.value());
-    }
-
-    @Test
-    public void testUnderflow() {
-        MutableInt num = MutableInt.of(Integer.MIN_VALUE);
-        num.decrement();
-        assertEquals(Integer.MAX_VALUE, num.value());
-    }
-
-    @Test
-    public void testSetIf() throws Exception {
-        MutableInt mutableInt = MutableInt.of(10);
-
-        boolean updated = mutableInt.setIf(v -> v < 15, 20);
-        Assertions.assertTrue(updated);
-        Assertions.assertEquals(20, mutableInt.value());
-
-        updated = mutableInt.setIf(v -> v < 15, 30);
-        Assertions.assertFalse(updated);
-        Assertions.assertEquals(20, mutableInt.value());
-    }
-
-    @Test
-    public void testCompareTo() {
-        MutableInt a = MutableInt.of(10);
-        MutableInt b = MutableInt.of(20);
-        MutableInt c = MutableInt.of(10);
-
-        Assertions.assertTrue(a.compareTo(b) < 0);
-        Assertions.assertTrue(b.compareTo(a) > 0);
-        Assertions.assertEquals(0, a.compareTo(c));
-    }
-
-    @Test
-    public void testEquals() {
-        MutableInt a = MutableInt.of(10);
-        MutableInt b = MutableInt.of(10);
-        MutableInt c = MutableInt.of(20);
-
-        Assertions.assertTrue(a.equals(b));
-        Assertions.assertFalse(a.equals(c));
-        Assertions.assertFalse(a.equals(null));
-        Assertions.assertFalse(a.equals("10"));
-    }
-
-    @Test
-    public void testOverflowBehavior() {
-        MutableInt mutableInt = MutableInt.of(Integer.MAX_VALUE);
-        mutableInt.increment();
-        Assertions.assertEquals(Integer.MIN_VALUE, mutableInt.value());
-
-        mutableInt.setValue(Integer.MIN_VALUE);
-        mutableInt.decrement();
-        Assertions.assertEquals(Integer.MAX_VALUE, mutableInt.value());
     }
 
 }

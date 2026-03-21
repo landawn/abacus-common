@@ -30,15 +30,15 @@ import com.landawn.abacus.util.cs;
  * This factory provides methods to create parsers for different serialization formats
  * including JSON, XML, Avro, and Kryo. It also manages parser availability checks
  * and Kryo class registration.
- * 
- * <p>The factory performs availability checks for optional dependencies at class loading time:
+ *
+ * <p>The factory performs availability checks for optional dependencies at class loading time:</p>
  * <ul>
  *   <li>Abacus XML support (requires XML processing libraries)</li>
  *   <li>Standard XML support (requires JAXP)</li>
  *   <li>Avro support (requires Apache Avro library)</li>
  *   <li>Kryo support (requires Kryo library)</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Check availability before creating parsers
@@ -46,20 +46,20 @@ import com.landawn.abacus.util.cs;
  *     KryoParser parser = ParserFactory.createKryoParser();
  *     // Use Kryo parser
  * }
- * 
+ *
  * // Create JSON parser (always available)
  * JsonParser jsonParser = ParserFactory.createJsonParser();
- * 
+ *
  * // Create XML parser with configuration
  * XmlSerConfig xsc = new XmlSerConfig();
  * XmlDeserConfig xdc = new XmlDeserConfig();
  * XmlParser xmlParser = ParserFactory.createXmlParser(xsc, xdc);
- * 
+ *
  * // Register Kryo classes for better performance
  * ParserFactory.registerKryo(MyClass.class);
  * ParserFactory.registerKryo(MyClass.class, 100);   // with ID
  * }</pre>
- * 
+ *
  * @see JsonParser
  * @see XmlParser
  * @see AvroParser
@@ -68,13 +68,16 @@ import com.landawn.abacus.util.cs;
 @SuppressWarnings("unused")
 public final class ParserFactory {
 
-    // Check for Android.
+    /** Whether the Abacus XML parser is available. */
     private static final boolean isAbacusXmlParserAvailable;
 
+    /** Whether the standard XML parser is available. */
     private static final boolean isXmlParserAvailable;
 
+    /** Whether the Apache Avro parser is available. */
     private static final boolean isAvroParserAvailable;
 
+    /** Whether the Kryo parser is available. */
     private static final boolean isKryoParserAvailable;
 
     static {
@@ -150,12 +153,16 @@ public final class ParserFactory {
         }
     }
 
+    /** Set of classes registered for Kryo serialization. */
     static final Set<Class<?>> _kryoClassSet = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
+    /** Map of class IDs registered for Kryo serialization. */
     static final Map<Class<?>, Integer> _kryoClassIdMap = new ConcurrentHashMap<>();
 
+    /** Map of custom serializers registered for Kryo serialization. */
     static final Map<Class<?>, Serializer<?>> _kryoClassSerializerMap = new ConcurrentHashMap<>();
 
+    /** Map of custom serializers and IDs registered for Kryo serialization. */
     static final Map<Class<?>, Tuple2<Serializer<?>, Integer>> _kryoClassSerializerIdMap = new ConcurrentHashMap<>();
 
     /**
@@ -175,7 +182,7 @@ public final class ParserFactory {
      *     XmlParser parser = ParserFactory.createAbacusXmlParser();
      * }
      * }</pre>
-     * 
+     *
      * @return {@code true} if abacus-common XML parser is available, {@code false} otherwise
      */
     public static boolean isAbacusXmlParserAvailable() {
@@ -192,7 +199,7 @@ public final class ParserFactory {
      *     XmlParser parser = ParserFactory.createXmlParser();
      * }
      * }</pre>
-     * 
+     *
      * @return {@code true} if XML parser is available, {@code false} otherwise
      */
     public static boolean isXmlParserAvailable() {
@@ -209,7 +216,7 @@ public final class ParserFactory {
      *     AvroParser parser = ParserFactory.createAvroParser();
      * }
      * }</pre>
-     * 
+     *
      * @return {@code true} if Avro parser is available, {@code false} otherwise
      */
     public static boolean isAvroParserAvailable() {
@@ -226,7 +233,7 @@ public final class ParserFactory {
      *     KryoParser parser = ParserFactory.createKryoParser();
      * }
      * }</pre>
-     * 
+     *
      * @return {@code true} if Kryo parser is available, {@code false} otherwise
      */
     public static boolean isKryoParserAvailable() {
@@ -234,7 +241,7 @@ public final class ParserFactory {
     }
 
     /**
-     * Creates a new Avro parser instance.
+     * Creates a new {@code AvroParser} instance.
      * Avro provides schema evolution and is particularly useful for data interchange.
      *
      * <p><b>Usage Examples:</b></p>
@@ -245,7 +252,7 @@ public final class ParserFactory {
      * }
      * }</pre>
      *
-     * @return a new {@link AvroParser} instance
+     * @return a new {@code AvroParser} instance
      * @throws NoClassDefFoundError if Avro library is not available
      */
     public static AvroParser createAvroParser() {
@@ -253,7 +260,7 @@ public final class ParserFactory {
     }
 
     /**
-     * Creates a new Kryo parser instance.
+     * Creates a new {@code KryoParser} instance.
      * Kryo provides fast binary serialization with automatic deep copying.
      *
      * <p><b>Usage Examples:</b></p>
@@ -264,7 +271,7 @@ public final class ParserFactory {
      * }
      * }</pre>
      *
-     * @return a new {@link KryoParser} instance
+     * @return a new {@code KryoParser} instance
      * @throws NoClassDefFoundError if Kryo library is not available
      */
     public static KryoParser createKryoParser() {
@@ -282,7 +289,7 @@ public final class ParserFactory {
      * MyObject obj = parser.deserialize(json, MyObject.class);
      * }</pre>
      *
-     * @return a new {@link JsonParser} instance
+     * @return a new {@code JsonParser} instance
      * @throws NoClassDefFoundError if JSON parser implementation is not available
      */
     public static JsonParser createJsonParser() {
@@ -305,7 +312,7 @@ public final class ParserFactory {
      *
      * @param jsc the JSON serialization configuration (may be {@code null} for default behavior)
      * @param jdc the JSON deserialization configuration (may be {@code null} for default behavior)
-     * @return a new {@link JsonParser} instance with the specified configurations
+     * @return a new {@code JsonParser} instance with the specified configurations
      * @throws NoClassDefFoundError if JSON parser implementation is not available
      */
     public static JsonParser createJsonParser(final JsonSerConfig jsc, final JsonDeserConfig jdc) {
@@ -314,7 +321,7 @@ public final class ParserFactory {
 
     /**
      * Creates a new abacus-common XML parser instance with default configuration.
-     * Uses StAX (Streaming API for XML) as the default parser type.
+     * Uses {@code StAX} (Streaming API for XML) as the default parser type.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -324,7 +331,7 @@ public final class ParserFactory {
      * }
      * }</pre>
      *
-     * @return a new abacus-common {@link XmlParser} instance
+     * @return a new abacus-common {@code XmlParser} instance
      * @throws NoClassDefFoundError if abacus-common XML support is not available
      */
     public static XmlParser createAbacusXmlParser() {
@@ -347,7 +354,7 @@ public final class ParserFactory {
      *
      * @param xsc the XML serialization configuration (may be {@code null} for default behavior)
      * @param xdc the XML deserialization configuration (may be {@code null} for default behavior)
-     * @return a new abacus-common {@link XmlParser} instance with the specified configurations
+     * @return a new abacus-common {@code XmlParser} instance with the specified configurations
      * @throws NoClassDefFoundError if abacus-common XML support is not available
      */
     public static XmlParser createAbacusXmlParser(final XmlSerConfig xsc, final XmlDeserConfig xdc) {
@@ -357,7 +364,7 @@ public final class ParserFactory {
     /**
      * Creates a new abacus-common XML SAX parser instance.
      * SAX parser is event-driven and memory efficient for large documents.
-     * 
+     *
      * @return a new abacus-common XML SAX parser
      */
     static XmlParser createAbacusXmlSAXParser() {
@@ -367,7 +374,7 @@ public final class ParserFactory {
     /**
      * Creates a new abacus-common XML StAX parser instance.
      * StAX parser provides a good balance between performance and ease of use.
-     * 
+     *
      * @return a new abacus-common XML StAX parser
      */
     static XmlParser createAbacusXmlStAXParser() {
@@ -377,7 +384,7 @@ public final class ParserFactory {
     /**
      * Creates a new abacus-common XML DOM parser instance.
      * DOM parser loads the entire document into memory but provides random access.
-     * 
+     *
      * @return a new abacus-common XML DOM parser
      */
     static XmlParser createAbacusXmlDOMParser() {
@@ -386,7 +393,7 @@ public final class ParserFactory {
 
     /**
      * Creates a new standard XML parser instance with default configuration.
-     * Uses StAX (Streaming API for XML) as the default parser type.
+     * Uses {@code StAX} (Streaming API for XML) as the default parser type.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -396,7 +403,7 @@ public final class ParserFactory {
      * }
      * }</pre>
      *
-     * @return a new standard {@link XmlParser} instance
+     * @return a new standard {@code XmlParser} instance
      * @throws NoClassDefFoundError if XML support is not available
      */
     public static XmlParser createXmlParser() {
@@ -418,7 +425,7 @@ public final class ParserFactory {
      *
      * @param xsc the XML serialization configuration (may be {@code null} for default behavior)
      * @param xdc the XML deserialization configuration (may be {@code null} for default behavior)
-     * @return a new standard {@link XmlParser} instance with the specified configurations
+     * @return a new standard {@code XmlParser} instance with the specified configurations
      * @throws NoClassDefFoundError if XML support is not available
      */
     public static XmlParser createXmlParser(final XmlSerConfig xsc, final XmlDeserConfig xdc) {
@@ -427,7 +434,7 @@ public final class ParserFactory {
 
     /**
      * Creates a new XML StAX parser instance.
-     * 
+     *
      * @return a new XML StAX parser
      */
     static XmlParser createXmlStAXParser() {
@@ -436,7 +443,7 @@ public final class ParserFactory {
 
     /**
      * Creates a new XML DOM parser instance.
-     * 
+     *
      * @return a new XML DOM parser
      */
     static XmlParser createXmlDOMParser() {
@@ -453,7 +460,7 @@ public final class ParserFactory {
      * // Use with JAXB-annotated classes
      * }</pre>
      *
-     * @return a new JAXB {@link XmlParser} instance
+     * @return a new JAXB {@code XmlParser} instance
      * @throws NoClassDefFoundError if JAXB implementation is not available
      */
     public static XmlParser createJaxbParser() {
@@ -473,7 +480,7 @@ public final class ParserFactory {
      *
      * @param xsc the XML serialization configuration (may be {@code null} for default behavior)
      * @param xdc the XML deserialization configuration (may be {@code null} for default behavior)
-     * @return a new JAXB {@link XmlParser} instance with the specified configurations
+     * @return a new JAXB {@code XmlParser} instance with the specified configurations
      * @throws NoClassDefFoundError if JAXB implementation is not available
      */
     public static XmlParser createJaxbParser(final XmlSerConfig xsc, final XmlDeserConfig xdc) {
@@ -492,7 +499,7 @@ public final class ParserFactory {
      * }</pre>
      *
      * @param type the class to register (must not be {@code null})
-     * @throws IllegalArgumentException if type is {@code null}
+     * @throws IllegalArgumentException if {@code type} is {@code null}
      */
     public static void registerKryo(final Class<?> type) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -514,7 +521,7 @@ public final class ParserFactory {
      *
      * @param type the class to register (must not be {@code null})
      * @param id the unique ID for this class
-     * @throws IllegalArgumentException if type is {@code null}
+     * @throws IllegalArgumentException if {@code type} is {@code null}
      */
     public static void registerKryo(final Class<?> type, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -535,7 +542,7 @@ public final class ParserFactory {
      *
      * @param type the class to register (must not be {@code null})
      * @param serializer the custom serializer for this class (must not be {@code null})
-     * @throws IllegalArgumentException if type or serializer is {@code null}
+     * @throws IllegalArgumentException if {@code type} or {@code serializer} is {@code null}
      */
     public static void registerKryo(final Class<?> type, final Serializer<?> serializer) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -558,7 +565,7 @@ public final class ParserFactory {
      * @param type the class to register (must not be {@code null})
      * @param serializer the custom serializer for this class (must not be {@code null})
      * @param id the unique ID for this class
-     * @throws IllegalArgumentException if type or serializer is {@code null}
+     * @throws IllegalArgumentException if {@code type} or {@code serializer} is {@code null}
      */
     public static void registerKryo(final Class<?> type, final Serializer<?> serializer, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);

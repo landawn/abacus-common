@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -17,7 +16,6 @@ import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.SK;
 
-@Tag("2025")
 public class JsonXmlSerConfigTest extends TestBase {
 
     static class TestConfig extends JsonXmlSerConfig<TestConfig> {
@@ -37,6 +35,42 @@ public class JsonXmlSerConfigTest extends TestBase {
     }
 
     @Test
+    public void testGetCharQuotation() {
+        assertEquals(SK._DOUBLE_QUOTE, config.getCharQuotation());
+    }
+
+    @Test
+    public void testDefaultValues() {
+        TestConfig newConfig = new TestConfig();
+
+        assertEquals(SK._DOUBLE_QUOTE, newConfig.getCharQuotation());
+        assertEquals(SK._DOUBLE_QUOTE, newConfig.getStringQuotation());
+        assertEquals(DateTimeFormat.LONG, newConfig.getDateTimeFormat());
+        assertFalse(newConfig.isPrettyFormat());
+        assertEquals("    ", newConfig.getIndentation());
+        assertNull(newConfig.getPropNamingPolicy());
+        assertFalse(newConfig.isWriteLongAsString());
+        assertFalse(newConfig.isWriteNullStringAsEmpty());
+        assertFalse(newConfig.isWriteNullNumberAsZero());
+        assertFalse(newConfig.isWriteNullBooleanAsFalse());
+        assertFalse(newConfig.isWriteBigDecimalAsPlain());
+        assertTrue(newConfig.isFailOnEmptyBean());
+        assertFalse(newConfig.isSupportCircularReference());
+    }
+
+    @Test
+    public void testSetCharQuotation() {
+        config.setCharQuotation('\'');
+        assertEquals('\'', config.getCharQuotation());
+
+        config.setCharQuotation('"');
+        assertEquals('"', config.getCharQuotation());
+
+        config.setCharQuotation((char) 0);
+        assertEquals((char) 0, config.getCharQuotation());
+    }
+
+    @Test
     public void test_setCharQuotation() {
         TestConfig config = new TestConfig();
         TestConfig result = config.setCharQuotation('\'');
@@ -51,15 +85,44 @@ public class JsonXmlSerConfigTest extends TestBase {
     }
 
     @Test
+    public void testSetCharQuotationZero() {
+        config.setCharQuotation((char) 0);
+        assertEquals((char) 0, config.getCharQuotation());
+    }
+
+    @Test
     public void test_setCharQuotation_invalidChar() {
         TestConfig config = new TestConfig();
         assertThrows(IllegalArgumentException.class, () -> config.setCharQuotation('x'));
     }
 
     @Test
+    public void testSetCharQuotationInvalid() {
+        assertThrows(IllegalArgumentException.class, () -> config.setCharQuotation('a'));
+        assertThrows(IllegalArgumentException.class, () -> config.setCharQuotation('@'));
+    }
+
+    @Test
     public void test_getStringQuotation() {
         TestConfig config = new TestConfig();
         assertEquals(SK._DOUBLE_QUOTE, config.getStringQuotation());
+    }
+
+    @Test
+    public void testGetStringQuotation() {
+        assertEquals(SK._DOUBLE_QUOTE, config.getStringQuotation());
+    }
+
+    @Test
+    public void testSetStringQuotation() {
+        config.setStringQuotation('\'');
+        assertEquals('\'', config.getStringQuotation());
+
+        config.setStringQuotation('"');
+        assertEquals('"', config.getStringQuotation());
+
+        config.setStringQuotation((char) 0);
+        assertEquals((char) 0, config.getStringQuotation());
     }
 
     @Test
@@ -71,9 +134,27 @@ public class JsonXmlSerConfigTest extends TestBase {
     }
 
     @Test
+    public void testSetStringQuotationZero() {
+        config.setStringQuotation((char) 0);
+        assertEquals((char) 0, config.getStringQuotation());
+    }
+
+    @Test
     public void test_setStringQuotation_invalidChar() {
         TestConfig config = new TestConfig();
         assertThrows(IllegalArgumentException.class, () -> config.setStringQuotation('x'));
+    }
+
+    @Test
+    public void testSetStringQuotationInvalid() {
+        assertThrows(IllegalArgumentException.class, () -> config.setStringQuotation('x'));
+        assertThrows(IllegalArgumentException.class, () -> config.setStringQuotation('#'));
+    }
+
+    @Test
+    public void testNoCharQuotation() {
+        config.noCharQuotation();
+        assertEquals((char) 0, config.getCharQuotation());
     }
 
     @Test
@@ -85,11 +166,24 @@ public class JsonXmlSerConfigTest extends TestBase {
     }
 
     @Test
+    public void testNoStringQuotation() {
+        config.noStringQuotation();
+        assertEquals((char) 0, config.getStringQuotation());
+    }
+
+    @Test
     public void test_noStringQuotation() {
         TestConfig config = new TestConfig();
         TestConfig result = config.noStringQuotation();
         assertSame(config, result);
         assertEquals(0, config.getStringQuotation());
+    }
+
+    @Test
+    public void testNoQuotation() {
+        config.noQuotation();
+        assertEquals((char) 0, config.getCharQuotation());
+        assertEquals((char) 0, config.getStringQuotation());
     }
 
     @Test
@@ -108,11 +202,44 @@ public class JsonXmlSerConfigTest extends TestBase {
     }
 
     @Test
+    public void testGetDateTimeFormat() {
+        assertEquals(DateTimeFormat.LONG, config.getDateTimeFormat());
+    }
+
+    @Test
+    public void testSetDateTimeFormat() {
+        config.setDateTimeFormat(DateTimeFormat.ISO_8601_DATE_TIME);
+        assertEquals(DateTimeFormat.ISO_8601_DATE_TIME, config.getDateTimeFormat());
+
+        config.setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP);
+        assertEquals(DateTimeFormat.ISO_8601_TIMESTAMP, config.getDateTimeFormat());
+    }
+
+    @Test
+    public void testSetDateTimeFormatAllValues() {
+        for (DateTimeFormat format : DateTimeFormat.values()) {
+            config.setDateTimeFormat(format);
+            assertEquals(format, config.getDateTimeFormat());
+        }
+    }
+
+    @Test
     public void test_setDateTimeFormat() {
         TestConfig config = new TestConfig();
         TestConfig result = config.setDateTimeFormat(DateTimeFormat.ISO_8601_DATE_TIME);
         assertSame(config, result);
         assertEquals(DateTimeFormat.ISO_8601_DATE_TIME, config.getDateTimeFormat());
+    }
+
+    @Test
+    public void testPrettyFormat() {
+        assertFalse(config.isPrettyFormat());
+
+        config.setPrettyFormat(true);
+        assertTrue(config.isPrettyFormat());
+
+        config.setPrettyFormat(false);
+        assertFalse(config.isPrettyFormat());
     }
 
     @Test
@@ -126,9 +253,23 @@ public class JsonXmlSerConfigTest extends TestBase {
     }
 
     @Test
+    public void testGetIndentation() {
+        assertEquals("    ", config.getIndentation());
+    }
+
+    @Test
     public void test_getIndentation() {
         TestConfig config = new TestConfig();
         assertNotNull(config.getIndentation());
+    }
+
+    @Test
+    public void testSetIndentation() {
+        config.setIndentation("\t");
+        assertEquals("\t", config.getIndentation());
+
+        config.setIndentation("  ");
+        assertEquals("  ", config.getIndentation());
     }
 
     @Test
@@ -140,9 +281,20 @@ public class JsonXmlSerConfigTest extends TestBase {
     }
 
     @Test
+    public void testSetIndentationEmpty() {
+        config.setIndentation("");
+        assertEquals("", config.getIndentation());
+    }
+
+    @Test
     public void test_getPropNamingPolicy() {
         TestConfig config = new TestConfig();
         assertEquals(null, config.getPropNamingPolicy());
+    }
+
+    @Test
+    public void testGetPropNamingPolicy() {
+        assertNull(config.getPropNamingPolicy());
     }
 
     @Test
@@ -151,6 +303,44 @@ public class JsonXmlSerConfigTest extends TestBase {
         TestConfig result = config.setPropNamingPolicy(NamingPolicy.SNAKE_CASE);
         assertSame(config, result);
         assertEquals(NamingPolicy.SNAKE_CASE, config.getPropNamingPolicy());
+    }
+
+    @Test
+    public void testSetPropNamingPolicy() {
+        config.setPropNamingPolicy(NamingPolicy.CAMEL_CASE);
+        assertEquals(NamingPolicy.CAMEL_CASE, config.getPropNamingPolicy());
+
+        config.setPropNamingPolicy(NamingPolicy.SNAKE_CASE);
+        assertEquals(NamingPolicy.SNAKE_CASE, config.getPropNamingPolicy());
+    }
+
+    @Test
+    public void testSetPropNamingPolicyNull() {
+        config.setPropNamingPolicy(NamingPolicy.CAMEL_CASE);
+        assertNotNull(config.getPropNamingPolicy());
+
+        config.setPropNamingPolicy(null);
+        assertNull(config.getPropNamingPolicy());
+    }
+
+    @Test
+    public void testWriteLongAsString() {
+        assertFalse(config.isWriteLongAsString());
+
+        config.setWriteLongAsString(true);
+        assertTrue(config.isWriteLongAsString());
+
+        config.setWriteLongAsString(false);
+        assertFalse(config.isWriteLongAsString());
+    }
+
+    @Test
+    public void testWriteLongAsStringToggle() {
+        assertFalse(config.isWriteLongAsString());
+        config.setWriteLongAsString(true);
+        assertTrue(config.isWriteLongAsString());
+        config.setWriteLongAsString(false);
+        assertFalse(config.isWriteLongAsString());
     }
 
     @Test
@@ -174,6 +364,26 @@ public class JsonXmlSerConfigTest extends TestBase {
     }
 
     @Test
+    public void testWriteNullStringAsEmpty() {
+        assertFalse(config.isWriteNullStringAsEmpty());
+
+        config.setWriteNullStringAsEmpty(true);
+        assertTrue(config.isWriteNullStringAsEmpty());
+
+        config.setWriteNullStringAsEmpty(false);
+        assertFalse(config.isWriteNullStringAsEmpty());
+    }
+
+    @Test
+    public void testWriteNullStringAsEmptyToggle() {
+        assertFalse(config.isWriteNullStringAsEmpty());
+        config.setWriteNullStringAsEmpty(true);
+        assertTrue(config.isWriteNullStringAsEmpty());
+        config.setWriteNullStringAsEmpty(false);
+        assertFalse(config.isWriteNullStringAsEmpty());
+    }
+
+    @Test
     public void test_writeNullNumberAsZero() {
         TestConfig config = new TestConfig();
         assertFalse(config.isWriteNullNumberAsZero());
@@ -184,6 +394,26 @@ public class JsonXmlSerConfigTest extends TestBase {
     }
 
     @Test
+    public void testWriteNullNumberAsZero() {
+        assertFalse(config.isWriteNullNumberAsZero());
+
+        config.setWriteNullNumberAsZero(true);
+        assertTrue(config.isWriteNullNumberAsZero());
+
+        config.setWriteNullNumberAsZero(false);
+        assertFalse(config.isWriteNullNumberAsZero());
+    }
+
+    @Test
+    public void testWriteNullNumberAsZeroToggle() {
+        assertFalse(config.isWriteNullNumberAsZero());
+        config.setWriteNullNumberAsZero(true);
+        assertTrue(config.isWriteNullNumberAsZero());
+        config.setWriteNullNumberAsZero(false);
+        assertFalse(config.isWriteNullNumberAsZero());
+    }
+
+    @Test
     public void test_writeNullBooleanAsFalse() {
         TestConfig config = new TestConfig();
         assertFalse(config.isWriteNullBooleanAsFalse());
@@ -191,6 +421,46 @@ public class JsonXmlSerConfigTest extends TestBase {
         TestConfig result = config.setWriteNullBooleanAsFalse(true);
         assertSame(config, result);
         assertTrue(config.isWriteNullBooleanAsFalse());
+    }
+
+    @Test
+    public void testWriteNullBooleanAsFalse() {
+        assertFalse(config.isWriteNullBooleanAsFalse());
+
+        config.setWriteNullBooleanAsFalse(true);
+        assertTrue(config.isWriteNullBooleanAsFalse());
+
+        config.setWriteNullBooleanAsFalse(false);
+        assertFalse(config.isWriteNullBooleanAsFalse());
+    }
+
+    @Test
+    public void testWriteNullBooleanAsFalseToggle() {
+        assertFalse(config.isWriteNullBooleanAsFalse());
+        config.setWriteNullBooleanAsFalse(true);
+        assertTrue(config.isWriteNullBooleanAsFalse());
+        config.setWriteNullBooleanAsFalse(false);
+        assertFalse(config.isWriteNullBooleanAsFalse());
+    }
+
+    @Test
+    public void testWriteBigDecimalAsPlain() {
+        assertFalse(config.isWriteBigDecimalAsPlain());
+
+        config.setWriteBigDecimalAsPlain(true);
+        assertTrue(config.isWriteBigDecimalAsPlain());
+
+        config.setWriteBigDecimalAsPlain(false);
+        assertFalse(config.isWriteBigDecimalAsPlain());
+    }
+
+    @Test
+    public void testWriteBigDecimalAsPlainToggle() {
+        assertFalse(config.isWriteBigDecimalAsPlain());
+        config.setWriteBigDecimalAsPlain(true);
+        assertTrue(config.isWriteBigDecimalAsPlain());
+        config.setWriteBigDecimalAsPlain(false);
+        assertFalse(config.isWriteBigDecimalAsPlain());
     }
 
     @Test
@@ -214,195 +484,21 @@ public class JsonXmlSerConfigTest extends TestBase {
     }
 
     @Test
-    public void test_supportCircularReference() {
-        TestConfig config = new TestConfig();
-        assertFalse(config.isSupportCircularReference());
-
-        TestConfig result = config.setSupportCircularReference(true);
-        assertSame(config, result);
-        assertTrue(config.isSupportCircularReference());
-    }
-
-    @Test
-    public void testGetCharQuotation() {
-        assertEquals(SK._DOUBLE_QUOTE, config.getCharQuotation());
-    }
-
-    @Test
-    public void testSetCharQuotation() {
-        config.setCharQuotation('\'');
-        assertEquals('\'', config.getCharQuotation());
-
-        config.setCharQuotation('"');
-        assertEquals('"', config.getCharQuotation());
-
-        config.setCharQuotation((char) 0);
-        assertEquals((char) 0, config.getCharQuotation());
-    }
-
-    @Test
-    public void testSetCharQuotationInvalid() {
-        assertThrows(IllegalArgumentException.class, () -> config.setCharQuotation('a'));
-        assertThrows(IllegalArgumentException.class, () -> config.setCharQuotation('@'));
-    }
-
-    @Test
-    public void testGetStringQuotation() {
-        assertEquals(SK._DOUBLE_QUOTE, config.getStringQuotation());
-    }
-
-    @Test
-    public void testSetStringQuotation() {
-        config.setStringQuotation('\'');
-        assertEquals('\'', config.getStringQuotation());
-
-        config.setStringQuotation('"');
-        assertEquals('"', config.getStringQuotation());
-
-        config.setStringQuotation((char) 0);
-        assertEquals((char) 0, config.getStringQuotation());
-    }
-
-    @Test
-    public void testSetStringQuotationInvalid() {
-        assertThrows(IllegalArgumentException.class, () -> config.setStringQuotation('x'));
-        assertThrows(IllegalArgumentException.class, () -> config.setStringQuotation('#'));
-    }
-
-    @Test
-    public void testNoCharQuotation() {
-        config.noCharQuotation();
-        assertEquals((char) 0, config.getCharQuotation());
-    }
-
-    @Test
-    public void testNoStringQuotation() {
-        config.noStringQuotation();
-        assertEquals((char) 0, config.getStringQuotation());
-    }
-
-    @Test
-    public void testNoQuotation() {
-        config.noQuotation();
-        assertEquals((char) 0, config.getCharQuotation());
-        assertEquals((char) 0, config.getStringQuotation());
-    }
-
-    @Test
-    public void testGetDateTimeFormat() {
-        assertEquals(DateTimeFormat.LONG, config.getDateTimeFormat());
-    }
-
-    @Test
-    public void testSetDateTimeFormat() {
-        config.setDateTimeFormat(DateTimeFormat.ISO_8601_DATE_TIME);
-        assertEquals(DateTimeFormat.ISO_8601_DATE_TIME, config.getDateTimeFormat());
-
-        config.setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP);
-        assertEquals(DateTimeFormat.ISO_8601_TIMESTAMP, config.getDateTimeFormat());
-    }
-
-    @Test
-    public void testPrettyFormat() {
-        assertFalse(config.isPrettyFormat());
-
-        config.setPrettyFormat(true);
-        assertTrue(config.isPrettyFormat());
-
-        config.setPrettyFormat(false);
-        assertFalse(config.isPrettyFormat());
-    }
-
-    @Test
-    public void testGetIndentation() {
-        assertEquals("    ", config.getIndentation());
-    }
-
-    @Test
-    public void testSetIndentation() {
-        config.setIndentation("\t");
-        assertEquals("\t", config.getIndentation());
-
-        config.setIndentation("  ");
-        assertEquals("  ", config.getIndentation());
-    }
-
-    @Test
-    public void testGetPropNamingPolicy() {
-        assertNull(config.getPropNamingPolicy());
-    }
-
-    @Test
-    public void testSetPropNamingPolicy() {
-        config.setPropNamingPolicy(NamingPolicy.CAMEL_CASE);
-        assertEquals(NamingPolicy.CAMEL_CASE, config.getPropNamingPolicy());
-
-        config.setPropNamingPolicy(NamingPolicy.SNAKE_CASE);
-        assertEquals(NamingPolicy.SNAKE_CASE, config.getPropNamingPolicy());
-    }
-
-    @Test
-    public void testWriteLongAsString() {
-        assertFalse(config.isWriteLongAsString());
-
-        config.setWriteLongAsString(true);
-        assertTrue(config.isWriteLongAsString());
-
-        config.setWriteLongAsString(false);
-        assertFalse(config.isWriteLongAsString());
-    }
-
-    @Test
-    public void testWriteNullStringAsEmpty() {
-        assertFalse(config.isWriteNullStringAsEmpty());
-
-        config.setWriteNullStringAsEmpty(true);
-        assertTrue(config.isWriteNullStringAsEmpty());
-
-        config.setWriteNullStringAsEmpty(false);
-        assertFalse(config.isWriteNullStringAsEmpty());
-    }
-
-    @Test
-    public void testWriteNullNumberAsZero() {
-        assertFalse(config.isWriteNullNumberAsZero());
-
-        config.setWriteNullNumberAsZero(true);
-        assertTrue(config.isWriteNullNumberAsZero());
-
-        config.setWriteNullNumberAsZero(false);
-        assertFalse(config.isWriteNullNumberAsZero());
-    }
-
-    @Test
-    public void testWriteNullBooleanAsFalse() {
-        assertFalse(config.isWriteNullBooleanAsFalse());
-
-        config.setWriteNullBooleanAsFalse(true);
-        assertTrue(config.isWriteNullBooleanAsFalse());
-
-        config.setWriteNullBooleanAsFalse(false);
-        assertFalse(config.isWriteNullBooleanAsFalse());
-    }
-
-    @Test
-    public void testWriteBigDecimalAsPlain() {
-        assertFalse(config.isWriteBigDecimalAsPlain());
-
-        config.setWriteBigDecimalAsPlain(true);
-        assertTrue(config.isWriteBigDecimalAsPlain());
-
-        config.setWriteBigDecimalAsPlain(false);
-        assertFalse(config.isWriteBigDecimalAsPlain());
-    }
-
-    @Test
     public void testFailOnEmptyBean() {
         assertTrue(config.isFailOnEmptyBean());
 
         config.setFailOnEmptyBean(false);
         assertFalse(config.isFailOnEmptyBean());
 
+        config.setFailOnEmptyBean(true);
+        assertTrue(config.isFailOnEmptyBean());
+    }
+
+    @Test
+    public void testFailOnEmptyBeanToggle() {
+        assertTrue(config.isFailOnEmptyBean());
+        config.setFailOnEmptyBean(false);
+        assertFalse(config.isFailOnEmptyBean());
         config.setFailOnEmptyBean(true);
         assertTrue(config.isFailOnEmptyBean());
     }
@@ -416,6 +512,25 @@ public class JsonXmlSerConfigTest extends TestBase {
 
         config.setSupportCircularReference(false);
         assertFalse(config.isSupportCircularReference());
+    }
+
+    @Test
+    public void testSupportCircularReferenceToggle() {
+        assertFalse(config.isSupportCircularReference());
+        config.setSupportCircularReference(true);
+        assertTrue(config.isSupportCircularReference());
+        config.setSupportCircularReference(false);
+        assertFalse(config.isSupportCircularReference());
+    }
+
+    @Test
+    public void test_supportCircularReference() {
+        TestConfig config = new TestConfig();
+        assertFalse(config.isSupportCircularReference());
+
+        TestConfig result = config.setSupportCircularReference(true);
+        assertSame(config, result);
+        assertTrue(config.isSupportCircularReference());
     }
 
     @Test
@@ -448,123 +563,6 @@ public class JsonXmlSerConfigTest extends TestBase {
         assertTrue(config.isWriteBigDecimalAsPlain());
         assertFalse(config.isFailOnEmptyBean());
         assertTrue(config.isSupportCircularReference());
-    }
-
-    @Test
-    public void testDefaultValues() {
-        TestConfig newConfig = new TestConfig();
-
-        assertEquals(SK._DOUBLE_QUOTE, newConfig.getCharQuotation());
-        assertEquals(SK._DOUBLE_QUOTE, newConfig.getStringQuotation());
-        assertEquals(DateTimeFormat.LONG, newConfig.getDateTimeFormat());
-        assertFalse(newConfig.isPrettyFormat());
-        assertEquals("    ", newConfig.getIndentation());
-        assertNull(newConfig.getPropNamingPolicy());
-        assertFalse(newConfig.isWriteLongAsString());
-        assertFalse(newConfig.isWriteNullStringAsEmpty());
-        assertFalse(newConfig.isWriteNullNumberAsZero());
-        assertFalse(newConfig.isWriteNullBooleanAsFalse());
-        assertFalse(newConfig.isWriteBigDecimalAsPlain());
-        assertTrue(newConfig.isFailOnEmptyBean());
-        assertFalse(newConfig.isSupportCircularReference());
-    }
-
-    @Test
-    public void testSetCharQuotationZero() {
-        config.setCharQuotation((char) 0);
-        assertEquals((char) 0, config.getCharQuotation());
-    }
-
-    @Test
-    public void testSetStringQuotationZero() {
-        config.setStringQuotation((char) 0);
-        assertEquals((char) 0, config.getStringQuotation());
-    }
-
-    @Test
-    public void testSetDateTimeFormatAllValues() {
-        for (DateTimeFormat format : DateTimeFormat.values()) {
-            config.setDateTimeFormat(format);
-            assertEquals(format, config.getDateTimeFormat());
-        }
-    }
-
-    @Test
-    public void testSetIndentationEmpty() {
-        config.setIndentation("");
-        assertEquals("", config.getIndentation());
-    }
-
-    @Test
-    public void testSetPropNamingPolicyNull() {
-        config.setPropNamingPolicy(NamingPolicy.CAMEL_CASE);
-        assertNotNull(config.getPropNamingPolicy());
-
-        config.setPropNamingPolicy(null);
-        assertNull(config.getPropNamingPolicy());
-    }
-
-    @Test
-    public void testWriteLongAsStringToggle() {
-        assertFalse(config.isWriteLongAsString());
-        config.setWriteLongAsString(true);
-        assertTrue(config.isWriteLongAsString());
-        config.setWriteLongAsString(false);
-        assertFalse(config.isWriteLongAsString());
-    }
-
-    @Test
-    public void testWriteNullStringAsEmptyToggle() {
-        assertFalse(config.isWriteNullStringAsEmpty());
-        config.setWriteNullStringAsEmpty(true);
-        assertTrue(config.isWriteNullStringAsEmpty());
-        config.setWriteNullStringAsEmpty(false);
-        assertFalse(config.isWriteNullStringAsEmpty());
-    }
-
-    @Test
-    public void testWriteNullNumberAsZeroToggle() {
-        assertFalse(config.isWriteNullNumberAsZero());
-        config.setWriteNullNumberAsZero(true);
-        assertTrue(config.isWriteNullNumberAsZero());
-        config.setWriteNullNumberAsZero(false);
-        assertFalse(config.isWriteNullNumberAsZero());
-    }
-
-    @Test
-    public void testWriteNullBooleanAsFalseToggle() {
-        assertFalse(config.isWriteNullBooleanAsFalse());
-        config.setWriteNullBooleanAsFalse(true);
-        assertTrue(config.isWriteNullBooleanAsFalse());
-        config.setWriteNullBooleanAsFalse(false);
-        assertFalse(config.isWriteNullBooleanAsFalse());
-    }
-
-    @Test
-    public void testWriteBigDecimalAsPlainToggle() {
-        assertFalse(config.isWriteBigDecimalAsPlain());
-        config.setWriteBigDecimalAsPlain(true);
-        assertTrue(config.isWriteBigDecimalAsPlain());
-        config.setWriteBigDecimalAsPlain(false);
-        assertFalse(config.isWriteBigDecimalAsPlain());
-    }
-
-    @Test
-    public void testFailOnEmptyBeanToggle() {
-        assertTrue(config.isFailOnEmptyBean());
-        config.setFailOnEmptyBean(false);
-        assertFalse(config.isFailOnEmptyBean());
-        config.setFailOnEmptyBean(true);
-        assertTrue(config.isFailOnEmptyBean());
-    }
-
-    @Test
-    public void testSupportCircularReferenceToggle() {
-        assertFalse(config.isSupportCircularReference());
-        config.setSupportCircularReference(true);
-        assertTrue(config.isSupportCircularReference());
-        config.setSupportCircularReference(false);
-        assertFalse(config.isSupportCircularReference());
     }
 
     @Test

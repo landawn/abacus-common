@@ -23,7 +23,7 @@ import java.lang.annotation.Target;
  * Indicates that a field should be excluded from bean difference comparison operations.
  * When comparing two bean instances for differences, fields marked with this annotation
  * will be completely ignored, allowing you to focus on meaningful business data changes.
- * 
+ *
  * <p><b>Common use cases for ignored fields:</b></p>
  * <ul>
  *   <li>Timestamps (created, modified dates) that change on every update</li>
@@ -33,7 +33,7 @@ import java.lang.annotation.Target;
  *   <li>System-generated metadata</li>
  *   <li>Fields that are expected to differ but aren't meaningful differences</li>
  * </ul>
- * 
+ *
  * <p><b>Benefits:</b></p>
  * <ul>
  *   <li>Cleaner difference reports focusing on actual data changes</li>
@@ -41,10 +41,9 @@ import java.lang.annotation.Target;
  *   <li>Simplified testing by ignoring volatile fields</li>
  *   <li>Better performance by skipping complex field comparisons</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- *
  * public class User {
  *     private Long id;
  *     private String username;
@@ -68,7 +67,7 @@ import java.lang.annotation.Target;
  * // Fields annotated with @DiffIgnore are excluded from comparison
  * Difference.BeanDifference<?, ?, ?> diff = Difference.BeanDifference.of(user1, user2);
  * }</pre>
- * 
+ *
  * @see com.landawn.abacus.util.Difference.BeanDifference
  * @see com.landawn.abacus.util.Difference.BeanDifference#of(Object, Object)
  */

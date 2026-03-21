@@ -9,12 +9,10 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BigIntegerSummaryStatisticsTest extends TestBase {
 
     @Test
@@ -40,6 +38,34 @@ public class BigIntegerSummaryStatisticsTest extends TestBase {
         assertEquals(min, stats.getMin());
         assertEquals(max, stats.getMax());
         assertEquals(sum, stats.getSum());
+    }
+
+    @Test
+    public void testLargeNumbers() {
+        BigIntegerSummaryStatistics stats = new BigIntegerSummaryStatistics();
+        BigInteger large1 = new BigInteger("999999999999999999999999");
+        BigInteger large2 = new BigInteger("888888888888888888888888");
+
+        stats.accept(large1);
+        stats.accept(large2);
+
+        assertEquals(2L, stats.getCount());
+        assertEquals(large2, stats.getMin());
+        assertEquals(large1, stats.getMax());
+    }
+
+    @Test
+    public void testParameterizedConstructor() {
+        BigInteger min = new BigInteger("10");
+        BigInteger max = new BigInteger("30");
+        BigInteger sum = new BigInteger("60");
+        BigIntegerSummaryStatistics stats = new BigIntegerSummaryStatistics(3L, min, max, sum);
+
+        Assertions.assertEquals(3, stats.getCount());
+        Assertions.assertEquals(sum, stats.getSum());
+        Assertions.assertEquals(min, stats.getMin());
+        Assertions.assertEquals(max, stats.getMax());
+        Assertions.assertEquals(0, new BigDecimal("20").compareTo(stats.getAverage().setScale(0)));
     }
 
     @Test
@@ -79,6 +105,19 @@ public class BigIntegerSummaryStatisticsTest extends TestBase {
         assertEquals(new BigInteger("-35"), stats.getSum());
         assertEquals(new BigInteger("-20"), stats.getMin());
         assertEquals(new BigInteger("-5"), stats.getMax());
+    }
+
+    @Test
+    public void testAccept() {
+        BigIntegerSummaryStatistics stats = new BigIntegerSummaryStatistics();
+        stats.accept(new BigInteger("100"));
+        stats.accept(new BigInteger("200"));
+        stats.accept(new BigInteger("300"));
+
+        Assertions.assertEquals(3, stats.getCount());
+        Assertions.assertEquals(new BigInteger("600"), stats.getSum());
+        Assertions.assertEquals(new BigInteger("100"), stats.getMin());
+        Assertions.assertEquals(new BigInteger("300"), stats.getMax());
     }
 
     @Test
@@ -185,47 +224,6 @@ public class BigIntegerSummaryStatisticsTest extends TestBase {
         assertTrue(str.contains("count="));
         assertTrue(str.contains("sum="));
         assertTrue(str.contains("average="));
-    }
-
-    @Test
-    public void testLargeNumbers() {
-        BigIntegerSummaryStatistics stats = new BigIntegerSummaryStatistics();
-        BigInteger large1 = new BigInteger("999999999999999999999999");
-        BigInteger large2 = new BigInteger("888888888888888888888888");
-
-        stats.accept(large1);
-        stats.accept(large2);
-
-        assertEquals(2L, stats.getCount());
-        assertEquals(large2, stats.getMin());
-        assertEquals(large1, stats.getMax());
-    }
-
-    @Test
-    public void testParameterizedConstructor() {
-        BigInteger min = new BigInteger("10");
-        BigInteger max = new BigInteger("30");
-        BigInteger sum = new BigInteger("60");
-        BigIntegerSummaryStatistics stats = new BigIntegerSummaryStatistics(3L, min, max, sum);
-
-        Assertions.assertEquals(3, stats.getCount());
-        Assertions.assertEquals(sum, stats.getSum());
-        Assertions.assertEquals(min, stats.getMin());
-        Assertions.assertEquals(max, stats.getMax());
-        Assertions.assertEquals(0, new BigDecimal("20").compareTo(stats.getAverage().setScale(0)));
-    }
-
-    @Test
-    public void testAccept() {
-        BigIntegerSummaryStatistics stats = new BigIntegerSummaryStatistics();
-        stats.accept(new BigInteger("100"));
-        stats.accept(new BigInteger("200"));
-        stats.accept(new BigInteger("300"));
-
-        Assertions.assertEquals(3, stats.getCount());
-        Assertions.assertEquals(new BigInteger("600"), stats.getSum());
-        Assertions.assertEquals(new BigInteger("100"), stats.getMin());
-        Assertions.assertEquals(new BigInteger("300"), stats.getMax());
     }
 
 }

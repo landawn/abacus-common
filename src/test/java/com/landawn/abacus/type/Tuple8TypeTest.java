@@ -16,28 +16,87 @@ package com.landawn.abacus.type;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.Tuple;
+import com.landawn.abacus.util.Tuple.Tuple8;
 
-@Tag("2025")
 public class Tuple8TypeTest extends TestBase {
 
     private final Tuple8Type type = new Tuple8Type("String", "String", "String", "String", "String", "String", "String", "String");
 
     @Test
-    public void test_name() {
-        assertNotNull(type.name());
-        assertFalse(type.name().isEmpty());
+    public void test_declaringName() {
+        String dn = type.declaringName();
+        assertNotNull(dn);
+        assertTrue(dn.contains("Tuple8"));
+    }
+
+    @Test
+    public void test_javaType() {
+        assertEquals(Tuple8.class, type.javaType());
+    }
+
+    @Test
+    public void test_parameterTypes() {
+        Type<?>[] params = type.parameterTypes();
+        assertNotNull(params);
+        assertEquals(8, params.length);
+    }
+
+    @Test
+    public void test_isParameterizedType() {
+        assertTrue(type.isParameterizedType());
+    }
+
+    @Test
+    public void test_stringOf_Null() {
+        assertNull(type.stringOf(null));
+    }
+
+    @Test
+    public void test_stringOf_NonNull() {
+        Tuple8<String, String, String, String, String, String, String, String> t = Tuple.of("a", "b", "c", "d", "e", "f", "g", "h");
+        String result = type.stringOf(t);
+        assertNotNull(result);
+        assertTrue(result.contains("a"));
+        assertTrue(result.contains("h"));
+    }
+
+    @Test
+    public void test_valueOf_Null() {
+        assertNull(type.valueOf((String) null));
+    }
+
+    @Test
+    public void test_valueOf_Empty() {
+        assertNull(type.valueOf(""));
+    }
+
+    @Test
+    public void test_valueOf_ValidJson() {
+        Tuple8<String, String, String, String, String, String, String, String> t = Tuple.of("a", "b", "c", "d", "e", "f", "g", "h");
+        String json = type.stringOf(t);
+        @SuppressWarnings("unchecked")
+        Tuple8<String, String, String, String, String, String, String, String> result = (Tuple8<String, String, String, String, String, String, String, String>) type
+                .valueOf(json);
+        assertNotNull(result);
+        assertEquals("a", result._1);
+        assertEquals("h", result._8);
     }
 
     @Test
@@ -46,6 +105,55 @@ public class Tuple8TypeTest extends TestBase {
         Object result = type.valueOf((String) null);
         // Result may be null or default value depending on type
         assertNull(result);
+    }
+
+    // appendTo with null tuple should write "null"
+    @Test
+    public void test_appendTo_Null() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        type.appendTo(sb, null);
+        assertEquals("null", sb.toString());
+    }
+
+    @Test
+    public void test_appendTo_WithAppendable() throws IOException {
+        Tuple8<String, String, String, String, String, String, String, String> t = Tuple.of("a", "b", "c", "d", "e", "f", "g", "h");
+        StringBuilder sb = new StringBuilder();
+        type.appendTo(sb, t);
+        String result = sb.toString();
+        assertNotNull(result);
+        assertTrue(result.startsWith("["));
+        assertTrue(result.endsWith("]"));
+    }
+
+    @Test
+    public void test_appendTo_WithWriter() throws IOException {
+        Tuple8<String, String, String, String, String, String, String, String> t = Tuple.of("a", "b", "c", "d", "e", "f", "g", "h");
+        StringWriter sw = new StringWriter();
+        type.appendTo(sw, t);
+        String result = sw.toString();
+        assertNotNull(result);
+        assertTrue(result.startsWith("["));
+    }
+
+    // writeCharacter with null writes "null"
+    @Test
+    public void test_writeCharacter_Null() throws IOException {
+        var writer = Objectory.createBufferedJsonWriter();
+        assertDoesNotThrow(() -> type.writeCharacter(writer, null, null));
+    }
+
+    @Test
+    public void test_writeCharacter_NonNull() throws IOException {
+        Tuple8<String, String, String, String, String, String, String, String> t = Tuple.of("a", "b", "c", "d", "e", "f", "g", "h");
+        var writer = Objectory.createBufferedJsonWriter();
+        assertDoesNotThrow(() -> type.writeCharacter(writer, t, null));
+    }
+
+    @Test
+    public void test_name() {
+        assertNotNull(type.name());
+        assertFalse(type.name().isEmpty());
     }
 
     @Test

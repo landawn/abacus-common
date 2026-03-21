@@ -4,13 +4,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class AccountStatusTest extends TestBase {
+
+    @Test
+    public void testIntValue_sequential() {
+        AccountStatus[] statuses = AccountStatus.values();
+        for (int i = 0; i < statuses.length; i++) {
+            assertEquals(i, statuses[i].code());
+        }
+    }
 
     @Test
     public void testIntValue() {
@@ -37,6 +43,26 @@ public class AccountStatusTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> AccountStatus.fromCode(-1));
         assertThrows(IllegalArgumentException.class, () -> AccountStatus.fromCode(6));
         assertThrows(IllegalArgumentException.class, () -> AccountStatus.fromCode(100));
+    }
+
+    @Test
+    public void testValueOfInvalid() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            AccountStatus.fromCode(10);
+        });
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            AccountStatus.fromCode(-1);
+        });
+    }
+
+    @Test
+    public void testIntegration_allStatusesRoundTrip() {
+        AccountStatus[] statuses = AccountStatus.values();
+        for (AccountStatus status : statuses) {
+            int value = status.code();
+            AccountStatus decoded = AccountStatus.fromCode(value);
+            assertEquals(status, decoded);
+        }
     }
 
     @Test
@@ -79,34 +105,6 @@ public class AccountStatusTest extends TestBase {
         assertEquals("RETIRED", AccountStatus.RETIRED.toString());
         assertEquals("CLOSED", AccountStatus.CLOSED.toString());
         assertEquals("DELETED", AccountStatus.DELETED.toString());
-    }
-
-    @Test
-    public void testValueOfInvalid() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            AccountStatus.fromCode(10);
-        });
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            AccountStatus.fromCode(-1);
-        });
-    }
-
-    @Test
-    public void testIntValue_sequential() {
-        AccountStatus[] statuses = AccountStatus.values();
-        for (int i = 0; i < statuses.length; i++) {
-            assertEquals(i, statuses[i].code());
-        }
-    }
-
-    @Test
-    public void testIntegration_allStatusesRoundTrip() {
-        AccountStatus[] statuses = AccountStatus.values();
-        for (AccountStatus status : statuses) {
-            int value = status.code();
-            AccountStatus decoded = AccountStatus.fromCode(value);
-            assertEquals(status, decoded);
-        }
     }
 
 }

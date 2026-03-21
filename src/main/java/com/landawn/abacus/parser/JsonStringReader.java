@@ -41,24 +41,27 @@ import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
 
 /**
- * Internal implementation of JsonReader for parsing JSON from string sources.
+ * Internal implementation of {@code JsonReader} for parsing JSON from string sources.
  * This class provides efficient JSON parsing by working directly with character arrays
  * and minimizing object allocation during parsing.
- * 
+ *
  * <p>Key features:</p>
  * <ul>
  *   <li>Efficient character buffer management</li>
  *   <li>Direct number parsing without intermediate string creation</li>
  *   <li>Support for escape character handling</li>
- *   <li>Optimized parsing of common JSON values (true, false, null)</li>
+ *   <li>Optimized parsing of common JSON values ({@code true}, {@code false}, {@code null})</li>
  * </ul>
- * 
+ *
  * <p>This is an internal class and should not be used directly by application code.</p>
- * 
+ *
  */
 class JsonStringReader extends AbstractJsonReader {
     private static final Logger logger = LoggerFactory.getLogger(JsonStringReader.class);
 
+    /**
+     * Default empty optional instances for various types.
+     */
     static final Map<Class<?>, Object> defaultOptionals = new HashMap<>(16);
 
     static {
@@ -79,40 +82,78 @@ class JsonStringReader extends AbstractJsonReader {
         defaultOptionals.put(java.util.OptionalDouble.class, java.util.OptionalDouble.empty());
     }
 
+    /** The underlying reader, if any. */
     final Reader reader;
 
+    /** The source character array. */
     final char[] strValue;
 
+    /** The end index of the string content. */
     int strEndIndex = 0;
 
+    /** The current beginning index for parsing. */
     int strBeginIndex = 0;
 
+    /** The starting index for the current text token. */
     int startIndexForText = 0;
 
+    /** The ending index for the current text token. */
     int endIndexForText = 0;
 
+    /** The internal character buffer for escape handling and token building. */
     char[] cbuf;
 
+    /** The length of the internal character buffer. */
     int cbufLen = 0;
 
+    /** The last parsed token. */
     int lastEvent = -1;
+
+    /** The next token to be processed. */
     int nextEvent = -1;
 
+    /** The next character position in {@code cbuf}. */
     int nextChar = 0;
 
+    /** The string representation of the current token. */
     String text = null;
 
+    /** The numeric representation of the current token. */
     Number numValue = null;
 
+    /**
+     * Constructs a new {@code JsonStringReader} with the specified string and buffer.
+     *
+     * @param str the JSON string to parse
+     * @param cbuf the character buffer to use for parsing
+     */
     JsonStringReader(final String str, final char[] cbuf) {
         this(str, 0, str.length(), cbuf);
     }
 
+    /**
+     * Constructs a new {@code JsonStringReader} with the specified string range and buffer.
+     *
+     * @param str the JSON string to parse
+     * @param beginIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @param cbuf the character buffer to use for parsing
+     */
     @SuppressWarnings("deprecation")
     JsonStringReader(final String str, final int beginIndex, final int toIndex, final char[] cbuf) {
         this(com.landawn.abacus.util.InternalUtil.getCharsForReadOnly(str), beginIndex, toIndex, cbuf, null);
     }
 
+    /**
+     * Constructs a new {@code JsonStringReader} with the specified character array range, buffer, and reader.
+     *
+     * @param strValue the character array to parse
+     * @param beginIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @param cbuf the character buffer to use for parsing
+     * @param reader the underlying reader (may be {@code null})
+     * @throws IllegalArgumentException if {@code beginIndex} or {@code toIndex} is invalid
+     */
     JsonStringReader(final char[] strValue, final int beginIndex, final int toIndex, final char[] cbuf, final Reader reader) {
         if (beginIndex < 0 || toIndex < 0 || toIndex < beginIndex) {
             throw new IllegalArgumentException("Invalid beginIndex or toIndex: " + beginIndex + ", " + toIndex);
@@ -128,7 +169,7 @@ class JsonStringReader extends AbstractJsonReader {
     }
 
     /**
-     * Creates a JsonReader for parsing the given JSON string.
+     * Creates a {@code JsonReader} for parsing the given JSON string.
      * This factory method creates an optimized reader for string sources.
      *
      * <p><b>Usage Examples:</b></p>
@@ -139,7 +180,7 @@ class JsonStringReader extends AbstractJsonReader {
      *
      * @param str the JSON string to parse
      * @param cbuf the character buffer to use for parsing
-     * @return a new JsonReader instance
+     * @return a new {@code JsonReader} instance
      */
     public static JsonReader parse(final String str, final char[] cbuf) {
         //        return new JsonStreamReader(new StringReader(str), new char[1], cbuf);
@@ -148,7 +189,7 @@ class JsonStringReader extends AbstractJsonReader {
     }
 
     /**
-     * Creates a JsonReader for parsing a substring of the given JSON string.
+     * Creates a {@code JsonReader} for parsing a substring of the given JSON string.
      * This allows parsing a portion of a larger string without creating a substring.
      *
      * <p><b>Usage Examples:</b></p>
@@ -161,7 +202,7 @@ class JsonStringReader extends AbstractJsonReader {
      * @param beginIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @param cbuf the character buffer to use for parsing
-     * @return a new JsonReader instance
+     * @return a new {@code JsonReader} instance
      */
     public static JsonReader parse(final String str, final int beginIndex, final int toIndex, final char[] cbuf) {
         return new JsonStringReader(str, beginIndex, toIndex, cbuf);
@@ -183,13 +224,13 @@ class JsonStringReader extends AbstractJsonReader {
      * Reads and returns the next token from the JSON input.
      * This method advances the reader position and identifies the next
      * structural token or value in the JSON stream.
-     * 
+     *
      * <p>The method handles:</p>
      * <ul>
      *   <li>Quoted strings (double and single quotes)</li>
      *   <li>Numbers (integers and decimals)</li>
-     *   <li>Boolean values (true/false)</li>
-     *   <li>Null values</li>
+     *   <li>Boolean values ({@code true}/{@code false})</li>
+     *   <li>{@code null} values</li>
      *   <li>Structural tokens (braces, brackets, colons, commas)</li>
      * </ul>
      *
@@ -313,11 +354,10 @@ class JsonStringReader extends AbstractJsonReader {
 
     /**
      * Checks if the reader has text content available.
-     * This is {@code true} when a value has been parsed (string, number, boolean, or null).
+     * This is {@code true} when a value has been parsed (string, number, boolean, or {@code null}).
      *
      * @return {@code true} if text content is available, {@code false} otherwise
      */
-    //
     @Override
     public boolean hasText() {
         return text != null || numValue != null || (nextChar > 0) || (endIndexForText > startIndexForText);
@@ -327,7 +367,7 @@ class JsonStringReader extends AbstractJsonReader {
      * Reads and parses a number from the JSON input.
      * This method efficiently parses numbers without creating intermediate strings
      * when possible, improving performance for numeric data.
-     * 
+     *
      * <p>Supported number formats:</p>
      * <ul>
      *   <li>Integers: 123, -456</li>
@@ -502,6 +542,9 @@ class JsonStringReader extends AbstractJsonReader {
         return ch;
     }
 
+    /**
+     * Saves the current string range to the internal character buffer.
+     */
     protected void saveToBuffer() {
         endIndexForText = strBeginIndex - 1;
 
@@ -514,12 +557,22 @@ class JsonStringReader extends AbstractJsonReader {
         nextChar = endIndexForText - startIndexForText;
     }
 
+    /**
+     * Throws a {@code ParsingException} when an unexpected non-string token is encountered.
+     *
+     * @throws ParsingException always thrown
+     */
     protected void throwExceptionDueToUnexpectedNonStringToken() {
         throw new ParsingException(
                 "\"false\", \"true\", \"null\" or a number is expected in or before \"" + (nextChar > 0 ? String.valueOf(cbuf, 0, N.min(32, nextChar))
                         : String.valueOf(strValue, Math.max(0, strBeginIndex - 1), N.min(32, strEndIndex - Math.max(0, strBeginIndex - 1)))));
     }
 
+    /**
+     * Returns the text content of the current token.
+     *
+     * @return the text of the current token
+     */
     @Override
     public String getText() {
         if (text != null) {
@@ -529,6 +582,13 @@ class JsonStringReader extends AbstractJsonReader {
         return (nextChar > 0) ? String.valueOf(cbuf, 0, nextChar) : String.valueOf(strValue, startIndexForText, endIndexForText - startIndexForText);
     }
 
+    /**
+     * Reads and converts the current token value to the specified type.
+     *
+     * @param <T> the target type
+     * @param type the type descriptor for conversion
+     * @return the converted value
+     */
     @SuppressWarnings("unchecked")
     @Override
     public <T> T readValue(final Type<? extends T> type) {
@@ -595,11 +655,22 @@ class JsonStringReader extends AbstractJsonReader {
         }
     }
 
+    /**
+     * Reads property information from the current token using the provided {@code symbolReader}.
+     *
+     * @param symbolReader the symbol reader to use for lookup
+     * @return the property information
+     */
     @Override
     public PropInfo readPropInfo(final SymbolReader symbolReader) {
         return (nextChar > 0) ? symbolReader.readPropInfo(cbuf, 0, nextChar) : symbolReader.readPropInfo(strValue, startIndexForText, endIndexForText);
     }
 
+    /**
+     * Closes the reader and releases associated resources.
+     *
+     * @throws UncheckedIOException if an I/O error occurs
+     */
     @Override
     public void close() throws UncheckedIOException {
         if (reader != null) {
@@ -614,16 +685,22 @@ class JsonStringReader extends AbstractJsonReader {
     /*
      * Copyright (C) 2010 Google Inc.
      *
-     * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
+     * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except compliance
      * with the License. You may obtain a copy of the License at
      *
      * https://www.apache.org/licenses/LICENSE-2.0
      *
-     * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
-     * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for
-     * the specific language governing permissions and limitations under the License.
+     * Unless required by applicable law or agreed to in writing, software distributed under the License
+     * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+     * or implied. See the License for the specific language governing permissions and limitations under
+     * the License.
      */
 
+    /**
+     * Increases the capacity of the internal character buffer.
+     *
+     * @throws ParsingException if the buffer size exceeds the maximum capacity
+     */
     void enlargeCharBuffer() {
         final long newCapacityLong = (long) (cbufLen * 1.75);
         final int newCapacity = (int) Math.min(newCapacityLong, Integer.MAX_VALUE);

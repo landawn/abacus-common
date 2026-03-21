@@ -5,41 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Method;
+
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class PercentageTest extends TestBase {
-
-    @Test
-    public void testDoubleValue_50() {
-        assertEquals(0.50, Percentage._50.doubleValue(), 0.0001);
-    }
-
-    @Test
-    public void testDoubleValue_95() {
-        assertEquals(0.95, Percentage._95.doubleValue(), 0.0001);
-    }
-
-    @Test
-    public void testToString_50() {
-        assertEquals("50%", Percentage._50.toString());
-    }
-
-    @Test
-    public void testToString_95() {
-        assertEquals("95%", Percentage._95.toString());
-    }
-
-    @Test
-    public void testValues() {
-        Percentage[] percentages = Percentage.values();
-        assertNotNull(percentages);
-        assertTrue(percentages.length > 0);
-    }
 
     @Test
     public void testRange_inclusive() {
@@ -51,15 +24,6 @@ public class PercentageTest extends TestBase {
     }
 
     @Test
-    public void testRangeClosed_inclusive() {
-        ImmutableSet<Percentage> range = Percentage.rangeClosed(Percentage._40, Percentage._60);
-        assertNotNull(range);
-        assertTrue(range.contains(Percentage._40));
-        assertTrue(range.contains(Percentage._50));
-        assertTrue(range.contains(Percentage._60));
-    }
-
-    @Test
     public void testRange_withStep() {
         ImmutableSet<Percentage> range = Percentage.range(Percentage._10, Percentage._50, Percentage._10);
         assertNotNull(range);
@@ -68,76 +32,6 @@ public class PercentageTest extends TestBase {
         assertTrue(range.contains(Percentage._30));
         assertTrue(range.contains(Percentage._40));
         assertFalse(range.contains(Percentage._50));
-    }
-
-    @Test
-    public void testRangeClosed_withStep() {
-        ImmutableSet<Percentage> range = Percentage.rangeClosed(Percentage._10, Percentage._50, Percentage._10);
-        assertNotNull(range);
-        assertTrue(range.contains(Percentage._10));
-        assertTrue(range.contains(Percentage._20));
-        assertTrue(range.contains(Percentage._30));
-        assertTrue(range.contains(Percentage._40));
-        assertTrue(range.contains(Percentage._50));
-    }
-
-    @Test
-    public void testDoubleValue_smallPercentages() {
-        assertEquals(0.000001, Percentage._0_0001.doubleValue(), 0.0000001);
-        assertEquals(0.00001, Percentage._0_001.doubleValue(), 0.000001);
-        assertEquals(0.0001, Percentage._0_01.doubleValue(), 0.00001);
-        assertEquals(0.001, Percentage._0_1.doubleValue(), 0.0001);
-    }
-
-    @Test
-    public void testDoubleValue_highPercentages() {
-        assertEquals(0.99, Percentage._99.doubleValue(), 0.0001);
-        assertEquals(0.999, Percentage._99_9.doubleValue(), 0.0001);
-        assertEquals(0.9999, Percentage._99_99.doubleValue(), 0.00001);
-        assertEquals(0.99999, Percentage._99_999.doubleValue(), 0.000001);
-    }
-
-    @Test
-    public void testIntegration_calculation() {
-        double total = 1000.0;
-        double result = total * Percentage._10.doubleValue();
-        assertEquals(100.0, result, 0.01);
-    }
-
-    @Test
-    public void testDoubleValue() {
-        Assertions.assertEquals(0.000001, Percentage._0_0001.doubleValue(), 0.0000001);
-        Assertions.assertEquals(0.00001, Percentage._0_001.doubleValue(), 0.0000001);
-        Assertions.assertEquals(0.0001, Percentage._0_01.doubleValue(), 0.0000001);
-        Assertions.assertEquals(0.001, Percentage._0_1.doubleValue(), 0.0000001);
-        Assertions.assertEquals(0.01, Percentage._1.doubleValue(), 0.0000001);
-        Assertions.assertEquals(0.05, Percentage._5.doubleValue(), 0.0000001);
-        Assertions.assertEquals(0.10, Percentage._10.doubleValue(), 0.0000001);
-        Assertions.assertEquals(0.50, Percentage._50.doubleValue(), 0.0000001);
-        Assertions.assertEquals(0.90, Percentage._90.doubleValue(), 0.0000001);
-        Assertions.assertEquals(0.95, Percentage._95.doubleValue(), 0.0000001);
-        Assertions.assertEquals(0.99, Percentage._99.doubleValue(), 0.0000001);
-        Assertions.assertEquals(0.999, Percentage._99_9.doubleValue(), 0.0000001);
-        Assertions.assertEquals(0.9999, Percentage._99_99.doubleValue(), 0.0000001);
-        Assertions.assertEquals(0.99999, Percentage._99_999.doubleValue(), 0.0000001);
-        Assertions.assertEquals(0.999999, Percentage._99_9999.doubleValue(), 0.0000001);
-    }
-
-    @Test
-    public void testToString() {
-        Assertions.assertEquals("0.0001%", Percentage._0_0001.toString());
-        Assertions.assertEquals("0.001%", Percentage._0_001.toString());
-        Assertions.assertEquals("1%", Percentage._1.toString());
-        Assertions.assertEquals("5%", Percentage._5.toString());
-        Assertions.assertEquals("10%", Percentage._10.toString());
-        Assertions.assertEquals("50%", Percentage._50.toString());
-        Assertions.assertEquals("90%", Percentage._90.toString());
-        Assertions.assertEquals("95%", Percentage._95.toString());
-        Assertions.assertEquals("99%", Percentage._99.toString());
-        Assertions.assertEquals("99.9%", Percentage._99_9.toString());
-        Assertions.assertEquals("99.99%", Percentage._99_99.toString());
-        Assertions.assertEquals("99.999%", Percentage._99_999.toString());
-        Assertions.assertEquals("99.9999%", Percentage._99_9999.toString());
     }
 
     @Test
@@ -198,6 +92,45 @@ public class PercentageTest extends TestBase {
     }
 
     @Test
+    public void testRangeCaching() {
+        ImmutableSet<Percentage> range1a = Percentage.range(Percentage._10, Percentage._50);
+        ImmutableSet<Percentage> range1b = Percentage.range(Percentage._10, Percentage._50);
+        Assertions.assertSame(range1a, range1b, "Same ranges should return cached instance");
+
+        ImmutableSet<Percentage> range2a = Percentage.range(Percentage._10, Percentage._50, Percentage._10);
+        ImmutableSet<Percentage> range2b = Percentage.range(Percentage._10, Percentage._50, Percentage._10);
+        Assertions.assertSame(range2a, range2b, "Same ranges with step should return cached instance");
+
+        ImmutableSet<Percentage> range3a = Percentage.rangeClosed(Percentage._20, Percentage._80);
+        ImmutableSet<Percentage> range3b = Percentage.rangeClosed(Percentage._20, Percentage._80);
+        Assertions.assertSame(range3a, range3b, "Same closed ranges should return cached instance");
+
+        ImmutableSet<Percentage> range4a = Percentage.rangeClosed(Percentage._20, Percentage._80, Percentage._10);
+        ImmutableSet<Percentage> range4b = Percentage.rangeClosed(Percentage._20, Percentage._80, Percentage._10);
+        Assertions.assertSame(range4a, range4b, "Same closed ranges with step should return cached instance");
+    }
+
+    @Test
+    public void testRangeClosed_inclusive() {
+        ImmutableSet<Percentage> range = Percentage.rangeClosed(Percentage._40, Percentage._60);
+        assertNotNull(range);
+        assertTrue(range.contains(Percentage._40));
+        assertTrue(range.contains(Percentage._50));
+        assertTrue(range.contains(Percentage._60));
+    }
+
+    @Test
+    public void testRangeClosed_withStep() {
+        ImmutableSet<Percentage> range = Percentage.rangeClosed(Percentage._10, Percentage._50, Percentage._10);
+        assertNotNull(range);
+        assertTrue(range.contains(Percentage._10));
+        assertTrue(range.contains(Percentage._20));
+        assertTrue(range.contains(Percentage._30));
+        assertTrue(range.contains(Percentage._40));
+        assertTrue(range.contains(Percentage._50));
+    }
+
+    @Test
     public void testRangeClosed() {
         ImmutableSet<Percentage> range1 = Percentage.rangeClosed(Percentage._10, Percentage._50);
         Assertions.assertTrue(range1.contains(Percentage._10));
@@ -241,22 +174,58 @@ public class PercentageTest extends TestBase {
     }
 
     @Test
-    public void testRangeCaching() {
-        ImmutableSet<Percentage> range1a = Percentage.range(Percentage._10, Percentage._50);
-        ImmutableSet<Percentage> range1b = Percentage.range(Percentage._10, Percentage._50);
-        Assertions.assertSame(range1a, range1b, "Same ranges should return cached instance");
+    public void testDoubleValue_50() {
+        assertEquals(0.50, Percentage._50.doubleValue(), 0.0001);
+    }
 
-        ImmutableSet<Percentage> range2a = Percentage.range(Percentage._10, Percentage._50, Percentage._10);
-        ImmutableSet<Percentage> range2b = Percentage.range(Percentage._10, Percentage._50, Percentage._10);
-        Assertions.assertSame(range2a, range2b, "Same ranges with step should return cached instance");
+    @Test
+    public void testDoubleValue_95() {
+        assertEquals(0.95, Percentage._95.doubleValue(), 0.0001);
+    }
 
-        ImmutableSet<Percentage> range3a = Percentage.rangeClosed(Percentage._20, Percentage._80);
-        ImmutableSet<Percentage> range3b = Percentage.rangeClosed(Percentage._20, Percentage._80);
-        Assertions.assertSame(range3a, range3b, "Same closed ranges should return cached instance");
+    @Test
+    public void testDoubleValue_smallPercentages() {
+        assertEquals(0.000001, Percentage._0_0001.doubleValue(), 0.0000001);
+        assertEquals(0.00001, Percentage._0_001.doubleValue(), 0.000001);
+        assertEquals(0.0001, Percentage._0_01.doubleValue(), 0.00001);
+        assertEquals(0.001, Percentage._0_1.doubleValue(), 0.0001);
+    }
 
-        ImmutableSet<Percentage> range4a = Percentage.rangeClosed(Percentage._20, Percentage._80, Percentage._10);
-        ImmutableSet<Percentage> range4b = Percentage.rangeClosed(Percentage._20, Percentage._80, Percentage._10);
-        Assertions.assertSame(range4a, range4b, "Same closed ranges with step should return cached instance");
+    @Test
+    public void testDoubleValue_highPercentages() {
+        assertEquals(0.99, Percentage._99.doubleValue(), 0.0001);
+        assertEquals(0.999, Percentage._99_9.doubleValue(), 0.0001);
+        assertEquals(0.9999, Percentage._99_99.doubleValue(), 0.00001);
+        assertEquals(0.99999, Percentage._99_999.doubleValue(), 0.000001);
+    }
+
+    @Test
+    public void testDoubleValue() {
+        Assertions.assertEquals(0.000001, Percentage._0_0001.doubleValue(), 0.0000001);
+        Assertions.assertEquals(0.00001, Percentage._0_001.doubleValue(), 0.0000001);
+        Assertions.assertEquals(0.0001, Percentage._0_01.doubleValue(), 0.0000001);
+        Assertions.assertEquals(0.001, Percentage._0_1.doubleValue(), 0.0000001);
+        Assertions.assertEquals(0.01, Percentage._1.doubleValue(), 0.0000001);
+        Assertions.assertEquals(0.05, Percentage._5.doubleValue(), 0.0000001);
+        Assertions.assertEquals(0.10, Percentage._10.doubleValue(), 0.0000001);
+        Assertions.assertEquals(0.50, Percentage._50.doubleValue(), 0.0000001);
+        Assertions.assertEquals(0.90, Percentage._90.doubleValue(), 0.0000001);
+        Assertions.assertEquals(0.95, Percentage._95.doubleValue(), 0.0000001);
+        Assertions.assertEquals(0.99, Percentage._99.doubleValue(), 0.0000001);
+        Assertions.assertEquals(0.999, Percentage._99_9.doubleValue(), 0.0000001);
+        Assertions.assertEquals(0.9999, Percentage._99_99.doubleValue(), 0.0000001);
+        Assertions.assertEquals(0.99999, Percentage._99_999.doubleValue(), 0.0000001);
+        Assertions.assertEquals(0.999999, Percentage._99_9999.doubleValue(), 0.0000001);
+    }
+
+    @Test
+    public void testIntValue() throws Exception {
+        final Method intValueMethod = Percentage.class.getDeclaredMethod("intValue", Percentage.class);
+        intValueMethod.setAccessible(true);
+
+        Assertions.assertEquals(1, ((Integer) intValueMethod.invoke(null, Percentage._0_0001)).intValue());
+        Assertions.assertEquals(500_000, ((Integer) intValueMethod.invoke(null, Percentage._50)).intValue());
+        Assertions.assertEquals(999_999, ((Integer) intValueMethod.invoke(null, Percentage._99_9999)).intValue());
     }
 
     @Test
@@ -270,6 +239,47 @@ public class PercentageTest extends TestBase {
 
         Assertions.assertEquals(Percentage._50, Percentage.valueOf("_50"));
         Assertions.assertEquals(Percentage._99_9999, Percentage.valueOf("_99_9999"));
+    }
+
+    @Test
+    public void testToString_50() {
+        assertEquals("50%", Percentage._50.toString());
+    }
+
+    @Test
+    public void testToString_95() {
+        assertEquals("95%", Percentage._95.toString());
+    }
+
+    @Test
+    public void testToString() {
+        Assertions.assertEquals("0.0001%", Percentage._0_0001.toString());
+        Assertions.assertEquals("0.001%", Percentage._0_001.toString());
+        Assertions.assertEquals("1%", Percentage._1.toString());
+        Assertions.assertEquals("5%", Percentage._5.toString());
+        Assertions.assertEquals("10%", Percentage._10.toString());
+        Assertions.assertEquals("50%", Percentage._50.toString());
+        Assertions.assertEquals("90%", Percentage._90.toString());
+        Assertions.assertEquals("95%", Percentage._95.toString());
+        Assertions.assertEquals("99%", Percentage._99.toString());
+        Assertions.assertEquals("99.9%", Percentage._99_9.toString());
+        Assertions.assertEquals("99.99%", Percentage._99_99.toString());
+        Assertions.assertEquals("99.999%", Percentage._99_999.toString());
+        Assertions.assertEquals("99.9999%", Percentage._99_9999.toString());
+    }
+
+    @Test
+    public void testIntegration_calculation() {
+        double total = 1000.0;
+        double result = total * Percentage._10.doubleValue();
+        assertEquals(100.0, result, 0.01);
+    }
+
+    @Test
+    public void testValues() {
+        Percentage[] percentages = Percentage.values();
+        assertNotNull(percentages);
+        assertTrue(percentages.length > 0);
     }
 
 }

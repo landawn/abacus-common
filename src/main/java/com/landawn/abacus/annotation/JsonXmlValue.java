@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.annotation;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -23,18 +24,18 @@ import java.lang.annotation.Target;
  * Indicates that the annotated method or field represents the value of an object
  * for JSON/XML serialization and deserialization purposes. This annotation is used
  * to designate a single property that contains the essential value of the object.
- * 
+ *
  * <p>When an object is annotated with this annotation on one of its properties,
  * that property's value will be used as the serialized representation of the entire object.
  * During deserialization, the value will be used to reconstruct the object.</p>
- * 
+ *
  * <p>This annotation is particularly useful for:</p>
  * <ul>
  *   <li>Wrapper objects that contain a single meaningful value</li>
  *   <li>Value objects where one field represents the primary content</li>
  *   <li>Custom types that need simplified JSON/XML representation</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  *
@@ -54,10 +55,11 @@ import java.lang.annotation.Target;
  *     // Result will be: 100.50
  * }
  * }</pre>
- * 
+ *
  * @see JsonXmlField
  * @see JsonXmlCreator
  */
+@Documented
 @Target({ ElementType.METHOD, ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JsonXmlValue {

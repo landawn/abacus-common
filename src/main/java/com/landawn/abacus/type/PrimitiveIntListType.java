@@ -44,7 +44,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<IntList> type = TypeFactory.getType(IntList.class);
-     * Class&lt;IntList&gt; clazz = type.javaType();
+     * Class<IntList> clazz = type.javaType();
      * // clazz equals IntList.class
      * }</pre>
      *
@@ -62,7 +62,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<IntList> type = TypeFactory.getType(IntList.class);
-     * Type&lt;Integer&gt; elemType = type.elementType();
+     * Type<Integer> elemType = type.elementType();
      * // elemType can be used for element-level operations
      * }</pre>
      *
@@ -79,7 +79,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<IntList> type = TypeFactory.getType(IntList.class);
-     * Type&lt;Integer&gt;[] paramTypes = type.parameterTypes();
+     * Type<Integer>[] paramTypes = type.parameterTypes();
      * // paramTypes[0] represents the element type
      * }</pre>
      *

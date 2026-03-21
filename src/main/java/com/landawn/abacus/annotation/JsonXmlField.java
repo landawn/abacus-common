@@ -27,7 +27,7 @@ import com.landawn.abacus.util.EnumType;
  * Configures JSON and XML serialization/deserialization behavior for individual fields.
  * This annotation provides fine-grained control over how a specific field is handled
  * during JSON or XML processing, allowing customization of field names, formats, and serialization rules.
- * 
+ *
  * <p>This annotation can be used to:</p>
  * <ul>
  *   <li>Customize field names in the serialized output</li>
@@ -36,7 +36,7 @@ import com.landawn.abacus.util.EnumType;
  *   <li>Control field inclusion/exclusion in serialization</li>
  *   <li>Handle raw JSON values</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  *
@@ -57,7 +57,7 @@ import com.landawn.abacus.util.EnumType;
  *     private String password;
  * }
  * }</pre>
- * 
+ *
  * @see JsonXmlConfig
  * @see JsonXmlCreator
  * @see JsonXmlValue
@@ -70,60 +70,60 @@ public @interface JsonXmlField {
     /**
      * Specifies the field name to use in JSON/XML serialization.
      * If not specified (empty string), the Java field name is used.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @JsonXmlField(name = "user_id")
      * private Long id;  // Serialized as "user_id" instead of "id"
      * }</pre>
-     * 
-     * @return the field name for serialization, empty string for default Java field name
+     *
+     * @return the field name for serialization, or an empty string for the default Java field name
      */
     String name() default "";
 
     /**
      * Defines alternative names that can be used during deserialization.
      * This allows the field to be deserialized from JSON/XML using any of the specified alias names.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @JsonXmlField(name = "full_name", aliases = {"name", "userName", "user_name"})
      * private String fullName;
      * // Can be deserialized from any of: "full_name", "name", "userName", "user_name"
      * }</pre>
-     * 
-     * @return array of alias names for deserialization
+     *
+     * @return an array of alias names for deserialization
      */
     String[] aliases() default {};
 
     /**
      * Specifies the explicit type for field serialization/deserialization.
      * This can be used to override the default type inference.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @JsonXmlField(type = "java.util.Date")
      * private Object dateValue;  // Forces treatment as Date type
      * }</pre>
-     * 
-     * @return the explicit type string, empty string for automatic type detection
+     *
+     * @return the explicit type string, or an empty string for automatic type detection
      */
     String type() default "";
 
     /**
      * Specifies the date format pattern for date/time field serialization.
-     * Uses SimpleDateFormat pattern syntax.
-     * 
+     * Uses {@link java.text.SimpleDateFormat} pattern syntax.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @JsonXmlField(dateFormat = "yyyy-MM-dd HH:mm:ss")
      * private Date created;  // Serialized as "2023-12-25 10:30:45"
-     * 
+     *
      * @JsonXmlField(dateFormat = "ISO_INSTANT")
      * private Instant timestamp;  // Serialized as "2023-12-25T10:30:45.123Z"
      * }</pre>
-     * 
-     * @return the date format pattern, empty string for default format
+     *
+     * @return the date format pattern, or an empty string for the default format
      * @see java.text.SimpleDateFormat
      * @see java.time.format.DateTimeFormatter
      */
@@ -131,54 +131,51 @@ public @interface JsonXmlField {
 
     /**
      * Specifies the time zone for date/time field serialization.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * @JsonXmlField(dateFormat = "yyyy-MM-dd HH:mm:ss", timeZone = "UTC")
-     * private Date eventTime;  // Always serialized in UTC timezone
-     * 
-     * @JsonXmlField(timeZone = "America/New_York")
-     * private LocalDateTime meetingTime;
-     * }</pre>
-     * 
-     * @return the time zone ID (e.g., "UTC", "America/New_York"), empty string for system default
+     * <ul>
+     *   <li>{@code @JsonXmlField(dateFormat = "yyyy-MM-dd HH:mm:ss", timeZone = "UTC")}</li>
+     *   <li>{@code @JsonXmlField(timeZone = "America/New_York")}</li>
+     * </ul>
+     *
+     * @return the time zone ID (e.g., {@code "UTC"}, {@code "America/New_York"}), or an empty string for the system default
      */
     String timeZone() default "";
 
     /**
      * Specifies the number format pattern for numeric field serialization.
-     * Uses DecimalFormat pattern syntax.
-     * 
+     * Uses {@link DecimalFormat} pattern syntax.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @JsonXmlField(numberFormat = "#.##")
      * private Double price;  // Serialized with 2 decimal places: "19.99"
-     * 
+     *
      * @JsonXmlField(numberFormat = "###,###.00")
      * private BigDecimal amount;  // Serialized with comma separators: "1,234.56"
      * }</pre>
-     * 
-     * @return the number format pattern, empty string for default formatting
+     *
+     * @return the number format pattern, or an empty string for default formatting
      * @see DecimalFormat
      */
     String numberFormat() default "";
 
     /**
      * Specifies how enum values are serialized and deserialized for this field.
-     * 
+     *
      * <p><b>Options:</b></p>
      * <ul>
-     *   <li>EnumType.NAME (default) - Use the enum constant name</li>
-     *   <li>EnumType.ORDINAL - Use the enum ordinal value</li>
-     *   <li>EnumType.CODE - Use an integer code defined by the enum (for example, via {@code public int code()})</li>
+     *   <li>{@link EnumType#NAME} (default) - Use the enum constant name</li>
+     *   <li>{@link EnumType#ORDINAL} - Use the enum ordinal value</li>
+     *   <li>{@link EnumType#CODE} - Use an integer code defined by the enum (for example, via {@code public int code()})</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @JsonXmlField(enumerated = EnumType.ORDINAL)
      * private Status status;  // Serialized as 0, 1, 2... instead of "ACTIVE", "INACTIVE"...
      * }</pre>
-     * 
+     *
      * @return the enum serialization strategy
      */
     EnumType enumerated() default EnumType.NAME;
@@ -186,20 +183,20 @@ public @interface JsonXmlField {
     /**
      * Specifies whether this field should be completely ignored during serialization and deserialization.
      * When set to {@code true}, the field will be excluded from JSON/XML processing.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * public class User {
      *     private String username;
-     *     
+     *
      *     @JsonXmlField(ignore = true)
      *     private String password;  // Never included in JSON/XML
-     *     
+     *
      *     @JsonXmlField(ignore = true)
      *     private String internalId;  // Hidden from serialization
      * }
      * }</pre>
-     * 
+     *
      * @return {@code true} to ignore this field during JSON/XML processing, {@code false} to include it
      */
     boolean ignore() default false;
@@ -208,47 +205,47 @@ public @interface JsonXmlField {
      * Indicates whether the field value should be treated as raw JSON/XML content.
      * When {@code true}, the field's string value is inserted directly into the output
      * without additional JSON/XML escaping or formatting.
-     * 
+     *
      * <p>This is useful when a field contains pre-serialized JSON/XML that should be
      * embedded as-is in the output.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * public class Document {
      *     private String title;
-     *     
+     *
      *     @JsonXmlField(isJsonRawValue = true)
      *     private String metadata;  // Contains: "{"key":"value"}"
      *     // Result: {"title":"My Doc","metadata":{"key":"value"}}
      *     // Instead of: {"title":"My Doc","metadata":"{\"key\":\"value\"}"}
      * }
      * }</pre>
-     * 
+     *
      * @return {@code true} if the field contains raw JSON/XML content, {@code false} for normal processing
      */
     boolean isJsonRawValue() default false;
 
     /**
      * Controls whether the field is included during serialization, deserialization, or both.
-     * 
+     *
      * <p><b>Options:</b></p>
      * <ul>
-     *   <li>BOTH - Include in both serialization and deserialization (default)</li>
-     *   <li>SERIALIZE_ONLY - Include only when writing JSON/XML output</li>
-     *   <li>DESERIALIZE_ONLY - Include only when reading from JSON/XML input</li>
+     *   <li>{@link Direction#BOTH} - Include in both serialization and deserialization (default)</li>
+     *   <li>{@link Direction#SERIALIZE_ONLY} - Include only when writing JSON/XML output</li>
+     *   <li>{@link Direction#DESERIALIZE_ONLY} - Include only when reading from JSON/XML input</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * public class User {
      *     @JsonXmlField(direction = Direction.SERIALIZE_ONLY)
      *     private String displayName;  // Written to JSON but not read from it
-     *     
+     *
      *     @JsonXmlField(direction = Direction.DESERIALIZE_ONLY)
      *     private String tempPassword;  // Read from JSON but not written to it
      * }
      * }</pre>
-     * 
+     *
      * @return the exposure mode for this field
      */
     Direction direction() default Direction.BOTH;
@@ -278,7 +275,7 @@ public @interface JsonXmlField {
          * The field participates in both serialization and deserialization operations.
          * This is the standard behavior for most fields.
          *
-         * @deprecated don't need to set it. It's {@code BOTH} by default.
+         * @deprecated This is the default behavior; explicitly setting it to {@code BOTH} is unnecessary.
          */
         @Deprecated
         BOTH,

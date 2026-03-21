@@ -14,7 +14,6 @@ import static org.mockito.Mockito.verify;
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -22,7 +21,6 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BooleanList;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("new-test")
 public class PrimitiveBooleanListTypeTest extends TestBase {
 
     private PrimitiveBooleanListType booleanListType;
@@ -68,6 +66,22 @@ public class PrimitiveBooleanListTypeTest extends TestBase {
     public void testStringOfWithMultipleElements() {
         BooleanList list = BooleanList.of(true, false, true, false);
         assertEquals("[true, false, true, false]", booleanListType.stringOf(list));
+    }
+
+    @Test
+    public void testCreateFromArray() {
+        boolean[] array = { true, false, true, false, true };
+        BooleanList list = BooleanList.of(array);
+
+        String stringRep = booleanListType.stringOf(list);
+        assertEquals("[true, false, true, false, true]", stringRep);
+
+        BooleanList parsed = booleanListType.valueOf(stringRep);
+        assertNotNull(parsed);
+        assertEquals(list.size(), parsed.size());
+        for (int i = 0; i < list.size(); i++) {
+            assertEquals(list.get(i), parsed.get(i));
+        }
     }
 
     @Test
@@ -175,21 +189,5 @@ public class PrimitiveBooleanListTypeTest extends TestBase {
     @Test
     public void testIsCollection() {
         assertFalse(booleanListType.isCollection());
-    }
-
-    @Test
-    public void testCreateFromArray() {
-        boolean[] array = { true, false, true, false, true };
-        BooleanList list = BooleanList.of(array);
-
-        String stringRep = booleanListType.stringOf(list);
-        assertEquals("[true, false, true, false, true]", stringRep);
-
-        BooleanList parsed = booleanListType.valueOf(stringRep);
-        assertNotNull(parsed);
-        assertEquals(list.size(), parsed.size());
-        for (int i = 0; i < list.size(); i++) {
-            assertEquals(list.get(i), parsed.get(i));
-        }
     }
 }

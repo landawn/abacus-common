@@ -19,13 +19,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.ThreadMode;
 
-@Tag("2025")
 public class EventBusTest extends TestBase {
 
     private EventBus eventBus;
@@ -199,6 +197,19 @@ public class EventBusTest extends TestBase {
         Assertions.assertSame(defaultBus, anotherDefault);
     }
 
+    @Test
+    public void testConstructorWithIdentifier() {
+        EventBus bus = EventBus.create("testBus");
+        assertEquals("testBus", bus.identifier());
+    }
+
+    @Test
+    public void testCreateTwoBusesHaveDifferentIdentifiers() {
+        EventBus bus1 = EventBus.create();
+        EventBus bus2 = EventBus.create();
+        assertNotEquals(bus1.identifier(), bus2.identifier());
+    }
+
     // ---- create ----
 
     @Test
@@ -207,12 +218,6 @@ public class EventBusTest extends TestBase {
         Assertions.assertNotNull(bus);
         Assertions.assertNotNull(bus.identifier());
         Assertions.assertFalse(bus.identifier().isEmpty());
-    }
-
-    @Test
-    public void testConstructorWithIdentifier() {
-        EventBus bus = EventBus.create("testBus");
-        assertEquals("testBus", bus.identifier());
     }
 
     @Test
@@ -250,43 +255,12 @@ public class EventBusTest extends TestBase {
         }
     }
 
-    @Test
-    public void testCreateTwoBusesHaveDifferentIdentifiers() {
-        EventBus bus1 = EventBus.create();
-        EventBus bus2 = EventBus.create();
-        assertNotEquals(bus1.identifier(), bus2.identifier());
-    }
-
     // ---- identifier ----
 
     @Test
     public void testIdentifier() {
         EventBus bus = EventBus.create("myIdentifier");
         Assertions.assertEquals("myIdentifier", bus.identifier());
-    }
-
-    // ---- subscribers(Class) ----
-
-    @Test
-    public void testSubscribers() {
-        TestSubscriber subscriber = new TestSubscriber();
-        eventBus.register(subscriber);
-
-        List<Object> subscribers = eventBus.subscribers(String.class);
-        Assertions.assertEquals(1, subscribers.size());
-        Assertions.assertTrue(subscribers.contains(subscriber));
-
-        List<Object> noSubscribers = eventBus.subscribers(Integer.class);
-        Assertions.assertTrue(noSubscribers.isEmpty());
-
-        eventBus.unregister(subscriber);
-    }
-
-    @Test
-    public void testSubscribers_EmptyBus() {
-        List<Object> subscribers = eventBus.subscribers(String.class);
-        assertNotNull(subscribers);
-        assertTrue(subscribers.isEmpty());
     }
 
     @Test
@@ -318,21 +292,28 @@ public class EventBusTest extends TestBase {
         eventBus.unregister(subscriber);
     }
 
+    // ---- subscribers(Class) ----
+
     @Test
-    public void testGetSubscribersWithEventId() {
-        TestSubscriber subscriber1 = new TestSubscriber();
-        TestSubscriber subscriber2 = new TestSubscriber();
+    public void testSubscribers() {
+        TestSubscriber subscriber = new TestSubscriber();
+        eventBus.register(subscriber);
 
-        eventBus.register(subscriber1, "event1");
-        eventBus.register(subscriber2, "event2");
-
-        List<Object> subscribers = eventBus.subscribers("event1", String.class);
+        List<Object> subscribers = eventBus.subscribers(String.class);
         Assertions.assertEquals(1, subscribers.size());
-        Assertions.assertTrue(subscribers.contains(subscriber1));
+        Assertions.assertTrue(subscribers.contains(subscriber));
 
-        subscribers = eventBus.subscribers("event2", String.class);
-        Assertions.assertEquals(1, subscribers.size());
-        Assertions.assertTrue(subscribers.contains(subscriber2));
+        List<Object> noSubscribers = eventBus.subscribers(Integer.class);
+        Assertions.assertTrue(noSubscribers.isEmpty());
+
+        eventBus.unregister(subscriber);
+    }
+
+    @Test
+    public void testSubscribers_EmptyBus() {
+        List<Object> subscribers = eventBus.subscribers(String.class);
+        assertNotNull(subscribers);
+        assertTrue(subscribers.isEmpty());
     }
 
     @Test
@@ -374,15 +355,21 @@ public class EventBusTest extends TestBase {
         assertTrue(all.isEmpty());
     }
 
-    // ---- register(Object) ----
-
     @Test
-    public void testRegister() {
-        TestSubscriber subscriber = new TestSubscriber();
-        EventBus result = eventBus.register(subscriber);
+    public void testGetSubscribersWithEventId() {
+        TestSubscriber subscriber1 = new TestSubscriber();
+        TestSubscriber subscriber2 = new TestSubscriber();
 
-        Assertions.assertSame(eventBus, result);
-        Assertions.assertEquals(1, eventBus.allSubscribers().size());
+        eventBus.register(subscriber1, "event1");
+        eventBus.register(subscriber2, "event2");
+
+        List<Object> subscribers = eventBus.subscribers("event1", String.class);
+        Assertions.assertEquals(1, subscribers.size());
+        Assertions.assertTrue(subscribers.contains(subscriber1));
+
+        subscribers = eventBus.subscribers("event2", String.class);
+        Assertions.assertEquals(1, subscribers.size());
+        Assertions.assertTrue(subscribers.contains(subscriber2));
     }
 
     @Test
@@ -395,20 +382,6 @@ public class EventBusTest extends TestBase {
     }
 
     @Test
-    public void testRegisterThrowsExceptionForNoSubscriberMethods() {
-        Object noMethodSubscriber = new Object();
-
-        Assertions.assertThrows(RuntimeException.class, () -> {
-            eventBus.register(noMethodSubscriber);
-        });
-    }
-
-    @Test
-    public void testRegisterRejectsStaticAnnotatedSubscriberMethod() {
-        Assertions.assertThrows(RuntimeException.class, () -> eventBus.register(new StaticAnnotatedSubscriber()));
-    }
-
-    @Test
     public void testRegisterSubscriberWithInheritedOnMethod() {
         InheritedSubscriberChild subscriber = new InheritedSubscriberChild();
 
@@ -417,31 +390,6 @@ public class EventBusTest extends TestBase {
 
         Assertions.assertEquals(1, subscriber.receivedEvents.size());
         Assertions.assertEquals("inherited-event", subscriber.receivedEvents.get(0));
-    }
-
-    @Test
-    public void testRegister_NullSubscriber() {
-        Assertions.assertThrows(NullPointerException.class, () -> eventBus.register(null));
-    }
-
-    @Test
-    public void testEqualSubscribersAreTrackedByIdentity() {
-        EqualSubscriber first = new EqualSubscriber("same");
-        EqualSubscriber second = new EqualSubscriber("same");
-
-        eventBus.register(first);
-        eventBus.register(second);
-        eventBus.post("event");
-
-        assertEquals(List.of("event"), first.events);
-        assertEquals(List.of("event"), second.events);
-        assertEquals(2, eventBus.allSubscribers().size());
-
-        eventBus.unregister(first);
-        eventBus.post("event2");
-
-        assertEquals(List.of("event"), first.events);
-        assertEquals(List.of("event", "event2"), second.events);
     }
 
     @Test
@@ -475,35 +423,6 @@ public class EventBusTest extends TestBase {
     }
 
     @Test
-    public void testRegisterMultipleSubscribersForSameEventType() {
-        TestSubscriber sub1 = new TestSubscriber();
-        TestSubscriber sub2 = new TestSubscriber();
-
-        eventBus.register(sub1);
-        eventBus.register(sub2);
-        eventBus.post("broadcast");
-
-        assertEquals(1, sub1.receivedEvents.size());
-        assertEquals("broadcast", sub1.receivedEvents.get(0));
-        assertEquals(1, sub2.receivedEvents.size());
-        assertEquals("broadcast", sub2.receivedEvents.get(0));
-
-        eventBus.unregister(sub1);
-        eventBus.unregister(sub2);
-    }
-
-    // ---- register(Object, String) ----
-
-    @Test
-    public void testRegisterWithEventId() {
-        TestSubscriber subscriber = new TestSubscriber();
-        EventBus result = eventBus.register(subscriber, "testEvent");
-
-        Assertions.assertSame(eventBus, result);
-        Assertions.assertEquals(1, eventBus.subscribers("testEvent", String.class).size());
-    }
-
-    @Test
     public void testRegisterAndPost() {
         AtomicReference<String> result = new AtomicReference<>();
         Subscriber<String> subscriber = event -> result.set(event);
@@ -512,28 +431,6 @@ public class EventBusTest extends TestBase {
         eventBus.post("testId", "hello");
 
         assertEquals("hello", result.get());
-    }
-
-    // ---- register(Object, ThreadMode) ----
-
-    @Test
-    public void testRegisterWithThreadMode() {
-        TestSubscriber subscriber = new TestSubscriber();
-        EventBus result = eventBus.register(subscriber, ThreadMode.DEFAULT);
-
-        Assertions.assertSame(eventBus, result);
-        Assertions.assertEquals(1, eventBus.allSubscribers().size());
-    }
-
-    // ---- register(Object, String, ThreadMode) ----
-
-    @Test
-    public void testRegisterWithEventIdAndThreadMode() {
-        TestSubscriber subscriber = new TestSubscriber();
-        EventBus result = eventBus.register(subscriber, "testEvent", ThreadMode.DEFAULT);
-
-        Assertions.assertSame(eventBus, result);
-        Assertions.assertEquals(1, eventBus.subscribers("testEvent", String.class).size());
     }
 
     // ---- register(Subscriber, String) ----
@@ -549,16 +446,6 @@ public class EventBusTest extends TestBase {
         Assertions.assertEquals("Hello Lambda", received.get());
     }
 
-    @Test
-    public void testRegisterThrowsExceptionForLambdaWithoutEventId() {
-        Subscriber<Object> generalSubscriber = event -> {
-        };
-
-        Assertions.assertThrows(RuntimeException.class, () -> {
-            eventBus.register(generalSubscriber);
-        });
-    }
-
     // ---- register(Subscriber, String, ThreadMode) ----
 
     @Test
@@ -570,110 +457,6 @@ public class EventBusTest extends TestBase {
         eventBus.post("lambdaEvent", "Hello Lambda");
 
         Assertions.assertEquals("Hello Lambda", received.get());
-    }
-
-    @Test
-    public void testRegisterLambdaSubscriberWithThreadPoolMode() throws InterruptedException {
-        CountDownLatch latch = new CountDownLatch(1);
-        AtomicReference<String> received = new AtomicReference<>();
-
-        Subscriber<String> subscriber = event -> {
-            received.set(event);
-            latch.countDown();
-        };
-
-        eventBus.register(subscriber, "asyncLambda", ThreadMode.THREAD_POOL_EXECUTOR);
-        eventBus.post("asyncLambda", "async value");
-
-        assertTrue(latch.await(5, TimeUnit.SECONDS));
-        assertEquals("async value", received.get());
-
-        eventBus.unregister(subscriber);
-    }
-
-    // ---- unregister ----
-
-    @Test
-    public void testUnregister() {
-        AtomicReference<String> result = new AtomicReference<>();
-        Subscriber<String> subscriber = event -> result.set(event);
-
-        eventBus.register(subscriber, "testId");
-        eventBus.unregister(subscriber);
-        eventBus.post("testId", "hello");
-
-        assertNull(result.get());
-    }
-
-    @Test
-    public void testUnregister_NotRegistered() {
-        TestSubscriber subscriber = new TestSubscriber();
-        // Unregistering a subscriber that was never registered should not throw
-        EventBus result = eventBus.unregister(subscriber);
-        Assertions.assertSame(eventBus, result);
-    }
-
-    @Test
-    public void testUnregister_DoubleUnregister() {
-        TestSubscriber subscriber = new TestSubscriber();
-        eventBus.register(subscriber);
-
-        EventBus result1 = eventBus.unregister(subscriber);
-        Assertions.assertSame(eventBus, result1);
-
-        // Second unregister should not throw
-        EventBus result2 = eventBus.unregister(subscriber);
-        Assertions.assertSame(eventBus, result2);
-
-        assertTrue(eventBus.allSubscribers().isEmpty());
-    }
-
-    @Test
-    public void testUnregister_VerifiesNoEventsAfter() {
-        TestSubscriber subscriber = new TestSubscriber();
-        eventBus.register(subscriber);
-
-        eventBus.post("before");
-        assertEquals(1, subscriber.receivedEvents.size());
-
-        eventBus.unregister(subscriber);
-        eventBus.post("after");
-
-        // Should still have only the "before" event
-        assertEquals(1, subscriber.receivedEvents.size());
-        assertEquals("before", subscriber.receivedEvents.get(0));
-    }
-
-    // ---- post(Object) ----
-
-    @Test
-    public void testPost() {
-        TestSubscriber subscriber = new TestSubscriber();
-        eventBus.register(subscriber);
-
-        EventBus result = eventBus.post("Test Message");
-        Assertions.assertSame(eventBus, result);
-        Assertions.assertEquals(1, subscriber.receivedEvents.size());
-        Assertions.assertEquals("Test Message", subscriber.receivedEvents.get(0));
-    }
-
-    @Test
-    public void testPost_NullEvent() {
-        Assertions.assertThrows(NullPointerException.class, () -> eventBus.post((Object) null));
-    }
-
-    @Test
-    public void testMultipleAnnotatedMethods() {
-        MultiMethodSubscriber subscriber = new MultiMethodSubscriber();
-        eventBus.register(subscriber);
-
-        eventBus.post("String Event");
-        eventBus.post(123);
-        eventBus.post(45.67);
-
-        Assertions.assertEquals(1, subscriber.stringCount);
-        Assertions.assertEquals(1, subscriber.integerCount);
-        Assertions.assertEquals(1, subscriber.doubleCount);
     }
 
     @Test
@@ -713,84 +496,6 @@ public class EventBusTest extends TestBase {
 
         Assertions.assertEquals(2, baseEventCount.get());
         Assertions.assertEquals(1, strictEventCount.get());
-    }
-
-    @Test
-    public void testPost_NoSubscribers() {
-        // Posting to a bus with no subscribers should not throw
-        EventBus result = eventBus.post("orphan event");
-        Assertions.assertSame(eventBus, result);
-    }
-
-    @Test
-    public void testPost_MultipleEventsInSequence() {
-        TestSubscriber subscriber = new TestSubscriber();
-        eventBus.register(subscriber);
-
-        eventBus.post("first");
-        eventBus.post("second");
-        eventBus.post("third");
-
-        assertEquals(3, subscriber.receivedEvents.size());
-        assertEquals("first", subscriber.receivedEvents.get(0));
-        assertEquals("second", subscriber.receivedEvents.get(1));
-        assertEquals("third", subscriber.receivedEvents.get(2));
-
-        eventBus.unregister(subscriber);
-    }
-
-    @Test
-    public void testPost_SubscriberExceptionDoesNotStopOthers() {
-        AtomicReference<String> goodResult = new AtomicReference<>();
-
-        Object throwingSubscriber = new Object() {
-            @Subscribe
-            public void onEvent(String event) {
-                throw new RuntimeException("intentional");
-            }
-        };
-
-        Object goodSubscriber = new Object() {
-            @Subscribe
-            public void onEvent(String event) {
-                goodResult.set(event);
-            }
-        };
-
-        eventBus.register(throwingSubscriber);
-        eventBus.register(goodSubscriber);
-
-        // Should not throw even though one subscriber throws
-        eventBus.post("test");
-
-        eventBus.unregister(throwingSubscriber);
-        eventBus.unregister(goodSubscriber);
-    }
-
-    @Test
-    public void testEventInterval() throws InterruptedException {
-        AtomicInteger eventCount = new AtomicInteger(0);
-
-        Object subscriber = new Object() {
-            @Subscribe(intervalMillis = 100)
-            public void onEvent(String event) {
-                eventCount.incrementAndGet();
-            }
-        };
-
-        eventBus.register(subscriber);
-
-        for (int i = 0; i < 5; i++) {
-            eventBus.post("Event " + i);
-            Thread.sleep(10);
-        }
-
-        Assertions.assertEquals(1, eventCount.get());
-
-        Thread.sleep(150);
-        eventBus.post("Event after interval");
-
-        Assertions.assertEquals(2, eventCount.get());
     }
 
     @Test
@@ -837,50 +542,6 @@ public class EventBusTest extends TestBase {
         eventBus.unregister(subscriber);
     }
 
-    // ---- post(String, Object) ----
-
-    @Test
-    public void testPostWithEventId() {
-        TestSubscriber subscriber1 = new TestSubscriber();
-        TestSubscriber subscriber2 = new TestSubscriber();
-
-        eventBus.register(subscriber1, "event1");
-        eventBus.register(subscriber2, "event2");
-
-        eventBus.post("event1", "Message 1");
-
-        Assertions.assertEquals(1, subscriber1.receivedEvents.size());
-        Assertions.assertEquals("Message 1", subscriber1.receivedEvents.get(0));
-        Assertions.assertEquals(0, subscriber2.receivedEvents.size());
-    }
-
-    @Test
-    public void testPostWithoutEventId() {
-        AtomicReference<String> result = new AtomicReference<>();
-        Subscriber<String> subscriber = event -> result.set(event);
-
-        eventBus.register(subscriber, "testId");
-        eventBus.post("hello");
-
-        assertNull(result.get()); // Should not receive without matching event ID
-    }
-
-    @Test
-    public void testPostWithEmptyEventIdBehavesAsNoEventId() {
-        AtomicReference<String> result = new AtomicReference<>();
-        Object subscriber = new Object() {
-            @Subscribe
-            public void onEvent(String event) {
-                result.set(event);
-            }
-        };
-
-        eventBus.register(subscriber);
-        eventBus.post("", "hello");
-
-        assertEquals("hello", result.get());
-    }
-
     @Test
     public void testEventIdFiltering() {
         AtomicInteger count = new AtomicInteger(0);
@@ -900,16 +561,174 @@ public class EventBusTest extends TestBase {
         eventBus.unregister(handler);
     }
 
+    // ---- register(Object) ----
+
     @Test
-    public void testPost_EventIdNoSubscribers() {
-        // Posting with eventId that has no subscribers should not throw
-        EventBus result = eventBus.post("nonExistentId", "orphan");
+    public void testRegister() {
+        TestSubscriber subscriber = new TestSubscriber();
+        EventBus result = eventBus.register(subscriber);
+
         Assertions.assertSame(eventBus, result);
+        Assertions.assertEquals(1, eventBus.allSubscribers().size());
     }
 
     @Test
-    public void testPost_EventIdNullEvent() {
-        Assertions.assertThrows(NullPointerException.class, () -> eventBus.post("someId", null));
+    public void testEqualSubscribersAreTrackedByIdentity() {
+        EqualSubscriber first = new EqualSubscriber("same");
+        EqualSubscriber second = new EqualSubscriber("same");
+
+        eventBus.register(first);
+        eventBus.register(second);
+        eventBus.post("event");
+
+        assertEquals(List.of("event"), first.events);
+        assertEquals(List.of("event"), second.events);
+        assertEquals(2, eventBus.allSubscribers().size());
+
+        eventBus.unregister(first);
+        eventBus.post("event2");
+
+        assertEquals(List.of("event"), first.events);
+        assertEquals(List.of("event", "event2"), second.events);
+    }
+
+    @Test
+    public void testRegisterMultipleSubscribersForSameEventType() {
+        TestSubscriber sub1 = new TestSubscriber();
+        TestSubscriber sub2 = new TestSubscriber();
+
+        eventBus.register(sub1);
+        eventBus.register(sub2);
+        eventBus.post("broadcast");
+
+        assertEquals(1, sub1.receivedEvents.size());
+        assertEquals("broadcast", sub1.receivedEvents.get(0));
+        assertEquals(1, sub2.receivedEvents.size());
+        assertEquals("broadcast", sub2.receivedEvents.get(0));
+
+        eventBus.unregister(sub1);
+        eventBus.unregister(sub2);
+    }
+
+    // ---- register(Object, String) ----
+
+    @Test
+    public void testRegisterWithEventId() {
+        TestSubscriber subscriber = new TestSubscriber();
+        EventBus result = eventBus.register(subscriber, "testEvent");
+
+        Assertions.assertSame(eventBus, result);
+        Assertions.assertEquals(1, eventBus.subscribers("testEvent", String.class).size());
+    }
+
+    // ---- register(Object, ThreadMode) ----
+
+    @Test
+    public void testRegisterWithThreadMode() {
+        TestSubscriber subscriber = new TestSubscriber();
+        EventBus result = eventBus.register(subscriber, ThreadMode.DEFAULT);
+
+        Assertions.assertSame(eventBus, result);
+        Assertions.assertEquals(1, eventBus.allSubscribers().size());
+    }
+
+    // ---- register(Object, String, ThreadMode) ----
+
+    @Test
+    public void testRegisterWithEventIdAndThreadMode() {
+        TestSubscriber subscriber = new TestSubscriber();
+        EventBus result = eventBus.register(subscriber, "testEvent", ThreadMode.DEFAULT);
+
+        Assertions.assertSame(eventBus, result);
+        Assertions.assertEquals(1, eventBus.subscribers("testEvent", String.class).size());
+    }
+
+    @Test
+    public void testMultipleAnnotatedMethods() {
+        MultiMethodSubscriber subscriber = new MultiMethodSubscriber();
+        eventBus.register(subscriber);
+
+        eventBus.post("String Event");
+        eventBus.post(123);
+        eventBus.post(45.67);
+
+        Assertions.assertEquals(1, subscriber.stringCount);
+        Assertions.assertEquals(1, subscriber.integerCount);
+        Assertions.assertEquals(1, subscriber.doubleCount);
+    }
+
+    @Test
+    public void testRegisterThrowsExceptionForNoSubscriberMethods() {
+        Object noMethodSubscriber = new Object();
+
+        Assertions.assertThrows(RuntimeException.class, () -> {
+            eventBus.register(noMethodSubscriber);
+        });
+    }
+
+    @Test
+    public void testRegisterRejectsStaticAnnotatedSubscriberMethod() {
+        Assertions.assertThrows(RuntimeException.class, () -> eventBus.register(new StaticAnnotatedSubscriber()));
+    }
+
+    @Test
+    public void testRegister_NullSubscriber() {
+        Assertions.assertThrows(NullPointerException.class, () -> eventBus.register(null));
+    }
+
+    @Test
+    public void testRegisterThrowsExceptionForLambdaWithoutEventId() {
+        Subscriber<Object> generalSubscriber = event -> {
+        };
+
+        Assertions.assertThrows(RuntimeException.class, () -> {
+            eventBus.register(generalSubscriber);
+        });
+    }
+
+    @Test
+    public void testRegisterLambdaSubscriberWithThreadPoolMode() throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<String> received = new AtomicReference<>();
+
+        Subscriber<String> subscriber = event -> {
+            received.set(event);
+            latch.countDown();
+        };
+
+        eventBus.register(subscriber, "asyncLambda", ThreadMode.THREAD_POOL_EXECUTOR);
+        eventBus.post("asyncLambda", "async value");
+
+        assertTrue(latch.await(5, TimeUnit.SECONDS));
+        assertEquals("async value", received.get());
+
+        eventBus.unregister(subscriber);
+    }
+
+    @Test
+    public void testEventInterval() throws InterruptedException {
+        AtomicInteger eventCount = new AtomicInteger(0);
+
+        Object subscriber = new Object() {
+            @Subscribe(intervalMillis = 100)
+            public void onEvent(String event) {
+                eventCount.incrementAndGet();
+            }
+        };
+
+        eventBus.register(subscriber);
+
+        for (int i = 0; i < 5; i++) {
+            eventBus.post("Event " + i);
+            Thread.sleep(10);
+        }
+
+        Assertions.assertEquals(1, eventCount.get());
+
+        Thread.sleep(150);
+        eventBus.post("Event after interval");
+
+        Assertions.assertEquals(2, eventCount.get());
     }
 
     @Test
@@ -955,19 +774,183 @@ public class EventBusTest extends TestBase {
         Assertions.assertNotEquals(Thread.currentThread(), eventThread.get());
     }
 
-    // ---- postSticky(Object) ----
-
     @Test
-    public void testPostSticky() {
-        TestStickySubscriber subscriber = new TestStickySubscriber();
-
-        EventBus result = eventBus.postSticky("Sticky Message");
-        Assertions.assertSame(eventBus, result);
-
+    public void testUnregister_VerifiesNoEventsAfter() {
+        TestSubscriber subscriber = new TestSubscriber();
         eventBus.register(subscriber);
 
+        eventBus.post("before");
+        assertEquals(1, subscriber.receivedEvents.size());
+
+        eventBus.unregister(subscriber);
+        eventBus.post("after");
+
+        // Should still have only the "before" event
+        assertEquals(1, subscriber.receivedEvents.size());
+        assertEquals("before", subscriber.receivedEvents.get(0));
+    }
+
+    // ---- unregister ----
+
+    @Test
+    public void testUnregister() {
+        AtomicReference<String> result = new AtomicReference<>();
+        Subscriber<String> subscriber = event -> result.set(event);
+
+        eventBus.register(subscriber, "testId");
+        eventBus.unregister(subscriber);
+        eventBus.post("testId", "hello");
+
+        assertNull(result.get());
+    }
+
+    @Test
+    public void testUnregister_NotRegistered() {
+        TestSubscriber subscriber = new TestSubscriber();
+        // Unregistering a subscriber that was never registered should not throw
+        EventBus result = eventBus.unregister(subscriber);
+        Assertions.assertSame(eventBus, result);
+    }
+
+    @Test
+    public void testUnregister_DoubleUnregister() {
+        TestSubscriber subscriber = new TestSubscriber();
+        eventBus.register(subscriber);
+
+        EventBus result1 = eventBus.unregister(subscriber);
+        Assertions.assertSame(eventBus, result1);
+
+        // Second unregister should not throw
+        EventBus result2 = eventBus.unregister(subscriber);
+        Assertions.assertSame(eventBus, result2);
+
+        assertTrue(eventBus.allSubscribers().isEmpty());
+    }
+
+    // ---- post(String, Object) ----
+
+    @Test
+    public void testPostWithEventId() {
+        TestSubscriber subscriber1 = new TestSubscriber();
+        TestSubscriber subscriber2 = new TestSubscriber();
+
+        eventBus.register(subscriber1, "event1");
+        eventBus.register(subscriber2, "event2");
+
+        eventBus.post("event1", "Message 1");
+
+        Assertions.assertEquals(1, subscriber1.receivedEvents.size());
+        Assertions.assertEquals("Message 1", subscriber1.receivedEvents.get(0));
+        Assertions.assertEquals(0, subscriber2.receivedEvents.size());
+    }
+
+    // ---- post(Object) ----
+
+    @Test
+    public void testPost() {
+        TestSubscriber subscriber = new TestSubscriber();
+        eventBus.register(subscriber);
+
+        EventBus result = eventBus.post("Test Message");
+        Assertions.assertSame(eventBus, result);
         Assertions.assertEquals(1, subscriber.receivedEvents.size());
-        Assertions.assertEquals("Sticky Message", subscriber.receivedEvents.get(0));
+        Assertions.assertEquals("Test Message", subscriber.receivedEvents.get(0));
+    }
+
+    @Test
+    public void testPost_MultipleEventsInSequence() {
+        TestSubscriber subscriber = new TestSubscriber();
+        eventBus.register(subscriber);
+
+        eventBus.post("first");
+        eventBus.post("second");
+        eventBus.post("third");
+
+        assertEquals(3, subscriber.receivedEvents.size());
+        assertEquals("first", subscriber.receivedEvents.get(0));
+        assertEquals("second", subscriber.receivedEvents.get(1));
+        assertEquals("third", subscriber.receivedEvents.get(2));
+
+        eventBus.unregister(subscriber);
+    }
+
+    @Test
+    public void testPostWithoutEventId() {
+        AtomicReference<String> result = new AtomicReference<>();
+        Subscriber<String> subscriber = event -> result.set(event);
+
+        eventBus.register(subscriber, "testId");
+        eventBus.post("hello");
+
+        assertNull(result.get()); // Should not receive without matching event ID
+    }
+
+    @Test
+    public void testPostWithEmptyEventIdBehavesAsNoEventId() {
+        AtomicReference<String> result = new AtomicReference<>();
+        Object subscriber = new Object() {
+            @Subscribe
+            public void onEvent(String event) {
+                result.set(event);
+            }
+        };
+
+        eventBus.register(subscriber);
+        eventBus.post("", "hello");
+
+        assertEquals("hello", result.get());
+    }
+
+    @Test
+    public void testPost_NullEvent() {
+        Assertions.assertThrows(NullPointerException.class, () -> eventBus.post((Object) null));
+    }
+
+    @Test
+    public void testPost_NoSubscribers() {
+        // Posting to a bus with no subscribers should not throw
+        EventBus result = eventBus.post("orphan event");
+        Assertions.assertSame(eventBus, result);
+    }
+
+    @Test
+    public void testPost_SubscriberExceptionDoesNotStopOthers() {
+        AtomicReference<String> goodResult = new AtomicReference<>();
+
+        Object throwingSubscriber = new Object() {
+            @Subscribe
+            public void onEvent(String event) {
+                throw new RuntimeException("intentional");
+            }
+        };
+
+        Object goodSubscriber = new Object() {
+            @Subscribe
+            public void onEvent(String event) {
+                goodResult.set(event);
+            }
+        };
+
+        eventBus.register(throwingSubscriber);
+        eventBus.register(goodSubscriber);
+
+        // Should not throw even though one subscriber throws
+        eventBus.post("test");
+
+        eventBus.unregister(throwingSubscriber);
+        eventBus.unregister(goodSubscriber);
+    }
+
+    @Test
+    public void testPost_EventIdNoSubscribers() {
+        // Posting with eventId that has no subscribers should not throw
+        EventBus result = eventBus.post("nonExistentId", "orphan");
+        Assertions.assertSame(eventBus, result);
+    }
+
+    @Test
+    public void testPost_EventIdNullEvent() {
+        Assertions.assertThrows(NullPointerException.class, () -> eventBus.post("someId", null));
     }
 
     @Test
@@ -988,10 +971,63 @@ public class EventBusTest extends TestBase {
         eventBus.unregister(handler);
     }
 
+    // ---- postSticky(String, Object) ----
+
     @Test
-    public void testPostStickyRejectsNullEvent() {
-        Assertions.assertThrows(NullPointerException.class, () -> eventBus.postSticky((Object) null));
-        Assertions.assertThrows(NullPointerException.class, () -> eventBus.postSticky("eventId", null));
+    public void testPostStickyWithEventId() {
+        TestStickySubscriber subscriber = new TestStickySubscriber();
+
+        eventBus.postSticky("stickyEvent", "Sticky Message");
+        eventBus.register(subscriber, "stickyEvent");
+
+        Assertions.assertEquals(1, subscriber.receivedEvents.size());
+        Assertions.assertEquals("Sticky Message", subscriber.receivedEvents.get(0));
+    }
+
+    @Test
+    public void testPostSticky_ThenRegisterWithMatchingEventId() {
+        eventBus.postSticky("myId", "sticky value");
+
+        AtomicReference<String> received = new AtomicReference<>();
+        Object subscriber = new Object() {
+            @Subscribe(sticky = true)
+            public void onEvent(String event) {
+                received.set(event);
+            }
+        };
+
+        eventBus.register(subscriber, "myId");
+        assertEquals("sticky value", received.get());
+
+        eventBus.unregister(subscriber);
+    }
+
+    @Test
+    public void testGetStickyEventsWithEventId() {
+        eventBus.postSticky("id1", "Event 1");
+        eventBus.postSticky("id2", "Event 2");
+        eventBus.postSticky("id1", "Event 3");
+
+        List<?> events = eventBus.stickyEvents("id1", String.class);
+        Assertions.assertEquals(2, events.size());
+
+        events = eventBus.stickyEvents("id2", String.class);
+        Assertions.assertEquals(1, events.size());
+    }
+
+    // ---- postSticky(Object) ----
+
+    @Test
+    public void testPostSticky() {
+        TestStickySubscriber subscriber = new TestStickySubscriber();
+
+        EventBus result = eventBus.postSticky("Sticky Message");
+        Assertions.assertSame(eventBus, result);
+
+        eventBus.register(subscriber);
+
+        Assertions.assertEquals(1, subscriber.receivedEvents.size());
+        Assertions.assertEquals("Sticky Message", subscriber.receivedEvents.get(0));
     }
 
     @Test
@@ -1018,19 +1054,6 @@ public class EventBusTest extends TestBase {
         assertEquals(2, subscriber.receivedEvents.size());
         assertTrue(subscriber.receivedEvents.contains("sticky1"));
         assertTrue(subscriber.receivedEvents.contains("sticky2"));
-    }
-
-    // ---- postSticky(String, Object) ----
-
-    @Test
-    public void testPostStickyWithEventId() {
-        TestStickySubscriber subscriber = new TestStickySubscriber();
-
-        eventBus.postSticky("stickyEvent", "Sticky Message");
-        eventBus.register(subscriber, "stickyEvent");
-
-        Assertions.assertEquals(1, subscriber.receivedEvents.size());
-        Assertions.assertEquals("Sticky Message", subscriber.receivedEvents.get(0));
     }
 
     @Test
@@ -1069,21 +1092,9 @@ public class EventBusTest extends TestBase {
     }
 
     @Test
-    public void testPostSticky_ThenRegisterWithMatchingEventId() {
-        eventBus.postSticky("myId", "sticky value");
-
-        AtomicReference<String> received = new AtomicReference<>();
-        Object subscriber = new Object() {
-            @Subscribe(sticky = true)
-            public void onEvent(String event) {
-                received.set(event);
-            }
-        };
-
-        eventBus.register(subscriber, "myId");
-        assertEquals("sticky value", received.get());
-
-        eventBus.unregister(subscriber);
+    public void testPostStickyRejectsNullEvent() {
+        Assertions.assertThrows(NullPointerException.class, () -> eventBus.postSticky((Object) null));
+        Assertions.assertThrows(NullPointerException.class, () -> eventBus.postSticky("eventId", null));
     }
 
     // ---- removeStickyEvent(Object) ----
@@ -1094,11 +1105,6 @@ public class EventBusTest extends TestBase {
         eventBus.postSticky(event);
         assertTrue(eventBus.removeStickyEvent(event));
         assertFalse(eventBus.removeStickyEvent(event)); // Already removed
-    }
-
-    @Test
-    public void testRemoveStickyEvent_NonExistent() {
-        assertFalse(eventBus.removeStickyEvent("never posted"));
     }
 
     // ---- removeStickyEvent(String, Object) ----
@@ -1116,16 +1122,6 @@ public class EventBusTest extends TestBase {
     }
 
     @Test
-    public void testRemoveStickyEvent_WithNullEventId() {
-        String event = "sticky";
-        eventBus.postSticky(event);
-
-        // Removing with null eventId should match event posted without eventId
-        assertTrue(eventBus.removeStickyEvent(null, event));
-        assertFalse(eventBus.removeStickyEvent(null, event));
-    }
-
-    @Test
     public void testRemoveStickyEvent_WrongEventId() {
         String event = "sticky";
         eventBus.postSticky("correctId", event);
@@ -1134,21 +1130,19 @@ public class EventBusTest extends TestBase {
         assertTrue(eventBus.removeStickyEvent("correctId", event));
     }
 
-    // ---- removeStickyEvents(Class) ----
+    @Test
+    public void testRemoveStickyEvent_NonExistent() {
+        assertFalse(eventBus.removeStickyEvent("never posted"));
+    }
 
     @Test
-    public void testRemoveStickyEventsByType() {
-        eventBus.postSticky("sticky1");
-        eventBus.postSticky("sticky2");
+    public void testRemoveStickyEvent_WithNullEventId() {
+        String event = "sticky";
+        eventBus.postSticky(event);
 
-        boolean removed = eventBus.removeStickyEvents(String.class);
-        Assertions.assertTrue(removed);
-
-        List<String> remaining = eventBus.stickyEvents(String.class);
-        Assertions.assertTrue(remaining.isEmpty());
-
-        // Removing again should return false
-        Assertions.assertFalse(eventBus.removeStickyEvents(String.class));
+        // Removing with null eventId should match event posted without eventId
+        assertTrue(eventBus.removeStickyEvent(null, event));
+        assertFalse(eventBus.removeStickyEvent(null, event));
     }
 
     @Test
@@ -1167,15 +1161,6 @@ public class EventBusTest extends TestBase {
         assertTrue(eventBus.removeStickyEvents("eventId", String.class));
         List<?> events = eventBus.stickyEvents("eventId", String.class);
         assertEquals(0, events.size());
-    }
-
-    @Test
-    public void testRemoveStickyEventsWithEmptyEventIdBehavesAsNoEventId() {
-        eventBus.postSticky("", "test1");
-        eventBus.postSticky("", "test2");
-
-        assertTrue(eventBus.removeStickyEvents("", String.class));
-        assertEquals(0, eventBus.stickyEvents("", String.class).size());
     }
 
     @Test
@@ -1216,6 +1201,32 @@ public class EventBusTest extends TestBase {
         assertFalse(eventBus.removeStickyEvents("id2", String.class));
     }
 
+    // ---- removeStickyEvents(Class) ----
+
+    @Test
+    public void testRemoveStickyEventsByType() {
+        eventBus.postSticky("sticky1");
+        eventBus.postSticky("sticky2");
+
+        boolean removed = eventBus.removeStickyEvents(String.class);
+        Assertions.assertTrue(removed);
+
+        List<String> remaining = eventBus.stickyEvents(String.class);
+        Assertions.assertTrue(remaining.isEmpty());
+
+        // Removing again should return false
+        Assertions.assertFalse(eventBus.removeStickyEvents(String.class));
+    }
+
+    @Test
+    public void testRemoveStickyEventsWithEmptyEventIdBehavesAsNoEventId() {
+        eventBus.postSticky("", "test1");
+        eventBus.postSticky("", "test2");
+
+        assertTrue(eventBus.removeStickyEvents("", String.class));
+        assertEquals(0, eventBus.stickyEvents("", String.class).size());
+    }
+
     @Test
     public void testRemoveStickyEvents_TypeHierarchy() {
         eventBus.postSticky(new SubEvent());
@@ -1246,6 +1257,19 @@ public class EventBusTest extends TestBase {
         // Should not throw on empty bus
         eventBus.removeAllStickyEvents();
         assertTrue(eventBus.stickyEvents(Object.class).isEmpty());
+    }
+
+    // ---- stickyEvents(String, Class) ----
+
+    @Test
+    public void testGetStickyEvents() {
+        eventBus.postSticky("event1", "sticky1");
+        eventBus.postSticky("event1", "sticky2");
+
+        List<?> events = eventBus.stickyEvents("event1", String.class);
+        assertEquals(2, events.size());
+
+        eventBus.removeAllStickyEvents();
     }
 
     // ---- stickyEvents(Class) ----
@@ -1294,32 +1318,6 @@ public class EventBusTest extends TestBase {
         // SubSubEvent should not match
         List<SubSubEvent> subSubEvents = eventBus.stickyEvents(SubSubEvent.class);
         assertTrue(subSubEvents.isEmpty());
-    }
-
-    // ---- stickyEvents(String, Class) ----
-
-    @Test
-    public void testGetStickyEvents() {
-        eventBus.postSticky("event1", "sticky1");
-        eventBus.postSticky("event1", "sticky2");
-
-        List<?> events = eventBus.stickyEvents("event1", String.class);
-        assertEquals(2, events.size());
-
-        eventBus.removeAllStickyEvents();
-    }
-
-    @Test
-    public void testGetStickyEventsWithEventId() {
-        eventBus.postSticky("id1", "Event 1");
-        eventBus.postSticky("id2", "Event 2");
-        eventBus.postSticky("id1", "Event 3");
-
-        List<?> events = eventBus.stickyEvents("id1", String.class);
-        Assertions.assertEquals(2, events.size());
-
-        events = eventBus.stickyEvents("id2", String.class);
-        Assertions.assertEquals(1, events.size());
     }
 
     @Test

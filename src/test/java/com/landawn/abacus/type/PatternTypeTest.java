@@ -11,12 +11,10 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class PatternTypeTest extends TestBase {
 
     private PatternType patternType;
@@ -29,11 +27,6 @@ public class PatternTypeTest extends TestBase {
     @Test
     public void testClazz() {
         assertEquals(Pattern.class, patternType.javaType());
-    }
-
-    @Test
-    public void testStringOfWithNull() {
-        assertNull(patternType.stringOf(null));
     }
 
     @Test
@@ -51,11 +44,26 @@ public class PatternTypeTest extends TestBase {
     }
 
     @Test
+    public void testStringOfWithNull() {
+        assertNull(patternType.stringOf(null));
+    }
+
+    @Test
     public void testStringOfWithFlags() {
         Pattern pattern = Pattern.compile("test", Pattern.CASE_INSENSITIVE);
         String result = patternType.stringOf(pattern);
         assertNotNull(result);
         assertTrue(result.contains("test"));
+    }
+
+    @Test
+    public void testRoundTrip() {
+        String originalRegex = "\\d{4}-\\d{2}-\\d{2}";
+        Pattern pattern1 = patternType.valueOf(originalRegex);
+        String stringRepresentation = patternType.stringOf(pattern1);
+        Pattern pattern2 = patternType.valueOf(stringRepresentation);
+
+        assertEquals(pattern1.pattern(), pattern2.pattern());
     }
 
     @Test
@@ -92,6 +100,17 @@ public class PatternTypeTest extends TestBase {
     }
 
     @Test
+    public void testVariousPatterns() {
+        String[] patterns = { ".*", "^start", "end$", "(group1|group2)", "a{2,5}", "[^abc]", "\\s+", "(?i)case", };
+
+        for (String regex : patterns) {
+            Pattern pattern = patternType.valueOf(regex);
+            assertNotNull(pattern);
+            assertEquals(regex, pattern.pattern());
+        }
+    }
+
+    @Test
     public void testValueOfWithInvalidPattern() {
         assertThrows(PatternSyntaxException.class, () -> {
             patternType.valueOf("[");
@@ -107,16 +126,6 @@ public class PatternTypeTest extends TestBase {
     }
 
     @Test
-    public void testRoundTrip() {
-        String originalRegex = "\\d{4}-\\d{2}-\\d{2}";
-        Pattern pattern1 = patternType.valueOf(originalRegex);
-        String stringRepresentation = patternType.stringOf(pattern1);
-        Pattern pattern2 = patternType.valueOf(stringRepresentation);
-
-        assertEquals(pattern1.pattern(), pattern2.pattern());
-    }
-
-    @Test
     public void testName() {
         assertEquals("Pattern", patternType.name());
     }
@@ -124,16 +133,5 @@ public class PatternTypeTest extends TestBase {
     @Test
     public void testIsSerializable() {
         assertTrue(patternType.isSerializable());
-    }
-
-    @Test
-    public void testVariousPatterns() {
-        String[] patterns = { ".*", "^start", "end$", "(group1|group2)", "a{2,5}", "[^abc]", "\\s+", "(?i)case", };
-
-        for (String regex : patterns) {
-            Pattern pattern = patternType.valueOf(regex);
-            assertNotNull(pattern);
-            assertEquals(regex, pattern.pattern());
-        }
     }
 }

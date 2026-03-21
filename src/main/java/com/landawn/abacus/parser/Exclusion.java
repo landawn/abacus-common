@@ -17,7 +17,7 @@ package com.landawn.abacus.parser;
 /**
  * Enumeration defining property exclusion policies for serialization.
  * This enum controls which bean properties should be excluded during the serialization process.
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Exclude properties with null values
@@ -30,19 +30,19 @@ package com.landawn.abacus.parser;
  * // Include all properties
  * config.setExclusion(Exclusion.NONE);
  * }</pre>
- * 
+ *
  */
 public enum Exclusion {
     /**
      * Excludes bean properties with {@code null} values during serialization.
      * Properties that are {@code null} will not be included in the serialized output.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person();
      * person.setName("John");
      * person.setAge(null);   // This property will be excluded
-     * 
+     *
      * // With Exclusion.NULL, output: {"name": "John"}
      * }</pre>
      */
@@ -50,15 +50,15 @@ public enum Exclusion {
 
     /**
      * Excludes bean properties with default values during serialization.
-     * This includes {@code null} values and primitive type default values (0, false, etc.).
-     * 
+     * This includes {@code null} values and primitive type default values (e.g., {@code 0}, {@code false}).
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person();
      * person.setName("John");
      * person.setAge(0);          // Default int value, will be excluded
      * person.setActive(false);   // Default boolean value, will be excluded
-     * 
+     *
      * // With Exclusion.DEFAULT, output: {"name": "John"}
      * }</pre>
      */
@@ -67,13 +67,13 @@ public enum Exclusion {
     /**
      * No bean properties are excluded during serialization.
      * All properties will be included in the serialized output regardless of their values.
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person();
      * person.setName("John");
      * person.setAge(null);
-     * 
+     *
      * // With Exclusion.NONE, output: {"name": "John", "age": null}
      * }</pre>
      */

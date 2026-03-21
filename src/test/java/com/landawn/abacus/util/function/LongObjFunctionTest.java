@@ -4,12 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class LongObjFunctionTest extends TestBase {
 
     @Test
@@ -47,26 +45,23 @@ public class LongObjFunctionTest extends TestBase {
     }
 
     @Test
-    public void testAndThen() {
-        LongObjFunction<String, String> function = (l, s) -> l + ":" + s;
-        java.util.function.Function<String, String> after = s -> s.toUpperCase();
+    public void testWithDifferentTypes() {
+        LongObjFunction<Integer, Boolean> function = (l, i) -> l > i;
 
-        LongObjFunction<String, String> combined = function.andThen(after);
-        String result = combined.apply(5L, "test");
+        Boolean result1 = function.apply(10L, 5);
+        Boolean result2 = function.apply(3L, 10);
 
-        assertEquals("5:TEST", result);
+        assertEquals(true, result1);
+        assertEquals(false, result2);
     }
 
     @Test
-    public void testAndThenChaining() {
-        LongObjFunction<Integer, Integer> function = (l, i) -> (int) (l + i);
-        java.util.function.Function<Integer, Integer> after1 = i -> i * 2;
-        java.util.function.Function<Integer, String> after2 = i -> "Result:" + i;
+    public void testComplexCalculation() {
+        LongObjFunction<Long, Long> function = (l1, l2) -> l1 * l2 + l1 / l2;
 
-        LongObjFunction<Integer, String> combined = function.andThen(after1).andThen(after2);
-        String result = combined.apply(5L, 10);
+        Long result = function.apply(10L, 2L);
 
-        assertEquals("Result:30", result);
+        assertEquals(25L, result);
     }
 
     @Test
@@ -112,23 +107,26 @@ public class LongObjFunctionTest extends TestBase {
     }
 
     @Test
-    public void testWithDifferentTypes() {
-        LongObjFunction<Integer, Boolean> function = (l, i) -> l > i;
+    public void testAndThenChaining() {
+        LongObjFunction<Integer, Integer> function = (l, i) -> (int) (l + i);
+        java.util.function.Function<Integer, Integer> after1 = i -> i * 2;
+        java.util.function.Function<Integer, String> after2 = i -> "Result:" + i;
 
-        Boolean result1 = function.apply(10L, 5);
-        Boolean result2 = function.apply(3L, 10);
+        LongObjFunction<Integer, String> combined = function.andThen(after1).andThen(after2);
+        String result = combined.apply(5L, 10);
 
-        assertEquals(true, result1);
-        assertEquals(false, result2);
+        assertEquals("Result:30", result);
     }
 
     @Test
-    public void testComplexCalculation() {
-        LongObjFunction<Long, Long> function = (l1, l2) -> l1 * l2 + l1 / l2;
+    public void testAndThen() {
+        LongObjFunction<String, String> function = (l, s) -> l + ":" + s;
+        java.util.function.Function<String, String> after = s -> s.toUpperCase();
 
-        Long result = function.apply(10L, 2L);
+        LongObjFunction<String, String> combined = function.andThen(after);
+        String result = combined.apply(5L, "test");
 
-        assertEquals(25L, result);
+        assertEquals("5:TEST", result);
     }
 
     @Test

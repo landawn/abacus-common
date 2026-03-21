@@ -39,36 +39,6 @@ import java.io.Serializable;
 public interface Pool extends Serializable, AutoCloseable {
 
     /**
-     * Acquires an exclusive lock on this pool.
-     * This method blocks until the lock is available.
-     *
-     * <p>The lock must be released by calling {@link #unlock()} in a finally block
-     * to ensure proper cleanup even if an exception occurs.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * pool.lock();
-     * try {
-     *     // perform operations requiring exclusive access
-     * } finally {
-     *     pool.unlock();
-     * }
-     * }</pre>
-     *
-     */
-    void lock();
-
-    /**
-     * Releases the exclusive lock on this pool.
-     *
-     * <p>This method must be called by the same thread that acquired the lock
-     * via {@link #lock()}, typically in a finally block.
-     *
-     * @throws IllegalMonitorStateException if the current thread does not hold the lock
-     */
-    void unlock();
-
-    /**
      * Returns the maximum capacity of this pool.
      * 
      * <p>The capacity represents the maximum number of objects that can be

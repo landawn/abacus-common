@@ -9,7 +9,6 @@ import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.alibaba.fastjson2.JSON;
@@ -28,7 +27,6 @@ import com.landawn.abacus.util.Profiler;
 public class JsonBindingTest extends AbstractParserTest {
 
     @Test
-    @Tag("slow-test")
     public void testPerformance() {
 
         N.println("josn======================================================================");

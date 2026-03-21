@@ -4,12 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class MonthTest extends TestBase {
 
     @Test
@@ -70,6 +68,26 @@ public class MonthTest extends TestBase {
     @Test
     public void testIntValue_DECEMBER() {
         assertEquals(12, Month.DECEMBER.intValue());
+    }
+
+    @Test
+    public void testIntValue_sequential() {
+        Month[] months = Month.values();
+        for (int i = 0; i < months.length; i++) {
+            assertEquals(i + 1, months[i].intValue());
+        }
+    }
+
+    @Test
+    public void testIntValue_uniqueness() {
+        Month[] months = Month.values();
+        for (int i = 0; i < months.length; i++) {
+            for (int j = i + 1; j < months.length; j++) {
+                if (months[i].intValue() == months[j].intValue()) {
+                    throw new AssertionError("Duplicate int value: " + months[i] + " and " + months[j]);
+                }
+            }
+        }
     }
 
     @Test
@@ -142,26 +160,6 @@ public class MonthTest extends TestBase {
     public void testValueOf_12() {
         Month month = Month.valueOf(12);
         assertEquals(Month.DECEMBER, month);
-    }
-
-    @Test
-    public void testValueOf_invalid_0() {
-        assertThrows(IllegalArgumentException.class, () -> Month.valueOf(0));
-    }
-
-    @Test
-    public void testValueOf_invalid_13() {
-        assertThrows(IllegalArgumentException.class, () -> Month.valueOf(13));
-    }
-
-    @Test
-    public void testValueOf_invalid_negative() {
-        assertThrows(IllegalArgumentException.class, () -> Month.valueOf(-1));
-    }
-
-    @Test
-    public void testValueOf_invalid_100() {
-        assertThrows(IllegalArgumentException.class, () -> Month.valueOf(100));
     }
 
     @Test
@@ -261,6 +259,45 @@ public class MonthTest extends TestBase {
     }
 
     @Test
+    public void testValueOf_invalid_0() {
+        assertThrows(IllegalArgumentException.class, () -> Month.valueOf(0));
+    }
+
+    @Test
+    public void testValueOf_invalid_13() {
+        assertThrows(IllegalArgumentException.class, () -> Month.valueOf(13));
+    }
+
+    @Test
+    public void testValueOf_invalid_negative() {
+        assertThrows(IllegalArgumentException.class, () -> Month.valueOf(-1));
+    }
+
+    @Test
+    public void testValueOf_invalid_100() {
+        assertThrows(IllegalArgumentException.class, () -> Month.valueOf(100));
+    }
+
+    @Test
+    public void testIntegration_allMonthsRoundTrip() {
+        Month[] months = Month.values();
+        for (Month month : months) {
+            int value = month.intValue();
+            Month decoded = Month.valueOf(value);
+            assertEquals(month, decoded);
+        }
+    }
+
+    @Test
+    public void testIntegration_monthRange() {
+        for (int i = 1; i <= 12; i++) {
+            Month month = Month.valueOf(i);
+            assertNotNull(month);
+            assertEquals(i, month.intValue());
+        }
+    }
+
+    @Test
     public void testValues() {
         Month[] months = Month.values();
         assertNotNull(months);
@@ -285,26 +322,6 @@ public class MonthTest extends TestBase {
     }
 
     @Test
-    public void testIntValue_sequential() {
-        Month[] months = Month.values();
-        for (int i = 0; i < months.length; i++) {
-            assertEquals(i + 1, months[i].intValue());
-        }
-    }
-
-    @Test
-    public void testIntValue_uniqueness() {
-        Month[] months = Month.values();
-        for (int i = 0; i < months.length; i++) {
-            for (int j = i + 1; j < months.length; j++) {
-                if (months[i].intValue() == months[j].intValue()) {
-                    throw new AssertionError("Duplicate int value: " + months[i] + " and " + months[j]);
-                }
-            }
-        }
-    }
-
-    @Test
     public void testSwitchStatement() {
         Month month = Month.JUNE;
         String season = switch (month) {
@@ -314,24 +331,5 @@ public class MonthTest extends TestBase {
             case SEPTEMBER, OCTOBER, NOVEMBER -> "Fall";
         };
         assertEquals("Summer", season);
-    }
-
-    @Test
-    public void testIntegration_allMonthsRoundTrip() {
-        Month[] months = Month.values();
-        for (Month month : months) {
-            int value = month.intValue();
-            Month decoded = Month.valueOf(value);
-            assertEquals(month, decoded);
-        }
-    }
-
-    @Test
-    public void testIntegration_monthRange() {
-        for (int i = 1; i <= 12; i++) {
-            Month month = Month.valueOf(i);
-            assertNotNull(month);
-            assertEquals(i, month.intValue());
-        }
     }
 }

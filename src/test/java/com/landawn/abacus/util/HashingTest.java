@@ -14,7 +14,6 @@ import java.util.List;
 
 import javax.crypto.spec.SecretKeySpec;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.hash.Funnel;
@@ -24,7 +23,6 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.guava.hash.HashFunction;
 import com.landawn.abacus.guava.hash.Hashing;
 
-@Tag("2025")
 public class HashingTest extends TestBase {
 
     @Test

@@ -54,10 +54,10 @@ public @interface JsonXmlConfig {
      *
      * <p><b>Common naming policies:</b></p>
      * <ul>
-     *   <li>CAMEL_CASE: myFieldName (default)</li>
-     *   <li>UPPER_CAMEL_CASE: MyFieldName</li>
-     *   <li>SNAKE_CASE: my_field_name</li>
-     *   <li>SCREAMING_SNAKE_CASE: MY_FIELD_NAME</li>
+     *   <li>{@code CAMEL_CASE}: myFieldName (default)</li>
+     *   <li>{@code UPPER_CAMEL_CASE}: MyFieldName</li>
+     *   <li>{@code SNAKE_CASE}: my_field_name</li>
+     *   <li>{@code SCREAMING_SNAKE_CASE}: MY_FIELD_NAME</li>
      * </ul>
      *
      * @return the naming policy to apply to field names during serialization
@@ -80,7 +80,7 @@ public @interface JsonXmlConfig {
      * }
      * }</pre>
      *
-     * @return array of field names or regex patterns to exclude from serialization
+     * @return an array of field names or regex patterns to exclude from serialization
      * @see String#matches(String)
      */
     String[] ignoredFields() default {};
@@ -93,12 +93,12 @@ public @interface JsonXmlConfig {
      *
      * <p><b>Common patterns:</b></p>
      * <ul>
-     *   <li>"yyyy-MM-dd" for dates only</li>
-     *   <li>"yyyy-MM-dd HH:mm:ss" for date and time</li>
-     *   <li>"yyyy-MM-dd'T'HH:mm:ss.SSSZ" for ISO-8601 with milliseconds</li>
+     *   <li>{@code "yyyy-MM-dd"} for dates only</li>
+     *   <li>{@code "yyyy-MM-dd HH:mm:ss"} for date and time</li>
+     *   <li>{@code "yyyy-MM-dd'T'HH:mm:ss.SSSZ"} for ISO-8601 with milliseconds</li>
      * </ul>
      *
-     * @return the date format pattern, empty string for default ISO-8601 format
+     * @return the date format pattern, or an empty string for the default ISO-8601 format
      * @see java.text.SimpleDateFormat
      */
     String dateFormat() default "";
@@ -112,13 +112,13 @@ public @interface JsonXmlConfig {
      *
      * <p><b>Usage Examples:</b></p>
      * <ul>
-     *   <li>"UTC" - Coordinated Universal Time</li>
-     *   <li>"America/New_York" - Eastern Time</li>
-     *   <li>"Europe/London" - British Time</li>
-     *   <li>"Asia/Tokyo" - Japan Standard Time</li>
+     *   <li>{@code "UTC"} - Coordinated Universal Time</li>
+     *   <li>{@code "America/New_York"} - Eastern Time</li>
+     *   <li>{@code "Europe/London"} - British Time</li>
+     *   <li>{@code "Asia/Tokyo"} - Japan Standard Time</li>
      * </ul>
      *
-     * @return the time zone ID, empty string for system default time zone
+     * @return the time zone ID, or an empty string for the system default time zone
      * @see java.util.TimeZone#getTimeZone(String)
      */
     String timeZone() default "";
@@ -132,13 +132,13 @@ public @interface JsonXmlConfig {
      *
      * <p><b>Common patterns:</b></p>
      * <ul>
-     *   <li>"#,##0.00" - Two decimal places with thousand separators</li>
-     *   <li>"0.000" - Three decimal places, always showing zeros</li>
-     *   <li>"#.##" - Up to two decimal places, omitting trailing zeros</li>
-     *   <li>"0.00E0" - Scientific notation</li>
+     *   <li>{@code "#,##0.00"} - Two decimal places with thousand separators</li>
+     *   <li>{@code "0.000"} - Three decimal places, always showing zeros</li>
+     *   <li>{@code "#.##"} - Up to two decimal places, omitting trailing zeros</li>
+     *   <li>{@code "0.00E0"} - Scientific notation</li>
      * </ul>
      *
-     * @return the number format pattern, empty string for default representation
+     * @return the number format pattern, or an empty string for default representation
      * @see DecimalFormat
      */
     String numberFormat() default "";
@@ -149,13 +149,13 @@ public @interface JsonXmlConfig {
      *
      * <p><b>Options:</b></p>
      * <ul>
-     *   <li>EnumType.NAME (default): Uses the enum constant name (e.g., "ACTIVE")</li>
-     *   <li>EnumType.ORDINAL: Uses the enum's ordinal position (e.g., 0, 1, 2)</li>
-     *   <li>EnumType.CODE: Uses an integer code defined by the enum (for example, via {@code public int code()})</li>
+     *   <li>{@link EnumType#NAME} (default): Uses the enum constant name (e.g., {@code "ACTIVE"})</li>
+     *   <li>{@link EnumType#ORDINAL}: Uses the enum's ordinal position (e.g., 0, 1, 2)</li>
+     *   <li>{@link EnumType#CODE}: Uses an integer code defined by the enum (for example, via {@code public int code()})</li>
      * </ul>
      *
-     * <p><b>Recommendation:</b> EnumType.NAME is more readable and resilient to enum
-     * reordering; EnumType.ORDINAL and EnumType.CODE are compact but require stable ordering or codes.</p>
+     * <p><b>Recommendation:</b> {@code EnumType.NAME} is more readable and resilient to enum
+     * reordering; {@code EnumType.ORDINAL} and {@code EnumType.CODE} are compact but require stable ordering or codes.</p>
      *
      * @return the enum serialization strategy
      */
@@ -167,9 +167,9 @@ public @interface JsonXmlConfig {
      *
      * <p><b>Common exclusion policies:</b></p>
      * <ul>
-     *   <li>Exclusion.NULL (default): Excludes fields with {@code null} values</li>
-     *   <li>Exclusion.DEFAULT: Excludes {@code null} values and primitive type default values (0, false, etc.)</li>
-     *   <li>Exclusion.NONE: Includes all fields</li>
+     *   <li>{@link Exclusion#NULL} (default): Excludes fields with {@code null} values</li>
+     *   <li>{@link Exclusion#DEFAULT}: Excludes {@code null} values and primitive type default values (0, {@code false}, etc.)</li>
+     *   <li>{@link Exclusion#NONE}: Includes all fields</li>
      * </ul>
      *
      * <p>This helps reduce payload size and improve clarity by omitting unnecessary data.</p>

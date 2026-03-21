@@ -8,12 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class KryoDeserConfigTest extends TestBase {
 
     private KryoDeserConfig config;
@@ -21,6 +19,13 @@ public class KryoDeserConfigTest extends TestBase {
     @BeforeEach
     void setUp() {
         config = KryoDeserConfig.create();
+    }
+
+    @Test
+    public void testDefaultValues() {
+        KryoDeserConfig newConfig = new KryoDeserConfig();
+
+        assertTrue(newConfig.isIgnoreUnmatchedProperty());
     }
 
     // hashCode
@@ -80,19 +85,6 @@ public class KryoDeserConfigTest extends TestBase {
         assertNotSame(config, newConfig);
     }
 
-    // copy
-    @Test
-    public void testCopy() {
-        config.setIgnoreUnmatchedProperty(false);
-        config.setElementType(String.class);
-
-        KryoDeserConfig copy = config.copy();
-        assertNotNull(copy);
-        assertNotSame(config, copy);
-        assertEquals(false, copy.isIgnoreUnmatchedProperty());
-        assertNotNull(copy.getElementType());
-    }
-
     // inherited method tests
     @Test
     public void test_setElementType() {
@@ -123,6 +115,30 @@ public class KryoDeserConfigTest extends TestBase {
     }
 
     @Test
+    public void testCreateMultipleInstances() {
+        KryoDeserConfig config1 = KryoDeserConfig.create();
+        KryoDeserConfig config2 = KryoDeserConfig.create();
+
+        assertNotSame(config1, config2);
+
+        config1.setIgnoreUnmatchedProperty(true);
+        assertTrue(config2.isIgnoreUnmatchedProperty());
+    }
+
+    // copy
+    @Test
+    public void testCopy() {
+        config.setIgnoreUnmatchedProperty(false);
+        config.setElementType(String.class);
+
+        KryoDeserConfig copy = config.copy();
+        assertNotNull(copy);
+        assertNotSame(config, copy);
+        assertEquals(false, copy.isIgnoreUnmatchedProperty());
+        assertNotNull(copy.getElementType());
+    }
+
+    @Test
     public void testInheritedMethods() {
         config.setIgnoreUnmatchedProperty(true);
         assertTrue(config.isIgnoreUnmatchedProperty());
@@ -138,24 +154,6 @@ public class KryoDeserConfigTest extends TestBase {
 
         assertSame(config, result);
         assertTrue(config.isIgnoreUnmatchedProperty());
-    }
-
-    @Test
-    public void testDefaultValues() {
-        KryoDeserConfig newConfig = new KryoDeserConfig();
-
-        assertTrue(newConfig.isIgnoreUnmatchedProperty());
-    }
-
-    @Test
-    public void testCreateMultipleInstances() {
-        KryoDeserConfig config1 = KryoDeserConfig.create();
-        KryoDeserConfig config2 = KryoDeserConfig.create();
-
-        assertNotSame(config1, config2);
-
-        config1.setIgnoreUnmatchedProperty(true);
-        assertTrue(config2.isIgnoreUnmatchedProperty());
     }
 
 }

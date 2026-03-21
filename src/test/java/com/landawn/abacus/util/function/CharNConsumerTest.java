@@ -7,12 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class CharNConsumerTest extends TestBase {
 
     @Test
@@ -38,6 +36,25 @@ public class CharNConsumerTest extends TestBase {
 
         consumer.accept('H', 'e', 'l', 'l', 'o');
         assertEquals("Hello", result[0]);
+    }
+
+    @Test
+    public void testAcceptManyElements() {
+        final int[] result = new int[1];
+        CharNConsumer consumer = args -> result[0] = args.length;
+
+        consumer.accept('a', 'b', 'c', 'd', 'e', 'f', 'g');
+        assertEquals(7, result[0]);
+    }
+
+    @Test
+    public void testWithSpecialCharacters() {
+        final List<char[]> result = new ArrayList<>();
+        CharNConsumer consumer = args -> result.add(args);
+
+        consumer.accept('\n', '\t', ' ');
+        assertEquals(1, result.size());
+        assertArrayEquals(new char[] { '\n', '\t', ' ' }, result.get(0));
     }
 
     @Test
@@ -80,12 +97,13 @@ public class CharNConsumerTest extends TestBase {
     }
 
     @Test
-    public void testAcceptManyElements() {
-        final int[] result = new int[1];
-        CharNConsumer consumer = args -> result[0] = args.length;
+    public void testWithBoundaryValues() {
+        final List<char[]> result = new ArrayList<>();
+        CharNConsumer consumer = args -> result.add(args);
 
-        consumer.accept('a', 'b', 'c', 'd', 'e', 'f', 'g');
-        assertEquals(7, result[0]);
+        consumer.accept(Character.MIN_VALUE, 'M', Character.MAX_VALUE);
+        assertEquals(1, result.size());
+        assertArrayEquals(new char[] { Character.MIN_VALUE, 'M', Character.MAX_VALUE }, result.get(0));
     }
 
     @Test
@@ -122,26 +140,6 @@ public class CharNConsumerTest extends TestBase {
         assertEquals("3", result.get(0));
         assertEquals("a", result.get(1));
         assertEquals("b", result.get(2));
-    }
-
-    @Test
-    public void testWithSpecialCharacters() {
-        final List<char[]> result = new ArrayList<>();
-        CharNConsumer consumer = args -> result.add(args);
-
-        consumer.accept('\n', '\t', ' ');
-        assertEquals(1, result.size());
-        assertArrayEquals(new char[] { '\n', '\t', ' ' }, result.get(0));
-    }
-
-    @Test
-    public void testWithBoundaryValues() {
-        final List<char[]> result = new ArrayList<>();
-        CharNConsumer consumer = args -> result.add(args);
-
-        consumer.accept(Character.MIN_VALUE, 'M', Character.MAX_VALUE);
-        assertEquals(1, result.size());
-        assertArrayEquals(new char[] { Character.MIN_VALUE, 'M', Character.MAX_VALUE }, result.get(0));
     }
 
     @Test

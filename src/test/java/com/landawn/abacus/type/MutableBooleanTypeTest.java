@@ -13,7 +13,6 @@ import java.sql.Types;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -21,7 +20,6 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.MutableBoolean;
 
-@Tag("new-test")
 public class MutableBooleanTypeTest extends TestBase {
 
     private MutableBooleanType mutableBooleanType;
@@ -52,12 +50,6 @@ public class MutableBooleanTypeTest extends TestBase {
     }
 
     @Test
-    public void testStringOfNull() {
-        String result = mutableBooleanType.stringOf(null);
-        Assertions.assertNull(result);
-    }
-
-    @Test
     public void testStringOfTrue() {
         MutableBoolean mb = MutableBoolean.of(true);
         String result = mutableBooleanType.stringOf(mb);
@@ -69,6 +61,12 @@ public class MutableBooleanTypeTest extends TestBase {
         MutableBoolean mb = MutableBoolean.of(false);
         String result = mutableBooleanType.stringOf(mb);
         assertEquals("false", result);
+    }
+
+    @Test
+    public void testStringOfNull() {
+        String result = mutableBooleanType.stringOf(null);
+        Assertions.assertNull(result);
     }
 
     @Test

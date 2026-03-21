@@ -13,12 +13,10 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class PermutationIteratorTest extends TestBase {
 
     @Test
@@ -34,41 +32,6 @@ public class PermutationIteratorTest extends TestBase {
         }
         // 3! = 6 permutations
         assertEquals(6, count);
-    }
-
-    @Test
-    public void testOf_EmptyCollection() {
-        ObjIterator<List<Integer>> iter = PermutationIterator.of(Arrays.asList());
-        assertTrue(iter.hasNext());
-        List<Integer> perm = iter.next();
-        assertEquals(0, perm.size());
-        assertTrue(!iter.hasNext());
-    }
-
-    @Test
-    public void testOf_SingleElement() {
-        ObjIterator<List<String>> iter = PermutationIterator.of(Arrays.asList("a"));
-        assertTrue(iter.hasNext());
-        assertEquals(Arrays.asList("a"), iter.next());
-        assertTrue(!iter.hasNext());
-    }
-
-    @Test
-    public void testOrderedRejectsNullComparator() {
-        assertThrows(IllegalArgumentException.class, () -> PermutationIterator.ordered(Arrays.asList(1, 2), null));
-    }
-
-    @Test
-    public void testOrderedWithComparatorStillWorks() {
-        ObjIterator<List<Integer>> iter = PermutationIterator.ordered(Arrays.asList(2, 1), Comparator.naturalOrder());
-
-        assertTrue(iter.hasNext());
-        assertEquals(Arrays.asList(1, 2), iter.next());
-    }
-
-    @Test
-    public void testOf_NullThrows() {
-        assertThrows(IllegalArgumentException.class, () -> PermutationIterator.of(null));
     }
 
     @Test
@@ -100,19 +63,20 @@ public class PermutationIteratorTest extends TestBase {
     }
 
     @Test
-    public void testOf_ExhaustionThrows() {
-        ObjIterator<List<Integer>> iter = PermutationIterator.of(Arrays.asList(1));
-        iter.next();
-        assertFalse(iter.hasNext());
-        assertThrows(NoSuchElementException.class, () -> iter.next());
+    public void testOf_EmptyCollection() {
+        ObjIterator<List<Integer>> iter = PermutationIterator.of(Arrays.asList());
+        assertTrue(iter.hasNext());
+        List<Integer> perm = iter.next();
+        assertEquals(0, perm.size());
+        assertTrue(!iter.hasNext());
     }
 
     @Test
-    public void testOf_EmptyCollection_ExhaustionThrows() {
-        ObjIterator<List<Integer>> iter = PermutationIterator.of(Arrays.asList());
-        iter.next();
-        assertFalse(iter.hasNext());
-        assertThrows(NoSuchElementException.class, () -> iter.next());
+    public void testOf_SingleElement() {
+        ObjIterator<List<String>> iter = PermutationIterator.of(Arrays.asList("a"));
+        assertTrue(iter.hasNext());
+        assertEquals(Arrays.asList("a"), iter.next());
+        assertTrue(!iter.hasNext());
     }
 
     @Test
@@ -133,32 +97,32 @@ public class PermutationIteratorTest extends TestBase {
     }
 
     @Test
-    public void testOrdered_NullThrows() {
-        assertThrows(IllegalArgumentException.class, () -> PermutationIterator.ordered(null));
+    public void testOf_NullThrows() {
+        assertThrows(IllegalArgumentException.class, () -> PermutationIterator.of(null));
     }
 
     @Test
-    public void testOrdered_EmptyCollection() {
-        ObjIterator<List<Integer>> iter = PermutationIterator.ordered(java.util.Collections.<Integer> emptyList());
-        assertTrue(iter.hasNext());
-        List<Integer> perm = iter.next();
-        assertEquals(0, perm.size());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOrdered_EmptyCollection_ExhaustionThrows() {
-        ObjIterator<List<Integer>> iter = PermutationIterator.ordered(java.util.Collections.<Integer> emptyList());
+    public void testOf_ExhaustionThrows() {
+        ObjIterator<List<Integer>> iter = PermutationIterator.of(Arrays.asList(1));
         iter.next();
+        assertFalse(iter.hasNext());
         assertThrows(NoSuchElementException.class, () -> iter.next());
     }
 
     @Test
-    public void testOrdered_SingleElement() {
-        ObjIterator<List<Integer>> iter = PermutationIterator.ordered(Arrays.asList(42));
-        assertTrue(iter.hasNext());
-        assertEquals(Arrays.asList(42), iter.next());
+    public void testOf_EmptyCollection_ExhaustionThrows() {
+        ObjIterator<List<Integer>> iter = PermutationIterator.of(Arrays.asList());
+        iter.next();
         assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, () -> iter.next());
+    }
+
+    @Test
+    public void testOrderedWithComparatorStillWorks() {
+        ObjIterator<List<Integer>> iter = PermutationIterator.ordered(Arrays.asList(2, 1), Comparator.naturalOrder());
+
+        assertTrue(iter.hasNext());
+        assertEquals(Arrays.asList(1, 2), iter.next());
     }
 
     @Test
@@ -211,15 +175,6 @@ public class PermutationIteratorTest extends TestBase {
     }
 
     @Test
-    public void testOrdered_ExhaustionThrows() {
-        ObjIterator<List<Integer>> iter = PermutationIterator.ordered(Arrays.asList(1, 2));
-        iter.next();
-        iter.next();
-        assertFalse(iter.hasNext());
-        assertThrows(NoSuchElementException.class, () -> iter.next());
-    }
-
-    @Test
     public void testOrdered_WithComparator_FullIteration() {
         ObjIterator<List<String>> iter = PermutationIterator.ordered(Arrays.asList("c", "a", "b"), Comparator.naturalOrder());
 
@@ -255,6 +210,49 @@ public class PermutationIteratorTest extends TestBase {
             all.add(iter.next());
         }
         assertEquals(3, all.size());
+    }
+
+    @Test
+    public void testOrdered_EmptyCollection() {
+        ObjIterator<List<Integer>> iter = PermutationIterator.ordered(java.util.Collections.<Integer> emptyList());
+        assertTrue(iter.hasNext());
+        List<Integer> perm = iter.next();
+        assertEquals(0, perm.size());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testOrdered_SingleElement() {
+        ObjIterator<List<Integer>> iter = PermutationIterator.ordered(Arrays.asList(42));
+        assertTrue(iter.hasNext());
+        assertEquals(Arrays.asList(42), iter.next());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testOrderedRejectsNullComparator() {
+        assertThrows(IllegalArgumentException.class, () -> PermutationIterator.ordered(Arrays.asList(1, 2), null));
+    }
+
+    @Test
+    public void testOrdered_NullThrows() {
+        assertThrows(IllegalArgumentException.class, () -> PermutationIterator.ordered(null));
+    }
+
+    @Test
+    public void testOrdered_EmptyCollection_ExhaustionThrows() {
+        ObjIterator<List<Integer>> iter = PermutationIterator.ordered(java.util.Collections.<Integer> emptyList());
+        iter.next();
+        assertThrows(NoSuchElementException.class, () -> iter.next());
+    }
+
+    @Test
+    public void testOrdered_ExhaustionThrows() {
+        ObjIterator<List<Integer>> iter = PermutationIterator.ordered(Arrays.asList(1, 2));
+        iter.next();
+        iter.next();
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, () -> iter.next());
     }
 
     @Test

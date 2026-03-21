@@ -5,12 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BooleanBinaryOperatorTest extends TestBase {
 
     @Test
@@ -126,15 +124,6 @@ public class BooleanBinaryOperatorTest extends TestBase {
     }
 
     @Test
-    public void testApplyAsBooleanWithException() {
-        BooleanBinaryOperator operator = (left, right) -> {
-            throw new RuntimeException("Test exception");
-        };
-
-        assertThrows(RuntimeException.class, () -> operator.applyAsBoolean(true, false));
-    }
-
-    @Test
     public void testAnonymousClass() {
         BooleanBinaryOperator operator = new BooleanBinaryOperator() {
             @Override
@@ -159,5 +148,14 @@ public class BooleanBinaryOperatorTest extends TestBase {
             boolean result = operator.applyAsBoolean(testCase[0], testCase[1]);
             assertEquals(testCase[2], result, String.format("Expected %b for inputs (%b, %b)", testCase[2], testCase[0], testCase[1]));
         }
+    }
+
+    @Test
+    public void testApplyAsBooleanWithException() {
+        BooleanBinaryOperator operator = (left, right) -> {
+            throw new RuntimeException("Test exception");
+        };
+
+        assertThrows(RuntimeException.class, () -> operator.applyAsBoolean(true, false));
     }
 }

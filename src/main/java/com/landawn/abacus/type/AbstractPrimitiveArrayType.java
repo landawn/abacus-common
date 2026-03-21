@@ -15,17 +15,19 @@
 package com.landawn.abacus.type;
 
 /**
- * Abstract base class for primitive array types in the type system.
+ * The Abstract base class for primitive array types in the type system.
+ * <p>
  * This class provides common functionality for handling primitive arrays
- * (int[], double[], boolean[], etc.) with optimized implementations for
+ * ({@code int[]}, {@code double[]}, {@code boolean[]}, etc.) with optimized implementations for
  * hash code calculation, equality checking, and string conversion.
+ * </p>
  *
- * @param <T> the primitive array type (e.g., int[], double[], boolean[])
+ * @param <T> the primitive array type (e.g., {@code int[]}, {@code double[]}, {@code boolean[]})
  */
 public abstract class AbstractPrimitiveArrayType<T> extends AbstractArrayType<T> {
 
     /**
-     * Constructs an AbstractPrimitiveArrayType with the specified type name.
+     * Constructs an {@code AbstractPrimitiveArrayType} with the specified type name.
      *
      * @param typeName the name of the primitive array type (e.g., "int[]", "double[]")
      */
@@ -35,8 +37,10 @@ public abstract class AbstractPrimitiveArrayType<T> extends AbstractArrayType<T>
 
     /**
      * Checks if this type represents a primitive array.
+     * <p>
      * This method always returns {@code true} for primitive array types,
      * distinguishing them from object arrays.
+     * </p>
      *
      * @return {@code true}, indicating this is a primitive array type
      */
@@ -47,8 +51,10 @@ public abstract class AbstractPrimitiveArrayType<T> extends AbstractArrayType<T>
 
     /**
      * Calculates the deep hash code for a primitive array.
+     * <p>
      * For primitive arrays, the deep hash code is the same as the regular hash code
      * since primitive arrays don't contain nested objects that require deep traversal.
+     * </p>
      *
      * @param x the primitive array
      * @return the hash code of the array
@@ -60,8 +66,10 @@ public abstract class AbstractPrimitiveArrayType<T> extends AbstractArrayType<T>
 
     /**
      * Performs deep equality comparison between two primitive arrays.
+     * <p>
      * For primitive arrays, deep equals is the same as regular equals
      * since primitive arrays don't contain nested objects that require deep comparison.
+     * </p>
      *
      * @param x the first primitive array
      * @param y the second primitive array
@@ -74,8 +82,10 @@ public abstract class AbstractPrimitiveArrayType<T> extends AbstractArrayType<T>
 
     /**
      * Converts a primitive array to its string representation.
+     * <p>
      * Returns "null" if the array is {@code null}, otherwise delegates
      * to the {@link #stringOf(Object)} method for the actual conversion.
+     * </p>
      *
      * @param x the primitive array
      * @return the string representation of the array
@@ -91,8 +101,10 @@ public abstract class AbstractPrimitiveArrayType<T> extends AbstractArrayType<T>
 
     /**
      * Converts a primitive array to its deep string representation.
+     * <p>
      * For primitive arrays, the deep string representation is the same as
      * the regular string representation since they don't contain nested objects.
+     * </p>
      *
      * @param x the primitive array
      * @return the string representation of the array

@@ -9,15 +9,20 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.ShortIterator;
 import com.landawn.abacus.util.ShortList;
 
-@Tag("new-test")
 public class ShortIteratorExTest extends TestBase {
+
+    @Test
+    public void testEmptyConstant() {
+        ShortIteratorEx iter1 = ShortIteratorEx.EMPTY;
+        ShortIteratorEx iter2 = ShortIteratorEx.empty();
+        Assertions.assertSame(iter1, iter2);
+    }
 
     // ---- empty() ----
 
@@ -29,36 +34,6 @@ public class ShortIteratorExTest extends TestBase {
         Assertions.assertEquals(0, iter.count());
         Assertions.assertArrayEquals(new short[0], iter.toArray());
         iter.close();
-    }
-
-    @Test
-    public void testEmptyConstant() {
-        ShortIteratorEx iter1 = ShortIteratorEx.EMPTY;
-        ShortIteratorEx iter2 = ShortIteratorEx.empty();
-        Assertions.assertSame(iter1, iter2);
-    }
-
-    // ---- of(short... a) ----
-
-    @Test
-    public void testOfArray() {
-        short[] array = { 1, 2, 3 };
-        ShortIteratorEx iter = ShortIteratorEx.of(array);
-
-        Assertions.assertTrue(iter.hasNext());
-        Assertions.assertEquals((short) 1, iter.nextShort());
-        Assertions.assertEquals((short) 2, iter.nextShort());
-        Assertions.assertEquals((short) 3, iter.nextShort());
-        Assertions.assertFalse(iter.hasNext());
-        Assertions.assertThrows(NoSuchElementException.class, () -> iter.nextShort());
-    }
-
-    @Test
-    public void testOfEmptyArray() {
-        short[] array = {};
-        ShortIteratorEx iter = ShortIteratorEx.of(array);
-        Assertions.assertFalse(iter.hasNext());
-        Assertions.assertSame(ShortIteratorEx.EMPTY, iter);
     }
 
     // ---- of(short[] a, int fromIndex, int toIndex) ----
@@ -73,22 +48,6 @@ public class ShortIteratorExTest extends TestBase {
         Assertions.assertEquals((short) 3, iter.nextShort());
         Assertions.assertEquals((short) 4, iter.nextShort());
         Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfArrayWithIndicesEmpty() {
-        short[] array = { 1, 2, 3 };
-        ShortIteratorEx iter = ShortIteratorEx.of(array, 1, 1);
-        Assertions.assertFalse(iter.hasNext());
-        Assertions.assertSame(ShortIteratorEx.EMPTY, iter);
-    }
-
-    @Test
-    public void testOfArrayWithIndicesInvalid() {
-        short[] array = { 1, 2, 3 };
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> ShortIteratorEx.of(array, 2, 1));
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> ShortIteratorEx.of(array, -1, 2));
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> ShortIteratorEx.of(array, 0, 4));
     }
 
     // ---- of(ShortIterator iter) ----
@@ -115,98 +74,6 @@ public class ShortIteratorExTest extends TestBase {
         Assertions.assertEquals((short) 10, iter.nextShort());
         Assertions.assertEquals((short) 20, iter.nextShort());
         Assertions.assertEquals((short) 30, iter.nextShort());
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfShortIteratorNull() {
-        ShortIterator nullIterator = null;
-        ShortIteratorEx iter = ShortIteratorEx.of(nullIterator);
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfShortIteratorAlreadyShortIteratorEx() {
-        ShortIteratorEx original = ShortIteratorEx.of((short) 1, (short) 2, (short) 3);
-        ShortIteratorEx wrapped = ShortIteratorEx.of(original);
-        Assertions.assertSame(original, wrapped);
-    }
-
-    // ---- from(Iterator<Short>) ----
-
-    @Test
-    public void testFromIterator() {
-        List<Short> list = Arrays.asList((short) 1, (short) 2, (short) 3);
-        ShortIteratorEx iter = ShortIteratorEx.from(list.iterator());
-
-        Assertions.assertTrue(iter.hasNext());
-        Assertions.assertEquals((short) 1, iter.nextShort());
-        Assertions.assertEquals((short) 2, iter.nextShort());
-        Assertions.assertEquals((short) 3, iter.nextShort());
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testFromIteratorNull() {
-        Iterator<Short> nullIterator = null;
-        ShortIteratorEx iter = ShortIteratorEx.from(nullIterator);
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testFromObjIteratorEx() {
-        ObjIteratorEx<Short> objIter = ObjIteratorEx.of((short) 1, (short) 2, (short) 3);
-        ShortIteratorEx iter = ShortIteratorEx.from(objIter);
-
-        iter.advance(1);
-        Assertions.assertEquals((short) 2, iter.nextShort());
-
-        Assertions.assertEquals(1, iter.count());
-
-        iter.close();
-    }
-
-    // ---- advance(long n) ----
-
-    @Test
-    public void testAdvance() {
-        short[] array = { 1, 2, 3, 4, 5 };
-        ShortIteratorEx iter = ShortIteratorEx.of(array);
-
-        iter.advance(2);
-        Assertions.assertEquals((short) 3, iter.nextShort());
-
-        iter.advance(1);
-        Assertions.assertEquals((short) 5, iter.nextShort());
-
-        iter.advance(10);
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testAdvanceZero() {
-        short[] array = { 1, 2, 3 };
-        ShortIteratorEx iter = ShortIteratorEx.of(array);
-
-        iter.advance(0);
-        Assertions.assertEquals((short) 1, iter.nextShort());
-    }
-
-    @Test
-    public void testAdvanceNegative() {
-        ShortIteratorEx iter = ShortIteratorEx.of((short) 1, (short) 2, (short) 3);
-        iter.advance(-1);
-        assertNotNull(iter);
-    }
-
-    // ---- count() ----
-
-    @Test
-    public void testCount() {
-        short[] array = { 1, 2, 3, 4, 5 };
-        ShortIteratorEx iter = ShortIteratorEx.of(array, 1, 4);
-
-        Assertions.assertEquals(3, iter.count());
         Assertions.assertFalse(iter.hasNext());
     }
 
@@ -257,16 +124,6 @@ public class ShortIteratorExTest extends TestBase {
         Assertions.assertEquals((short) 2, filtered.nextShort());
         Assertions.assertEquals((short) 4, filtered.nextShort());
         Assertions.assertFalse(filtered.hasNext());
-    }
-
-    // ---- stream() ----
-
-    @Test
-    public void testStream() {
-        ShortIteratorEx iter = ShortIteratorEx.of((short) 1, (short) 2, (short) 3);
-        ShortStream stream = iter.stream();
-        Assertions.assertNotNull(stream);
-        Assertions.assertEquals(3, stream.count());
     }
 
     // ---- indexed() ----
@@ -353,6 +210,147 @@ public class ShortIteratorExTest extends TestBase {
         Assertions.assertEquals((short) 2, result.get(0));
         Assertions.assertEquals((short) 3, result.get(1));
         Assertions.assertEquals((short) 4, result.get(2));
+        Assertions.assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testOfEmptyArray() {
+        short[] array = {};
+        ShortIteratorEx iter = ShortIteratorEx.of(array);
+        Assertions.assertFalse(iter.hasNext());
+        Assertions.assertSame(ShortIteratorEx.EMPTY, iter);
+    }
+
+    @Test
+    public void testOfArrayWithIndicesEmpty() {
+        short[] array = { 1, 2, 3 };
+        ShortIteratorEx iter = ShortIteratorEx.of(array, 1, 1);
+        Assertions.assertFalse(iter.hasNext());
+        Assertions.assertSame(ShortIteratorEx.EMPTY, iter);
+    }
+
+    @Test
+    public void testOfShortIteratorNull() {
+        ShortIterator nullIterator = null;
+        ShortIteratorEx iter = ShortIteratorEx.of(nullIterator);
+        Assertions.assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testOfShortIteratorAlreadyShortIteratorEx() {
+        ShortIteratorEx original = ShortIteratorEx.of((short) 1, (short) 2, (short) 3);
+        ShortIteratorEx wrapped = ShortIteratorEx.of(original);
+        Assertions.assertSame(original, wrapped);
+    }
+
+    // ---- stream() ----
+
+    @Test
+    public void testStream() {
+        ShortIteratorEx iter = ShortIteratorEx.of((short) 1, (short) 2, (short) 3);
+        ShortStream stream = iter.stream();
+        Assertions.assertNotNull(stream);
+        Assertions.assertEquals(3, stream.count());
+    }
+
+    // ---- of(short... a) ----
+
+    @Test
+    public void testOfArray() {
+        short[] array = { 1, 2, 3 };
+        ShortIteratorEx iter = ShortIteratorEx.of(array);
+
+        Assertions.assertTrue(iter.hasNext());
+        Assertions.assertEquals((short) 1, iter.nextShort());
+        Assertions.assertEquals((short) 2, iter.nextShort());
+        Assertions.assertEquals((short) 3, iter.nextShort());
+        Assertions.assertFalse(iter.hasNext());
+        Assertions.assertThrows(NoSuchElementException.class, () -> iter.nextShort());
+    }
+
+    @Test
+    public void testOfArrayWithIndicesInvalid() {
+        short[] array = { 1, 2, 3 };
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> ShortIteratorEx.of(array, 2, 1));
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> ShortIteratorEx.of(array, -1, 2));
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> ShortIteratorEx.of(array, 0, 4));
+    }
+
+    // ---- from(Iterator<Short>) ----
+
+    @Test
+    public void testFromIterator() {
+        List<Short> list = Arrays.asList((short) 1, (short) 2, (short) 3);
+        ShortIteratorEx iter = ShortIteratorEx.from(list.iterator());
+
+        Assertions.assertTrue(iter.hasNext());
+        Assertions.assertEquals((short) 1, iter.nextShort());
+        Assertions.assertEquals((short) 2, iter.nextShort());
+        Assertions.assertEquals((short) 3, iter.nextShort());
+        Assertions.assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testFromObjIteratorEx() {
+        ObjIteratorEx<Short> objIter = ObjIteratorEx.of((short) 1, (short) 2, (short) 3);
+        ShortIteratorEx iter = ShortIteratorEx.from(objIter);
+
+        iter.advance(1);
+        Assertions.assertEquals((short) 2, iter.nextShort());
+
+        Assertions.assertEquals(1, iter.count());
+
+        iter.close();
+    }
+
+    @Test
+    public void testFromIteratorNull() {
+        Iterator<Short> nullIterator = null;
+        ShortIteratorEx iter = ShortIteratorEx.from(nullIterator);
+        Assertions.assertFalse(iter.hasNext());
+    }
+
+    // ---- advance(long n) ----
+
+    @Test
+    public void testAdvance() {
+        short[] array = { 1, 2, 3, 4, 5 };
+        ShortIteratorEx iter = ShortIteratorEx.of(array);
+
+        iter.advance(2);
+        Assertions.assertEquals((short) 3, iter.nextShort());
+
+        iter.advance(1);
+        Assertions.assertEquals((short) 5, iter.nextShort());
+
+        iter.advance(10);
+        Assertions.assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testAdvanceZero() {
+        short[] array = { 1, 2, 3 };
+        ShortIteratorEx iter = ShortIteratorEx.of(array);
+
+        iter.advance(0);
+        Assertions.assertEquals((short) 1, iter.nextShort());
+    }
+
+    @Test
+    public void testAdvanceNegative() {
+        ShortIteratorEx iter = ShortIteratorEx.of((short) 1, (short) 2, (short) 3);
+        iter.advance(-1);
+        assertNotNull(iter);
+    }
+
+    // ---- count() ----
+
+    @Test
+    public void testCount() {
+        short[] array = { 1, 2, 3, 4, 5 };
+        ShortIteratorEx iter = ShortIteratorEx.of(array, 1, 4);
+
+        Assertions.assertEquals(3, iter.count());
         Assertions.assertFalse(iter.hasNext());
     }
 

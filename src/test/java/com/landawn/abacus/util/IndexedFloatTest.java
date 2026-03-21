@@ -6,12 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class IndexedFloatTest extends TestBase {
 
     @Test
@@ -29,49 +27,6 @@ public class IndexedFloatTest extends TestBase {
     }
 
     @Test
-    public void testOfNegativeIntIndex() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            IndexedFloat.of(1.0f, -1);
-        });
-    }
-
-    @Test
-    public void testValue() {
-        IndexedFloat indexed = IndexedFloat.of(123.456f, 0);
-        assertEquals(123.456f, indexed.value(), 0.001f);
-    }
-
-    @Test
-    public void testHashCode() {
-        IndexedFloat indexed1 = IndexedFloat.of(3.14f, 5);
-        IndexedFloat indexed2 = IndexedFloat.of(3.14f, 5);
-        assertEquals(indexed1.hashCode(), indexed2.hashCode());
-    }
-
-    @Test
-    public void testEquals() {
-        IndexedFloat indexed1 = IndexedFloat.of(3.14f, 5);
-        IndexedFloat indexed2 = IndexedFloat.of(3.14f, 5);
-        IndexedFloat indexed3 = IndexedFloat.of(2.71f, 5);
-
-        assertTrue(indexed1.equals(indexed2));
-        assertFalse(indexed1.equals(indexed3));
-    }
-
-    @Test
-    public void testToString() {
-        IndexedFloat indexed = IndexedFloat.of(3.14f, 5);
-        assertTrue(indexed.toString().contains("[5]="));
-        assertTrue(indexed.toString().contains("3.14"));
-    }
-
-    @Test
-    public void testZeroValue() {
-        IndexedFloat indexed = IndexedFloat.of(0.0f, 0);
-        assertEquals(0.0f, indexed.value(), 0.0f);
-    }
-
-    @Test
     public void testNaN() {
         IndexedFloat indexed = IndexedFloat.of(Float.NaN, 0);
         assertTrue(Float.isNaN(indexed.value()));
@@ -86,6 +41,23 @@ public class IndexedFloatTest extends TestBase {
 
         assertEquals(value, indexedFloat.value());
         assertEquals(index, indexedFloat.index());
+    }
+
+    @Test
+    public void testOf_WithLongIndex() {
+        float value = 3.14f;
+        long index = 5000000000L;
+
+        IndexedFloat indexedFloat = IndexedFloat.of(value, index);
+
+        assertEquals(value, indexedFloat.value());
+        assertEquals(index, indexedFloat.longIndex());
+    }
+
+    @Test
+    public void testZeroValue() {
+        IndexedFloat indexed = IndexedFloat.of(0.0f, 0);
+        assertEquals(0.0f, indexed.value(), 0.0f);
     }
 
     @Test
@@ -111,25 +83,6 @@ public class IndexedFloatTest extends TestBase {
     }
 
     @Test
-    public void testOf_WithIntIndex_NegativeIndex() {
-        float value = 3.14f;
-        int index = -1;
-
-        assertThrows(IllegalArgumentException.class, () -> IndexedFloat.of(value, index));
-    }
-
-    @Test
-    public void testOf_WithLongIndex() {
-        float value = 3.14f;
-        long index = 5000000000L;
-
-        IndexedFloat indexedFloat = IndexedFloat.of(value, index);
-
-        assertEquals(value, indexedFloat.value());
-        assertEquals(index, indexedFloat.longIndex());
-    }
-
-    @Test
     public void testOf_WithLongIndex_Zero() {
         float value = -100.5f;
         long index = 0L;
@@ -152,11 +105,39 @@ public class IndexedFloatTest extends TestBase {
     }
 
     @Test
+    public void testOfNegativeIntIndex() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            IndexedFloat.of(1.0f, -1);
+        });
+    }
+
+    @Test
+    public void testOf_WithIntIndex_NegativeIndex() {
+        float value = 3.14f;
+        int index = -1;
+
+        assertThrows(IllegalArgumentException.class, () -> IndexedFloat.of(value, index));
+    }
+
+    @Test
     public void testOf_WithLongIndex_NegativeIndex() {
         float value = 3.14f;
         long index = -1L;
 
         assertThrows(IllegalArgumentException.class, () -> IndexedFloat.of(value, index));
+    }
+
+    @Test
+    public void testValue() {
+        IndexedFloat indexed = IndexedFloat.of(123.456f, 0);
+        assertEquals(123.456f, indexed.value(), 0.001f);
+    }
+
+    @Test
+    public void testHashCode() {
+        IndexedFloat indexed1 = IndexedFloat.of(3.14f, 5);
+        IndexedFloat indexed2 = IndexedFloat.of(3.14f, 5);
+        assertEquals(indexed1.hashCode(), indexed2.hashCode());
     }
 
     @Test
@@ -191,10 +172,13 @@ public class IndexedFloatTest extends TestBase {
     }
 
     @Test
-    public void testEquals_SameObject() {
-        IndexedFloat indexedFloat = IndexedFloat.of(3.14f, 5);
+    public void testEquals() {
+        IndexedFloat indexed1 = IndexedFloat.of(3.14f, 5);
+        IndexedFloat indexed2 = IndexedFloat.of(3.14f, 5);
+        IndexedFloat indexed3 = IndexedFloat.of(2.71f, 5);
 
-        assertTrue(indexedFloat.equals(indexedFloat));
+        assertTrue(indexed1.equals(indexed2));
+        assertFalse(indexed1.equals(indexed3));
     }
 
     @Test
@@ -232,18 +216,25 @@ public class IndexedFloatTest extends TestBase {
     }
 
     @Test
-    public void testEquals_Null() {
-        IndexedFloat indexedFloat = IndexedFloat.of(3.14f, 5);
-
-        assertFalse(indexedFloat.equals(null));
-    }
-
-    @Test
     public void testEquals_DifferentClass() {
         IndexedFloat indexedFloat = IndexedFloat.of(3.14f, 5);
 
         assertFalse(indexedFloat.equals("not an IndexedFloat"));
         assertFalse(indexedFloat.equals(3.14f));
+    }
+
+    @Test
+    public void testEquals_SameObject() {
+        IndexedFloat indexedFloat = IndexedFloat.of(3.14f, 5);
+
+        assertTrue(indexedFloat.equals(indexedFloat));
+    }
+
+    @Test
+    public void testEquals_Null() {
+        IndexedFloat indexedFloat = IndexedFloat.of(3.14f, 5);
+
+        assertFalse(indexedFloat.equals(null));
     }
 
     @Test
@@ -265,13 +256,10 @@ public class IndexedFloatTest extends TestBase {
     }
 
     @Test
-    public void testToString_NegativeValue() {
-        float value = -42.42f;
-        int index = 10;
-
-        IndexedFloat indexedFloat = IndexedFloat.of(value, index);
-
-        assertEquals("[10]=-42.42", indexedFloat.toString());
+    public void testToString() {
+        IndexedFloat indexed = IndexedFloat.of(3.14f, 5);
+        assertTrue(indexed.toString().contains("[5]="));
+        assertTrue(indexed.toString().contains("3.14"));
     }
 
     @Test
@@ -282,6 +270,16 @@ public class IndexedFloatTest extends TestBase {
         IndexedFloat indexedFloat = IndexedFloat.of(value, index);
 
         assertEquals("[1000000]=100.001", indexedFloat.toString());
+    }
+
+    @Test
+    public void testToString_NegativeValue() {
+        float value = -42.42f;
+        int index = 10;
+
+        IndexedFloat indexedFloat = IndexedFloat.of(value, index);
+
+        assertEquals("[10]=-42.42", indexedFloat.toString());
     }
 
     @Test

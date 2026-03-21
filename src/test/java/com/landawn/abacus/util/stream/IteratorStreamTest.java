@@ -18,7 +18,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -29,8 +28,6 @@ import com.landawn.abacus.util.Multimap;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.u.Optional;
 
-@Tag("new-test")
-@Tag("2025")
 public class IteratorStreamTest extends TestBase {
 
     private Stream<Integer> emptyStream;
@@ -190,6 +187,13 @@ public class IteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testMapToCharFromIterator() {
+        Stream<Integer> stream = createStream(Arrays.asList(65, 66, 67));
+        char[] result = stream.mapToChar(x -> (char) x.intValue()).toArray();
+        assertArrayEquals(new char[] { 'A', 'B', 'C' }, result);
+    }
+
+    @Test
     public void testMapToByte() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
         byte[] result = stream.mapToByte(x -> x.byteValue()).toArray();
@@ -232,6 +236,13 @@ public class IteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testFlatmap() {
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
+        List<Integer> result = stream.flatmap(x -> Arrays.asList(x, x * 10)).toList();
+        assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), result);
+    }
+
+    @Test
     public void testFlatMap() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
         List<Integer> result = stream.flatMap(x -> Stream.of(x, x * 10)).toList();
@@ -240,13 +251,6 @@ public class IteratorStreamTest extends TestBase {
         Stream<Integer> stream2 = createStream(Arrays.asList(1, 2, 3));
         List<Integer> result2 = stream2.flatMap(x -> x % 2 == 0 ? Stream.of(x) : Stream.empty()).toList();
         assertEquals(Arrays.asList(2), result2);
-    }
-
-    @Test
-    public void testFlatmap() {
-        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
-        List<Integer> result = stream.flatmap(x -> Arrays.asList(x, x * 10)).toList();
-        assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), result);
     }
 
     @Test
@@ -268,6 +272,13 @@ public class IteratorStreamTest extends TestBase {
         Stream<String> stream = createStream(Arrays.asList("ab", "cd"));
         char[] result = stream.flatmapToChar(String::toCharArray).toArray();
         assertArrayEquals(new char[] { 'a', 'b', 'c', 'd' }, result);
+    }
+
+    @Test
+    public void testFlatmapToChar_nonParallel() {
+        Stream<String> stream = createStream(Arrays.asList("ab", "cd"));
+        char[] result = stream.flatmapToChar(s -> s.toCharArray()).toArray();
+        assertEquals(4, result.length);
     }
 
     @Test
@@ -299,6 +310,13 @@ public class IteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testFlatmapToShort_nonParallel() {
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
+        short[] result = stream.flatmapToShort(x -> new short[] { x.shortValue(), (short) (x * 2) }).toArray();
+        assertEquals(6, result.length);
+    }
+
+    @Test
     public void testFlatMapToInt() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2));
         int[] result = stream.flatMapToInt(x -> IntStream.of(x, x * 10)).toArray();
@@ -310,6 +328,13 @@ public class IteratorStreamTest extends TestBase {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2));
         int[] result = stream.flatmapToInt(x -> new int[] { x, x * 10 }).toArray();
         assertArrayEquals(new int[] { 1, 10, 2, 20 }, result);
+    }
+
+    @Test
+    public void testFlatmapToInt_nonParallel() {
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
+        int[] result = stream.flatmapToInt(x -> new int[] { x, x * 10 }).toArray();
+        assertEquals(6, result.length);
     }
 
     @Test
@@ -327,6 +352,13 @@ public class IteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testFlatmapToLong_nonParallel() {
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
+        long[] result = stream.flatmapToLong(x -> new long[] { x, (long) x * 100 }).toArray();
+        assertEquals(6, result.length);
+    }
+
+    @Test
     public void testFlatMapToFloat() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2));
         float[] result = stream.flatMapToFloat(x -> FloatStream.of(x, x * 10f)).toArray();
@@ -341,6 +373,13 @@ public class IteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testFlatmapToFloat_nonParallel() {
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
+        float[] result = stream.flatmapToFloat(x -> new float[] { x, x * 1.5f }).toArray();
+        assertEquals(6, result.length);
+    }
+
+    @Test
     public void testFlatMapToDouble() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2));
         double[] result = stream.flatMapToDouble(x -> DoubleStream.of(x, x * 10.0)).toArray();
@@ -352,6 +391,13 @@ public class IteratorStreamTest extends TestBase {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2));
         double[] result = stream.flatmapToDouble(x -> new double[] { x, x * 10.0 }).toArray();
         assertArrayEquals(new double[] { 1.0, 10.0, 2.0, 20.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testFlatmapToDouble_nonParallel() {
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
+        double[] result = stream.flatmapToDouble(x -> new double[] { x, x * 2.5 }).toArray();
+        assertEquals(6, result.length);
     }
 
     @Test
@@ -371,13 +417,6 @@ public class IteratorStreamTest extends TestBase {
     }
 
     @Test
-    public void testSplitWithChunkSizeAndCollector() {
-        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5));
-        List<Integer> result = stream.split(2, Collectors.summingInt(Integer::intValue)).toList();
-        assertEquals(Arrays.asList(3, 7, 5), result);
-    }
-
-    @Test
     public void testSplitByPredicate() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5));
         List<List<Integer>> result = stream.split(x -> x % 2 == 0).toList();
@@ -385,9 +424,18 @@ public class IteratorStreamTest extends TestBase {
     }
 
     @Test
-    public void test_distinct_sort() {
-        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 2, 3, 3, 4, 5));
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), stream.sorted().distinct().toList());
+    public void testSplitWithCollectionSupplier() {
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5));
+        List<LinkedList<Integer>> result = stream.split(2, IntFunctions.ofLinkedList()).toList();
+        assertEquals(3, result.size());
+        assertTrue(result.get(0) instanceof LinkedList);
+    }
+
+    @Test
+    public void testSplitWithChunkSizeAndCollector() {
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5));
+        List<Integer> result = stream.split(2, Collectors.summingInt(Integer::intValue)).toList();
+        assertEquals(Arrays.asList(3, 7, 5), result);
     }
 
     @Test
@@ -412,6 +460,13 @@ public class IteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testSplit_withPredicateAndCollector() {
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 4, 3, 5));
+        List<List<Integer>> result = stream.split(x -> x % 2 == 0, Collectors.toList()).toList();
+        assertFalse(result.isEmpty());
+    }
+
+    @Test
     public void testsliding() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5));
         List<List<Integer>> result = stream.sliding(3, 1).toList();
@@ -432,6 +487,48 @@ public class IteratorStreamTest extends TestBase {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5));
         List<Integer> result = stream.sliding(3, 1, Collectors.summingInt(Integer::intValue)).toList();
         assertEquals(Arrays.asList(6, 9, 12), result);
+    }
+
+    @Test
+    public void testSliding_withCollector_incrementGreaterThanWindowSize() {
+        // increment > windowSize triggers toSkip branch
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5, 6));
+        List<Integer> result = stream.sliding(2, 3, Collectors.summingInt(Integer::intValue)).toList();
+        assertFalse(result.isEmpty());
+        assertEquals(3, (int) result.get(0)); // 1+2
+    }
+
+    @Test
+    public void testSliding_withCollectionSupplier_incrementGreaterThanWindowSize() {
+        // increment > windowSize triggers toSkip branch in the IntFunction version
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5, 6));
+        List<ArrayList<Integer>> result = stream.sliding(2, 3, ArrayList::new).toList();
+        assertFalse(result.isEmpty());
+        assertEquals(2, result.get(0).size());
+    }
+
+    @Test
+    public void test_distinct_sort() {
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 2, 3, 3, 4, 5));
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), stream.sorted().distinct().toList());
+    }
+
+    @Test
+    public void testDistinctByKey() {
+        Stream<String> stream = createStream(Arrays.asList("apple", "avocado", "banana", "blueberry"));
+        List<String> result = stream.distinctBy(s -> s.charAt(0)).toList();
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void testDistinct_isSortedBranch() {
+        // sorted() triggers isSorted distinct path
+        Stream<Integer> stream = createStream(Arrays.asList(1, 1, 2, 2, 3)).sorted();
+        List<Integer> result = stream.distinct().toList();
+        assertEquals(3, result.size());
+        assertTrue(result.contains(1));
+        assertTrue(result.contains(2));
+        assertTrue(result.contains(3));
     }
 
     @Test
@@ -498,10 +595,27 @@ public class IteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testTop_emptyResult() {
+        // top(0) should return empty stream
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
+        List<Integer> result = stream.top(0, Comparator.naturalOrder()).toList();
+        assertEquals(0, result.size());
+    }
+
+    @Test
     public void testOnEach() {
         List<Integer> sideEffect = new ArrayList<>();
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
         List<Integer> result = stream.peek(sideEffect::add).toList();
+        assertEquals(Arrays.asList(1, 2, 3), result);
+        assertEquals(Arrays.asList(1, 2, 3), sideEffect);
+    }
+
+    @Test
+    public void testOnEachFromIterator() {
+        List<Integer> sideEffect = new ArrayList<>();
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
+        List<Integer> result = stream.onEach(sideEffect::add).toList();
         assertEquals(Arrays.asList(1, 2, 3), result);
         assertEquals(Arrays.asList(1, 2, 3), sideEffect);
     }
@@ -540,6 +654,45 @@ public class IteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testAcceptIfNotEmpty() {
+        AtomicInteger sum = new AtomicInteger(0);
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
+        If.OrElse result = stream.acceptIfNotEmpty(s -> s.forEach(sum::addAndGet));
+        assertTrue(result == If.OrElse.TRUE);
+        assertEquals(6, sum.get());
+
+        sum.set(0);
+        If.OrElse emptyResult = emptyStream.acceptIfNotEmpty(s -> s.forEach(sum::addAndGet));
+        assertTrue(emptyResult == If.OrElse.FALSE);
+        assertEquals(0, sum.get());
+    }
+
+    @Test
+    public void testForEach_withFlatMapper_nullCollection() {
+        // flatMapper returns null -> action should not be called for that element
+        List<String> result = new ArrayList<>();
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
+        stream.forEach(x -> x == 2 ? null : Arrays.asList("val" + x), (x, s) -> result.add(s));
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void testForEach_withDoubleFlatMapper_nullCollection() {
+        List<String> result = new ArrayList<>();
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2));
+        stream.forEach(x -> x == 2 ? null : Arrays.asList("a" + x), s -> Arrays.asList(s + "1"), (x, s, t) -> result.add(t));
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    public void testForEachPairIncrement2() {
+        List<String> result = new ArrayList<>();
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5, 6));
+        stream.forEachPair(2, (a, b) -> result.add(a + "," + b));
+        assertEquals(Arrays.asList("1,2", "3,4", "5,6"), result);
+    }
+
+    @Test
     public void testForEachPair() {
         List<String> result = new ArrayList<>();
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4));
@@ -550,6 +703,23 @@ public class IteratorStreamTest extends TestBase {
         Stream<Integer> stream2 = createStream(Arrays.asList(1, 2, 3, 4, 5));
         stream2.forEachPair(2, (a, b) -> result2.add(a + "," + b));
         assertEquals(Arrays.asList("1,2", "3,4", "5,null"), result2);
+    }
+
+    @Test
+    public void testForEachPair_incrementGreaterThanWindowSize() {
+        List<String> result = new ArrayList<>();
+        // increment=3 > windowSize=2, so skip 1 element between pairs
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5, 6, 7));
+        stream.forEachPair(3, (a, b) -> result.add(a + "," + b));
+        assertFalse(result.isEmpty());
+    }
+
+    @Test
+    public void testForEachTripleIncrement3() {
+        List<String> result = new ArrayList<>();
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5, 6));
+        stream.forEachTriple(3, (a, b, c) -> result.add(a + "," + b + "," + c));
+        assertEquals(Arrays.asList("1,2,3", "4,5,6"), result);
     }
 
     @Test
@@ -566,6 +736,40 @@ public class IteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testForEachTriple_increment2Branch() {
+        List<String> result = new ArrayList<>();
+        // increment=2 takes increment==2 branch
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5, 6));
+        stream.forEachTriple(2, (a, b, c) -> result.add(a + "," + b + "," + c));
+        assertFalse(result.isEmpty());
+        assertTrue(result.get(0).contains(","));
+    }
+
+    @Test
+    public void testForEachTriple_incrementGreaterThan3() {
+        List<String> result = new ArrayList<>();
+        // increment=4 > windowSize=3
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+        stream.forEachTriple(4, (a, b, c) -> result.add(a + "," + b + "," + c));
+        assertFalse(result.isEmpty());
+    }
+
+    @Test
+    public void testToArrayWithGenerator() {
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
+        Integer[] result = stream.toArray(Integer[]::new);
+        assertArrayEquals(new Integer[] { 1, 2, 3 }, result);
+    }
+
+    @Test
+    public void testToArray_closeStream() {
+        // toArray(boolean) is protected; covered via public toArray()
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
+        Object[] arr = stream.toArray();
+        assertEquals(3, arr.length);
+    }
+
+    @Test
     public void testToArray() {
         Object[] array = multiElementStream.toArray();
         assertArrayEquals(new Object[] { 1, 2, 3, 4, 5 }, array);
@@ -574,9 +778,61 @@ public class IteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testOnClose() {
+        AtomicInteger closeCalls = new AtomicInteger(0);
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
+        stream.onClose(() -> closeCalls.incrementAndGet()).toList();
+        assertEquals(1, closeCalls.get());
+
+        closeCalls.set(0);
+        Stream<Integer> stream2 = createStream(Arrays.asList(1, 2, 3));
+        stream2.onClose(() -> closeCalls.incrementAndGet()).onClose(() -> closeCalls.incrementAndGet()).toList();
+        assertEquals(2, closeCalls.get());
+    }
+
+    @Test
+    public void testStep() {
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+        List<Integer> result = stream.step(3).toList();
+        assertEquals(Arrays.asList(1, 4, 7, 10), result);
+
+        Stream<Integer> stream2 = createStream(Arrays.asList(1, 2, 3));
+        assertEquals(Arrays.asList(1), stream2.step(5).toList());
+    }
+
+    @Test
+    public void testBuffered() {
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5));
+        List<Integer> result = stream.buffered().toList();
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
+    }
+
+    @Test
     public void testToList() {
         assertEquals(Arrays.asList(1, 2, 3, 4, 5), multiElementStream.toList());
         assertTrue(emptyStream.toList().isEmpty());
+    }
+
+    @Test
+    public void testSorted() {
+        Stream<Integer> stream = createStream(Arrays.asList(5, 3, 1, 4, 2));
+        List<Integer> result = stream.sorted().toList();
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
+
+        Stream<Integer> stream2 = createStream(Arrays.asList(5, 3, 1, 4, 2));
+        result = stream2.sorted(Comparator.reverseOrder()).toList();
+        assertEquals(Arrays.asList(5, 4, 3, 2, 1), result);
+
+        assertTrue(createStream(Collections.emptyList()).sorted().toList().isEmpty());
+    }
+
+    @Test
+    public void testCycled() {
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2));
+        List<Integer> result = stream.cycled(3).toList();
+        assertEquals(Arrays.asList(1, 2, 1, 2, 1, 2), result);
+
+        assertTrue(createStream(Collections.emptyList()).cycled(3).toList().isEmpty());
     }
 
     @Test
@@ -632,11 +888,27 @@ public class IteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testToMapWithMapFactory() {
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
+        Map<Integer, String> result = stream.toMap(x -> x, x -> "v" + x, (a, b) -> a, java.util.LinkedHashMap::new);
+        assertEquals(3, result.size());
+        assertTrue(result instanceof java.util.LinkedHashMap);
+    }
+
+    @Test
     public void testToMultimap() {
         Stream<String> stream = createStream(Arrays.asList("a1", "a2", "b1", "b2"));
         Multimap<Character, String, List<String>> result = stream.toMultimap(s -> s.charAt(0), s -> s);
         assertEquals(Arrays.asList("a1", "a2"), result.get('a'));
         assertEquals(Arrays.asList("b1", "b2"), result.get('b'));
+    }
+
+    @Test
+    public void testToMultimapWithSupplier() {
+        Stream<String> stream = createStream(Arrays.asList("a1", "a2", "b1"));
+        ListMultimap<Character, String> result = stream.toMultimap(s -> s.charAt(0), s -> s);
+        assertEquals(2, result.get('a').size());
+        assertEquals(1, result.get('b').size());
     }
 
     @Test
@@ -689,10 +961,37 @@ public class IteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testApplyIfNotEmpty() {
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
+        Optional<Integer> result = stream.applyIfNotEmpty(s -> s.reduce(0, Integer::sum));
+        assertTrue(result.isPresent());
+        assertEquals(Integer.valueOf(6), result.get());
+
+        Optional<Integer> emptyResult = emptyStream.applyIfNotEmpty(s -> s.reduce(0, Integer::sum));
+        assertFalse(emptyResult.isPresent());
+    }
+
+    @Test
+    public void testReduceWithIdentity() {
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4));
+        Integer result = stream.reduce(0, Integer::sum);
+        assertEquals(Integer.valueOf(10), result);
+
+        assertEquals(Integer.valueOf(100), createStream(Collections.<Integer> emptyList()).reduce(100, Integer::sum));
+    }
+
+    @Test
     public void testCollectWithSupplierAccumulatorCombiner() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4));
         List<Integer> result = stream.collect(ArrayList::new, List::add, List::addAll);
         assertEquals(Arrays.asList(1, 2, 3, 4), result);
+    }
+
+    @Test
+    public void testCollectWithJoining() {
+        Stream<String> stream = createStream(Arrays.asList("a", "b", "c"));
+        String result = stream.collect(Collectors.joining(", "));
+        assertEquals("a, b, c", result);
     }
 
     @Test
@@ -741,6 +1040,31 @@ public class IteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testMin_isSortedBranch() {
+        // sorted() triggers isSorted branch in min
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5)).sorted();
+        Optional<Integer> min = stream.min(Comparator.naturalOrder());
+        assertTrue(min.isPresent());
+        assertEquals(Integer.valueOf(1), min.get());
+    }
+
+    @Test
+    public void testMinMaxKthLargest_NullComparatorWithNullElements() {
+        List<Integer> values = Arrays.asList(null, 2, null, 1);
+
+        Optional<Integer> min = createStream(values).min(null);
+        Optional<Integer> max = createStream(values).max(null);
+        Optional<Integer> kth = createStream(Arrays.asList(3, 2, 1)).kthLargest(2, null);
+
+        assertTrue(min.isPresent());
+        assertEquals(Integer.valueOf(1), min.get());
+        assertTrue(max.isPresent());
+        assertEquals(Integer.valueOf(2), max.get());
+        assertTrue(kth.isPresent());
+        assertEquals(Integer.valueOf(2), kth.get());
+    }
+
+    @Test
     public void testMax() {
         Stream<Integer> stream = createStream(Arrays.asList(3, 1, 4, 1, 5));
         Optional<Integer> max = stream.max(Comparator.naturalOrder());
@@ -748,6 +1072,22 @@ public class IteratorStreamTest extends TestBase {
         assertEquals(Integer.valueOf(5), max.get());
 
         assertFalse(emptyStream.max(Comparator.naturalOrder()).isPresent());
+    }
+
+    @Test
+    public void testMaxAll() {
+        Stream<Integer> stream = createStream(Arrays.asList(1, 5, 3, 5, 2));
+        List<Integer> result = stream.maxAll(Comparator.naturalOrder());
+        assertEquals(Arrays.asList(5, 5), result);
+    }
+
+    @Test
+    public void testMax_isSortedBranch() {
+        // sorted() triggers isSorted branch in max
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5)).sorted();
+        Optional<Integer> max = stream.max(Comparator.naturalOrder());
+        assertTrue(max.isPresent());
+        assertEquals(Integer.valueOf(5), max.get());
     }
 
     @Test
@@ -759,6 +1099,22 @@ public class IteratorStreamTest extends TestBase {
 
         Stream<Integer> stream2 = createStream(Arrays.asList(1, 2));
         assertFalse(stream2.kthLargest(3, Comparator.naturalOrder()).isPresent());
+    }
+
+    @Test
+    public void testKthLargest_isSortedBranch() {
+        // sorted() triggers isSorted branch in kthLargest
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5)).sorted();
+        Optional<Integer> kth = stream.kthLargest(2, Comparator.naturalOrder());
+        assertTrue(kth.isPresent());
+
+        // empty sorted stream
+        Stream<Integer> empty = createStream(Collections.<Integer> emptyList()).sorted();
+        assertFalse(empty.kthLargest(1, Comparator.naturalOrder()).isPresent());
+
+        // k > size returns empty
+        Stream<Integer> small = createStream(Arrays.asList(1, 2)).sorted();
+        assertFalse(small.kthLargest(5, Comparator.naturalOrder()).isPresent());
     }
 
     @Test
@@ -799,6 +1155,13 @@ public class IteratorStreamTest extends TestBase {
         assertFalse(stream2.noneMatch(x -> x % 2 == 0));
 
         assertTrue(emptyStream.noneMatch(x -> true));
+    }
+
+    @Test
+    public void testHasMatchCountBetween_countExceedsAtMost() {
+        // More matches than atMost -> returns false
+        Stream<Integer> stream = createStream(Arrays.asList(2, 4, 6, 8, 10));
+        assertFalse(stream.hasMatchCountBetween(1L, 3L, x -> x % 2 == 0));
     }
 
     @Test
@@ -862,6 +1225,21 @@ public class IteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testAppendIfEmpty_withNonEmptyCollection() {
+        Stream<Integer> nonEmpty = createStream(Arrays.asList(1, 2, 3));
+        List<Integer> result = nonEmpty.appendIfEmpty(Arrays.asList(10, 20)).toList();
+        // stream not empty, appendIfEmpty values not added
+        assertEquals(Arrays.asList(1, 2, 3), result);
+    }
+
+    @Test
+    public void testAppendIfEmpty_withEmptyStreamAndCollection() {
+        Stream<Integer> empty = createStream(Collections.<Integer> emptyList());
+        List<Integer> result = empty.appendIfEmpty(Arrays.asList(10, 20)).toList();
+        assertEquals(Arrays.asList(10, 20), result);
+    }
+
+    @Test
     public void testIfEmpty() {
         AtomicInteger calls = new AtomicInteger(0);
         Stream<Integer> stream = createStream(Collections.emptyList());
@@ -891,31 +1269,6 @@ public class IteratorStreamTest extends TestBase {
     }
 
     @Test
-    public void testApplyIfNotEmpty() {
-        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
-        Optional<Integer> result = stream.applyIfNotEmpty(s -> s.reduce(0, Integer::sum));
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(6), result.get());
-
-        Optional<Integer> emptyResult = emptyStream.applyIfNotEmpty(s -> s.reduce(0, Integer::sum));
-        assertFalse(emptyResult.isPresent());
-    }
-
-    @Test
-    public void testAcceptIfNotEmpty() {
-        AtomicInteger sum = new AtomicInteger(0);
-        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
-        If.OrElse result = stream.acceptIfNotEmpty(s -> s.forEach(sum::addAndGet));
-        assertTrue(result == If.OrElse.TRUE);
-        assertEquals(6, sum.get());
-
-        sum.set(0);
-        If.OrElse emptyResult = emptyStream.acceptIfNotEmpty(s -> s.forEach(sum::addAndGet));
-        assertTrue(emptyResult == If.OrElse.FALSE);
-        assertEquals(0, sum.get());
-    }
-
-    @Test
     public void testToJdkStream() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5));
         java.util.stream.Stream<Integer> jdkStream = stream.toJdkStream();
@@ -924,39 +1277,14 @@ public class IteratorStreamTest extends TestBase {
     }
 
     @Test
-    public void testOnClose() {
-        AtomicInteger closeCalls = new AtomicInteger(0);
-        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
-        stream.onClose(() -> closeCalls.incrementAndGet()).toList();
-        assertEquals(1, closeCalls.get());
+    public void testIsEmpty_viaStream() {
+        // isEmpty is a protected method called internally; test via indirect path
+        // when stream is empty, operations like findFirst return empty
+        Stream<Integer> empty = createStream(Collections.<Integer> emptyList());
+        assertFalse(empty.findFirst().isPresent());
 
-        closeCalls.set(0);
-        Stream<Integer> stream2 = createStream(Arrays.asList(1, 2, 3));
-        stream2.onClose(() -> closeCalls.incrementAndGet()).onClose(() -> closeCalls.incrementAndGet()).toList();
-        assertEquals(2, closeCalls.get());
-    }
-
-    @Test
-    public void testSorted() {
-        Stream<Integer> stream = createStream(Arrays.asList(5, 3, 1, 4, 2));
-        List<Integer> result = stream.sorted().toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
-
-        Stream<Integer> stream2 = createStream(Arrays.asList(5, 3, 1, 4, 2));
-        result = stream2.sorted(Comparator.reverseOrder()).toList();
-        assertEquals(Arrays.asList(5, 4, 3, 2, 1), result);
-
-        assertTrue(createStream(Collections.emptyList()).sorted().toList().isEmpty());
-    }
-
-    @Test
-    public void testStep() {
-        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
-        List<Integer> result = stream.step(3).toList();
-        assertEquals(Arrays.asList(1, 4, 7, 10), result);
-
-        Stream<Integer> stream2 = createStream(Arrays.asList(1, 2, 3));
-        assertEquals(Arrays.asList(1), stream2.step(5).toList());
+        Stream<Integer> nonEmpty = createStream(Arrays.asList(1));
+        assertTrue(nonEmpty.findFirst().isPresent());
     }
 
     @Test
@@ -1006,114 +1334,5 @@ public class IteratorStreamTest extends TestBase {
         assertEquals(2, result.size());
         assertEquals(3, result.get(0).size());
         assertEquals(3, result.get(1).size());
-    }
-
-    @Test
-    public void testToArrayWithGenerator() {
-        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
-        Integer[] result = stream.toArray(Integer[]::new);
-        assertArrayEquals(new Integer[] { 1, 2, 3 }, result);
-    }
-
-    @Test
-    public void testCycled() {
-        Stream<Integer> stream = createStream(Arrays.asList(1, 2));
-        List<Integer> result = stream.cycled(3).toList();
-        assertEquals(Arrays.asList(1, 2, 1, 2, 1, 2), result);
-
-        assertTrue(createStream(Collections.emptyList()).cycled(3).toList().isEmpty());
-    }
-
-    @Test
-    public void testBuffered() {
-        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5));
-        List<Integer> result = stream.buffered().toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
-    }
-
-    @Test
-    public void testReduceWithIdentity() {
-        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4));
-        Integer result = stream.reduce(0, Integer::sum);
-        assertEquals(Integer.valueOf(10), result);
-
-        assertEquals(Integer.valueOf(100), createStream(Collections.<Integer> emptyList()).reduce(100, Integer::sum));
-    }
-
-    @Test
-    public void testMapToCharFromIterator() {
-        Stream<Integer> stream = createStream(Arrays.asList(65, 66, 67));
-        char[] result = stream.mapToChar(x -> (char) x.intValue()).toArray();
-        assertArrayEquals(new char[] { 'A', 'B', 'C' }, result);
-    }
-
-    @Test
-    public void testDistinctByKey() {
-        Stream<String> stream = createStream(Arrays.asList("apple", "avocado", "banana", "blueberry"));
-        List<String> result = stream.distinctBy(s -> s.charAt(0)).toList();
-        assertEquals(2, result.size());
-    }
-
-    @Test
-    public void testToMapWithMapFactory() {
-        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
-        Map<Integer, String> result = stream.toMap(x -> x, x -> "v" + x, (a, b) -> a, java.util.LinkedHashMap::new);
-        assertEquals(3, result.size());
-        assertTrue(result instanceof java.util.LinkedHashMap);
-    }
-
-    @Test
-    public void testSplitWithCollectionSupplier() {
-        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5));
-        List<LinkedList<Integer>> result = stream.split(2, IntFunctions.ofLinkedList()).toList();
-        assertEquals(3, result.size());
-        assertTrue(result.get(0) instanceof LinkedList);
-    }
-
-    @Test
-    public void testForEachPairIncrement2() {
-        List<String> result = new ArrayList<>();
-        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5, 6));
-        stream.forEachPair(2, (a, b) -> result.add(a + "," + b));
-        assertEquals(Arrays.asList("1,2", "3,4", "5,6"), result);
-    }
-
-    @Test
-    public void testForEachTripleIncrement3() {
-        List<String> result = new ArrayList<>();
-        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5, 6));
-        stream.forEachTriple(3, (a, b, c) -> result.add(a + "," + b + "," + c));
-        assertEquals(Arrays.asList("1,2,3", "4,5,6"), result);
-    }
-
-    @Test
-    public void testToMultimapWithSupplier() {
-        Stream<String> stream = createStream(Arrays.asList("a1", "a2", "b1"));
-        ListMultimap<Character, String> result = stream.toMultimap(s -> s.charAt(0), s -> s);
-        assertEquals(2, result.get('a').size());
-        assertEquals(1, result.get('b').size());
-    }
-
-    @Test
-    public void testMaxAll() {
-        Stream<Integer> stream = createStream(Arrays.asList(1, 5, 3, 5, 2));
-        List<Integer> result = stream.maxAll(Comparator.naturalOrder());
-        assertEquals(Arrays.asList(5, 5), result);
-    }
-
-    @Test
-    public void testOnEachFromIterator() {
-        List<Integer> sideEffect = new ArrayList<>();
-        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
-        List<Integer> result = stream.onEach(sideEffect::add).toList();
-        assertEquals(Arrays.asList(1, 2, 3), result);
-        assertEquals(Arrays.asList(1, 2, 3), sideEffect);
-    }
-
-    @Test
-    public void testCollectWithJoining() {
-        Stream<String> stream = createStream(Arrays.asList("a", "b", "c"));
-        String result = stream.collect(Collectors.joining(", "));
-        assertEquals("a, b, c", result);
     }
 }

@@ -6,13 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Pair;
 
-@Tag("2025")
 public class CharBiConsumerTest extends TestBase {
 
     @Test
@@ -40,6 +38,16 @@ public class CharBiConsumerTest extends TestBase {
     }
 
     @Test
+    public void testWithSpecialCharacters() {
+        final List<String> result = new ArrayList<>();
+        CharBiConsumer consumer = (t, u) -> result.add("" + t + u);
+
+        consumer.accept('\n', '\t');
+        assertEquals(1, result.size());
+        assertEquals("\n\t", result.get(0));
+    }
+
+    @Test
     public void testAcceptWithAnonymousClass() {
         final List<String> result = new ArrayList<>();
         CharBiConsumer consumer = new CharBiConsumer() {
@@ -52,6 +60,17 @@ public class CharBiConsumerTest extends TestBase {
         consumer.accept('a', 'b');
         assertEquals(1, result.size());
         assertEquals("AB", result.get(0));
+    }
+
+    @Test
+    public void testWithBoundaryValues() {
+        final List<Pair<Character, Character>> result = new ArrayList<>();
+        CharBiConsumer consumer = (t, u) -> result.add(Pair.of(t, u));
+
+        consumer.accept(Character.MIN_VALUE, Character.MAX_VALUE);
+        assertEquals(1, result.size());
+        assertEquals(Character.MIN_VALUE, result.get(0).left());
+        assertEquals(Character.MAX_VALUE, result.get(0).right());
     }
 
     @Test
@@ -82,27 +101,6 @@ public class CharBiConsumerTest extends TestBase {
         assertEquals("x", result.get(0));
         assertEquals("y", result.get(1));
         assertEquals("xy", result.get(2));
-    }
-
-    @Test
-    public void testWithSpecialCharacters() {
-        final List<String> result = new ArrayList<>();
-        CharBiConsumer consumer = (t, u) -> result.add("" + t + u);
-
-        consumer.accept('\n', '\t');
-        assertEquals(1, result.size());
-        assertEquals("\n\t", result.get(0));
-    }
-
-    @Test
-    public void testWithBoundaryValues() {
-        final List<Pair<Character, Character>> result = new ArrayList<>();
-        CharBiConsumer consumer = (t, u) -> result.add(Pair.of(t, u));
-
-        consumer.accept(Character.MIN_VALUE, Character.MAX_VALUE);
-        assertEquals(1, result.size());
-        assertEquals(Character.MIN_VALUE, result.get(0).left());
-        assertEquals(Character.MAX_VALUE, result.get(0).right());
     }
 
     @Test

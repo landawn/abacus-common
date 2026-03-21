@@ -14,12 +14,10 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class AccessFieldByMethodTest extends TestBase {
 
     @AccessFieldByMethod
@@ -34,6 +32,44 @@ public class AccessFieldByMethodTest extends TestBase {
         public String getMethod() {
             return "test";
         }
+    }
+
+    @Test
+    public void testRetentionPolicy() {
+        Retention retention = AccessFieldByMethod.class.getAnnotation(Retention.class);
+        assertNotNull(retention);
+        assertEquals(RetentionPolicy.RUNTIME, retention.value());
+    }
+
+    @Test
+    public void testTargetElements() {
+        Target target = AccessFieldByMethod.class.getAnnotation(Target.class);
+        assertNotNull(target);
+        ElementType[] expectedTargets = { ElementType.TYPE, ElementType.METHOD, ElementType.FIELD };
+        assertArrayEquals(expectedTargets, target.value());
+    }
+
+    @Test
+    public void testDefaultValue() throws NoSuchFieldException {
+        Field field = TestClassWithAnnotation.class.getDeclaredField("field2");
+        AccessFieldByMethod annotation = field.getAnnotation(AccessFieldByMethod.class);
+        assertNotNull(annotation);
+        assertEquals("", annotation.value());
+    }
+
+    @Test
+    public void testCustomValue() throws NoSuchFieldException {
+        Field field = TestClassWithAnnotation.class.getDeclaredField("field1");
+        AccessFieldByMethod annotation = field.getAnnotation(AccessFieldByMethod.class);
+        assertNotNull(annotation);
+        assertEquals("customValue", annotation.value());
+    }
+
+    @Test
+    public void testValueMethod() throws NoSuchMethodException {
+        Method valueMethod = AccessFieldByMethod.class.getDeclaredMethod("value");
+        assertNotNull(valueMethod);
+        assertEquals(String.class, valueMethod.getReturnType());
     }
 
     @Test
@@ -57,37 +93,6 @@ public class AccessFieldByMethodTest extends TestBase {
     }
 
     @Test
-    public void testDefaultValue() throws NoSuchFieldException {
-        Field field = TestClassWithAnnotation.class.getDeclaredField("field2");
-        AccessFieldByMethod annotation = field.getAnnotation(AccessFieldByMethod.class);
-        assertNotNull(annotation);
-        assertEquals("", annotation.value());
-    }
-
-    @Test
-    public void testCustomValue() throws NoSuchFieldException {
-        Field field = TestClassWithAnnotation.class.getDeclaredField("field1");
-        AccessFieldByMethod annotation = field.getAnnotation(AccessFieldByMethod.class);
-        assertNotNull(annotation);
-        assertEquals("customValue", annotation.value());
-    }
-
-    @Test
-    public void testRetentionPolicy() {
-        Retention retention = AccessFieldByMethod.class.getAnnotation(Retention.class);
-        assertNotNull(retention);
-        assertEquals(RetentionPolicy.RUNTIME, retention.value());
-    }
-
-    @Test
-    public void testTargetElements() {
-        Target target = AccessFieldByMethod.class.getAnnotation(Target.class);
-        assertNotNull(target);
-        ElementType[] expectedTargets = { ElementType.TYPE, ElementType.METHOD, ElementType.FIELD };
-        assertArrayEquals(expectedTargets, target.value());
-    }
-
-    @Test
     public void testDocumented() {
         assertTrue(AccessFieldByMethod.class.isAnnotationPresent(Documented.class));
     }
@@ -97,13 +102,6 @@ public class AccessFieldByMethodTest extends TestBase {
         AccessFieldByMethod annotation = TestClassWithAnnotation.class.getAnnotation(AccessFieldByMethod.class);
         assertNotNull(annotation);
         assertEquals(AccessFieldByMethod.class, annotation.annotationType());
-    }
-
-    @Test
-    public void testValueMethod() throws NoSuchMethodException {
-        Method valueMethod = AccessFieldByMethod.class.getDeclaredMethod("value");
-        assertNotNull(valueMethod);
-        assertEquals(String.class, valueMethod.getReturnType());
     }
 
     @Test

@@ -169,6 +169,21 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Performance First:</b> Optimized for performance with minimal overhead and object allocation.</li>
  * </ul>
  *
+ * <p><b>Naming Convention for Removal Methods:</b>
+ * <ul>
+ *   <li>{@code removeAt(..., index)} / {@code removeRange(..., fromIndex, toIndex)} - removes elements by <b>index</b>.</li>
+ *   <li>{@code remove(..., value)} / {@code removeAll(..., values)} - removes elements by <b>value</b> (equality).</li>
+ * </ul>
+ *
+ * <p><b>Usage Note:</b> This class provides null-safe static utility methods for arrays, collections, and maps.
+ * While many methods have counterparts in JDK 8+ (e.g., {@link java.util.Collection#removeIf(java.util.function.Predicate)}),
+ * the methods here are often preferred for:
+ * <ul>
+ *   <li>Enhanced null-safety (handling {@code null} inputs gracefully).</li>
+ *   <li>Performance optimizations for specific data types.</li>
+ *   <li>Support for primitive arrays which lack standard functional API support in the JDK.</li>
+ * </ul></p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Array operations - null-safe and efficient
@@ -9797,6 +9812,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original array remains unchanged.
      *
+     * <p><b>Naming Convention:</b>
+     * <ul>
+     *   <li>{@link #removeAt(boolean[], int) removeAt}/{@link #removeRange(boolean[], int, int) removeRange} - removes elements by <b>index</b>.</li>
+     *   <li>{@link #remove(boolean[], boolean) remove}/{@link #removeAll(boolean[], boolean...) removeAll} - removes elements by <b>value</b>.</li>
+     * </ul></p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] flags = {true, false, true, false};
@@ -9837,6 +9858,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns a new array with elements copied from the specified array except the element at the specified position.
      * <br />
      * The original array remains unchanged.
+     *
+     * <p><b>Naming Convention:</b>
+     * <ul>
+     *   <li>{@link #removeAt(boolean[], int) removeAt}/{@link #removeRange(boolean[], int, int) removeRange} - removes elements by <b>index</b>.</li>
+     *   <li>{@link #remove(boolean[], boolean) remove}/{@link #removeAll(boolean[], boolean...) removeAll} - removes elements by <b>value</b>.</li>
+     * </ul></p>
      *
      * @param a the original char array
      * @param index the position of the element to be removed
@@ -9933,6 +9960,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns a new array with elements copied from the specified array except the element at the specified position.
      * <br />
      * The original array remains unchanged.
+     *
+     * <p><b>Naming Convention:</b>
+     * <ul>
+     *   <li>{@link #removeAt(boolean[], int) removeAt}/{@link #removeRange(boolean[], int, int) removeRange} - removes elements by <b>index</b>.</li>
+     *   <li>{@link #remove(boolean[], boolean) remove}/{@link #removeAll(boolean[], boolean...) removeAll} - removes elements by <b>value</b>.</li>
+     * </ul></p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

@@ -18,12 +18,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class IfTest extends TestBase {
 
     // ==================== is(boolean) ====================
@@ -35,6 +33,66 @@ public class IfTest extends TestBase {
 
         assertTrue(If.is(true) == If.is(true));
         assertTrue(If.is(false) == If.is(false));
+    }
+
+    // ==================== OrElse.orElse(Runnable) ====================
+
+    @Test
+    public void testOrElseRunnable() {
+        AtomicInteger counter = new AtomicInteger(0);
+
+        If.is(true).then(() -> counter.set(1)).orElse(() -> counter.set(2));
+        assertEquals(1, counter.get());
+
+        If.is(false).then(() -> counter.set(1)).orElse(() -> counter.set(2));
+        assertEquals(2, counter.get());
+    }
+
+    @Test
+    public void testOrElseRunnable_NotExecutedWhenTrue() {
+        AtomicBoolean orElseExecuted = new AtomicBoolean(false);
+        If.is(true).then(() -> {
+        }).orElse(() -> orElseExecuted.set(true));
+        assertFalse(orElseExecuted.get());
+    }
+
+    @Test
+    public void testOrElseRunnable_ExecutedWhenFalse() {
+        AtomicBoolean orElseExecuted = new AtomicBoolean(false);
+        If.is(false).then(() -> {
+        }).orElse(() -> orElseExecuted.set(true));
+        assertTrue(orElseExecuted.get());
+    }
+
+    // ==================== OrElse.orElse(T, Consumer) ====================
+
+    @Test
+    public void testOrElseWithInput() {
+        AtomicInteger result = new AtomicInteger(0);
+
+        If.is(true).then(() -> result.set(1)).orElse(5, result::set);
+        assertEquals(1, result.get());
+
+        If.is(false).then(() -> result.set(1)).orElse(5, result::set);
+        assertEquals(5, result.get());
+    }
+
+    @Test
+    public void testOrElseWithInput_NotExecutedWhenTrue() {
+        AtomicInteger result = new AtomicInteger(0);
+        If.is(true).then(() -> result.set(10)).orElse(20, result::set);
+        assertEquals(10, result.get());
+    }
+
+    @Test
+    public void testIs_SideEffectOnlyInThenBranch() {
+        List<String> log = new ArrayList<>();
+        If.is(true).then(() -> log.add("then")).orElse(() -> log.add("else"));
+        assertEquals(Arrays.asList("then"), log);
+
+        log.clear();
+        If.is(false).then(() -> log.add("then")).orElse(() -> log.add("else"));
+        assertEquals(Arrays.asList("else"), log);
     }
 
     @Test
@@ -51,6 +109,136 @@ public class IfTest extends TestBase {
     @Test
     public void testIs_TrueNotSameAsFalse() {
         assertTrue(If.is(true) != If.is(false));
+    }
+
+    @Test
+    public void testOrElseWithInput_NullValue() {
+        AtomicReference<String> result = new AtomicReference<>("initial");
+        If.is(false).then(() -> {
+        }).orElse(null, result::set);
+        assertTrue(result.get() == null);
+    }
+
+    @Test
+    public void testMultipleConditionTypes() {
+        AtomicInteger step = new AtomicInteger(0);
+
+        If.is(true).then(() -> step.set(1));
+        assertEquals(1, step.get());
+
+        If.not(false).then(() -> step.set(2));
+        assertEquals(2, step.get());
+
+        If.notNull("value").then(() -> step.set(3));
+        assertEquals(3, step.get());
+
+        If.notEmpty("value").then(() -> step.set(4));
+        assertEquals(4, step.get());
+
+        If.notBlank("value").then(() -> step.set(5));
+        assertEquals(5, step.get());
+
+        If.exists(0).then(() -> step.set(6));
+        assertEquals(6, step.get());
+    }
+
+    @Test
+    public void testOrElseRunnable_Null() {
+        assertThrows(IllegalArgumentException.class, () -> If.is(true).then(() -> {
+        }).orElse((Throwables.Runnable<Exception>) null));
+    }
+
+    @Test
+    public void testOrElseRunnable_ExceptionPropagation() {
+        assertThrows(RuntimeException.class, () -> If.is(false).then(() -> {
+        }).orElse(() -> {
+            throw new RuntimeException("orElse error");
+        }));
+    }
+
+    @Test
+    public void testOrElseWithInput_Null() {
+        assertThrows(IllegalArgumentException.class, () -> If.is(true).then(() -> {
+        }).orElse("value", null));
+    }
+
+    // ==================== OrElse.orElseThrow(Supplier) ====================
+
+    @Test
+    public void testOrElseThrow() {
+        assertDoesNotThrow(() -> If.is(true).then(() -> {
+        }).orElseThrow(() -> new RuntimeException("Error")));
+
+        assertThrows(RuntimeException.class, () -> If.is(false).then(() -> {
+        }).orElseThrow(() -> new RuntimeException("Error")));
+    }
+
+    @Test
+    public void testOrElseThrow_Null() {
+        assertThrows(IllegalArgumentException.class, () -> If.is(true).then(() -> {
+        }).orElseThrow(null));
+    }
+
+    @Test
+    public void testOrElseThrow_ExceptionMessage() {
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
+            If.is(false).then(() -> {
+            }).orElseThrow(() -> new RuntimeException("or else message"));
+        });
+        assertEquals("or else message", thrown.getMessage());
+    }
+
+    @Test
+    public void testOrElseThrow_NotThrownWhenTrue() {
+        assertDoesNotThrow(() -> If.is(true).then(() -> {
+        }).orElseThrow(() -> new RuntimeException("should not throw")));
+    }
+
+    @Test
+    public void testOrElseThrow_CheckedException() {
+        assertThrows(Exception.class, () -> If.is(false).then(() -> {
+        }).orElseThrow(() -> new Exception("checked orElse")));
+    }
+
+    @Test
+    public void testNullArguments() {
+        assertThrows(IllegalArgumentException.class, () -> If.is(true).then((Throwables.Runnable<?>) null));
+
+        assertThrows(IllegalArgumentException.class, () -> If.is(true).then("value", null));
+
+        assertThrows(IllegalArgumentException.class, () -> If.is(true).thenThrow(null));
+
+        assertThrows(IllegalArgumentException.class, () -> If.is(true).then(() -> {
+        }).orElse((Throwables.Runnable<?>) null));
+
+        assertThrows(IllegalArgumentException.class, () -> If.is(true).then(() -> {
+        }).orElse("value", null));
+
+        assertThrows(IllegalArgumentException.class, () -> If.is(true).then(() -> {
+        }).orElseThrow(null));
+    }
+
+    @Test
+    public void testNullArguments_FalseCondition() {
+        // Null checks should be enforced even when condition is false
+        assertThrows(IllegalArgumentException.class, () -> If.is(false).then((Throwables.Runnable<?>) null));
+
+        assertThrows(IllegalArgumentException.class, () -> If.is(false).then("value", null));
+
+        assertThrows(IllegalArgumentException.class, () -> If.is(false).thenThrow(null));
+    }
+
+    @Test
+    public void testOrElse_NullArguments_FalseCondition() {
+        // orElse null checks should be enforced even when the orElse branch is not taken
+        assertThrows(IllegalArgumentException.class, () -> If.is(false).then(() -> {
+        }).orElse((Throwables.Runnable<?>) null));
+
+        assertThrows(IllegalArgumentException.class, () -> If.is(false).then(() -> {
+        }).orElse("value", null));
+
+        assertThrows(IllegalArgumentException.class, () -> If.is(false).then(() -> {
+        }).orElseThrow(null));
     }
 
     // ==================== not(boolean) ====================
@@ -82,14 +270,6 @@ public class IfTest extends TestBase {
     }
 
     @Test
-    public void testExists_BoundaryValues() {
-        assertTrue(If.exists(0).b);
-        assertTrue(If.exists(Integer.MAX_VALUE).b);
-        assertFalse(If.exists(-1).b);
-        assertFalse(If.exists(Integer.MIN_VALUE).b);
-    }
-
-    @Test
     public void testExists_WithIndexOf() {
         List<String> list = Arrays.asList("a", "b", "c");
 
@@ -100,6 +280,14 @@ public class IfTest extends TestBase {
         executed.set(false);
         If.exists(list.indexOf("d")).then(() -> executed.set(true));
         assertFalse(executed.get());
+    }
+
+    @Test
+    public void testExists_BoundaryValues() {
+        assertTrue(If.exists(0).b);
+        assertTrue(If.exists(Integer.MAX_VALUE).b);
+        assertFalse(If.exists(-1).b);
+        assertFalse(If.exists(Integer.MIN_VALUE).b);
     }
 
     // ==================== isNull(Object) ====================
@@ -340,6 +528,41 @@ public class IfTest extends TestBase {
         assertFalse(If.isEmpty(sm).b);
     }
 
+    @Test
+    public void testIsEmptyPrimitiveArrays() {
+        assertTrue(If.isEmpty((boolean[]) null).b);
+        assertTrue(If.isEmpty(new boolean[0]).b);
+        assertFalse(If.isEmpty(new boolean[] { true }).b);
+
+        assertTrue(If.isEmpty((char[]) null).b);
+        assertTrue(If.isEmpty(new char[0]).b);
+        assertFalse(If.isEmpty(new char[] { 'a' }).b);
+
+        assertTrue(If.isEmpty((byte[]) null).b);
+        assertTrue(If.isEmpty(new byte[0]).b);
+        assertFalse(If.isEmpty(new byte[] { 1 }).b);
+
+        assertTrue(If.isEmpty((short[]) null).b);
+        assertTrue(If.isEmpty(new short[0]).b);
+        assertFalse(If.isEmpty(new short[] { 1 }).b);
+
+        assertTrue(If.isEmpty((int[]) null).b);
+        assertTrue(If.isEmpty(new int[0]).b);
+        assertFalse(If.isEmpty(new int[] { 1 }).b);
+
+        assertTrue(If.isEmpty((long[]) null).b);
+        assertTrue(If.isEmpty(new long[0]).b);
+        assertFalse(If.isEmpty(new long[] { 1L }).b);
+
+        assertTrue(If.isEmpty((float[]) null).b);
+        assertTrue(If.isEmpty(new float[0]).b);
+        assertFalse(If.isEmpty(new float[] { 1.0f }).b);
+
+        assertTrue(If.isEmpty((double[]) null).b);
+        assertTrue(If.isEmpty(new double[0]).b);
+        assertFalse(If.isEmpty(new double[] { 1.0 }).b);
+    }
+
     // ==================== isBlank(CharSequence) ====================
 
     @Test
@@ -360,6 +583,16 @@ public class IfTest extends TestBase {
         assertFalse(If.isBlank("\t a \n").b);
     }
 
+    @Test
+    public void testValidationScenario() {
+        String input = "";
+
+        assertThrows(IllegalArgumentException.class, () -> If.isBlank(input).thenThrow(() -> new IllegalArgumentException("Input cannot be blank")));
+
+        String validInput = "valid";
+        assertDoesNotThrow(() -> If.isBlank(validInput).thenThrow(() -> new IllegalArgumentException("Input cannot be blank")));
+    }
+
     // ==================== notNull(Object) ====================
 
     @Test
@@ -377,6 +610,19 @@ public class IfTest extends TestBase {
         assertTrue(If.notNull(new ArrayList<>()).b);
         assertTrue(If.notNull(new HashMap<>()).b);
         assertTrue(If.notNull(Boolean.TRUE).b);
+    }
+
+    @Test
+    public void testNullCheckWithAction() {
+        String value = "test";
+        AtomicReference<String> processed = new AtomicReference<>();
+
+        If.notNull(value).then(value, v -> processed.set(v.toUpperCase())).orElse(() -> processed.set("NULL"));
+        assertEquals("TEST", processed.get());
+
+        processed.set(null);
+        If.notNull((String) null).then(value, v -> processed.set(v.toUpperCase())).orElse(() -> processed.set("NULL"));
+        assertEquals("NULL", processed.get());
     }
 
     // ==================== notEmpty(CharSequence) ====================
@@ -580,6 +826,56 @@ public class IfTest extends TestBase {
         assertTrue(If.notEmpty(sm).b);
     }
 
+    @Test
+    public void testNestedConditions() {
+        List<String> list = Arrays.asList("a", "b", "c");
+        String searchItem = "b";
+        AtomicBoolean found = new AtomicBoolean(false);
+
+        If.notEmpty(list).then(() -> {
+            If.exists(list.indexOf(searchItem)).then(() -> found.set(true));
+        });
+
+        assertTrue(found.get());
+    }
+
+    @Test
+    public void testNotEmptyPrimitiveArrays() {
+        assertTrue(If.notEmpty(new boolean[] { true }).b);
+        assertFalse(If.notEmpty(new boolean[0]).b);
+
+        assertTrue(If.notEmpty(new char[] { 'a' }).b);
+        assertFalse(If.notEmpty(new char[0]).b);
+
+        assertTrue(If.notEmpty(new byte[] { 1 }).b);
+        assertFalse(If.notEmpty(new byte[0]).b);
+
+        assertTrue(If.notEmpty(new short[] { 1 }).b);
+        assertFalse(If.notEmpty(new short[0]).b);
+
+        assertTrue(If.notEmpty(new int[] { 1 }).b);
+        assertFalse(If.notEmpty(new int[0]).b);
+
+        assertTrue(If.notEmpty(new long[] { 1L }).b);
+        assertFalse(If.notEmpty(new long[0]).b);
+
+        assertTrue(If.notEmpty(new float[] { 1.0f }).b);
+        assertFalse(If.notEmpty(new float[0]).b);
+
+        assertTrue(If.notEmpty(new double[] { 1.0 }).b);
+        assertFalse(If.notEmpty(new double[0]).b);
+    }
+
+    @Test
+    public void testCollectionProcessing() {
+        List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
+        AtomicInteger sum = new AtomicInteger(0);
+
+        If.notEmpty(numbers).then(() -> numbers.forEach(sum::addAndGet)).orElseThrow(() -> new IllegalStateException("List is empty"));
+
+        assertEquals(15, sum.get());
+    }
+
     // ==================== notBlank(CharSequence) ====================
 
     @Test
@@ -614,6 +910,17 @@ public class IfTest extends TestBase {
     }
 
     @Test
+    public void testThenDoNothing_WithOrElseConsumer() {
+        AtomicReference<String> ref = new AtomicReference<>("untouched");
+        If.is(false).thenDoNothing().orElse("touched", ref::set);
+        assertEquals("touched", ref.get());
+
+        ref.set("untouched");
+        If.is(true).thenDoNothing().orElse("touched", ref::set);
+        assertEquals("untouched", ref.get());
+    }
+
+    @Test
     public void testThenDoNothing_ReturnType() {
         If.OrElse result = If.is(true).thenDoNothing();
         assertNotNull(result);
@@ -643,34 +950,6 @@ public class IfTest extends TestBase {
         assertEquals(1, counter.get());
     }
 
-    @Test
-    public void testThenRunnable_Null() {
-        assertThrows(IllegalArgumentException.class, () -> If.is(true).then((Throwables.Runnable<Exception>) null));
-    }
-
-    @Test
-    public void testThenRunnable_ReturnType() {
-        If.OrElse result = If.is(true).then(() -> {
-        });
-        assertSame(If.OrElse.TRUE, result);
-
-        If.OrElse result2 = If.is(false).then(() -> {
-        });
-        assertSame(If.OrElse.FALSE, result2);
-    }
-
-    @Test
-    public void testThenRunnable_ExceptionPropagation() {
-        assertThrows(RuntimeException.class, () -> If.is(true).then(() -> {
-            throw new RuntimeException("test error");
-        }));
-
-        // false condition: exception not thrown since action not executed
-        assertDoesNotThrow(() -> If.is(false).then(() -> {
-            throw new RuntimeException("test error");
-        }));
-    }
-
     // ==================== then(T, Consumer) ====================
 
     @Test
@@ -685,8 +964,21 @@ public class IfTest extends TestBase {
     }
 
     @Test
-    public void testThenWithInput_Null() {
-        assertThrows(IllegalArgumentException.class, () -> If.is(true).then("value", null));
+    public void testThenWithInput_ComplexType() {
+        List<String> items = new ArrayList<>();
+        If.is(true).then(Arrays.asList("a", "b", "c"), items::addAll);
+        assertEquals(3, items.size());
+    }
+
+    @Test
+    public void testThenRunnable_ReturnType() {
+        If.OrElse result = If.is(true).then(() -> {
+        });
+        assertSame(If.OrElse.TRUE, result);
+
+        If.OrElse result2 = If.is(false).then(() -> {
+        });
+        assertSame(If.OrElse.FALSE, result2);
     }
 
     @Test
@@ -708,10 +1000,25 @@ public class IfTest extends TestBase {
     }
 
     @Test
-    public void testThenWithInput_ComplexType() {
-        List<String> items = new ArrayList<>();
-        If.is(true).then(Arrays.asList("a", "b", "c"), items::addAll);
-        assertEquals(3, items.size());
+    public void testThenRunnable_Null() {
+        assertThrows(IllegalArgumentException.class, () -> If.is(true).then((Throwables.Runnable<Exception>) null));
+    }
+
+    @Test
+    public void testThenRunnable_ExceptionPropagation() {
+        assertThrows(RuntimeException.class, () -> If.is(true).then(() -> {
+            throw new RuntimeException("test error");
+        }));
+
+        // false condition: exception not thrown since action not executed
+        assertDoesNotThrow(() -> If.is(false).then(() -> {
+            throw new RuntimeException("test error");
+        }));
+    }
+
+    @Test
+    public void testThenWithInput_Null() {
+        assertThrows(IllegalArgumentException.class, () -> If.is(true).then("value", null));
     }
 
     // ==================== thenThrow(Supplier) ====================
@@ -760,121 +1067,6 @@ public class IfTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> If.is(true).thenThrow(() -> new IllegalArgumentException("bad arg")));
     }
 
-    // ==================== OrElse.orElse(Runnable) ====================
-
-    @Test
-    public void testOrElseRunnable() {
-        AtomicInteger counter = new AtomicInteger(0);
-
-        If.is(true).then(() -> counter.set(1)).orElse(() -> counter.set(2));
-        assertEquals(1, counter.get());
-
-        If.is(false).then(() -> counter.set(1)).orElse(() -> counter.set(2));
-        assertEquals(2, counter.get());
-    }
-
-    @Test
-    public void testOrElseRunnable_Null() {
-        assertThrows(IllegalArgumentException.class, () -> If.is(true).then(() -> {
-        }).orElse((Throwables.Runnable<Exception>) null));
-    }
-
-    @Test
-    public void testOrElseRunnable_NotExecutedWhenTrue() {
-        AtomicBoolean orElseExecuted = new AtomicBoolean(false);
-        If.is(true).then(() -> {
-        }).orElse(() -> orElseExecuted.set(true));
-        assertFalse(orElseExecuted.get());
-    }
-
-    @Test
-    public void testOrElseRunnable_ExecutedWhenFalse() {
-        AtomicBoolean orElseExecuted = new AtomicBoolean(false);
-        If.is(false).then(() -> {
-        }).orElse(() -> orElseExecuted.set(true));
-        assertTrue(orElseExecuted.get());
-    }
-
-    @Test
-    public void testOrElseRunnable_ExceptionPropagation() {
-        assertThrows(RuntimeException.class, () -> If.is(false).then(() -> {
-        }).orElse(() -> {
-            throw new RuntimeException("orElse error");
-        }));
-    }
-
-    // ==================== OrElse.orElse(T, Consumer) ====================
-
-    @Test
-    public void testOrElseWithInput() {
-        AtomicInteger result = new AtomicInteger(0);
-
-        If.is(true).then(() -> result.set(1)).orElse(5, result::set);
-        assertEquals(1, result.get());
-
-        If.is(false).then(() -> result.set(1)).orElse(5, result::set);
-        assertEquals(5, result.get());
-    }
-
-    @Test
-    public void testOrElseWithInput_Null() {
-        assertThrows(IllegalArgumentException.class, () -> If.is(true).then(() -> {
-        }).orElse("value", null));
-    }
-
-    @Test
-    public void testOrElseWithInput_NullValue() {
-        AtomicReference<String> result = new AtomicReference<>("initial");
-        If.is(false).then(() -> {
-        }).orElse(null, result::set);
-        assertTrue(result.get() == null);
-    }
-
-    @Test
-    public void testOrElseWithInput_NotExecutedWhenTrue() {
-        AtomicInteger result = new AtomicInteger(0);
-        If.is(true).then(() -> result.set(10)).orElse(20, result::set);
-        assertEquals(10, result.get());
-    }
-
-    // ==================== OrElse.orElseThrow(Supplier) ====================
-
-    @Test
-    public void testOrElseThrow() {
-        assertDoesNotThrow(() -> If.is(true).then(() -> {
-        }).orElseThrow(() -> new RuntimeException("Error")));
-
-        assertThrows(RuntimeException.class, () -> If.is(false).then(() -> {
-        }).orElseThrow(() -> new RuntimeException("Error")));
-    }
-
-    @Test
-    public void testOrElseThrow_Null() {
-        assertThrows(IllegalArgumentException.class, () -> If.is(true).then(() -> {
-        }).orElseThrow(null));
-    }
-
-    @Test
-    public void testOrElseThrow_ExceptionMessage() {
-        RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
-            If.is(false).then(() -> {
-            }).orElseThrow(() -> new RuntimeException("or else message"));
-        });
-        assertEquals("or else message", thrown.getMessage());
-    }
-
-    @Test
-    public void testOrElseThrow_NotThrownWhenTrue() {
-        assertDoesNotThrow(() -> If.is(true).then(() -> {
-        }).orElseThrow(() -> new RuntimeException("should not throw")));
-    }
-
-    @Test
-    public void testOrElseThrow_CheckedException() {
-        assertThrows(Exception.class, () -> If.is(false).then(() -> {
-        }).orElseThrow(() -> new Exception("checked orElse")));
-    }
-
     // ==================== Integration / combined tests ====================
 
     @Test
@@ -885,137 +1077,6 @@ public class IfTest extends TestBase {
 
         If.is(false).then(() -> result.set("success2")).orElse(() -> result.set("failure2"));
         assertEquals("failure2", result.get());
-    }
-
-    @Test
-    public void testNestedConditions() {
-        List<String> list = Arrays.asList("a", "b", "c");
-        String searchItem = "b";
-        AtomicBoolean found = new AtomicBoolean(false);
-
-        If.notEmpty(list).then(() -> {
-            If.exists(list.indexOf(searchItem)).then(() -> found.set(true));
-        });
-
-        assertTrue(found.get());
-    }
-
-    @Test
-    public void testNullCheckWithAction() {
-        String value = "test";
-        AtomicReference<String> processed = new AtomicReference<>();
-
-        If.notNull(value).then(value, v -> processed.set(v.toUpperCase())).orElse(() -> processed.set("NULL"));
-        assertEquals("TEST", processed.get());
-
-        processed.set(null);
-        If.notNull((String) null).then(value, v -> processed.set(v.toUpperCase())).orElse(() -> processed.set("NULL"));
-        assertEquals("NULL", processed.get());
-    }
-
-    @Test
-    public void testCollectionProcessing() {
-        List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
-        AtomicInteger sum = new AtomicInteger(0);
-
-        If.notEmpty(numbers).then(() -> numbers.forEach(sum::addAndGet)).orElseThrow(() -> new IllegalStateException("List is empty"));
-
-        assertEquals(15, sum.get());
-    }
-
-    @Test
-    public void testValidationScenario() {
-        String input = "";
-
-        assertThrows(IllegalArgumentException.class, () -> If.isBlank(input).thenThrow(() -> new IllegalArgumentException("Input cannot be blank")));
-
-        String validInput = "valid";
-        assertDoesNotThrow(() -> If.isBlank(validInput).thenThrow(() -> new IllegalArgumentException("Input cannot be blank")));
-    }
-
-    @Test
-    public void testMultipleConditionTypes() {
-        AtomicInteger step = new AtomicInteger(0);
-
-        If.is(true).then(() -> step.set(1));
-        assertEquals(1, step.get());
-
-        If.not(false).then(() -> step.set(2));
-        assertEquals(2, step.get());
-
-        If.notNull("value").then(() -> step.set(3));
-        assertEquals(3, step.get());
-
-        If.notEmpty("value").then(() -> step.set(4));
-        assertEquals(4, step.get());
-
-        If.notBlank("value").then(() -> step.set(5));
-        assertEquals(5, step.get());
-
-        If.exists(0).then(() -> step.set(6));
-        assertEquals(6, step.get());
-    }
-
-    @Test
-    public void testIsEmptyPrimitiveArrays() {
-        assertTrue(If.isEmpty((boolean[]) null).b);
-        assertTrue(If.isEmpty(new boolean[0]).b);
-        assertFalse(If.isEmpty(new boolean[] { true }).b);
-
-        assertTrue(If.isEmpty((char[]) null).b);
-        assertTrue(If.isEmpty(new char[0]).b);
-        assertFalse(If.isEmpty(new char[] { 'a' }).b);
-
-        assertTrue(If.isEmpty((byte[]) null).b);
-        assertTrue(If.isEmpty(new byte[0]).b);
-        assertFalse(If.isEmpty(new byte[] { 1 }).b);
-
-        assertTrue(If.isEmpty((short[]) null).b);
-        assertTrue(If.isEmpty(new short[0]).b);
-        assertFalse(If.isEmpty(new short[] { 1 }).b);
-
-        assertTrue(If.isEmpty((int[]) null).b);
-        assertTrue(If.isEmpty(new int[0]).b);
-        assertFalse(If.isEmpty(new int[] { 1 }).b);
-
-        assertTrue(If.isEmpty((long[]) null).b);
-        assertTrue(If.isEmpty(new long[0]).b);
-        assertFalse(If.isEmpty(new long[] { 1L }).b);
-
-        assertTrue(If.isEmpty((float[]) null).b);
-        assertTrue(If.isEmpty(new float[0]).b);
-        assertFalse(If.isEmpty(new float[] { 1.0f }).b);
-
-        assertTrue(If.isEmpty((double[]) null).b);
-        assertTrue(If.isEmpty(new double[0]).b);
-        assertFalse(If.isEmpty(new double[] { 1.0 }).b);
-    }
-
-    @Test
-    public void testNotEmptyPrimitiveArrays() {
-        assertTrue(If.notEmpty(new boolean[] { true }).b);
-        assertFalse(If.notEmpty(new boolean[0]).b);
-
-        assertTrue(If.notEmpty(new char[] { 'a' }).b);
-        assertFalse(If.notEmpty(new char[0]).b);
-
-        assertTrue(If.notEmpty(new byte[] { 1 }).b);
-        assertFalse(If.notEmpty(new byte[0]).b);
-
-        assertTrue(If.notEmpty(new short[] { 1 }).b);
-        assertFalse(If.notEmpty(new short[0]).b);
-
-        assertTrue(If.notEmpty(new int[] { 1 }).b);
-        assertFalse(If.notEmpty(new int[0]).b);
-
-        assertTrue(If.notEmpty(new long[] { 1L }).b);
-        assertFalse(If.notEmpty(new long[0]).b);
-
-        assertTrue(If.notEmpty(new float[] { 1.0f }).b);
-        assertFalse(If.notEmpty(new float[0]).b);
-
-        assertTrue(If.notEmpty(new double[] { 1.0 }).b);
-        assertFalse(If.notEmpty(new double[0]).b);
     }
 
     @Test
@@ -1032,72 +1093,9 @@ public class IfTest extends TestBase {
     }
 
     @Test
-    public void testNullArguments() {
-        assertThrows(IllegalArgumentException.class, () -> If.is(true).then((Throwables.Runnable<?>) null));
-
-        assertThrows(IllegalArgumentException.class, () -> If.is(true).then("value", null));
-
-        assertThrows(IllegalArgumentException.class, () -> If.is(true).thenThrow(null));
-
-        assertThrows(IllegalArgumentException.class, () -> If.is(true).then(() -> {
-        }).orElse((Throwables.Runnable<?>) null));
-
-        assertThrows(IllegalArgumentException.class, () -> If.is(true).then(() -> {
-        }).orElse("value", null));
-
-        assertThrows(IllegalArgumentException.class, () -> If.is(true).then(() -> {
-        }).orElseThrow(null));
-    }
-
-    @Test
-    public void testNullArguments_FalseCondition() {
-        // Null checks should be enforced even when condition is false
-        assertThrows(IllegalArgumentException.class, () -> If.is(false).then((Throwables.Runnable<?>) null));
-
-        assertThrows(IllegalArgumentException.class, () -> If.is(false).then("value", null));
-
-        assertThrows(IllegalArgumentException.class, () -> If.is(false).thenThrow(null));
-    }
-
-    @Test
-    public void testOrElse_NullArguments_FalseCondition() {
-        // orElse null checks should be enforced even when the orElse branch is not taken
-        assertThrows(IllegalArgumentException.class, () -> If.is(false).then(() -> {
-        }).orElse((Throwables.Runnable<?>) null));
-
-        assertThrows(IllegalArgumentException.class, () -> If.is(false).then(() -> {
-        }).orElse("value", null));
-
-        assertThrows(IllegalArgumentException.class, () -> If.is(false).then(() -> {
-        }).orElseThrow(null));
-    }
-
-    @Test
     public void testOrElse_CachedInstances() {
         assertSame(If.OrElse.TRUE, If.OrElse.TRUE);
         assertSame(If.OrElse.FALSE, If.OrElse.FALSE);
         assertTrue(If.OrElse.TRUE != If.OrElse.FALSE);
-    }
-
-    @Test
-    public void testThenDoNothing_WithOrElseConsumer() {
-        AtomicReference<String> ref = new AtomicReference<>("untouched");
-        If.is(false).thenDoNothing().orElse("touched", ref::set);
-        assertEquals("touched", ref.get());
-
-        ref.set("untouched");
-        If.is(true).thenDoNothing().orElse("touched", ref::set);
-        assertEquals("untouched", ref.get());
-    }
-
-    @Test
-    public void testIs_SideEffectOnlyInThenBranch() {
-        List<String> log = new ArrayList<>();
-        If.is(true).then(() -> log.add("then")).orElse(() -> log.add("else"));
-        assertEquals(Arrays.asList("then"), log);
-
-        log.clear();
-        If.is(false).then(() -> log.add("then")).orElse(() -> log.add("else"));
-        assertEquals(Arrays.asList("else"), log);
     }
 }

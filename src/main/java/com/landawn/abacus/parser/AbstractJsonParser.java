@@ -101,7 +101,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Deserializes a JSON string into an object of the specified target type using default deserialization configuration.
      * This method provides a convenient way to parse JSON without specifying custom configuration options.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * User user = parser.parse("{\"name\":\"John\",\"age\":30}", Type.of(User.class));
      * List<String> names = parser.parse("[\"Alice\",\"Bob\"]", Type.of(List.class));
@@ -115,7 +115,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      */
     @Override
-    public <T> T parse(final String source, final Type<? extends T> targetType) {
+    public <T> T parse(final String source, final Type<? extends T> targetType) throws UncheckedIOException, ParsingException {
         return parse(source, null, targetType);
     }
 
@@ -123,7 +123,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Deserializes a JSON string into an object of the specified target class using default deserialization configuration.
      * This method provides a convenient way to parse JSON without specifying custom configuration options.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * User user = parser.parse("{\"name\":\"John\",\"age\":30}", User.class);
      * List<String> names = parser.parse("[\"Alice\",\"Bob\"]", List.class);
@@ -137,7 +137,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
      */
     @Override
-    public <T> T parse(final String source, final Class<? extends T> targetType) {
+    public <T> T parse(final String source, final Class<? extends T> targetType) throws UncheckedIOException, ParsingException {
         return parse(source, null, targetType);
     }
 
@@ -167,7 +167,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Deserializes a JSON array string and populates the provided object array with the deserialized elements.
      * This method uses default deserialization configuration and directly populates the output array.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * Object[] output = new Object[3];
      * parser.parse("[\"Alice\",\"Bob\",\"Charlie\"]", output);
@@ -180,7 +180,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @throws IndexOutOfBoundsException if the JSON array size doesn't match the output array size
      */
     @Override
-    public void parse(final String source, final Object[] output) {
+    public void parse(final String source, final Object[] output) throws UncheckedIOException, ParsingException, IndexOutOfBoundsException {
         parse(source, null, output);
     }
 
@@ -188,7 +188,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Deserializes a JSON array string and populates the provided object array using custom deserialization configuration.
      * This method allows fine-grained control over how array elements are deserialized.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * Object[] output = new Object[3];
      * JsonDeserConfig config = new JsonDeserConfig();
@@ -209,7 +209,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Deserializes a JSON array string and populates the provided collection with the deserialized elements.
      * This method uses default deserialization configuration and adds elements to the output collection.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * List<String> output = new ArrayList<>();
      * parser.parse("[\"Alice\",\"Bob\"]", output);
@@ -222,7 +222,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @throws UnsupportedOperationException if the collection is unmodifiable
      */
     @Override
-    public void parse(final String source, final Collection<?> output) {
+    public void parse(final String source, final Collection<?> output) throws UncheckedIOException, ParsingException, UnsupportedOperationException {
         parse(source, null, output);
     }
 
@@ -230,7 +230,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Deserializes a JSON array string and populates the provided collection using custom deserialization configuration.
      * This method allows fine-grained control over how collection elements are deserialized.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * List<String> output = new ArrayList<>();
      * JsonDeserConfig config = new JsonDeserConfig();
@@ -251,7 +251,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Deserializes a JSON object string and populates the provided map with the deserialized key-value pairs.
      * This method uses default deserialization configuration and adds entries to the output map.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * Map<String, Object> output = new HashMap<>();
      * parser.parse("{\"name\":\"John\",\"age\":30}", output);
@@ -264,7 +264,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @throws UnsupportedOperationException if the map is unmodifiable
      */
     @Override
-    public void parse(final String source, final Map<?, ?> output) {
+    public void parse(final String source, final Map<?, ?> output) throws UncheckedIOException, ParsingException, UnsupportedOperationException {
         parse(source, null, output);
     }
 
@@ -272,7 +272,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Deserializes a JSON object string and populates the provided map using custom deserialization configuration.
      * This method allows fine-grained control over how map entries are deserialized.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * Map<String, Object> output = new HashMap<>();
      * JsonDeserConfig config = new JsonDeserConfig();
@@ -293,7 +293,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Deserializes a substring of a JSON string into an object of the specified target type using default configuration.
      * This method is useful when parsing a portion of a larger JSON string without creating a substring copy.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * String json = "{\"users\":[{\"name\":\"John\"}]}";
      * User user = parser.deserialize(json, 10, 25, Type.of(User.class));
@@ -305,9 +305,12 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @param toIndex the ending index of the substring, exclusive
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
      * @return an instance of the target type populated with data from the JSON substring; never {@code null}
+     * @throws UncheckedIOException if an I/O error occurs during deserialization
+     * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      */
     @Override
-    public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final Type<? extends T> targetType) {
+    public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final Type<? extends T> targetType)
+            throws UncheckedIOException, ParsingException {
         return deserialize(source, fromIndex, toIndex, null, targetType);
     }
 
@@ -315,7 +318,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Deserializes a substring of a JSON string into an object of the specified target class using default configuration.
      * This method is useful when parsing a portion of a larger JSON string without creating a substring copy.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * String json = "{\"users\":[{\"name\":\"John\"}]}";
      * User user = parser.deserialize(json, 10, 25, User.class);
@@ -327,9 +330,12 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @param toIndex the ending index of the substring, exclusive
      * @param targetType the class of the target object to deserialize into; must not be {@code null}
      * @return an instance of the target class populated with data from the JSON substring; never {@code null}
+     * @throws UncheckedIOException if an I/O error occurs during deserialization
+     * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
      */
     @Override
-    public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final Class<? extends T> targetType) {
+    public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final Class<? extends T> targetType)
+            throws UncheckedIOException, ParsingException {
         return deserialize(source, fromIndex, toIndex, null, targetType);
     }
 
@@ -337,7 +343,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Deserializes a substring of a JSON string into an object using custom deserialization configuration.
      * This method allows fine-grained control over the deserialization process for a specific portion of the input.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * String json = "{\"users\":[{\"name\":\"John\"}]}";
      * JsonDeserConfig config = new JsonDeserConfig();
@@ -351,9 +357,12 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @param config the deserialization configuration to use, or {@code null} to use default configuration
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
      * @return an instance of the target object populated with data from the JSON substring; never {@code null}
+     * @throws UncheckedIOException if an I/O error occurs during deserialization
+     * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      */
     @Override
-    public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final JsonDeserConfig config, final Type<? extends T> targetType) {
+    public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final JsonDeserConfig config, final Type<? extends T> targetType)
+            throws UncheckedIOException, ParsingException {
         return deserialize(source.substring(fromIndex, toIndex), config, targetType);
     }
 
@@ -361,7 +370,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Deserializes a substring of a JSON string into an object using custom deserialization configuration.
      * This method allows fine-grained control over the deserialization process for a specific portion of the input.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * String json = "{\"users\":[{\"name\":\"John\"}]}";
      * JsonDeserConfig config = new JsonDeserConfig();
@@ -375,9 +384,12 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @param config the deserialization configuration to use, or {@code null} to use default configuration
      * @param targetType the class of the target object to deserialize into; must not be {@code null}
      * @return an instance of the target class populated with data from the JSON substring; never {@code null}
+     * @throws UncheckedIOException if an I/O error occurs during deserialization
+     * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
      */
     @Override
-    public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final JsonDeserConfig config, final Class<? extends T> targetType) {
+    public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final JsonDeserConfig config, final Class<? extends T> targetType)
+            throws UncheckedIOException, ParsingException {
         return deserialize(source.substring(fromIndex, toIndex), config, targetType);
     }
 
@@ -385,7 +397,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Creates a stream that lazily deserializes elements from a JSON array string.
      * This method provides efficient streaming of large JSON arrays without loading all elements into memory at once.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * Stream<User> userStream = parser.stream("[{\"name\":\"John\"},{\"name\":\"Jane\"}]", Type.of(User.class));
      * userStream.forEach(System.out::println);
@@ -405,7 +417,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Creates a stream that lazily deserializes elements from a JSON array file.
      * This method provides efficient streaming of large JSON files without loading the entire file into memory.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * File jsonFile = new File("users.json");
      * Stream<User> userStream = parser.stream(jsonFile, Type.of(User.class));
@@ -425,7 +437,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Creates a stream that lazily deserializes elements from a JSON array input stream.
      * This method provides efficient streaming from input streams with optional automatic resource management.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * InputStream is = new FileInputStream("users.json");
      * Stream<User> userStream = parser.stream(is, true, Type.of(User.class));
@@ -446,7 +458,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Creates a stream that lazily deserializes elements from a JSON array reader.
      * This method provides efficient streaming from readers with optional automatic resource management.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * Reader reader = new FileReader("users.json");
      * Stream<User> userStream = parser.stream(reader, true, Type.of(User.class));

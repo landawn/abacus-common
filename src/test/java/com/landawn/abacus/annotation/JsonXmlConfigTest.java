@@ -10,7 +10,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -18,7 +17,6 @@ import com.landawn.abacus.parser.Exclusion;
 import com.landawn.abacus.util.EnumType;
 import com.landawn.abacus.util.NamingPolicy;
 
-@Tag("2025")
 public class JsonXmlConfigTest extends TestBase {
     @JsonXmlConfig
     static class TestClass1 {
@@ -27,11 +25,6 @@ public class JsonXmlConfigTest extends TestBase {
     @JsonXmlConfig(namingPolicy = NamingPolicy.SCREAMING_SNAKE_CASE, dateFormat = "yyyy-MM-dd", timeZone = "UTC", numberFormat = "#.##", enumerated = EnumType.ORDINAL, exclusion = Exclusion.NONE, ignoredFields = {
             "password", "secret" })
     static class TestClass2 {
-    }
-
-    @Test
-    public void testTypeAnnotation() {
-        assertTrue(TestClass1.class.isAnnotationPresent(JsonXmlConfig.class));
     }
 
     @Test
@@ -58,6 +51,11 @@ public class JsonXmlConfigTest extends TestBase {
         assertEquals(EnumType.ORDINAL, annotation.enumerated());
         assertEquals(Exclusion.NONE, annotation.exclusion());
         assertArrayEquals(new String[] { "password", "secret" }, annotation.ignoredFields());
+    }
+
+    @Test
+    public void testTypeAnnotation() {
+        assertTrue(TestClass1.class.isAnnotationPresent(JsonXmlConfig.class));
     }
 
     @Test

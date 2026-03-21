@@ -23,7 +23,6 @@ import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -31,7 +30,6 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("new-test")
 public class AbstractTypeTest extends TestBase {
 
     private Type<String> stringType;
@@ -50,6 +48,94 @@ public class AbstractTypeTest extends TestBase {
 
     @AfterEach
     public void tearDown() {
+    }
+
+    private static class TestComparableType extends AbstractType<String> {
+        public TestComparableType() {
+            super("TestComparableType");
+        }
+
+        @Override
+        public Class<String> javaType() {
+            return String.class;
+        }
+
+        @Override
+        public boolean isComparable() {
+            return true;
+        }
+
+        @Override
+        public String stringOf(String x) {
+            return x;
+        }
+
+        @Override
+        public String valueOf(String str) {
+            return str;
+        }
+    }
+
+    private static class TestSplitType extends AbstractType<String> {
+        public TestSplitType() {
+            super("TestSplitType");
+        }
+
+        @Override
+        public Class<String> javaType() {
+            return String.class;
+        }
+
+        @Override
+        public String stringOf(String x) {
+            return x;
+        }
+
+        @Override
+        public String valueOf(String str) {
+            return str;
+        }
+
+        public String[] splitForTest(String str, String sep) {
+            return AbstractType.split(str, sep);
+        }
+
+        public String[] getTypeParametersForTest(String typeName) {
+            return AbstractType.getTypeParameters(typeName);
+        }
+
+        public String[] getParametersForTest(String typeName) {
+            return AbstractType.getParameters(typeName);
+        }
+    }
+
+    // writeCharacter with null value writes NULL_CHAR_ARRAY via AbstractType default implementation
+    @Test
+    public void testWriteCharacter_NullValue_WritesNullArray() throws IOException {
+        BufferedJsonWriter writer = mock(BufferedJsonWriter.class);
+        TestSplitType type = new TestSplitType();
+        type.writeCharacter(writer, null, null);
+        verify(writer, times(1)).write(AbstractType.NULL_CHAR_ARRAY);
+    }
+
+    @Test
+    public void testGetTypeParameters_ProtectedHelper() {
+        TestSplitType helper = new TestSplitType();
+        String[] parts = helper.getTypeParametersForTest("Map<String, Integer>");
+
+        assertEquals(2, parts.length);
+        assertEquals("String", parts[0]);
+        assertEquals("Integer", parts[1]);
+    }
+
+    @Test
+    public void testGetParameters_ProtectedHelper() {
+        TestSplitType helper = new TestSplitType();
+        String[] parts = helper.getParametersForTest("HashMap<String, Integer>(16, 0.75f)");
+
+        assertEquals(2, parts.length);
+        assertEquals("16", parts[0]);
+        assertEquals("0.75f", parts[1]);
     }
 
     @Test
@@ -249,16 +335,17 @@ public class AbstractTypeTest extends TestBase {
         assertTrue(stringType.isComparable());
     }
 
+    // isComparable() default returns false
+    @Test
+    public void testIsComparable_DefaultReturnsFalse() {
+        TestSplitType type = new TestSplitType();
+        assertFalse(type.isComparable());
+    }
+
     @Test
     @DisplayName("Test isSerializable()")
     public void testIsSerializable() {
         assertTrue(stringType.isSerializable());
-    }
-
-    @Test
-    @DisplayName("Test getSerializationType()")
-    public void testGetSerializationType() {
-        assertEquals(Type.SerializationType.SERIALIZABLE, stringType.serializationType());
     }
 
     @Test
@@ -271,20 +358,6 @@ public class AbstractTypeTest extends TestBase {
     @DisplayName("Test isObject()")
     public void testIsObject() {
         assertFalse(stringType.isObject());
-    }
-
-    @Test
-    @DisplayName("Test getElementType()")
-    public void testGetElementType() {
-        assertNull(stringType.elementType());
-    }
-
-    @Test
-    @DisplayName("Test getParameterTypes()")
-    public void testGetParameterTypes() {
-        Type<?>[] paramTypes = stringType.parameterTypes();
-        assertNotNull(paramTypes);
-        assertEquals(0, paramTypes.length);
     }
 
     @Test
@@ -312,30 +385,14 @@ public class AbstractTypeTest extends TestBase {
         assertTrue(comparableType.compare("a", null) > 0);
     }
 
-    private static class TestComparableType extends AbstractType<String> {
-        public TestComparableType() {
-            super("TestComparableType");
-        }
-
-        @Override
-        public Class<String> javaType() {
-            return String.class;
-        }
-
-        @Override
-        public boolean isComparable() {
-            return true;
-        }
-
-        @Override
-        public String stringOf(String x) {
-            return x;
-        }
-
-        @Override
-        public String valueOf(String str) {
-            return str;
-        }
+    // compare() throws UnsupportedOperationException when isComparable() returns false (default)
+    @Test
+    public void testCompare_NonComparable_ThrowsUnsupportedOperation() {
+        // stringType uses the default AbstractType which returns false from isComparable()
+        // But stringType is configured to be comparable in the test setup. Use a plain type.
+        TestSplitType nonComparableType = new TestSplitType();
+        assertFalse(nonComparableType.isComparable());
+        assertThrows(UnsupportedOperationException.class, () -> nonComparableType.compare("a", "b"));
     }
 
     @Test
@@ -352,6 +409,26 @@ public class AbstractTypeTest extends TestBase {
         assertEquals("hello", stringType.valueOf(chars, 0, 5));
         assertEquals("world", stringType.valueOf(chars, 6, 5));
         assertNull(stringType.valueOf(null, 0, 0));
+    }
+
+    @Test
+    @DisplayName("Test getSerializationType()")
+    public void testGetSerializationType() {
+        assertEquals(Type.SerializationType.SERIALIZABLE, stringType.serializationType());
+    }
+
+    @Test
+    @DisplayName("Test getElementType()")
+    public void testGetElementType() {
+        assertNull(stringType.elementType());
+    }
+
+    @Test
+    @DisplayName("Test getParameterTypes()")
+    public void testGetParameterTypes() {
+        Type<?>[] paramTypes = stringType.parameterTypes();
+        assertNotNull(paramTypes);
+        assertEquals(0, paramTypes.length);
     }
 
     @Test
@@ -474,6 +551,12 @@ public class AbstractTypeTest extends TestBase {
     }
 
     @Test
+    @DisplayName("Test hashCode()")
+    public void testHashCode() {
+        assertEquals(stringType.name().hashCode(), stringType.hashCode());
+    }
+
+    @Test
     @DisplayName("Test hashCode(T)")
     public void testHashCodeValue() {
         assertEquals("test".hashCode(), stringType.hashCode("test"));
@@ -485,6 +568,15 @@ public class AbstractTypeTest extends TestBase {
     public void testDeepHashCode() {
         assertEquals("test".hashCode(), stringType.deepHashCode("test"));
         assertEquals(0, stringType.deepHashCode(null));
+    }
+
+    @Test
+    public void testEqualsObject() {
+        Type<String> anotherStringType = createType(String.class);
+
+        assertTrue(stringType.equals(anotherStringType));
+        assertFalse(stringType.equals(integerType));
+        assertFalse(stringType.equals("String"));
     }
 
     @Test
@@ -507,6 +599,12 @@ public class AbstractTypeTest extends TestBase {
     }
 
     @Test
+    @DisplayName("Test toString()")
+    public void testToString() {
+        assertEquals("String", stringType.toString());
+    }
+
+    @Test
     @DisplayName("Test toString(T)")
     public void testToStringValue() {
         assertEquals("test", stringType.toString("test"));
@@ -521,15 +619,22 @@ public class AbstractTypeTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test hashCode()")
-    public void testHashCode() {
-        assertEquals(stringType.name().hashCode(), stringType.hashCode());
+    public void testSplit_WithSeparator() {
+        TestSplitType helper = new TestSplitType();
+        // split uses a separator converter internally; comma-separated values
+        String[] parts = helper.splitForTest("a,b,c", ",");
+        assertNotNull(parts);
+        assertEquals(3, parts.length);
+        assertEquals("a", parts[0]);
+        assertEquals("c", parts[2]);
     }
 
     @Test
-    @DisplayName("Test toString()")
-    public void testToString() {
-        assertEquals("String", stringType.toString());
+    public void testSplit_WithPipeSeparator() {
+        TestSplitType helper = new TestSplitType();
+        String[] parts = helper.splitForTest("x|y", "\\|");
+        assertNotNull(parts);
+        assertEquals(2, parts.length);
     }
 
     // Cover optimized numeric parsing paths used by primitive type implementations.
@@ -539,10 +644,69 @@ public class AbstractTypeTest extends TestBase {
         assertEquals(-42, AbstractType.parseInt("x-42".toCharArray(), 1, 3));
     }
 
+    // parseInt: length >= 10 falls through to Numbers.toInt
+    @Test
+    public void testParseInt_LongNumber_FallsBackToNumbersToInt() {
+        assertEquals(1234567890, AbstractType.parseInt("1234567890".toCharArray(), 0, 10));
+    }
+
+    // parseInt: null or empty char array returns 0
+    @Test
+    public void testParseInt_NullOrEmpty_ReturnsZero() {
+        assertEquals(0, AbstractType.parseInt(null, 0, 0));
+        assertEquals(0, AbstractType.parseInt("abc".toCharArray(), 0, 0));
+    }
+
+    // parseInt: negative offset/len throws IllegalArgumentException
+    @Test
+    public void testParseInt_NegativeOffset_ThrowsIllegalArgument() {
+        assertThrows(IllegalArgumentException.class, () -> AbstractType.parseInt("123".toCharArray(), -1, 3));
+        assertThrows(IllegalArgumentException.class, () -> AbstractType.parseInt("123".toCharArray(), 0, -1));
+    }
+
+    // parseInt: suffix 'L' followed by non-digit throws NumberFormatException
+    @Test
+    public void testParseInt_SuffixOnlyNoDigit_ThrowsNumberFormat() {
+        // "L" alone - suffix consumed leaves len=0, but then cbuf[offset+len-1] check fails
+        assertThrows(NumberFormatException.class, () -> AbstractType.parseInt("L".toCharArray(), 0, 1));
+    }
+
+    // parseInt: single non-digit character throws NumberFormatException
+    @Test
+    public void testParseInt_SingleNonDigit_ThrowsNumberFormat() {
+        assertThrows(NumberFormatException.class, () -> AbstractType.parseInt("x".toCharArray(), 0, 1));
+    }
+
+    // parseInt: multi-char with non-digit in middle throws NumberFormatException
+    @Test
+    public void testParseInt_MultiCharWithNonDigit_ThrowsNumberFormat() {
+        assertThrows(NumberFormatException.class, () -> AbstractType.parseInt("12x".toCharArray(), 0, 3));
+    }
+
+    // parseLong: null returns 0
+    @Test
+    public void testParseLong_NullOrEmpty_ReturnsZero() {
+        assertEquals(0L, AbstractType.parseLong(null, 0, 0));
+        assertEquals(0L, AbstractType.parseLong("abc".toCharArray(), 0, 0));
+    }
+
     @Test
     public void testParseLong_CharArrayWithSuffixAndInvalidLiteral() {
         assertEquals(9876543210123L, AbstractType.parseLong("__9876543210123d".toCharArray(), 2, 14));
         assertThrows(NumberFormatException.class, () -> AbstractType.parseLong("L".toCharArray(), 0, 1));
+    }
+
+    // parseLong: negative offset/len throws IllegalArgumentException
+    @Test
+    public void testParseLong_NegativeOffset_ThrowsIllegalArgument() {
+        assertThrows(IllegalArgumentException.class, () -> AbstractType.parseLong("123".toCharArray(), -1, 3));
+    }
+
+    // parseLong: suffix 'f' leaves len=0 returns 0
+    @Test
+    public void testParseLong_SuffixOnlyNoDigit_ReturnsZeroOrThrows() {
+        // "0f" - 'f' suffix removed, len becomes 1, cbuf[0]='0' which is digit
+        assertEquals(0L, AbstractType.parseLong("0f".toCharArray(), 0, 2));
     }
 
 }

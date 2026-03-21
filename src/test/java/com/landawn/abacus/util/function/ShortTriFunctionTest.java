@@ -19,12 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ShortTriFunctionTest extends TestBase {
 
     @Test
@@ -45,6 +43,22 @@ public class ShortTriFunctionTest extends TestBase {
     }
 
     @Test
+    public void test_apply_returningDouble() {
+        ShortTriFunction<Double> average = (a, b, c) -> (a + b + c) / 3.0;
+
+        assertEquals(5.0, average.apply((short) 3, (short) 5, (short) 7), 0.001);
+        assertEquals(0.0, average.apply((short) 0, (short) 0, (short) 0), 0.001);
+    }
+
+    @Test
+    public void test_apply_complexCalculation() {
+        ShortTriFunction<Long> volumeCalculation = (length, width, height) -> (long) length * width * height;
+
+        assertEquals(60, volumeCalculation.apply((short) 3, (short) 4, (short) 5));
+        assertEquals(0, volumeCalculation.apply((short) 0, (short) 4, (short) 5));
+    }
+
+    @Test
     public void test_apply_anonymousClass() {
         ShortTriFunction<Boolean> allPositive = new ShortTriFunction<>() {
             @Override
@@ -59,11 +73,10 @@ public class ShortTriFunctionTest extends TestBase {
     }
 
     @Test
-    public void test_apply_returningDouble() {
-        ShortTriFunction<Double> average = (a, b, c) -> (a + b + c) / 3.0;
+    public void test_apply_returningNull() {
+        ShortTriFunction<String> alwaysNull = (a, b, c) -> null;
 
-        assertEquals(5.0, average.apply((short) 3, (short) 5, (short) 7), 0.001);
-        assertEquals(0.0, average.apply((short) 0, (short) 0, (short) 0), 0.001);
+        assertNull(alwaysNull.apply((short) 1, (short) 2, (short) 3));
     }
 
     @Test
@@ -87,20 +100,5 @@ public class ShortTriFunctionTest extends TestBase {
 
         assertEquals("15.0", combined.apply((short) 2, (short) 3, (short) 5));
         assertEquals("0.0", combined.apply((short) 0, (short) 0, (short) 0));
-    }
-
-    @Test
-    public void test_apply_returningNull() {
-        ShortTriFunction<String> alwaysNull = (a, b, c) -> null;
-
-        assertNull(alwaysNull.apply((short) 1, (short) 2, (short) 3));
-    }
-
-    @Test
-    public void test_apply_complexCalculation() {
-        ShortTriFunction<Long> volumeCalculation = (length, width, height) -> (long) length * width * height;
-
-        assertEquals(60, volumeCalculation.apply((short) 3, (short) 4, (short) 5));
-        assertEquals(0, volumeCalculation.apply((short) 0, (short) 4, (short) 5));
     }
 }

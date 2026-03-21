@@ -16,22 +16,11 @@ package com.landawn.abacus.util.function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ShortToIntFunctionTest extends TestBase {
-
-    @Test
-    public void test_DEFAULT() {
-        assertEquals(100, ShortToIntFunction.DEFAULT.applyAsInt((short) 100));
-        assertEquals(0, ShortToIntFunction.DEFAULT.applyAsInt((short) 0));
-        assertEquals(-50, ShortToIntFunction.DEFAULT.applyAsInt((short) -50));
-        assertEquals(Short.MAX_VALUE, ShortToIntFunction.DEFAULT.applyAsInt(Short.MAX_VALUE));
-        assertEquals(Short.MIN_VALUE, ShortToIntFunction.DEFAULT.applyAsInt(Short.MIN_VALUE));
-    }
 
     @Test
     public void test_applyAsInt() {
@@ -66,6 +55,32 @@ public class ShortToIntFunctionTest extends TestBase {
     }
 
     @Test
+    public void test_applyAsInt_complexCalculation() {
+        ShortToIntFunction complexFunction = value -> (value * 3 + 10) / 2;
+
+        assertEquals(20, complexFunction.applyAsInt((short) 10)); // (10 * 3 + 10) / 2 = 40 / 2 = 20
+        assertEquals(5, complexFunction.applyAsInt((short) 0)); // (0 * 3 + 10) / 2 = 10 / 2 = 5
+    }
+
+    @Test
+    public void test_applyAsInt_absoluteValue() {
+        ShortToIntFunction abs = value -> Math.abs(value);
+
+        assertEquals(100, abs.applyAsInt((short) 100));
+        assertEquals(100, abs.applyAsInt((short) -100));
+        assertEquals(0, abs.applyAsInt((short) 0));
+    }
+
+    @Test
+    public void test_DEFAULT() {
+        assertEquals(100, ShortToIntFunction.DEFAULT.applyAsInt((short) 100));
+        assertEquals(0, ShortToIntFunction.DEFAULT.applyAsInt((short) 0));
+        assertEquals(-50, ShortToIntFunction.DEFAULT.applyAsInt((short) -50));
+        assertEquals(Short.MAX_VALUE, ShortToIntFunction.DEFAULT.applyAsInt(Short.MAX_VALUE));
+        assertEquals(Short.MIN_VALUE, ShortToIntFunction.DEFAULT.applyAsInt(Short.MIN_VALUE));
+    }
+
+    @Test
     public void test_applyAsInt_wideningConversion() {
         ShortToIntFunction function = value -> value;
 
@@ -94,22 +109,5 @@ public class ShortToIntFunctionTest extends TestBase {
         ShortToIntFunction multiplier = value -> value * 100;
 
         assertEquals(0, multiplier.applyAsInt((short) 0));
-    }
-
-    @Test
-    public void test_applyAsInt_complexCalculation() {
-        ShortToIntFunction complexFunction = value -> (value * 3 + 10) / 2;
-
-        assertEquals(20, complexFunction.applyAsInt((short) 10)); // (10 * 3 + 10) / 2 = 40 / 2 = 20
-        assertEquals(5, complexFunction.applyAsInt((short) 0)); // (0 * 3 + 10) / 2 = 10 / 2 = 5
-    }
-
-    @Test
-    public void test_applyAsInt_absoluteValue() {
-        ShortToIntFunction abs = value -> Math.abs(value);
-
-        assertEquals(100, abs.applyAsInt((short) 100));
-        assertEquals(100, abs.applyAsInt((short) -100));
-        assertEquals(0, abs.applyAsInt((short) 0));
     }
 }

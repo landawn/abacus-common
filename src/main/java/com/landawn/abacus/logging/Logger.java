@@ -32,25 +32,24 @@ import java.util.function.Supplier;
  * <p>This interface is inspired by SLF4J but provides additional features such as:</p>
  * <ul>
  *   <li>Support for multiple parameter substitution (up to 7 parameters)</li>
- *   <li>Supplier-based lazy evaluation for expensive message construction</li>
+ *   <li>{@link Supplier}-based lazy evaluation for expensive message construction</li>
  *   <li>Consistent method signatures across all log levels</li>
- *   <li>Both (Throwable, String) and (String, Throwable) parameter orders</li>
+ *   <li>Both ({@code Throwable}, {@code String}) and ({@code String}, {@code Throwable}) parameter orders</li>
  * </ul>
  *
  * <p>The interface supports five log levels in increasing order of severity:</p>
  * <ol>
- *   <li>TRACE - Most detailed information</li>
- *   <li>DEBUG - Detailed information for debugging</li>
- *   <li>INFO - General informational messages</li>
- *   <li>WARN - Warning messages for potentially harmful situations</li>
- *   <li>ERROR - Error messages for error events</li>
+ *   <li>{@code TRACE} - Most detailed information</li>
+ *   <li>{@code DEBUG} - Detailed information for debugging</li>
+ *   <li>{@code INFO} - General informational messages</li>
+ *   <li>{@code WARN} - Warning messages for potentially harmful situations</li>
+ *   <li>{@code ERROR} - Error messages for error events</li>
  * </ol>
  *
- * <p>Typical usage pattern:</p>
+ * <p><b>Typical usage pattern:</b></p>
  * <pre>{@code
- *
  * public class Wombat {
- *   static final Logger logger = LoggerFactory.getLogger(Wombat.class);
+ *   private static final Logger logger = LoggerFactory.getLogger(Wombat.class);
  *   Integer t;
  *   Integer oldT;
  *
@@ -58,7 +57,7 @@ import java.util.function.Supplier;
  *     oldT = t;
  *     t = temperature;
  *     logger.debug("Temperature set to {}. Old temperature was {}.", t, oldT);
- *     if(temperature.intValue() > 50) {
+ *     if (temperature > 50) {
  *       logger.info("Temperature has risen above 50 degrees.");
  *     }
  *   }
@@ -67,7 +66,6 @@ import java.util.function.Supplier;
  *
  * @see AbstractLogger
  * @author Ceki G&uuml;lc&uuml; (original SLF4J design)
- * @author HaiYang Li (adaptations for Abacus)
  */
 public interface Logger {
 
@@ -102,7 +100,7 @@ public interface Logger {
     String getName();
 
     /**
-     * Checks if the logger instance is enabled for the TRACE level.
+     * Checks if the logger instance is enabled for the {@code TRACE} level.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -111,21 +109,21 @@ public interface Logger {
      * }
      * }</pre>
      *
-     * @return {@code true} if this Logger is enabled for the TRACE level, {@code false} otherwise
+     * @return {@code true} if this Logger is enabled for the {@code TRACE} level, {@code false} otherwise
      */
     boolean isTraceEnabled();
 
     /**
-     * Logs a message at the TRACE level.
-     * 
-     * <p>TRACE level is typically used for very detailed information, finer than DEBUG.</p>
+     * Logs a message at the {@code TRACE} level.
+     *
+     * <p>{@code TRACE} level is typically used for very detailed information, finer than {@code DEBUG}.</p>
      *
      * @param msg the message string to be logged
      */
     void trace(String msg);
 
     /**
-     * Logs a message at the TRACE level with one parameter.
+     * Logs a message at the {@code TRACE} level with one parameter.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -138,7 +136,7 @@ public interface Logger {
     void trace(String template, Object arg);
 
     /**
-     * Logs a message at the TRACE level with two parameters.
+     * Logs a message at the {@code TRACE} level with two parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -152,7 +150,7 @@ public interface Logger {
     void trace(String template, Object arg1, Object arg2);
 
     /**
-     * Logs a message at the TRACE level with three parameters.
+     * Logs a message at the {@code TRACE} level with three parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -167,7 +165,7 @@ public interface Logger {
     void trace(String template, Object arg1, Object arg2, Object arg3);
 
     /**
-     * Logs a message at the TRACE level with four parameters.
+     * Logs a message at the {@code TRACE} level with four parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -184,7 +182,7 @@ public interface Logger {
     void trace(String template, Object arg1, Object arg2, Object arg3, Object arg4);
 
     /**
-     * Logs a message at the TRACE level with five parameters.
+     * Logs a message at the {@code TRACE} level with five parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -202,7 +200,7 @@ public interface Logger {
     void trace(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5);
 
     /**
-     * Logs a message at the TRACE level with six parameters.
+     * Logs a message at the {@code TRACE} level with six parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -221,7 +219,7 @@ public interface Logger {
     void trace(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6);
 
     /**
-     * Logs a message at the TRACE level with seven parameters.
+     * Logs a message at the {@code TRACE} level with seven parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -241,10 +239,10 @@ public interface Logger {
     void trace(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7);
 
     /**
-     * Logs a message at the TRACE level with variable number of arguments.
+     * Logs a message at the {@code TRACE} level with variable number of arguments.
      *
      * <p>This form avoids superfluous object creation when the logger is disabled
-     * for the TRACE level. However, the Supplier-based methods are preferred for
+     * for the {@code TRACE} level. However, the {@link Supplier}-based methods are preferred for
      * expensive message construction.</p>
      *
      * @param template the template string
@@ -255,7 +253,7 @@ public interface Logger {
     void trace(String template, Object... args);
 
     /**
-     * Logs an exception at the TRACE level with an accompanying message.
+     * Logs an exception at the {@code TRACE} level with an accompanying message.
      *
      * @param msg the message accompanying the exception
      * @param t the exception or error to log
@@ -263,7 +261,7 @@ public interface Logger {
     void trace(String msg, Throwable t);
 
     /**
-     * Logs an exception at the TRACE level with an accompanying message.
+     * Logs an exception at the {@code TRACE} level with an accompanying message.
      *
      * <p>This method provides an alternative parameter order where the exception comes first
      * for consistency with other exception-handling patterns in the framework.</p>
@@ -274,7 +272,7 @@ public interface Logger {
     void trace(Throwable t, String msg);
 
     /**
-     * Logs an exception at the TRACE level with a formatted message and one parameter.
+     * Logs an exception at the {@code TRACE} level with a formatted message and one parameter.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -288,7 +286,7 @@ public interface Logger {
     void trace(Throwable t, String template, Object arg);
 
     /**
-     * Logs an exception at the TRACE level with a formatted message and two parameters.
+     * Logs an exception at the {@code TRACE} level with a formatted message and two parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -303,7 +301,7 @@ public interface Logger {
     void trace(Throwable t, String template, Object arg1, Object arg2);
 
     /**
-     * Logs an exception at the TRACE level with a formatted message and three parameters.
+     * Logs an exception at the {@code TRACE} level with a formatted message and three parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -319,7 +317,7 @@ public interface Logger {
     void trace(Throwable t, String template, Object arg1, Object arg2, Object arg3);
 
     /**
-     * Logs a message at the TRACE level using a supplier for lazy evaluation.
+     * Logs a message at the {@code TRACE} level using a {@link Supplier} for lazy evaluation.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -331,7 +329,7 @@ public interface Logger {
     void trace(Supplier<String> supplier);
 
     /**
-     * Logs a message at the TRACE level with an exception using a supplier.
+     * Logs a message at the {@code TRACE} level with an exception using a {@link Supplier}.
      *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
@@ -341,7 +339,7 @@ public interface Logger {
     void trace(Supplier<String> supplier, Throwable t);
 
     /**
-     * Logs a message at the TRACE level with an exception using a supplier for lazy evaluation.
+     * Logs a message at the {@code TRACE} level with an exception using a {@link Supplier} for lazy evaluation.
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
@@ -349,25 +347,25 @@ public interface Logger {
     void trace(Throwable t, Supplier<String> supplier);
 
     /**
-     * Checks if the logger instance is enabled for the DEBUG level.
-     * 
+     * Checks if the logger instance is enabled for the {@code DEBUG} level.
+     *
      * <p>This method should be used to guard expensive debug message construction.</p>
      *
-     * @return {@code true} if this Logger is enabled for the DEBUG level, {@code false} otherwise
+     * @return {@code true} if this Logger is enabled for the {@code DEBUG} level, {@code false} otherwise
      */
     boolean isDebugEnabled();
 
     /**
-     * Logs a message at the DEBUG level.
-     * 
-     * <p>DEBUG level is typically used for information useful during development.</p>
+     * Logs a message at the {@code DEBUG} level.
+     *
+     * <p>{@code DEBUG} level is typically used for information useful during development.</p>
      *
      * @param msg the message string to be logged
      */
     void debug(String msg);
 
     /**
-     * Logs a message at the DEBUG level with one parameter.
+     * Logs a message at the {@code DEBUG} level with one parameter.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -380,7 +378,7 @@ public interface Logger {
     void debug(String template, Object arg);
 
     /**
-     * Logs a message at the DEBUG level with two parameters.
+     * Logs a message at the {@code DEBUG} level with two parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -394,7 +392,7 @@ public interface Logger {
     void debug(String template, Object arg1, Object arg2);
 
     /**
-     * Logs a message at the DEBUG level with three parameters.
+     * Logs a message at the {@code DEBUG} level with three parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -409,7 +407,7 @@ public interface Logger {
     void debug(String template, Object arg1, Object arg2, Object arg3);
 
     /**
-     * Logs a message at the DEBUG level with four parameters.
+     * Logs a message at the {@code DEBUG} level with four parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -426,7 +424,7 @@ public interface Logger {
     void debug(String template, Object arg1, Object arg2, Object arg3, Object arg4);
 
     /**
-     * Logs a message at the DEBUG level with five parameters.
+     * Logs a message at the {@code DEBUG} level with five parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -444,7 +442,7 @@ public interface Logger {
     void debug(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5);
 
     /**
-     * Logs a message at the DEBUG level with six parameters.
+     * Logs a message at the {@code DEBUG} level with six parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -463,7 +461,7 @@ public interface Logger {
     void debug(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6);
 
     /**
-     * Logs a message at the DEBUG level with seven parameters.
+     * Logs a message at the {@code DEBUG} level with seven parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -483,10 +481,10 @@ public interface Logger {
     void debug(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7);
 
     /**
-     * Logs a message at the DEBUG level with variable number of arguments.
+     * Logs a message at the {@code DEBUG} level with variable number of arguments.
      *
      * <p>This form avoids superfluous object creation when the logger is disabled
-     * for the DEBUG level.</p>
+     * for the {@code DEBUG} level.</p>
      *
      * @param template the template string
      * @param args an array of arguments
@@ -496,7 +494,7 @@ public interface Logger {
     void debug(String template, Object... args);
 
     /**
-     * Logs an exception at the DEBUG level with an accompanying message.
+     * Logs an exception at the {@code DEBUG} level with an accompanying message.
      *
      * @param msg the message accompanying the exception
      * @param t the exception or error to log
@@ -504,7 +502,7 @@ public interface Logger {
     void debug(String msg, Throwable t);
 
     /**
-     * Logs an exception at the DEBUG level with an accompanying message.
+     * Logs an exception at the {@code DEBUG} level with an accompanying message.
      *
      * <p>This method provides an alternative parameter order where the exception comes first
      * for consistency with other exception-handling patterns in the framework.</p>
@@ -515,7 +513,7 @@ public interface Logger {
     void debug(Throwable t, String msg);
 
     /**
-     * Logs an exception at the DEBUG level with a formatted message and one parameter.
+     * Logs an exception at the {@code DEBUG} level with a formatted message and one parameter.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -529,7 +527,7 @@ public interface Logger {
     void debug(Throwable t, String template, Object arg);
 
     /**
-     * Logs an exception at the DEBUG level with a formatted message and two parameters.
+     * Logs an exception at the {@code DEBUG} level with a formatted message and two parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -544,7 +542,7 @@ public interface Logger {
     void debug(Throwable t, String template, Object arg1, Object arg2);
 
     /**
-     * Logs an exception at the DEBUG level with a formatted message and three parameters.
+     * Logs an exception at the {@code DEBUG} level with a formatted message and three parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -560,7 +558,7 @@ public interface Logger {
     void debug(Throwable t, String template, Object arg1, Object arg2, Object arg3);
 
     /**
-     * Logs a message at the DEBUG level using a supplier for lazy evaluation.
+     * Logs a message at the {@code DEBUG} level using a {@link Supplier} for lazy evaluation.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -572,7 +570,7 @@ public interface Logger {
     void debug(Supplier<String> supplier);
 
     /**
-     * Logs a message at the DEBUG level with an exception using a supplier.
+     * Logs a message at the {@code DEBUG} level with an exception using a {@link Supplier}.
      *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
@@ -582,7 +580,7 @@ public interface Logger {
     void debug(Supplier<String> supplier, Throwable t);
 
     /**
-     * Logs a message at the DEBUG level with an exception using a supplier for lazy evaluation.
+     * Logs a message at the {@code DEBUG} level with an exception using a {@link Supplier} for lazy evaluation.
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
@@ -590,18 +588,18 @@ public interface Logger {
     void debug(Throwable t, Supplier<String> supplier);
 
     /**
-     * Checks if the logger instance is enabled for the INFO level.
-     * 
+     * Checks if the logger instance is enabled for the {@code INFO} level.
+     *
      * <p>This method should be used to guard expensive info message construction.</p>
      *
-     * @return {@code true} if this Logger is enabled for the INFO level, {@code false} otherwise
+     * @return {@code true} if this Logger is enabled for the {@code INFO} level, {@code false} otherwise
      */
     boolean isInfoEnabled();
 
     /**
-     * Logs a message at the INFO level.
-     * 
-     * <p>INFO level is typically used for informational messages that highlight
+     * Logs a message at the {@code INFO} level.
+     *
+     * <p>{@code INFO} level is typically used for informational messages that highlight
      * the progress of the application.</p>
      *
      * @param msg the message string to be logged
@@ -609,8 +607,8 @@ public interface Logger {
     void info(String msg);
 
     /**
-     * Logs a message at the INFO level with one parameter.
-     * 
+     * Logs a message at the {@code INFO} level with one parameter.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.info("Server started on port {}", port);
@@ -622,7 +620,7 @@ public interface Logger {
     void info(String template, Object arg);
 
     /**
-     * Logs a message at the INFO level with two parameters.
+     * Logs a message at the {@code INFO} level with two parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -636,7 +634,7 @@ public interface Logger {
     void info(String template, Object arg1, Object arg2);
 
     /**
-     * Logs a message at the INFO level with three parameters.
+     * Logs a message at the {@code INFO} level with three parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -651,7 +649,7 @@ public interface Logger {
     void info(String template, Object arg1, Object arg2, Object arg3);
 
     /**
-     * Logs a message at the INFO level with four parameters.
+     * Logs a message at the {@code INFO} level with four parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -668,7 +666,7 @@ public interface Logger {
     void info(String template, Object arg1, Object arg2, Object arg3, Object arg4);
 
     /**
-     * Logs a message at the INFO level with five parameters.
+     * Logs a message at the {@code INFO} level with five parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -686,7 +684,7 @@ public interface Logger {
     void info(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5);
 
     /**
-     * Logs a message at the INFO level with six parameters.
+     * Logs a message at the {@code INFO} level with six parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -705,7 +703,7 @@ public interface Logger {
     void info(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6);
 
     /**
-     * Logs a message at the INFO level with seven parameters.
+     * Logs a message at the {@code INFO} level with seven parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -725,10 +723,10 @@ public interface Logger {
     void info(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7);
 
     /**
-     * Logs a message at the INFO level with variable number of arguments.
+     * Logs a message at the {@code INFO} level with variable number of arguments.
      *
      * <p>This form avoids superfluous object creation when the logger is disabled
-     * for the INFO level.</p>
+     * for the {@code INFO} level.</p>
      *
      * @param template the template string
      * @param args an array of arguments
@@ -738,7 +736,7 @@ public interface Logger {
     void info(String template, Object... args);
 
     /**
-     * Logs an exception at the INFO level with an accompanying message.
+     * Logs an exception at the {@code INFO} level with an accompanying message.
      *
      * @param msg the message accompanying the exception
      * @param t the exception or error to log
@@ -746,7 +744,7 @@ public interface Logger {
     void info(String msg, Throwable t);
 
     /**
-     * Logs an exception at the INFO level with an accompanying message.
+     * Logs an exception at the {@code INFO} level with an accompanying message.
      *
      * <p>This method provides an alternative parameter order where the exception comes first
      * for consistency with other exception-handling patterns in the framework.</p>
@@ -757,7 +755,7 @@ public interface Logger {
     void info(Throwable t, String msg);
 
     /**
-     * Logs an exception at the INFO level with a formatted message and one parameter.
+     * Logs an exception at the {@code INFO} level with a formatted message and one parameter.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -771,7 +769,7 @@ public interface Logger {
     void info(Throwable t, String template, Object arg);
 
     /**
-     * Logs an exception at the INFO level with a formatted message and two parameters.
+     * Logs an exception at the {@code INFO} level with a formatted message and two parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -786,7 +784,7 @@ public interface Logger {
     void info(Throwable t, String template, Object arg1, Object arg2);
 
     /**
-     * Logs an exception at the INFO level with a formatted message and three parameters.
+     * Logs an exception at the {@code INFO} level with a formatted message and three parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -802,7 +800,7 @@ public interface Logger {
     void info(Throwable t, String template, Object arg1, Object arg2, Object arg3);
 
     /**
-     * Logs a message at the INFO level using a supplier for lazy evaluation.
+     * Logs a message at the {@code INFO} level using a {@link Supplier} for lazy evaluation.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -814,7 +812,7 @@ public interface Logger {
     void info(Supplier<String> supplier);
 
     /**
-     * Logs a message at the INFO level with an exception using a supplier.
+     * Logs a message at the {@code INFO} level with an exception using a {@link Supplier}.
      *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
@@ -824,7 +822,7 @@ public interface Logger {
     void info(Supplier<String> supplier, Throwable t);
 
     /**
-     * Logs a message at the INFO level with an exception using a supplier for lazy evaluation.
+     * Logs a message at the {@code INFO} level with an exception using a {@link Supplier} for lazy evaluation.
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
@@ -832,18 +830,18 @@ public interface Logger {
     void info(Throwable t, Supplier<String> supplier);
 
     /**
-     * Checks if the logger instance is enabled for the WARN level.
-     * 
+     * Checks if the logger instance is enabled for the {@code WARN} level.
+     *
      * <p>This method should be used to guard expensive warn message construction.</p>
      *
-     * @return {@code true} if this Logger is enabled for the WARN level, {@code false} otherwise
+     * @return {@code true} if this Logger is enabled for the {@code WARN} level, {@code false} otherwise
      */
     boolean isWarnEnabled();
 
     /**
-     * Logs a message at the WARN level.
-     * 
-     * <p>WARN level is typically used for potentially harmful situations that
+     * Logs a message at the {@code WARN} level.
+     *
+     * <p>{@code WARN} level is typically used for potentially harmful situations that
      * the application can recover from.</p>
      *
      * @param msg the message string to be logged
@@ -851,8 +849,8 @@ public interface Logger {
     void warn(String msg);
 
     /**
-     * Logs a message at the WARN level with one parameter.
-     * 
+     * Logs a message at the {@code WARN} level with one parameter.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.warn("Cache size {} exceeds recommended maximum", cacheSize);
@@ -864,7 +862,7 @@ public interface Logger {
     void warn(String template, Object arg);
 
     /**
-     * Logs a message at the WARN level with two parameters.
+     * Logs a message at the {@code WARN} level with two parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -878,7 +876,7 @@ public interface Logger {
     void warn(String template, Object arg1, Object arg2);
 
     /**
-     * Logs a message at the WARN level with three parameters.
+     * Logs a message at the {@code WARN} level with three parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -893,7 +891,7 @@ public interface Logger {
     void warn(String template, Object arg1, Object arg2, Object arg3);
 
     /**
-     * Logs a message at the WARN level with four parameters.
+     * Logs a message at the {@code WARN} level with four parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -910,7 +908,7 @@ public interface Logger {
     void warn(String template, Object arg1, Object arg2, Object arg3, Object arg4);
 
     /**
-     * Logs a message at the WARN level with five parameters.
+     * Logs a message at the {@code WARN} level with five parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -928,7 +926,7 @@ public interface Logger {
     void warn(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5);
 
     /**
-     * Logs a message at the WARN level with six parameters.
+     * Logs a message at the {@code WARN} level with six parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -947,7 +945,7 @@ public interface Logger {
     void warn(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6);
 
     /**
-     * Logs a message at the WARN level with seven parameters.
+     * Logs a message at the {@code WARN} level with seven parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -967,10 +965,10 @@ public interface Logger {
     void warn(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7);
 
     /**
-     * Logs a message at the WARN level with variable number of arguments.
+     * Logs a message at the {@code WARN} level with variable number of arguments.
      *
      * <p>This form avoids superfluous object creation when the logger is disabled
-     * for the WARN level.</p>
+     * for the {@code WARN} level.</p>
      *
      * @param template the template string
      * @param args an array of arguments
@@ -980,7 +978,7 @@ public interface Logger {
     void warn(String template, Object... args);
 
     /**
-     * Logs an exception at the WARN level with an accompanying message.
+     * Logs an exception at the {@code WARN} level with an accompanying message.
      *
      * @param msg the message accompanying the exception
      * @param t the exception or error to log
@@ -988,7 +986,7 @@ public interface Logger {
     void warn(String msg, Throwable t);
 
     /**
-     * Logs an exception at the WARN level with an accompanying message.
+     * Logs an exception at the {@code WARN} level with an accompanying message.
      *
      * <p>This method provides an alternative parameter order where the exception comes first
      * for consistency with other exception-handling patterns in the framework.</p>
@@ -999,7 +997,7 @@ public interface Logger {
     void warn(Throwable t, String msg);
 
     /**
-     * Logs an exception at the WARN level with a formatted message and one parameter.
+     * Logs an exception at the {@code WARN} level with a formatted message and one parameter.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1013,7 +1011,7 @@ public interface Logger {
     void warn(Throwable t, String template, Object arg);
 
     /**
-     * Logs an exception at the WARN level with a formatted message and two parameters.
+     * Logs an exception at the {@code WARN} level with a formatted message and two parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1028,7 +1026,7 @@ public interface Logger {
     void warn(Throwable t, String template, Object arg1, Object arg2);
 
     /**
-     * Logs an exception at the WARN level with a formatted message and three parameters.
+     * Logs an exception at the {@code WARN} level with a formatted message and three parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1044,7 +1042,7 @@ public interface Logger {
     void warn(Throwable t, String template, Object arg1, Object arg2, Object arg3);
 
     /**
-     * Logs a message at the WARN level using a supplier for lazy evaluation.
+     * Logs a message at the {@code WARN} level using a {@link Supplier} for lazy evaluation.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1056,7 +1054,7 @@ public interface Logger {
     void warn(Supplier<String> supplier);
 
     /**
-     * Logs a message at the WARN level with an exception using a supplier.
+     * Logs a message at the {@code WARN} level with an exception using a {@link Supplier}.
      *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
@@ -1066,7 +1064,7 @@ public interface Logger {
     void warn(Supplier<String> supplier, Throwable t);
 
     /**
-     * Logs a message at the WARN level with an exception using a supplier for lazy evaluation.
+     * Logs a message at the {@code WARN} level with an exception using a {@link Supplier} for lazy evaluation.
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
@@ -1074,18 +1072,18 @@ public interface Logger {
     void warn(Throwable t, Supplier<String> supplier);
 
     /**
-     * Checks if the logger instance is enabled for the ERROR level.
-     * 
+     * Checks if the logger instance is enabled for the {@code ERROR} level.
+     *
      * <p>This method should be used to guard expensive error message construction.</p>
      *
-     * @return {@code true} if this Logger is enabled for the ERROR level, {@code false} otherwise
+     * @return {@code true} if this Logger is enabled for the {@code ERROR} level, {@code false} otherwise
      */
     boolean isErrorEnabled();
 
     /**
-     * Logs a message at the ERROR level.
-     * 
-     * <p>ERROR level is typically used for error events that might still allow
+     * Logs a message at the {@code ERROR} level.
+     *
+     * <p>{@code ERROR} level is typically used for error events that might still allow
      * the application to continue running.</p>
      *
      * @param msg the message string to be logged
@@ -1093,8 +1091,8 @@ public interface Logger {
     void error(String msg);
 
     /**
-     * Logs a message at the ERROR level with one parameter.
-     * 
+     * Logs a message at the {@code ERROR} level with one parameter.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * logger.error("Failed to process file: {}", filename);
@@ -1106,7 +1104,7 @@ public interface Logger {
     void error(String template, Object arg);
 
     /**
-     * Logs a message at the ERROR level with two parameters.
+     * Logs a message at the {@code ERROR} level with two parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1120,7 +1118,7 @@ public interface Logger {
     void error(String template, Object arg1, Object arg2);
 
     /**
-     * Logs a message at the ERROR level with three parameters.
+     * Logs a message at the {@code ERROR} level with three parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1135,7 +1133,7 @@ public interface Logger {
     void error(String template, Object arg1, Object arg2, Object arg3);
 
     /**
-     * Logs a message at the ERROR level with four parameters.
+     * Logs a message at the {@code ERROR} level with four parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1152,7 +1150,7 @@ public interface Logger {
     void error(String template, Object arg1, Object arg2, Object arg3, Object arg4);
 
     /**
-     * Logs a message at the ERROR level with five parameters.
+     * Logs a message at the {@code ERROR} level with five parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1170,7 +1168,7 @@ public interface Logger {
     void error(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5);
 
     /**
-     * Logs a message at the ERROR level with six parameters.
+     * Logs a message at the {@code ERROR} level with six parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1189,7 +1187,7 @@ public interface Logger {
     void error(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6);
 
     /**
-     * Logs a message at the ERROR level with seven parameters.
+     * Logs a message at the {@code ERROR} level with seven parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1209,10 +1207,10 @@ public interface Logger {
     void error(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7);
 
     /**
-     * Logs a message at the ERROR level with variable number of arguments.
+     * Logs a message at the {@code ERROR} level with variable number of arguments.
      *
      * <p>This form avoids superfluous object creation when the logger is disabled
-     * for the ERROR level.</p>
+     * for the {@code ERROR} level.</p>
      *
      * @param template the template string
      * @param args an array of arguments
@@ -1222,7 +1220,7 @@ public interface Logger {
     void error(String template, Object... args);
 
     /**
-     * Logs an exception at the ERROR level with an accompanying message.
+     * Logs an exception at the {@code ERROR} level with an accompanying message.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1239,7 +1237,7 @@ public interface Logger {
     void error(String msg, Throwable t);
 
     /**
-     * Logs an exception at the ERROR level with an accompanying message.
+     * Logs an exception at the {@code ERROR} level with an accompanying message.
      *
      * <p>This method provides an alternative parameter order where the exception comes first
      * for consistency with other exception-handling patterns in the framework.</p>
@@ -1250,7 +1248,7 @@ public interface Logger {
     void error(Throwable t, String msg);
 
     /**
-     * Logs an exception at the ERROR level with a formatted message and one parameter.
+     * Logs an exception at the {@code ERROR} level with a formatted message and one parameter.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1264,7 +1262,7 @@ public interface Logger {
     void error(Throwable t, String template, Object arg);
 
     /**
-     * Logs an exception at the ERROR level with a formatted message and two parameters.
+     * Logs an exception at the {@code ERROR} level with a formatted message and two parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1279,7 +1277,7 @@ public interface Logger {
     void error(Throwable t, String template, Object arg1, Object arg2);
 
     /**
-     * Logs an exception at the ERROR level with a formatted message and three parameters.
+     * Logs an exception at the {@code ERROR} level with a formatted message and three parameters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1295,7 +1293,7 @@ public interface Logger {
     void error(Throwable t, String template, Object arg1, Object arg2, Object arg3);
 
     /**
-     * Logs a message at the ERROR level using a supplier for lazy evaluation.
+     * Logs a message at the {@code ERROR} level using a {@link Supplier} for lazy evaluation.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1307,7 +1305,7 @@ public interface Logger {
     void error(Supplier<String> supplier);
 
     /**
-     * Logs a message at the ERROR level with an exception using a supplier.
+     * Logs a message at the {@code ERROR} level with an exception using a {@link Supplier}.
      *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
@@ -1317,7 +1315,7 @@ public interface Logger {
     void error(Supplier<String> supplier, Throwable t);
 
     /**
-     * Logs a message at the ERROR level with an exception using a supplier for lazy evaluation.
+     * Logs a message at the {@code ERROR} level with an exception using a {@link Supplier} for lazy evaluation.
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message

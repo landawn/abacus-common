@@ -6,12 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class LongObjConsumerTest extends TestBase {
 
     @Test
@@ -25,21 +23,6 @@ public class LongObjConsumerTest extends TestBase {
         assertEquals(2, result.size());
         assertEquals("5:test", result.get(0));
         assertEquals("10:value", result.get(1));
-    }
-
-    @Test
-    public void testAcceptWithLambda() {
-        final long[] longResult = new long[1];
-        final String[] stringResult = new String[1];
-        LongObjConsumer<String> consumer = (l, s) -> {
-            longResult[0] = l * 2;
-            stringResult[0] = s.toUpperCase();
-        };
-
-        consumer.accept(7L, "hello");
-
-        assertEquals(14L, longResult[0]);
-        assertEquals("HELLO", stringResult[0]);
     }
 
     @Test
@@ -59,33 +42,43 @@ public class LongObjConsumerTest extends TestBase {
     }
 
     @Test
-    public void testAndThen() {
+    public void testWithDifferentObjectTypes() {
         final List<String> result = new ArrayList<>();
-        LongObjConsumer<String> first = (l, s) -> result.add(l + ":" + s);
-        LongObjConsumer<String> second = (l, s) -> result.add(s + ":" + l);
+        LongObjConsumer<Integer> consumer = (l, i) -> result.add(l + ":" + i);
 
-        LongObjConsumer<String> combined = first.andThen(second);
-        combined.accept(5L, "test");
+        consumer.accept(5L, 10);
+        consumer.accept(7L, 20);
 
         assertEquals(2, result.size());
-        assertEquals("5:test", result.get(0));
-        assertEquals("test:5", result.get(1));
+        assertEquals("5:10", result.get(0));
+        assertEquals("7:20", result.get(1));
     }
 
     @Test
-    public void testAndThenChaining() {
-        final List<String> result = new ArrayList<>();
-        LongObjConsumer<String> first = (l, s) -> result.add("first");
-        LongObjConsumer<String> second = (l, s) -> result.add("second");
-        LongObjConsumer<String> third = (l, s) -> result.add("third");
+    public void testSideEffects() {
+        final int[] counter = { 0 };
+        LongObjConsumer<String> consumer = (l, s) -> counter[0]++;
 
-        LongObjConsumer<String> combined = first.andThen(second).andThen(third);
-        combined.accept(5L, "test");
+        consumer.accept(1L, "a");
+        consumer.accept(2L, "b");
+        consumer.accept(3L, "c");
 
-        assertEquals(3, result.size());
-        assertEquals("first", result.get(0));
-        assertEquals("second", result.get(1));
-        assertEquals("third", result.get(2));
+        assertEquals(3, counter[0]);
+    }
+
+    @Test
+    public void testAcceptWithLambda() {
+        final long[] longResult = new long[1];
+        final String[] stringResult = new String[1];
+        LongObjConsumer<String> consumer = (l, s) -> {
+            longResult[0] = l * 2;
+            stringResult[0] = s.toUpperCase();
+        };
+
+        consumer.accept(7L, "hello");
+
+        assertEquals(14L, longResult[0]);
+        assertEquals("HELLO", stringResult[0]);
     }
 
     @Test
@@ -128,28 +121,33 @@ public class LongObjConsumerTest extends TestBase {
     }
 
     @Test
-    public void testWithDifferentObjectTypes() {
+    public void testAndThen() {
         final List<String> result = new ArrayList<>();
-        LongObjConsumer<Integer> consumer = (l, i) -> result.add(l + ":" + i);
+        LongObjConsumer<String> first = (l, s) -> result.add(l + ":" + s);
+        LongObjConsumer<String> second = (l, s) -> result.add(s + ":" + l);
 
-        consumer.accept(5L, 10);
-        consumer.accept(7L, 20);
+        LongObjConsumer<String> combined = first.andThen(second);
+        combined.accept(5L, "test");
 
         assertEquals(2, result.size());
-        assertEquals("5:10", result.get(0));
-        assertEquals("7:20", result.get(1));
+        assertEquals("5:test", result.get(0));
+        assertEquals("test:5", result.get(1));
     }
 
     @Test
-    public void testSideEffects() {
-        final int[] counter = { 0 };
-        LongObjConsumer<String> consumer = (l, s) -> counter[0]++;
+    public void testAndThenChaining() {
+        final List<String> result = new ArrayList<>();
+        LongObjConsumer<String> first = (l, s) -> result.add("first");
+        LongObjConsumer<String> second = (l, s) -> result.add("second");
+        LongObjConsumer<String> third = (l, s) -> result.add("third");
 
-        consumer.accept(1L, "a");
-        consumer.accept(2L, "b");
-        consumer.accept(3L, "c");
+        LongObjConsumer<String> combined = first.andThen(second).andThen(third);
+        combined.accept(5L, "test");
 
-        assertEquals(3, counter[0]);
+        assertEquals(3, result.size());
+        assertEquals("first", result.get(0));
+        assertEquals("second", result.get(1));
+        assertEquals("third", result.get(2));
     }
 
     @Test

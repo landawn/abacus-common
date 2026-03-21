@@ -6,13 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.MapEntity;
 
-@Tag("new-test")
 public class MapEntityTypeTest extends TestBase {
 
     private MapEntityType mapEntityType;

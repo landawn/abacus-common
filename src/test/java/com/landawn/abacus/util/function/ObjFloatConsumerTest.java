@@ -6,12 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ObjFloatConsumerTest extends TestBase {
 
     @Test
@@ -28,21 +26,6 @@ public class ObjFloatConsumerTest extends TestBase {
     }
 
     @Test
-    public void testAcceptWithLambda() {
-        final float[] floatResult = new float[1];
-        final String[] stringResult = new String[1];
-        ObjFloatConsumer<String> consumer = (t, value) -> {
-            floatResult[0] = value * 2;
-            stringResult[0] = t.toUpperCase();
-        };
-
-        consumer.accept("hello", 7.5f);
-
-        assertEquals(15.0f, floatResult[0]);
-        assertEquals("HELLO", stringResult[0]);
-    }
-
-    @Test
     public void testAcceptWithAnonymousClass() {
         final List<String> result = new ArrayList<>();
         ObjFloatConsumer<String> consumer = new ObjFloatConsumer<>() {
@@ -56,6 +39,33 @@ public class ObjFloatConsumerTest extends TestBase {
 
         assertEquals(1, result.size());
         assertEquals("test[3.14]", result.get(0));
+    }
+
+    @Test
+    public void testSideEffects() {
+        final float[] sum = { 0.0f };
+        ObjFloatConsumer<String> consumer = (t, value) -> sum[0] += value;
+
+        consumer.accept("a", 1.5f);
+        consumer.accept("b", 2.5f);
+        consumer.accept("c", 3.0f);
+
+        assertEquals(7.0f, sum[0], 0.001f);
+    }
+
+    @Test
+    public void testAcceptWithLambda() {
+        final float[] floatResult = new float[1];
+        final String[] stringResult = new String[1];
+        ObjFloatConsumer<String> consumer = (t, value) -> {
+            floatResult[0] = value * 2;
+            stringResult[0] = t.toUpperCase();
+        };
+
+        consumer.accept("hello", 7.5f);
+
+        assertEquals(15.0f, floatResult[0]);
+        assertEquals("HELLO", stringResult[0]);
     }
 
     @Test
@@ -110,18 +120,6 @@ public class ObjFloatConsumerTest extends TestBase {
 
         assertEquals(1, result.size());
         assertEquals("null:5.5", result.get(0));
-    }
-
-    @Test
-    public void testSideEffects() {
-        final float[] sum = { 0.0f };
-        ObjFloatConsumer<String> consumer = (t, value) -> sum[0] += value;
-
-        consumer.accept("a", 1.5f);
-        consumer.accept("b", 2.5f);
-        consumer.accept("c", 3.0f);
-
-        assertEquals(7.0f, sum[0], 0.001f);
     }
 
     @Test

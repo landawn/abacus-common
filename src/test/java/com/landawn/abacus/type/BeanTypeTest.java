@@ -8,13 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type.SerializationType;
 
-@Tag("new-test")
 public class BeanTypeTest extends TestBase {
 
     private Type<TestBean> beanType;
@@ -22,6 +20,27 @@ public class BeanTypeTest extends TestBase {
     @BeforeEach
     public void setUp() {
         beanType = createType(TestBean.class);
+    }
+
+    public static class TestBean {
+        private int id;
+        private String name;
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
     }
 
     @Test
@@ -61,20 +80,6 @@ public class BeanTypeTest extends TestBase {
     }
 
     @Test
-    public void testValueOf() {
-        assertNull(beanType.valueOf(""));
-        assertNull(beanType.valueOf((String) null));
-
-        String json = "{\"id\":456,\"name\":\"Example\"}";
-        TestBean bean = beanType.valueOf(json);
-        assertNotNull(bean);
-        assertEquals(456, bean.getId());
-        assertEquals("Example", bean.getName());
-
-        assertThrows(Exception.class, () -> beanType.valueOf("{invalid json}"));
-    }
-
-    @Test
     public void testRoundTrip() {
         TestBean original = new TestBean();
         original.setId(789);
@@ -88,24 +93,17 @@ public class BeanTypeTest extends TestBase {
         assertEquals(original.getName(), decoded.getName());
     }
 
-    public static class TestBean {
-        private int id;
-        private String name;
+    @Test
+    public void testValueOf() {
+        assertNull(beanType.valueOf(""));
+        assertNull(beanType.valueOf((String) null));
 
-        public int getId() {
-            return id;
-        }
+        String json = "{\"id\":456,\"name\":\"Example\"}";
+        TestBean bean = beanType.valueOf(json);
+        assertNotNull(bean);
+        assertEquals(456, bean.getId());
+        assertEquals("Example", bean.getName());
 
-        public void setId(int id) {
-            this.id = id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
+        assertThrows(Exception.class, () -> beanType.valueOf("{invalid json}"));
     }
 }

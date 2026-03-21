@@ -22,53 +22,53 @@ import java.lang.annotation.Target;
 /**
  * Indicates that the annotated type or method represents mutable data or operations.
  * This annotation explicitly documents that state can be changed after creation,
- * which is important for understanding thread-safety and usage patterns.
- * 
+ * which is important for understanding thread safety and usage patterns.
+ *
  * <p><b>When applied to types (classes/interfaces):</b></p>
  * <ul>
- *   <li>The type's instances have modifiable state</li>
- *   <li>Fields may change after object construction</li>
- *   <li>The type is NOT thread-safe without external synchronization</li>
- *   <li>Instances should not be shared between threads without proper synchronization</li>
+ *   <li>The type's instances have modifiable state.</li>
+ *   <li>Fields may change after object construction.</li>
+ *   <li>The type is NOT thread-safe without external synchronization.</li>
+ *   <li>Instances should not be shared between threads without proper synchronization.</li>
  * </ul>
- * 
+ *
  * <p><b>When applied to methods:</b></p>
  * <ul>
- *   <li>The method modifies the object's state</li>
- *   <li>The method has side effects</li>
- *   <li>Calling the method may produce different results over time</li>
- *   <li>The method is not safe to call concurrently without synchronization</li>
+ *   <li>The method modifies the object's state.</li>
+ *   <li>The method has side effects.</li>
+ *   <li>Calling the method may produce different results over time.</li>
+ *   <li>The method is not safe to call concurrently without synchronization.</li>
  * </ul>
- * 
+ *
  * <p><b>Important considerations for mutable types:</b></p>
  * <ul>
- *   <li>Not suitable as Map keys or Set elements (unless equals/hashCode are immutable)</li>
- *   <li>Require defensive copying when passing between untrusted code</li>
- *   <li>Need synchronization for thread-safe access</li>
- *   <li>May cause unexpected behavior if aliased (multiple references)</li>
+ *   <li>Not suitable as Map keys or Set elements (unless {@code equals}/{@code hashCode} are immutable).</li>
+ *   <li>Require defensive copying when passing between untrusted code.</li>
+ *   <li>Need synchronization for thread-safe access.</li>
+ *   <li>May cause unexpected behavior if aliased (multiple references).</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * @Mutable
  * public class Counter {
  *     private int value = 0;
- *     
+ *
  *     @Mutable
  *     public void increment() {
  *         value++;
  *     }
- *     
+ *
  *     public int getValue() {
  *         return value;
  *     }
  * }
  * }</pre>
- * 
+ *
  * <p>This annotation serves as documentation and can be used by static analysis tools
  * to verify mutability contracts and detect potential issues with concurrent access
  * or inappropriate usage patterns.</p>
- * 
+ *
  * @see Immutable
  */
 @Documented

@@ -8,12 +8,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class SuppressFBWarningsTest extends TestBase {
     @SuppressFBWarnings
     static class TestClass {
@@ -35,11 +33,6 @@ public class SuppressFBWarningsTest extends TestBase {
     }
 
     @Test
-    public void testIsAnnotation() {
-        assertTrue(SuppressFBWarnings.class.isAnnotation());
-    }
-
-    @Test
     public void testValueMethodExists() throws NoSuchMethodException {
         Method valueMethod = SuppressFBWarnings.class.getDeclaredMethod("value");
         assertNotNull(valueMethod);
@@ -51,5 +44,10 @@ public class SuppressFBWarningsTest extends TestBase {
         Method justificationMethod = SuppressFBWarnings.class.getDeclaredMethod("justification");
         assertNotNull(justificationMethod);
         assertEquals(String.class, justificationMethod.getReturnType());
+    }
+
+    @Test
+    public void testIsAnnotation() {
+        assertTrue(SuppressFBWarnings.class.isAnnotation());
     }
 }

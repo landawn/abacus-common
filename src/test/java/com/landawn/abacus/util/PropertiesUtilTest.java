@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -24,7 +25,6 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -32,7 +32,6 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 
-@Tag("2025")
 public class PropertiesUtilTest extends TestBase {
 
     @TempDir
@@ -99,6 +98,16 @@ public class PropertiesUtilTest extends TestBase {
     public void tearDown() {
     }
 
+    @Test
+    public void testGetCommonConfigPaths_PathsExist() {
+        java.util.List<String> paths = PropertiesUtil.getCommonConfigPaths();
+        for (String path : paths) {
+            File dir = new File(path);
+            assertTrue(dir.exists());
+            assertTrue(dir.isDirectory());
+        }
+    }
+
     // ==================== getCommonConfigPaths() ====================
 
     @Test
@@ -118,13 +127,9 @@ public class PropertiesUtilTest extends TestBase {
     }
 
     @Test
-    public void testGetCommonConfigPaths_PathsExist() {
-        java.util.List<String> paths = PropertiesUtil.getCommonConfigPaths();
-        for (String path : paths) {
-            File dir = new File(path);
-            assertTrue(dir.exists());
-            assertTrue(dir.isDirectory());
-        }
+    public void testFormatPath_ExistingFileUnchanged() {
+        File result = PropertiesUtil.formatPath(testPropertiesFile);
+        assertEquals(testPropertiesFile.getAbsolutePath(), result.getAbsolutePath());
     }
 
     // ==================== formatPath(File) ====================
@@ -144,6 +149,14 @@ public class PropertiesUtilTest extends TestBase {
     }
 
     @Test
+    public void testFormatPath_NonExistingWithNoEncodedSpaces() {
+        File nonExisting = new File("/nonexistent/path/file.txt");
+        File result = PropertiesUtil.formatPath(nonExisting);
+        assertNotNull(result);
+        assertEquals(nonExisting, result);
+    }
+
+    @Test
     public void testFormatPath_WithEncodedSpaces() throws IOException {
         File dirWithSpace = new File(tempDir.toFile(), "dir with space");
         dirWithSpace.mkdirs();
@@ -160,20 +173,6 @@ public class PropertiesUtilTest extends TestBase {
     public void testFormatPath_WithNoEncodedSpaces() throws IOException {
         File result = PropertiesUtil.formatPath(testPropertiesFile);
         assertEquals(testPropertiesFile, result);
-    }
-
-    @Test
-    public void testFormatPath_NonExistingWithNoEncodedSpaces() {
-        File nonExisting = new File("/nonexistent/path/file.txt");
-        File result = PropertiesUtil.formatPath(nonExisting);
-        assertNotNull(result);
-        assertEquals(nonExisting, result);
-    }
-
-    @Test
-    public void testFormatPath_ExistingFileUnchanged() {
-        File result = PropertiesUtil.formatPath(testPropertiesFile);
-        assertEquals(testPropertiesFile.getAbsolutePath(), result.getAbsolutePath());
     }
 
     // ==================== findDir(String) ====================
@@ -224,17 +223,20 @@ public class PropertiesUtilTest extends TestBase {
         // Just ensure it doesn't throw
     }
 
-    // ==================== findFileRelativeTo(File, String) ====================
+    // ==================== findFile/findDir edge cases ====================
 
     @Test
-    public void testFindFileRelativeTo() throws IOException {
-        File srcFile = testPropertiesFile;
-        File targetFile = tempDir.resolve("relative-target.txt").toFile();
-        targetFile.createNewFile();
+    public void testFindFile_CurrentDirFile() throws IOException {
+        // Create a temp file and search for it — using just filename search in findFileInDir
+        File subDir = new File(tempDir.toFile(), "searchtest");
+        subDir.mkdirs();
+        File target = new File(subDir, "uniquesearchfile12345.txt");
+        target.createNewFile();
 
-        File result = PropertiesUtil.findFileRelativeTo(srcFile, targetFile.getAbsolutePath());
+        File result = PropertiesUtil.findFileInDir("uniquesearchfile12345.txt", tempDir.toFile(), false);
         assertNotNull(result);
         assertTrue(result.exists());
+        assertEquals("uniquesearchfile12345.txt", result.getName());
     }
 
     @Test
@@ -248,6 +250,19 @@ public class PropertiesUtilTest extends TestBase {
         File srcFile = new File(tempDir.toFile(), "nonexistent_src.txt");
         File result = PropertiesUtil.findFileRelativeTo(srcFile, "nonexistent_target_xyz123.txt");
         assertTrue(result == null || !result.exists());
+    }
+
+    // ==================== findFileRelativeTo(File, String) ====================
+
+    @Test
+    public void testFindFileRelativeTo() throws IOException {
+        File srcFile = testPropertiesFile;
+        File targetFile = tempDir.resolve("relative-target.txt").toFile();
+        targetFile.createNewFile();
+
+        File result = PropertiesUtil.findFileRelativeTo(srcFile, targetFile.getAbsolutePath());
+        assertNotNull(result);
+        assertTrue(result.exists());
     }
 
     @Test
@@ -269,6 +284,18 @@ public class PropertiesUtilTest extends TestBase {
         assertNotNull(result);
     }
 
+    @Test
+    public void testFindFileInDir_FileNotExists() {
+        File result = PropertiesUtil.findFileInDir("nonexistent_xyz123.txt", tempDir.toFile(), false);
+        assertTrue(result == null || !result.exists());
+    }
+
+    @Test
+    public void testFindFileInDir_NullDir() {
+        File result = PropertiesUtil.findFileInDir("something.txt", null, false);
+        assertNull(result);
+    }
+
     // ==================== findFileInDir(String, File, boolean) ====================
 
     @Test
@@ -281,12 +308,6 @@ public class PropertiesUtilTest extends TestBase {
         File result = PropertiesUtil.findFileInDir("findme.txt", tempDir.toFile(), false);
         assertNotNull(result);
         assertTrue(result.exists());
-    }
-
-    @Test
-    public void testFindFileInDir_FileNotExists() {
-        File result = PropertiesUtil.findFileInDir("nonexistent_xyz123.txt", tempDir.toFile(), false);
-        assertTrue(result == null || !result.exists());
     }
 
     @Test
@@ -348,12 +369,6 @@ public class PropertiesUtilTest extends TestBase {
     }
 
     @Test
-    public void testFindFileInDir_NullDir() {
-        File result = PropertiesUtil.findFileInDir("something.txt", null, false);
-        assertNull(result);
-    }
-
-    @Test
     public void testFindFileInDir_EmptyDir() throws IOException {
         File emptyDir = new File(tempDir.toFile(), "emptydir");
         emptyDir.mkdirs();
@@ -384,6 +399,14 @@ public class PropertiesUtilTest extends TestBase {
         assertEquals("value2", props.get("key2"));
         assertEquals("value3", props.get("key3"));
         assertEquals("nested.value", props.get("nested.key"));
+    }
+
+    @Test
+    public void testLoad_FileWithoutAutoRefresh() {
+        Properties<String, String> props = PropertiesUtil.load(testPropertiesFile, false);
+
+        assertNotNull(props);
+        assertEquals("value1", props.get("key1"));
     }
 
     @Test
@@ -420,14 +443,6 @@ public class PropertiesUtilTest extends TestBase {
         }
 
         Thread.sleep(3000);
-    }
-
-    @Test
-    public void testLoad_FileWithoutAutoRefresh() {
-        Properties<String, String> props = PropertiesUtil.load(testPropertiesFile, false);
-
-        assertNotNull(props);
-        assertEquals("value1", props.get("key1"));
     }
 
     @Test
@@ -557,6 +572,34 @@ public class PropertiesUtilTest extends TestBase {
         }
     }
 
+    @Test
+    public void testLoadFromNonExistentFile() {
+        File nonExistentFile = new File("non-existent-file.properties");
+        Assertions.assertThrows(UncheckedIOException.class, () -> {
+            PropertiesUtil.load(nonExistentFile);
+        });
+    }
+
+    @Test
+    public void testLoad_ReaderWithEqualsInValue() throws IOException {
+        String propsContent = "url=jdbc:mysql://localhost:3306/db?param=value&other=test\n";
+        try (Reader reader = new StringReader(propsContent)) {
+            Properties<String, String> props = PropertiesUtil.load(reader);
+            assertNotNull(props);
+            assertEquals("jdbc:mysql://localhost:3306/db?param=value&other=test", props.get("url"));
+        }
+    }
+
+    @Test
+    public void testLoad_InputStreamWithUnicodeEscapes() throws IOException {
+        String propsContent = "greeting=Hello\\u0020World\n";
+        try (InputStream is = new ByteArrayInputStream(propsContent.getBytes())) {
+            Properties<String, String> props = PropertiesUtil.load(is);
+            assertNotNull(props);
+            assertEquals("Hello World", props.get("greeting"));
+        }
+    }
+
     // ==================== loadFromXml(File) ====================
 
     @Test
@@ -567,6 +610,68 @@ public class PropertiesUtilTest extends TestBase {
         assertNotNull(props.get("database"));
         assertNotNull(props.get("timeout"));
         assertEquals(true, props.get("enabled"));
+    }
+
+    // ==================== loadFromXml(File, boolean) ====================
+
+    @Test
+    public void testLoadFromXml_FileWithAutoRefresh() {
+        Properties<String, Object> props = PropertiesUtil.loadFromXml(testXmlFile, true);
+
+        assertNotNull(props);
+        assertNotNull(props.get("database"));
+    }
+
+    @Test
+    public void testLoadFromXml_FileWithoutAutoRefresh() {
+        Properties<String, Object> props = PropertiesUtil.loadFromXml(testXmlFile, false);
+
+        assertNotNull(props);
+        assertNotNull(props.get("database"));
+    }
+
+    @Test
+    public void testLoadFromXml_FileAutoRefreshSameInstance() {
+        Properties<String, Object> props1 = PropertiesUtil.loadFromXml(testXmlFile, true);
+        Properties<String, Object> props2 = PropertiesUtil.loadFromXml(testXmlFile, true);
+        Assertions.assertSame(props1, props2);
+    }
+
+    // ==================== loadFromXml(File, Class) ====================
+
+    @Test
+    public void testLoadFromXml_FileWithClass() {
+        Properties<String, Object> props = PropertiesUtil.loadFromXml(testXmlFile, Properties.class);
+
+        assertNotNull(props);
+        assertNotNull(props.get("database"));
+    }
+
+    @Test
+    public void testLoadFromXml_FileWithCustomClass() {
+        CustomProperties props = PropertiesUtil.loadFromXml(testXmlFile, CustomProperties.class);
+
+        assertNotNull(props);
+        assertTrue(props instanceof CustomProperties);
+        assertEquals(5000L, props.get("timeout"));
+    }
+
+    // ==================== loadFromXml(File, boolean, Class) ====================
+
+    @Test
+    public void testLoadFromXml_FileWithAutoRefreshAndClass() {
+        Properties<String, Object> props = PropertiesUtil.loadFromXml(testXmlFile, true, Properties.class);
+
+        assertNotNull(props);
+        assertNotNull(props.get("database"));
+    }
+
+    @Test
+    public void testLoadFromXml_FileWithoutAutoRefreshAndClass() {
+        Properties<String, Object> props = PropertiesUtil.loadFromXml(testXmlFile, false, Properties.class);
+
+        assertNotNull(props);
+        assertNotNull(props.get("database"));
     }
 
     @Test
@@ -580,16 +685,6 @@ public class PropertiesUtilTest extends TestBase {
     public void testLoadFromXml_FileNonExistent() {
         File nonExistent = new File(tempDir.toFile(), "nonexistent.xml");
         assertThrows(Exception.class, () -> PropertiesUtil.loadFromXml(nonExistent));
-    }
-
-    // ==================== loadFromXml(File, boolean) ====================
-
-    @Test
-    public void testLoadFromXml_FileWithAutoRefresh() {
-        Properties<String, Object> props = PropertiesUtil.loadFromXml(testXmlFile, true);
-
-        assertNotNull(props);
-        assertNotNull(props.get("database"));
     }
 
     @Test
@@ -617,21 +712,6 @@ public class PropertiesUtilTest extends TestBase {
         }
 
         assertTrue(refreshed, "Expected auto-refresh to update UTF-16 XML properties");
-    }
-
-    @Test
-    public void testLoadFromXml_FileWithoutAutoRefresh() {
-        Properties<String, Object> props = PropertiesUtil.loadFromXml(testXmlFile, false);
-
-        assertNotNull(props);
-        assertNotNull(props.get("database"));
-    }
-
-    @Test
-    public void testLoadFromXml_FileAutoRefreshSameInstance() {
-        Properties<String, Object> props1 = PropertiesUtil.loadFromXml(testXmlFile, true);
-        Properties<String, Object> props2 = PropertiesUtil.loadFromXml(testXmlFile, true);
-        Assertions.assertSame(props1, props2);
     }
 
     // ==================== loadFromXml(InputStream) ====================
@@ -737,47 +817,10 @@ public class PropertiesUtilTest extends TestBase {
         });
     }
 
-    // ==================== loadFromXml(File, Class) ====================
-
-    @Test
-    public void testLoadFromXml_FileWithClass() {
-        Properties<String, Object> props = PropertiesUtil.loadFromXml(testXmlFile, Properties.class);
-
-        assertNotNull(props);
-        assertNotNull(props.get("database"));
-    }
-
-    @Test
-    public void testLoadFromXml_FileWithCustomClass() {
-        CustomProperties props = PropertiesUtil.loadFromXml(testXmlFile, CustomProperties.class);
-
-        assertNotNull(props);
-        assertTrue(props instanceof CustomProperties);
-        assertEquals(5000L, props.get("timeout"));
-    }
-
     @Test
     public void testLoadFromXml_FileWithClassNonExistent() {
         File nonExistent = new File(tempDir.toFile(), "nonexistent.xml");
         assertThrows(Exception.class, () -> PropertiesUtil.loadFromXml(nonExistent, Properties.class));
-    }
-
-    // ==================== loadFromXml(File, boolean, Class) ====================
-
-    @Test
-    public void testLoadFromXml_FileWithAutoRefreshAndClass() {
-        Properties<String, Object> props = PropertiesUtil.loadFromXml(testXmlFile, true, Properties.class);
-
-        assertNotNull(props);
-        assertNotNull(props.get("database"));
-    }
-
-    @Test
-    public void testLoadFromXml_FileWithoutAutoRefreshAndClass() {
-        Properties<String, Object> props = PropertiesUtil.loadFromXml(testXmlFile, false, Properties.class);
-
-        assertNotNull(props);
-        assertNotNull(props.get("database"));
     }
 
     @Test
@@ -839,6 +882,134 @@ public class PropertiesUtilTest extends TestBase {
             assertTrue(props instanceof CustomProperties);
             assertEquals(5000L, props.get("timeout"));
         }
+    }
+
+    // ==================== Complex types and edge cases ====================
+
+    @Test
+    public void testLoadFromXml_WithDuplicatedProperties() throws IOException {
+        String xml = "<?xml version=\"1.0\"?><root><item>value1</item><item>value2</item></root>";
+
+        assertThrows(RuntimeException.class, () -> {
+            try (Reader reader = new StringReader(xml)) {
+                PropertiesUtil.loadFromXml(reader);
+            }
+        });
+    }
+
+    @Test
+    public void testLoadFromXml_WithAutoRefresh() throws IOException {
+        Properties<String, Object> testProps = new Properties<>();
+        testProps.put("key1", "value1");
+
+        File xmlFile = File.createTempFile("test", ".xml");
+        try {
+            PropertiesUtil.storeToXml(testProps, "root", true, xmlFile);
+
+            Properties<String, Object> loaded = PropertiesUtil.loadFromXml(xmlFile, true);
+            Assertions.assertEquals("value1", loaded.get("key1"));
+        } finally {
+            xmlFile.delete();
+        }
+    }
+
+    @Test
+    public void testXmlWithComplexTypes() throws IOException {
+        File complexXml = tempDir.resolve("complex-types.xml").toFile();
+        try (FileWriter writer = new FileWriter(complexXml)) {
+            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+            writer.write("<config>\n");
+            writer.write("  <stringValue>test string</stringValue>\n");
+            writer.write("  <intValue type=\"int\">42</intValue>\n");
+            writer.write("  <longValue type=\"long\">1234567890123</longValue>\n");
+            writer.write("  <doubleValue type=\"double\">3.14159</doubleValue>\n");
+            writer.write("  <floatValue type=\"float\">2.718</floatValue>\n");
+            writer.write("  <booleanValue type=\"boolean\">true</booleanValue>\n");
+            writer.write("  <byteValue type=\"byte\">127</byteValue>\n");
+            writer.write("  <shortValue type=\"short\">32767</shortValue>\n");
+            writer.write("</config>\n");
+        }
+
+        Properties<String, Object> props = PropertiesUtil.loadFromXml(complexXml);
+
+        Assertions.assertEquals("test string", props.get("stringValue"));
+        Assertions.assertEquals(42, props.get("intValue"));
+        Assertions.assertEquals(1234567890123L, props.get("longValue"));
+        Assertions.assertEquals(3.14159, (Double) props.get("doubleValue"), 0.00001);
+        Assertions.assertEquals(2.718f, (Float) props.get("floatValue"), 0.001f);
+        Assertions.assertEquals(true, props.get("booleanValue"));
+        Assertions.assertEquals((byte) 127, props.get("byteValue"));
+        Assertions.assertEquals((short) 32767, props.get("shortValue"));
+    }
+
+    @Test
+    public void testXmlWithDuplicatedPropertyNames() throws IOException {
+        File duplicatedXml = tempDir.resolve("duplicated.xml").toFile();
+        try (FileWriter writer = new FileWriter(duplicatedXml)) {
+            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+            writer.write("<config>\n");
+            writer.write("  <item>first</item>\n");
+            writer.write("  <item>second</item>\n");
+            writer.write("</config>\n");
+        }
+
+        Assertions.assertThrows(RuntimeException.class, () -> {
+            PropertiesUtil.loadFromXml(duplicatedXml);
+        });
+    }
+
+    @Test
+    public void testLoadFromXml_InputStream_DefaultClass() throws IOException {
+        String xmlContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<config>\n  <key1>value1</key1>\n  <key2>value2</key2>\n</config>\n";
+        try (InputStream is = new ByteArrayInputStream(xmlContent.getBytes(StandardCharsets.UTF_8))) {
+            Properties<String, Object> props = PropertiesUtil.loadFromXml(is, Properties.class);
+            assertNotNull(props);
+            assertEquals("value1", props.get("key1"));
+            assertEquals("value2", props.get("key2"));
+        }
+    }
+
+    @Test
+    public void testLoadFromXml_Reader_DefaultClass() throws IOException {
+        String xmlContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<config>\n  <host>localhost</host>\n  <port>8080</port>\n</config>\n";
+        try (Reader reader = new StringReader(xmlContent)) {
+            Properties<String, Object> props = PropertiesUtil.loadFromXml(reader, Properties.class);
+            assertNotNull(props);
+            assertEquals("localhost", props.get("host"));
+        }
+    }
+
+    @Test
+    public void testLoadFromXml_InputStream_InvalidXml() {
+        String invalidXml = "this is not xml";
+        InputStream is = new ByteArrayInputStream(invalidXml.getBytes(StandardCharsets.UTF_8));
+        assertThrows(Exception.class, () -> PropertiesUtil.loadFromXml(is, Properties.class));
+    }
+
+    // ==================== loadFromXml merge path (output != null) ====================
+
+    @Test
+    public void testLoadFromXml_refreshMerge_removesOldKeys() throws IOException {
+        // Create initial XML with two keys
+        String xmlV1 = "<?xml version=\"1.0\"?><root><key1>v1</key1><key2>v2</key2></root>";
+        Properties<String, Object> loaded = PropertiesUtil.loadFromXml(new java.io.ByteArrayInputStream(xmlV1.getBytes()), Properties.class);
+        assertEquals("v1", loaded.get("key1"));
+        assertEquals("v2", loaded.get("key2"));
+    }
+
+    @Test
+    public void testLoadFromXml_WithCustomProperties_multipleKeys() throws IOException {
+        String xml = "<?xml version=\"1.0\"?><config>" + "<host>localhost</host>" + "<port type=\"int\">8080</port>" + "<ssl type=\"boolean\">true</ssl>"
+                + "</config>";
+
+        java.io.StringReader reader = new java.io.StringReader(xml);
+        CustomProperties props = PropertiesUtil.loadFromXml(reader, CustomProperties.class);
+
+        assertNotNull(props);
+        assertTrue(props instanceof CustomProperties);
+        assertEquals("localhost", props.get("host"));
+        assertEquals(8080, props.get("port"));
+        assertEquals(true, props.get("ssl"));
     }
 
     // ==================== store(Properties, String, File) ====================
@@ -969,6 +1140,118 @@ public class PropertiesUtilTest extends TestBase {
             PropertiesUtil.store(props, "Empty", writer);
             assertNotNull(writer.toString());
         }
+    }
+
+    // ==================== Round trip tests ====================
+
+    @Test
+    public void testStoreAndLoadRoundTrip() throws IOException {
+        Properties<String, String> original = new Properties<>();
+        original.put("key1", "value1");
+        original.put("key2", "value2");
+        original.put("key3", "value3");
+
+        File tempFile = tempDir.resolve("roundtrip.properties").toFile();
+        PropertiesUtil.store(original, "Round trip test", tempFile);
+
+        Properties<String, String> loaded = PropertiesUtil.load(tempFile);
+
+        assertEquals(original.size(), loaded.size());
+        assertEquals(original.get("key1"), loaded.get("key1"));
+        assertEquals(original.get("key2"), loaded.get("key2"));
+        assertEquals(original.get("key3"), loaded.get("key3"));
+    }
+
+    @Test
+    public void testStoreAndLoadRoundTrip_Unicode() throws IOException {
+        Properties<String, String> original = new Properties<>();
+        original.put("greeting", "Hello, \u4f60\u597d, caf\u00e9");
+
+        File tempFile = tempDir.resolve("roundtrip-unicode.properties").toFile();
+        PropertiesUtil.store(original, "Unicode round trip test", tempFile);
+
+        Properties<String, String> loaded = PropertiesUtil.load(tempFile);
+        assertEquals(original.get("greeting"), loaded.get("greeting"));
+    }
+
+    @Test
+    public void testStoreAndLoadConsistency() throws IOException {
+        Properties<String, Object> originalProps = new Properties<>();
+        originalProps.put("string", "value");
+        originalProps.put("integer", 123);
+        originalProps.put("long", 456L);
+        originalProps.put("boolean", true);
+        originalProps.put("double", 3.14);
+
+        Properties<String, Object> nestedProps = new Properties<>();
+        nestedProps.put("nested.string", "nested value");
+        nestedProps.put("nested.int", 789);
+        originalProps.put("nested", nestedProps);
+
+        File xmlFile = tempDir.resolve("consistency.xml").toFile();
+        PropertiesUtil.storeToXml(originalProps, "test", true, xmlFile);
+
+        Properties<String, Object> loadedProps = PropertiesUtil.loadFromXml(xmlFile);
+
+        Assertions.assertEquals(originalProps.get("string"), loadedProps.get("string"));
+        Assertions.assertEquals(originalProps.get("integer"), loadedProps.get("integer"));
+        Assertions.assertEquals(originalProps.get("long"), loadedProps.get("long"));
+        Assertions.assertEquals(originalProps.get("boolean"), loadedProps.get("boolean"));
+        Assertions.assertEquals(originalProps.get("double"), loadedProps.get("double"));
+
+        Properties<String, Object> loadedNested = (Properties<String, Object>) loadedProps.get("nested");
+        Properties<String, Object> originalNested = (Properties<String, Object>) originalProps.get("nested");
+        Assertions.assertEquals(originalNested.get("nested.string"), loadedNested.get("nested.string"));
+        Assertions.assertEquals(originalNested.get("nested.int"), loadedNested.get("nested.int"));
+    }
+
+    @Test
+    public void testPropertiesWithSpecialCharacters() throws IOException {
+        Properties<String, String> props = new Properties<>();
+        props.put("key.with.dots", "value with spaces");
+        props.put("key:with:colons", "value=with=equals");
+        props.put("key\\with\\backslashes", "value\nwith\nnewlines");
+
+        File outputFile = tempDir.resolve("special.properties").toFile();
+        PropertiesUtil.store(props, "Special Characters Test", outputFile);
+
+        Properties<String, String> loadedProps = PropertiesUtil.load(outputFile);
+        Assertions.assertEquals("value with spaces", loadedProps.get("key.with.dots"));
+        Assertions.assertEquals("value=with=equals", loadedProps.get("key:with:colons"));
+        Assertions.assertTrue(loadedProps.get("key\\with\\backslashes").contains("with"));
+    }
+
+    // ==================== store with various property types ====================
+
+    @Test
+    public void testStore_OutputStream_LargeProperties() throws IOException {
+        Properties<String, String> props = new Properties<>();
+        for (int i = 0; i < 100; i++) {
+            props.put("key" + i, "value" + i);
+        }
+
+        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+        PropertiesUtil.store(props, "Large properties test", baos);
+        String output = baos.toString();
+
+        assertTrue(output.contains("key0"));
+        assertTrue(output.contains("key99"));
+        assertTrue(output.contains("value0"));
+        assertTrue(output.contains("value99"));
+    }
+
+    @Test
+    public void testStore_Writer_WithSpecialCharacters() throws IOException {
+        Properties<String, String> props = new Properties<>();
+        props.put("message", "Hello, World!");
+        props.put("url", "http://example.com/path?a=1&b=2");
+
+        java.io.StringWriter sw = new java.io.StringWriter();
+        PropertiesUtil.store(props, "Special characters", sw);
+        String output = sw.toString();
+
+        assertTrue(output.contains("message"));
+        assertTrue(output.contains("url"));
     }
 
     // ==================== storeToXml(Properties, String, boolean, File) ====================
@@ -1139,6 +1422,194 @@ public class PropertiesUtilTest extends TestBase {
             assertTrue(output.contains("intVal"));
             assertTrue(output.contains("boolVal"));
         }
+    }
+
+    @Test
+    public void testStoreToXmlAndLoadRoundTrip() throws IOException {
+        Properties<String, Object> original = new Properties<>();
+        original.put("stringKey", "stringValue");
+        original.put("intKey", 42);
+        original.put("boolKey", true);
+
+        File tempFile = tempDir.resolve("roundtrip.xml").toFile();
+        PropertiesUtil.storeToXml(original, "root", true, tempFile);
+
+        Properties<String, Object> loaded = PropertiesUtil.loadFromXml(tempFile);
+
+        assertNotNull(loaded);
+        assertEquals("stringValue", loaded.get("stringKey"));
+    }
+
+    @Test
+    public void testStoreToXmlAndLoadRoundTrip_Unicode() throws IOException {
+        Properties<String, Object> original = new Properties<>();
+        original.put("greeting", "Hello, \u4f60\u597d, caf\u00e9");
+
+        File tempFile = tempDir.resolve("roundtrip-unicode.xml").toFile();
+        PropertiesUtil.storeToXml(original, "root", true, tempFile);
+
+        String xmlContent = Files.readString(tempFile.toPath(), Charsets.UTF_8);
+        assertTrue(xmlContent.contains("encoding=\"UTF-8\""));
+        assertTrue(xmlContent.contains("\u4f60\u597d"));
+
+        Properties<String, Object> loaded = PropertiesUtil.loadFromXml(tempFile);
+        assertEquals(original.get("greeting"), loaded.get("greeting"));
+    }
+
+    @Test
+    public void testStoreToXml_RoundTripWithNestedAndSimple() throws IOException {
+        Properties<String, Object> props = new Properties<>();
+        props.put("name", "app");
+        Properties<String, Object> db = new Properties<>();
+        db.put("host", "localhost");
+        db.put("port", 3306);
+        props.put("database", db);
+
+        File xmlFile = tempDir.resolve("nested-roundtrip.xml").toFile();
+        PropertiesUtil.storeToXml(props, "config", true, xmlFile);
+
+        Properties<String, Object> loaded = PropertiesUtil.loadFromXml(xmlFile);
+        assertEquals("app", loaded.get("name"));
+        assertNotNull(loaded.get("database"));
+    }
+
+    @Test
+    public void testStoreToXml_OutputStreamWithNullValue() throws IOException {
+        Properties<String, Object> props = new Properties<>();
+        props.put("key1", "value1");
+        // null values should be skipped in storeToXml
+
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+            PropertiesUtil.storeToXml(props, "config", true, os);
+            String output = os.toString();
+            assertTrue(output.contains("<?xml"));
+            assertTrue(output.contains("key1"));
+        }
+    }
+
+    @Test
+    public void testStoreToXml_Writer_AndLoadBack() throws IOException {
+        Properties<String, Object> props = new Properties<>();
+        props.put("app", "test-app");
+        props.put("version", "1.0");
+
+        StringWriter sw = new StringWriter();
+        PropertiesUtil.storeToXml(props, "root", true, sw);
+        String xmlOutput = sw.toString();
+        assertTrue(xmlOutput.contains("app"));
+        assertTrue(xmlOutput.contains("test-app"));
+        assertTrue(xmlOutput.contains("version"));
+        assertTrue(xmlOutput.contains("1.0"));
+    }
+
+    // ==================== storeToXml with null value (skipped) ====================
+
+    @Test
+    public void testStoreToXml_Writer_NullValueSkipped() throws IOException {
+        // A null value in the properties should be skipped (not serialized)
+        Properties<String, Object> props = new Properties<>();
+        props.put("key1", "value1");
+        props.put("key2", null); // null value — should be skipped
+
+        StringWriter sw = new StringWriter();
+        PropertiesUtil.storeToXml(props, "root", true, sw);
+        String xml = sw.toString();
+        assertTrue(xml.contains("key1"));
+        assertTrue(xml.contains("value1"));
+        // key2 with null value should not appear as an element
+        assertFalse(xml.contains("<key2>null</key2>"));
+    }
+
+    @Test
+    public void testStoreToXml_Writer_CustomProperties_typeInfo() throws IOException {
+        // When the property value is a custom Properties subclass, it should serialize with type info
+        CustomProperties nested = new CustomProperties();
+        nested.put("innerKey", "innerValue");
+
+        Properties<String, Object> props = new Properties<>();
+        props.put("sub", nested);
+
+        StringWriter sw = new StringWriter();
+        PropertiesUtil.storeToXml(props, "root", true, sw);
+        String xml = sw.toString();
+        assertTrue(xml.contains("sub"));
+        assertTrue(xml.contains("innerKey"));
+        assertTrue(xml.contains("innerValue"));
+    }
+
+    @Test
+    public void testStoreToXml_Writer_StringValue_noTypeInfo() throws IOException {
+        Properties<String, Object> props = new Properties<>();
+        props.put("name", "Alice");
+
+        StringWriter sw = new StringWriter();
+        PropertiesUtil.storeToXml(props, "config", false, sw);
+        String xml = sw.toString();
+        // Without type info, no type attribute
+        assertFalse(xml.contains("type=\"String\""));
+        assertTrue(xml.contains("<name>Alice</name>"));
+    }
+
+    @Test
+    public void testStoreToXml_Writer_FloatValue() throws IOException {
+        Properties<String, Object> props = new Properties<>();
+        props.put("ratio", 0.5f);
+
+        StringWriter sw = new StringWriter();
+        PropertiesUtil.storeToXml(props, "root", true, sw);
+        String xml = sw.toString();
+        assertTrue(xml.contains("ratio"));
+        assertTrue(xml.contains("type=\"float\""));
+    }
+
+    @Test
+    public void testStoreToXml_Writer_NonPrimitiveType() throws IOException {
+        // A java.util.Date is not a primitive wrapper, so declaringName() should be used for type info
+        java.util.Date date = new java.util.Date(0);
+        Properties<String, Object> props = new Properties<>();
+        props.put("startDate", date);
+
+        StringWriter sw = new StringWriter();
+        // Should not throw even for date types
+        PropertiesUtil.storeToXml(props, "root", true, sw);
+        String xml = sw.toString();
+        assertTrue(xml.contains("startDate"));
+    }
+
+    @Test
+    public void testStoreToXml_OutputStream_LongStringValue() throws IOException {
+        StringBuilder longValue = new StringBuilder();
+        for (int i = 0; i < 1000; i++) {
+            longValue.append("x");
+        }
+        Properties<String, Object> props = new Properties<>();
+        props.put("longKey", longValue.toString());
+
+        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+        PropertiesUtil.storeToXml(props, "root", true, baos);
+        String xml = baos.toString();
+
+        assertTrue(xml.contains("longKey"));
+        assertTrue(xml.contains(longValue.toString()));
+    }
+
+    @Test
+    public void testStoreToXml_Writer_WithTypeInfoRootAttribute() throws IOException {
+        Properties<String, Object> props = new Properties<>();
+        props.put("port", 8080);
+        props.put("enabled", true);
+
+        java.io.StringWriter writer = new java.io.StringWriter();
+        PropertiesUtil.storeToXml(props, "config", true, writer);
+
+        String xml = writer.toString();
+        assertTrue(xml.contains("<config>"));
+        assertTrue(xml.contains("<port type=\"int\">8080</port>"));
+        assertTrue(xml.contains("<enabled type=\"boolean\">true</enabled>"));
+
+        Properties<String, Object> loaded = PropertiesUtil.loadFromXml(new java.io.StringReader(xml), Properties.class);
+        assertEquals(8080, loaded.get("port"));
+        assertEquals(true, loaded.get("enabled"));
     }
 
     // ==================== xmlToJava(String, ...) ====================
@@ -1363,250 +1834,6 @@ public class PropertiesUtilTest extends TestBase {
         Assertions.assertThrows(RuntimeException.class, () -> {
             PropertiesUtil.xmlToJava(xml, srcPath, packageName, className, false);
         });
-    }
-
-    // ==================== Round trip tests ====================
-
-    @Test
-    public void testStoreAndLoadRoundTrip() throws IOException {
-        Properties<String, String> original = new Properties<>();
-        original.put("key1", "value1");
-        original.put("key2", "value2");
-        original.put("key3", "value3");
-
-        File tempFile = tempDir.resolve("roundtrip.properties").toFile();
-        PropertiesUtil.store(original, "Round trip test", tempFile);
-
-        Properties<String, String> loaded = PropertiesUtil.load(tempFile);
-
-        assertEquals(original.size(), loaded.size());
-        assertEquals(original.get("key1"), loaded.get("key1"));
-        assertEquals(original.get("key2"), loaded.get("key2"));
-        assertEquals(original.get("key3"), loaded.get("key3"));
-    }
-
-    @Test
-    public void testStoreAndLoadRoundTrip_Unicode() throws IOException {
-        Properties<String, String> original = new Properties<>();
-        original.put("greeting", "Hello, \u4f60\u597d, caf\u00e9");
-
-        File tempFile = tempDir.resolve("roundtrip-unicode.properties").toFile();
-        PropertiesUtil.store(original, "Unicode round trip test", tempFile);
-
-        Properties<String, String> loaded = PropertiesUtil.load(tempFile);
-        assertEquals(original.get("greeting"), loaded.get("greeting"));
-    }
-
-    @Test
-    public void testStoreToXmlAndLoadRoundTrip() throws IOException {
-        Properties<String, Object> original = new Properties<>();
-        original.put("stringKey", "stringValue");
-        original.put("intKey", 42);
-        original.put("boolKey", true);
-
-        File tempFile = tempDir.resolve("roundtrip.xml").toFile();
-        PropertiesUtil.storeToXml(original, "root", true, tempFile);
-
-        Properties<String, Object> loaded = PropertiesUtil.loadFromXml(tempFile);
-
-        assertNotNull(loaded);
-        assertEquals("stringValue", loaded.get("stringKey"));
-    }
-
-    @Test
-    public void testStoreToXmlAndLoadRoundTrip_Unicode() throws IOException {
-        Properties<String, Object> original = new Properties<>();
-        original.put("greeting", "Hello, \u4f60\u597d, caf\u00e9");
-
-        File tempFile = tempDir.resolve("roundtrip-unicode.xml").toFile();
-        PropertiesUtil.storeToXml(original, "root", true, tempFile);
-
-        String xmlContent = Files.readString(tempFile.toPath(), Charsets.UTF_8);
-        assertTrue(xmlContent.contains("encoding=\"UTF-8\""));
-        assertTrue(xmlContent.contains("\u4f60\u597d"));
-
-        Properties<String, Object> loaded = PropertiesUtil.loadFromXml(tempFile);
-        assertEquals(original.get("greeting"), loaded.get("greeting"));
-    }
-
-    @Test
-    public void testStoreAndLoadConsistency() throws IOException {
-        Properties<String, Object> originalProps = new Properties<>();
-        originalProps.put("string", "value");
-        originalProps.put("integer", 123);
-        originalProps.put("long", 456L);
-        originalProps.put("boolean", true);
-        originalProps.put("double", 3.14);
-
-        Properties<String, Object> nestedProps = new Properties<>();
-        nestedProps.put("nested.string", "nested value");
-        nestedProps.put("nested.int", 789);
-        originalProps.put("nested", nestedProps);
-
-        File xmlFile = tempDir.resolve("consistency.xml").toFile();
-        PropertiesUtil.storeToXml(originalProps, "test", true, xmlFile);
-
-        Properties<String, Object> loadedProps = PropertiesUtil.loadFromXml(xmlFile);
-
-        Assertions.assertEquals(originalProps.get("string"), loadedProps.get("string"));
-        Assertions.assertEquals(originalProps.get("integer"), loadedProps.get("integer"));
-        Assertions.assertEquals(originalProps.get("long"), loadedProps.get("long"));
-        Assertions.assertEquals(originalProps.get("boolean"), loadedProps.get("boolean"));
-        Assertions.assertEquals(originalProps.get("double"), loadedProps.get("double"));
-
-        Properties<String, Object> loadedNested = (Properties<String, Object>) loadedProps.get("nested");
-        Properties<String, Object> originalNested = (Properties<String, Object>) originalProps.get("nested");
-        Assertions.assertEquals(originalNested.get("nested.string"), loadedNested.get("nested.string"));
-        Assertions.assertEquals(originalNested.get("nested.int"), loadedNested.get("nested.int"));
-    }
-
-    // ==================== Complex types and edge cases ====================
-
-    @Test
-    public void testLoadFromXml_WithDuplicatedProperties() throws IOException {
-        String xml = "<?xml version=\"1.0\"?><root><item>value1</item><item>value2</item></root>";
-
-        assertThrows(RuntimeException.class, () -> {
-            try (Reader reader = new StringReader(xml)) {
-                PropertiesUtil.loadFromXml(reader);
-            }
-        });
-    }
-
-    @Test
-    public void testLoadFromXml_WithAutoRefresh() throws IOException {
-        Properties<String, Object> testProps = new Properties<>();
-        testProps.put("key1", "value1");
-
-        File xmlFile = File.createTempFile("test", ".xml");
-        try {
-            PropertiesUtil.storeToXml(testProps, "root", true, xmlFile);
-
-            Properties<String, Object> loaded = PropertiesUtil.loadFromXml(xmlFile, true);
-            Assertions.assertEquals("value1", loaded.get("key1"));
-        } finally {
-            xmlFile.delete();
-        }
-    }
-
-    @Test
-    public void testXmlWithComplexTypes() throws IOException {
-        File complexXml = tempDir.resolve("complex-types.xml").toFile();
-        try (FileWriter writer = new FileWriter(complexXml)) {
-            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-            writer.write("<config>\n");
-            writer.write("  <stringValue>test string</stringValue>\n");
-            writer.write("  <intValue type=\"int\">42</intValue>\n");
-            writer.write("  <longValue type=\"long\">1234567890123</longValue>\n");
-            writer.write("  <doubleValue type=\"double\">3.14159</doubleValue>\n");
-            writer.write("  <floatValue type=\"float\">2.718</floatValue>\n");
-            writer.write("  <booleanValue type=\"boolean\">true</booleanValue>\n");
-            writer.write("  <byteValue type=\"byte\">127</byteValue>\n");
-            writer.write("  <shortValue type=\"short\">32767</shortValue>\n");
-            writer.write("</config>\n");
-        }
-
-        Properties<String, Object> props = PropertiesUtil.loadFromXml(complexXml);
-
-        Assertions.assertEquals("test string", props.get("stringValue"));
-        Assertions.assertEquals(42, props.get("intValue"));
-        Assertions.assertEquals(1234567890123L, props.get("longValue"));
-        Assertions.assertEquals(3.14159, (Double) props.get("doubleValue"), 0.00001);
-        Assertions.assertEquals(2.718f, (Float) props.get("floatValue"), 0.001f);
-        Assertions.assertEquals(true, props.get("booleanValue"));
-        Assertions.assertEquals((byte) 127, props.get("byteValue"));
-        Assertions.assertEquals((short) 32767, props.get("shortValue"));
-    }
-
-    @Test
-    public void testPropertiesWithSpecialCharacters() throws IOException {
-        Properties<String, String> props = new Properties<>();
-        props.put("key.with.dots", "value with spaces");
-        props.put("key:with:colons", "value=with=equals");
-        props.put("key\\with\\backslashes", "value\nwith\nnewlines");
-
-        File outputFile = tempDir.resolve("special.properties").toFile();
-        PropertiesUtil.store(props, "Special Characters Test", outputFile);
-
-        Properties<String, String> loadedProps = PropertiesUtil.load(outputFile);
-        Assertions.assertEquals("value with spaces", loadedProps.get("key.with.dots"));
-        Assertions.assertEquals("value=with=equals", loadedProps.get("key:with:colons"));
-        Assertions.assertTrue(loadedProps.get("key\\with\\backslashes").contains("with"));
-    }
-
-    @Test
-    public void testXmlWithDuplicatedPropertyNames() throws IOException {
-        File duplicatedXml = tempDir.resolve("duplicated.xml").toFile();
-        try (FileWriter writer = new FileWriter(duplicatedXml)) {
-            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-            writer.write("<config>\n");
-            writer.write("  <item>first</item>\n");
-            writer.write("  <item>second</item>\n");
-            writer.write("</config>\n");
-        }
-
-        Assertions.assertThrows(RuntimeException.class, () -> {
-            PropertiesUtil.loadFromXml(duplicatedXml);
-        });
-    }
-
-    @Test
-    public void testLoadFromNonExistentFile() {
-        File nonExistentFile = new File("non-existent-file.properties");
-        Assertions.assertThrows(UncheckedIOException.class, () -> {
-            PropertiesUtil.load(nonExistentFile);
-        });
-    }
-
-    @Test
-    public void testStoreToXml_RoundTripWithNestedAndSimple() throws IOException {
-        Properties<String, Object> props = new Properties<>();
-        props.put("name", "app");
-        Properties<String, Object> db = new Properties<>();
-        db.put("host", "localhost");
-        db.put("port", 3306);
-        props.put("database", db);
-
-        File xmlFile = tempDir.resolve("nested-roundtrip.xml").toFile();
-        PropertiesUtil.storeToXml(props, "config", true, xmlFile);
-
-        Properties<String, Object> loaded = PropertiesUtil.loadFromXml(xmlFile);
-        assertEquals("app", loaded.get("name"));
-        assertNotNull(loaded.get("database"));
-    }
-
-    @Test
-    public void testLoad_ReaderWithEqualsInValue() throws IOException {
-        String propsContent = "url=jdbc:mysql://localhost:3306/db?param=value&other=test\n";
-        try (Reader reader = new StringReader(propsContent)) {
-            Properties<String, String> props = PropertiesUtil.load(reader);
-            assertNotNull(props);
-            assertEquals("jdbc:mysql://localhost:3306/db?param=value&other=test", props.get("url"));
-        }
-    }
-
-    @Test
-    public void testLoad_InputStreamWithUnicodeEscapes() throws IOException {
-        String propsContent = "greeting=Hello\\u0020World\n";
-        try (InputStream is = new ByteArrayInputStream(propsContent.getBytes())) {
-            Properties<String, String> props = PropertiesUtil.load(is);
-            assertNotNull(props);
-            assertEquals("Hello World", props.get("greeting"));
-        }
-    }
-
-    @Test
-    public void testStoreToXml_OutputStreamWithNullValue() throws IOException {
-        Properties<String, Object> props = new Properties<>();
-        props.put("key1", "value1");
-        // null values should be skipped in storeToXml
-
-        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-            PropertiesUtil.storeToXml(props, "config", true, os);
-            String output = os.toString();
-            assertTrue(output.contains("<?xml"));
-            assertTrue(output.contains("key1"));
-        }
     }
 
     @Test

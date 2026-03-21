@@ -16,109 +16,24 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 
-@Tag("old-test")
 public class BiMapTest extends AbstractTest {
 
     @Test
-    public void test_01() {
-        BiMap<String, Integer> biMap = new BiMap<>();
-        biMap.put("a", 1);
-        biMap.put("b", 2);
-        N.println(biMap);
-        assertEquals(1, biMap.get("a").intValue());
-        assertEquals("a", biMap.getByValue(1));
-
-        biMap.put("a", 11);
-        N.println(biMap);
-        assertNull(biMap.getByValue(1));
-
-        biMap.forcePut("c", 2);
-        assertNull(biMap.get("b"));
-
-        try {
-            biMap.put(null, 1);
-            fail("Should throw IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
-        }
-
-        try {
-            biMap.put("d", null);
-            fail("Should throw IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
-        }
-
-        Map<String, Integer> map = BiMap.of("e", 5);
-        biMap.putAll(map);
-        N.println(biMap);
-
-        assertEquals(5, biMap.remove("e").intValue());
-        assertEquals("c", biMap.removeByValue(2));
-
-        N.println(biMap);
-
-        assertTrue(biMap.containsKey("a"));
-        assertTrue(biMap.containsValue(11));
-        biMap.clear();
-
-        assertTrue(biMap.isEmpty());
-        assertTrue(biMap.size() == 0);
-
-        N.println(biMap.hashCode());
-        N.println(biMap.equals(new HashMap<>()));
-        N.println(biMap.toString());
-        N.println(biMap.keySet());
-        N.println(biMap.values());
-        assertNull(biMap.remove("a"));
-        assertNull(biMap.removeByValue(1));
-        BiMap<String, Integer> biMap2 = new BiMap<>(map.size() * 2);
-        biMap2.putAll(map);
-
-        N.println(biMap2);
+    public void testOf() {
+        BiMap<String, Integer> biMap = BiMap.of("one", 1);
+        assertEquals(1, biMap.size());
+        assertEquals(1, biMap.get("one"));
     }
 
     @Test
-    public void testDefaultConstructor() {
-        BiMap<String, Integer> biMap = new BiMap<>();
-        assertNotNull(biMap);
-        assertTrue(biMap.isEmpty());
-        assertEquals(0, biMap.size());
-    }
-
-    @Test
-    public void testConstructorWithInitialCapacity() {
-        BiMap<String, Integer> biMap = new BiMap<>(20);
-        assertNotNull(biMap);
-        assertTrue(biMap.isEmpty());
-        assertEquals(0, biMap.size());
-    }
-
-    @Test
-    public void testConstructorWithCapacityAndLoadFactor() {
-        BiMap<String, Integer> biMap = new BiMap<>(20, 0.8f);
-        assertNotNull(biMap);
-        assertTrue(biMap.isEmpty());
-        assertEquals(0, biMap.size());
-    }
-
-    @Test
-    public void testConstructorWithMapTypes() {
-        BiMap<String, Integer> biMap = new BiMap<>(LinkedHashMap.class, TreeMap.class);
-        assertNotNull(biMap);
-        assertTrue(biMap.isEmpty());
-        assertEquals(0, biMap.size());
-    }
-
-    @Test
-    public void testConstructorWithSuppliers() {
-        BiMap<String, Integer> biMap = new BiMap<>(HashMap::new, HashMap::new);
-        assertNotNull(biMap);
-        assertTrue(biMap.isEmpty());
-        assertEquals(0, biMap.size());
+    public void testOfManyPairs() {
+        BiMap<String, Integer> biMap = BiMap.of("one", 1, "two", 2, "three", 3, "four", 4, "five", 5, "six", 6, "seven", 7, "eight", 8, "nine", 9, "ten", 10);
+        assertEquals(10, biMap.size());
+        assertEquals(10, biMap.get("ten"));
     }
 
     @Test
@@ -208,6 +123,69 @@ public class BiMapTest extends AbstractTest {
     }
 
     @Test
+    public void testInversed() {
+        BiMap<String, Integer> biMap = BiMap.of("one", 1, "two", 2);
+        BiMap<Integer, String> inverse = biMap.inverted();
+
+        assertNotNull(inverse);
+        assertEquals(2, inverse.size());
+        assertEquals("one", inverse.get(1));
+        assertEquals("two", inverse.get(2));
+        assertEquals(1, inverse.getByValue("one"));
+        assertEquals(2, inverse.getByValue("two"));
+    }
+
+    @Test
+    public void testInversedBackedBySameData() {
+        BiMap<String, Integer> biMap = BiMap.of("one", 1);
+        BiMap<Integer, String> inverse = biMap.inverted();
+
+        biMap.put("two", 2);
+        assertEquals(2, inverse.size());
+        assertEquals("two", inverse.get(2));
+
+        inverse.put(3, "three");
+        assertEquals(3, biMap.size());
+        assertEquals(3, biMap.get("three"));
+    }
+
+    @Test
+    public void testInversedReturnsSameInstance() {
+        BiMap<String, Integer> biMap = BiMap.of("one", 1);
+        BiMap<Integer, String> inverse1 = biMap.inverted();
+        BiMap<Integer, String> inverse2 = biMap.inverted();
+
+        assertSame(inverse1, inverse2);
+    }
+
+    @Test
+    public void testInverseOperations() {
+        BiMap<String, Integer> biMap = BiMap.of("one", 1, "two", 2);
+        BiMap<Integer, String> inverse = biMap.inverted();
+
+        inverse.put(3, "three");
+        assertEquals(3, biMap.size());
+        assertEquals(3, biMap.get("three"));
+
+        inverse.remove(1);
+        assertEquals(2, biMap.size());
+        assertNull(biMap.get("one"));
+
+        inverse.forcePut(2, "new-two");
+        assertEquals("new-two", biMap.getByValue(2));
+        assertEquals("new-two", inverse.get(2));
+    }
+
+    @Test
+    public void testOfMultiple() {
+        BiMap<String, Integer> biMap = BiMap.of("one", 1, "two", 2, "three", 3);
+        assertEquals(3, biMap.size());
+        assertEquals(1, biMap.get("one"));
+        assertEquals(2, biMap.get("two"));
+        assertEquals(3, biMap.get("three"));
+    }
+
+    @Test
     public void testOfWithDuplicateValue() {
         assertThrows(IllegalArgumentException.class, () -> {
             BiMap.of("one", 1, "two", 1);
@@ -229,6 +207,20 @@ public class BiMapTest extends AbstractTest {
     }
 
     @Test
+    public void testInverse_PutWithNullKey() {
+        BiMap<String, Integer> biMap = BiMap.of("a", 1);
+        BiMap<Integer, String> inverse = biMap.inverted();
+        assertThrows(IllegalArgumentException.class, () -> inverse.put(null, "b"));
+    }
+
+    @Test
+    public void testInverse_PutWithNullValue() {
+        BiMap<String, Integer> biMap = BiMap.of("a", 1);
+        BiMap<Integer, String> inverse = biMap.inverted();
+        assertThrows(IllegalArgumentException.class, () -> inverse.put(2, null));
+    }
+
+    @Test
     public void testCopyOf() {
         Map<String, Integer> map = new HashMap<>();
         map.put("one", 1);
@@ -241,6 +233,13 @@ public class BiMapTest extends AbstractTest {
         assertEquals(1, biMap.get("one"));
         assertEquals(2, biMap.get("two"));
         assertEquals(3, biMap.get("three"));
+    }
+
+    @Test
+    public void testCopyOf_EmptyMap() {
+        BiMap<String, Integer> biMap = BiMap.copyOf(new HashMap<>());
+        assertNotNull(biMap);
+        assertTrue(biMap.isEmpty());
     }
 
     @Test
@@ -271,11 +270,86 @@ public class BiMapTest extends AbstractTest {
     }
 
     @Test
+    public void test_01() {
+        BiMap<String, Integer> biMap = new BiMap<>();
+        biMap.put("a", 1);
+        biMap.put("b", 2);
+        N.println(biMap);
+        assertEquals(1, biMap.get("a").intValue());
+        assertEquals("a", biMap.getByValue(1));
+
+        biMap.put("a", 11);
+        N.println(biMap);
+        assertNull(biMap.getByValue(1));
+
+        biMap.forcePut("c", 2);
+        assertNull(biMap.get("b"));
+
+        try {
+            biMap.put(null, 1);
+            fail("Should throw IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+        }
+
+        try {
+            biMap.put("d", null);
+            fail("Should throw IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+        }
+
+        Map<String, Integer> map = BiMap.of("e", 5);
+        biMap.putAll(map);
+        N.println(biMap);
+
+        assertEquals(5, biMap.remove("e").intValue());
+        assertEquals("c", biMap.removeByValue(2));
+
+        N.println(biMap);
+
+        assertTrue(biMap.containsKey("a"));
+        assertTrue(biMap.containsValue(11));
+        biMap.clear();
+
+        assertTrue(biMap.isEmpty());
+        assertTrue(biMap.size() == 0);
+
+        N.println(biMap.hashCode());
+        N.println(biMap.equals(new HashMap<>()));
+        N.println(biMap.toString());
+        N.println(biMap.keySet());
+        N.println(biMap.values());
+        assertNull(biMap.remove("a"));
+        assertNull(biMap.removeByValue(1));
+        BiMap<String, Integer> biMap2 = new BiMap<>(map.size() * 2);
+        biMap2.putAll(map);
+
+        N.println(biMap2);
+    }
+
+    @Test
     public void testGetByValueOrDefault() {
         BiMap<String, Integer> biMap = BiMap.of("one", 1, "two", 2);
         assertEquals("one", biMap.getByValueOrDefault(1, "default"));
         assertEquals("two", biMap.getByValueOrDefault(2, "default"));
         assertEquals("default", biMap.getByValueOrDefault(3, "default"));
+    }
+
+    @Test
+    public void testGetByValueOrDefault_Found() {
+        BiMap<String, Integer> biMap = BiMap.of("one", 1, "two", 2);
+        assertEquals("one", biMap.getByValueOrDefault(1, "default"));
+    }
+
+    @Test
+    public void testGetByValueOrDefault_NotFound() {
+        BiMap<String, Integer> biMap = BiMap.of("one", 1);
+        assertEquals("default", biMap.getByValueOrDefault(99, "default"));
+    }
+
+    @Test
+    public void testGetByValueOrDefault_NullDefault() {
+        BiMap<String, Integer> biMap = BiMap.of("one", 1);
+        assertNull(biMap.getByValueOrDefault(99, null));
     }
 
     @Test
@@ -308,6 +382,16 @@ public class BiMapTest extends AbstractTest {
     }
 
     @Test
+    public void testPut_ReplaceValueAndInverse() {
+        BiMap<String, Integer> biMap = BiMap.of("a", 1, "b", 2);
+        biMap.put("a", 10);
+        assertEquals(10, biMap.get("a"));
+        assertNull(biMap.getByValue(1));
+        assertEquals("a", biMap.getByValue(10));
+        assertEquals(2, biMap.size());
+    }
+
+    @Test
     public void testPutWithNullKey() {
         BiMap<String, Integer> biMap = new BiMap<>();
         assertThrows(IllegalArgumentException.class, () -> {
@@ -333,6 +417,14 @@ public class BiMapTest extends AbstractTest {
     }
 
     @Test
+    public void testForcePutReplaceValue() {
+        BiMap<String, Integer> biMap = BiMap.of("one", 1);
+        Integer oldValue = biMap.forcePut("one", 2);
+        assertEquals(1, oldValue);
+        assertEquals(2, biMap.get("one"));
+    }
+
+    @Test
     public void testForcePut() {
         BiMap<String, Integer> biMap = new BiMap<>();
         assertNull(biMap.forcePut("one", 1));
@@ -351,11 +443,24 @@ public class BiMapTest extends AbstractTest {
     }
 
     @Test
-    public void testForcePutReplaceValue() {
-        BiMap<String, Integer> biMap = BiMap.of("one", 1);
-        Integer oldValue = biMap.forcePut("one", 2);
-        assertEquals(1, oldValue);
+    public void testForcePutReplacingKey() {
+        BiMap<String, Integer> biMap = new BiMap<>();
+        biMap.put("one", 1);
+        biMap.put("two", 2);
+        assertEquals(1, biMap.forcePut("one", 2));
+        assertNull(biMap.get("two"));
         assertEquals(2, biMap.get("one"));
+        assertEquals(1, biMap.size());
+    }
+
+    @Test
+    public void testForcePut_SameKeyAndValue() {
+        BiMap<String, Integer> biMap = BiMap.of("one", 1);
+        Integer old = biMap.forcePut("one", 1);
+        assertEquals(1, old);
+        assertEquals(1, biMap.size());
+        assertEquals(1, biMap.get("one"));
+        assertEquals("one", biMap.getByValue(1));
     }
 
     @Test
@@ -433,6 +538,16 @@ public class BiMapTest extends AbstractTest {
     }
 
     @Test
+    public void testRemoveByValue_ClearsInverse() {
+        BiMap<String, Integer> biMap = BiMap.of("a", 1, "b", 2);
+        String removed = biMap.removeByValue(2);
+        assertEquals("b", removed);
+        assertNull(biMap.get("b"));
+        assertNull(biMap.getByValue(2));
+        assertEquals(1, biMap.size());
+    }
+
+    @Test
     public void testContainsKey() {
         BiMap<String, Integer> biMap = BiMap.of("one", 1, "two", 2);
         assertTrue(biMap.containsKey("one"));
@@ -490,39 +605,54 @@ public class BiMapTest extends AbstractTest {
     }
 
     @Test
-    public void testInversed() {
+    public void testEntrySet_Iteration() {
+        BiMap<String, Integer> biMap = BiMap.of("a", 1, "b", 2, "c", 3);
+        ImmutableSet<Map.Entry<String, Integer>> entries = biMap.entrySet();
+        assertEquals(3, entries.size());
+
+        int count = 0;
+        for (Map.Entry<String, Integer> entry : entries) {
+            assertNotNull(entry.getKey());
+            assertNotNull(entry.getValue());
+            count++;
+        }
+        assertEquals(3, count);
+    }
+
+    // inverted()
+    @Test
+    public void testInverted() {
         BiMap<String, Integer> biMap = BiMap.of("one", 1, "two", 2);
-        BiMap<Integer, String> inverse = biMap.inverted();
-
-        assertNotNull(inverse);
-        assertEquals(2, inverse.size());
-        assertEquals("one", inverse.get(1));
-        assertEquals("two", inverse.get(2));
-        assertEquals(1, inverse.getByValue("one"));
-        assertEquals(2, inverse.getByValue("two"));
+        BiMap<Integer, String> inverted = biMap.inverted();
+        assertNotNull(inverted);
+        assertEquals(2, inverted.size());
+        assertEquals("one", inverted.get(1));
+        assertEquals("two", inverted.get(2));
     }
 
     @Test
-    public void testInversedBackedBySameData() {
+    public void testInverted_modifications() {
         BiMap<String, Integer> biMap = BiMap.of("one", 1);
-        BiMap<Integer, String> inverse = biMap.inverted();
+        BiMap<Integer, String> inverted = biMap.inverted();
 
-        biMap.put("two", 2);
-        assertEquals(2, inverse.size());
-        assertEquals("two", inverse.get(2));
+        // Modifications through inverted view reflect in original
+        inverted.put(2, "two");
+        assertEquals(2, biMap.size());
+        assertEquals(2, biMap.get("two"));
 
-        inverse.put(3, "three");
-        assertEquals(3, biMap.size());
-        assertEquals(3, biMap.get("three"));
+        // Same instance returned on repeated calls
+        assertSame(inverted, biMap.inverted());
     }
 
     @Test
-    public void testInversedReturnsSameInstance() {
-        BiMap<String, Integer> biMap = BiMap.of("one", 1);
-        BiMap<Integer, String> inverse1 = biMap.inverted();
-        BiMap<Integer, String> inverse2 = biMap.inverted();
+    public void testInversedTwice() {
+        BiMap<String, Integer> biMap = new BiMap<>();
+        biMap.put("one", 1);
 
-        assertSame(inverse1, inverse2);
+        BiMap<Integer, String> inverse = biMap.inverted();
+        BiMap<String, Integer> inverseInverse = inverse.inverted();
+
+        assertSame(biMap, inverseInverse);
     }
 
     @Test
@@ -559,6 +689,46 @@ public class BiMapTest extends AbstractTest {
     }
 
     @Test
+    public void testDefaultConstructor() {
+        BiMap<String, Integer> biMap = new BiMap<>();
+        assertNotNull(biMap);
+        assertTrue(biMap.isEmpty());
+        assertEquals(0, biMap.size());
+    }
+
+    @Test
+    public void testConstructorWithInitialCapacity() {
+        BiMap<String, Integer> biMap = new BiMap<>(20);
+        assertNotNull(biMap);
+        assertTrue(biMap.isEmpty());
+        assertEquals(0, biMap.size());
+    }
+
+    @Test
+    public void testConstructorWithCapacityAndLoadFactor() {
+        BiMap<String, Integer> biMap = new BiMap<>(20, 0.8f);
+        assertNotNull(biMap);
+        assertTrue(biMap.isEmpty());
+        assertEquals(0, biMap.size());
+    }
+
+    @Test
+    public void testConstructorWithMapTypes() {
+        BiMap<String, Integer> biMap = new BiMap<>(LinkedHashMap.class, TreeMap.class);
+        assertNotNull(biMap);
+        assertTrue(biMap.isEmpty());
+        assertEquals(0, biMap.size());
+    }
+
+    @Test
+    public void testConstructorWithSuppliers() {
+        BiMap<String, Integer> biMap = new BiMap<>(HashMap::new, HashMap::new);
+        assertNotNull(biMap);
+        assertTrue(biMap.isEmpty());
+        assertEquals(0, biMap.size());
+    }
+
+    @Test
     public void testIsEmpty() {
         BiMap<String, Integer> biMap = new BiMap<>();
         assertTrue(biMap.isEmpty());
@@ -568,6 +738,13 @@ public class BiMapTest extends AbstractTest {
 
         biMap.remove("one");
         assertTrue(biMap.isEmpty());
+    }
+
+    @Test
+    public void testConstructorWithInitialCapacityAndLoadFactor() {
+        BiMap<String, Integer> biMap = new BiMap<>(100, 0.8f);
+        assertTrue(biMap.isEmpty());
+        assertEquals(0, biMap.size());
     }
 
     @Test
@@ -586,6 +763,34 @@ public class BiMapTest extends AbstractTest {
 
         biMap.clear();
         assertEquals(0, biMap.size());
+    }
+
+    @Test
+    public void testMultipleOperations() {
+        BiMap<String, Integer> biMap = new BiMap<>();
+
+        biMap.put("one", 1);
+        biMap.put("two", 2);
+        biMap.put("three", 3);
+        assertEquals(3, biMap.size());
+
+        biMap.put("one", 11);
+        assertEquals(11, biMap.get("one"));
+        assertNull(biMap.getByValue(1));
+
+        biMap.forcePut("four", 2);
+        assertNull(biMap.get("two"));
+        assertEquals("four", biMap.getByValue(2));
+        assertEquals(3, biMap.size());
+
+        biMap.remove("three");
+        assertEquals(2, biMap.size());
+
+        biMap.removeByValue(11);
+        assertEquals(1, biMap.size());
+
+        biMap.clear();
+        assertTrue(biMap.isEmpty());
     }
 
     @Test
@@ -614,12 +819,6 @@ public class BiMapTest extends AbstractTest {
     }
 
     @Test
-    public void testEqualsSameInstance() {
-        BiMap<String, Integer> biMap = BiMap.of("one", 1);
-        assertEquals(biMap, biMap);
-    }
-
-    @Test
     public void testEqualsWithDifferentMaps() {
         BiMap<String, Integer> biMap1 = BiMap.of("one", 1);
         BiMap<String, Integer> biMap2 = BiMap.of("two", 2);
@@ -628,15 +827,38 @@ public class BiMapTest extends AbstractTest {
     }
 
     @Test
-    public void testEqualsWithNull() {
-        BiMap<String, Integer> biMap = BiMap.of("one", 1);
-        assertNotEquals(biMap, null);
-    }
-
-    @Test
     public void testEqualsWithDifferentType() {
         BiMap<String, Integer> biMap = BiMap.of("one", 1);
         assertNotEquals(biMap, new HashMap<>());
+    }
+
+    @Test
+    public void testEqualsAndHashCode() {
+        BiMap<String, Integer> biMap1 = new BiMap<>();
+        biMap1.put("one", 1);
+        biMap1.put("two", 2);
+
+        BiMap<String, Integer> biMap2 = new BiMap<>();
+        biMap2.put("one", 1);
+        biMap2.put("two", 2);
+
+        assertEquals(biMap1, biMap2);
+        assertEquals(biMap1.hashCode(), biMap2.hashCode());
+
+        biMap2.put("three", 3);
+        assertNotEquals(biMap1, biMap2);
+    }
+
+    @Test
+    public void testEqualsSameInstance() {
+        BiMap<String, Integer> biMap = BiMap.of("one", 1);
+        assertEquals(biMap, biMap);
+    }
+
+    @Test
+    public void testEqualsWithNull() {
+        BiMap<String, Integer> biMap = BiMap.of("one", 1);
+        assertNotEquals(biMap, null);
     }
 
     @Test
@@ -715,13 +937,6 @@ public class BiMapTest extends AbstractTest {
     }
 
     @Test
-    public void testBuilderWithNullMap() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            BiMap.builder(null);
-        });
-    }
-
-    @Test
     public void testBuilderBuild() {
         BiMap<String, Integer> biMap = BiMap.<String, Integer> builder().put("one", 1).build();
 
@@ -730,227 +945,10 @@ public class BiMapTest extends AbstractTest {
     }
 
     @Test
-    public void testMultipleOperations() {
-        BiMap<String, Integer> biMap = new BiMap<>();
-
-        biMap.put("one", 1);
-        biMap.put("two", 2);
-        biMap.put("three", 3);
-        assertEquals(3, biMap.size());
-
-        biMap.put("one", 11);
-        assertEquals(11, biMap.get("one"));
-        assertNull(biMap.getByValue(1));
-
-        biMap.forcePut("four", 2);
-        assertNull(biMap.get("two"));
-        assertEquals("four", biMap.getByValue(2));
-        assertEquals(3, biMap.size());
-
-        biMap.remove("three");
-        assertEquals(2, biMap.size());
-
-        biMap.removeByValue(11);
-        assertEquals(1, biMap.size());
-
-        biMap.clear();
-        assertTrue(biMap.isEmpty());
-    }
-
-    @Test
-    public void testInverseOperations() {
-        BiMap<String, Integer> biMap = BiMap.of("one", 1, "two", 2);
-        BiMap<Integer, String> inverse = biMap.inverted();
-
-        inverse.put(3, "three");
-        assertEquals(3, biMap.size());
-        assertEquals(3, biMap.get("three"));
-
-        inverse.remove(1);
-        assertEquals(2, biMap.size());
-        assertNull(biMap.get("one"));
-
-        inverse.forcePut(2, "new-two");
-        assertEquals("new-two", biMap.getByValue(2));
-        assertEquals("new-two", inverse.get(2));
-    }
-
-    // inverted()
-    @Test
-    public void testInverted() {
-        BiMap<String, Integer> biMap = BiMap.of("one", 1, "two", 2);
-        BiMap<Integer, String> inverted = biMap.inverted();
-        assertNotNull(inverted);
-        assertEquals(2, inverted.size());
-        assertEquals("one", inverted.get(1));
-        assertEquals("two", inverted.get(2));
-    }
-
-    @Test
-    public void testInverted_modifications() {
-        BiMap<String, Integer> biMap = BiMap.of("one", 1);
-        BiMap<Integer, String> inverted = biMap.inverted();
-
-        // Modifications through inverted view reflect in original
-        inverted.put(2, "two");
-        assertEquals(2, biMap.size());
-        assertEquals(2, biMap.get("two"));
-
-        // Same instance returned on repeated calls
-        assertSame(inverted, biMap.inverted());
-    }
-
-    @Test
-    public void testConstructorWithInitialCapacityAndLoadFactor() {
-        BiMap<String, Integer> biMap = new BiMap<>(100, 0.8f);
-        assertTrue(biMap.isEmpty());
-        assertEquals(0, biMap.size());
-    }
-
-    @Test
-    public void testForcePutReplacingKey() {
-        BiMap<String, Integer> biMap = new BiMap<>();
-        biMap.put("one", 1);
-        biMap.put("two", 2);
-        assertEquals(1, biMap.forcePut("one", 2));
-        assertNull(biMap.get("two"));
-        assertEquals(2, biMap.get("one"));
-        assertEquals(1, biMap.size());
-    }
-
-    @Test
-    public void testInversedTwice() {
-        BiMap<String, Integer> biMap = new BiMap<>();
-        biMap.put("one", 1);
-
-        BiMap<Integer, String> inverse = biMap.inverted();
-        BiMap<String, Integer> inverseInverse = inverse.inverted();
-
-        assertSame(biMap, inverseInverse);
-    }
-
-    @Test
-    public void testOf() {
-        BiMap<String, Integer> biMap = BiMap.of("one", 1);
-        assertEquals(1, biMap.size());
-        assertEquals(1, biMap.get("one"));
-    }
-
-    @Test
-    public void testOfMultiple() {
-        BiMap<String, Integer> biMap = BiMap.of("one", 1, "two", 2, "three", 3);
-        assertEquals(3, biMap.size());
-        assertEquals(1, biMap.get("one"));
-        assertEquals(2, biMap.get("two"));
-        assertEquals(3, biMap.get("three"));
-    }
-
-    @Test
-    public void testOfManyPairs() {
-        BiMap<String, Integer> biMap = BiMap.of("one", 1, "two", 2, "three", 3, "four", 4, "five", 5, "six", 6, "seven", 7, "eight", 8, "nine", 9, "ten", 10);
-        assertEquals(10, biMap.size());
-        assertEquals(10, biMap.get("ten"));
-    }
-
-    @Test
-    public void testEqualsAndHashCode() {
-        BiMap<String, Integer> biMap1 = new BiMap<>();
-        biMap1.put("one", 1);
-        biMap1.put("two", 2);
-
-        BiMap<String, Integer> biMap2 = new BiMap<>();
-        biMap2.put("one", 1);
-        biMap2.put("two", 2);
-
-        assertEquals(biMap1, biMap2);
-        assertEquals(biMap1.hashCode(), biMap2.hashCode());
-
-        biMap2.put("three", 3);
-        assertNotEquals(biMap1, biMap2);
-    }
-
-    @Test
-    public void testGetByValueOrDefault_Found() {
-        BiMap<String, Integer> biMap = BiMap.of("one", 1, "two", 2);
-        assertEquals("one", biMap.getByValueOrDefault(1, "default"));
-    }
-
-    @Test
-    public void testGetByValueOrDefault_NotFound() {
-        BiMap<String, Integer> biMap = BiMap.of("one", 1);
-        assertEquals("default", biMap.getByValueOrDefault(99, "default"));
-    }
-
-    @Test
-    public void testGetByValueOrDefault_NullDefault() {
-        BiMap<String, Integer> biMap = BiMap.of("one", 1);
-        assertNull(biMap.getByValueOrDefault(99, null));
-    }
-
-    @Test
-    public void testEntrySet_Iteration() {
-        BiMap<String, Integer> biMap = BiMap.of("a", 1, "b", 2, "c", 3);
-        ImmutableSet<Map.Entry<String, Integer>> entries = biMap.entrySet();
-        assertEquals(3, entries.size());
-
-        int count = 0;
-        for (Map.Entry<String, Integer> entry : entries) {
-            assertNotNull(entry.getKey());
-            assertNotNull(entry.getValue());
-            count++;
-        }
-        assertEquals(3, count);
-    }
-
-    @Test
-    public void testForcePut_SameKeyAndValue() {
-        BiMap<String, Integer> biMap = BiMap.of("one", 1);
-        Integer old = biMap.forcePut("one", 1);
-        assertEquals(1, old);
-        assertEquals(1, biMap.size());
-        assertEquals(1, biMap.get("one"));
-        assertEquals("one", biMap.getByValue(1));
-    }
-
-    @Test
-    public void testCopyOf_EmptyMap() {
-        BiMap<String, Integer> biMap = BiMap.copyOf(new HashMap<>());
-        assertNotNull(biMap);
-        assertTrue(biMap.isEmpty());
-    }
-
-    @Test
-    public void testPut_ReplaceValueAndInverse() {
-        BiMap<String, Integer> biMap = BiMap.of("a", 1, "b", 2);
-        biMap.put("a", 10);
-        assertEquals(10, biMap.get("a"));
-        assertNull(biMap.getByValue(1));
-        assertEquals("a", biMap.getByValue(10));
-        assertEquals(2, biMap.size());
-    }
-
-    @Test
-    public void testRemoveByValue_ClearsInverse() {
-        BiMap<String, Integer> biMap = BiMap.of("a", 1, "b", 2);
-        String removed = biMap.removeByValue(2);
-        assertEquals("b", removed);
-        assertNull(biMap.get("b"));
-        assertNull(biMap.getByValue(2));
-        assertEquals(1, biMap.size());
-    }
-
-    @Test
-    public void testInverse_PutWithNullKey() {
-        BiMap<String, Integer> biMap = BiMap.of("a", 1);
-        BiMap<Integer, String> inverse = biMap.inverted();
-        assertThrows(IllegalArgumentException.class, () -> inverse.put(null, "b"));
-    }
-
-    @Test
-    public void testInverse_PutWithNullValue() {
-        BiMap<String, Integer> biMap = BiMap.of("a", 1);
-        BiMap<Integer, String> inverse = biMap.inverted();
-        assertThrows(IllegalArgumentException.class, () -> inverse.put(2, null));
+    public void testBuilderWithNullMap() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            BiMap.builder(null);
+        });
     }
 
 }

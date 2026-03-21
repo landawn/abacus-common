@@ -3,12 +3,10 @@ package com.landawn.abacus.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class DayOfWeekTest extends TestBase {
 
     @Test
@@ -34,13 +32,6 @@ public class DayOfWeekTest extends TestBase {
     }
 
     @Test
-    public void testValueOf_withInvalidIntValue() {
-        assertThrows(IllegalArgumentException.class, () -> DayOfWeek.valueOf(-1));
-        assertThrows(IllegalArgumentException.class, () -> DayOfWeek.valueOf(7));
-        assertThrows(IllegalArgumentException.class, () -> DayOfWeek.valueOf(100));
-    }
-
-    @Test
     public void testValueOf_withStringName() {
         assertEquals(DayOfWeek.SUNDAY, DayOfWeek.valueOf("SUNDAY"));
         assertEquals(DayOfWeek.MONDAY, DayOfWeek.valueOf("MONDAY"));
@@ -49,6 +40,27 @@ public class DayOfWeekTest extends TestBase {
         assertEquals(DayOfWeek.THURSDAY, DayOfWeek.valueOf("THURSDAY"));
         assertEquals(DayOfWeek.FRIDAY, DayOfWeek.valueOf("FRIDAY"));
         assertEquals(DayOfWeek.SATURDAY, DayOfWeek.valueOf("SATURDAY"));
+    }
+
+    @Test
+    public void testRoundTrip() {
+        for (DayOfWeek day : DayOfWeek.values()) {
+            assertEquals(day, DayOfWeek.valueOf(day.intValue()));
+            assertEquals(day.intValue(), DayOfWeek.valueOf(day.intValue()).intValue());
+        }
+    }
+
+    @Test
+    public void testValueOf_withInvalidIntValue() {
+        assertThrows(IllegalArgumentException.class, () -> DayOfWeek.valueOf(-1));
+        assertThrows(IllegalArgumentException.class, () -> DayOfWeek.valueOf(7));
+        assertThrows(IllegalArgumentException.class, () -> DayOfWeek.valueOf(100));
+    }
+
+    @Test
+    public void testValueOfStringInvalid() {
+        assertThrows(IllegalArgumentException.class, () -> DayOfWeek.valueOf("INVALID"));
+        assertThrows(IllegalArgumentException.class, () -> DayOfWeek.valueOf("sunday"));
     }
 
     @Test
@@ -87,12 +99,6 @@ public class DayOfWeekTest extends TestBase {
     }
 
     @Test
-    public void testValueOfStringInvalid() {
-        assertThrows(IllegalArgumentException.class, () -> DayOfWeek.valueOf("INVALID"));
-        assertThrows(IllegalArgumentException.class, () -> DayOfWeek.valueOf("sunday"));
-    }
-
-    @Test
     public void testEnumOrdinal() {
         assertEquals(0, DayOfWeek.SUNDAY.ordinal());
         assertEquals(1, DayOfWeek.MONDAY.ordinal());
@@ -101,14 +107,6 @@ public class DayOfWeekTest extends TestBase {
         assertEquals(4, DayOfWeek.THURSDAY.ordinal());
         assertEquals(5, DayOfWeek.FRIDAY.ordinal());
         assertEquals(6, DayOfWeek.SATURDAY.ordinal());
-    }
-
-    @Test
-    public void testRoundTrip() {
-        for (DayOfWeek day : DayOfWeek.values()) {
-            assertEquals(day, DayOfWeek.valueOf(day.intValue()));
-            assertEquals(day.intValue(), DayOfWeek.valueOf(day.intValue()).intValue());
-        }
     }
 
 }

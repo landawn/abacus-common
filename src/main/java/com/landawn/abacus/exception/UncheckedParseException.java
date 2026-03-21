@@ -19,22 +19,22 @@ import java.io.Serial;
 /**
  * A runtime exception that wraps {@link java.text.ParseException}, allowing parsing exceptions
  * to be thrown without being declared in method signatures.
- * 
+ *
  * <p>This exception is useful when working with date/time parsing, number formatting, or other
  * text parsing operations in contexts where checked exceptions cannot be declared, such as:</p>
  * <ul>
  *   <li>Lambda expressions and functional interfaces</li>
  *   <li>Stream operations for parsing collections of strings</li>
- *   <li>Implementing interfaces that don't declare ParseException</li>
+ *   <li>Implementing interfaces that don't declare {@code ParseException}</li>
  *   <li>Simplifying error handling in parsing-heavy code</li>
  * </ul>
- * 
+ *
  * <p>Note the distinction between this class and {@link com.landawn.abacus.exception.ParsingException}:</p>
  * <ul>
  *   <li>{@link com.landawn.abacus.exception.ParsingException} - A runtime exception for general parsing errors</li>
  *   <li>{@code UncheckedParseException} - Specifically wraps {@link java.text.ParseException}</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // In a stream operation parsing dates
@@ -59,10 +59,10 @@ import java.io.Serial;
  *     }
  * };
  * }</pre>
- * 
+ *
  * @see UncheckedException
  * @see java.text.ParseException
- * @see com.landawn.abacus.exception.ParsingException
+ * @see ParsingException
  */
 public class UncheckedParseException extends UncheckedException {
 
@@ -72,7 +72,7 @@ public class UncheckedParseException extends UncheckedException {
     /**
      * Constructs a new {@code UncheckedParseException} by wrapping the specified {@link java.text.ParseException}.
      *
-     * <p>This constructor preserves all information from the original ParseException including
+     * <p>This constructor preserves all information from the original {@code ParseException} including
      * its message, error offset, stack trace, and any suppressed exceptions.</p>
      *
      * <p><b>Usage Examples:</b></p>

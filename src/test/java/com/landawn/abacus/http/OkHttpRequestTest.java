@@ -21,7 +21,6 @@ import java.util.concurrent.Executors;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -39,7 +38,6 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 
-@Tag("2025")
 public class OkHttpRequestTest extends TestBase {
 
     private MockWebServer server;
@@ -90,6 +88,14 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
+    public void testCreateWithHttpUrl() {
+        OkHttpClient client = new OkHttpClient();
+        HttpUrl httpUrl = HttpUrl.parse("https://api.example.com");
+        OkHttpRequest request = OkHttpRequest.create(httpUrl, client);
+        assertNotNull(request);
+    }
+
+    @Test
     public void testCreateWithURL() throws Exception {
         OkHttpClient client = new OkHttpClient();
         URL url = new URL("https://api.example.com");
@@ -98,11 +104,9 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testCreateWithHttpUrl() {
-        OkHttpClient client = new OkHttpClient();
-        HttpUrl httpUrl = HttpUrl.parse("https://api.example.com");
-        OkHttpRequest request = OkHttpRequest.create(httpUrl, client);
-        assertNotNull(request);
+    public void testInvalidUrlArguments() {
+        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.create((String) null, new OkHttpClient()));
+        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.create("", new OkHttpClient()));
     }
 
     @Test
@@ -112,23 +116,9 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testUrlWithURL() throws Exception {
-        URL url = new URL("https://api.example.com");
-        OkHttpRequest request = OkHttpRequest.url(url);
-        assertNotNull(request);
-    }
-
-    @Test
     public void testUrlWithHttpUrl() {
         HttpUrl httpUrl = HttpUrl.parse("https://api.example.com");
         OkHttpRequest request = OkHttpRequest.url(httpUrl);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testUrlWithURLAndTimeouts() throws Exception {
-        URL url = new URL("https://api.example.com");
-        OkHttpRequest request = OkHttpRequest.url(url, 5000L, 10000L);
         assertNotNull(request);
     }
 
@@ -143,6 +133,44 @@ public class OkHttpRequestTest extends TestBase {
     public void testUrlWithStringAndTimeouts() {
         OkHttpRequest request = OkHttpRequest.url("https://api.example.com", 5000L, 10000L);
         assertNotNull(request);
+    }
+
+    @Test
+    public void testAsyncMethodsReturnTypes() {
+        OkHttpRequest request = OkHttpRequest.url("https://httpbin.org/get");
+
+        ContinuableFuture<?> future1 = request.asyncGet();
+        assertNotNull(future1);
+
+        Executor executor = Executors.newSingleThreadExecutor();
+        ContinuableFuture<?> future2 = request.asyncGet(executor);
+        assertNotNull(future2);
+
+        ContinuableFuture<String> future3 = request.asyncGet(String.class);
+        assertNotNull(future3);
+
+        ContinuableFuture<String> future4 = request.asyncGet(String.class, executor);
+        assertNotNull(future4);
+    }
+
+    @Test
+    public void testUrlWithURL() throws Exception {
+        URL url = new URL("https://api.example.com");
+        OkHttpRequest request = OkHttpRequest.url(url);
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testUrlWithURLAndTimeouts() throws Exception {
+        URL url = new URL("https://api.example.com");
+        OkHttpRequest request = OkHttpRequest.url(url, 5000L, 10000L);
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testInvalidUrl() {
+        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url(""));
+        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url((String) null));
     }
 
     // --- Configuration methods ---
@@ -199,6 +227,20 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
+    public void testBasicAuth() {
+        OkHttpRequest request = OkHttpRequest.url(baseUrl);
+        OkHttpRequest result = request.basicAuth("user", "password");
+        assertSame(request, result);
+    }
+
+    @Test
+    public void testHeader() {
+        OkHttpRequest request = OkHttpRequest.url(baseUrl);
+        OkHttpRequest result = request.header("X-Custom-Header", "value");
+        assertSame(request, result);
+    }
+
+    @Test
     public void testHeadersWithThreeHeaders() {
         OkHttpRequest request = OkHttpRequest.url("https://api.example.com")
                 .headers("Accept", "application/json", "Content-Type", "application/json", "Authorization", "Bearer token");
@@ -243,226 +285,6 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testQueryWithMap() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("param1", "value1");
-        params.put("param2", 123);
-
-        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").query(params);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testJsonBodyWithObject() {
-        Map<String, String> obj = new HashMap<>();
-        obj.put("key", "value");
-
-        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").jsonBody(obj);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testFormBodyWithMap() {
-        Map<String, String> formData = new HashMap<>();
-        formData.put("username", "john");
-        formData.put("password", "secret");
-
-        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").formBody(formData);
-        assertNotNull(request);
-
-        OkHttpRequest requestWithEmpty = OkHttpRequest.url("https://api.example.com").formBody(new HashMap<>());
-        assertNotNull(requestWithEmpty);
-    }
-
-    @Test
-    public void testFormBodyWithBean() {
-        TestBean bean = new TestBean();
-        bean.setName("test");
-        bean.setValue("value");
-
-        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").formBody(bean);
-        assertNotNull(request);
-
-        OkHttpRequest requestWithNull = OkHttpRequest.url("https://api.example.com").formBody((Object) null);
-        assertNotNull(requestWithNull);
-    }
-
-    @Test
-    public void testFormBodyWithNonBean() {
-        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url("https://api.example.com").formBody("not a bean"));
-    }
-
-    @Test
-    public void testBodyWithRequestBody() {
-        RequestBody body = RequestBody.create("test", MediaType.get("text/plain"));
-        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").body(body);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testBodyWithByteArrayAndMediaType() {
-        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").body("test".getBytes(), MediaType.get("text/plain"));
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testBodyWithByteArrayOffsetAndMediaType() {
-        byte[] data = "test data".getBytes();
-        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").body(data, 0, 4, MediaType.get("text/plain"));
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testBodyWithFileAndMediaType() throws IOException {
-        File tempFile = File.createTempFile("test", ".txt");
-        tempFile.deleteOnExit();
-        Files.write(tempFile.toPath(), "test content".getBytes());
-
-        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").body(tempFile, MediaType.get("text/plain"));
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testInvalidUrl() {
-        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url(""));
-        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url((String) null));
-    }
-
-    @Test
-    public void testAsyncMethodsReturnTypes() {
-        OkHttpRequest request = OkHttpRequest.url("https://httpbin.org/get");
-
-        ContinuableFuture<?> future1 = request.asyncGet();
-        assertNotNull(future1);
-
-        Executor executor = Executors.newSingleThreadExecutor();
-        ContinuableFuture<?> future2 = request.asyncGet(executor);
-        assertNotNull(future2);
-
-        ContinuableFuture<String> future3 = request.asyncGet(String.class);
-        assertNotNull(future3);
-
-        ContinuableFuture<String> future4 = request.asyncGet(String.class, executor);
-        assertNotNull(future4);
-    }
-
-    @Test
-    public void testAsyncPostMethods() {
-        OkHttpRequest request = OkHttpRequest.url("https://httpbin.org/post").jsonBody("{}");
-
-        ContinuableFuture<?> future1 = request.asyncPost();
-        assertNotNull(future1);
-
-        Executor executor = Executors.newSingleThreadExecutor();
-        ContinuableFuture<?> future2 = request.asyncPost(executor);
-        assertNotNull(future2);
-
-        ContinuableFuture<String> future3 = request.asyncPost(String.class);
-        assertNotNull(future3);
-
-        ContinuableFuture<String> future4 = request.asyncPost(String.class, executor);
-        assertNotNull(future4);
-    }
-
-    @Test
-    public void testAsyncPutMethods() {
-        OkHttpRequest request = OkHttpRequest.url("https://httpbin.org/put").jsonBody("{}");
-
-        ContinuableFuture<?> future1 = request.asyncPut();
-        assertNotNull(future1);
-
-        Executor executor = Executors.newSingleThreadExecutor();
-        ContinuableFuture<?> future2 = request.asyncPut(executor);
-        assertNotNull(future2);
-
-        ContinuableFuture<String> future3 = request.asyncPut(String.class);
-        assertNotNull(future3);
-
-        ContinuableFuture<String> future4 = request.asyncPut(String.class, executor);
-        assertNotNull(future4);
-    }
-
-    @Test
-    public void testAsyncPatchMethods() {
-        OkHttpRequest request = OkHttpRequest.url("https://httpbin.org/patch").jsonBody("{}");
-
-        ContinuableFuture<?> future1 = request.asyncPatch();
-        assertNotNull(future1);
-
-        Executor executor = Executors.newSingleThreadExecutor();
-        ContinuableFuture<?> future2 = request.asyncPatch(executor);
-        assertNotNull(future2);
-
-        ContinuableFuture<String> future3 = request.asyncPatch(String.class);
-        assertNotNull(future3);
-
-        ContinuableFuture<String> future4 = request.asyncPatch(String.class, executor);
-        assertNotNull(future4);
-    }
-
-    @Test
-    public void testAsyncDeleteMethods() {
-        OkHttpRequest request = OkHttpRequest.url("https://httpbin.org/delete");
-
-        ContinuableFuture<?> future1 = request.asyncDelete();
-        assertNotNull(future1);
-
-        Executor executor = Executors.newSingleThreadExecutor();
-        ContinuableFuture<?> future2 = request.asyncDelete(executor);
-        assertNotNull(future2);
-
-        ContinuableFuture<String> future3 = request.asyncDelete(String.class);
-        assertNotNull(future3);
-
-        ContinuableFuture<String> future4 = request.asyncDelete(String.class, executor);
-        assertNotNull(future4);
-    }
-
-    @Test
-    public void testAsyncHeadMethods() {
-        OkHttpRequest request = OkHttpRequest.url("https://httpbin.org/get");
-
-        ContinuableFuture<?> future1 = request.asyncHead();
-        assertNotNull(future1);
-
-        Executor executor = Executors.newSingleThreadExecutor();
-        ContinuableFuture<?> future2 = request.asyncHead(executor);
-        assertNotNull(future2);
-    }
-
-    @Test
-    public void testAsyncExecuteMethods() {
-        OkHttpRequest request = OkHttpRequest.url("https://httpbin.org/get");
-
-        ContinuableFuture<?> future1 = request.asyncExecute(HttpMethod.GET);
-        assertNotNull(future1);
-
-        Executor executor = Executors.newSingleThreadExecutor();
-        ContinuableFuture<?> future2 = request.asyncExecute(HttpMethod.GET, executor);
-        assertNotNull(future2);
-
-        ContinuableFuture<String> future3 = request.asyncExecute(HttpMethod.GET, String.class);
-        assertNotNull(future3);
-
-        ContinuableFuture<String> future4 = request.asyncExecute(HttpMethod.GET, String.class, executor);
-        assertNotNull(future4);
-    }
-
-    @Test
-    public void testBasicAuth() {
-        OkHttpRequest request = OkHttpRequest.url(baseUrl);
-        OkHttpRequest result = request.basicAuth("user", "password");
-        assertSame(request, result);
-    }
-
-    @Test
-    public void testHeader() {
-        OkHttpRequest request = OkHttpRequest.url(baseUrl);
-        OkHttpRequest result = request.header("X-Custom-Header", "value");
-        assertSame(request, result);
-    }
-
-    @Test
     public void testHeadersWithTwoHeaders() {
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
         OkHttpRequest result = request.headers("Header1", "value1", "Header2", "value2");
@@ -502,6 +324,16 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
+    public void testQueryWithMap() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("param1", "value1");
+        params.put("param2", 123);
+
+        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").query(params);
+        assertNotNull(request);
+    }
+
+    @Test
     public void testQueryString() {
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
         OkHttpRequest result = request.query("param1=value1&param2=value2");
@@ -516,6 +348,15 @@ public class OkHttpRequestTest extends TestBase {
         params.put("param2", 123);
         OkHttpRequest result = request.query(params);
         assertSame(request, result);
+    }
+
+    @Test
+    public void testJsonBodyWithObject() {
+        Map<String, String> obj = new HashMap<>();
+        obj.put("key", "value");
+
+        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").jsonBody(obj);
+        assertNotNull(request);
     }
 
     @Test
@@ -548,6 +389,32 @@ public class OkHttpRequestTest extends TestBase {
         obj.put("name", "John");
         OkHttpRequest result = request.xmlBody(obj);
         assertSame(request, result);
+    }
+
+    @Test
+    public void testFormBodyWithMap() {
+        Map<String, String> formData = new HashMap<>();
+        formData.put("username", "john");
+        formData.put("password", "secret");
+
+        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").formBody(formData);
+        assertNotNull(request);
+
+        OkHttpRequest requestWithEmpty = OkHttpRequest.url("https://api.example.com").formBody(new HashMap<>());
+        assertNotNull(requestWithEmpty);
+    }
+
+    @Test
+    public void testFormBodyWithBean() {
+        TestBean bean = new TestBean();
+        bean.setName("test");
+        bean.setValue("value");
+
+        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").formBody(bean);
+        assertNotNull(request);
+
+        OkHttpRequest requestWithNull = OkHttpRequest.url("https://api.example.com").formBody((Object) null);
+        assertNotNull(requestWithNull);
     }
 
     @Test
@@ -586,9 +453,34 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
+    public void testFormBodyWithNonBean() {
+        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url("https://api.example.com").formBody("not a bean"));
+    }
+
+    @Test
     public void testFormBodyInvalidObject() {
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
         assertThrows(IllegalArgumentException.class, () -> request.formBody("not a bean"));
+    }
+
+    @Test
+    public void testBodyWithRequestBody() {
+        RequestBody body = RequestBody.create("test", MediaType.get("text/plain"));
+        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").body(body);
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testBodyWithByteArrayAndMediaType() {
+        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").body("test".getBytes(), MediaType.get("text/plain"));
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testBodyWithByteArrayOffsetAndMediaType() {
+        byte[] data = "test data".getBytes();
+        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").body(data, 0, 4, MediaType.get("text/plain"));
+        assertNotNull(request);
     }
 
     @Test
@@ -648,6 +540,16 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
+    public void testBodyWithFileAndMediaType() throws IOException {
+        File tempFile = File.createTempFile("test", ".txt");
+        tempFile.deleteOnExit();
+        Files.write(tempFile.toPath(), "test content".getBytes());
+
+        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").body(tempFile, MediaType.get("text/plain"));
+        assertNotNull(request);
+    }
+
+    @Test
     public void testBodyFile() throws IOException {
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
         File tempFile = File.createTempFile("test", ".txt");
@@ -675,6 +577,36 @@ public class OkHttpRequestTest extends TestBase {
 
         String result = request.get(String.class);
         assertEquals("GET response", result);
+    }
+
+    @Test
+    public void testGetWithQuery() throws IOException, InterruptedException {
+        server.enqueue(new MockResponse().setBody("Response"));
+        OkHttpRequest request = OkHttpRequest.url(baseUrl);
+        request.query("param=value");
+
+        String result = request.get(String.class);
+        assertEquals("Response", result);
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertTrue(recordedRequest.getPath().contains("param=value"));
+    }
+
+    @Test
+    public void testGetWithMapQuery() throws IOException, InterruptedException {
+        server.enqueue(new MockResponse().setBody("Response"));
+        OkHttpRequest request = OkHttpRequest.url(baseUrl);
+        Map<String, Object> params = new HashMap<>();
+        params.put("key", "value");
+        params.put("num", 123);
+        request.query(params);
+
+        String result = request.get(String.class);
+        assertEquals("Response", result);
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertTrue(recordedRequest.getPath().contains("key=value"));
+        assertTrue(recordedRequest.getPath().contains("num=123"));
     }
 
     @Test
@@ -872,6 +804,32 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
+    public void testExecute_FormUrlEncodedResponseToBean() throws IOException {
+        server.enqueue(new MockResponse().setHeader("Content-Type", "application/x-www-form-urlencoded").setBody("name=encoded&value=body"));
+
+        TestBean result = OkHttpRequest.url(baseUrl).execute(HttpMethod.GET, TestBean.class);
+
+        assertNotNull(result);
+        assertEquals("encoded", result.getName());
+        assertEquals("body", result.getValue());
+    }
+
+    @Test
+    public void testExecute_HttpUrlWithQueryParameters() throws IOException, InterruptedException {
+        server.enqueue(new MockResponse().setBody("Query response"));
+
+        OkHttpRequest request = OkHttpRequest.url(server.url("/search"));
+        request.query(Map.of("q", "hello world", "page", 2));
+
+        String result = request.execute(HttpMethod.GET, String.class);
+        RecordedRequest recordedRequest = server.takeRequest();
+
+        assertEquals("Query response", result);
+        assertEquals("hello world", recordedRequest.getRequestUrl().queryParameter("q"));
+        assertEquals("2", recordedRequest.getRequestUrl().queryParameter("page"));
+    }
+
+    @Test
     public void testAsyncGet() throws Exception {
         server.enqueue(new MockResponse().setBody("Async GET response"));
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
@@ -917,6 +875,24 @@ public class OkHttpRequestTest extends TestBase {
         ContinuableFuture<String> future = request.asyncGet(String.class, executor);
         String result = future.get();
         assertEquals("Async GET response", result);
+    }
+
+    @Test
+    public void testAsyncPostMethods() {
+        OkHttpRequest request = OkHttpRequest.url("https://httpbin.org/post").jsonBody("{}");
+
+        ContinuableFuture<?> future1 = request.asyncPost();
+        assertNotNull(future1);
+
+        Executor executor = Executors.newSingleThreadExecutor();
+        ContinuableFuture<?> future2 = request.asyncPost(executor);
+        assertNotNull(future2);
+
+        ContinuableFuture<String> future3 = request.asyncPost(String.class);
+        assertNotNull(future3);
+
+        ContinuableFuture<String> future4 = request.asyncPost(String.class, executor);
+        assertNotNull(future4);
     }
 
     @Test
@@ -972,6 +948,24 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
+    public void testAsyncPutMethods() {
+        OkHttpRequest request = OkHttpRequest.url("https://httpbin.org/put").jsonBody("{}");
+
+        ContinuableFuture<?> future1 = request.asyncPut();
+        assertNotNull(future1);
+
+        Executor executor = Executors.newSingleThreadExecutor();
+        ContinuableFuture<?> future2 = request.asyncPut(executor);
+        assertNotNull(future2);
+
+        ContinuableFuture<String> future3 = request.asyncPut(String.class);
+        assertNotNull(future3);
+
+        ContinuableFuture<String> future4 = request.asyncPut(String.class, executor);
+        assertNotNull(future4);
+    }
+
+    @Test
     public void testAsyncPut() throws Exception {
         server.enqueue(new MockResponse().setBody("Async PUT response"));
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
@@ -1021,6 +1015,24 @@ public class OkHttpRequestTest extends TestBase {
         ContinuableFuture<String> future = request.asyncPut(String.class, executor);
         String result = future.get();
         assertEquals("Async PUT response", result);
+    }
+
+    @Test
+    public void testAsyncPatchMethods() {
+        OkHttpRequest request = OkHttpRequest.url("https://httpbin.org/patch").jsonBody("{}");
+
+        ContinuableFuture<?> future1 = request.asyncPatch();
+        assertNotNull(future1);
+
+        Executor executor = Executors.newSingleThreadExecutor();
+        ContinuableFuture<?> future2 = request.asyncPatch(executor);
+        assertNotNull(future2);
+
+        ContinuableFuture<String> future3 = request.asyncPatch(String.class);
+        assertNotNull(future3);
+
+        ContinuableFuture<String> future4 = request.asyncPatch(String.class, executor);
+        assertNotNull(future4);
     }
 
     @Test
@@ -1076,6 +1088,24 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
+    public void testAsyncDeleteMethods() {
+        OkHttpRequest request = OkHttpRequest.url("https://httpbin.org/delete");
+
+        ContinuableFuture<?> future1 = request.asyncDelete();
+        assertNotNull(future1);
+
+        Executor executor = Executors.newSingleThreadExecutor();
+        ContinuableFuture<?> future2 = request.asyncDelete(executor);
+        assertNotNull(future2);
+
+        ContinuableFuture<String> future3 = request.asyncDelete(String.class);
+        assertNotNull(future3);
+
+        ContinuableFuture<String> future4 = request.asyncDelete(String.class, executor);
+        assertNotNull(future4);
+    }
+
+    @Test
     public void testAsyncDelete() throws Exception {
         server.enqueue(new MockResponse().setBody("Async DELETE response"));
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
@@ -1124,6 +1154,18 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
+    public void testAsyncHeadMethods() {
+        OkHttpRequest request = OkHttpRequest.url("https://httpbin.org/get");
+
+        ContinuableFuture<?> future1 = request.asyncHead();
+        assertNotNull(future1);
+
+        Executor executor = Executors.newSingleThreadExecutor();
+        ContinuableFuture<?> future2 = request.asyncHead(executor);
+        assertNotNull(future2);
+    }
+
+    @Test
     public void testAsyncHead() throws Exception {
         server.enqueue(new MockResponse());
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
@@ -1146,6 +1188,24 @@ public class OkHttpRequestTest extends TestBase {
         assertNotNull(response);
 
         IOUtil.close(response);
+    }
+
+    @Test
+    public void testAsyncExecuteMethods() {
+        OkHttpRequest request = OkHttpRequest.url("https://httpbin.org/get");
+
+        ContinuableFuture<?> future1 = request.asyncExecute(HttpMethod.GET);
+        assertNotNull(future1);
+
+        Executor executor = Executors.newSingleThreadExecutor();
+        ContinuableFuture<?> future2 = request.asyncExecute(HttpMethod.GET, executor);
+        assertNotNull(future2);
+
+        ContinuableFuture<String> future3 = request.asyncExecute(HttpMethod.GET, String.class);
+        assertNotNull(future3);
+
+        ContinuableFuture<String> future4 = request.asyncExecute(HttpMethod.GET, String.class, executor);
+        assertNotNull(future4);
     }
 
     @Test
@@ -1194,68 +1254,6 @@ public class OkHttpRequestTest extends TestBase {
         ContinuableFuture<String> future = request.asyncExecute(HttpMethod.GET, String.class, executor);
         String result = future.get();
         assertEquals("Async Execute response", result);
-    }
-
-    @Test
-    public void testInvalidUrlArguments() {
-        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.create((String) null, new OkHttpClient()));
-        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.create("", new OkHttpClient()));
-    }
-
-    @Test
-    public void testGetWithQuery() throws IOException, InterruptedException {
-        server.enqueue(new MockResponse().setBody("Response"));
-        OkHttpRequest request = OkHttpRequest.url(baseUrl);
-        request.query("param=value");
-
-        String result = request.get(String.class);
-        assertEquals("Response", result);
-
-        RecordedRequest recordedRequest = server.takeRequest();
-        assertTrue(recordedRequest.getPath().contains("param=value"));
-    }
-
-    @Test
-    public void testGetWithMapQuery() throws IOException, InterruptedException {
-        server.enqueue(new MockResponse().setBody("Response"));
-        OkHttpRequest request = OkHttpRequest.url(baseUrl);
-        Map<String, Object> params = new HashMap<>();
-        params.put("key", "value");
-        params.put("num", 123);
-        request.query(params);
-
-        String result = request.get(String.class);
-        assertEquals("Response", result);
-
-        RecordedRequest recordedRequest = server.takeRequest();
-        assertTrue(recordedRequest.getPath().contains("key=value"));
-        assertTrue(recordedRequest.getPath().contains("num=123"));
-    }
-
-    @Test
-    public void testExecute_FormUrlEncodedResponseToBean() throws IOException {
-        server.enqueue(new MockResponse().setHeader("Content-Type", "application/x-www-form-urlencoded").setBody("name=encoded&value=body"));
-
-        TestBean result = OkHttpRequest.url(baseUrl).execute(HttpMethod.GET, TestBean.class);
-
-        assertNotNull(result);
-        assertEquals("encoded", result.getName());
-        assertEquals("body", result.getValue());
-    }
-
-    @Test
-    public void testExecute_HttpUrlWithQueryParameters() throws IOException, InterruptedException {
-        server.enqueue(new MockResponse().setBody("Query response"));
-
-        OkHttpRequest request = OkHttpRequest.url(server.url("/search"));
-        request.query(Map.of("q", "hello world", "page", 2));
-
-        String result = request.execute(HttpMethod.GET, String.class);
-        RecordedRequest recordedRequest = server.takeRequest();
-
-        assertEquals("Query response", result);
-        assertEquals("hello world", recordedRequest.getRequestUrl().queryParameter("q"));
-        assertEquals("2", recordedRequest.getRequestUrl().queryParameter("page"));
     }
 
 }

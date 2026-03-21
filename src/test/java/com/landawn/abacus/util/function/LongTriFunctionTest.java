@@ -4,13 +4,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class LongTriFunctionTest extends TestBase {
+
+    private Long sumThree(final long a, final long b, final long c) {
+        return a + b + c;
+    }
 
     @Test
     public void testApply() {
@@ -40,6 +42,67 @@ public class LongTriFunctionTest extends TestBase {
     }
 
     @Test
+    public void testApply_calculateAverage() {
+        final LongTriFunction<Double> function = (a, b, c) -> (a + b + c) / 3.0;
+        final Double result = function.apply(10L, 20L, 30L);
+        assertEquals(20.0, result, 0.001);
+    }
+
+    @Test
+    public void testApply_findMedian() {
+        final LongTriFunction<Long> function = (a, b, c) -> {
+            if ((a >= b && a <= c) || (a <= b && a >= c))
+                return a;
+            if ((b >= a && b <= c) || (b <= a && b >= c))
+                return b;
+            return c;
+        };
+        final Long result = function.apply(5L, 100L, 50L);
+        assertEquals(50L, result);
+    }
+
+    @Test
+    public void testMethodReference() {
+        final LongTriFunction<Long> function = this::sumThree;
+        final Long result = function.apply(5L, 10L, 15L);
+        assertEquals(30L, result);
+    }
+
+    @Test
+    public void testApply_returnsNull() {
+        final LongTriFunction<String> function = (a, b, c) -> null;
+        final String result = function.apply(1L, 2L, 3L);
+        assertNull(result);
+    }
+
+    @Test
+    public void testApply_withNegativeValues() {
+        final LongTriFunction<Long> function = (a, b, c) -> a + b + c;
+        final Long result = function.apply(-10L, -20L, -30L);
+        assertEquals(-60L, result);
+    }
+
+    @Test
+    public void testApply_findMax() {
+        final LongTriFunction<Long> function = (a, b, c) -> Math.max(a, Math.max(b, c));
+        final Long result = function.apply(5L, 100L, 50L);
+        assertEquals(100L, result);
+    }
+
+    @Test
+    public void testApply_findMin() {
+        final LongTriFunction<Long> function = (a, b, c) -> Math.min(a, Math.min(b, c));
+        final Long result = function.apply(5L, 100L, 50L);
+        assertEquals(5L, result);
+    }
+
+    @Test
+    public void testFunctionalInterfaceContract() {
+        final LongTriFunction<String> function = (a, b, c) -> "test";
+        assertNotNull(function.apply(1L, 2L, 3L));
+    }
+
+    @Test
     public void testAndThen() {
         final LongTriFunction<Long> function = (a, b, c) -> a + b + c;
         final java.util.function.Function<Long, String> after = val -> "Result: " + val;
@@ -60,70 +123,5 @@ public class LongTriFunctionTest extends TestBase {
         final Integer result = composed.apply(2L, 3L, 4L); // 2*3*4 = 24, "24".length() = 2
 
         assertEquals(2, result);
-    }
-
-    @Test
-    public void testApply_returnsNull() {
-        final LongTriFunction<String> function = (a, b, c) -> null;
-        final String result = function.apply(1L, 2L, 3L);
-        assertNull(result);
-    }
-
-    @Test
-    public void testApply_withNegativeValues() {
-        final LongTriFunction<Long> function = (a, b, c) -> a + b + c;
-        final Long result = function.apply(-10L, -20L, -30L);
-        assertEquals(-60L, result);
-    }
-
-    @Test
-    public void testApply_calculateAverage() {
-        final LongTriFunction<Double> function = (a, b, c) -> (a + b + c) / 3.0;
-        final Double result = function.apply(10L, 20L, 30L);
-        assertEquals(20.0, result, 0.001);
-    }
-
-    @Test
-    public void testApply_findMax() {
-        final LongTriFunction<Long> function = (a, b, c) -> Math.max(a, Math.max(b, c));
-        final Long result = function.apply(5L, 100L, 50L);
-        assertEquals(100L, result);
-    }
-
-    @Test
-    public void testApply_findMin() {
-        final LongTriFunction<Long> function = (a, b, c) -> Math.min(a, Math.min(b, c));
-        final Long result = function.apply(5L, 100L, 50L);
-        assertEquals(5L, result);
-    }
-
-    @Test
-    public void testApply_findMedian() {
-        final LongTriFunction<Long> function = (a, b, c) -> {
-            if ((a >= b && a <= c) || (a <= b && a >= c))
-                return a;
-            if ((b >= a && b <= c) || (b <= a && b >= c))
-                return b;
-            return c;
-        };
-        final Long result = function.apply(5L, 100L, 50L);
-        assertEquals(50L, result);
-    }
-
-    @Test
-    public void testFunctionalInterfaceContract() {
-        final LongTriFunction<String> function = (a, b, c) -> "test";
-        assertNotNull(function.apply(1L, 2L, 3L));
-    }
-
-    @Test
-    public void testMethodReference() {
-        final LongTriFunction<Long> function = this::sumThree;
-        final Long result = function.apply(5L, 10L, 15L);
-        assertEquals(30L, result);
-    }
-
-    private Long sumThree(final long a, final long b, final long c) {
-        return a + b + c;
     }
 }

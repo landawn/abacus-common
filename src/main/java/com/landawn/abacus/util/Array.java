@@ -802,9 +802,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param a the array to be converted to a list. Can be {@code null} or empty.
      * @return a fixed-size list backed by the specified array, or an empty list if the array is {@code null} or empty.
      * @see Arrays#asList(Object...)
+     * @see N#asList(Object...)
      * @see N#asArray(Object...)
-     * @see N#toList(Object...)
      * @see List#of(Object...)
+     * @see N#toList(Object...)
      * @see N#emptyList()
      */
     @SafeVarargs

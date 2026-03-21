@@ -8,27 +8,11 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class HBaseColumnTest extends TestBase {
-
-    @Test
-    public void testConstructorWithValue() {
-        HBaseColumn<String> col = new HBaseColumn<>("test");
-        Assertions.assertEquals("test", col.value());
-        Assertions.assertEquals(Long.MAX_VALUE, col.version());
-    }
-
-    @Test
-    public void testConstructorWithValueAndVersion() {
-        HBaseColumn<String> col = new HBaseColumn<>("test", 12345L);
-        Assertions.assertEquals("test", col.value());
-        Assertions.assertEquals(12345L, col.version());
-    }
 
     @Test
     public void testEmptyOf() {
@@ -42,17 +26,17 @@ public class HBaseColumnTest extends TestBase {
     }
 
     @Test
-    public void testValueOf() {
-        HBaseColumn<String> col = HBaseColumn.valueOf("test");
-        Assertions.assertEquals("test", col.value());
-        Assertions.assertEquals(Long.MAX_VALUE, col.version());
-    }
-
-    @Test
     public void testValueOfWithVersion() {
         HBaseColumn<String> col = HBaseColumn.valueOf("test", 12345L);
         Assertions.assertEquals("test", col.value());
         Assertions.assertEquals(12345L, col.version());
+    }
+
+    @Test
+    public void testValueOf() {
+        HBaseColumn<String> col = HBaseColumn.valueOf("test");
+        Assertions.assertEquals("test", col.value());
+        Assertions.assertEquals(Long.MAX_VALUE, col.version());
     }
 
     @Test
@@ -172,9 +156,23 @@ public class HBaseColumnTest extends TestBase {
     }
 
     @Test
+    public void testConstructorWithValueAndVersion() {
+        HBaseColumn<String> col = new HBaseColumn<>("test", 12345L);
+        Assertions.assertEquals("test", col.value());
+        Assertions.assertEquals(12345L, col.version());
+    }
+
+    @Test
     public void testValue() {
         HBaseColumn<Integer> col = new HBaseColumn<>(42, 12345L);
         Assertions.assertEquals(42, col.value());
+    }
+
+    @Test
+    public void testConstructorWithValue() {
+        HBaseColumn<String> col = new HBaseColumn<>("test");
+        Assertions.assertEquals("test", col.value());
+        Assertions.assertEquals(Long.MAX_VALUE, col.version());
     }
 
     @Test

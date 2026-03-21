@@ -26,7 +26,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -36,7 +35,6 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 
-@Tag("new-test")
 public class ZonedDateTimeTypeTest extends TestBase {
 
     private ZonedDateTimeType zonedDateTimeType;
@@ -160,13 +158,6 @@ public class ZonedDateTimeTypeTest extends TestBase {
     }
 
     @Test
-    public void testValueOfStringWithInvalidFormat() {
-        assertThrows(DateTimeParseException.class, () -> {
-            zonedDateTimeType.valueOf("invalid-date-time");
-        });
-    }
-
-    @Test
     public void testValueOfCharArrayWithNull() {
         ZonedDateTime result = zonedDateTimeType.valueOf(null, 0, 0);
         assertNull(result);
@@ -199,6 +190,13 @@ public class ZonedDateTimeTypeTest extends TestBase {
         char[] cbuf = "xxx2023-12-25T10:30:45Z".toCharArray();
         ZonedDateTime result = zonedDateTimeType.valueOf(cbuf, 3, 20);
         assertNotNull(result);
+    }
+
+    @Test
+    public void testValueOfStringWithInvalidFormat() {
+        assertThrows(DateTimeParseException.class, () -> {
+            zonedDateTimeType.valueOf("invalid-date-time");
+        });
     }
 
     @Test

@@ -10,12 +10,10 @@ import java.io.StringWriter;
 import java.io.Writer;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class AppendableWriterTest extends TestBase {
 
     private static final class FailingCloseAppendable implements Appendable, AutoCloseable {
@@ -47,6 +45,13 @@ public class AppendableWriterTest extends TestBase {
     }
 
     @Test
+    public void testConstructorWithValidAppendable() {
+        StringBuilder sb = new StringBuilder();
+        AppendableWriter writer = new AppendableWriter(sb);
+        assertEquals("", writer.toString());
+    }
+
+    @Test
     public void testConstructorWithNullAppendable() {
         assertThrows(IllegalArgumentException.class, () -> {
             new AppendableWriter(null);
@@ -54,10 +59,34 @@ public class AppendableWriterTest extends TestBase {
     }
 
     @Test
-    public void testConstructorWithValidAppendable() {
+    public void testChainedOperations() throws IOException {
         StringBuilder sb = new StringBuilder();
-        AppendableWriter writer = new AppendableWriter(sb);
-        assertEquals("", writer.toString());
+        try (AppendableWriter writer = new AppendableWriter(sb)) {
+            writer.append("Hello").append(' ').append("World");
+            assertEquals("Hello World", sb.toString());
+        }
+    }
+
+    @Test
+    public void testMixedWrites() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        try (AppendableWriter writer = new AppendableWriter(sb)) {
+            writer.write("Hello");
+            writer.write(' ');
+            writer.append("World");
+            writer.write('!');
+            assertEquals("Hello World!", sb.toString());
+        }
+    }
+
+    @Test
+    public void testWithStringBuffer() throws IOException {
+        StringBuffer sb = new StringBuffer();
+        try (AppendableWriter writer = new AppendableWriter(sb)) {
+            writer.write("Hello");
+            writer.append(" World");
+            assertEquals("Hello World", sb.toString());
+        }
     }
 
     @Test
@@ -167,6 +196,25 @@ public class AppendableWriterTest extends TestBase {
         AppendableWriter writer = new AppendableWriter(sb);
         writer.close();
         assertThrows(IOException.class, () -> writer.append("Hello", 0, 3));
+    }
+
+    @Test
+    public void testAppendAfterClose() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        AppendableWriter writer = new AppendableWriter(sb);
+        writer.close();
+
+        assertThrows(IOException.class, () -> {
+            writer.append('A');
+        });
+    }
+
+    @Test
+    public void testAppendSubsequence() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        AppendableWriter writer = new AppendableWriter(sb);
+        writer.append("Hello World", 0, 5);
+        Assertions.assertEquals("Hello", sb.toString());
     }
 
     @Test
@@ -307,6 +355,66 @@ public class AppendableWriterTest extends TestBase {
     }
 
     @Test
+    public void testWriteAfterClose() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        AppendableWriter writer = new AppendableWriter(sb);
+        writer.close();
+
+        assertThrows(IOException.class, () -> {
+            writer.write("Test");
+        });
+    }
+
+    @Test
+    public void testWriteUnicodeCharacters() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        try (AppendableWriter writer = new AppendableWriter(sb)) {
+            writer.write("Hello \u4E16\u754C");
+            writer.write('!');
+            assertTrue(sb.toString().contains("\u4E16\u754C"));
+        }
+    }
+
+    @Test
+    public void testWriteSpecialCharacters() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        try (AppendableWriter writer = new AppendableWriter(sb)) {
+            writer.write("\n\t\r");
+            assertEquals("\n\t\r", sb.toString());
+        }
+    }
+
+    @Test
+    public void testWriteLargeData() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        try (AppendableWriter writer = new AppendableWriter(sb)) {
+            StringBuilder largeData = new StringBuilder();
+            for (int i = 0; i < 1000; i++) {
+                largeData.append("Line ").append(i).append("\n");
+            }
+            writer.write(largeData.toString());
+            assertEquals(largeData.toString(), sb.toString());
+        }
+    }
+
+    @Test
+    public void testWriteCharArrayPortion() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        AppendableWriter writer = new AppendableWriter(sb);
+        char[] chars = { 'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd' };
+        writer.write(chars, 6, 5);
+        Assertions.assertEquals("World", sb.toString());
+    }
+
+    @Test
+    public void testWriteStringPortion() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        AppendableWriter writer = new AppendableWriter(sb);
+        writer.write("Hello World", 6, 5);
+        Assertions.assertEquals("World", sb.toString());
+    }
+
+    @Test
     public void testFlush() throws IOException {
         StringBuilder sb = new StringBuilder();
         try (AppendableWriter writer = new AppendableWriter(sb)) {
@@ -355,28 +463,6 @@ public class AppendableWriterTest extends TestBase {
     }
 
     @Test
-    public void testWriteAfterClose() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        AppendableWriter writer = new AppendableWriter(sb);
-        writer.close();
-
-        assertThrows(IOException.class, () -> {
-            writer.write("Test");
-        });
-    }
-
-    @Test
-    public void testAppendAfterClose() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        AppendableWriter writer = new AppendableWriter(sb);
-        writer.close();
-
-        assertThrows(IOException.class, () -> {
-            writer.append('A');
-        });
-    }
-
-    @Test
     public void testCloseIdempotent() throws IOException {
         StringBuilder sb = new StringBuilder();
         AppendableWriter writer = new AppendableWriter(sb);
@@ -410,93 +496,5 @@ public class AppendableWriterTest extends TestBase {
         try (AppendableWriter writer = new AppendableWriter(sb)) {
             assertEquals("", writer.toString());
         }
-    }
-
-    @Test
-    public void testChainedOperations() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        try (AppendableWriter writer = new AppendableWriter(sb)) {
-            writer.append("Hello").append(' ').append("World");
-            assertEquals("Hello World", sb.toString());
-        }
-    }
-
-    @Test
-    public void testMixedWrites() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        try (AppendableWriter writer = new AppendableWriter(sb)) {
-            writer.write("Hello");
-            writer.write(' ');
-            writer.append("World");
-            writer.write('!');
-            assertEquals("Hello World!", sb.toString());
-        }
-    }
-
-    @Test
-    public void testWriteUnicodeCharacters() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        try (AppendableWriter writer = new AppendableWriter(sb)) {
-            writer.write("Hello \u4E16\u754C");
-            writer.write('!');
-            assertTrue(sb.toString().contains("\u4E16\u754C"));
-        }
-    }
-
-    @Test
-    public void testWriteSpecialCharacters() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        try (AppendableWriter writer = new AppendableWriter(sb)) {
-            writer.write("\n\t\r");
-            assertEquals("\n\t\r", sb.toString());
-        }
-    }
-
-    @Test
-    public void testWriteLargeData() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        try (AppendableWriter writer = new AppendableWriter(sb)) {
-            StringBuilder largeData = new StringBuilder();
-            for (int i = 0; i < 1000; i++) {
-                largeData.append("Line ").append(i).append("\n");
-            }
-            writer.write(largeData.toString());
-            assertEquals(largeData.toString(), sb.toString());
-        }
-    }
-
-    @Test
-    public void testWithStringBuffer() throws IOException {
-        StringBuffer sb = new StringBuffer();
-        try (AppendableWriter writer = new AppendableWriter(sb)) {
-            writer.write("Hello");
-            writer.append(" World");
-            assertEquals("Hello World", sb.toString());
-        }
-    }
-
-    @Test
-    public void testAppendSubsequence() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        AppendableWriter writer = new AppendableWriter(sb);
-        writer.append("Hello World", 0, 5);
-        Assertions.assertEquals("Hello", sb.toString());
-    }
-
-    @Test
-    public void testWriteCharArrayPortion() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        AppendableWriter writer = new AppendableWriter(sb);
-        char[] chars = { 'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd' };
-        writer.write(chars, 6, 5);
-        Assertions.assertEquals("World", sb.toString());
-    }
-
-    @Test
-    public void testWriteStringPortion() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        AppendableWriter writer = new AppendableWriter(sb);
-        writer.write("Hello World", 6, 5);
-        Assertions.assertEquals("World", sb.toString());
     }
 }

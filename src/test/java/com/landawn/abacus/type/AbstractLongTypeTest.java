@@ -23,14 +23,12 @@ import java.util.Calendar;
 import java.util.Date;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("new-test")
 public class AbstractLongTypeTest extends TestBase {
 
     private Type<Number> longType;
@@ -78,6 +76,20 @@ public class AbstractLongTypeTest extends TestBase {
     }
 
     @Test
+    public void testValueOfCharArray() {
+        assertEquals(null, longType.valueOf(null, 0, 0));
+        assertEquals(null, longType.valueOf(new char[0], 0, 0));
+
+        char[] chars = "123456789012".toCharArray();
+        assertEquals(123456789012L, longType.valueOf(chars, 0, 12));
+        assertEquals(3456789L, longType.valueOf(chars, 2, 7));
+        assertEquals(2L, longType.valueOf(chars, 11, 1));
+
+        char[] negChars = "-987654321".toCharArray();
+        assertEquals(-987654321L, longType.valueOf(negChars, 0, 10));
+    }
+
+    @Test
     public void testValueOfString() {
         assertEquals(null, longType.valueOf(""));
         assertEquals(null, longType.valueOf((String) null));
@@ -92,20 +104,6 @@ public class AbstractLongTypeTest extends TestBase {
 
         assertThrows(NumberFormatException.class, () -> longType.valueOf("abc"));
         assertThrows(NumberFormatException.class, () -> longType.valueOf("12.34"));
-    }
-
-    @Test
-    public void testValueOfCharArray() {
-        assertEquals(null, longType.valueOf(null, 0, 0));
-        assertEquals(null, longType.valueOf(new char[0], 0, 0));
-
-        char[] chars = "123456789012".toCharArray();
-        assertEquals(123456789012L, longType.valueOf(chars, 0, 12));
-        assertEquals(3456789L, longType.valueOf(chars, 2, 7));
-        assertEquals(2L, longType.valueOf(chars, 11, 1));
-
-        char[] negChars = "-987654321".toCharArray();
-        assertEquals(-987654321L, longType.valueOf(negChars, 0, 10));
     }
 
     @Test

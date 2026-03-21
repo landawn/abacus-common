@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -27,7 +26,6 @@ import okhttp3.ResponseBody;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 
-@Tag("2025")
 public class CurlInterceptorTest extends TestBase {
 
     private final Consumer<String> logHandler = s -> {
@@ -45,6 +43,45 @@ public class CurlInterceptorTest extends TestBase {
         AtomicReference<String> capturedCurl = new AtomicReference<>();
         CurlInterceptor interceptor = new CurlInterceptor('"', capturedCurl::set);
         assertNotNull(interceptor);
+    }
+
+    @Test
+    public void testConstructorWithDefaultQuoteChar() {
+        CurlInterceptor interceptor = new CurlInterceptor(logHandler);
+        assertNotNull(interceptor);
+    }
+
+    @Test
+    public void testConstructorWithCustomQuoteChar() {
+        CurlInterceptor interceptor = new CurlInterceptor('"', logHandler);
+        assertNotNull(interceptor);
+    }
+
+    @Test
+    public void testMultipleInterceptsOnSameInterceptor() throws IOException {
+        AtomicReference<String> capturedCurl = new AtomicReference<>();
+        int[] count = { 0 };
+
+        CurlInterceptor interceptor = new CurlInterceptor(curl -> {
+            capturedCurl.set(curl);
+            count[0]++;
+        });
+
+        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+
+        Request request1 = new Request.Builder().url("https://httpbin.org/get").get().build();
+
+        Request request2 = new Request.Builder().url("https://httpbin.org/post").post(RequestBody.create("", MediaType.get("text/plain"))).build();
+
+        try {
+            client.newCall(request1).execute();
+            client.newCall(request2).execute();
+        } catch (Exception e) {
+            // May fail due to network
+        }
+
+        // Log handler should be called for each request
+        assertTrue(count[0] >= 0);
     }
 
     @Test
@@ -184,45 +221,6 @@ public class CurlInterceptorTest extends TestBase {
         String curl = capturedCurl.get();
         assertNotNull(interceptor);
         // The curl should be generated even if request fails
-    }
-
-    @Test
-    public void testMultipleInterceptsOnSameInterceptor() throws IOException {
-        AtomicReference<String> capturedCurl = new AtomicReference<>();
-        int[] count = { 0 };
-
-        CurlInterceptor interceptor = new CurlInterceptor(curl -> {
-            capturedCurl.set(curl);
-            count[0]++;
-        });
-
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
-
-        Request request1 = new Request.Builder().url("https://httpbin.org/get").get().build();
-
-        Request request2 = new Request.Builder().url("https://httpbin.org/post").post(RequestBody.create("", MediaType.get("text/plain"))).build();
-
-        try {
-            client.newCall(request1).execute();
-            client.newCall(request2).execute();
-        } catch (Exception e) {
-            // May fail due to network
-        }
-
-        // Log handler should be called for each request
-        assertTrue(count[0] >= 0);
-    }
-
-    @Test
-    public void testConstructorWithDefaultQuoteChar() {
-        CurlInterceptor interceptor = new CurlInterceptor(logHandler);
-        assertNotNull(interceptor);
-    }
-
-    @Test
-    public void testConstructorWithCustomQuoteChar() {
-        CurlInterceptor interceptor = new CurlInterceptor('"', logHandler);
-        assertNotNull(interceptor);
     }
 
     @Test

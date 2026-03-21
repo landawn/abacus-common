@@ -23,13 +23,11 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.http.HttpMethod;
 
-@Tag("2025")
 public class HttpRequestTest extends TestBase {
 
     private static final String TEST_URL = "https://httpbin.org/get";
@@ -84,6 +82,59 @@ public class HttpRequestTest extends TestBase {
         assertNotNull(HttpRequest.create(testUrl, client));
     }
 
+    // ==================== create(URI, HttpClient) ====================
+
+    @Test
+    public void test_create_withURI() {
+        HttpClient client = HttpClient.newHttpClient();
+        URI uri = URI.create(TEST_URL);
+        HttpRequest request = HttpRequest.create(uri, client);
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testCreateWithURIAndHttpClient() {
+        HttpRequest request = HttpRequest.create(testUri, mockHttpClient);
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testCreateWithURIReturnsNonNull() {
+        HttpClient client = HttpClient.newHttpClient();
+        assertNotNull(HttpRequest.create(testUri, client));
+    }
+
+    @Test
+    public void testCreateWithURIContainingQueryParams() {
+        URI uriWithParams = URI.create("https://httpbin.org/get?key=value");
+        HttpRequest request = HttpRequest.url(uriWithParams);
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testCreateWithDifferentHttpClients() {
+        HttpClient client1 = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
+        HttpClient client2 = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
+
+        HttpRequest request1 = HttpRequest.create(testUrl, client1);
+        HttpRequest request2 = HttpRequest.create(testUrl, client2);
+
+        assertNotNull(request1);
+        assertNotNull(request2);
+    }
+
+    @Test
+    public void testCreateWithHttpsUrl() {
+        HttpRequest request = HttpRequest.url("https://httpbin.org/get");
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testCreateWithHttpUrl() {
+        HttpRequest request = HttpRequest.url("http://httpbin.org/get");
+        assertNotNull(request);
+    }
+
     // ==================== create(URL, HttpClient) ====================
 
     @Test
@@ -107,26 +158,27 @@ public class HttpRequestTest extends TestBase {
         assertNotNull(HttpRequest.create(new URL(testUrl), client));
     }
 
-    // ==================== create(URI, HttpClient) ====================
-
     @Test
-    public void test_create_withURI() {
-        HttpClient client = HttpClient.newHttpClient();
-        URI uri = URI.create(TEST_URL);
-        HttpRequest request = HttpRequest.create(uri, client);
-        assertNotNull(request);
+    public void testCreateWithTimeoutsAndExecute() {
+        try {
+            HttpResponse<String> response = HttpRequest.url(testUrl, 5000L, 30000L).header("Accept", "application/json").get();
+            assertNotNull(response);
+        } catch (Exception e) {
+        }
     }
 
     @Test
-    public void testCreateWithURIAndHttpClient() {
-        HttpRequest request = HttpRequest.create(testUri, mockHttpClient);
+    public void testCreateWithTimeoutsUsesNewClient() {
+        HttpRequest request = HttpRequest.url(testUrl, 1000L, 2000L);
         assertNotNull(request);
-    }
-
-    @Test
-    public void testCreateWithURIReturnsNonNull() {
-        HttpClient client = HttpClient.newHttpClient();
-        assertNotNull(HttpRequest.create(testUri, client));
+        // The request should work with internal client built from timeouts
+        assertDoesNotThrow(() -> {
+            try {
+                request.get();
+            } catch (Exception e) {
+                // Network errors are expected
+            }
+        });
     }
 
     // ==================== url(String) ====================
@@ -179,6 +231,99 @@ public class HttpRequestTest extends TestBase {
         assertNotNull(request);
     }
 
+    // ==================== url(URI) ====================
+
+    @Test
+    public void test_url_withURI() {
+        URI uri = URI.create(TEST_URL);
+        HttpRequest request = HttpRequest.url(uri);
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testUrlWithURI() {
+        HttpRequest request = HttpRequest.url(testUri);
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testUrlWithURIReturnsNonNull() {
+        assertNotNull(HttpRequest.url(testUri));
+    }
+
+    // ==================== url(URI, long, long) ====================
+
+    @Test
+    public void test_url_withURIAndTimeouts() {
+        URI uri = URI.create(TEST_URL);
+        HttpRequest request = HttpRequest.url(uri, 5000, 10000);
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testUrlWithURIAndTimeouts() {
+        HttpRequest request = HttpRequest.url(testUri, 5000L, 30000L);
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testUrlWithURIAndTimeoutsReturnsNonNull() {
+        assertNotNull(HttpRequest.url(testUri, 3000L, 6000L));
+    }
+
+    @Test
+    public void testUrlWithURIAndZeroTimeouts() {
+        HttpRequest request = HttpRequest.url(testUri, 0L, 0L);
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testMultipleConnectTimeoutOverrides() {
+        HttpRequest request = HttpRequest.url(testUrl).connectTimeout(Duration.ofSeconds(1)).connectTimeout(Duration.ofSeconds(5));
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testMultipleReadTimeoutOverrides() {
+        HttpRequest request = HttpRequest.url(testUrl).readTimeout(Duration.ofSeconds(5)).readTimeout(Duration.ofSeconds(30));
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testChainedBuilderWithQueryAndHeaders() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("page", 1);
+        HttpRequest request = HttpRequest.url(testUrl).header("Accept", "application/json").query(params).readTimeout(Duration.ofSeconds(10));
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testChainedBuilderWithBodyAndHeaders() {
+        HttpRequest request = HttpRequest.url(testUrl).header("X-Custom", "custom-value").jsonBody("{\"key\":\"value\"}").connectTimeout(Duration.ofSeconds(5));
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testChainedBuilderWithAllOptions() {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Accept", "application/json");
+
+        HttpRequest request = HttpRequest.url(testUrl)
+                .connectTimeout(Duration.ofSeconds(5))
+                .readTimeout(Duration.ofSeconds(30))
+                .basicAuth("user", "pass")
+                .headers(headers)
+                .query("param=value")
+                .jsonBody("{\"key\":\"value\"}");
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testUrlWithQueryStringAlreadyInUrl() {
+        HttpRequest request = HttpRequest.url("https://httpbin.org/get?existing=param");
+        assertNotNull(request);
+    }
+
     // ==================== url(URL) ====================
 
     @Test
@@ -228,50 +373,32 @@ public class HttpRequestTest extends TestBase {
         assertNotNull(request);
     }
 
-    // ==================== url(URI) ====================
-
     @Test
-    public void test_url_withURI() {
-        URI uri = URI.create(TEST_URL);
-        HttpRequest request = HttpRequest.url(uri);
+    public void testUrlWithURITimeoutsUsesNewClient() throws Exception {
+        URI uri = URI.create(testUrl);
+        HttpRequest request = HttpRequest.url(uri, 1000L, 2000L);
         assertNotNull(request);
+        assertDoesNotThrow(() -> {
+            try {
+                request.get();
+            } catch (Exception e) {
+                // Network errors are expected
+            }
+        });
     }
 
     @Test
-    public void testUrlWithURI() {
-        HttpRequest request = HttpRequest.url(testUri);
+    public void testUrlWithURLTimeoutsUsesNewClient() throws Exception {
+        URL url = new URL(testUrl);
+        HttpRequest request = HttpRequest.url(url, 1000L, 2000L);
         assertNotNull(request);
-    }
-
-    @Test
-    public void testUrlWithURIReturnsNonNull() {
-        assertNotNull(HttpRequest.url(testUri));
-    }
-
-    // ==================== url(URI, long, long) ====================
-
-    @Test
-    public void test_url_withURIAndTimeouts() {
-        URI uri = URI.create(TEST_URL);
-        HttpRequest request = HttpRequest.url(uri, 5000, 10000);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testUrlWithURIAndTimeouts() {
-        HttpRequest request = HttpRequest.url(testUri, 5000L, 30000L);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testUrlWithURIAndTimeoutsReturnsNonNull() {
-        assertNotNull(HttpRequest.url(testUri, 3000L, 6000L));
-    }
-
-    @Test
-    public void testUrlWithURIAndZeroTimeouts() {
-        HttpRequest request = HttpRequest.url(testUri, 0L, 0L);
-        assertNotNull(request);
+        assertDoesNotThrow(() -> {
+            try {
+                request.get();
+            } catch (Exception e) {
+                // Network errors are expected
+            }
+        });
     }
 
     // ==================== connectTimeout(Duration) ====================
@@ -292,12 +419,6 @@ public class HttpRequestTest extends TestBase {
     public void testConnectTimeoutReturnsSameInstance() {
         HttpRequest request = HttpRequest.url(testUrl);
         assertSame(request, request.connectTimeout(Duration.ofSeconds(5)));
-    }
-
-    @Test
-    public void testMultipleConnectTimeoutOverrides() {
-        HttpRequest request = HttpRequest.url(testUrl).connectTimeout(Duration.ofSeconds(1)).connectTimeout(Duration.ofSeconds(5));
-        assertNotNull(request);
     }
 
     @Test
@@ -322,6 +443,13 @@ public class HttpRequestTest extends TestBase {
     public void testConnectTimeoutOnCreateInstance() {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.create(testUrl, client).connectTimeout(Duration.ofSeconds(10));
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testConnectTimeoutThenAuthenticator() {
+        Authenticator auth = mock(Authenticator.class);
+        HttpRequest request = HttpRequest.url(testUrl).connectTimeout(Duration.ofSeconds(5)).authenticator(auth);
         assertNotNull(request);
     }
 
@@ -354,12 +482,6 @@ public class HttpRequestTest extends TestBase {
     @Test
     public void testReadTimeoutWithLargeDuration() {
         HttpRequest request = HttpRequest.url(testUrl).readTimeout(Duration.ofMinutes(10));
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testMultipleReadTimeoutOverrides() {
-        HttpRequest request = HttpRequest.url(testUrl).readTimeout(Duration.ofSeconds(5)).readTimeout(Duration.ofSeconds(30));
         assertNotNull(request);
     }
 
@@ -403,6 +525,13 @@ public class HttpRequestTest extends TestBase {
     public void testAuthenticatorWithConnectTimeout() {
         Authenticator auth = mock(Authenticator.class);
         HttpRequest request = HttpRequest.url(testUrl).connectTimeout(Duration.ofSeconds(5)).authenticator(auth);
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testAuthenticatorThenConnectTimeout() {
+        Authenticator auth = mock(Authenticator.class);
+        HttpRequest request = HttpRequest.url(testUrl).authenticator(auth).connectTimeout(Duration.ofSeconds(5));
         assertNotNull(request);
     }
 
@@ -479,6 +608,18 @@ public class HttpRequestTest extends TestBase {
     @Test
     public void testHeaderWithEmptyValue() {
         HttpRequest request = HttpRequest.url(testUrl).header("X-Empty", "");
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testHeaderWithBooleanValue() {
+        HttpRequest request = HttpRequest.url(testUrl).header("X-Debug", true);
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testHeaderWithLongValue() {
+        HttpRequest request = HttpRequest.url(testUrl).header("X-Timestamp", System.currentTimeMillis());
         assertNotNull(request);
     }
 
@@ -682,6 +823,25 @@ public class HttpRequestTest extends TestBase {
         assertNotNull(request);
     }
 
+    @Test
+    public void testQueryOverridesOnSameInstance() {
+        HttpRequest request = HttpRequest.url(testUrl);
+        request.query("first=1");
+        request.query("second=2");
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testQueryWithMultipleParams() {
+        Map<String, Object> params = new LinkedHashMap<>();
+        params.put("q", "search term");
+        params.put("page", 1);
+        params.put("size", 20);
+        params.put("sort", "name");
+        HttpRequest request = HttpRequest.url(testUrl).query(params);
+        assertNotNull(request);
+    }
+
     // ==================== jsonBody(String) ====================
 
     @Test
@@ -764,6 +924,17 @@ public class HttpRequestTest extends TestBase {
         assertNotNull(request);
     }
 
+    @Test
+    public void testJsonBodyWithNestedMap() {
+        Map<String, Object> outer = new HashMap<>();
+        Map<String, Object> inner = new HashMap<>();
+        inner.put("nested_key", "nested_value");
+        outer.put("data", inner);
+        outer.put("count", 5);
+        HttpRequest request = HttpRequest.url(testUrl).jsonBody(outer);
+        assertNotNull(request);
+    }
+
     // ==================== xmlBody(String) ====================
 
     @Test
@@ -827,6 +998,15 @@ public class HttpRequestTest extends TestBase {
     @Test
     public void testXmlBodyWithEmptyMapObject() {
         HttpRequest request = HttpRequest.url(testUrl).xmlBody(new HashMap<>());
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testXmlBodyWithBeanObject() {
+        TestBean bean = new TestBean();
+        bean.setName("xmlTest");
+        bean.setValue(99);
+        HttpRequest request = HttpRequest.url(testUrl).xmlBody(bean);
         assertNotNull(request);
     }
 
@@ -913,6 +1093,24 @@ public class HttpRequestTest extends TestBase {
         assertNotNull(request);
     }
 
+    @Test
+    public void testFormBodyThenJsonBody() {
+        Map<String, String> formData = new HashMap<>();
+        formData.put("key", "value");
+        HttpRequest request = HttpRequest.url(testUrl);
+        request.formBody(formData);
+        request.jsonBody("{\"key\":\"value\"}");
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testFormBodyWithSingleEntryMap() {
+        Map<String, String> formData = new HashMap<>();
+        formData.put("token", "abc123");
+        HttpRequest request = HttpRequest.url(testUrl).formBody(formData);
+        assertNotNull(request);
+    }
+
     // ==================== body(BodyPublisher) ====================
 
     @Test
@@ -949,6 +1147,22 @@ public class HttpRequestTest extends TestBase {
     @Test
     public void testBodyPublisherWithEmptyByteArray() {
         HttpRequest request = HttpRequest.url(testUrl).body(BodyPublishers.ofByteArray(new byte[0]));
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testBodyOverridesOnSameInstance() {
+        HttpRequest request = HttpRequest.url(testUrl);
+        request.jsonBody("{\"first\":1}");
+        request.xmlBody("<second/>");
+        assertNotNull(request);
+    }
+
+    @Test
+    public void testBodyPublisherOverridesJsonBody() {
+        HttpRequest request = HttpRequest.url(testUrl);
+        request.jsonBody("{\"key\":\"value\"}");
+        request.body(BodyPublishers.ofString("plain text"));
         assertNotNull(request);
     }
 
@@ -1014,6 +1228,26 @@ public class HttpRequestTest extends TestBase {
         }
     }
 
+    @Test
+    public void testGetWithQueryParams() {
+        try {
+            Map<String, Object> params = new HashMap<>();
+            params.put("key", "value");
+            HttpResponse<String> response = HttpRequest.url(TEST_URL).query(params).get();
+            assertNotNull(response);
+        } catch (Exception e) {
+        }
+    }
+
+    @Test
+    public void testGetWithStringQuery() {
+        try {
+            HttpResponse<String> response = HttpRequest.url(TEST_URL).query("key=value&other=123").get();
+            assertNotNull(response);
+        } catch (Exception e) {
+        }
+    }
+
     // ==================== post() ====================
 
     @Test
@@ -1052,6 +1286,27 @@ public class HttpRequestTest extends TestBase {
         try {
             String result = HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").post(String.class);
             assertNotNull(result);
+        } catch (Exception e) {
+        }
+    }
+
+    @Test
+    public void testPostWithFormBody() {
+        try {
+            Map<String, String> formData = new HashMap<>();
+            formData.put("username", "testuser");
+            formData.put("password", "testpass");
+            HttpResponse<String> response = HttpRequest.url(POST_URL).formBody(formData).post();
+            assertNotNull(response);
+        } catch (Exception e) {
+        }
+    }
+
+    @Test
+    public void testPostWithXmlBody() {
+        try {
+            HttpResponse<String> response = HttpRequest.url(POST_URL).xmlBody("<root><key>value</key></root>").post();
+            assertNotNull(response);
         } catch (Exception e) {
         }
     }
@@ -1375,6 +1630,17 @@ public class HttpRequestTest extends TestBase {
         }
     }
 
+    @Test
+    public void testAsyncGetWithQueryMap() throws Exception {
+        try {
+            Map<String, Object> params = new HashMap<>();
+            params.put("page", 1);
+            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(TEST_URL).query(params).asyncGet();
+            assertNotNull(future);
+        } catch (Exception e) {
+        }
+    }
+
     // ==================== asyncPost() ====================
 
     @Test
@@ -1423,6 +1689,17 @@ public class HttpRequestTest extends TestBase {
     public void test_asyncPost_withPushPromiseHandler() throws Exception {
         try {
             CompletableFuture<HttpResponse<String>> future = HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").asyncPost(BodyHandlers.ofString(), null);
+            assertNotNull(future);
+        } catch (Exception e) {
+        }
+    }
+
+    @Test
+    public void testAsyncPostWithFormBody() throws Exception {
+        try {
+            Map<String, String> formData = new HashMap<>();
+            formData.put("key", "value");
+            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(POST_URL).formBody(formData).asyncPost();
             assertNotNull(future);
         } catch (Exception e) {
         }
@@ -1733,285 +2010,6 @@ public class HttpRequestTest extends TestBase {
                 .header("Accept", "application/json")
                 .header("User-Agent", "TestAgent");
         assertNotNull(request);
-    }
-
-    @Test
-    public void testChainedBuilderWithQueryAndHeaders() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("page", 1);
-        HttpRequest request = HttpRequest.url(testUrl).header("Accept", "application/json").query(params).readTimeout(Duration.ofSeconds(10));
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testChainedBuilderWithBodyAndHeaders() {
-        HttpRequest request = HttpRequest.url(testUrl).header("X-Custom", "custom-value").jsonBody("{\"key\":\"value\"}").connectTimeout(Duration.ofSeconds(5));
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testChainedBuilderWithAllOptions() {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Accept", "application/json");
-
-        HttpRequest request = HttpRequest.url(testUrl)
-                .connectTimeout(Duration.ofSeconds(5))
-                .readTimeout(Duration.ofSeconds(30))
-                .basicAuth("user", "pass")
-                .headers(headers)
-                .query("param=value")
-                .jsonBody("{\"key\":\"value\"}");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testCreateWithTimeoutsAndExecute() {
-        try {
-            HttpResponse<String> response = HttpRequest.url(testUrl, 5000L, 30000L).header("Accept", "application/json").get();
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testQueryOverridesOnSameInstance() {
-        HttpRequest request = HttpRequest.url(testUrl);
-        request.query("first=1");
-        request.query("second=2");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testBodyOverridesOnSameInstance() {
-        HttpRequest request = HttpRequest.url(testUrl);
-        request.jsonBody("{\"first\":1}");
-        request.xmlBody("<second/>");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testFormBodyThenJsonBody() {
-        Map<String, String> formData = new HashMap<>();
-        formData.put("key", "value");
-        HttpRequest request = HttpRequest.url(testUrl);
-        request.formBody(formData);
-        request.jsonBody("{\"key\":\"value\"}");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testBodyPublisherOverridesJsonBody() {
-        HttpRequest request = HttpRequest.url(testUrl);
-        request.jsonBody("{\"key\":\"value\"}");
-        request.body(BodyPublishers.ofString("plain text"));
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testUrlWithQueryStringAlreadyInUrl() {
-        HttpRequest request = HttpRequest.url("https://httpbin.org/get?existing=param");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testCreateWithURIContainingQueryParams() {
-        URI uriWithParams = URI.create("https://httpbin.org/get?key=value");
-        HttpRequest request = HttpRequest.url(uriWithParams);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testCreateWithDifferentHttpClients() {
-        HttpClient client1 = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
-        HttpClient client2 = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
-
-        HttpRequest request1 = HttpRequest.create(testUrl, client1);
-        HttpRequest request2 = HttpRequest.create(testUrl, client2);
-
-        assertNotNull(request1);
-        assertNotNull(request2);
-    }
-
-    @Test
-    public void testConnectTimeoutThenAuthenticator() {
-        Authenticator auth = mock(Authenticator.class);
-        HttpRequest request = HttpRequest.url(testUrl).connectTimeout(Duration.ofSeconds(5)).authenticator(auth);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testAuthenticatorThenConnectTimeout() {
-        Authenticator auth = mock(Authenticator.class);
-        HttpRequest request = HttpRequest.url(testUrl).authenticator(auth).connectTimeout(Duration.ofSeconds(5));
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testHeaderWithBooleanValue() {
-        HttpRequest request = HttpRequest.url(testUrl).header("X-Debug", true);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testHeaderWithLongValue() {
-        HttpRequest request = HttpRequest.url(testUrl).header("X-Timestamp", System.currentTimeMillis());
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testFormBodyWithSingleEntryMap() {
-        Map<String, String> formData = new HashMap<>();
-        formData.put("token", "abc123");
-        HttpRequest request = HttpRequest.url(testUrl).formBody(formData);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testQueryWithMultipleParams() {
-        Map<String, Object> params = new LinkedHashMap<>();
-        params.put("q", "search term");
-        params.put("page", 1);
-        params.put("size", 20);
-        params.put("sort", "name");
-        HttpRequest request = HttpRequest.url(testUrl).query(params);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testCreateWithHttpsUrl() {
-        HttpRequest request = HttpRequest.url("https://httpbin.org/get");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testCreateWithHttpUrl() {
-        HttpRequest request = HttpRequest.url("http://httpbin.org/get");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testJsonBodyWithNestedMap() {
-        Map<String, Object> outer = new HashMap<>();
-        Map<String, Object> inner = new HashMap<>();
-        inner.put("nested_key", "nested_value");
-        outer.put("data", inner);
-        outer.put("count", 5);
-        HttpRequest request = HttpRequest.url(testUrl).jsonBody(outer);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testXmlBodyWithBeanObject() {
-        TestBean bean = new TestBean();
-        bean.setName("xmlTest");
-        bean.setValue(99);
-        HttpRequest request = HttpRequest.url(testUrl).xmlBody(bean);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testPostWithFormBody() {
-        try {
-            Map<String, String> formData = new HashMap<>();
-            formData.put("username", "testuser");
-            formData.put("password", "testpass");
-            HttpResponse<String> response = HttpRequest.url(POST_URL).formBody(formData).post();
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testPostWithXmlBody() {
-        try {
-            HttpResponse<String> response = HttpRequest.url(POST_URL).xmlBody("<root><key>value</key></root>").post();
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testGetWithQueryParams() {
-        try {
-            Map<String, Object> params = new HashMap<>();
-            params.put("key", "value");
-            HttpResponse<String> response = HttpRequest.url(TEST_URL).query(params).get();
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testGetWithStringQuery() {
-        try {
-            HttpResponse<String> response = HttpRequest.url(TEST_URL).query("key=value&other=123").get();
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testAsyncGetWithQueryMap() throws Exception {
-        try {
-            Map<String, Object> params = new HashMap<>();
-            params.put("page", 1);
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(TEST_URL).query(params).asyncGet();
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testAsyncPostWithFormBody() throws Exception {
-        try {
-            Map<String, String> formData = new HashMap<>();
-            formData.put("key", "value");
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(POST_URL).formBody(formData).asyncPost();
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testCreateWithTimeoutsUsesNewClient() {
-        HttpRequest request = HttpRequest.url(testUrl, 1000L, 2000L);
-        assertNotNull(request);
-        // The request should work with internal client built from timeouts
-        assertDoesNotThrow(() -> {
-            try {
-                request.get();
-            } catch (Exception e) {
-                // Network errors are expected
-            }
-        });
-    }
-
-    @Test
-    public void testUrlWithURITimeoutsUsesNewClient() throws Exception {
-        URI uri = URI.create(testUrl);
-        HttpRequest request = HttpRequest.url(uri, 1000L, 2000L);
-        assertNotNull(request);
-        assertDoesNotThrow(() -> {
-            try {
-                request.get();
-            } catch (Exception e) {
-                // Network errors are expected
-            }
-        });
-    }
-
-    @Test
-    public void testUrlWithURLTimeoutsUsesNewClient() throws Exception {
-        URL url = new URL(testUrl);
-        HttpRequest request = HttpRequest.url(url, 1000L, 2000L);
-        assertNotNull(request);
-        assertDoesNotThrow(() -> {
-            try {
-                request.get();
-            } catch (Exception e) {
-                // Network errors are expected
-            }
-        });
     }
 
 }

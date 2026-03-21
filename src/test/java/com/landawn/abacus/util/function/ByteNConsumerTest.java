@@ -7,12 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ByteNConsumerTest extends TestBase {
 
     @Test
@@ -60,6 +58,15 @@ public class ByteNConsumerTest extends TestBase {
     }
 
     @Test
+    public void testAcceptManyElements() {
+        final byte[] result = new byte[1];
+        ByteNConsumer consumer = args -> result[0] = (byte) args.length;
+
+        consumer.accept((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6, (byte) 7);
+        assertEquals((byte) 7, result[0]);
+    }
+
+    @Test
     public void testAcceptEmptyArray() {
         final List<byte[]> result = new ArrayList<>();
         ByteNConsumer consumer = args -> result.add(args);
@@ -80,12 +87,28 @@ public class ByteNConsumerTest extends TestBase {
     }
 
     @Test
-    public void testAcceptManyElements() {
+    public void testWithNegativeValues() {
         final byte[] result = new byte[1];
-        ByteNConsumer consumer = args -> result[0] = (byte) args.length;
+        ByteNConsumer consumer = args -> {
+            byte sum = 0;
+            for (byte b : args) {
+                sum += b;
+            }
+            result[0] = sum;
+        };
 
-        consumer.accept((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6, (byte) 7);
-        assertEquals((byte) 7, result[0]);
+        consumer.accept((byte) -5, (byte) 3, (byte) -2);
+        assertEquals((byte) -4, result[0]);
+    }
+
+    @Test
+    public void testWithBoundaryValues() {
+        final List<byte[]> result = new ArrayList<>();
+        ByteNConsumer consumer = args -> result.add(args);
+
+        consumer.accept(Byte.MIN_VALUE, (byte) 0, Byte.MAX_VALUE);
+        assertEquals(1, result.size());
+        assertArrayEquals(new byte[] { Byte.MIN_VALUE, 0, Byte.MAX_VALUE }, result.get(0));
     }
 
     @Test
@@ -122,31 +145,6 @@ public class ByteNConsumerTest extends TestBase {
         assertEquals((byte) 3, result.get(0));
         assertEquals((byte) 5, result.get(1));
         assertEquals((byte) 10, result.get(2));
-    }
-
-    @Test
-    public void testWithNegativeValues() {
-        final byte[] result = new byte[1];
-        ByteNConsumer consumer = args -> {
-            byte sum = 0;
-            for (byte b : args) {
-                sum += b;
-            }
-            result[0] = sum;
-        };
-
-        consumer.accept((byte) -5, (byte) 3, (byte) -2);
-        assertEquals((byte) -4, result[0]);
-    }
-
-    @Test
-    public void testWithBoundaryValues() {
-        final List<byte[]> result = new ArrayList<>();
-        ByteNConsumer consumer = args -> result.add(args);
-
-        consumer.accept(Byte.MIN_VALUE, (byte) 0, Byte.MAX_VALUE);
-        assertEquals(1, result.size());
-        assertArrayEquals(new byte[] { Byte.MIN_VALUE, 0, Byte.MAX_VALUE }, result.get(0));
     }
 
     @Test

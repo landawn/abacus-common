@@ -1,10 +1,7 @@
 package com.landawn.abacus.annotation;
 
-import org.junit.jupiter.api.Tag;
-
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class EntityTest extends TestBase {
 
     @Entity

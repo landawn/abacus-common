@@ -92,7 +92,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<XMLGregorianCalendar> type = TypeFactory.getType(XMLGregorianCalendar.class);
-     * Class&lt;XMLGregorianCalendar&gt; clazz = type.javaType();   // Returns XMLGregorianCalendar.class
+     * Class<XMLGregorianCalendar> clazz = type.javaType();   // Returns XMLGregorianCalendar.class
      * }</pre>
      *
      * @return the Class object for XMLGregorianCalendar.class

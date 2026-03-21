@@ -22,7 +22,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 
 /**
  * A factory for creating Logger objects with automatic detection of the logging framework.
- * 
+ *
  * <p>This factory automatically detects and initializes the appropriate logging implementation
  * in the following order of preference:</p>
  * <ol>
@@ -31,10 +31,10 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  *   <li>Log4j v2 Logger</li>
  *   <li>JDK Logger (fallback)</li>
  * </ol>
- * 
+ *
  * <p>The factory maintains a cache of logger instances to avoid creating multiple instances
  * for the same logger name.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Get logger by class
@@ -48,7 +48,6 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * // Get root logger
  * Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
  * }</pre>
- * 
  */
 public final class LoggerFactory {
 

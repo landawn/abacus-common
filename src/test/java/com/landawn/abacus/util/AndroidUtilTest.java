@@ -1,5 +1,7 @@
 package com.landawn.abacus.util;
 
+import com.landawn.abacus.TestBase;
+
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -8,14 +10,7 @@ import java.util.concurrent.Executor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class AndroidUtilTest {
-
-    @Test
-    public void test() {
-        assertDoesNotThrow(() -> {
-            AndroidUtil.getThreadPoolExecutor().execute(() -> System.out.print("Hello"));
-        });
-    }
+public class AndroidUtilTest extends TestBase {
 
     @Test
     public void testGetSerialExecutor() {
@@ -29,6 +24,26 @@ public class AndroidUtilTest {
         Executor executor2 = AndroidUtil.getSerialExecutor();
         assertNotNull(executor1);
         assertNotNull(executor2);
+    }
+
+    @Test
+    public void testExecutorsAreDifferent() {
+        Executor serial = AndroidUtil.getSerialExecutor();
+        Executor threadPool = AndroidUtil.getThreadPoolExecutor();
+        Assertions.assertNotSame(serial, threadPool);
+    }
+
+    @Test
+    public void testSerialExecutorExecutes() throws InterruptedException {
+        Executor executor = AndroidUtil.getSerialExecutor();
+        final boolean[] executed = { false };
+
+        executor.execute(() -> {
+            executed[0] = true;
+        });
+
+        Thread.sleep(100);
+        assertNotNull(executor);
     }
 
     @Test
@@ -46,16 +61,10 @@ public class AndroidUtilTest {
     }
 
     @Test
-    public void testSerialExecutorExecutes() throws InterruptedException {
-        Executor executor = AndroidUtil.getSerialExecutor();
-        final boolean[] executed = { false };
-
-        executor.execute(() -> {
-            executed[0] = true;
+    public void test() {
+        assertDoesNotThrow(() -> {
+            AndroidUtil.getThreadPoolExecutor().execute(() -> System.out.print("Hello"));
         });
-
-        Thread.sleep(100);
-        assertNotNull(executor);
     }
 
     @Test
@@ -69,13 +78,6 @@ public class AndroidUtilTest {
 
         Thread.sleep(100);
         assertNotNull(executor);
-    }
-
-    @Test
-    public void testExecutorsAreDifferent() {
-        Executor serial = AndroidUtil.getSerialExecutor();
-        Executor threadPool = AndroidUtil.getThreadPoolExecutor();
-        Assertions.assertNotSame(serial, threadPool);
     }
 
 }

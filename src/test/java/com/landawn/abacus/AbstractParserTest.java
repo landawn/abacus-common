@@ -7,8 +7,6 @@ package com.landawn.abacus;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.landawn.abacus.entity.BigXBean;
@@ -27,7 +25,6 @@ import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-@Tag("old-test")
 public abstract class AbstractParserTest extends AbstractTest {
     protected static final JsonParser jsonParser = ParserFactory.createJsonParser();
     protected static final XmlParser abacusXmlParser = com.landawn.abacus.parser.AbstractParserTest.abacusXmlParser;

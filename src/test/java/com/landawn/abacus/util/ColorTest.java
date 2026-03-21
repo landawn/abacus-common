@@ -3,29 +3,11 @@ package com.landawn.abacus.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class ColorTest extends TestBase {
-
-    @Test
-    public void testEnumValues() {
-        Color[] values = Color.values();
-        assertEquals(9, values.length);
-
-        assertEquals(Color.BLACK, values[0]);
-        assertEquals(Color.WHITE, values[1]);
-        assertEquals(Color.RED, values[2]);
-        assertEquals(Color.ORANGE, values[3]);
-        assertEquals(Color.YELLOW, values[4]);
-        assertEquals(Color.GREEN, values[5]);
-        assertEquals(Color.CYAN, values[6]);
-        assertEquals(Color.BLUE, values[7]);
-        assertEquals(Color.PURPLE, values[8]);
-    }
 
     @Test
     public void testIntValue() {
@@ -54,13 +36,6 @@ public class ColorTest extends TestBase {
     }
 
     @Test
-    public void testValueOfIntInvalid() {
-        assertThrows(IllegalArgumentException.class, () -> Color.valueOf(-1));
-        assertThrows(IllegalArgumentException.class, () -> Color.valueOf(9));
-        assertThrows(IllegalArgumentException.class, () -> Color.valueOf(100));
-    }
-
-    @Test
     public void testValueOfString() {
         assertEquals(Color.BLACK, Color.valueOf("BLACK"));
         assertEquals(Color.WHITE, Color.valueOf("WHITE"));
@@ -74,9 +49,69 @@ public class ColorTest extends TestBase {
     }
 
     @Test
+    public void testRoundTrip() {
+        for (Color color : Color.values()) {
+            assertEquals(color, Color.valueOf(color.intValue()));
+            assertEquals(color.intValue(), Color.valueOf(color.intValue()).intValue());
+        }
+    }
+
+    @Test
+    public void testValueOf_intRoundTrip() {
+        for (Color color : Color.values()) {
+            Color fromInt = Color.valueOf(color.intValue());
+            assertEquals(color, fromInt);
+            assertEquals(color.intValue(), fromInt.intValue());
+            assertEquals(color.name(), fromInt.name());
+        }
+    }
+
+    @Test
+    public void testValueOfIntInvalid() {
+        assertThrows(IllegalArgumentException.class, () -> Color.valueOf(-1));
+        assertThrows(IllegalArgumentException.class, () -> Color.valueOf(9));
+        assertThrows(IllegalArgumentException.class, () -> Color.valueOf(100));
+    }
+
+    @Test
     public void testValueOfStringInvalid() {
         assertThrows(IllegalArgumentException.class, () -> Color.valueOf("INVALID"));
         assertThrows(IllegalArgumentException.class, () -> Color.valueOf("black"));
+    }
+
+    @Test
+    public void testEquals() {
+        assertEquals(Color.RED, Color.RED);
+        assertEquals(Color.valueOf(2), Color.RED);
+        assertThrows(IllegalArgumentException.class, () -> Color.valueOf("red"));
+        for (Color color : Color.values()) {
+            assertEquals(color, Color.valueOf(color.name()));
+            assertEquals(color, Color.valueOf(color.intValue()));
+        }
+    }
+
+    @Test
+    public void testValueOf_intBoundary() {
+        assertEquals(Color.BLACK, Color.valueOf(0));
+        assertEquals(Color.PURPLE, Color.valueOf(8));
+        assertThrows(IllegalArgumentException.class, () -> Color.valueOf(Integer.MIN_VALUE));
+        assertThrows(IllegalArgumentException.class, () -> Color.valueOf(Integer.MAX_VALUE));
+    }
+
+    @Test
+    public void testEnumValues() {
+        Color[] values = Color.values();
+        assertEquals(9, values.length);
+
+        assertEquals(Color.BLACK, values[0]);
+        assertEquals(Color.WHITE, values[1]);
+        assertEquals(Color.RED, values[2]);
+        assertEquals(Color.ORANGE, values[3]);
+        assertEquals(Color.YELLOW, values[4]);
+        assertEquals(Color.GREEN, values[5]);
+        assertEquals(Color.CYAN, values[6]);
+        assertEquals(Color.BLUE, values[7]);
+        assertEquals(Color.PURPLE, values[8]);
     }
 
     @Test
@@ -116,42 +151,5 @@ public class ColorTest extends TestBase {
         assertEquals("CYAN", Color.CYAN.toString());
         assertEquals("BLUE", Color.BLUE.toString());
         assertEquals("PURPLE", Color.PURPLE.toString());
-    }
-
-    @Test
-    public void testRoundTrip() {
-        for (Color color : Color.values()) {
-            assertEquals(color, Color.valueOf(color.intValue()));
-            assertEquals(color.intValue(), Color.valueOf(color.intValue()).intValue());
-        }
-    }
-
-    @Test
-    public void testEquals() {
-        assertEquals(Color.RED, Color.RED);
-        assertEquals(Color.valueOf(2), Color.RED);
-        assertThrows(IllegalArgumentException.class, () -> Color.valueOf("red"));
-        for (Color color : Color.values()) {
-            assertEquals(color, Color.valueOf(color.name()));
-            assertEquals(color, Color.valueOf(color.intValue()));
-        }
-    }
-
-    @Test
-    public void testValueOf_intBoundary() {
-        assertEquals(Color.BLACK, Color.valueOf(0));
-        assertEquals(Color.PURPLE, Color.valueOf(8));
-        assertThrows(IllegalArgumentException.class, () -> Color.valueOf(Integer.MIN_VALUE));
-        assertThrows(IllegalArgumentException.class, () -> Color.valueOf(Integer.MAX_VALUE));
-    }
-
-    @Test
-    public void testValueOf_intRoundTrip() {
-        for (Color color : Color.values()) {
-            Color fromInt = Color.valueOf(color.intValue());
-            assertEquals(color, fromInt);
-            assertEquals(color.intValue(), fromInt.intValue());
-            assertEquals(color.name(), fromInt.name());
-        }
     }
 }

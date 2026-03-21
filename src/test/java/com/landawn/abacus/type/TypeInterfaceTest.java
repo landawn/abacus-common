@@ -45,7 +45,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -56,7 +55,6 @@ import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.SetMultimap;
 import com.landawn.abacus.util.TypeReference;
 
-@Tag("new-test")
 public class TypeInterfaceTest extends TestBase {
 
     private Type<String> stringType;

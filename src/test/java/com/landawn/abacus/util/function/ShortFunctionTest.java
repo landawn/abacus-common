@@ -20,25 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ShortFunctionTest extends TestBase {
-
-    @Test
-    public void test_BOX() {
-        Short result = ShortFunction.BOX.apply((short) 42);
-        assertEquals(Short.valueOf((short) 42), result);
-
-        result = ShortFunction.BOX.apply((short) 0);
-        assertEquals(Short.valueOf((short) 0), result);
-
-        result = ShortFunction.BOX.apply(Short.MAX_VALUE);
-        assertEquals(Short.valueOf(Short.MAX_VALUE), result);
-    }
 
     @Test
     public void test_apply() {
@@ -67,6 +53,18 @@ public class ShortFunctionTest extends TestBase {
     }
 
     @Test
+    public void test_BOX() {
+        Short result = ShortFunction.BOX.apply((short) 42);
+        assertEquals(Short.valueOf((short) 42), result);
+
+        result = ShortFunction.BOX.apply((short) 0);
+        assertEquals(Short.valueOf((short) 0), result);
+
+        result = ShortFunction.BOX.apply(Short.MAX_VALUE);
+        assertEquals(Short.valueOf(Short.MAX_VALUE), result);
+    }
+
+    @Test
     public void test_apply_anonymousClass() {
         ShortFunction<Boolean> isPositive = new ShortFunction<>() {
             @Override
@@ -78,6 +76,28 @@ public class ShortFunctionTest extends TestBase {
         assertTrue(isPositive.apply((short) 5));
         assertFalse(isPositive.apply((short) -5));
         assertFalse(isPositive.apply((short) 0));
+    }
+
+    @Test
+    public void test_apply_withMaxValue() {
+        ShortFunction<Long> toLong = value -> (long) value;
+
+        assertEquals(Short.MAX_VALUE, toLong.apply(Short.MAX_VALUE));
+    }
+
+    @Test
+    public void test_apply_withMinValue() {
+        ShortFunction<Long> toLong = value -> (long) value;
+
+        assertEquals(Short.MIN_VALUE, toLong.apply(Short.MIN_VALUE));
+    }
+
+    @Test
+    public void test_returnsNull() {
+        ShortFunction<String> alwaysNull = value -> null;
+
+        assertNull(alwaysNull.apply((short) 100));
+        assertNull(alwaysNull.apply((short) 0));
     }
 
     @Test
@@ -127,27 +147,5 @@ public class ShortFunctionTest extends TestBase {
 
         // For values in the cache range, should be same object
         assertSame(result1, result2);
-    }
-
-    @Test
-    public void test_apply_withMaxValue() {
-        ShortFunction<Long> toLong = value -> (long) value;
-
-        assertEquals(Short.MAX_VALUE, toLong.apply(Short.MAX_VALUE));
-    }
-
-    @Test
-    public void test_apply_withMinValue() {
-        ShortFunction<Long> toLong = value -> (long) value;
-
-        assertEquals(Short.MIN_VALUE, toLong.apply(Short.MIN_VALUE));
-    }
-
-    @Test
-    public void test_returnsNull() {
-        ShortFunction<String> alwaysNull = value -> null;
-
-        assertNull(alwaysNull.apply((short) 100));
-        assertNull(alwaysNull.apply((short) 0));
     }
 }

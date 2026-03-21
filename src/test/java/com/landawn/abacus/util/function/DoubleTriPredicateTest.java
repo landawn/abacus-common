@@ -5,12 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class DoubleTriPredicateTest extends TestBase {
 
     @Test
@@ -48,6 +46,21 @@ public class DoubleTriPredicateTest extends TestBase {
     }
 
     @Test
+    public void testTriangleInequality() {
+        DoubleTriPredicate isValidTriangle = (a, b, c) -> (a + b > c) && (b + c > a) && (a + c > b);
+
+        assertTrue(isValidTriangle.test(3.0, 4.0, 5.0));
+        assertFalse(isValidTriangle.test(1.0, 2.0, 10.0));
+    }
+
+    @Test
+    public void testFunctionalInterfaceContract() {
+        DoubleTriPredicate lambda = (a, b, c) -> true;
+        assertNotNull(lambda);
+        assertDoesNotThrow(() -> lambda.test(1.0, 2.0, 3.0));
+    }
+
+    @Test
     public void testNegate() {
         DoubleTriPredicate predicate = (a, b, c) -> a + b + c > 10.0;
         DoubleTriPredicate negated = predicate.negate();
@@ -82,20 +95,5 @@ public class DoubleTriPredicateTest extends TestBase {
         assertTrue(combined.test(2.0, 15.0, 3.0));
         assertTrue(combined.test(2.0, 3.0, 15.0));
         assertFalse(combined.test(2.0, 3.0, 4.0));
-    }
-
-    @Test
-    public void testTriangleInequality() {
-        DoubleTriPredicate isValidTriangle = (a, b, c) -> (a + b > c) && (b + c > a) && (a + c > b);
-
-        assertTrue(isValidTriangle.test(3.0, 4.0, 5.0));
-        assertFalse(isValidTriangle.test(1.0, 2.0, 10.0));
-    }
-
-    @Test
-    public void testFunctionalInterfaceContract() {
-        DoubleTriPredicate lambda = (a, b, c) -> true;
-        assertNotNull(lambda);
-        assertDoesNotThrow(() -> lambda.test(1.0, 2.0, 3.0));
     }
 }

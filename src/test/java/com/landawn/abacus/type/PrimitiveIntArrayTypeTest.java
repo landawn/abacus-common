@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -28,7 +27,6 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("2025")
 public class PrimitiveIntArrayTypeTest extends TestBase {
 
     private final PrimitiveIntArrayType type = new PrimitiveIntArrayType();
@@ -39,8 +37,9 @@ public class PrimitiveIntArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void test_isPrimitiveArray() {
-        assertTrue(type.isPrimitiveArray());
+    public void testGetElementType() {
+        Type<Integer> elementType = type.elementType();
+        assertNotNull(elementType);
     }
 
     @Test
@@ -50,47 +49,6 @@ public class PrimitiveIntArrayTypeTest extends TestBase {
         assertNotNull(result);
 
         assertNull(type.stringOf(null));
-    }
-
-    @Test
-    public void test_valueOf_String() {
-        int[] result = type.valueOf("[1, 2, 3]");
-        assertNotNull(result);
-
-        assertNull(type.valueOf((String) null));
-    }
-
-    @Test
-    public void test_appendTo() throws IOException {
-        StringWriter sw = new StringWriter();
-
-        int[] arr = new int[] { 1, 2, 3 };
-        type.appendTo(sw, arr);
-        assertNotNull(sw.toString());
-
-        sw = new StringWriter();
-        type.appendTo(sw, null);
-        assertEquals("null", sw.toString());
-    }
-
-    @Test
-    public void test_writeCharacter() throws IOException {
-        CharacterWriter writer = mock(BufferedJsonWriter.class);
-        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
-
-        int[] arr = new int[] { 1, 2, 3 };
-        type.writeCharacter(writer, arr, config);
-        verify(writer, atLeastOnce()).write(any(String.class));
-
-        reset(writer);
-        type.writeCharacter(writer, null, config);
-        verify(writer).write(NULL_CHAR_ARRAY);
-    }
-
-    @Test
-    public void testGetElementType() {
-        Type<Integer> elementType = type.elementType();
-        assertNotNull(elementType);
     }
 
     @Test
@@ -109,6 +67,14 @@ public class PrimitiveIntArrayTypeTest extends TestBase {
     public void testStringOfSingleElement() {
         int[] array = { 42 };
         assertEquals("[42]", type.stringOf(array));
+    }
+
+    @Test
+    public void test_valueOf_String() {
+        int[] result = type.valueOf("[1, 2, 3]");
+        assertNotNull(result);
+
+        assertNull(type.valueOf((String) null));
     }
 
     @Test
@@ -139,6 +105,19 @@ public class PrimitiveIntArrayTypeTest extends TestBase {
     }
 
     @Test
+    public void test_appendTo() throws IOException {
+        StringWriter sw = new StringWriter();
+
+        int[] arr = new int[] { 1, 2, 3 };
+        type.appendTo(sw, arr);
+        assertNotNull(sw.toString());
+
+        sw = new StringWriter();
+        type.appendTo(sw, null);
+        assertEquals("null", sw.toString());
+    }
+
+    @Test
     public void testAppendToEmptyArray() throws IOException {
         StringBuilder sb = new StringBuilder();
         type.appendTo(sb, new int[0]);
@@ -150,6 +129,20 @@ public class PrimitiveIntArrayTypeTest extends TestBase {
         StringBuilder sb = new StringBuilder();
         type.appendTo(sb, new int[] { 1, 2, 3 });
         assertEquals("[1, 2, 3]", sb.toString());
+    }
+
+    @Test
+    public void test_writeCharacter() throws IOException {
+        CharacterWriter writer = mock(BufferedJsonWriter.class);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
+
+        int[] arr = new int[] { 1, 2, 3 };
+        type.writeCharacter(writer, arr, config);
+        verify(writer, atLeastOnce()).write(any(String.class));
+
+        reset(writer);
+        type.writeCharacter(writer, null, config);
+        verify(writer).write(NULL_CHAR_ARRAY);
     }
 
     @Test
@@ -225,18 +218,6 @@ public class PrimitiveIntArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void testEqualsOneNull() {
-        assertFalse(type.equals(new int[] { 1 }, null));
-        assertFalse(type.equals(null, new int[] { 1 }));
-    }
-
-    @Test
-    public void testEqualsSame() {
-        int[] array = { 1, 2, 3 };
-        assertTrue(type.equals(array, array));
-    }
-
-    @Test
     public void testEqualsEqual() {
         int[] array1 = { 1, 2, 3 };
         int[] array2 = { 1, 2, 3 };
@@ -255,6 +236,23 @@ public class PrimitiveIntArrayTypeTest extends TestBase {
         int[] array1 = { 1, 2, 3 };
         int[] array2 = { 1, 2, 4 };
         assertFalse(type.equals(array1, array2));
+    }
+
+    @Test
+    public void testEqualsOneNull() {
+        assertFalse(type.equals(new int[] { 1 }, null));
+        assertFalse(type.equals(null, new int[] { 1 }));
+    }
+
+    @Test
+    public void testEqualsSame() {
+        int[] array = { 1, 2, 3 };
+        assertTrue(type.equals(array, array));
+    }
+
+    @Test
+    public void test_isPrimitiveArray() {
+        assertTrue(type.isPrimitiveArray());
     }
 
 }

@@ -11,7 +11,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -23,7 +22,6 @@ import com.landawn.abacus.exception.UncheckedReflectiveOperationException;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.util.u.Optional;
 
-@Tag("new-test")
 public class ExceptionUtilTest extends TestBase {
 
     public static class CustomCheckedException extends Exception {
@@ -59,6 +57,19 @@ public class ExceptionUtilTest extends TestBase {
                 () -> ExceptionUtil.registerRuntimeExceptionMapper(IOException.class, e -> new RuntimeException(e)));
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> ExceptionUtil.registerRuntimeExceptionMapper(RuntimeException.class, e -> e));
+    }
+
+    // TODO: testRegisterAndUseCustomMapper - cannot register exception classes from com.landawn.abacus.util package
+    // The registerRuntimeExceptionMapper method blocks built-in packages including com.landawn.abacus.*
+    // which is the package of all test inner classes. Custom exception classes would need to be in a
+    // different package to be registered.
+
+    @Test
+    public void testRegisterRuntimeExceptionMapper_WithoutForce() {
+        // Test the one-arg overload which calls registerRuntimeExceptionMapper(class, mapper, false)
+        // This validates that the single-arg method properly delegates
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> ExceptionUtil.registerRuntimeExceptionMapper(IOException.class, e -> new RuntimeException(e)));
     }
 
     @Test
@@ -181,6 +192,65 @@ public class ExceptionUtilTest extends TestBase {
     }
 
     @Test
+    public void testCachingBehavior() {
+        IOException io1 = new IOException("io1");
+        IOException io2 = new IOException("io2");
+
+        RuntimeException result1 = ExceptionUtil.toRuntimeException(io1);
+        RuntimeException result2 = ExceptionUtil.toRuntimeException(io2);
+
+        Assertions.assertTrue(result1 instanceof UncheckedIOException);
+        Assertions.assertTrue(result2 instanceof UncheckedIOException);
+        Assertions.assertEquals(io1, result1.getCause());
+        Assertions.assertEquals(io2, result2.getCause());
+    }
+
+    @Test
+    public void testToRuntimeException_UndeclaredThrowableExceptionNoCause() {
+        UndeclaredThrowableException undeclaredNoCause = new UndeclaredThrowableException(null);
+        RuntimeException result = ExceptionUtil.toRuntimeException(undeclaredNoCause);
+        Assertions.assertSame(undeclaredNoCause, result);
+    }
+
+    @Test
+    public void testToRuntimeException_InvocationTargetExceptionNoCause() {
+        InvocationTargetException invocNoCause = new InvocationTargetException(null);
+        RuntimeException result = ExceptionUtil.toRuntimeException(invocNoCause);
+        Assertions.assertTrue(result instanceof UncheckedException);
+    }
+
+    @Test
+    public void testToRuntimeException_CallInterruptAndThrowError() {
+        // Test with callInterrupt=true and throwIfItIsError=true for an Error
+        Error error = new Error("test error");
+        Assertions.assertThrows(Error.class, () -> ExceptionUtil.toRuntimeException(error, true, true));
+    }
+
+    @Test
+    public void testToRuntimeException_CallInterruptAndThrowError_WithInterruptedException() {
+        // Test with callInterrupt=true and throwIfItIsError=true for InterruptedException
+        Thread.interrupted(); // clear
+        InterruptedException interruptEx = new InterruptedException("interrupted");
+        RuntimeException result = ExceptionUtil.toRuntimeException(interruptEx, true, true);
+        Assertions.assertTrue(result instanceof UncheckedInterruptedException);
+        Assertions.assertTrue(Thread.interrupted()); // should have been interrupted
+    }
+
+    @Test
+    public void testToRuntimeException_ThrowIfError() {
+        Error error = new Error("test error");
+        Assertions.assertThrows(Error.class, () -> ExceptionUtil.toRuntimeException(error, false, true));
+    }
+
+    @Test
+    public void testToRuntimeException_WrapError() {
+        Error error = new Error("test error");
+        RuntimeException result = ExceptionUtil.toRuntimeException(error, false, false);
+        Assertions.assertNotNull(result);
+        Assertions.assertSame(error, result.getCause());
+    }
+
+    @Test
     public void testTryToGetOriginalCheckedException() {
         IOException originalCause = new IOException("original");
         UncheckedException uncheckedException = new UncheckedException(originalCause);
@@ -203,6 +273,86 @@ public class ExceptionUtilTest extends TestBase {
         RuntimeException noCause = new RuntimeException("no cause");
         result = ExceptionUtil.tryToGetOriginalCheckedException(noCause);
         Assertions.assertEquals(noCause, result);
+    }
+
+    @Test
+    public void testTryToGetOriginalCheckedException_UncheckedIOException() {
+        IOException originalIO = new IOException("io error");
+        UncheckedIOException uncheckedIO = new UncheckedIOException(originalIO);
+        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(uncheckedIO);
+        // UncheckedIOException name matches the "Unchecked*Exception" pattern
+        Assertions.assertEquals(originalIO, result);
+    }
+
+    @Test
+    public void testTryToGetOriginalCheckedException_UncheckedSQLException() {
+        SQLException originalSQL = new SQLException("sql error");
+        UncheckedSQLException uncheckedSQL = new UncheckedSQLException(originalSQL);
+        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(uncheckedSQL);
+        Assertions.assertEquals(originalSQL, result);
+    }
+
+    @Test
+    public void testTryToGetOriginalCheckedException_UncheckedParseException() {
+        ParseException originalParse = new ParseException("parse error", 5);
+        UncheckedParseException uncheckedParse = new UncheckedParseException(originalParse);
+        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(uncheckedParse);
+        Assertions.assertEquals(originalParse, result);
+    }
+
+    @Test
+    public void testTryToGetOriginalCheckedException_ExecutionExceptionWithCheckedException() {
+        IOException ioEx = new IOException("nested io");
+        ExecutionException execEx = new ExecutionException(ioEx);
+        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(execEx);
+        Assertions.assertEquals(ioEx, result);
+    }
+
+    @Test
+    public void testTryToGetOriginalCheckedException_InvocationTargetExceptionWithCheckedException() {
+        SQLException sqlEx = new SQLException("nested sql");
+        InvocationTargetException invocEx = new InvocationTargetException(sqlEx);
+        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(invocEx);
+        Assertions.assertEquals(sqlEx, result);
+    }
+
+    @Test
+    public void testTryToGetOriginalCheckedException_RuntimeCauseNotUnwrapped() {
+        // When cause is also a RuntimeException, should NOT unwrap
+        RuntimeException innerRuntime = new RuntimeException("inner");
+        RuntimeException outerRuntime = new RuntimeException("outer", innerRuntime);
+        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(outerRuntime);
+        Assertions.assertSame(outerRuntime, result);
+    }
+
+    @Test
+    public void testTryToGetOriginalCheckedException_UncheckedException() {
+        IOException cause = new IOException("original io");
+        UncheckedIOException wrapped = new UncheckedIOException(cause);
+        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(wrapped);
+        Assertions.assertSame(cause, result);
+    }
+
+    @Test
+    public void testTryToGetOriginalCheckedException_ExecutionException() throws Exception {
+        IOException cause = new IOException("exec cause");
+        ExecutionException execEx = new ExecutionException(cause);
+        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(execEx);
+        Assertions.assertSame(cause, result);
+    }
+
+    @Test
+    public void testTryToGetOriginalCheckedException_RuntimeException() {
+        RuntimeException ex = new RuntimeException("plain runtime");
+        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(ex);
+        Assertions.assertSame(ex, result);
+    }
+
+    @Test
+    public void testTryToGetOriginalCheckedException_NoRuntimeWrapper() {
+        IOException io = new IOException("checked");
+        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(io);
+        Assertions.assertSame(io, result);
     }
 
     @Test
@@ -250,6 +400,27 @@ public class ExceptionUtilTest extends TestBase {
     }
 
     @Test
+    public void testHasCause_SingleException() {
+        IOException ioEx = new IOException("io");
+        Assertions.assertTrue(ExceptionUtil.hasCause(ioEx, IOException.class));
+        Assertions.assertTrue(ExceptionUtil.hasCause(ioEx, Exception.class));
+        Assertions.assertFalse(ExceptionUtil.hasCause(ioEx, SQLException.class));
+    }
+
+    @Test
+    public void testHasCause_WithPredicate_Found() {
+        IOException ioEx = new IOException("io");
+        RuntimeException runtimeEx = new RuntimeException("runtime", ioEx);
+        Assertions.assertTrue(ExceptionUtil.hasCause(runtimeEx, e -> e instanceof IOException));
+    }
+
+    @Test
+    public void testHasCause_WithPredicate_NotFound() {
+        RuntimeException ex = new RuntimeException("runtime");
+        Assertions.assertFalse(ExceptionUtil.hasCause(ex, e -> e instanceof IOException));
+    }
+
+    @Test
     public void testHasSQLCause() {
         SQLException sqlEx = new SQLException("sql error");
         Assertions.assertTrue(ExceptionUtil.hasSQLCause(sqlEx));
@@ -265,6 +436,20 @@ public class ExceptionUtilTest extends TestBase {
     }
 
     @Test
+    public void testHasSQLCause_DeepChain() {
+        SQLException sqlEx = new SQLException("sql");
+        IOException ioEx = new IOException("io", sqlEx);
+        RuntimeException runtimeEx = new RuntimeException("runtime", ioEx);
+        Assertions.assertTrue(ExceptionUtil.hasSQLCause(runtimeEx));
+    }
+
+    @Test
+    public void testHasSQLCause_NoCause() {
+        RuntimeException ex = new RuntimeException("no sql cause");
+        Assertions.assertFalse(ExceptionUtil.hasSQLCause(ex));
+    }
+
+    @Test
     public void testHasIOCause() {
         IOException ioEx = new IOException("io error");
         Assertions.assertTrue(ExceptionUtil.hasIOCause(ioEx));
@@ -277,6 +462,20 @@ public class ExceptionUtilTest extends TestBase {
 
         SQLException sqlEx = new SQLException("sql error");
         Assertions.assertFalse(ExceptionUtil.hasIOCause(sqlEx));
+    }
+
+    @Test
+    public void testHasIOCause_DeepChain() {
+        IOException ioEx = new IOException("io");
+        SQLException sqlEx = new SQLException("sql", ioEx);
+        RuntimeException runtimeEx = new RuntimeException("runtime", sqlEx);
+        Assertions.assertTrue(ExceptionUtil.hasIOCause(runtimeEx));
+    }
+
+    @Test
+    public void testHasIOCause_NoCause() {
+        RuntimeException ex = new RuntimeException("no io cause");
+        Assertions.assertFalse(ExceptionUtil.hasIOCause(ex));
     }
 
     @Test
@@ -343,6 +542,23 @@ public class ExceptionUtilTest extends TestBase {
     }
 
     @Test
+    public void testFirstCause_CircularReference() {
+        RuntimeException circular1 = new RuntimeException("circular1");
+        RuntimeException circular2 = new RuntimeException("circular2", circular1);
+        try {
+            Field causeField = Throwable.class.getDeclaredField("cause");
+            causeField.setAccessible(true);
+            causeField.set(circular1, circular2);
+
+            // Should not loop forever, should terminate due to identity-based cycle detection
+            Throwable first = ExceptionUtil.firstCause(circular1);
+            Assertions.assertNotNull(first);
+        } catch (Exception e) {
+            // Reflection may fail on some JVMs
+        }
+    }
+
+    @Test
     public void testFindCauseByClass() {
         IOException ioEx = new IOException("io");
         SQLException sqlEx = new SQLException("sql", ioEx);
@@ -380,6 +596,56 @@ public class ExceptionUtilTest extends TestBase {
 
         Optional<Throwable> notFound = ExceptionUtil.findCause(runtimeEx, ex -> ex.getMessage() != null && ex.getMessage().contains("foo"));
         Assertions.assertFalse(notFound.isPresent());
+    }
+
+    @Test
+    public void testComplexExceptionChains() {
+        IOException level3 = new IOException("level 3");
+        SQLException level2 = new SQLException("level 2", level3);
+        RuntimeException level1 = new RuntimeException("level 1", level2);
+        ExecutionException level0 = new ExecutionException("level 0", level1);
+
+        Optional<IOException> foundIo = ExceptionUtil.findCause(level0, IOException.class);
+        Assertions.assertTrue(foundIo.isPresent());
+        Assertions.assertEquals(level3, foundIo.get());
+
+        Throwable first = ExceptionUtil.firstCause(level0);
+        Assertions.assertEquals(level3, first);
+
+        List<Throwable> causes = ExceptionUtil.listCause(level0);
+        Assertions.assertEquals(4, causes.size());
+    }
+
+    @Test
+    public void testFindCause_NotFound() {
+        RuntimeException runtimeEx = new RuntimeException("runtime");
+        Optional<IOException> result = ExceptionUtil.findCause(runtimeEx, IOException.class);
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testFindCauseByPredicate_NotFound() {
+        RuntimeException runtimeEx = new RuntimeException("runtime");
+        Optional<Throwable> result = ExceptionUtil.findCause(runtimeEx, ex -> ex instanceof IOException);
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testFindCause_Found() {
+        IOException ioEx = new IOException("found io");
+        RuntimeException runtimeEx = new RuntimeException("wrapper", ioEx);
+        Optional<IOException> result = ExceptionUtil.findCause(runtimeEx, IOException.class);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertSame(ioEx, result.get());
+    }
+
+    @Test
+    public void testFindCauseByPredicate_Found() {
+        IOException ioEx = new IOException("found");
+        RuntimeException runtimeEx = new RuntimeException("wrapper", ioEx);
+        Optional<Throwable> result = ExceptionUtil.findCause(runtimeEx, e -> e instanceof IOException);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertSame(ioEx, result.get());
     }
 
     @Test
@@ -443,102 +709,6 @@ public class ExceptionUtilTest extends TestBase {
     }
 
     @Test
-    public void testComplexExceptionChains() {
-        IOException level3 = new IOException("level 3");
-        SQLException level2 = new SQLException("level 2", level3);
-        RuntimeException level1 = new RuntimeException("level 1", level2);
-        ExecutionException level0 = new ExecutionException("level 0", level1);
-
-        Optional<IOException> foundIo = ExceptionUtil.findCause(level0, IOException.class);
-        Assertions.assertTrue(foundIo.isPresent());
-        Assertions.assertEquals(level3, foundIo.get());
-
-        Throwable first = ExceptionUtil.firstCause(level0);
-        Assertions.assertEquals(level3, first);
-
-        List<Throwable> causes = ExceptionUtil.listCause(level0);
-        Assertions.assertEquals(4, causes.size());
-    }
-
-    @Test
-    public void testCachingBehavior() {
-        IOException io1 = new IOException("io1");
-        IOException io2 = new IOException("io2");
-
-        RuntimeException result1 = ExceptionUtil.toRuntimeException(io1);
-        RuntimeException result2 = ExceptionUtil.toRuntimeException(io2);
-
-        Assertions.assertTrue(result1 instanceof UncheckedIOException);
-        Assertions.assertTrue(result2 instanceof UncheckedIOException);
-        Assertions.assertEquals(io1, result1.getCause());
-        Assertions.assertEquals(io2, result2.getCause());
-    }
-
-    @Test
-    public void testTryToGetOriginalCheckedException_UncheckedIOException() {
-        IOException originalIO = new IOException("io error");
-        UncheckedIOException uncheckedIO = new UncheckedIOException(originalIO);
-        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(uncheckedIO);
-        // UncheckedIOException name matches the "Unchecked*Exception" pattern
-        Assertions.assertEquals(originalIO, result);
-    }
-
-    @Test
-    public void testTryToGetOriginalCheckedException_UncheckedSQLException() {
-        SQLException originalSQL = new SQLException("sql error");
-        UncheckedSQLException uncheckedSQL = new UncheckedSQLException(originalSQL);
-        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(uncheckedSQL);
-        Assertions.assertEquals(originalSQL, result);
-    }
-
-    @Test
-    public void testTryToGetOriginalCheckedException_UncheckedParseException() {
-        ParseException originalParse = new ParseException("parse error", 5);
-        UncheckedParseException uncheckedParse = new UncheckedParseException(originalParse);
-        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(uncheckedParse);
-        Assertions.assertEquals(originalParse, result);
-    }
-
-    @Test
-    public void testTryToGetOriginalCheckedException_ExecutionExceptionWithCheckedException() {
-        IOException ioEx = new IOException("nested io");
-        ExecutionException execEx = new ExecutionException(ioEx);
-        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(execEx);
-        Assertions.assertEquals(ioEx, result);
-    }
-
-    @Test
-    public void testTryToGetOriginalCheckedException_InvocationTargetExceptionWithCheckedException() {
-        SQLException sqlEx = new SQLException("nested sql");
-        InvocationTargetException invocEx = new InvocationTargetException(sqlEx);
-        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(invocEx);
-        Assertions.assertEquals(sqlEx, result);
-    }
-
-    @Test
-    public void testTryToGetOriginalCheckedException_RuntimeCauseNotUnwrapped() {
-        // When cause is also a RuntimeException, should NOT unwrap
-        RuntimeException innerRuntime = new RuntimeException("inner");
-        RuntimeException outerRuntime = new RuntimeException("outer", innerRuntime);
-        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(outerRuntime);
-        Assertions.assertSame(outerRuntime, result);
-    }
-
-    @Test
-    public void testToRuntimeException_UndeclaredThrowableExceptionNoCause() {
-        UndeclaredThrowableException undeclaredNoCause = new UndeclaredThrowableException(null);
-        RuntimeException result = ExceptionUtil.toRuntimeException(undeclaredNoCause);
-        Assertions.assertSame(undeclaredNoCause, result);
-    }
-
-    @Test
-    public void testToRuntimeException_InvocationTargetExceptionNoCause() {
-        InvocationTargetException invocNoCause = new InvocationTargetException(null);
-        RuntimeException result = ExceptionUtil.toRuntimeException(invocNoCause);
-        Assertions.assertTrue(result instanceof UncheckedException);
-    }
-
-    @Test
     public void testGetErrorMessage_DeeplyNestedNoMessages() {
         Exception inner = new Exception();
         Exception middle = new Exception(inner);
@@ -566,74 +736,49 @@ public class ExceptionUtilTest extends TestBase {
     }
 
     @Test
-    public void testFirstCause_CircularReference() {
-        RuntimeException circular1 = new RuntimeException("circular1");
-        RuntimeException circular2 = new RuntimeException("circular2", circular1);
-        try {
-            Field causeField = Throwable.class.getDeclaredField("cause");
-            causeField.setAccessible(true);
-            causeField.set(circular1, circular2);
-
-            // Should not loop forever, should terminate due to identity-based cycle detection
-            Throwable first = ExceptionUtil.firstCause(circular1);
-            Assertions.assertNotNull(first);
-        } catch (Exception e) {
-            // Reflection may fail on some JVMs
-        }
+    public void testGetErrorMessage_WithClassName() {
+        IOException ex = new IOException("io message");
+        String msg = ExceptionUtil.getErrorMessage(ex, true);
+        Assertions.assertTrue(msg.contains("IOException"));
+        Assertions.assertTrue(msg.contains("io message"));
     }
 
     @Test
-    public void testToRuntimeException_CallInterruptAndThrowError() {
-        // Test with callInterrupt=true and throwIfItIsError=true for an Error
-        Error error = new Error("test error");
-        Assertions.assertThrows(Error.class, () -> ExceptionUtil.toRuntimeException(error, true, true));
+    public void testGetErrorMessage_WithoutClassName() {
+        IOException ex = new IOException("plain message");
+        String msg = ExceptionUtil.getErrorMessage(ex, false);
+        Assertions.assertEquals("plain message", msg);
     }
 
     @Test
-    public void testToRuntimeException_CallInterruptAndThrowError_WithInterruptedException() {
-        // Test with callInterrupt=true and throwIfItIsError=true for InterruptedException
-        Thread.interrupted(); // clear
-        InterruptedException interruptEx = new InterruptedException("interrupted");
-        RuntimeException result = ExceptionUtil.toRuntimeException(interruptEx, true, true);
-        Assertions.assertTrue(result instanceof UncheckedInterruptedException);
-        Assertions.assertTrue(Thread.interrupted()); // should have been interrupted
+    public void testGetErrorMessage_SQLWithClassName() {
+        SQLException sqlEx = new SQLException("sql msg", "S0001", 42);
+        String msg = ExceptionUtil.getErrorMessage(sqlEx, true);
+        Assertions.assertTrue(msg.contains("SQLException"));
+        Assertions.assertTrue(msg.contains("42"));
     }
 
     @Test
-    public void testHasCause_SingleException() {
-        IOException ioEx = new IOException("io");
-        Assertions.assertTrue(ExceptionUtil.hasCause(ioEx, IOException.class));
-        Assertions.assertTrue(ExceptionUtil.hasCause(ioEx, Exception.class));
-        Assertions.assertFalse(ExceptionUtil.hasCause(ioEx, SQLException.class));
+    public void testGetErrorMessage_SQLWithoutClassName() {
+        SQLException sqlEx = new SQLException("sql msg", "S0001", 42);
+        String msg = ExceptionUtil.getErrorMessage(sqlEx, false);
+        Assertions.assertTrue(msg.contains("42"));
     }
 
     @Test
-    public void testHasSQLCause_DeepChain() {
-        SQLException sqlEx = new SQLException("sql");
-        IOException ioEx = new IOException("io", sqlEx);
-        RuntimeException runtimeEx = new RuntimeException("runtime", ioEx);
-        Assertions.assertTrue(ExceptionUtil.hasSQLCause(runtimeEx));
+    public void testGetErrorMessage_EmptyMessage_UsesClassName() {
+        RuntimeException ex = new RuntimeException();
+        String msg = ExceptionUtil.getErrorMessage(ex, false);
+        Assertions.assertNotNull(msg);
+        Assertions.assertFalse(msg.isEmpty());
     }
 
     @Test
-    public void testHasIOCause_DeepChain() {
-        IOException ioEx = new IOException("io");
-        SQLException sqlEx = new SQLException("sql", ioEx);
-        RuntimeException runtimeEx = new RuntimeException("runtime", sqlEx);
-        Assertions.assertTrue(ExceptionUtil.hasIOCause(runtimeEx));
-    }
-
-    @Test
-    public void testFindCause_NotFound() {
-        RuntimeException runtimeEx = new RuntimeException("runtime");
-        Optional<IOException> result = ExceptionUtil.findCause(runtimeEx, IOException.class);
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testFindCauseByPredicate_NotFound() {
-        RuntimeException runtimeEx = new RuntimeException("runtime");
-        Optional<Throwable> result = ExceptionUtil.findCause(runtimeEx, ex -> ex instanceof IOException);
-        Assertions.assertFalse(result.isPresent());
+    public void testGetErrorMessage_NullMessageWithCause() {
+        IOException cause = new IOException("cause message");
+        RuntimeException ex = new RuntimeException((String) null, cause) {
+        };
+        String msg = ExceptionUtil.getErrorMessage(ex, false);
+        Assertions.assertEquals("cause message", msg);
     }
 }

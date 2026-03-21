@@ -17,33 +17,11 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class IntSupplierTest extends TestBase {
-
-    @Test
-    public void test_ZERO() {
-        assertEquals(0, IntSupplier.ZERO.getAsInt());
-        assertEquals(0, IntSupplier.ZERO.getAsInt());
-        assertEquals(0, IntSupplier.ZERO.getAsInt());
-    }
-
-    @Test
-    public void test_RANDOM() {
-        // RANDOM should return int values
-        int value1 = IntSupplier.RANDOM.getAsInt();
-        int value2 = IntSupplier.RANDOM.getAsInt();
-        int value3 = IntSupplier.RANDOM.getAsInt();
-
-        // Verify they are valid int values (always true, but tests don't throw)
-        assertTrue(value1 >= Integer.MIN_VALUE && value1 <= Integer.MAX_VALUE);
-        assertTrue(value2 >= Integer.MIN_VALUE && value2 <= Integer.MAX_VALUE);
-        assertTrue(value3 >= Integer.MIN_VALUE && value3 <= Integer.MAX_VALUE);
-    }
 
     @Test
     public void test_getAsInt_lambda() {
@@ -78,6 +56,26 @@ public class IntSupplierTest extends TestBase {
     }
 
     @Test
+    public void test_getAsInt_varyingValues() {
+        final int[] values = { 10, 20, 30 };
+        final int[] index = { 0 };
+
+        IntSupplier supplier = () -> values[index[0]++ % values.length];
+
+        assertEquals(10, supplier.getAsInt());
+        assertEquals(20, supplier.getAsInt());
+        assertEquals(30, supplier.getAsInt());
+        assertEquals(10, supplier.getAsInt()); // Wraps around
+    }
+
+    @Test
+    public void test_ZERO() {
+        assertEquals(0, IntSupplier.ZERO.getAsInt());
+        assertEquals(0, IntSupplier.ZERO.getAsInt());
+        assertEquals(0, IntSupplier.ZERO.getAsInt());
+    }
+
+    @Test
     public void test_getAsInt_negativeValue() {
         IntSupplier supplier = () -> -500;
 
@@ -99,15 +97,15 @@ public class IntSupplierTest extends TestBase {
     }
 
     @Test
-    public void test_getAsInt_varyingValues() {
-        final int[] values = { 10, 20, 30 };
-        final int[] index = { 0 };
+    public void test_RANDOM() {
+        // RANDOM should return int values
+        int value1 = IntSupplier.RANDOM.getAsInt();
+        int value2 = IntSupplier.RANDOM.getAsInt();
+        int value3 = IntSupplier.RANDOM.getAsInt();
 
-        IntSupplier supplier = () -> values[index[0]++ % values.length];
-
-        assertEquals(10, supplier.getAsInt());
-        assertEquals(20, supplier.getAsInt());
-        assertEquals(30, supplier.getAsInt());
-        assertEquals(10, supplier.getAsInt()); // Wraps around
+        // Verify they are valid int values (always true, but tests don't throw)
+        assertTrue(value1 >= Integer.MIN_VALUE && value1 <= Integer.MAX_VALUE);
+        assertTrue(value2 >= Integer.MIN_VALUE && value2 <= Integer.MAX_VALUE);
+        assertTrue(value3 >= Integer.MIN_VALUE && value3 <= Integer.MAX_VALUE);
     }
 }

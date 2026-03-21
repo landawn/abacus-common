@@ -17,12 +17,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ObserverTest extends TestBase {
 
     // ==================== complete(BlockingQueue) ====================
@@ -194,6 +192,132 @@ public class ObserverTest extends TestBase {
     @Test
     public void testOfIterator_NullArg() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> Observer.of((Iterator<String>) null));
+    }
+
+    // ==================== chained operations ====================
+
+    @Test
+    public void testChainedOperations() throws InterruptedException {
+        Observer<Integer> observer = Observer.of(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+
+        List<String> results = new ArrayList<>();
+        CountDownLatch latch = new CountDownLatch(1);
+
+        observer.skip(2)
+                .filter(i -> i % 2 == 0)
+                .map(i -> i * 2)
+                .limit(3)
+                .map(i -> "Result: " + i)
+                .observe(results::add, e -> Assertions.fail("Unexpected error: " + e), latch::countDown);
+
+        boolean completed = latch.await(5, TimeUnit.SECONDS);
+        Assertions.assertTrue(completed);
+        Assertions.assertEquals(Arrays.asList("Result: 8", "Result: 12", "Result: 16"), results);
+    }
+
+    @Test
+    public void testChainedOperations_DistinctAndFilter() throws InterruptedException {
+        Observer<Integer> observer = Observer.of(Arrays.asList(1, 2, 2, 3, 3, 4, 5));
+
+        List<Integer> results = new ArrayList<>();
+        CountDownLatch latch = new CountDownLatch(1);
+
+        observer.distinct().filter(i -> i > 2).observe(results::add, e -> Assertions.fail("Unexpected error: " + e), latch::countDown);
+
+        boolean completed = latch.await(5, TimeUnit.SECONDS);
+        Assertions.assertTrue(completed);
+        Assertions.assertEquals(Arrays.asList(3, 4, 5), results);
+    }
+
+    @Test
+    public void testChainedOperations_SkipAndLimit() throws InterruptedException {
+        Observer<Integer> observer = Observer.of(Arrays.asList(1, 2, 3, 4, 5));
+
+        List<Integer> results = new ArrayList<>();
+        CountDownLatch latch = new CountDownLatch(1);
+
+        observer.skip(1).limit(2).observe(results::add, e -> Assertions.fail("Unexpected error: " + e), latch::countDown);
+
+        boolean completed = latch.await(5, TimeUnit.SECONDS);
+        Assertions.assertTrue(completed);
+        Assertions.assertEquals(Arrays.asList(2, 3), results);
+    }
+
+    @Test
+    public void testChainedOperations_FilterAndMap() throws InterruptedException {
+        Observer<Integer> observer = Observer.of(Arrays.asList(1, 2, 3, 4, 5));
+
+        List<String> results = new ArrayList<>();
+        CountDownLatch latch = new CountDownLatch(1);
+
+        observer.filter(i -> i > 2).map(i -> "num:" + i).observe(results::add, e -> Assertions.fail("Unexpected error: " + e), latch::countDown);
+
+        boolean completed = latch.await(5, TimeUnit.SECONDS);
+        Assertions.assertTrue(completed);
+        Assertions.assertEquals(Arrays.asList("num:3", "num:4", "num:5"), results);
+    }
+
+    @Test
+    public void testChainedOperations_DistinctByAndLimit() throws InterruptedException {
+        Observer<String> observer = Observer.of(Arrays.asList("apple", "avocado", "banana", "blueberry", "cherry"));
+
+        List<String> results = new ArrayList<>();
+        CountDownLatch latch = new CountDownLatch(1);
+
+        observer.distinctBy(s -> s.charAt(0)).limit(2).observe(results::add, e -> Assertions.fail("Unexpected error: " + e), latch::countDown);
+
+        boolean completed = latch.await(5, TimeUnit.SECONDS);
+        Assertions.assertTrue(completed);
+        Assertions.assertEquals(Arrays.asList("apple", "banana"), results);
+    }
+
+    @Test
+    public void testChainedOperations_MapAndFlatMap() throws InterruptedException {
+        Observer<Integer> observer = Observer.of(Arrays.asList(1, 2));
+
+        List<String> results = new ArrayList<>();
+        CountDownLatch latch = new CountDownLatch(1);
+
+        observer.map(i -> i * 10)
+                .flatMap(i -> Arrays.asList(i + "a", i + "b"))
+                .observe(results::add, e -> Assertions.fail("Unexpected error: " + e), latch::countDown);
+
+        boolean completed = latch.await(5, TimeUnit.SECONDS);
+        Assertions.assertTrue(completed);
+        Assertions.assertEquals(Arrays.asList("10a", "10b", "20a", "20b"), results);
+    }
+
+    @Test
+    public void testChainedOperations_SkipFilterDistinctLimit() throws InterruptedException {
+        Observer<Integer> observer = Observer.of(Arrays.asList(1, 2, 3, 3, 4, 5, 5, 6, 7));
+
+        List<Integer> results = new ArrayList<>();
+        CountDownLatch latch = new CountDownLatch(1);
+
+        observer.skip(1).filter(i -> i % 2 == 0).distinct().limit(2).observe(results::add, e -> Assertions.fail("Unexpected error: " + e), latch::countDown);
+
+        boolean completed = latch.await(5, TimeUnit.SECONDS);
+        Assertions.assertTrue(completed);
+        Assertions.assertEquals(Arrays.asList(2, 4), results);
+    }
+
+    // ==================== legacy test ====================
+
+    @Test
+    public void test_0() {
+        BlockingQueue<String> queue = new ArrayBlockingQueue<>(100);
+        Observer.of(queue).observe(Fn.println(), Exception::printStackTrace, () -> N.println("completed"));
+
+        queue.add("ab");
+        queue.add("cc");
+        queue.add("dd");
+
+        Observer.timer(10).observe(Fn.println(), Exception::printStackTrace, () -> N.println("completed"));
+
+        Observer.interval(100).observe(Fn.println(), Exception::printStackTrace, () -> N.println("completed"));
+
+        N.sleep(3000);
+        assertNotNull(queue);
     }
 
     // ==================== timer(long) ====================
@@ -414,6 +538,20 @@ public class ObserverTest extends TestBase {
         Assertions.assertEquals(1L, results.get(1));
     }
 
+    @Test
+    public void testDebounceMillis_Zero() {
+        Observer<String> observer = Observer.of(Arrays.asList("a", "b"));
+        Observer<String> debounced = observer.debounce(0);
+        Assertions.assertSame(observer, debounced);
+    }
+
+    @Test
+    public void testDebounceWithUnit_Zero() {
+        Observer<String> observer = Observer.of(Arrays.asList("a"));
+        Observer<String> debounced = observer.debounce(0, TimeUnit.MILLISECONDS);
+        Assertions.assertSame(observer, debounced);
+    }
+
     // ==================== debounce(long) ====================
 
     @Test
@@ -430,13 +568,6 @@ public class ObserverTest extends TestBase {
         boolean completed = latch.await(5, TimeUnit.SECONDS);
         Assertions.assertTrue(completed);
         Assertions.assertTrue(results.size() <= 5);
-    }
-
-    @Test
-    public void testDebounceMillis_Zero() {
-        Observer<String> observer = Observer.of(Arrays.asList("a", "b"));
-        Observer<String> debounced = observer.debounce(0);
-        Assertions.assertSame(observer, debounced);
     }
 
     @Test
@@ -464,17 +595,24 @@ public class ObserverTest extends TestBase {
     }
 
     @Test
-    public void testDebounceWithUnit_Zero() {
-        Observer<String> observer = Observer.of(Arrays.asList("a"));
-        Observer<String> debounced = observer.debounce(0, TimeUnit.MILLISECONDS);
-        Assertions.assertSame(observer, debounced);
-    }
-
-    @Test
     public void testDebounceWithUnit_InvalidArgs() {
         Observer<String> observer = Observer.of(Arrays.asList("test"));
         Assertions.assertThrows(IllegalArgumentException.class, () -> observer.debounce(-1, TimeUnit.MILLISECONDS));
         Assertions.assertThrows(IllegalArgumentException.class, () -> observer.debounce(100, null));
+    }
+
+    @Test
+    public void testThrottleFirstMillis_Zero() {
+        Observer<String> observer = Observer.of(Arrays.asList("a", "b"));
+        Observer<String> throttled = observer.throttleFirst(0);
+        Assertions.assertSame(observer, throttled);
+    }
+
+    @Test
+    public void testThrottleFirstWithUnit_Zero() {
+        Observer<String> observer = Observer.of(Arrays.asList("a"));
+        Observer<String> throttled = observer.throttleFirst(0, TimeUnit.MILLISECONDS);
+        Assertions.assertSame(observer, throttled);
     }
 
     // ==================== throttleFirst(long) ====================
@@ -493,13 +631,6 @@ public class ObserverTest extends TestBase {
         boolean completed = latch.await(5, TimeUnit.SECONDS);
         Assertions.assertTrue(completed);
         Assertions.assertTrue(results.size() <= 5);
-    }
-
-    @Test
-    public void testThrottleFirstMillis_Zero() {
-        Observer<String> observer = Observer.of(Arrays.asList("a", "b"));
-        Observer<String> throttled = observer.throttleFirst(0);
-        Assertions.assertSame(observer, throttled);
     }
 
     @Test
@@ -527,17 +658,24 @@ public class ObserverTest extends TestBase {
     }
 
     @Test
-    public void testThrottleFirstWithUnit_Zero() {
-        Observer<String> observer = Observer.of(Arrays.asList("a"));
-        Observer<String> throttled = observer.throttleFirst(0, TimeUnit.MILLISECONDS);
-        Assertions.assertSame(observer, throttled);
-    }
-
-    @Test
     public void testThrottleFirstWithUnit_InvalidArgs() {
         Observer<String> observer = Observer.of(Arrays.asList("test"));
         Assertions.assertThrows(IllegalArgumentException.class, () -> observer.throttleFirst(-1, TimeUnit.MILLISECONDS));
         Assertions.assertThrows(IllegalArgumentException.class, () -> observer.throttleFirst(100, null));
+    }
+
+    @Test
+    public void testThrottleLastMillis_Zero() {
+        Observer<String> observer = Observer.of(Arrays.asList("a", "b"));
+        Observer<String> throttled = observer.throttleLast(0);
+        Assertions.assertSame(observer, throttled);
+    }
+
+    @Test
+    public void testThrottleLastWithUnit_Zero() {
+        Observer<String> observer = Observer.of(Arrays.asList("a"));
+        Observer<String> throttled = observer.throttleLast(0, TimeUnit.MILLISECONDS);
+        Assertions.assertSame(observer, throttled);
     }
 
     // ==================== throttleLast(long) ====================
@@ -556,13 +694,6 @@ public class ObserverTest extends TestBase {
         boolean completed = latch.await(5, TimeUnit.SECONDS);
         Assertions.assertTrue(completed);
         Assertions.assertTrue(results.size() <= 5);
-    }
-
-    @Test
-    public void testThrottleLastMillis_Zero() {
-        Observer<String> observer = Observer.of(Arrays.asList("a", "b"));
-        Observer<String> throttled = observer.throttleLast(0);
-        Assertions.assertSame(observer, throttled);
     }
 
     @Test
@@ -590,17 +721,24 @@ public class ObserverTest extends TestBase {
     }
 
     @Test
-    public void testThrottleLastWithUnit_Zero() {
-        Observer<String> observer = Observer.of(Arrays.asList("a"));
-        Observer<String> throttled = observer.throttleLast(0, TimeUnit.MILLISECONDS);
-        Assertions.assertSame(observer, throttled);
-    }
-
-    @Test
     public void testThrottleLastWithUnit_InvalidArgs() {
         Observer<String> observer = Observer.of(Arrays.asList("test"));
         Assertions.assertThrows(IllegalArgumentException.class, () -> observer.throttleLast(-1, TimeUnit.MILLISECONDS));
         Assertions.assertThrows(IllegalArgumentException.class, () -> observer.throttleLast(100, null));
+    }
+
+    @Test
+    public void testDelayMillis_Zero() {
+        Observer<String> observer = Observer.of(Arrays.asList("a", "b"));
+        Observer<String> delayed = observer.delay(0);
+        Assertions.assertSame(observer, delayed);
+    }
+
+    @Test
+    public void testDelayWithUnit_Zero() {
+        Observer<String> observer = Observer.of(Arrays.asList("a"));
+        Observer<String> delayed = observer.delay(0, TimeUnit.MILLISECONDS);
+        Assertions.assertSame(observer, delayed);
     }
 
     // ==================== delay(long) ====================
@@ -623,13 +761,6 @@ public class ObserverTest extends TestBase {
         Assertions.assertTrue(completed);
         Assertions.assertEquals(Arrays.asList("test"), results);
         Assertions.assertTrue(elapsedTime >= 100);
-    }
-
-    @Test
-    public void testDelayMillis_Zero() {
-        Observer<String> observer = Observer.of(Arrays.asList("a", "b"));
-        Observer<String> delayed = observer.delay(0);
-        Assertions.assertSame(observer, delayed);
     }
 
     @Test
@@ -677,13 +808,6 @@ public class ObserverTest extends TestBase {
         Assertions.assertTrue(completed);
         Assertions.assertEquals(Arrays.asList("test"), results);
         Assertions.assertTrue(elapsedTime >= 100);
-    }
-
-    @Test
-    public void testDelayWithUnit_Zero() {
-        Observer<String> observer = Observer.of(Arrays.asList("a"));
-        Observer<String> delayed = observer.delay(0, TimeUnit.MILLISECONDS);
-        Assertions.assertSame(observer, delayed);
     }
 
     @Test
@@ -1486,131 +1610,5 @@ public class ObserverTest extends TestBase {
         Assertions.assertTrue(completed);
         Assertions.assertTrue(completeCalled.get());
         Assertions.assertTrue(results.isEmpty());
-    }
-
-    // ==================== chained operations ====================
-
-    @Test
-    public void testChainedOperations() throws InterruptedException {
-        Observer<Integer> observer = Observer.of(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
-
-        List<String> results = new ArrayList<>();
-        CountDownLatch latch = new CountDownLatch(1);
-
-        observer.skip(2)
-                .filter(i -> i % 2 == 0)
-                .map(i -> i * 2)
-                .limit(3)
-                .map(i -> "Result: " + i)
-                .observe(results::add, e -> Assertions.fail("Unexpected error: " + e), latch::countDown);
-
-        boolean completed = latch.await(5, TimeUnit.SECONDS);
-        Assertions.assertTrue(completed);
-        Assertions.assertEquals(Arrays.asList("Result: 8", "Result: 12", "Result: 16"), results);
-    }
-
-    @Test
-    public void testChainedOperations_DistinctAndFilter() throws InterruptedException {
-        Observer<Integer> observer = Observer.of(Arrays.asList(1, 2, 2, 3, 3, 4, 5));
-
-        List<Integer> results = new ArrayList<>();
-        CountDownLatch latch = new CountDownLatch(1);
-
-        observer.distinct().filter(i -> i > 2).observe(results::add, e -> Assertions.fail("Unexpected error: " + e), latch::countDown);
-
-        boolean completed = latch.await(5, TimeUnit.SECONDS);
-        Assertions.assertTrue(completed);
-        Assertions.assertEquals(Arrays.asList(3, 4, 5), results);
-    }
-
-    @Test
-    public void testChainedOperations_SkipAndLimit() throws InterruptedException {
-        Observer<Integer> observer = Observer.of(Arrays.asList(1, 2, 3, 4, 5));
-
-        List<Integer> results = new ArrayList<>();
-        CountDownLatch latch = new CountDownLatch(1);
-
-        observer.skip(1).limit(2).observe(results::add, e -> Assertions.fail("Unexpected error: " + e), latch::countDown);
-
-        boolean completed = latch.await(5, TimeUnit.SECONDS);
-        Assertions.assertTrue(completed);
-        Assertions.assertEquals(Arrays.asList(2, 3), results);
-    }
-
-    @Test
-    public void testChainedOperations_FilterAndMap() throws InterruptedException {
-        Observer<Integer> observer = Observer.of(Arrays.asList(1, 2, 3, 4, 5));
-
-        List<String> results = new ArrayList<>();
-        CountDownLatch latch = new CountDownLatch(1);
-
-        observer.filter(i -> i > 2).map(i -> "num:" + i).observe(results::add, e -> Assertions.fail("Unexpected error: " + e), latch::countDown);
-
-        boolean completed = latch.await(5, TimeUnit.SECONDS);
-        Assertions.assertTrue(completed);
-        Assertions.assertEquals(Arrays.asList("num:3", "num:4", "num:5"), results);
-    }
-
-    @Test
-    public void testChainedOperations_DistinctByAndLimit() throws InterruptedException {
-        Observer<String> observer = Observer.of(Arrays.asList("apple", "avocado", "banana", "blueberry", "cherry"));
-
-        List<String> results = new ArrayList<>();
-        CountDownLatch latch = new CountDownLatch(1);
-
-        observer.distinctBy(s -> s.charAt(0)).limit(2).observe(results::add, e -> Assertions.fail("Unexpected error: " + e), latch::countDown);
-
-        boolean completed = latch.await(5, TimeUnit.SECONDS);
-        Assertions.assertTrue(completed);
-        Assertions.assertEquals(Arrays.asList("apple", "banana"), results);
-    }
-
-    @Test
-    public void testChainedOperations_MapAndFlatMap() throws InterruptedException {
-        Observer<Integer> observer = Observer.of(Arrays.asList(1, 2));
-
-        List<String> results = new ArrayList<>();
-        CountDownLatch latch = new CountDownLatch(1);
-
-        observer.map(i -> i * 10)
-                .flatMap(i -> Arrays.asList(i + "a", i + "b"))
-                .observe(results::add, e -> Assertions.fail("Unexpected error: " + e), latch::countDown);
-
-        boolean completed = latch.await(5, TimeUnit.SECONDS);
-        Assertions.assertTrue(completed);
-        Assertions.assertEquals(Arrays.asList("10a", "10b", "20a", "20b"), results);
-    }
-
-    @Test
-    public void testChainedOperations_SkipFilterDistinctLimit() throws InterruptedException {
-        Observer<Integer> observer = Observer.of(Arrays.asList(1, 2, 3, 3, 4, 5, 5, 6, 7));
-
-        List<Integer> results = new ArrayList<>();
-        CountDownLatch latch = new CountDownLatch(1);
-
-        observer.skip(1).filter(i -> i % 2 == 0).distinct().limit(2).observe(results::add, e -> Assertions.fail("Unexpected error: " + e), latch::countDown);
-
-        boolean completed = latch.await(5, TimeUnit.SECONDS);
-        Assertions.assertTrue(completed);
-        Assertions.assertEquals(Arrays.asList(2, 4), results);
-    }
-
-    // ==================== legacy test ====================
-
-    @Test
-    public void test_0() {
-        BlockingQueue<String> queue = new ArrayBlockingQueue<>(100);
-        Observer.of(queue).observe(Fn.println(), Exception::printStackTrace, () -> N.println("completed"));
-
-        queue.add("ab");
-        queue.add("cc");
-        queue.add("dd");
-
-        Observer.timer(10).observe(Fn.println(), Exception::printStackTrace, () -> N.println("completed"));
-
-        Observer.interval(100).observe(Fn.println(), Exception::printStackTrace, () -> N.println("completed"));
-
-        N.sleep(3000);
-        assertNotNull(queue);
     }
 }

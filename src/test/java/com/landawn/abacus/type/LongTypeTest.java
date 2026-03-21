@@ -15,14 +15,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("new-test")
 public class LongTypeTest extends TestBase {
 
     private LongType longType;
@@ -38,115 +36,8 @@ public class LongTypeTest extends TestBase {
     }
 
     @Test
-    public void test_name() {
-        assertEquals("Long", longType.name());
-    }
-
-    @Test
     public void testIsPrimitiveWrapper() {
         assertTrue(longType.isPrimitiveWrapper());
-    }
-
-    @Test
-    public void test_isLong() {
-        assertTrue(longType.isLong());
-    }
-
-    @Test
-    public void test_stringOf() {
-        assertEquals("1000", longType.stringOf(1000L));
-        assertEquals("-500", longType.stringOf(-500L));
-        assertEquals("0", longType.stringOf(0L));
-        assertEquals("9223372036854775807", longType.stringOf(Long.MAX_VALUE));
-        assertEquals("-9223372036854775808", longType.stringOf(Long.MIN_VALUE));
-        assertNull(longType.stringOf(null));
-    }
-
-    @Test
-    public void test_valueOf_String() {
-        assertEquals(1000L, longType.valueOf("1000"));
-        assertEquals(-500L, longType.valueOf("-500"));
-        assertEquals(0L, longType.valueOf("0"));
-        assertEquals(Long.MAX_VALUE, longType.valueOf("9223372036854775807"));
-        assertEquals(Long.MIN_VALUE, longType.valueOf("-9223372036854775808"));
-        assertNull(longType.valueOf((String) null));
-        assertNull(longType.valueOf(""));
-    }
-
-    @Test
-    public void test_valueOf_String_withSuffix() {
-        assertEquals(42L, longType.valueOf("42L"));
-        assertEquals(42L, longType.valueOf("42l"));
-        assertEquals(42L, longType.valueOf("42F"));
-        assertEquals(42L, longType.valueOf("42D"));
-    }
-
-    @Test
-    public void test_valueOf_charArray() {
-        char[] chars = "9876543210".toCharArray();
-        assertEquals(9876543210L, longType.valueOf(chars, 0, 10));
-
-        char[] negChars = "-1234".toCharArray();
-        assertEquals(-1234L, longType.valueOf(negChars, 0, 5));
-
-        assertNull(longType.valueOf((char[]) null, 0, 0));
-        assertNull(longType.valueOf(chars, 0, 0));
-    }
-
-    @Test
-    public void test_set_PreparedStatement() throws SQLException {
-        PreparedStatement stmt = mock(PreparedStatement.class);
-
-        // Test with value
-        longType.set(stmt, 1, 88888L);
-        verify(stmt).setLong(1, 88888L);
-
-        // Test with null
-        longType.set(stmt, 2, null);
-        verify(stmt).setNull(2, java.sql.Types.BIGINT);
-    }
-
-    @Test
-    public void test_set_CallableStatement() throws SQLException {
-        CallableStatement stmt = mock(CallableStatement.class);
-
-        // Test with value
-        longType.set(stmt, "param1", 77777L);
-        verify(stmt).setLong("param1", 77777L);
-
-        // Test with null
-        longType.set(stmt, "param2", null);
-        verify(stmt).setNull("param2", java.sql.Types.BIGINT);
-    }
-
-    @Test
-    public void test_appendTo() throws Exception {
-        StringWriter sw = new StringWriter();
-
-        // Test value
-        longType.appendTo(sw, 66666L);
-        assertEquals("66666", sw.toString());
-
-        // Test null
-        sw = new StringWriter();
-        longType.appendTo(sw, null);
-        assertEquals("null", sw.toString());
-    }
-
-    @Test
-    public void test_writeCharacter_null() throws Exception {
-        CharacterWriter writer = mock(BufferedJsonWriter.class);
-
-        longType.writeCharacter(writer, null, null);
-        verify(writer).write("null".toCharArray());
-    }
-
-    @Test
-    public void test_writeCharacter_withValue() throws Exception {
-        CharacterWriter writer = mock(BufferedJsonWriter.class);
-
-        longType.writeCharacter(writer, 42L, null);
-        verify(writer).write(42L);
     }
 
     @Test
@@ -282,5 +173,112 @@ public class LongTypeTest extends TestBase {
 
         Long result = longType.get(rs, "long_column");
         assertEquals(42L, result);
+    }
+
+    @Test
+    public void test_name() {
+        assertEquals("Long", longType.name());
+    }
+
+    @Test
+    public void test_isLong() {
+        assertTrue(longType.isLong());
+    }
+
+    @Test
+    public void test_stringOf() {
+        assertEquals("1000", longType.stringOf(1000L));
+        assertEquals("-500", longType.stringOf(-500L));
+        assertEquals("0", longType.stringOf(0L));
+        assertEquals("9223372036854775807", longType.stringOf(Long.MAX_VALUE));
+        assertEquals("-9223372036854775808", longType.stringOf(Long.MIN_VALUE));
+        assertNull(longType.stringOf(null));
+    }
+
+    @Test
+    public void test_valueOf_String() {
+        assertEquals(1000L, longType.valueOf("1000"));
+        assertEquals(-500L, longType.valueOf("-500"));
+        assertEquals(0L, longType.valueOf("0"));
+        assertEquals(Long.MAX_VALUE, longType.valueOf("9223372036854775807"));
+        assertEquals(Long.MIN_VALUE, longType.valueOf("-9223372036854775808"));
+        assertNull(longType.valueOf((String) null));
+        assertNull(longType.valueOf(""));
+    }
+
+    @Test
+    public void test_valueOf_String_withSuffix() {
+        assertEquals(42L, longType.valueOf("42L"));
+        assertEquals(42L, longType.valueOf("42l"));
+        assertEquals(42L, longType.valueOf("42F"));
+        assertEquals(42L, longType.valueOf("42D"));
+    }
+
+    @Test
+    public void test_valueOf_charArray() {
+        char[] chars = "9876543210".toCharArray();
+        assertEquals(9876543210L, longType.valueOf(chars, 0, 10));
+
+        char[] negChars = "-1234".toCharArray();
+        assertEquals(-1234L, longType.valueOf(negChars, 0, 5));
+
+        assertNull(longType.valueOf((char[]) null, 0, 0));
+        assertNull(longType.valueOf(chars, 0, 0));
+    }
+
+    @Test
+    public void test_set_PreparedStatement() throws SQLException {
+        PreparedStatement stmt = mock(PreparedStatement.class);
+
+        // Test with value
+        longType.set(stmt, 1, 88888L);
+        verify(stmt).setLong(1, 88888L);
+
+        // Test with null
+        longType.set(stmt, 2, null);
+        verify(stmt).setNull(2, java.sql.Types.BIGINT);
+    }
+
+    @Test
+    public void test_set_CallableStatement() throws SQLException {
+        CallableStatement stmt = mock(CallableStatement.class);
+
+        // Test with value
+        longType.set(stmt, "param1", 77777L);
+        verify(stmt).setLong("param1", 77777L);
+
+        // Test with null
+        longType.set(stmt, "param2", null);
+        verify(stmt).setNull("param2", java.sql.Types.BIGINT);
+    }
+
+    @Test
+    public void test_appendTo() throws Exception {
+        StringWriter sw = new StringWriter();
+
+        // Test value
+        longType.appendTo(sw, 66666L);
+        assertEquals("66666", sw.toString());
+
+        // Test null
+        sw = new StringWriter();
+        longType.appendTo(sw, null);
+        assertEquals("null", sw.toString());
+    }
+
+    @Test
+    public void test_writeCharacter_null() throws Exception {
+        CharacterWriter writer = mock(BufferedJsonWriter.class);
+
+        longType.writeCharacter(writer, null, null);
+        verify(writer).write("null".toCharArray());
+    }
+
+    @Test
+    public void test_writeCharacter_withValue() throws Exception {
+        CharacterWriter writer = mock(BufferedJsonWriter.class);
+
+        longType.writeCharacter(writer, 42L, null);
+        verify(writer).write(42L);
     }
 }

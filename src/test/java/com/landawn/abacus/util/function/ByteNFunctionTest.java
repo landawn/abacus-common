@@ -3,13 +3,19 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ByteNFunctionTest extends TestBase {
+
+    private static class TestObject {
+        final byte[] values;
+
+        TestObject(byte... values) {
+            this.values = values;
+        }
+    }
 
     @Test
     public void testApply() {
@@ -61,6 +67,22 @@ public class ByteNFunctionTest extends TestBase {
     }
 
     @Test
+    public void testApplyManyElements() {
+        ByteNFunction<Integer> count = args -> args.length;
+
+        assertEquals(7, count.apply((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6, (byte) 7));
+    }
+
+    @Test
+    public void testReturningComplexObject() {
+        ByteNFunction<TestObject> createObject = args -> new TestObject(args);
+
+        TestObject obj = createObject.apply((byte) 1, (byte) 2, (byte) 3);
+        assertEquals(3, obj.values.length);
+        assertEquals(1, obj.values[0]);
+    }
+
+    @Test
     public void testApplyEmptyArray() {
         ByteNFunction<Integer> count = args -> args.length;
 
@@ -75,10 +97,32 @@ public class ByteNFunctionTest extends TestBase {
     }
 
     @Test
-    public void testApplyManyElements() {
-        ByteNFunction<Integer> count = args -> args.length;
+    public void testWithNegativeValues() {
+        ByteNFunction<Integer> sum = args -> {
+            int total = 0;
+            for (byte b : args) {
+                total += b;
+            }
+            return total;
+        };
 
-        assertEquals(7, count.apply((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6, (byte) 7));
+        assertEquals(-4, sum.apply((byte) -5, (byte) 3, (byte) -2));
+    }
+
+    @Test
+    public void testWithBoundaryValues() {
+        ByteNFunction<String> toString = args -> {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < args.length; i++) {
+                if (i > 0)
+                    sb.append(",");
+                sb.append(args[i]);
+            }
+            return sb.toString();
+        };
+
+        String result = toString.apply(Byte.MIN_VALUE, (byte) 0, Byte.MAX_VALUE);
+        assertEquals(Byte.MIN_VALUE + ",0," + Byte.MAX_VALUE, result);
     }
 
     @Test
@@ -116,53 +160,7 @@ public class ByteNFunctionTest extends TestBase {
     }
 
     @Test
-    public void testReturningComplexObject() {
-        ByteNFunction<TestObject> createObject = args -> new TestObject(args);
-
-        TestObject obj = createObject.apply((byte) 1, (byte) 2, (byte) 3);
-        assertEquals(3, obj.values.length);
-        assertEquals(1, obj.values[0]);
-    }
-
-    @Test
-    public void testWithNegativeValues() {
-        ByteNFunction<Integer> sum = args -> {
-            int total = 0;
-            for (byte b : args) {
-                total += b;
-            }
-            return total;
-        };
-
-        assertEquals(-4, sum.apply((byte) -5, (byte) 3, (byte) -2));
-    }
-
-    @Test
-    public void testWithBoundaryValues() {
-        ByteNFunction<String> toString = args -> {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < args.length; i++) {
-                if (i > 0)
-                    sb.append(",");
-                sb.append(args[i]);
-            }
-            return sb.toString();
-        };
-
-        String result = toString.apply(Byte.MIN_VALUE, (byte) 0, Byte.MAX_VALUE);
-        assertEquals(Byte.MIN_VALUE + ",0," + Byte.MAX_VALUE, result);
-    }
-
-    @Test
     public void testFunctionalInterface() {
         assertNotNull(ByteNFunction.class.getAnnotation(FunctionalInterface.class));
-    }
-
-    private static class TestObject {
-        final byte[] values;
-
-        TestObject(byte... values) {
-            this.values = values;
-        }
     }
 }

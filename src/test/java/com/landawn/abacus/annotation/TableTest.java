@@ -12,12 +12,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class TableTest extends TestBase {
     @Table
     static class TestEntity1 {
@@ -45,8 +43,35 @@ public class TableTest extends TestBase {
     }
 
     @Test
-    public void testTypeAnnotation() {
-        assertTrue(TestEntity1.class.isAnnotationPresent(Table.class));
+    public void testAllAttributes() {
+        Table annotation = TestEntity6.class.getAnnotation(Table.class);
+        assertNotNull(annotation);
+        assertEquals("legacy", annotation.value());
+        assertEquals("new_table", annotation.name());
+        assertEquals("nt", annotation.alias());
+        assertArrayEquals(new String[] { "id" }, annotation.columnFields());
+        assertArrayEquals(new String[] { "old" }, annotation.nonColumnFields());
+    }
+
+    @Test
+    public void testRetentionPolicy() {
+        Retention retention = Table.class.getAnnotation(Retention.class);
+        assertNotNull(retention);
+        assertEquals(RetentionPolicy.RUNTIME, retention.value());
+    }
+
+    @Test
+    public void testTargetElements() {
+        Target target = Table.class.getAnnotation(Target.class);
+        assertNotNull(target);
+        assertArrayEquals(new ElementType[] { ElementType.TYPE }, target.value());
+    }
+
+    @Test
+    public void testValueMethodExists() throws NoSuchMethodException {
+        Method method = Table.class.getDeclaredMethod("value");
+        assertNotNull(method);
+        assertEquals(String.class, method.getReturnType());
     }
 
     @Test
@@ -76,10 +101,31 @@ public class TableTest extends TestBase {
     }
 
     @Test
+    public void testNameMethodExists() throws NoSuchMethodException {
+        Method method = Table.class.getDeclaredMethod("name");
+        assertNotNull(method);
+        assertEquals(String.class, method.getReturnType());
+    }
+
+    @Test
+    public void testAliasMethodExists() throws NoSuchMethodException {
+        Method method = Table.class.getDeclaredMethod("alias");
+        assertNotNull(method);
+        assertEquals(String.class, method.getReturnType());
+    }
+
+    @Test
     public void testColumnFields() {
         Table annotation = TestEntity4.class.getAnnotation(Table.class);
         assertNotNull(annotation);
         assertArrayEquals(new String[] { "id", "name" }, annotation.columnFields());
+    }
+
+    @Test
+    public void testColumnFieldsMethodExists() throws NoSuchMethodException {
+        Method method = Table.class.getDeclaredMethod("columnFields");
+        assertNotNull(method);
+        assertEquals(String[].class, method.getReturnType());
     }
 
     @Test
@@ -90,28 +136,15 @@ public class TableTest extends TestBase {
     }
 
     @Test
-    public void testAllAttributes() {
-        Table annotation = TestEntity6.class.getAnnotation(Table.class);
-        assertNotNull(annotation);
-        assertEquals("legacy", annotation.value());
-        assertEquals("new_table", annotation.name());
-        assertEquals("nt", annotation.alias());
-        assertArrayEquals(new String[] { "id" }, annotation.columnFields());
-        assertArrayEquals(new String[] { "old" }, annotation.nonColumnFields());
+    public void testNonColumnFieldsMethodExists() throws NoSuchMethodException {
+        Method method = Table.class.getDeclaredMethod("nonColumnFields");
+        assertNotNull(method);
+        assertEquals(String[].class, method.getReturnType());
     }
 
     @Test
-    public void testRetentionPolicy() {
-        Retention retention = Table.class.getAnnotation(Retention.class);
-        assertNotNull(retention);
-        assertEquals(RetentionPolicy.RUNTIME, retention.value());
-    }
-
-    @Test
-    public void testTargetElements() {
-        Target target = Table.class.getAnnotation(Target.class);
-        assertNotNull(target);
-        assertArrayEquals(new ElementType[] { ElementType.TYPE }, target.value());
+    public void testTypeAnnotation() {
+        assertTrue(TestEntity1.class.isAnnotationPresent(Table.class));
     }
 
     @Test
@@ -129,40 +162,5 @@ public class TableTest extends TestBase {
         Table annotation = TestEntity1.class.getAnnotation(Table.class);
         assertNotNull(annotation);
         assertEquals(Table.class, annotation.annotationType());
-    }
-
-    @Test
-    public void testValueMethodExists() throws NoSuchMethodException {
-        Method method = Table.class.getDeclaredMethod("value");
-        assertNotNull(method);
-        assertEquals(String.class, method.getReturnType());
-    }
-
-    @Test
-    public void testNameMethodExists() throws NoSuchMethodException {
-        Method method = Table.class.getDeclaredMethod("name");
-        assertNotNull(method);
-        assertEquals(String.class, method.getReturnType());
-    }
-
-    @Test
-    public void testAliasMethodExists() throws NoSuchMethodException {
-        Method method = Table.class.getDeclaredMethod("alias");
-        assertNotNull(method);
-        assertEquals(String.class, method.getReturnType());
-    }
-
-    @Test
-    public void testColumnFieldsMethodExists() throws NoSuchMethodException {
-        Method method = Table.class.getDeclaredMethod("columnFields");
-        assertNotNull(method);
-        assertEquals(String[].class, method.getReturnType());
-    }
-
-    @Test
-    public void testNonColumnFieldsMethodExists() throws NoSuchMethodException {
-        Method method = Table.class.getDeclaredMethod("nonColumnFields");
-        assertNotNull(method);
-        assertEquals(String[].class, method.getReturnType());
     }
 }

@@ -380,6 +380,7 @@ public class u { // NOSONAR
          * @return the value described by this {@code OptionalBoolean}
          * @throws NoSuchElementException if no value is present
          */
+        @Beta
         public boolean get() throws NoSuchElementException { // NOSONAR
             return orElseThrow();
         }
@@ -389,11 +390,10 @@ public class u { // NOSONAR
          * {@code NoSuchElementException}.
          *
          * @return the value described by this {@code OptionalBoolean}
-         * @throws NoSuchElementException if no value is present
-         * @deprecated This method is deprecated in favor of the more concise {@link #get()} method.
+         * @throws NoSuchElementException if no value is present 
          * @see #get()
          */
-        @Deprecated
+        @Beta
         public boolean getAsBoolean() throws NoSuchElementException { // For AI
             return orElseThrow();
         }
@@ -1128,6 +1128,7 @@ public class u { // NOSONAR
          * @return the value described by this {@code OptionalChar}
          * @throws NoSuchElementException if no value is present
          */
+        @Beta
         public char get() throws NoSuchElementException {
             return orElseThrow();
         }
@@ -1138,10 +1139,9 @@ public class u { // NOSONAR
          *
          * @return the value described by this {@code OptionalChar}
          * @throws NoSuchElementException if no value is present
-         * @deprecated This method is deprecated in favor of the more concise {@link #get()} method.
          * @see #get()
          */
-        @Deprecated
+        @Beta
         public char getAsChar() throws NoSuchElementException { // For AI
             return orElseThrow();
         }
@@ -1844,6 +1844,7 @@ public class u { // NOSONAR
          * @return the byte value held by this {@code OptionalByte}
          * @throws NoSuchElementException if no value is present
          */
+        @Beta
         public byte get() throws NoSuchElementException {
             return orElseThrow();
         }
@@ -1853,10 +1854,9 @@ public class u { // NOSONAR
          *
          * @return the byte value held by this {@code OptionalByte}
          * @throws NoSuchElementException if no value is present
-         * @deprecated This method is deprecated in favor of the more concise {@link #get()} method.
          * @see #get()
          */
-        @Deprecated
+        @Beta
         public byte getAsByte() throws NoSuchElementException { // For AI
             return orElseThrow();
         }
@@ -2545,6 +2545,7 @@ public class u { // NOSONAR
          * @return the short value held by this {@code OptionalShort}
          * @throws NoSuchElementException if no value is present
          */
+        @Beta
         public short get() throws NoSuchElementException {
             return orElseThrow();
         }
@@ -2554,10 +2555,9 @@ public class u { // NOSONAR
          *
          * @return the short value held by this {@code OptionalShort}
          * @throws NoSuchElementException if no value is present
-         * @deprecated This method is deprecated in favor of the more concise {@link #get()} method.
          * @see #get()
          */
-        @Deprecated
+        @Beta
         public short getAsShort() throws NoSuchElementException { // For AI
             return orElseThrow();
         }
@@ -3205,6 +3205,7 @@ public class u { // NOSONAR
          * @return the int value held by this {@code OptionalInt}
          * @throws NoSuchElementException if no value is present
          */
+        @Beta
         public int get() throws NoSuchElementException {
             return orElseThrow();
         }
@@ -3214,10 +3215,9 @@ public class u { // NOSONAR
          *
          * @return the int value held by this {@code OptionalInt}
          * @throws NoSuchElementException if no value is present
-         * @deprecated This method is deprecated in favor of the more concise {@link #get()} method.
          * @see #get()
          */
-        @Deprecated
+        @Beta
         public int getAsInt() throws NoSuchElementException {
             return orElseThrow();
         }
@@ -3930,6 +3930,7 @@ public class u { // NOSONAR
          * @return the value if present
          * @throws NoSuchElementException if no value is present
          */
+        @Beta
         public long get() throws NoSuchElementException {
             return orElseThrow();
         }
@@ -3939,10 +3940,9 @@ public class u { // NOSONAR
          *
          * @return the value if present
          * @throws NoSuchElementException if no value is present
-         * @deprecated This method is deprecated in favor of the more concise {@link #get()} method.
          * @see #get()
          */
-        @Deprecated
+        @Beta
         public long getAsLong() throws NoSuchElementException {
             return orElseThrow();
         }
@@ -4560,6 +4560,7 @@ public class u { // NOSONAR
          * @return the value if present
          * @throws NoSuchElementException if no value is present
          */
+        @Beta
         public float get() throws NoSuchElementException {
             return orElseThrow();
         }
@@ -4569,10 +4570,9 @@ public class u { // NOSONAR
          *
          * @return the value if present
          * @throws NoSuchElementException if no value is present
-         * @deprecated This method is deprecated in favor of the more concise {@link #get()} method.
          * @see #get()
          */
-        @Deprecated
+        @Beta
         public float getAsFloat() throws NoSuchElementException { // For AI
             return orElseThrow();
         }
@@ -5179,6 +5179,7 @@ public class u { // NOSONAR
          * @return the value if present
          * @throws NoSuchElementException if no value is present
          */
+        @Beta
         public double get() throws NoSuchElementException {
             return orElseThrow();
         }
@@ -5188,11 +5189,9 @@ public class u { // NOSONAR
          *
          * @return the value if present
          * @throws NoSuchElementException if no value is present
-         * @deprecated Use {@link #get()} instead. This method is maintained for compatibility with {@code java.util.OptionalDouble}
-         *             but the simpler {@code get()} method is preferred in new code.
          * @see #get()
          */
-        @Deprecated
+        @Beta
         public double getAsDouble() throws NoSuchElementException {
             return orElseThrow();
         }

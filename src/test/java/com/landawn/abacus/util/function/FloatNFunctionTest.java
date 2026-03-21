@@ -3,12 +3,10 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class FloatNFunctionTest extends TestBase {
 
     @Test
@@ -40,6 +38,12 @@ public class FloatNFunctionTest extends TestBase {
     }
 
     @Test
+    public void testFunctionalInterfaceContract() {
+        final FloatNFunction<String> function = args -> "test";
+        assertNotNull(function.apply(1.0f, 2.0f));
+    }
+
+    @Test
     public void testAndThen() {
         final FloatNFunction<Float> function = args -> {
             float sum = 0;
@@ -54,11 +58,5 @@ public class FloatNFunctionTest extends TestBase {
         final String result = composed.apply(10.5f, 20.3f, 30.2f);
 
         assertEquals("Result: 61.0", result);
-    }
-
-    @Test
-    public void testFunctionalInterfaceContract() {
-        final FloatNFunction<String> function = args -> "test";
-        assertNotNull(function.apply(1.0f, 2.0f));
     }
 }

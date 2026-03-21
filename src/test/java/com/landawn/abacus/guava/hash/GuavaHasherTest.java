@@ -11,7 +11,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.hash.Funnel;
@@ -19,7 +18,6 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.PrimitiveSink;
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class GuavaHasherTest extends TestBase {
 
     // Helper class for testing
@@ -31,6 +29,28 @@ public class GuavaHasherTest extends TestBase {
             this.name = name;
             this.age = age;
         }
+    }
+
+    private static class TestData {
+        final String name;
+        final int value;
+        final boolean flag;
+
+        TestData(String name, int value, boolean flag) {
+            this.name = name;
+            this.value = value;
+            this.flag = flag;
+        }
+    }
+
+    @Test
+    @DisplayName("Test hashing order matters")
+    public void testHashingOrderMatters() {
+        HashCode hash1 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put("first").put("second").hash();
+
+        HashCode hash2 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put("second").put("first").hash();
+
+        assertNotEquals(hash1, hash2);
     }
 
     @Test
@@ -57,6 +77,185 @@ public class GuavaHasherTest extends TestBase {
         assertNotSame(hasher1, hasher2);
     }
 
+    @Test
+    @DisplayName("Test hashing file metadata")
+    public void testHashingFileMetadata() {
+        GuavaHasher hasher = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher());
+
+        String filename = "document.pdf";
+        long fileSize = 1024 * 1024;
+        byte[] header = { 0x25, 0x50, 0x44, 0x46 };
+
+        HashCode hash = hasher.put(filename, StandardCharsets.UTF_8).put(fileSize).put(header).hash();
+
+        assertNotNull(hash);
+    }
+
+    @Test
+    @DisplayName("Test hashing with mixed types")
+    public void testHashingMixedTypes() {
+        GuavaHasher hasher = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher());
+
+        HashCode hash = hasher.put((byte) 127)
+                .put((short) 32767)
+                .put(2147483647)
+                .put(9223372036854775807L)
+                .put(3.14f)
+                .put(2.718281828459045)
+                .put(true)
+                .put('Z')
+                .put("mixed types")
+                .hash();
+
+        assertNotNull(hash);
+    }
+
+    // Edge cases
+
+    @Test
+    @DisplayName("Test empty hasher produces hash")
+    public void testEmptyHasher() {
+        GuavaHasher hasher = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher());
+
+        HashCode hash = hasher.hash();
+
+        assertNotNull(hash);
+    }
+
+    @Test
+    @DisplayName("Test hashing same data produces same result")
+    public void testHashingDeterminism() {
+        byte[] data = "deterministic test".getBytes(StandardCharsets.UTF_8);
+
+        HashCode hash1 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(data).hash();
+
+        HashCode hash2 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(data).hash();
+
+        HashCode hash3 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(data).hash();
+
+        assertEquals(hash1, hash2);
+        assertEquals(hash2, hash3);
+    }
+
+    @Test
+    public void testComplexHashingScenario() {
+        Hasher hasher = Hashing.murmur3_128().newHasher();
+
+        byte[] bytes = { 1, 2, 3, 4, 5 };
+        ByteBuffer buffer = ByteBuffer.wrap(new byte[] { 6, 7, 8 });
+        char[] chars = { 'A', 'B', 'C' };
+        String text = "text";
+        TestData data = new TestData("obj", 99, false);
+
+        Funnel<TestData> funnel = (from, into) -> {
+            into.putString(from.name, StandardCharsets.UTF_8).putInt(from.value).putBoolean(from.flag);
+        };
+
+        hasher.put((byte) 0)
+                .put(bytes)
+                .put(bytes, 1, 3)
+                .put(buffer)
+                .put((short) 10)
+                .put(20)
+                .put(30L)
+                .put(40.5f)
+                .put(50.5)
+                .put(true)
+                .put('Z')
+                .put(chars)
+                .put(chars, 1, 1)
+                .put(text)
+                .put(text, StandardCharsets.UTF_8)
+                .put(data, funnel);
+
+        HashCode hash = hasher.hash();
+        assertNotNull(hash);
+        assertEquals(128, hash.bits());
+    }
+
+    @Test
+    @DisplayName("Test put byte produces consistent hash")
+    public void testPutByteConsistency() {
+        HashCode hash1 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put((byte) 100).hash();
+
+        HashCode hash2 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put((byte) 100).hash();
+
+        assertEquals(hash1, hash2);
+    }
+
+    @Test
+    @DisplayName("Test put byte array produces consistent hash")
+    public void testPutByteArrayConsistency() {
+        byte[] bytes = "test data".getBytes(StandardCharsets.UTF_8);
+
+        HashCode hash1 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(bytes).hash();
+
+        HashCode hash2 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(bytes).hash();
+
+        assertEquals(hash1, hash2);
+    }
+
+    @Test
+    @DisplayName("Test put byte array full range")
+    public void testPutByteArrayFullRange() {
+        byte[] bytes = { 10, 20, 30, 40, 50 };
+
+        HashCode hash1 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(bytes).hash();
+
+        HashCode hash2 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(bytes, 0, bytes.length).hash();
+
+        assertEquals(hash1, hash2);
+    }
+
+    @Test
+    @DisplayName("Test put int consistency")
+    public void testPutIntConsistency() {
+        HashCode hash1 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(12345).hash();
+
+        HashCode hash2 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(12345).hash();
+
+        assertEquals(hash1, hash2);
+    }
+
+    @Test
+    @DisplayName("Test put long consistency")
+    public void testPutLongConsistency() {
+        long value = System.currentTimeMillis();
+
+        HashCode hash1 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(value).hash();
+
+        HashCode hash2 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(value).hash();
+
+        assertEquals(hash1, hash2);
+    }
+
+    @Test
+    @DisplayName("Test put boolean different values produce different hashes")
+    public void testPutBooleanDifferentHashes() {
+        HashCode hashTrue = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(true).hash();
+
+        HashCode hashFalse = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(false).hash();
+
+        assertNotEquals(hashTrue, hashFalse);
+    }
+
+    @Test
+    @DisplayName("Test put with Funnel consistency")
+    public void testPutWithFunnelConsistency() {
+        Funnel<Person> personFunnel = (person, into) -> {
+            into.putString(person.name, StandardCharsets.UTF_8);
+            into.putInt(person.age);
+        };
+
+        Person person = new Person("Bob", 25);
+
+        HashCode hash1 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(person, personFunnel).hash();
+
+        HashCode hash2 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(person, personFunnel).hash();
+
+        assertEquals(hash1, hash2);
+    }
+
     // Test put(byte) method
 
     @Test
@@ -79,16 +278,6 @@ public class GuavaHasherTest extends TestBase {
         HashCode hash = hasher.hash();
 
         assertNotNull(hash);
-    }
-
-    @Test
-    @DisplayName("Test put byte produces consistent hash")
-    public void testPutByteConsistency() {
-        HashCode hash1 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put((byte) 100).hash();
-
-        HashCode hash2 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put((byte) 100).hash();
-
-        assertEquals(hash1, hash2);
     }
 
     // Test put(byte[]) method
@@ -131,18 +320,6 @@ public class GuavaHasherTest extends TestBase {
         assertNotNull(hash);
     }
 
-    @Test
-    @DisplayName("Test put byte array produces consistent hash")
-    public void testPutByteArrayConsistency() {
-        byte[] bytes = "test data".getBytes(StandardCharsets.UTF_8);
-
-        HashCode hash1 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(bytes).hash();
-
-        HashCode hash2 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(bytes).hash();
-
-        assertEquals(hash1, hash2);
-    }
-
     // Test put(byte[], int, int) method
 
     @Test
@@ -166,18 +343,6 @@ public class GuavaHasherTest extends TestBase {
         HashCode hash = hasher.put(bytes, 0, 0).hash();
 
         assertNotNull(hash);
-    }
-
-    @Test
-    @DisplayName("Test put byte array full range")
-    public void testPutByteArrayFullRange() {
-        byte[] bytes = { 10, 20, 30, 40, 50 };
-
-        HashCode hash1 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(bytes).hash();
-
-        HashCode hash2 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(bytes, 0, bytes.length).hash();
-
-        assertEquals(hash1, hash2);
     }
 
     // Test put(ByteBuffer) method
@@ -286,16 +451,6 @@ public class GuavaHasherTest extends TestBase {
         assertNotNull(hash);
     }
 
-    @Test
-    @DisplayName("Test put int consistency")
-    public void testPutIntConsistency() {
-        HashCode hash1 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(12345).hash();
-
-        HashCode hash2 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(12345).hash();
-
-        assertEquals(hash1, hash2);
-    }
-
     // Test put(long) method
 
     @Test
@@ -317,18 +472,6 @@ public class GuavaHasherTest extends TestBase {
         HashCode hash = hasher.hash();
 
         assertNotNull(hash);
-    }
-
-    @Test
-    @DisplayName("Test put long consistency")
-    public void testPutLongConsistency() {
-        long value = System.currentTimeMillis();
-
-        HashCode hash1 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(value).hash();
-
-        HashCode hash2 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(value).hash();
-
-        assertEquals(hash1, hash2);
     }
 
     // Test put(float) method
@@ -419,16 +562,6 @@ public class GuavaHasherTest extends TestBase {
         HashCode hash = hasher.put(false).hash();
 
         assertNotNull(hash);
-    }
-
-    @Test
-    @DisplayName("Test put boolean different values produce different hashes")
-    public void testPutBooleanDifferentHashes() {
-        HashCode hashTrue = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(true).hash();
-
-        HashCode hashFalse = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(false).hash();
-
-        assertNotEquals(hashTrue, hashFalse);
     }
 
     // Test put(char) method
@@ -535,17 +668,6 @@ public class GuavaHasherTest extends TestBase {
         assertNotNull(hash);
     }
 
-    @Test
-    @DisplayName("Test put char array bounds validation")
-    public void testPutCharArrayBoundsValidation() {
-        GuavaHasher hasher = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher());
-        char[] chars = { 'a', 'b', 'c' };
-
-        assertThrows(IndexOutOfBoundsException.class, () -> hasher.put(chars, -1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> hasher.put(chars, 0, 5));
-        assertThrows(IndexOutOfBoundsException.class, () -> hasher.put(chars, 2, 3));
-    }
-
     // Test put(CharSequence) method
 
     @Test
@@ -642,23 +764,6 @@ public class GuavaHasherTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test put with Funnel consistency")
-    public void testPutWithFunnelConsistency() {
-        Funnel<Person> personFunnel = (person, into) -> {
-            into.putString(person.name, StandardCharsets.UTF_8);
-            into.putInt(person.age);
-        };
-
-        Person person = new Person("Bob", 25);
-
-        HashCode hash1 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(person, personFunnel).hash();
-
-        HashCode hash2 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(person, personFunnel).hash();
-
-        assertEquals(hash1, hash2);
-    }
-
-    @Test
     @DisplayName("Test put with complex Funnel")
     public void testPutWithComplexFunnel() {
         GuavaHasher hasher = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher());
@@ -673,170 +778,6 @@ public class GuavaHasherTest extends TestBase {
         Person person = new Person("Charlie", 35);
         HashCode hash = hasher.put(person, complexFunnel).hash();
 
-        assertNotNull(hash);
-    }
-
-    // Test hash() method
-
-    @Test
-    @DisplayName("Test hash method")
-    public void testHash() {
-        GuavaHasher hasher = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher());
-
-        hasher.put("test");
-        HashCode hash = hasher.hash();
-
-        assertNotNull(hash);
-    }
-
-    @Test
-    @DisplayName("Test hash produces consistent results")
-    public void testHashConsistency() {
-        HashCode hash1 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put("test data").put(123).hash();
-
-        HashCode hash2 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put("test data").put(123).hash();
-
-        assertEquals(hash1, hash2);
-    }
-
-    @Test
-    @DisplayName("Test hash with different hash functions")
-    public void testHashDifferentFunctions() {
-        byte[] data = "test".getBytes(StandardCharsets.UTF_8);
-
-        HashCode murmurHash = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(data).hash();
-
-        HashCode sha256Hash = GuavaHasher.wrap(com.google.common.hash.Hashing.sha256().newHasher()).put(data).hash();
-
-        assertNotNull(murmurHash);
-        assertNotNull(sha256Hash);
-        assertNotEquals(murmurHash.bits(), sha256Hash.bits());
-    }
-
-    // Test chaining
-
-    @Test
-    @DisplayName("Test method chaining")
-    public void testMethodChaining() {
-        GuavaHasher hasher = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher());
-
-        HashCode hash = hasher.put((byte) 1).put(new byte[] { 2, 3 }).put((short) 4).put(5).put(6L).put(7.0f).put(8.0).put(true).put('c').put("test").hash();
-
-        assertNotNull(hash);
-    }
-
-    @Test
-    @DisplayName("Test complex chaining scenario")
-    public void testComplexChaining() {
-        GuavaHasher hasher = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher());
-
-        Funnel<Person> personFunnel = (person, into) -> {
-            into.putString(person.name, StandardCharsets.UTF_8);
-            into.putInt(person.age);
-        };
-
-        Person person = new Person("Dave", 40);
-
-        HashCode hash = hasher.put("User:").put(person, personFunnel).put(System.currentTimeMillis()).put(true).hash();
-
-        assertNotNull(hash);
-    }
-
-    // Test integration scenarios
-
-    @Test
-    @DisplayName("Test hashing user credentials")
-    public void testHashingUserCredentials() {
-        GuavaHasher hasher = GuavaHasher.wrap(com.google.common.hash.Hashing.sha256().newHasher());
-
-        String username = "john.doe@example.com";
-        String password = "secret123";
-        long timestamp = System.currentTimeMillis();
-
-        HashCode hash = hasher.put(username, StandardCharsets.UTF_8).put(password, StandardCharsets.UTF_8).put(timestamp).hash();
-
-        assertNotNull(hash);
-        assertEquals(256, hash.bits());
-    }
-
-    @Test
-    @DisplayName("Test hashing file metadata")
-    public void testHashingFileMetadata() {
-        GuavaHasher hasher = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher());
-
-        String filename = "document.pdf";
-        long fileSize = 1024 * 1024;
-        byte[] header = { 0x25, 0x50, 0x44, 0x46 };
-
-        HashCode hash = hasher.put(filename, StandardCharsets.UTF_8).put(fileSize).put(header).hash();
-
-        assertNotNull(hash);
-    }
-
-    @Test
-    @DisplayName("Test hashing with mixed types")
-    public void testHashingMixedTypes() {
-        GuavaHasher hasher = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher());
-
-        HashCode hash = hasher.put((byte) 127)
-                .put((short) 32767)
-                .put(2147483647)
-                .put(9223372036854775807L)
-                .put(3.14f)
-                .put(2.718281828459045)
-                .put(true)
-                .put('Z')
-                .put("mixed types")
-                .hash();
-
-        assertNotNull(hash);
-    }
-
-    // Edge cases
-
-    @Test
-    @DisplayName("Test empty hasher produces hash")
-    public void testEmptyHasher() {
-        GuavaHasher hasher = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher());
-
-        HashCode hash = hasher.hash();
-
-        assertNotNull(hash);
-    }
-
-    @Test
-    @DisplayName("Test hashing same data produces same result")
-    public void testHashingDeterminism() {
-        byte[] data = "deterministic test".getBytes(StandardCharsets.UTF_8);
-
-        HashCode hash1 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(data).hash();
-
-        HashCode hash2 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(data).hash();
-
-        HashCode hash3 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(data).hash();
-
-        assertEquals(hash1, hash2);
-        assertEquals(hash2, hash3);
-    }
-
-    @Test
-    @DisplayName("Test hashing order matters")
-    public void testHashingOrderMatters() {
-        HashCode hash1 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put("first").put("second").hash();
-
-        HashCode hash2 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put("second").put("first").hash();
-
-        assertNotEquals(hash1, hash2);
-    }
-
-    @Test
-    public void testHasherWrapFunctionality() {
-        Hasher hasher = Hashing.sha256().newHasher();
-        assertNotNull(hasher);
-
-        hasher.put((byte) 1).put(new byte[] { 2, 3 }).put((short) 4).put(5).put(6L).put(7.0f).put(8.0).put(true).put('A');
-
-        HashCode hash = hasher.hash();
         assertNotNull(hash);
     }
 
@@ -941,24 +882,6 @@ public class GuavaHasherTest extends TestBase {
     }
 
     @Test
-    public void testPutCharArrayBoundaryChecks() {
-        char[] chars = "test".toCharArray();
-
-        Hasher hasher1 = Hashing.sha256().newHasher();
-        hasher1.put((char[]) null);
-
-        Hasher hasher2 = Hashing.sha256().newHasher();
-        hasher2.put((char[]) null, 0, 0);
-
-        Hasher hasher3 = Hashing.sha256().newHasher();
-        assertThrows(IndexOutOfBoundsException.class, () -> hasher3.put(chars, -1, 1));
-        assertThrows(IllegalArgumentException.class, () -> hasher3.put(chars, 0, -1));
-        assertThrows(IndexOutOfBoundsException.class, () -> hasher3.put(chars, 0, chars.length + 1));
-        assertThrows(IndexOutOfBoundsException.class, () -> hasher3.put(chars, chars.length, 1));
-        assertThrows(IndexOutOfBoundsException.class, () -> hasher3.put(chars, 2, 3));
-    }
-
-    @Test
     public void testPutCharSequenceMethods() {
         String text = "test string";
 
@@ -1001,50 +924,42 @@ public class GuavaHasherTest extends TestBase {
     }
 
     @Test
-    public void testHashMethod() {
-        Hasher hasher = Hashing.sha256().newHasher();
-        hasher.put("test data".getBytes());
+    @DisplayName("Test put char array bounds validation")
+    public void testPutCharArrayBoundsValidation() {
+        GuavaHasher hasher = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher());
+        char[] chars = { 'a', 'b', 'c' };
 
-        HashCode hash = hasher.hash();
-        assertNotNull(hash);
-        assertEquals(256, hash.bits());
-        assertEquals(32, hash.asBytes().length);
+        assertThrows(IndexOutOfBoundsException.class, () -> hasher.put(chars, -1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> hasher.put(chars, 0, 5));
+        assertThrows(IndexOutOfBoundsException.class, () -> hasher.put(chars, 2, 3));
     }
 
     @Test
-    public void testComplexHashingScenario() {
-        Hasher hasher = Hashing.murmur3_128().newHasher();
+    public void testPutCharArrayBoundaryChecks() {
+        char[] chars = "test".toCharArray();
 
-        byte[] bytes = { 1, 2, 3, 4, 5 };
-        ByteBuffer buffer = ByteBuffer.wrap(new byte[] { 6, 7, 8 });
-        char[] chars = { 'A', 'B', 'C' };
-        String text = "text";
-        TestData data = new TestData("obj", 99, false);
+        Hasher hasher1 = Hashing.sha256().newHasher();
+        hasher1.put((char[]) null);
 
-        Funnel<TestData> funnel = (from, into) -> {
-            into.putString(from.name, StandardCharsets.UTF_8).putInt(from.value).putBoolean(from.flag);
-        };
+        Hasher hasher2 = Hashing.sha256().newHasher();
+        hasher2.put((char[]) null, 0, 0);
 
-        hasher.put((byte) 0)
-                .put(bytes)
-                .put(bytes, 1, 3)
-                .put(buffer)
-                .put((short) 10)
-                .put(20)
-                .put(30L)
-                .put(40.5f)
-                .put(50.5)
-                .put(true)
-                .put('Z')
-                .put(chars)
-                .put(chars, 1, 1)
-                .put(text)
-                .put(text, StandardCharsets.UTF_8)
-                .put(data, funnel);
+        Hasher hasher3 = Hashing.sha256().newHasher();
+        assertThrows(IndexOutOfBoundsException.class, () -> hasher3.put(chars, -1, 1));
+        assertThrows(IllegalArgumentException.class, () -> hasher3.put(chars, 0, -1));
+        assertThrows(IndexOutOfBoundsException.class, () -> hasher3.put(chars, 0, chars.length + 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> hasher3.put(chars, chars.length, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> hasher3.put(chars, 2, 3));
+    }
 
-        HashCode hash = hasher.hash();
-        assertNotNull(hash);
-        assertEquals(128, hash.bits());
+    @Test
+    @DisplayName("Test hash produces consistent results")
+    public void testHashConsistency() {
+        HashCode hash1 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put("test data").put(123).hash();
+
+        HashCode hash2 = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put("test data").put(123).hash();
+
+        assertEquals(hash1, hash2);
     }
 
     @Test
@@ -1087,15 +1002,98 @@ public class GuavaHasherTest extends TestBase {
         assertEquals(128, hashMurmur.bits());
     }
 
-    private static class TestData {
-        final String name;
-        final int value;
-        final boolean flag;
+    // Test hash() method
 
-        TestData(String name, int value, boolean flag) {
-            this.name = name;
-            this.value = value;
-            this.flag = flag;
-        }
+    @Test
+    @DisplayName("Test hash method")
+    public void testHash() {
+        GuavaHasher hasher = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher());
+
+        hasher.put("test");
+        HashCode hash = hasher.hash();
+
+        assertNotNull(hash);
+    }
+
+    @Test
+    @DisplayName("Test hash with different hash functions")
+    public void testHashDifferentFunctions() {
+        byte[] data = "test".getBytes(StandardCharsets.UTF_8);
+
+        HashCode murmurHash = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher()).put(data).hash();
+
+        HashCode sha256Hash = GuavaHasher.wrap(com.google.common.hash.Hashing.sha256().newHasher()).put(data).hash();
+
+        assertNotNull(murmurHash);
+        assertNotNull(sha256Hash);
+        assertNotEquals(murmurHash.bits(), sha256Hash.bits());
+    }
+
+    @Test
+    public void testHasherWrapFunctionality() {
+        Hasher hasher = Hashing.sha256().newHasher();
+        assertNotNull(hasher);
+
+        hasher.put((byte) 1).put(new byte[] { 2, 3 }).put((short) 4).put(5).put(6L).put(7.0f).put(8.0).put(true).put('A');
+
+        HashCode hash = hasher.hash();
+        assertNotNull(hash);
+    }
+
+    @Test
+    public void testHashMethod() {
+        Hasher hasher = Hashing.sha256().newHasher();
+        hasher.put("test data".getBytes());
+
+        HashCode hash = hasher.hash();
+        assertNotNull(hash);
+        assertEquals(256, hash.bits());
+        assertEquals(32, hash.asBytes().length);
+    }
+
+    // Test chaining
+
+    @Test
+    @DisplayName("Test method chaining")
+    public void testMethodChaining() {
+        GuavaHasher hasher = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher());
+
+        HashCode hash = hasher.put((byte) 1).put(new byte[] { 2, 3 }).put((short) 4).put(5).put(6L).put(7.0f).put(8.0).put(true).put('c').put("test").hash();
+
+        assertNotNull(hash);
+    }
+
+    @Test
+    @DisplayName("Test complex chaining scenario")
+    public void testComplexChaining() {
+        GuavaHasher hasher = GuavaHasher.wrap(com.google.common.hash.Hashing.murmur3_128().newHasher());
+
+        Funnel<Person> personFunnel = (person, into) -> {
+            into.putString(person.name, StandardCharsets.UTF_8);
+            into.putInt(person.age);
+        };
+
+        Person person = new Person("Dave", 40);
+
+        HashCode hash = hasher.put("User:").put(person, personFunnel).put(System.currentTimeMillis()).put(true).hash();
+
+        assertNotNull(hash);
+    }
+
+    // Test integration scenarios
+
+    @Test
+    @DisplayName("Test hashing user credentials")
+    public void testHashingUserCredentials() {
+        GuavaHasher hasher = GuavaHasher.wrap(com.google.common.hash.Hashing.sha256().newHasher());
+
+        String username = "john.doe@example.com";
+        String password = "secret123";
+        long timestamp = System.currentTimeMillis();
+
+        HashCode hash = hasher.put(username, StandardCharsets.UTF_8).put(password, StandardCharsets.UTF_8).put(timestamp).hash();
+
+        assertNotNull(hash);
+        assertEquals(256, hash.bits());
     }
 }

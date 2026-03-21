@@ -4,12 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class DoubleObjFunctionTest extends TestBase {
 
     @Test
@@ -47,26 +45,23 @@ public class DoubleObjFunctionTest extends TestBase {
     }
 
     @Test
-    public void testAndThen() {
-        DoubleObjFunction<String, String> function = (d, s) -> d + ":" + s;
-        java.util.function.Function<String, String> after = s -> s.toUpperCase();
+    public void testWithDifferentTypes() {
+        DoubleObjFunction<Integer, Boolean> function = (d, i) -> d > i;
 
-        DoubleObjFunction<String, String> combined = function.andThen(after);
-        String result = combined.apply(5.0, "test");
+        Boolean result1 = function.apply(10.5, 5);
+        Boolean result2 = function.apply(3.5, 10);
 
-        assertEquals("5.0:TEST", result);
+        assertEquals(true, result1);
+        assertEquals(false, result2);
     }
 
     @Test
-    public void testAndThenChaining() {
-        DoubleObjFunction<Integer, Integer> function = (d, i) -> (int) (d + i);
-        java.util.function.Function<Integer, Integer> after1 = i -> i * 2;
-        java.util.function.Function<Integer, String> after2 = i -> "Result:" + i;
+    public void testComplexCalculation() {
+        DoubleObjFunction<Double, Double> function = (d1, d2) -> d1 * d2 + d1 / d2;
 
-        DoubleObjFunction<Integer, String> combined = function.andThen(after1).andThen(after2);
-        String result = combined.apply(5.0, 10);
+        Double result = function.apply(10.0, 2.0);
 
-        assertEquals("Result:30", result);
+        assertEquals(25.0, result);
     }
 
     @Test
@@ -125,23 +120,26 @@ public class DoubleObjFunctionTest extends TestBase {
     }
 
     @Test
-    public void testWithDifferentTypes() {
-        DoubleObjFunction<Integer, Boolean> function = (d, i) -> d > i;
+    public void testAndThenChaining() {
+        DoubleObjFunction<Integer, Integer> function = (d, i) -> (int) (d + i);
+        java.util.function.Function<Integer, Integer> after1 = i -> i * 2;
+        java.util.function.Function<Integer, String> after2 = i -> "Result:" + i;
 
-        Boolean result1 = function.apply(10.5, 5);
-        Boolean result2 = function.apply(3.5, 10);
+        DoubleObjFunction<Integer, String> combined = function.andThen(after1).andThen(after2);
+        String result = combined.apply(5.0, 10);
 
-        assertEquals(true, result1);
-        assertEquals(false, result2);
+        assertEquals("Result:30", result);
     }
 
     @Test
-    public void testComplexCalculation() {
-        DoubleObjFunction<Double, Double> function = (d1, d2) -> d1 * d2 + d1 / d2;
+    public void testAndThen() {
+        DoubleObjFunction<String, String> function = (d, s) -> d + ":" + s;
+        java.util.function.Function<String, String> after = s -> s.toUpperCase();
 
-        Double result = function.apply(10.0, 2.0);
+        DoubleObjFunction<String, String> combined = function.andThen(after);
+        String result = combined.apply(5.0, "test");
 
-        assertEquals(25.0, result);
+        assertEquals("5.0:TEST", result);
     }
 
     @Test

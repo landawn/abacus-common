@@ -16,90 +16,6 @@ import com.landawn.abacus.entity.extendDirty.basic.AclUser;
 public class NamingPolicyTest extends AbstractParserTest {
 
     @Test
-    public void test_01() {
-        Account bean = createAccountWithContact(Account.class);
-
-        Map<String, Object> props = Beans.beanToMap(bean, true, null, NamingPolicy.CAMEL_CASE);
-        N.println(props);
-        N.println(Beans.mapToBean(props, Account.class));
-
-        props = Beans.beanToMap(bean, true, null, NamingPolicy.SNAKE_CASE);
-        N.println(props);
-        N.println(Beans.mapToBean(props, Account.class));
-
-        props = Beans.beanToMap(bean, true, null, NamingPolicy.SCREAMING_SNAKE_CASE);
-        N.println(props);
-        N.println(Beans.mapToBean(props, Account.class));
-
-        props = Beans.deepBeanToMap(bean, true, null, NamingPolicy.CAMEL_CASE);
-        N.println(props);
-        N.println(Beans.mapToBean(props, Account.class));
-
-        props = Beans.deepBeanToMap(bean, true, null, NamingPolicy.SNAKE_CASE);
-        N.println(props);
-        N.println(Beans.mapToBean(props, Account.class));
-
-        props = Beans.deepBeanToMap(bean, true, null, NamingPolicy.SCREAMING_SNAKE_CASE);
-        N.println(props);
-        N.println(Beans.mapToBean(props, Account.class));
-
-        props = Beans.beanToFlatMap(bean, true, null, NamingPolicy.CAMEL_CASE);
-        N.println(props);
-        N.println(Beans.mapToBean(props, Account.class));
-
-        props = Beans.beanToFlatMap(bean, true, null, NamingPolicy.SNAKE_CASE);
-        N.println(props);
-        N.println(Beans.mapToBean(props, Account.class));
-
-        props = Beans.beanToFlatMap(bean, true, null, NamingPolicy.SCREAMING_SNAKE_CASE);
-        N.println(props);
-        N.println(Beans.mapToBean(props, Account.class));
-        assertNotNull(props);
-    }
-
-    @Test
-    public void test_02() {
-        AclUser bean = createAclUserWithAclGroup(AclUser.class);
-
-        Map<String, Object> props = Beans.beanToMap(bean, true, null, NamingPolicy.CAMEL_CASE);
-        N.println(props);
-        N.println(Beans.mapToBean(props, AclUser.class));
-
-        props = Beans.beanToMap(bean, true, null, NamingPolicy.SNAKE_CASE);
-        N.println(props);
-        N.println(Beans.mapToBean(props, AclUser.class));
-
-        props = Beans.beanToMap(bean, true, null, NamingPolicy.SCREAMING_SNAKE_CASE);
-        N.println(props);
-        N.println(Beans.mapToBean(props, AclUser.class));
-
-        props = Beans.deepBeanToMap(bean, true, null, NamingPolicy.CAMEL_CASE);
-        N.println(props);
-        N.println(Beans.mapToBean(props, AclUser.class));
-
-        props = Beans.deepBeanToMap(bean, true, null, NamingPolicy.SNAKE_CASE);
-        N.println(props);
-        N.println(Beans.mapToBean(props, AclUser.class));
-
-        props = Beans.deepBeanToMap(bean, true, null, NamingPolicy.SCREAMING_SNAKE_CASE);
-        N.println(props);
-        N.println(Beans.mapToBean(props, AclUser.class));
-
-        props = Beans.beanToFlatMap(bean, true, null, NamingPolicy.CAMEL_CASE);
-        N.println(props);
-        N.println(Beans.mapToBean(props, AclUser.class));
-
-        props = Beans.beanToFlatMap(bean, true, null, NamingPolicy.SNAKE_CASE);
-        N.println(props);
-        N.println(Beans.mapToBean(props, AclUser.class));
-
-        props = Beans.beanToFlatMap(bean, true, null, NamingPolicy.SCREAMING_SNAKE_CASE);
-        N.println(props);
-        N.println(Beans.mapToBean(props, AclUser.class));
-        assertNotNull(props);
-    }
-
-    @Test
     public void test_camelCase_convert_withUnderscores() {
         assertEquals("userName", NamingPolicy.CAMEL_CASE.convert("user_name"));
         assertEquals("userId", NamingPolicy.CAMEL_CASE.convert("user_id"));
@@ -353,6 +269,49 @@ public class NamingPolicyTest extends AbstractParserTest {
     }
 
     @Test
+    public void test_convert_withMultipleConsecutiveUnderscores() {
+        assertEquals("userName", NamingPolicy.CAMEL_CASE.convert("user__name"));
+        assertEquals("user__name", NamingPolicy.SNAKE_CASE.convert("user__name"));
+    }
+
+    @Test
+    public void test_convert_withMultipleConsecutiveHyphens() {
+        assertEquals("userName", NamingPolicy.CAMEL_CASE.convert("user--name"));
+        assertEquals("user--name", NamingPolicy.SNAKE_CASE.convert("user--name"));
+    }
+
+    @Test
+    public void test_convert_withLeadingUnderscore() {
+        assertEquals("userName", NamingPolicy.CAMEL_CASE.convert("_user_name"));
+        assertEquals("_user_name", NamingPolicy.SNAKE_CASE.convert("_userName"));
+    }
+
+    @Test
+    public void test_convert_withTrailingUnderscore() {
+        assertEquals("userName", NamingPolicy.CAMEL_CASE.convert("user_name_"));
+        assertEquals("user_name_", NamingPolicy.SNAKE_CASE.convert("userName_"));
+    }
+
+    @Test
+    public void test_convert_withNumbers() {
+        assertEquals("user1Name", NamingPolicy.CAMEL_CASE.convert("user1_name"));
+        assertEquals("user1_name", NamingPolicy.SNAKE_CASE.convert("user1Name"));
+        assertEquals("USER1_NAME", NamingPolicy.SCREAMING_SNAKE_CASE.convert("user1Name"));
+    }
+
+    @Test
+    public void test_convert_withAcronyms() {
+        assertEquals("httpUrl", NamingPolicy.CAMEL_CASE.convert("HTTP_URL"));
+        assertEquals("http_url", NamingPolicy.SNAKE_CASE.convert("HTTPUrl"));
+    }
+
+    @Test
+    public void test_convert_complexMixedFormat() {
+        String input = "user-Name_ID";
+        assertEquals("usernameid", NamingPolicy.CAMEL_CASE.convert(input).toLowerCase());
+    }
+
+    @Test
     public void test_camelCase_func_returnsFunction() {
         Function<String, String> converter = NamingPolicy.CAMEL_CASE.asFunction();
         assertNotNull(converter);
@@ -402,46 +361,87 @@ public class NamingPolicyTest extends AbstractParserTest {
     }
 
     @Test
-    public void test_convert_withMultipleConsecutiveUnderscores() {
-        assertEquals("userName", NamingPolicy.CAMEL_CASE.convert("user__name"));
-        assertEquals("user__name", NamingPolicy.SNAKE_CASE.convert("user__name"));
+    public void test_01() {
+        Account bean = createAccountWithContact(Account.class);
+
+        Map<String, Object> props = Beans.beanToMap(bean, true, null, NamingPolicy.CAMEL_CASE);
+        N.println(props);
+        N.println(Beans.mapToBean(props, Account.class));
+
+        props = Beans.beanToMap(bean, true, null, NamingPolicy.SNAKE_CASE);
+        N.println(props);
+        N.println(Beans.mapToBean(props, Account.class));
+
+        props = Beans.beanToMap(bean, true, null, NamingPolicy.SCREAMING_SNAKE_CASE);
+        N.println(props);
+        N.println(Beans.mapToBean(props, Account.class));
+
+        props = Beans.deepBeanToMap(bean, true, null, NamingPolicy.CAMEL_CASE);
+        N.println(props);
+        N.println(Beans.mapToBean(props, Account.class));
+
+        props = Beans.deepBeanToMap(bean, true, null, NamingPolicy.SNAKE_CASE);
+        N.println(props);
+        N.println(Beans.mapToBean(props, Account.class));
+
+        props = Beans.deepBeanToMap(bean, true, null, NamingPolicy.SCREAMING_SNAKE_CASE);
+        N.println(props);
+        N.println(Beans.mapToBean(props, Account.class));
+
+        props = Beans.beanToFlatMap(bean, true, null, NamingPolicy.CAMEL_CASE);
+        N.println(props);
+        N.println(Beans.mapToBean(props, Account.class));
+
+        props = Beans.beanToFlatMap(bean, true, null, NamingPolicy.SNAKE_CASE);
+        N.println(props);
+        N.println(Beans.mapToBean(props, Account.class));
+
+        props = Beans.beanToFlatMap(bean, true, null, NamingPolicy.SCREAMING_SNAKE_CASE);
+        N.println(props);
+        N.println(Beans.mapToBean(props, Account.class));
+        assertNotNull(props);
     }
 
     @Test
-    public void test_convert_withMultipleConsecutiveHyphens() {
-        assertEquals("userName", NamingPolicy.CAMEL_CASE.convert("user--name"));
-        assertEquals("user--name", NamingPolicy.SNAKE_CASE.convert("user--name"));
-    }
+    public void test_02() {
+        AclUser bean = createAclUserWithAclGroup(AclUser.class);
 
-    @Test
-    public void test_convert_withLeadingUnderscore() {
-        assertEquals("userName", NamingPolicy.CAMEL_CASE.convert("_user_name"));
-        assertEquals("_user_name", NamingPolicy.SNAKE_CASE.convert("_userName"));
-    }
+        Map<String, Object> props = Beans.beanToMap(bean, true, null, NamingPolicy.CAMEL_CASE);
+        N.println(props);
+        N.println(Beans.mapToBean(props, AclUser.class));
 
-    @Test
-    public void test_convert_withTrailingUnderscore() {
-        assertEquals("userName", NamingPolicy.CAMEL_CASE.convert("user_name_"));
-        assertEquals("user_name_", NamingPolicy.SNAKE_CASE.convert("userName_"));
-    }
+        props = Beans.beanToMap(bean, true, null, NamingPolicy.SNAKE_CASE);
+        N.println(props);
+        N.println(Beans.mapToBean(props, AclUser.class));
 
-    @Test
-    public void test_convert_withNumbers() {
-        assertEquals("user1Name", NamingPolicy.CAMEL_CASE.convert("user1_name"));
-        assertEquals("user1_name", NamingPolicy.SNAKE_CASE.convert("user1Name"));
-        assertEquals("USER1_NAME", NamingPolicy.SCREAMING_SNAKE_CASE.convert("user1Name"));
-    }
+        props = Beans.beanToMap(bean, true, null, NamingPolicy.SCREAMING_SNAKE_CASE);
+        N.println(props);
+        N.println(Beans.mapToBean(props, AclUser.class));
 
-    @Test
-    public void test_convert_withAcronyms() {
-        assertEquals("httpUrl", NamingPolicy.CAMEL_CASE.convert("HTTP_URL"));
-        assertEquals("http_url", NamingPolicy.SNAKE_CASE.convert("HTTPUrl"));
-    }
+        props = Beans.deepBeanToMap(bean, true, null, NamingPolicy.CAMEL_CASE);
+        N.println(props);
+        N.println(Beans.mapToBean(props, AclUser.class));
 
-    @Test
-    public void test_convert_complexMixedFormat() {
-        String input = "user-Name_ID";
-        assertEquals("usernameid", NamingPolicy.CAMEL_CASE.convert(input).toLowerCase());
+        props = Beans.deepBeanToMap(bean, true, null, NamingPolicy.SNAKE_CASE);
+        N.println(props);
+        N.println(Beans.mapToBean(props, AclUser.class));
+
+        props = Beans.deepBeanToMap(bean, true, null, NamingPolicy.SCREAMING_SNAKE_CASE);
+        N.println(props);
+        N.println(Beans.mapToBean(props, AclUser.class));
+
+        props = Beans.beanToFlatMap(bean, true, null, NamingPolicy.CAMEL_CASE);
+        N.println(props);
+        N.println(Beans.mapToBean(props, AclUser.class));
+
+        props = Beans.beanToFlatMap(bean, true, null, NamingPolicy.SNAKE_CASE);
+        N.println(props);
+        N.println(Beans.mapToBean(props, AclUser.class));
+
+        props = Beans.beanToFlatMap(bean, true, null, NamingPolicy.SCREAMING_SNAKE_CASE);
+        N.println(props);
+        N.println(Beans.mapToBean(props, AclUser.class));
+        assertNotNull(props);
     }
 
     @Test

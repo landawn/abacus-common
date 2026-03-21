@@ -21,7 +21,6 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -44,7 +43,6 @@ import com.landawn.abacus.util.StringWriter;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.XmlUtil;
 
-@Tag("old-test")
 public class XmlParserTest extends AbstractXmlParserTest {
 
     @Override
@@ -96,106 +94,37 @@ public class XmlParserTest extends AbstractXmlParserTest {
     }
 
     @Test
-    public void test_node_by_name() throws SAXException, IOException {
-        final Account account = createAccount(Account.class);
+    public void test_transient() {
+        final TransientBean bean = new TransientBean();
+        bean.setTransientField("abc");
+        bean.setNontransientField("123");
 
-        final String str = xmlParser.serialize(account);
-        final InputStream is = IOUtil.stringToInputStream(str);
+        String str = xmlParser.serialize(bean);
 
-        final Map<String, Type<?>> nodeClasses = N.asMap("account", Type.of(Account.class));
+        N.println(str);
 
-        Account account2 = xmlParser.deserialize(is, null, nodeClasses);
+        assertTrue(str.indexOf("abc") == -1);
 
-        IOUtil.close(is);
+        final XmlSerConfig config = XmlSerConfig.create().setSkipTransientField(false);
+        str = xmlParser.serialize(bean, config);
 
-        N.println(account2);
+        N.println(str);
 
-        assertEquals(account, account2);
+        assertTrue(str.indexOf("abc") >= 0);
 
-        final Reader reader = new StringReader(str);
-        account2 = xmlParser.deserialize(reader, null, nodeClasses);
-
-        IOUtil.close(reader);
-
-        N.println(account2);
-
-        assertEquals(account, account2);
-
-        final DocumentBuilder docBuilder = XmlUtil.createDOMParser();
-        final Document doc = docBuilder.parse(IOUtil.stringToInputStream(str));
-        account2 = xmlParser.deserialize(doc.getDocumentElement(), null, nodeClasses);
-
-        N.println(account2);
-
-        assertEquals(account, account2);
+        assertTrue(bean.equals(xmlParser.deserialize(str, TransientBean.class)));
     }
 
     @Test
-    public void test_BufferedWriter() {
-        final Writer writer = new StringWriter();
-        final BufferedXmlWriter bw = Objectory.createBufferedXmlWriter(writer);
-        final Account account = createAccount(Account.class);
-        xmlParser.serialize(account, bw);
-
-        N.println(writer.toString());
-
-        Objectory.recycle(bw);
-        assertNotNull(account);
-    }
-
-    @Test
-    public void test_BufferedWriter_2() {
-        final Writer writer = new StringWriter();
-        final BufferedXmlWriter bw = Objectory.createBufferedXmlWriter(writer);
-        final Account account = null;
-        xmlParser.serialize(account, bw);
-
-        assertEquals(Strings.EMPTY, writer.toString());
-
-        Objectory.recycle(bw);
-    }
-
-    @Test
-    public void test_null() {
-        final String nullElement = null;
-
-        final String[] array = N.asArray(nullElement);
-        String str = xmlParser.serialize(array);
+    public void testSerialize_map() {
+        Map<String, Object> m = N.asMap("firstName", "fn", "lastName", "ln", "birthday", "2003-08-08");
+        String str = jsonParser.serialize(m);
         N.println(str);
 
-        final String[] array2 = xmlParser.deserialize(str, String[].class);
-        assertTrue(N.equals(array, array2));
+        Map<String, Object> m2 = jsonParser.deserialize(str, Map.class);
 
-        final List<String> list = N.toList(nullElement);
-        str = xmlParser.serialize(list);
-        N.println(str);
-
-        final List<String> list2 = xmlParser.deserialize(str, List.class);
-        N.println(list2);
-
-        final Map<String, Object> map = N.asMap(nullElement, nullElement);
-        final XmlSerConfig jsc = XmlSerConfig.create().setExclusion(Exclusion.NONE);
-        str = xmlParser.serialize(map, jsc);
-        N.println(str);
-
-        final Map<String, Object> map2 = xmlParser.deserialize(str, Map.class);
-        N.println(map2);
-
-        xmlParser.deserialize(str, Object.class);
-
-        try {
-            xmlParser.deserialize(str, xmlParser.getClass());
-            fail("Should throw RuntimeException");
-        } catch (final ParsingException e) {
-
-        }
-
-        try {
-            xmlParser.serialize(xmlParser);
-            fail("Should throw RuntimeException");
-        } catch (final ParsingException e) {
-
-        }
+        N.println(m2);
+        assertEquals(m, m2);
     }
 
     @Test
@@ -296,25 +225,117 @@ public class XmlParserTest extends AbstractXmlParserTest {
     }
 
     @Test
-    public void test_transient() {
-        final TransientBean bean = new TransientBean();
-        bean.setTransientField("abc");
-        bean.setNontransientField("123");
+    public void testSerialize() {
+        Account account = createAccount(Account.class);
+        account.setId(100);
 
-        String str = xmlParser.serialize(bean);
+        String str = jsonParser.serialize(account);
+        println(str);
 
+        println(jsonParser.deserialize(str, Account.class));
+
+        str = "{\r\n" + "    \"id\": 100,\r\n" + "    \"gui\": \"d670ced631a14cf2820296263e2364f0\",\r\n"
+                + "    \"emailAddress\": \"1e7cd28a386d47058a593d0dae386394@earth.com\",\r\n" + "    \"firstName\": \"firstName\",\r\n"
+                + "    \"middleName\": \"MN\",\r\n" + "    \"lastName\": \"lastName\",\r\n" + "    \"birthDate\": 1394842092851,\r\n"
+                + "    \"lastUpdateTime\": 1394842092851,\r\n" + "    \"createdTime\": 1394842092851\\r\\n" + "}";
+
+        println(jsonParser.deserialize(str, Account.class));
+
+        str = "{id:100,gui:\"5197aaf659794f1784fd45570ada3d62\",unknownProperty1:null, emailAddress:\"13f6a5129c274c758a6eddf40fd825c6@earth.com\",firstName:\"firstName\",middleName:\"MN\",lastName:\"lastName\",birthDate:1399943675943,lastUpdateTime:1399943675943,createdTime:1399943675943,unknownProperty2:1}";
+        println(jsonParser.deserialize(str, Account.class));
+        println(jsonParser.deserialize(str, Map.class));
+        assertNotNull(str);
+    }
+
+    @Test
+    public void testSerialize5() {
+        List<Account> accounts = createAccountWithContact(Account.class, 100);
+        String xml = jsonParser.serialize(accounts);
+        println(xml);
+
+        List<Account> xmlAccounts = jsonParser.deserialize(xml, List.class);
+
+        N.println(N.stringOf(accounts));
+        N.println(N.stringOf(xmlAccounts));
+        assertNotNull(xmlAccounts);
+    }
+
+    @Test
+    public void test_node_by_name() throws SAXException, IOException {
+        final Account account = createAccount(Account.class);
+
+        final String str = xmlParser.serialize(account);
+        final InputStream is = IOUtil.stringToInputStream(str);
+
+        final Map<String, Type<?>> nodeClasses = N.asMap("account", Type.of(Account.class));
+
+        Account account2 = xmlParser.deserialize(is, null, nodeClasses);
+
+        IOUtil.close(is);
+
+        N.println(account2);
+
+        assertEquals(account, account2);
+
+        final Reader reader = new StringReader(str);
+        account2 = xmlParser.deserialize(reader, null, nodeClasses);
+
+        IOUtil.close(reader);
+
+        N.println(account2);
+
+        assertEquals(account, account2);
+
+        final DocumentBuilder docBuilder = XmlUtil.createDOMParser();
+        final Document doc = docBuilder.parse(IOUtil.stringToInputStream(str));
+        account2 = xmlParser.deserialize(doc.getDocumentElement(), null, nodeClasses);
+
+        N.println(account2);
+
+        assertEquals(account, account2);
+    }
+
+    @Test
+    public void test_null() {
+        final String nullElement = null;
+
+        final String[] array = N.asArray(nullElement);
+        String str = xmlParser.serialize(array);
         N.println(str);
 
-        assertTrue(str.indexOf("abc") == -1);
+        final String[] array2 = xmlParser.deserialize(str, String[].class);
+        assertTrue(N.equals(array, array2));
 
-        final XmlSerConfig config = XmlSerConfig.create().setSkipTransientField(false);
-        str = xmlParser.serialize(bean, config);
-
+        final List<String> list = N.toList(nullElement);
+        str = xmlParser.serialize(list);
         N.println(str);
 
-        assertTrue(str.indexOf("abc") >= 0);
+        final List<String> list2 = xmlParser.deserialize(str, List.class);
+        N.println(list2);
 
-        assertTrue(bean.equals(xmlParser.deserialize(str, TransientBean.class)));
+        final Map<String, Object> map = N.asMap(nullElement, nullElement);
+        final XmlSerConfig jsc = XmlSerConfig.create().setExclusion(Exclusion.NONE);
+        str = xmlParser.serialize(map, jsc);
+        N.println(str);
+
+        final Map<String, Object> map2 = xmlParser.deserialize(str, Map.class);
+        N.println(map2);
+
+        xmlParser.deserialize(str, Object.class);
+
+        try {
+            xmlParser.deserialize(str, xmlParser.getClass());
+            fail("Should throw RuntimeException");
+        } catch (final ParsingException e) {
+
+        }
+
+        try {
+            xmlParser.serialize(xmlParser);
+            fail("Should throw RuntimeException");
+        } catch (final ParsingException e) {
+
+        }
     }
 
     @Test
@@ -333,7 +354,6 @@ public class XmlParserTest extends AbstractXmlParserTest {
     }
 
     @Test
-    @Tag("slow-test")
     public void test_perf() throws Exception {
         final Account account = createAccountWithContact(Account.class);
         final String xml = xmlParser.serialize(account);
@@ -919,50 +939,27 @@ public class XmlParserTest extends AbstractXmlParserTest {
     }
 
     @Test
-    public void testSerialize_map() {
-        Map<String, Object> m = N.asMap("firstName", "fn", "lastName", "ln", "birthday", "2003-08-08");
-        String str = jsonParser.serialize(m);
-        N.println(str);
+    public void test_BufferedWriter() {
+        final Writer writer = new StringWriter();
+        final BufferedXmlWriter bw = Objectory.createBufferedXmlWriter(writer);
+        final Account account = createAccount(Account.class);
+        xmlParser.serialize(account, bw);
 
-        Map<String, Object> m2 = jsonParser.deserialize(str, Map.class);
+        N.println(writer.toString());
 
-        N.println(m2);
-        assertEquals(m, m2);
+        Objectory.recycle(bw);
+        assertNotNull(account);
     }
 
     @Test
-    public void testSerialize() {
-        Account account = createAccount(Account.class);
-        account.setId(100);
+    public void test_BufferedWriter_2() {
+        final Writer writer = new StringWriter();
+        final BufferedXmlWriter bw = Objectory.createBufferedXmlWriter(writer);
+        final Account account = null;
+        xmlParser.serialize(account, bw);
 
-        String str = jsonParser.serialize(account);
-        println(str);
+        assertEquals(Strings.EMPTY, writer.toString());
 
-        println(jsonParser.deserialize(str, Account.class));
-
-        str = "{\r\n" + "    \"id\": 100,\r\n" + "    \"gui\": \"d670ced631a14cf2820296263e2364f0\",\r\n"
-                + "    \"emailAddress\": \"1e7cd28a386d47058a593d0dae386394@earth.com\",\r\n" + "    \"firstName\": \"firstName\",\r\n"
-                + "    \"middleName\": \"MN\",\r\n" + "    \"lastName\": \"lastName\",\r\n" + "    \"birthDate\": 1394842092851,\r\n"
-                + "    \"lastUpdateTime\": 1394842092851,\r\n" + "    \"createdTime\": 1394842092851\\r\\n" + "}";
-
-        println(jsonParser.deserialize(str, Account.class));
-
-        str = "{id:100,gui:\"5197aaf659794f1784fd45570ada3d62\",unknownProperty1:null, emailAddress:\"13f6a5129c274c758a6eddf40fd825c6@earth.com\",firstName:\"firstName\",middleName:\"MN\",lastName:\"lastName\",birthDate:1399943675943,lastUpdateTime:1399943675943,createdTime:1399943675943,unknownProperty2:1}";
-        println(jsonParser.deserialize(str, Account.class));
-        println(jsonParser.deserialize(str, Map.class));
-        assertNotNull(str);
-    }
-
-    @Test
-    public void testSerialize5() {
-        List<Account> accounts = createAccountWithContact(Account.class, 100);
-        String xml = jsonParser.serialize(accounts);
-        println(xml);
-
-        List<Account> xmlAccounts = jsonParser.deserialize(xml, List.class);
-
-        N.println(N.stringOf(accounts));
-        N.println(N.stringOf(xmlAccounts));
-        assertNotNull(xmlAccounts);
+        Objectory.recycle(bw);
     }
 }

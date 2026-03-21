@@ -19,12 +19,10 @@ import java.sql.Timestamp;
 import java.util.Date;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class JUDateTypeTest extends TestBase {
 
     private JUDateType dateType;
@@ -35,13 +33,13 @@ public class JUDateTypeTest extends TestBase {
     }
 
     @Test
-    public void testClazz() {
-        assertEquals(Date.class, dateType.javaType());
+    public void testDeclaringName() {
+        assertEquals("java.util.Date", dateType.declaringName());
     }
 
     @Test
-    public void testDeclaringName() {
-        assertEquals("java.util.Date", dateType.declaringName());
+    public void testClazz() {
+        assertEquals(Date.class, dateType.javaType());
     }
 
     @Test

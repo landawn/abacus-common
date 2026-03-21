@@ -9,29 +9,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ClazzTypeTest extends TestBase {
 
     private final ClazzType type = new ClazzType(String.class.getName());
-
-    @Test
-    public void test_get_ResultSet_byLabel() throws SQLException {
-        ResultSet rs = mock(ResultSet.class);
-        // Basic get test - actual implementation will vary by type
-        assertDoesNotThrow(() -> type.get(rs, "col"));
-    }
-
-    @Test
-    public void test_set_CallableStatement() throws SQLException {
-        CallableStatement stmt = mock(CallableStatement.class);
-        // Basic set test - actual implementation will vary by type
-        assertDoesNotThrow(() -> type.set(stmt, "param", null));
-    }
 
     @Test
     public void testClazz() {
@@ -67,66 +51,6 @@ public class ClazzTypeTest extends TestBase {
     public void testStringOf_PrimitiveArrayClass() {
         String result = type.stringOf(int[].class);
         assertEquals("int[]", result);
-    }
-
-    @Test
-    public void testStringOf_NestedClass() {
-        String result = type.stringOf(java.util.Map.Entry.class);
-        assertEquals("java.util.Map.Entry", result);
-    }
-
-    @Test
-    public void testValueOf_Null() {
-        Class result = type.valueOf(null);
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void testValueOf_EmptyString() {
-        Class result = type.valueOf("");
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void testValueOf_SimpleClassName() {
-        Class result = type.valueOf("java.lang.String");
-        assertEquals(String.class, result);
-    }
-
-    @Test
-    public void testValueOf_PrimitiveName() {
-        Class result = type.valueOf("int");
-        assertEquals(int.class, result);
-    }
-
-    @Test
-    public void testValueOf_BooleanPrimitive() {
-        Class result = type.valueOf("boolean");
-        assertEquals(boolean.class, result);
-    }
-
-    @Test
-    public void testValueOf_ArrayClassName() {
-        Class result = type.valueOf("java.lang.String[]");
-        assertEquals(String[].class, result);
-    }
-
-    @Test
-    public void testValueOf_PrimitiveArrayName() {
-        Class result = type.valueOf("int[]");
-        assertEquals(int[].class, result);
-    }
-
-    @Test
-    public void testValueOf_MultidimensionalArray() {
-        Class result = type.valueOf("int[][]");
-        assertEquals(int[][].class, result);
-    }
-
-    @Test
-    public void testValueOf_NestedClassName() {
-        Class result = type.valueOf("java.util.Map$Entry");
-        assertEquals(java.util.Map.Entry.class, result);
     }
 
     @Test
@@ -173,6 +97,80 @@ public class ClazzTypeTest extends TestBase {
             Class restored = type.valueOf(str);
             assertEquals(wrapper, restored, "Failed for wrapper: " + wrapper);
         }
+    }
+
+    @Test
+    public void testStringOf_NestedClass() {
+        String result = type.stringOf(java.util.Map.Entry.class);
+        assertEquals("java.util.Map.Entry", result);
+    }
+
+    @Test
+    public void testValueOf_SimpleClassName() {
+        Class result = type.valueOf("java.lang.String");
+        assertEquals(String.class, result);
+    }
+
+    @Test
+    public void testValueOf_PrimitiveName() {
+        Class result = type.valueOf("int");
+        assertEquals(int.class, result);
+    }
+
+    @Test
+    public void testValueOf_BooleanPrimitive() {
+        Class result = type.valueOf("boolean");
+        assertEquals(boolean.class, result);
+    }
+
+    @Test
+    public void testValueOf_ArrayClassName() {
+        Class result = type.valueOf("java.lang.String[]");
+        assertEquals(String[].class, result);
+    }
+
+    @Test
+    public void testValueOf_PrimitiveArrayName() {
+        Class result = type.valueOf("int[]");
+        assertEquals(int[].class, result);
+    }
+
+    @Test
+    public void testValueOf_MultidimensionalArray() {
+        Class result = type.valueOf("int[][]");
+        assertEquals(int[][].class, result);
+    }
+
+    @Test
+    public void testValueOf_Null() {
+        Class result = type.valueOf(null);
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testValueOf_EmptyString() {
+        Class result = type.valueOf("");
+        Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testValueOf_NestedClassName() {
+        Class result = type.valueOf("java.util.Map$Entry");
+        assertEquals(java.util.Map.Entry.class, result);
+    }
+
+    @Test
+    public void test_get_ResultSet_byLabel() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+        // Basic get test - actual implementation will vary by type
+        assertDoesNotThrow(() -> type.get(rs, "col"));
+    }
+
+    @Test
+    public void test_set_CallableStatement() throws SQLException {
+        CallableStatement stmt = mock(CallableStatement.class);
+        // Basic set test - actual implementation will vary by type
+        assertDoesNotThrow(() -> type.set(stmt, "param", null));
     }
 
 }

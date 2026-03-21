@@ -11,7 +11,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
@@ -20,7 +19,6 @@ import com.landawn.abacus.util.Dates.DTF;
 public class DateUtilTest extends AbstractTest {
 
     @Test
-    @Tag("slow-test")
     public void test_perf() {
         final Date date = new Date();
 

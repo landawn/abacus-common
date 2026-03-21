@@ -20,14 +20,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("new-test")
 public class ObjectArrayTypeTest extends TestBase {
 
     private ObjectArrayType<String> stringArrayType;
@@ -221,6 +219,17 @@ public class ObjectArrayTypeTest extends TestBase {
     }
 
     @Test
+    public void testArray2CollectionWithArray() {
+        List<String> list = new ArrayList<>();
+        String[] array = { "a", "b", "c" };
+        stringArrayType.arrayToCollection(array, list);
+        assertEquals(3, list.size());
+        assertTrue(list.contains("a"));
+        assertTrue(list.contains("b"));
+        assertTrue(list.contains("c"));
+    }
+
+    @Test
     public void testArray2CollectionWithNull() {
         List<String> list = new ArrayList<>();
         stringArrayType.arrayToCollection(null, list);
@@ -233,17 +242,6 @@ public class ObjectArrayTypeTest extends TestBase {
         String[] emptyArray = new String[0];
         stringArrayType.arrayToCollection(emptyArray, list);
         assertTrue(list.isEmpty());
-    }
-
-    @Test
-    public void testArray2CollectionWithArray() {
-        List<String> list = new ArrayList<>();
-        String[] array = { "a", "b", "c" };
-        stringArrayType.arrayToCollection(array, list);
-        assertEquals(3, list.size());
-        assertTrue(list.contains("a"));
-        assertTrue(list.contains("b"));
-        assertTrue(list.contains("c"));
     }
 
     @Test

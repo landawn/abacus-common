@@ -17,13 +17,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.ThreadMode;
 
-@Tag("2025")
 public class SubscribeTest extends TestBase {
 
     static class TestHandler {
@@ -61,12 +59,6 @@ public class SubscribeTest extends TestBase {
     }
 
     @Test
-    public void testMethodAnnotation() throws NoSuchMethodException {
-        Method method = TestHandler.class.getDeclaredMethod("handleDefault", String.class);
-        assertTrue(method.isAnnotationPresent(Subscribe.class));
-    }
-
-    @Test
     public void testDefaultValues() throws NoSuchMethodException {
         Method method = TestHandler.class.getDeclaredMethod("handleDefault", String.class);
         Subscribe annotation = method.getAnnotation(Subscribe.class);
@@ -87,41 +79,6 @@ public class SubscribeTest extends TestBase {
     }
 
     @Test
-    public void testEventId() throws NoSuchMethodException {
-        Method method = TestHandler.class.getDeclaredMethod("handleWithEventId", String.class);
-        Subscribe annotation = method.getAnnotation(Subscribe.class);
-        assertEquals("myEvents", annotation.eventId());
-    }
-
-    @Test
-    public void testSticky() throws NoSuchMethodException {
-        Method method = TestHandler.class.getDeclaredMethod("handleSticky", String.class);
-        Subscribe annotation = method.getAnnotation(Subscribe.class);
-        assertTrue(annotation.sticky());
-    }
-
-    @Test
-    public void testStrictEventType() throws NoSuchMethodException {
-        Method method = TestHandler.class.getDeclaredMethod("handleStrict", String.class);
-        Subscribe annotation = method.getAnnotation(Subscribe.class);
-        assertTrue(annotation.strictEventType());
-    }
-
-    @Test
-    public void testInterval() throws NoSuchMethodException {
-        Method method = TestHandler.class.getDeclaredMethod("handleWithInterval", String.class);
-        Subscribe annotation = method.getAnnotation(Subscribe.class);
-        assertEquals(1000, annotation.intervalMillis());
-    }
-
-    @Test
-    public void testDeduplicate() throws NoSuchMethodException {
-        Method method = TestHandler.class.getDeclaredMethod("handleDeduplicate", String.class);
-        Subscribe annotation = method.getAnnotation(Subscribe.class);
-        assertTrue(annotation.deduplicate());
-    }
-
-    @Test
     public void testAllAttributes() throws NoSuchMethodException {
         Method method = TestHandler.class.getDeclaredMethod("handleAll", String.class);
         Subscribe annotation = method.getAnnotation(Subscribe.class);
@@ -132,33 +89,6 @@ public class SubscribeTest extends TestBase {
         assertTrue(annotation.strictEventType());
         assertEquals(5000, annotation.intervalMillis());
         assertTrue(annotation.deduplicate());
-    }
-
-    @Test
-    public void testRetentionPolicy() {
-        Retention retention = Subscribe.class.getAnnotation(Retention.class);
-        assertNotNull(retention);
-        assertEquals(RetentionPolicy.RUNTIME, retention.value());
-    }
-
-    @Test
-    public void testTargetElements() {
-        Target target = Subscribe.class.getAnnotation(Target.class);
-        assertNotNull(target);
-        assertArrayEquals(new ElementType[] { ElementType.METHOD }, target.value());
-    }
-
-    @Test
-    public void testIsAnnotation() {
-        assertTrue(Subscribe.class.isAnnotation());
-    }
-
-    @Test
-    public void testAnnotationType() throws NoSuchMethodException {
-        Method method = TestHandler.class.getDeclaredMethod("handleDefault", String.class);
-        Subscribe annotation = method.getAnnotation(Subscribe.class);
-        assertNotNull(annotation);
-        assertEquals(Subscribe.class, annotation.annotationType());
     }
 
     @Test
@@ -236,6 +166,13 @@ public class SubscribeTest extends TestBase {
     }
 
     @Test
+    public void testStrictEventType() throws NoSuchMethodException {
+        Method method = TestHandler.class.getDeclaredMethod("handleStrict", String.class);
+        Subscribe annotation = method.getAnnotation(Subscribe.class);
+        assertTrue(annotation.strictEventType());
+    }
+
+    @Test
     public void testStickyAttribute() {
         EventBus eventBus = EventBus.create();
         AtomicReference<String> receivedEvent = new AtomicReference<>();
@@ -253,6 +190,13 @@ public class SubscribeTest extends TestBase {
         eventBus.register(subscriber);
 
         Assertions.assertEquals("Sticky Event", receivedEvent.get());
+    }
+
+    @Test
+    public void testSticky() throws NoSuchMethodException {
+        Method method = TestHandler.class.getDeclaredMethod("handleSticky", String.class);
+        Subscribe annotation = method.getAnnotation(Subscribe.class);
+        assertTrue(annotation.sticky());
     }
 
     @Test
@@ -285,31 +229,17 @@ public class SubscribeTest extends TestBase {
     }
 
     @Test
-    public void testIntervalAttribute() throws InterruptedException {
-        EventBus eventBus = EventBus.create();
-        AtomicInteger eventCount = new AtomicInteger(0);
+    public void testEventId() throws NoSuchMethodException {
+        Method method = TestHandler.class.getDeclaredMethod("handleWithEventId", String.class);
+        Subscribe annotation = method.getAnnotation(Subscribe.class);
+        assertEquals("myEvents", annotation.eventId());
+    }
 
-        class TestClass {
-            @Subscribe(intervalMillis = 80)
-            public void onEvent(String event) {
-                eventCount.incrementAndGet();
-            }
-        }
-
-        TestClass subscriber = new TestClass();
-        eventBus.register(subscriber);
-
-        for (int i = 0; i < 5; i++) {
-            eventBus.post("Event " + i);
-            Thread.sleep(10);
-        }
-
-        Assertions.assertEquals(1, eventCount.get());
-
-        Thread.sleep(150);
-        eventBus.post("Event after interval");
-
-        Assertions.assertEquals(2, eventCount.get());
+    @Test
+    public void testInterval() throws NoSuchMethodException {
+        Method method = TestHandler.class.getDeclaredMethod("handleWithInterval", String.class);
+        Subscribe annotation = method.getAnnotation(Subscribe.class);
+        assertEquals(1000, annotation.intervalMillis());
     }
 
     @Test
@@ -337,6 +267,74 @@ public class SubscribeTest extends TestBase {
 
         Assertions.assertEquals(3, eventCount.get());
         Assertions.assertEquals("Event A", lastEvent.get());
+    }
+
+    @Test
+    public void testDeduplicate() throws NoSuchMethodException {
+        Method method = TestHandler.class.getDeclaredMethod("handleDeduplicate", String.class);
+        Subscribe annotation = method.getAnnotation(Subscribe.class);
+        assertTrue(annotation.deduplicate());
+    }
+
+    @Test
+    public void testMethodAnnotation() throws NoSuchMethodException {
+        Method method = TestHandler.class.getDeclaredMethod("handleDefault", String.class);
+        assertTrue(method.isAnnotationPresent(Subscribe.class));
+    }
+
+    @Test
+    public void testRetentionPolicy() {
+        Retention retention = Subscribe.class.getAnnotation(Retention.class);
+        assertNotNull(retention);
+        assertEquals(RetentionPolicy.RUNTIME, retention.value());
+    }
+
+    @Test
+    public void testTargetElements() {
+        Target target = Subscribe.class.getAnnotation(Target.class);
+        assertNotNull(target);
+        assertArrayEquals(new ElementType[] { ElementType.METHOD }, target.value());
+    }
+
+    @Test
+    public void testIsAnnotation() {
+        assertTrue(Subscribe.class.isAnnotation());
+    }
+
+    @Test
+    public void testAnnotationType() throws NoSuchMethodException {
+        Method method = TestHandler.class.getDeclaredMethod("handleDefault", String.class);
+        Subscribe annotation = method.getAnnotation(Subscribe.class);
+        assertNotNull(annotation);
+        assertEquals(Subscribe.class, annotation.annotationType());
+    }
+
+    @Test
+    public void testIntervalAttribute() throws InterruptedException {
+        EventBus eventBus = EventBus.create();
+        AtomicInteger eventCount = new AtomicInteger(0);
+
+        class TestClass {
+            @Subscribe(intervalMillis = 80)
+            public void onEvent(String event) {
+                eventCount.incrementAndGet();
+            }
+        }
+
+        TestClass subscriber = new TestClass();
+        eventBus.register(subscriber);
+
+        for (int i = 0; i < 5; i++) {
+            eventBus.post("Event " + i);
+            Thread.sleep(10);
+        }
+
+        Assertions.assertEquals(1, eventCount.get());
+
+        Thread.sleep(150);
+        eventBus.post("Event after interval");
+
+        Assertions.assertEquals(2, eventCount.get());
     }
 
     @Test

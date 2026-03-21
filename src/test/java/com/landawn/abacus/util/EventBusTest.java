@@ -2,7 +2,6 @@ package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
@@ -10,7 +9,6 @@ import com.landawn.abacus.eventbus.EventBus;
 import com.landawn.abacus.eventbus.Subscribe;
 import com.landawn.abacus.eventbus.Subscriber;
 
-@Tag("old-test")
 public class EventBusTest extends AbstractTest {
 
     @Test

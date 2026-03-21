@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.esotericsoftware.kryo.Kryo;
@@ -15,7 +14,6 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ParserFactoryTest extends TestBase {
 
     // Simple Kryo Serializer for testing
@@ -35,6 +33,12 @@ public class ParserFactoryTest extends TestBase {
         }
     }
 
+    @Test
+    public void testIsAbacusXMLAvailable() {
+        boolean available = ParserFactory.isAbacusXmlParserAvailable();
+        assertTrue(available || !available);
+    }
+
     // =====================================================================
     // isAbacusXmlParserAvailable
     // =====================================================================
@@ -48,8 +52,8 @@ public class ParserFactoryTest extends TestBase {
     }
 
     @Test
-    public void testIsAbacusXMLAvailable() {
-        boolean available = ParserFactory.isAbacusXmlParserAvailable();
+    public void testIsXMLAvailable() {
+        boolean available = ParserFactory.isXmlParserAvailable();
         assertTrue(available || !available);
     }
 
@@ -65,8 +69,8 @@ public class ParserFactoryTest extends TestBase {
     }
 
     @Test
-    public void testIsXMLAvailable() {
-        boolean available = ParserFactory.isXmlParserAvailable();
+    public void testIsAvroAvailable() {
+        boolean available = ParserFactory.isAvroParserAvailable();
         assertTrue(available || !available);
     }
 
@@ -79,12 +83,6 @@ public class ParserFactoryTest extends TestBase {
         assertDoesNotThrow(() -> {
             ParserFactory.isAvroParserAvailable();
         });
-    }
-
-    @Test
-    public void testIsAvroAvailable() {
-        boolean available = ParserFactory.isAvroParserAvailable();
-        assertTrue(available || !available);
     }
 
     // =====================================================================
@@ -115,6 +113,17 @@ public class ParserFactoryTest extends TestBase {
         }
     }
 
+    @Test
+    public void testCreateAvroParser_notNull() {
+        if (ParserFactory.isAvroParserAvailable()) {
+            AvroParser parser1 = ParserFactory.createAvroParser();
+            AvroParser parser2 = ParserFactory.createAvroParser();
+            assertNotNull(parser1);
+            assertNotNull(parser2);
+            assertTrue(parser1 != parser2);
+        }
+    }
+
     // =====================================================================
     // createKryoParser
     // =====================================================================
@@ -135,6 +144,17 @@ public class ParserFactoryTest extends TestBase {
             assertNotNull(parser1);
             assertNotNull(parser2);
             assertTrue(parser1 != parser2);
+        }
+    }
+
+    @Test
+    public void testCreateKryoParser_usable() {
+        if (ParserFactory.isKryoParserAvailable()) {
+            KryoParser parser = ParserFactory.createKryoParser();
+            byte[] encoded = parser.encode("hello");
+            assertNotNull(encoded);
+            String decoded = parser.decode(encoded);
+            assertEquals("hello", decoded);
         }
     }
 
@@ -166,6 +186,25 @@ public class ParserFactoryTest extends TestBase {
         assertNotNull(parser);
     }
 
+    @Test
+    public void testCreateJsonParser_usable() {
+        JsonParser parser = ParserFactory.createJsonParser();
+        String json = parser.serialize("hello");
+        assertNotNull(json);
+        String result = parser.deserialize(json, String.class);
+        assertEquals("hello", result);
+    }
+
+    @Test
+    public void testCreateJsonParser_withCustomConfig() {
+        JsonSerConfig jsc = new JsonSerConfig().setPrettyFormat(true).setQuotePropName(true);
+        JsonDeserConfig jdc = new JsonDeserConfig();
+        JsonParser parser = ParserFactory.createJsonParser(jsc, jdc);
+
+        String json = parser.serialize("test");
+        assertNotNull(json);
+    }
+
     // =====================================================================
     // createAbacusXmlParser
     // =====================================================================
@@ -192,6 +231,14 @@ public class ParserFactoryTest extends TestBase {
         }
     }
 
+    @Test
+    public void testCreateAbacusXmlParser_withNullConfigs() {
+        if (ParserFactory.isAbacusXmlParserAvailable()) {
+            XmlParser parser = ParserFactory.createAbacusXmlParser(null, null);
+            assertNotNull(parser);
+        }
+    }
+
     // =====================================================================
     // createXmlParser
     // =====================================================================
@@ -214,6 +261,14 @@ public class ParserFactoryTest extends TestBase {
             XmlSerConfig xsc = new XmlSerConfig();
             XmlDeserConfig xdc = new XmlDeserConfig();
             XmlParser parser = ParserFactory.createXmlParser(xsc, xdc);
+            assertNotNull(parser);
+        }
+    }
+
+    @Test
+    public void testCreateXmlParser_withNullConfigs() {
+        if (ParserFactory.isXmlParserAvailable()) {
+            XmlParser parser = ParserFactory.createXmlParser(null, null);
             assertNotNull(parser);
         }
     }
@@ -353,63 +408,6 @@ public class ParserFactoryTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> {
             ParserFactory.registerKryo(null, null, 300);
         });
-    }
-
-    @Test
-    public void testCreateJsonParser_usable() {
-        JsonParser parser = ParserFactory.createJsonParser();
-        String json = parser.serialize("hello");
-        assertNotNull(json);
-        String result = parser.deserialize(json, String.class);
-        assertEquals("hello", result);
-    }
-
-    @Test
-    public void testCreateJsonParser_withCustomConfig() {
-        JsonSerConfig jsc = new JsonSerConfig().setPrettyFormat(true).setQuotePropName(true);
-        JsonDeserConfig jdc = new JsonDeserConfig();
-        JsonParser parser = ParserFactory.createJsonParser(jsc, jdc);
-
-        String json = parser.serialize("test");
-        assertNotNull(json);
-    }
-
-    @Test
-    public void testCreateAbacusXmlParser_withNullConfigs() {
-        if (ParserFactory.isAbacusXmlParserAvailable()) {
-            XmlParser parser = ParserFactory.createAbacusXmlParser(null, null);
-            assertNotNull(parser);
-        }
-    }
-
-    @Test
-    public void testCreateXmlParser_withNullConfigs() {
-        if (ParserFactory.isXmlParserAvailable()) {
-            XmlParser parser = ParserFactory.createXmlParser(null, null);
-            assertNotNull(parser);
-        }
-    }
-
-    @Test
-    public void testCreateKryoParser_usable() {
-        if (ParserFactory.isKryoParserAvailable()) {
-            KryoParser parser = ParserFactory.createKryoParser();
-            byte[] encoded = parser.encode("hello");
-            assertNotNull(encoded);
-            String decoded = parser.decode(encoded);
-            assertEquals("hello", decoded);
-        }
-    }
-
-    @Test
-    public void testCreateAvroParser_notNull() {
-        if (ParserFactory.isAvroParserAvailable()) {
-            AvroParser parser1 = ParserFactory.createAvroParser();
-            AvroParser parser2 = ParserFactory.createAvroParser();
-            assertNotNull(parser1);
-            assertNotNull(parser2);
-            assertTrue(parser1 != parser2);
-        }
     }
 
     @Test

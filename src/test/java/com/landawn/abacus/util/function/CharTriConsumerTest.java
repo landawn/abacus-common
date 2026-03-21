@@ -6,13 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Triple;
 
-@Tag("2025")
 public class CharTriConsumerTest extends TestBase {
 
     @Test
@@ -39,6 +37,16 @@ public class CharTriConsumerTest extends TestBase {
     }
 
     @Test
+    public void testWithSpecialCharacters() {
+        final List<String> result = new ArrayList<>();
+        CharTriConsumer consumer = (a, b, c) -> result.add("" + a + b + c);
+
+        consumer.accept('\n', '\t', ' ');
+        assertEquals(1, result.size());
+        assertEquals("\n\t ", result.get(0));
+    }
+
+    @Test
     public void testAcceptWithAnonymousClass() {
         final List<String> result = new ArrayList<>();
         CharTriConsumer consumer = new CharTriConsumer() {
@@ -51,6 +59,18 @@ public class CharTriConsumerTest extends TestBase {
         consumer.accept('a', 'b', 'c');
         assertEquals(1, result.size());
         assertEquals("ABC", result.get(0));
+    }
+
+    @Test
+    public void testWithBoundaryValues() {
+        final List<Triple<Character, Character, Character>> result = new ArrayList<>();
+        CharTriConsumer consumer = (a, b, c) -> result.add(Triple.of(a, b, c));
+
+        consumer.accept(Character.MIN_VALUE, 'M', Character.MAX_VALUE);
+        assertEquals(1, result.size());
+        assertEquals(Character.MIN_VALUE, result.get(0).left());
+        assertEquals('M', result.get(0).middle());
+        assertEquals(Character.MAX_VALUE, result.get(0).right());
     }
 
     @Test
@@ -81,28 +101,6 @@ public class CharTriConsumerTest extends TestBase {
         assertEquals('x', result.get(0));
         assertEquals('y', result.get(1));
         assertEquals('z', result.get(2));
-    }
-
-    @Test
-    public void testWithSpecialCharacters() {
-        final List<String> result = new ArrayList<>();
-        CharTriConsumer consumer = (a, b, c) -> result.add("" + a + b + c);
-
-        consumer.accept('\n', '\t', ' ');
-        assertEquals(1, result.size());
-        assertEquals("\n\t ", result.get(0));
-    }
-
-    @Test
-    public void testWithBoundaryValues() {
-        final List<Triple<Character, Character, Character>> result = new ArrayList<>();
-        CharTriConsumer consumer = (a, b, c) -> result.add(Triple.of(a, b, c));
-
-        consumer.accept(Character.MIN_VALUE, 'M', Character.MAX_VALUE);
-        assertEquals(1, result.size());
-        assertEquals(Character.MIN_VALUE, result.get(0).left());
-        assertEquals('M', result.get(0).middle());
-        assertEquals(Character.MAX_VALUE, result.get(0).right());
     }
 
     @Test

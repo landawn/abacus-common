@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -15,7 +14,6 @@ import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.annotation.Table;
 import com.landawn.abacus.util.NamingPolicy;
 
-@Tag("new-test")
 public class BeanInfoTest extends TestBase {
 
     private ParserUtil.BeanInfo beanInfo;
@@ -140,6 +138,27 @@ public class BeanInfoTest extends TestBase {
         char[] nonExistentBuffer = "xyz".toCharArray();
         ParserUtil.PropInfo nonExistentProp = beanInfo.readPropInfo(nonExistentBuffer, 0, nonExistentBuffer.length);
         Assertions.assertNull(nonExistentProp);
+    }
+
+    @Test
+    public void testSetPropValueByPropInfo_WithAliasFallback() {
+        AliasOnlyBean target = new AliasOnlyBean();
+        ParserUtil.PropInfo sourcePropInfo = beanInfo.getPropInfo("aliasedField");
+
+        boolean result = ParserUtil.getBeanInfo(AliasOnlyBean.class).setPropValue(target, sourcePropInfo, "aliasValue", false);
+
+        Assertions.assertTrue(result);
+        Assertions.assertEquals("aliasValue", target.getAlias1());
+    }
+
+    @Test
+    public void testSetPropValueByPropInfo_WithAliasFallbackIgnored() {
+        UnmatchedBean target = new UnmatchedBean();
+        ParserUtil.PropInfo sourcePropInfo = beanInfo.getPropInfo("aliasedField");
+
+        boolean result = ParserUtil.getBeanInfo(UnmatchedBean.class).setPropValue(target, sourcePropInfo, "aliasValue", true);
+
+        Assertions.assertFalse(result);
     }
 
     @Test
@@ -291,6 +310,30 @@ public class BeanInfoTest extends TestBase {
 
         public void setSharedField(String sharedField) {
             this.sharedField = sharedField;
+        }
+    }
+
+    public static class AliasOnlyBean {
+        private String alias1;
+
+        public String getAlias1() {
+            return alias1;
+        }
+
+        public void setAlias1(String alias1) {
+            this.alias1 = alias1;
+        }
+    }
+
+    public static class UnmatchedBean {
+        private String value;
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
         }
     }
 }

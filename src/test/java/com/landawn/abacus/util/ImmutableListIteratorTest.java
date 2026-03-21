@@ -6,13 +6,18 @@ import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class ImmutableListIteratorTest extends TestBase {
+
+    @Test
+    public void testEmptySingleton() {
+        ImmutableListIterator<String> empty1 = ImmutableListIterator.empty();
+        ImmutableListIterator<Integer> empty2 = ImmutableListIterator.empty();
+        Assertions.assertSame(empty1, empty2);
+    }
 
     @Test
     public void testEmpty() {
@@ -28,17 +33,21 @@ public class ImmutableListIteratorTest extends TestBase {
     }
 
     @Test
-    public void testOf_NullIterator() {
-        ImmutableListIterator<String> iter = ImmutableListIterator.of((ListIterator<String>) null);
-        Assertions.assertFalse(iter.hasNext());
-        Assertions.assertFalse(iter.hasPrevious());
+    public void testEmptyRemoveThrows() {
+        ImmutableListIterator<String> empty = ImmutableListIterator.empty();
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> empty.remove());
     }
 
     @Test
-    public void testOf_AlreadyImmutable() {
-        ImmutableListIterator<String> original = ImmutableListIterator.empty();
-        ImmutableListIterator<String> wrapped = ImmutableListIterator.of(original);
-        Assertions.assertSame(original, wrapped);
+    public void testEmptySetThrows() {
+        ImmutableListIterator<String> empty = ImmutableListIterator.empty();
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> empty.set("x"));
+    }
+
+    @Test
+    public void testEmptyAddThrows() {
+        ImmutableListIterator<String> empty = ImmutableListIterator.empty();
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> empty.add("x"));
     }
 
     @Test
@@ -95,67 +104,6 @@ public class ImmutableListIteratorTest extends TestBase {
     }
 
     @Test
-    public void testSet_ThrowsUnsupported() {
-        ArrayList<String> list = new ArrayList<>(Arrays.asList("a", "b"));
-        ImmutableListIterator<String> iter = ImmutableListIterator.of(list.listIterator());
-
-        iter.next();
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> iter.set("new"));
-    }
-
-    @Test
-    public void testAdd_ThrowsUnsupported() {
-        ArrayList<String> list = new ArrayList<>(Arrays.asList("a", "b"));
-        ImmutableListIterator<String> iter = ImmutableListIterator.of(list.listIterator());
-
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> iter.add("new"));
-    }
-
-    @Test
-    public void testRemove_ThrowsUnsupported() {
-        ArrayList<String> list = new ArrayList<>(Arrays.asList("a", "b"));
-        ImmutableListIterator<String> iter = ImmutableListIterator.of(list.listIterator());
-
-        iter.next();
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> iter.remove());
-    }
-
-    @Test
-    public void testIteratorWithNullElements() {
-        ArrayList<String> list = new ArrayList<>(Arrays.asList("a", null, "c"));
-        ImmutableListIterator<String> iter = ImmutableListIterator.of(list.listIterator());
-
-        Assertions.assertEquals("a", iter.next());
-        Assertions.assertNull(iter.next());
-        Assertions.assertEquals("c", iter.next());
-    }
-
-    @Test
-    public void testEmptySingleton() {
-        ImmutableListIterator<String> empty1 = ImmutableListIterator.empty();
-        ImmutableListIterator<Integer> empty2 = ImmutableListIterator.empty();
-        Assertions.assertSame(empty1, empty2);
-    }
-
-    @Test
-    public void testEmptyRemoveThrows() {
-        ImmutableListIterator<String> empty = ImmutableListIterator.empty();
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> empty.remove());
-    }
-
-    @Test
-    public void testEmptySetThrows() {
-        ImmutableListIterator<String> empty = ImmutableListIterator.empty();
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> empty.set("x"));
-    }
-
-    @Test
-    public void testEmptyAddThrows() {
-        ImmutableListIterator<String> empty = ImmutableListIterator.empty();
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> empty.add("x"));
-    }
-
-    @Test
     public void testForEachRemaining() {
         ArrayList<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
         ImmutableListIterator<String> iter = ImmutableListIterator.of(list.listIterator());
@@ -167,6 +115,30 @@ public class ImmutableListIteratorTest extends TestBase {
 
         Assertions.assertEquals(Arrays.asList("b", "c", "d"), remaining);
         Assertions.assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testOf_NullIterator() {
+        ImmutableListIterator<String> iter = ImmutableListIterator.of((ListIterator<String>) null);
+        Assertions.assertFalse(iter.hasNext());
+        Assertions.assertFalse(iter.hasPrevious());
+    }
+
+    @Test
+    public void testOf_AlreadyImmutable() {
+        ImmutableListIterator<String> original = ImmutableListIterator.empty();
+        ImmutableListIterator<String> wrapped = ImmutableListIterator.of(original);
+        Assertions.assertSame(original, wrapped);
+    }
+
+    @Test
+    public void testIteratorWithNullElements() {
+        ArrayList<String> list = new ArrayList<>(Arrays.asList("a", null, "c"));
+        ImmutableListIterator<String> iter = ImmutableListIterator.of(list.listIterator());
+
+        Assertions.assertEquals("a", iter.next());
+        Assertions.assertNull(iter.next());
+        Assertions.assertEquals("c", iter.next());
     }
 
     @Test
@@ -201,5 +173,31 @@ public class ImmutableListIteratorTest extends TestBase {
         Assertions.assertFalse(iter.hasPrevious());
         Assertions.assertEquals(0, iter.nextIndex());
         Assertions.assertEquals(-1, iter.previousIndex());
+    }
+
+    @Test
+    public void testRemove_ThrowsUnsupported() {
+        ArrayList<String> list = new ArrayList<>(Arrays.asList("a", "b"));
+        ImmutableListIterator<String> iter = ImmutableListIterator.of(list.listIterator());
+
+        iter.next();
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> iter.remove());
+    }
+
+    @Test
+    public void testSet_ThrowsUnsupported() {
+        ArrayList<String> list = new ArrayList<>(Arrays.asList("a", "b"));
+        ImmutableListIterator<String> iter = ImmutableListIterator.of(list.listIterator());
+
+        iter.next();
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> iter.set("new"));
+    }
+
+    @Test
+    public void testAdd_ThrowsUnsupported() {
+        ArrayList<String> list = new ArrayList<>(Arrays.asList("a", "b"));
+        ImmutableListIterator<String> iter = ImmutableListIterator.of(list.listIterator());
+
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> iter.add("new"));
     }
 }

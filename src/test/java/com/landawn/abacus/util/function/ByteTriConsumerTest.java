@@ -6,13 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Triple;
 
-@Tag("2025")
 public class ByteTriConsumerTest extends TestBase {
 
     @Test
@@ -54,6 +52,28 @@ public class ByteTriConsumerTest extends TestBase {
     }
 
     @Test
+    public void testWithNegativeValues() {
+        final List<Byte> result = new ArrayList<>();
+        ByteTriConsumer consumer = (a, b, c) -> result.add((byte) (a + b + c));
+
+        consumer.accept((byte) -5, (byte) 3, (byte) -2);
+        assertEquals(1, result.size());
+        assertEquals((byte) -4, result.get(0));
+    }
+
+    @Test
+    public void testWithBoundaryValues() {
+        final List<Triple<Byte, Byte, Byte>> result = new ArrayList<>();
+        ByteTriConsumer consumer = (a, b, c) -> result.add(Triple.of(a, b, c));
+
+        consumer.accept(Byte.MIN_VALUE, (byte) 0, Byte.MAX_VALUE);
+        assertEquals(1, result.size());
+        assertEquals(Byte.MIN_VALUE, result.get(0).left());
+        assertEquals((byte) 0, result.get(0).middle());
+        assertEquals(Byte.MAX_VALUE, result.get(0).right());
+    }
+
+    @Test
     public void testAndThen() {
         final List<Byte> result = new ArrayList<>();
         ByteTriConsumer first = (a, b, c) -> result.add((byte) (a + b + c));
@@ -81,28 +101,6 @@ public class ByteTriConsumerTest extends TestBase {
         assertEquals((byte) 5, result.get(0));
         assertEquals((byte) 10, result.get(1));
         assertEquals((byte) 15, result.get(2));
-    }
-
-    @Test
-    public void testWithNegativeValues() {
-        final List<Byte> result = new ArrayList<>();
-        ByteTriConsumer consumer = (a, b, c) -> result.add((byte) (a + b + c));
-
-        consumer.accept((byte) -5, (byte) 3, (byte) -2);
-        assertEquals(1, result.size());
-        assertEquals((byte) -4, result.get(0));
-    }
-
-    @Test
-    public void testWithBoundaryValues() {
-        final List<Triple<Byte, Byte, Byte>> result = new ArrayList<>();
-        ByteTriConsumer consumer = (a, b, c) -> result.add(Triple.of(a, b, c));
-
-        consumer.accept(Byte.MIN_VALUE, (byte) 0, Byte.MAX_VALUE);
-        assertEquals(1, result.size());
-        assertEquals(Byte.MIN_VALUE, result.get(0).left());
-        assertEquals((byte) 0, result.get(0).middle());
-        assertEquals(Byte.MAX_VALUE, result.get(0).right());
     }
 
     @Test

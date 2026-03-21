@@ -14,12 +14,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class IntegerTypeTest extends TestBase {
 
     private final IntegerType type = new IntegerType();
@@ -31,57 +29,13 @@ public class IntegerTypeTest extends TestBase {
     }
 
     @Test
-    public void test_name() {
-        assertEquals("Integer", type.name());
+    public void testClazz() {
+        assertEquals(Integer.class, integerType.javaType());
     }
 
     @Test
-    public void test_stringOf() {
-        assertEquals("1000", type.stringOf(1000));
-        assertEquals("-500", type.stringOf(-500));
-        assertEquals("0", type.stringOf(0));
-        assertEquals("2147483647", type.stringOf(Integer.MAX_VALUE));
-        assertEquals("-2147483648", type.stringOf(Integer.MIN_VALUE));
-        assertNull(type.stringOf(null));
-    }
-
-    @Test
-    public void test_valueOf_String() {
-        assertEquals(1000, type.valueOf("1000"));
-        assertEquals(-500, type.valueOf("-500"));
-        assertEquals(0, type.valueOf("0"));
-        assertEquals(Integer.MAX_VALUE, type.valueOf("2147483647"));
-        assertEquals(Integer.MIN_VALUE, type.valueOf("-2147483648"));
-        assertNull(type.valueOf((String) null));
-        assertNull(type.valueOf(""));
-    }
-
-    @Test
-    public void test_valueOf_Object() {
-        // Integer input
-        assertEquals(2000, type.valueOf(Integer.valueOf(2000)));
-
-        // Number inputs
-        assertEquals(50, type.valueOf(Byte.valueOf((byte) 50)));
-        assertEquals(300, type.valueOf(Long.valueOf(300L)));
-        assertThrows(NumberFormatException.class, () -> type.valueOf(Double.valueOf(100.7)));
-
-        // String input
-        assertEquals(1500, type.valueOf("1500"));
-
-        // Null input
-        assertNull(type.valueOf((Object) null));
-    }
-
-    @Test
-    public void test_valueOf_charArray() {
-        char[] chars = "12345".toCharArray();
-        assertEquals(12345, type.valueOf(chars, 0, 5));
-
-        char[] negChars = "-9999".toCharArray();
-        assertEquals(-9999, type.valueOf(negChars, 0, 5));
-
-        assertNull(type.valueOf((char[]) null, 0, 0));
+    public void testIsPrimitiveWrapper() {
+        assertTrue(integerType.isPrimitiveWrapper());
     }
 
     @Test
@@ -120,69 +74,6 @@ public class IntegerTypeTest extends TestBase {
         // Test with Number
         when(rs.getObject("longCol")).thenReturn(999999L);
         assertEquals(999999, type.get(rs, "longCol"));
-    }
-
-    @Test
-    public void test_set_PreparedStatement() throws SQLException {
-        PreparedStatement stmt = mock(PreparedStatement.class);
-
-        // Test with value
-        type.set(stmt, 1, 88888);
-        verify(stmt).setInt(1, 88888);
-
-        // Test with null
-        type.set(stmt, 2, null);
-        verify(stmt).setNull(2, java.sql.Types.INTEGER);
-    }
-
-    @Test
-    public void test_set_CallableStatement() throws SQLException {
-        CallableStatement stmt = mock(CallableStatement.class);
-
-        // Test with value
-        type.set(stmt, "param1", 77777);
-        verify(stmt).setInt("param1", 77777);
-
-        // Test with null
-        type.set(stmt, "param2", null);
-        verify(stmt).setNull("param2", java.sql.Types.INTEGER);
-    }
-
-    @Test
-    public void test_appendTo() throws Exception {
-        StringWriter sw = new StringWriter();
-
-        // Test value
-        type.appendTo(sw, 66666);
-        assertEquals("66666", sw.toString());
-
-        // Test null
-        sw = new StringWriter();
-        type.appendTo(sw, null);
-        assertEquals("null", sw.toString());
-    }
-
-    @Test
-    public void test_isInteger() {
-        assertTrue(type.isInteger());
-    }
-
-    @Test
-    public void test_valueOf_String_withSuffix() {
-        assertEquals(42, type.valueOf("42L"));
-        assertEquals(42, type.valueOf("42l"));
-        assertEquals(42, type.valueOf("42F"));
-        assertEquals(42, type.valueOf("42D"));
-    }
-
-    @Test
-    public void testClazz() {
-        assertEquals(Integer.class, integerType.javaType());
-    }
-
-    @Test
-    public void testIsPrimitiveWrapper() {
-        assertTrue(integerType.isPrimitiveWrapper());
     }
 
     @Test
@@ -318,6 +209,113 @@ public class IntegerTypeTest extends TestBase {
 
         Integer result = integerType.get(rs, "int_column");
         assertEquals(42, result);
+    }
+
+    @Test
+    public void test_name() {
+        assertEquals("Integer", type.name());
+    }
+
+    @Test
+    public void test_stringOf() {
+        assertEquals("1000", type.stringOf(1000));
+        assertEquals("-500", type.stringOf(-500));
+        assertEquals("0", type.stringOf(0));
+        assertEquals("2147483647", type.stringOf(Integer.MAX_VALUE));
+        assertEquals("-2147483648", type.stringOf(Integer.MIN_VALUE));
+        assertNull(type.stringOf(null));
+    }
+
+    @Test
+    public void test_valueOf_String() {
+        assertEquals(1000, type.valueOf("1000"));
+        assertEquals(-500, type.valueOf("-500"));
+        assertEquals(0, type.valueOf("0"));
+        assertEquals(Integer.MAX_VALUE, type.valueOf("2147483647"));
+        assertEquals(Integer.MIN_VALUE, type.valueOf("-2147483648"));
+        assertNull(type.valueOf((String) null));
+        assertNull(type.valueOf(""));
+    }
+
+    @Test
+    public void test_valueOf_Object() {
+        // Integer input
+        assertEquals(2000, type.valueOf(Integer.valueOf(2000)));
+
+        // Number inputs
+        assertEquals(50, type.valueOf(Byte.valueOf((byte) 50)));
+        assertEquals(300, type.valueOf(Long.valueOf(300L)));
+        assertThrows(NumberFormatException.class, () -> type.valueOf(Double.valueOf(100.7)));
+
+        // String input
+        assertEquals(1500, type.valueOf("1500"));
+
+        // Null input
+        assertNull(type.valueOf((Object) null));
+    }
+
+    @Test
+    public void test_valueOf_charArray() {
+        char[] chars = "12345".toCharArray();
+        assertEquals(12345, type.valueOf(chars, 0, 5));
+
+        char[] negChars = "-9999".toCharArray();
+        assertEquals(-9999, type.valueOf(negChars, 0, 5));
+
+        assertNull(type.valueOf((char[]) null, 0, 0));
+    }
+
+    @Test
+    public void test_set_PreparedStatement() throws SQLException {
+        PreparedStatement stmt = mock(PreparedStatement.class);
+
+        // Test with value
+        type.set(stmt, 1, 88888);
+        verify(stmt).setInt(1, 88888);
+
+        // Test with null
+        type.set(stmt, 2, null);
+        verify(stmt).setNull(2, java.sql.Types.INTEGER);
+    }
+
+    @Test
+    public void test_set_CallableStatement() throws SQLException {
+        CallableStatement stmt = mock(CallableStatement.class);
+
+        // Test with value
+        type.set(stmt, "param1", 77777);
+        verify(stmt).setInt("param1", 77777);
+
+        // Test with null
+        type.set(stmt, "param2", null);
+        verify(stmt).setNull("param2", java.sql.Types.INTEGER);
+    }
+
+    @Test
+    public void test_appendTo() throws Exception {
+        StringWriter sw = new StringWriter();
+
+        // Test value
+        type.appendTo(sw, 66666);
+        assertEquals("66666", sw.toString());
+
+        // Test null
+        sw = new StringWriter();
+        type.appendTo(sw, null);
+        assertEquals("null", sw.toString());
+    }
+
+    @Test
+    public void test_isInteger() {
+        assertTrue(type.isInteger());
+    }
+
+    @Test
+    public void test_valueOf_String_withSuffix() {
+        assertEquals(42, type.valueOf("42L"));
+        assertEquals(42, type.valueOf("42l"));
+        assertEquals(42, type.valueOf("42F"));
+        assertEquals(42, type.valueOf("42D"));
     }
 
 }

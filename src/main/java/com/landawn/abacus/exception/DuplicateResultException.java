@@ -18,16 +18,17 @@ import java.io.Serial;
 
 /**
  * Exception thrown when an operation that expects a unique result encounters duplicate results.
- * This exception extends {@link IllegalStateException} to indicate that the application is in
- * an illegal state due to the presence of duplicate results where uniqueness was expected.
- * 
+ * This exception extends {@link IllegalStateException} to indicate that the application
+ * is in an illegal state because an operation expected a unique result but encountered
+ * duplicate results.
+ *
  * <p>Common use cases include:</p>
  * <ul>
- *   <li>Database queries expected to return a single row but returning multiple rows</li>
- *   <li>Collection operations where uniqueness constraint is violated</li>
- *   <li>Stream operations expecting a single element but finding duplicates</li>
+ *   <li>Database queries expected to return a single row but returning multiple rows.</li>
+ *   <li>Collection operations where uniqueness constraint is violated.</li>
+ *   <li>Stream operations expecting a single element but finding duplicates.</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // In a DAO method expecting unique result
@@ -36,7 +37,7 @@ import java.io.Serial;
  *     throw new DuplicateResultException("Expected unique user but found " + users.size());
  * }
  * }</pre>
- * 
+ *
  * @see IllegalStateException
  */
 public class DuplicateResultException extends IllegalStateException {
@@ -54,6 +55,7 @@ public class DuplicateResultException extends IllegalStateException {
      * }</pre>
      */
     public DuplicateResultException() {
+        super();
     }
 
     /**
@@ -62,7 +64,7 @@ public class DuplicateResultException extends IllegalStateException {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * throw new DuplicateResultException("Found 3 records for unique ID: " + id);
+     * throw new DuplicateResultException("Found multiple records for unique ID: " + id);
      * }</pre>
      *
      * @param message the detail message. The detail message is saved for later retrieval
@@ -90,7 +92,7 @@ public class DuplicateResultException extends IllegalStateException {
      * @param message the detail message. The detail message is saved for later retrieval
      *                by the {@link #getMessage()} method.
      * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
-     *              A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.
+     *              (A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.)
      */
     public DuplicateResultException(final String message, final Throwable cause) {
         super(message, cause);
@@ -106,13 +108,15 @@ public class DuplicateResultException extends IllegalStateException {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * catch (SQLException e) {
+     * try {
+     *     // database operation
+     * } catch (SQLException e) {
      *     throw new DuplicateResultException(e);
      * }
      * }</pre>
      *
      * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
-     *              A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.
+     *              (A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.)
      */
     public DuplicateResultException(final Throwable cause) {
         super(cause);

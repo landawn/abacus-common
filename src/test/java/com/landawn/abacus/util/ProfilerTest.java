@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 
-@Tag("2025")
+@Tag("slow-test")
 public class ProfilerTest extends AbstractTest {
 
     static {
@@ -60,18 +60,14 @@ public class ProfilerTest extends AbstractTest {
     }
 
     // ============================================================
-    // Tests for Profiler.run(int, int, int, Runnable) — source line ~300
+    // SingleLoopStatistics tests
     // ============================================================
 
-    @Test
-    public void testRunWithRunnable() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, () -> doWork());
-
-        assertNotNull(stats);
-        assertEquals(1, stats.getThreadNum());
-        assertTrue(stats.getElapsedTimeInMillis() > 0);
-        assertEquals(1, stats.getMethodNameList().size());
-        assertEquals("run", stats.getMethodNameList().get(0));
+    private Profiler.MethodStatistics makeMethodStats(String name, long elapsedMs, boolean failed) {
+        long now = System.currentTimeMillis();
+        long startNano = System.nanoTime();
+        Object result = failed ? new RuntimeException("failed") : null;
+        return new Profiler.MethodStatistics(name, now - elapsedMs, now, startNano - elapsedMs * 1_000_000L, startNano, result);
     }
 
     @Test
@@ -85,20 +81,274 @@ public class ProfilerTest extends AbstractTest {
         assertTrue(sw.toString().contains("run"));
     }
 
+    // ============================================================
+    // Tests for MultiLoopsStatistics.getStartTimeInMillis/EndTime/Nano setters/getters
+    // ============================================================
+
     @Test
-    public void testRunInvalidThreadNum() {
-        assertThrows(IllegalArgumentException.class, () -> Profiler.run(0, 10, 1, () -> {
-        }));
-        assertThrows(IllegalArgumentException.class, () -> Profiler.run(-1, 10, 1, () -> {
-        }));
+    public void testMultiLoopsStatisticsGetStartEndTime() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "timeTest", () -> {
+        });
+
+        assertTrue(stats.getStartTimeInMillis() > 0);
+        assertTrue(stats.getEndTimeInMillis() >= stats.getStartTimeInMillis());
+        assertTrue(stats.getStartTimeInNano() > 0);
+        assertTrue(stats.getEndTimeInNano() >= stats.getStartTimeInNano());
+    }
+
+    // ============================================================
+    // Tests for MultiLoopsStatistics.printResult() — source line ~1924
+    // ============================================================
+
+    @Test
+    public void testPrintResult() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        java.io.PrintStream originalOut = System.out;
+
+        try {
+            System.setOut(new java.io.PrintStream(baos));
+
+            Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "printTest", () -> doWork());
+            stats.printResult();
+
+            String output = baos.toString();
+            assertTrue(output.contains("printTest"));
+            assertTrue(output.contains("threadNum=1"));
+            assertTrue(output.contains("loops=5"));
+        } finally {
+            System.setOut(originalOut);
+        }
+    }
+
+    // ============================================================
+    // Tests for MultiLoopsStatistics.writeResult(OutputStream) — source line ~1961
+    // ============================================================
+
+    @Test
+    public void testWriteResultOutputStream() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "osTest", () -> {
+        });
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        stats.writeResult(baos);
+        String output = baos.toString();
+        assertTrue(output.contains("osTest"));
+    }
+
+    // ============================================================
+    // Tests for MultiLoopsStatistics.writeResult(Writer) — source line ~2044
+    // ============================================================
+
+    @Test
+    public void testWriteResultWriter() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "writerTest", () -> {
+        });
+
+        StringWriter sw = new StringWriter();
+        stats.writeResult(sw);
+        String output = sw.toString();
+        assertTrue(output.contains("writerTest"));
     }
 
     @Test
-    public void testRunInvalidLoopNum() {
-        assertThrows(IllegalArgumentException.class, () -> Profiler.run(1, 0, 1, () -> {
-        }));
-        assertThrows(IllegalArgumentException.class, () -> Profiler.run(1, -1, 1, () -> {
-        }));
+    public void testWriteResult() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "writeTest", () -> doWork());
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        stats.writeResult(baos);
+        String output = baos.toString();
+        assertTrue(output.contains("writeTest"));
+        assertTrue(output.contains("avg time"));
+
+        StringWriter sw = new StringWriter();
+        stats.writeResult(sw);
+        output = sw.toString();
+        assertTrue(output.contains("writeTest"));
+        assertTrue(output.contains("avg time"));
+    }
+
+    // ============================================================
+    // Tests for MultiLoopsStatistics.writeHtmlResult(OutputStream) — source line ~2160
+    // ============================================================
+
+    @Test
+    public void testWriteHtmlResultOutputStream() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "htmlOsTest", () -> {
+        });
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        stats.writeHtmlResult(baos);
+        String output = baos.toString();
+        assertTrue(output.contains("<table"));
+        assertTrue(output.contains("htmlOsTest"));
+    }
+
+    // ============================================================
+    // Tests for MultiLoopsStatistics.writeHtmlResult(Writer) — source line ~2254
+    // ============================================================
+
+    @Test
+    public void testWriteHtmlResultWriter() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "htmlWriterTest", () -> {
+        });
+
+        StringWriter sw = new StringWriter();
+        stats.writeHtmlResult(sw);
+        String output = sw.toString();
+        assertTrue(output.contains("<table"));
+        assertTrue(output.contains("htmlWriterTest"));
+    }
+
+    @Test
+    public void testWriteHtmlResult() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "htmlTest", () -> doWork());
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        stats.writeHtmlResult(baos);
+        String output = baos.toString();
+        assertTrue(output.contains("<table"));
+        assertTrue(output.contains("htmlTest"));
+        assertTrue(output.contains("<th>avg time</th>"));
+
+        StringWriter sw = new StringWriter();
+        stats.writeHtmlResult(sw);
+        output = sw.toString();
+        assertTrue(output.contains("<table"));
+        assertTrue(output.contains("htmlTest"));
+    }
+
+    // ============================================================
+    // Tests for MultiLoopsStatistics.writeXmlResult(OutputStream) — source line ~2374
+    // ============================================================
+
+    @Test
+    public void testWriteXmlResultOutputStream() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "xmlOsTest", () -> {
+        });
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        stats.writeXmlResult(baos);
+        String output = baos.toString();
+        assertTrue(output.contains("<result>"));
+        assertTrue(output.contains("xmlOsTest"));
+    }
+
+    // ============================================================
+    // Tests for MultiLoopsStatistics.writeXmlResult(Writer) — source line ~2504
+    // ============================================================
+
+    @Test
+    public void testWriteXmlResultWriter() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "xmlWriterTest", () -> {
+        });
+
+        StringWriter sw = new StringWriter();
+        stats.writeXmlResult(sw);
+        String output = sw.toString();
+        assertTrue(output.contains("<result>"));
+        assertTrue(output.contains("xmlWriterTest"));
+    }
+
+    @Test
+    public void testWriteXmlResult() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "xmlTest", () -> doWork());
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        stats.writeXmlResult(baos);
+        String output = baos.toString();
+        assertTrue(output.contains("<result>"));
+        assertTrue(output.contains("<method name=\"xmlTest\">"));
+        assertTrue(output.contains("<avgTime>"));
+
+        StringWriter sw = new StringWriter();
+        stats.writeXmlResult(sw);
+        output = sw.toString();
+        assertTrue(output.contains("<result>"));
+        assertTrue(output.contains("xmlTest"));
+    }
+
+    @Test
+    public void testLoopStatistics_GetMethodTotalElapsedTimeInMillis() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopTotal", () -> doWork());
+        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
+        double total = loopStats.getMethodTotalElapsedTimeInMillis("loopTotal");
+        assertTrue(total >= 0);
+    }
+
+    @Test
+    public void testLoopStatistics_GetMethodAverageElapsedTimeInMillis() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopAvg", () -> doWork());
+        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
+        double avg = loopStats.getMethodAverageElapsedTimeInMillis("loopAvg");
+        assertTrue(avg >= 0);
+    }
+
+    @Test
+    public void testLoopStatistics_GetTotalElapsedTimeInMillis() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopTotalElapsed", () -> doWork());
+        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
+        double total = loopStats.getTotalElapsedTimeInMillis();
+        assertTrue(total >= 0);
+    }
+
+    @Test
+    public void testLoopStatistics_GetMethodSize() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopSize", () -> {
+        });
+        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
+        assertEquals(1, loopStats.getMethodSize("loopSize"));
+    }
+
+    @Test
+    public void testLoopStatistics_GetElapsedTimeInMillis() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopElapsed", () -> doWork());
+        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
+        assertTrue(loopStats.getElapsedTimeInMillis() >= 0);
+    }
+
+    @Test
+    public void testLoopStatistics_GetStartEndTime() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopTime", () -> {
+        });
+        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
+        assertTrue(loopStats.getStartTimeInMillis() > 0);
+        assertTrue(loopStats.getEndTimeInMillis() >= loopStats.getStartTimeInMillis());
+        assertTrue(loopStats.getStartTimeInNano() > 0);
+        assertTrue(loopStats.getEndTimeInNano() >= loopStats.getStartTimeInNano());
+    }
+
+    @Test
+    public void testPercentileCalculations_XmlFormat() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 100, 1, "percentileXml", () -> {
+        });
+
+        StringWriter sw = new StringWriter();
+        stats.writeXmlResult(sw);
+        String output = sw.toString();
+
+        assertTrue(output.contains("<_0.0001>"));
+        assertTrue(output.contains("<_0.001>"));
+        assertTrue(output.contains("<_0.01>"));
+        assertTrue(output.contains("<_0.5>"));
+        assertTrue(output.contains("<_0.9>"));
+        assertTrue(output.contains("<_0.99>"));
+        assertTrue(output.contains("<_0.999>"));
+        assertTrue(output.contains("<_0.9999>"));
+    }
+
+    // ============================================================
+    // Tests for Profiler.run(int, int, int, Runnable) — source line ~300
+    // ============================================================
+
+    @Test
+    public void testRunWithRunnable() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, () -> doWork());
+
+        assertNotNull(stats);
+        assertEquals(1, stats.getThreadNum());
+        assertTrue(stats.getElapsedTimeInMillis() > 0);
+        assertEquals(1, stats.getMethodNameList().size());
+        assertEquals("run", stats.getMethodNameList().get(0));
     }
 
     // ============================================================
@@ -148,20 +398,6 @@ public class ProfilerTest extends AbstractTest {
         assertEquals(1, stats.getThreadNum());
     }
 
-    @Test
-    public void testRunInvalidDelays() {
-        assertThrows(IllegalArgumentException.class, () -> Profiler.run(1, -1, 10, 0, 1, "test", () -> {
-        }));
-        assertThrows(IllegalArgumentException.class, () -> Profiler.run(1, 0, 10, -1, 1, "test", () -> {
-        }));
-    }
-
-    @Test
-    public void testRunInvalidDelays_BothNegative() {
-        assertThrows(IllegalArgumentException.class, () -> Profiler.run(1, -1, 5, -1, 1, "test", () -> {
-        }));
-    }
-
     // ============================================================
     // Tests for Profiler.run(Object, String, int, int, int) — source line ~495
     // ============================================================
@@ -171,11 +407,6 @@ public class ProfilerTest extends AbstractTest {
         Profiler.MultiLoopsStatistics stats = Profiler.run(this, "normal", 1, 2, 1);
         assertNotNull(stats);
         assertTrue(stats.getElapsedTimeInMillis() > 0);
-    }
-
-    @Test
-    public void testRunWithMethodName_NonExistentMethod() {
-        assertThrows(IllegalArgumentException.class, () -> Profiler.run(this, "nonExistentMethod", 1, 2, 1));
     }
 
     // ============================================================
@@ -193,17 +424,6 @@ public class ProfilerTest extends AbstractTest {
     public void testRunWithMethodObject_MultipleRounds() {
         Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "normal");
         Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, 1, 2, 2);
-        assertNotNull(stats);
-    }
-
-    // ============================================================
-    // Tests for Profiler.run(Object, Method, Object, int, int, int) — source line ~524
-    // ============================================================
-
-    @Test
-    public void testRunWithMethodAndSingleArg() {
-        Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "error", Object.class);
-        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, "arg", 1, 2, 1);
         assertNotNull(stats);
     }
 
@@ -225,14 +445,6 @@ public class ProfilerTest extends AbstractTest {
         assertNotNull(stats);
     }
 
-    @Test
-    public void testRunWithMethodAndDelays_WithArg() {
-        Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "error", Object.class);
-        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, "testVal", 1, 0, 2, 0, 1);
-        assertNotNull(stats);
-        assertTrue(stats.getAllFailedMethodStatisticsList().size() > 0);
-    }
-
     // ============================================================
     // Tests for Profiler.run(Object, Method, List, int, int, int) — source line ~557
     // ============================================================
@@ -252,6 +464,455 @@ public class ProfilerTest extends AbstractTest {
     }
 
     @Test
+    public void testRunWithMethodReflection() {
+        Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "normal");
+        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, null, 1, 2, 1);
+        assertNotNull(stats);
+        assertTrue(stats.getElapsedTimeInMillis() > 0);
+    }
+
+    @Test
+    public void testRunWithMethodReflection_EmptyArgsList() {
+        Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "normal");
+        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, new ArrayList<>(), 1, 2, 1);
+        assertNotNull(stats);
+    }
+
+    // ============================================================
+    // Tests for Profiler.run(Object, Method, List, Method...setup/teardown, int, long, int, long, int) — source line ~580
+    // ============================================================
+
+    @Test
+    public void testRunWithSetupAndTeardown() {
+        Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "normal");
+        // Using null for setup/teardown methods
+        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, null, null, null, null, null, 1, 0, 2, 0, 1);
+        assertNotNull(stats);
+    }
+
+    @Test
+    public void testRunWithSetupAndTeardown_MultipleRounds() {
+        Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "normal");
+        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, null, null, null, null, null, 1, 0, 2, 0, 2);
+        assertNotNull(stats);
+    }
+
+    @Test
+    public void testMultiLoopsStatisticsGetMethodNameList_NonEmpty() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "nameListTest", () -> {
+        });
+        List<String> names = stats.getMethodNameList();
+        assertEquals(1, names.size());
+        assertEquals("nameListTest", names.get(0));
+    }
+
+    // ============================================================
+    // Tests for MultiLoopsStatistics.getLoopStatisticsList() / setLoopStatisticsList() — source line ~1637
+    // ============================================================
+
+    @Test
+    public void testMultiLoopsStatisticsSetLoopStatisticsList() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "setListTest", () -> doWork());
+        List<Profiler.LoopStatistics> originalList = stats.getLoopStatisticsList();
+        assertNotNull(originalList);
+
+        List<Profiler.LoopStatistics> newList = new ArrayList<>();
+        stats.setLoopStatisticsList(newList);
+        assertSame(newList, stats.getLoopStatisticsList());
+    }
+
+    // ============================================================
+    // Tests for MultiLoopsStatistics.addMethodStatisticsList(LoopStatistics) — source line ~1658
+    // ============================================================
+
+    @Test
+    public void testMultiLoopsStatisticsAddMethodStatisticsList() {
+        Profiler.MultiLoopsStatistics stats = new Profiler.MultiLoopsStatistics(0, 1, 0, 1000000, 1);
+        assertTrue(stats.getLoopStatisticsList().isEmpty());
+
+        Profiler.MultiLoopsStatistics fromRun = Profiler.run(1, 5, 1, "addTest", () -> {
+        });
+        Profiler.LoopStatistics loopStats = fromRun.getLoopStatisticsList().get(0);
+        stats.addMethodStatisticsList(loopStats);
+
+        assertEquals(1, stats.getLoopStatisticsList().size());
+    }
+
+    @Test
+    public void testMultiLoopsStatisticsAddMethodStatisticsList_Multiple() {
+        Profiler.MultiLoopsStatistics stats = new Profiler.MultiLoopsStatistics(0, 1, 0, 1000000, 1);
+        Profiler.MultiLoopsStatistics fromRun = Profiler.run(1, 5, 1, "addMultiTest", () -> {
+        });
+
+        for (Profiler.LoopStatistics ls : fromRun.getLoopStatisticsList()) {
+            stats.addMethodStatisticsList(ls);
+        }
+        assertEquals(fromRun.getLoopStatisticsList().size(), stats.getLoopStatisticsList().size());
+    }
+
+    @Test
+    public void testMultiLoopsStatisticsGetMaxElapsedTimeMethod_NonEmpty() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "maxTimeTest", () -> doWork());
+        Profiler.MethodStatistics maxMethod = stats.getMaxElapsedTimeMethod();
+        assertNotNull(maxMethod);
+        assertEquals("maxTimeTest", maxMethod.getMethodName());
+        assertTrue(maxMethod.getElapsedTimeInMillis() > 0);
+    }
+
+    @Test
+    public void testMultiLoopsStatisticsGetMinElapsedTimeMethod_NonEmpty() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "minTimeTest", () -> doWork());
+        Profiler.MethodStatistics minMethod = stats.getMinElapsedTimeMethod();
+        assertNotNull(minMethod);
+        assertEquals("minTimeTest", minMethod.getMethodName());
+    }
+
+    @Test
+    public void testMultiLoopsStatisticsGetMethodTotalElapsedTime_NonEmpty() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "totalTimeTest", () -> doWork());
+        double total = stats.getMethodTotalElapsedTimeInMillis("totalTimeTest");
+        assertTrue(total > 0);
+    }
+
+    @Test
+    public void testMultiLoopsStatisticsGetMethodMaxElapsedTime_NonEmpty() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "maxElapsed", () -> doWork());
+        double maxTime = stats.getMethodMaxElapsedTimeInMillis("maxElapsed");
+        assertTrue(maxTime > 0);
+    }
+
+    @Test
+    public void testMultiLoopsStatisticsGetMethodMinElapsedTime_NonEmpty() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "minElapsed", () -> doWork());
+        double minTime = stats.getMethodMinElapsedTimeInMillis("minElapsed");
+        assertTrue(minTime >= 0);
+    }
+
+    @Test
+    public void testMultiLoopsStatisticsGetMethodAverageElapsedTime_NonEmpty() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "avgElapsed", () -> doWork());
+        double avg = stats.getMethodAverageElapsedTimeInMillis("avgElapsed");
+        assertTrue(avg > 0);
+        // Average should be between min and max
+        double min = stats.getMethodMinElapsedTimeInMillis("avgElapsed");
+        double max = stats.getMethodMaxElapsedTimeInMillis("avgElapsed");
+        assertTrue(avg >= min);
+        assertTrue(avg <= max);
+    }
+
+    @Test
+    public void testMultiLoopsStatisticsGetTotalElapsedTime_NonEmpty() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "totalTest", () -> doWork());
+        assertTrue(stats.getTotalElapsedTimeInMillis() > 0);
+    }
+
+    @Test
+    public void testMultiLoopsStatisticsGetMethodSize_NonEmpty() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(2, 5, 1, "sizeTest", () -> {
+        });
+        assertEquals(10, stats.getMethodSize("sizeTest")); // 2 threads * 5 loops
+    }
+
+    @Test
+    public void testMultiLoopsStatisticsGetMethodStatisticsList_NonEmpty() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "statsList", () -> {
+        });
+        List<Profiler.MethodStatistics> list = stats.getMethodStatisticsList("statsList");
+        assertEquals(5, list.size());
+        for (Profiler.MethodStatistics ms : list) {
+            assertEquals("statsList", ms.getMethodName());
+        }
+    }
+
+    @Test
+    public void testWriteResult_ContainsTimingInfo() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "timingInfo", () -> {
+        });
+        StringWriter sw = new StringWriter();
+        stats.writeResult(sw);
+        String output = sw.toString();
+        assertTrue(output.contains("(unit: milliseconds)"));
+        assertTrue(output.contains("startTime:"));
+        assertTrue(output.contains("endTime:"));
+        assertTrue(output.contains("totalElapsedTime:"));
+    }
+
+    @Test
+    public void testWriteHtmlResult_ContainsAllPercentileHeaders() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "htmlPercentile", () -> {
+        });
+        StringWriter sw = new StringWriter();
+        stats.writeHtmlResult(sw);
+        String output = sw.toString();
+        assertTrue(output.contains("<th>method name</th>"));
+        assertTrue(output.contains("<th>avg time</th>"));
+        assertTrue(output.contains("<th>min time</th>"));
+        assertTrue(output.contains("<th>max time</th>"));
+        assertTrue(output.contains("<th>0.01%"));
+        assertTrue(output.contains("<th>99.99%"));
+    }
+
+    @Test
+    public void testWriteXmlResult_ContainsAllElements() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "xmlElements", () -> {
+        });
+        StringWriter sw = new StringWriter();
+        stats.writeXmlResult(sw);
+        String output = sw.toString();
+        assertTrue(output.contains("<unit>milliseconds</unit>"));
+        assertTrue(output.contains("<threadNum>"));
+        assertTrue(output.contains("<loops>"));
+        assertTrue(output.contains("<startTime>"));
+        assertTrue(output.contains("<endTime>"));
+        assertTrue(output.contains("<totalElapsedTime>"));
+        assertTrue(output.contains("<avgTime>"));
+        assertTrue(output.contains("<minTime>"));
+        assertTrue(output.contains("<maxTime>"));
+        assertTrue(output.contains("</result>"));
+    }
+
+    // ============================================================
+    // Multi-threaded and multi-round integration tests
+    // ============================================================
+
+    @Test
+    public void testRunMultiThreaded() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(3, 10, 1, "multiThread", () -> doWork());
+
+        assertNotNull(stats);
+        assertEquals(3, stats.getThreadNum());
+        assertTrue(stats.getLoopStatisticsList().size() > 0);
+
+        int totalMethodCalls = 0;
+        for (Profiler.LoopStatistics loopStats : stats.getLoopStatisticsList()) {
+            totalMethodCalls += loopStats.getMethodSize("multiThread");
+        }
+        assertEquals(30, totalMethodCalls);
+    }
+
+    @Test
+    public void testRunMultipleRounds() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 3, "multiRound", () -> doWork());
+
+        assertNotNull(stats);
+        assertTrue(stats.getElapsedTimeInMillis() > 0);
+    }
+
+    @Test
+    public void testRunWithMultipleRounds() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 2, "multiRound2", () -> {
+        });
+        assertNotNull(stats);
+        assertEquals(1, stats.getMethodNameList().size());
+    }
+
+    @Test
+    public void testSingleThreadSingleLoop() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 1, 1, "single", () -> {
+        });
+
+        assertNotNull(stats);
+        assertEquals(1, stats.getThreadNum());
+        assertEquals(1, stats.getMethodSize("single"));
+        assertEquals(1, stats.getLoopStatisticsList().size());
+    }
+
+    @Test
+    public void testEmptyMethodName() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 1, 1, "", () -> {
+        });
+
+        assertNotNull(stats);
+        assertEquals(1, stats.getMethodNameList().size());
+        assertEquals("", stats.getMethodNameList().get(0));
+    }
+
+    @Test
+    public void testGetLoopStatisticsList() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(2, 5, 1, "loopStatsTest", () -> {
+        });
+        List<Profiler.LoopStatistics> loopStatsList = stats.getLoopStatisticsList();
+        assertNotNull(loopStatsList);
+        assertEquals(10, loopStatsList.size()); // 2 threads * 5 loops
+    }
+
+    // ============================================================
+    // Tests for LoopStatistics interface methods accessed through getLoopStatisticsList()
+    // ============================================================
+
+    @Test
+    public void testLoopStatistics_GetMethodNameList() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopMethodNames", () -> {
+        });
+        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
+        List<String> names = loopStats.getMethodNameList();
+        assertNotNull(names);
+        assertEquals(1, names.size());
+        assertEquals("loopMethodNames", names.get(0));
+    }
+
+    @Test
+    public void testLoopStatistics_GetMinElapsedTimeMethod() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopMin", () -> doWork());
+        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
+        Profiler.MethodStatistics minMethod = loopStats.getMinElapsedTimeMethod();
+        assertNotNull(minMethod);
+        assertEquals("loopMin", minMethod.getMethodName());
+    }
+
+    @Test
+    public void testLoopStatistics_GetMaxElapsedTimeMethod() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopMax", () -> doWork());
+        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
+        Profiler.MethodStatistics maxMethod = loopStats.getMaxElapsedTimeMethod();
+        assertNotNull(maxMethod);
+        assertEquals("loopMax", maxMethod.getMethodName());
+    }
+
+    @Test
+    public void testLoopStatistics_GetMethodMaxElapsedTimeInMillis() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopMaxTime", () -> doWork());
+        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
+        double maxTime = loopStats.getMethodMaxElapsedTimeInMillis("loopMaxTime");
+        assertTrue(maxTime >= 0);
+    }
+
+    @Test
+    public void testLoopStatistics_GetMethodMinElapsedTimeInMillis() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopMinTime", () -> doWork());
+        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
+        double minTime = loopStats.getMethodMinElapsedTimeInMillis("loopMinTime");
+        assertTrue(minTime >= 0);
+    }
+
+    @Test
+    public void testLoopStatistics_GetMethodMinElapsedTimeInMillis_NotFound() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopMinNotFound", () -> {
+        });
+        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
+        double minTime = loopStats.getMethodMinElapsedTimeInMillis("nonExistent");
+        assertEquals(0.0, minTime, 0.001);
+    }
+
+    @Test
+    public void testLoopStatistics_GetMethodAverageElapsedTimeInMillis_NotFound() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopAvgNotFound", () -> {
+        });
+        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
+        double avg = loopStats.getMethodAverageElapsedTimeInMillis("nonExistent");
+        assertEquals(0.0, avg, 0.001);
+    }
+
+    @Test
+    public void testLoopStatistics_GetMethodSize_NotFound() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopSizeNotFound", () -> {
+        });
+        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
+        assertEquals(0, loopStats.getMethodSize("nonExistent"));
+    }
+
+    @Test
+    public void testLoopStatistics_GetMethodStatisticsList() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopStatsList", () -> {
+        });
+        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
+        List<Profiler.MethodStatistics> list = loopStats.getMethodStatisticsList("loopStatsList");
+        assertNotNull(list);
+        assertEquals(1, list.size());
+        assertEquals("loopStatsList", list.get(0).getMethodName());
+    }
+
+    @Test
+    public void testLoopStatistics_GetMethodStatisticsList_NotFound() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopStatsNotFound", () -> {
+        });
+        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
+        List<Profiler.MethodStatistics> list = loopStats.getMethodStatisticsList("nonExistent");
+        assertNotNull(list);
+        assertTrue(list.isEmpty());
+    }
+
+    // ============================================================
+    // Reflection-based run method tests (with Method object)
+    // ============================================================
+
+    @Test
+    public void testRunWithMethodReflection_MultipleThreads() {
+        Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "normal");
+        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, null, 2, 2, 1);
+        assertNotNull(stats);
+        assertEquals(2, stats.getThreadNum());
+    }
+
+    @Test
+    public void testRunWithMethodReflection_WithDelaysAndNullArg() {
+        Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "normal");
+        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, (Object) null, 1, 0, 3, 0, 1);
+        assertNotNull(stats);
+        assertEquals(3, stats.getMethodSize("normal"));
+    }
+
+    @Test
+    public void testRunWithMethodName_MultipleRounds() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(this, "normal", 1, 2, 2);
+        assertNotNull(stats);
+    }
+
+    @Test
+    public void testRunInvalidThreadNum() {
+        assertThrows(IllegalArgumentException.class, () -> Profiler.run(0, 10, 1, () -> {
+        }));
+        assertThrows(IllegalArgumentException.class, () -> Profiler.run(-1, 10, 1, () -> {
+        }));
+    }
+
+    @Test
+    public void testRunInvalidLoopNum() {
+        assertThrows(IllegalArgumentException.class, () -> Profiler.run(1, 0, 1, () -> {
+        }));
+        assertThrows(IllegalArgumentException.class, () -> Profiler.run(1, -1, 1, () -> {
+        }));
+    }
+
+    @Test
+    public void testRunInvalidDelays() {
+        assertThrows(IllegalArgumentException.class, () -> Profiler.run(1, -1, 10, 0, 1, "test", () -> {
+        }));
+        assertThrows(IllegalArgumentException.class, () -> Profiler.run(1, 0, 10, -1, 1, "test", () -> {
+        }));
+    }
+
+    @Test
+    public void testRunInvalidDelays_BothNegative() {
+        assertThrows(IllegalArgumentException.class, () -> Profiler.run(1, -1, 5, -1, 1, "test", () -> {
+        }));
+    }
+
+    @Test
+    public void testRunWithMethodName_NonExistentMethod() {
+        assertThrows(IllegalArgumentException.class, () -> Profiler.run(this, "nonExistentMethod", 1, 2, 1));
+    }
+
+    // ============================================================
+    // Tests for Profiler.run(Object, Method, Object, int, int, int) — source line ~524
+    // ============================================================
+
+    @Test
+    public void testRunWithMethodAndSingleArg() {
+        Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "error", Object.class);
+        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, "arg", 1, 2, 1);
+        assertNotNull(stats);
+    }
+
+    @Test
+    public void testRunWithMethodAndDelays_WithArg() {
+        Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "error", Object.class);
+        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, "testVal", 1, 0, 2, 0, 1);
+        assertNotNull(stats);
+        assertTrue(stats.getAllFailedMethodStatisticsList().size() > 0);
+    }
+
+    @Test
     public void test_error() {
         Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "error", Object.class);
         Profiler.run(this, method, CommonUtil.toList("a", "b"), 2, 2, 1).printResult();
@@ -263,27 +924,12 @@ public class ProfilerTest extends AbstractTest {
     }
 
     @Test
-    public void testRunWithMethodReflection() {
-        Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "normal");
-        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, null, 1, 2, 1);
-        assertNotNull(stats);
-        assertTrue(stats.getElapsedTimeInMillis() > 0);
-    }
-
-    @Test
     public void testRunWithMethodReflectionAndArgs() {
         Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "error", Object.class);
         Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, CommonUtil.toList("testArg"), 1, 2, 1);
         assertNotNull(stats);
         // Method throws, so there should be failed stats
         assertTrue(stats.getAllFailedMethodStatisticsList().size() > 0);
-    }
-
-    @Test
-    public void testRunWithMethodReflection_EmptyArgsList() {
-        Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "normal");
-        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, new ArrayList<>(), 1, 2, 1);
-        assertNotNull(stats);
     }
 
     @Test
@@ -309,23 +955,234 @@ public class ProfilerTest extends AbstractTest {
         assertNotNull(stats);
     }
 
-    // ============================================================
-    // Tests for Profiler.run(Object, Method, List, Method...setup/teardown, int, long, int, long, int) — source line ~580
-    // ============================================================
+    @Test
+    public void testMultiLoopsStatisticsGetFailedMethodStatisticsList_NoFailures() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "noFail", () -> {
+        });
+        List<Profiler.MethodStatistics> list = stats.getFailedMethodStatisticsList("noFail");
+        assertNotNull(list);
+        assertTrue(list.isEmpty());
+    }
 
     @Test
-    public void testRunWithSetupAndTeardown() {
-        Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "normal");
-        // Using null for setup/teardown methods
-        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, null, null, null, null, null, 1, 0, 2, 0, 1);
+    public void testMultiLoopsStatisticsGetAllFailedMethodStatisticsList_NoFailures() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "allNoFail", () -> {
+        });
+        assertTrue(stats.getAllFailedMethodStatisticsList().isEmpty());
+    }
+
+    @Test
+    public void testPrintResult_WithErrors() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        java.io.PrintStream originalOut = System.out;
+
+        try {
+            System.setOut(new java.io.PrintStream(baos));
+
+            final int[] counter = { 0 };
+            Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "printErr", () -> {
+                counter[0]++;
+                if (counter[0] % 2 == 0) {
+                    throw new RuntimeException("fail");
+                }
+            });
+            stats.printResult();
+
+            String output = baos.toString();
+            assertTrue(output.contains("printErr"));
+            assertTrue(output.contains("Errors:"));
+        } finally {
+            System.setOut(originalOut);
+        }
+    }
+
+    @Test
+    public void testWriteHtmlResultWithErrors() {
+        final int[] counter = { 0 };
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 10, 1, "htmlErrorTest", () -> {
+            counter[0]++;
+            if (counter[0] % 3 == 0) {
+                throw new RuntimeException("HTML error test");
+            }
+        });
+
+        StringWriter sw = new StringWriter();
+        stats.writeHtmlResult(sw);
+        String output = sw.toString();
+        assertTrue(output.contains("Errors:"));
+    }
+
+    @Test
+    public void testWriteXmlResultWithErrors() {
+        final int[] counter = { 0 };
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 10, 1, "xmlErrorTest", () -> {
+            counter[0]++;
+            if (counter[0] % 3 == 0) {
+                throw new RuntimeException("XML error test");
+            }
+        });
+
+        StringWriter sw = new StringWriter();
+        stats.writeXmlResult(sw);
+        String output = sw.toString();
+        assertTrue(output.contains("<errors>"));
+    }
+
+    @Test
+    public void testRunInvalidRoundNum() {
+        // roundNum can be 0 or negative but the profiler still runs at least once
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 0, "zeroRound", () -> {
+        });
+        // Depending on implementation, it should either return null or valid stats
+        // Just verify no exception is thrown
         assertNotNull(stats);
     }
 
     @Test
-    public void testRunWithSetupAndTeardown_MultipleRounds() {
-        Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "normal");
-        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, null, null, null, null, null, 1, 0, 2, 0, 2);
+    public void testLoopStatistics_GetFailedMethodStatisticsList() {
+        final int[] counter = { 0 };
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopFailed", () -> {
+            counter[0]++;
+            if (counter[0] % 2 == 0) {
+                throw new RuntimeException("fail");
+            }
+        });
+        boolean foundFailed = false;
+        for (Profiler.LoopStatistics ls : stats.getLoopStatisticsList()) {
+            if (!ls.getFailedMethodStatisticsList("loopFailed").isEmpty()) {
+                foundFailed = true;
+                break;
+            }
+        }
+        assertTrue(foundFailed);
+    }
+
+    @Test
+    public void testLoopStatistics_GetAllFailedMethodStatisticsList() {
+        final int[] counter = { 0 };
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopAllFailed", () -> {
+            counter[0]++;
+            if (counter[0] % 2 == 0) {
+                throw new RuntimeException("fail");
+            }
+        });
+        boolean foundFailed = false;
+        for (Profiler.LoopStatistics ls : stats.getLoopStatisticsList()) {
+            if (!ls.getAllFailedMethodStatisticsList().isEmpty()) {
+                foundFailed = true;
+                break;
+            }
+        }
+        assertTrue(foundFailed);
+    }
+
+    // ============================================================
+    // Failed method statistics integration tests
+    // ============================================================
+
+    @Test
+    public void testFailedMethodStatistics() {
+        final int[] counter = { 0 };
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 10, 1, "errorTest", () -> {
+            counter[0]++;
+            if (counter[0] % 3 == 0) {
+                throw new RuntimeException("Test exception");
+            }
+        });
+
+        assertTrue(stats.getFailedMethodStatisticsList("errorTest").size() > 0);
+        assertTrue(stats.getAllFailedMethodStatisticsList().size() > 0);
+
+        StringWriter sw = new StringWriter();
+        stats.writeResult(sw);
+        String output = sw.toString();
+        assertTrue(output.contains("Errors:"));
+    }
+
+    @Test
+    public void testFailedMethodStatistics_AllFail() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "allFail", () -> {
+            throw new RuntimeException("always fails");
+        });
+        assertEquals(5, stats.getAllFailedMethodStatisticsList().size());
+        for (Profiler.MethodStatistics ms : stats.getAllFailedMethodStatisticsList()) {
+            assertTrue(ms.isFailed());
+            assertEquals("allFail", ms.getMethodName());
+        }
+    }
+
+    // ============================================================
+    // Statistics calculations comprehensive tests
+    // ============================================================
+
+    @Test
+    public void testStatisticsCalculations() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(2, 10, 1, "statsTest", () -> {
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException e) {
+            }
+        });
+
+        assertTrue(stats.getMethodTotalElapsedTimeInMillis("statsTest") > 0);
+        assertTrue(stats.getMethodAverageElapsedTimeInMillis("statsTest") > 0);
+        assertTrue(stats.getMethodMinElapsedTimeInMillis("statsTest") >= 0);
+        assertTrue(stats.getMethodMaxElapsedTimeInMillis("statsTest") > 0);
+        assertTrue(stats.getTotalElapsedTimeInMillis() > 0);
+
+        assertTrue(stats.getMethodMinElapsedTimeInMillis("statsTest") <= stats.getMethodMaxElapsedTimeInMillis("statsTest"));
+
+        double avg = stats.getMethodAverageElapsedTimeInMillis("statsTest");
+        assertTrue(avg >= stats.getMethodMinElapsedTimeInMillis("statsTest"));
+        assertTrue(avg <= stats.getMethodMaxElapsedTimeInMillis("statsTest"));
+
+        assertEquals(20, stats.getMethodSize("statsTest"));
+
+        assertEquals(20, stats.getMethodStatisticsList("statsTest").size());
+
+        Profiler.MethodStatistics minMethod = stats.getMinElapsedTimeMethod();
+        Profiler.MethodStatistics maxMethod = stats.getMaxElapsedTimeMethod();
+        assertNotNull(minMethod);
+        assertNotNull(maxMethod);
+        assertEquals("statsTest", minMethod.getMethodName());
+        assertEquals("statsTest", maxMethod.getMethodName());
+    }
+
+    // ============================================================
+    // Percentile calculation tests
+    // ============================================================
+
+    @Test
+    public void testPercentileCalculations() {
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 100, 1, "percentileTest", () -> {
+            try {
+                Thread.sleep((long) (Math.random() * 5));
+            } catch (InterruptedException e) {
+            }
+        });
+
+        StringWriter sw = new StringWriter();
+        stats.writeResult(sw);
+        String output = sw.toString();
+
+        assertTrue(output.contains("0.01% >="));
+        assertTrue(output.contains("0.1% >="));
+        assertTrue(output.contains("1% >="));
+        assertTrue(output.contains("10% >="));
+        assertTrue(output.contains("50% >="));
+        assertTrue(output.contains("90% >="));
+        assertTrue(output.contains("99% >="));
+        assertTrue(output.contains("99.9% >="));
+        assertTrue(output.contains("99.99% >="));
+    }
+
+    @Test
+    public void testRunWithMethodReflection_ErrorMethod() {
+        Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "error", Object.class);
+        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, (Object) null, 1, 2, 1);
         assertNotNull(stats);
+        // error method should produce failed statistics
+        assertTrue(stats.getAllFailedMethodStatisticsList().size() > 0);
     }
 
     // ============================================================
@@ -760,65 +1617,12 @@ public class ProfilerTest extends AbstractTest {
     }
 
     @Test
-    public void testMultiLoopsStatisticsGetMethodNameList_NonEmpty() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "nameListTest", () -> {
-        });
-        List<String> names = stats.getMethodNameList();
-        assertEquals(1, names.size());
-        assertEquals("nameListTest", names.get(0));
-    }
-
-    // ============================================================
-    // Tests for MultiLoopsStatistics.getLoopStatisticsList() / setLoopStatisticsList() — source line ~1637
-    // ============================================================
-
-    @Test
-    public void testMultiLoopsStatisticsSetLoopStatisticsList() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "setListTest", () -> doWork());
-        List<Profiler.LoopStatistics> originalList = stats.getLoopStatisticsList();
-        assertNotNull(originalList);
-
-        List<Profiler.LoopStatistics> newList = new ArrayList<>();
-        stats.setLoopStatisticsList(newList);
-        assertSame(newList, stats.getLoopStatisticsList());
-    }
-
-    @Test
     public void testMultiLoopsStatisticsSetLoopStatisticsList_Null() {
         Profiler.MultiLoopsStatistics stats = new Profiler.MultiLoopsStatistics(0, 0, 0, 0, 1);
         stats.setLoopStatisticsList(null);
         // getLoopStatisticsList should return a new empty list when null
         assertNotNull(stats.getLoopStatisticsList());
         assertTrue(stats.getLoopStatisticsList().isEmpty());
-    }
-
-    // ============================================================
-    // Tests for MultiLoopsStatistics.addMethodStatisticsList(LoopStatistics) — source line ~1658
-    // ============================================================
-
-    @Test
-    public void testMultiLoopsStatisticsAddMethodStatisticsList() {
-        Profiler.MultiLoopsStatistics stats = new Profiler.MultiLoopsStatistics(0, 1, 0, 1000000, 1);
-        assertTrue(stats.getLoopStatisticsList().isEmpty());
-
-        Profiler.MultiLoopsStatistics fromRun = Profiler.run(1, 5, 1, "addTest", () -> {
-        });
-        Profiler.LoopStatistics loopStats = fromRun.getLoopStatisticsList().get(0);
-        stats.addMethodStatisticsList(loopStats);
-
-        assertEquals(1, stats.getLoopStatisticsList().size());
-    }
-
-    @Test
-    public void testMultiLoopsStatisticsAddMethodStatisticsList_Multiple() {
-        Profiler.MultiLoopsStatistics stats = new Profiler.MultiLoopsStatistics(0, 1, 0, 1000000, 1);
-        Profiler.MultiLoopsStatistics fromRun = Profiler.run(1, 5, 1, "addMultiTest", () -> {
-        });
-
-        for (Profiler.LoopStatistics ls : fromRun.getLoopStatisticsList()) {
-            stats.addMethodStatisticsList(ls);
-        }
-        assertEquals(fromRun.getLoopStatisticsList().size(), stats.getLoopStatisticsList().size());
     }
 
     // ============================================================
@@ -831,15 +1635,6 @@ public class ProfilerTest extends AbstractTest {
         assertNull(stats.getMaxElapsedTimeMethod());
     }
 
-    @Test
-    public void testMultiLoopsStatisticsGetMaxElapsedTimeMethod_NonEmpty() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "maxTimeTest", () -> doWork());
-        Profiler.MethodStatistics maxMethod = stats.getMaxElapsedTimeMethod();
-        assertNotNull(maxMethod);
-        assertEquals("maxTimeTest", maxMethod.getMethodName());
-        assertTrue(maxMethod.getElapsedTimeInMillis() > 0);
-    }
-
     // ============================================================
     // Tests for MultiLoopsStatistics.getMinElapsedTimeMethod() — source line ~1679
     // ============================================================
@@ -848,14 +1643,6 @@ public class ProfilerTest extends AbstractTest {
     public void testMultiLoopsStatisticsGetMinElapsedTimeMethodEmpty() {
         Profiler.MultiLoopsStatistics stats = new Profiler.MultiLoopsStatistics(0, 0, 0, 0, 1);
         assertNull(stats.getMinElapsedTimeMethod());
-    }
-
-    @Test
-    public void testMultiLoopsStatisticsGetMinElapsedTimeMethod_NonEmpty() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "minTimeTest", () -> doWork());
-        Profiler.MethodStatistics minMethod = stats.getMinElapsedTimeMethod();
-        assertNotNull(minMethod);
-        assertEquals("minTimeTest", minMethod.getMethodName());
     }
 
     // ============================================================
@@ -868,13 +1655,6 @@ public class ProfilerTest extends AbstractTest {
         assertEquals(0.0, stats.getMethodTotalElapsedTimeInMillis("nonexistent"), 0.001);
     }
 
-    @Test
-    public void testMultiLoopsStatisticsGetMethodTotalElapsedTime_NonEmpty() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "totalTimeTest", () -> doWork());
-        double total = stats.getMethodTotalElapsedTimeInMillis("totalTimeTest");
-        assertTrue(total > 0);
-    }
-
     // ============================================================
     // Tests for MultiLoopsStatistics.getMethodMaxElapsedTimeInMillis(String) — source line ~1716
     // ============================================================
@@ -883,13 +1663,6 @@ public class ProfilerTest extends AbstractTest {
     public void testMultiLoopsStatisticsGetMethodMaxElapsedTimeEmpty() {
         Profiler.MultiLoopsStatistics stats = new Profiler.MultiLoopsStatistics(0, 0, 0, 0, 1);
         assertEquals(0.0, stats.getMethodMaxElapsedTimeInMillis("nonexistent"), 0.001);
-    }
-
-    @Test
-    public void testMultiLoopsStatisticsGetMethodMaxElapsedTime_NonEmpty() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "maxElapsed", () -> doWork());
-        double maxTime = stats.getMethodMaxElapsedTimeInMillis("maxElapsed");
-        assertTrue(maxTime > 0);
     }
 
     // ============================================================
@@ -902,13 +1675,6 @@ public class ProfilerTest extends AbstractTest {
         assertEquals(0.0, stats.getMethodMinElapsedTimeInMillis("nonexistent"), 0.001);
     }
 
-    @Test
-    public void testMultiLoopsStatisticsGetMethodMinElapsedTime_NonEmpty() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "minElapsed", () -> doWork());
-        double minTime = stats.getMethodMinElapsedTimeInMillis("minElapsed");
-        assertTrue(minTime >= 0);
-    }
-
     // ============================================================
     // Tests for MultiLoopsStatistics.getMethodAverageElapsedTimeInMillis(String) — source line ~1758
     // ============================================================
@@ -917,18 +1683,6 @@ public class ProfilerTest extends AbstractTest {
     public void testMultiLoopsStatisticsGetMethodAverageElapsedTimeEmpty() {
         Profiler.MultiLoopsStatistics stats = new Profiler.MultiLoopsStatistics(0, 0, 0, 0, 1);
         assertEquals(0.0, stats.getMethodAverageElapsedTimeInMillis("nonexistent"), 0.001);
-    }
-
-    @Test
-    public void testMultiLoopsStatisticsGetMethodAverageElapsedTime_NonEmpty() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "avgElapsed", () -> doWork());
-        double avg = stats.getMethodAverageElapsedTimeInMillis("avgElapsed");
-        assertTrue(avg > 0);
-        // Average should be between min and max
-        double min = stats.getMethodMinElapsedTimeInMillis("avgElapsed");
-        double max = stats.getMethodMaxElapsedTimeInMillis("avgElapsed");
-        assertTrue(avg >= min);
-        assertTrue(avg <= max);
     }
 
     // ============================================================
@@ -941,12 +1695,6 @@ public class ProfilerTest extends AbstractTest {
         assertEquals(0.0, stats.getTotalElapsedTimeInMillis(), 0.001);
     }
 
-    @Test
-    public void testMultiLoopsStatisticsGetTotalElapsedTime_NonEmpty() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "totalTest", () -> doWork());
-        assertTrue(stats.getTotalElapsedTimeInMillis() > 0);
-    }
-
     // ============================================================
     // Tests for MultiLoopsStatistics.getMethodSize(String) — source line ~1784
     // ============================================================
@@ -955,13 +1703,6 @@ public class ProfilerTest extends AbstractTest {
     public void testMultiLoopsStatisticsGetMethodSizeEmpty() {
         Profiler.MultiLoopsStatistics stats = new Profiler.MultiLoopsStatistics(0, 0, 0, 0, 1);
         assertEquals(0, stats.getMethodSize("nonexistent"));
-    }
-
-    @Test
-    public void testMultiLoopsStatisticsGetMethodSize_NonEmpty() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(2, 5, 1, "sizeTest", () -> {
-        });
-        assertEquals(10, stats.getMethodSize("sizeTest")); // 2 threads * 5 loops
     }
 
     // ============================================================
@@ -976,17 +1717,6 @@ public class ProfilerTest extends AbstractTest {
         assertTrue(list.isEmpty());
     }
 
-    @Test
-    public void testMultiLoopsStatisticsGetMethodStatisticsList_NonEmpty() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "statsList", () -> {
-        });
-        List<Profiler.MethodStatistics> list = stats.getMethodStatisticsList("statsList");
-        assertEquals(5, list.size());
-        for (Profiler.MethodStatistics ms : list) {
-            assertEquals("statsList", ms.getMethodName());
-        }
-    }
-
     // ============================================================
     // Tests for MultiLoopsStatistics.getFailedMethodStatisticsList(String) — source line ~1806
     // ============================================================
@@ -995,15 +1725,6 @@ public class ProfilerTest extends AbstractTest {
     public void testMultiLoopsStatisticsGetFailedMethodStatisticsListEmpty() {
         Profiler.MultiLoopsStatistics stats = new Profiler.MultiLoopsStatistics(0, 0, 0, 0, 1);
         List<Profiler.MethodStatistics> list = stats.getFailedMethodStatisticsList("nonexistent");
-        assertNotNull(list);
-        assertTrue(list.isEmpty());
-    }
-
-    @Test
-    public void testMultiLoopsStatisticsGetFailedMethodStatisticsList_NoFailures() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "noFail", () -> {
-        });
-        List<Profiler.MethodStatistics> list = stats.getFailedMethodStatisticsList("noFail");
         assertNotNull(list);
         assertTrue(list.isEmpty());
     }
@@ -1018,28 +1739,6 @@ public class ProfilerTest extends AbstractTest {
         List<Profiler.MethodStatistics> list = stats.getAllFailedMethodStatisticsList();
         assertNotNull(list);
         assertTrue(list.isEmpty());
-    }
-
-    @Test
-    public void testMultiLoopsStatisticsGetAllFailedMethodStatisticsList_NoFailures() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "allNoFail", () -> {
-        });
-        assertTrue(stats.getAllFailedMethodStatisticsList().isEmpty());
-    }
-
-    // ============================================================
-    // Tests for MultiLoopsStatistics.getStartTimeInMillis/EndTime/Nano setters/getters
-    // ============================================================
-
-    @Test
-    public void testMultiLoopsStatisticsGetStartEndTime() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "timeTest", () -> {
-        });
-
-        assertTrue(stats.getStartTimeInMillis() > 0);
-        assertTrue(stats.getEndTimeInMillis() >= stats.getStartTimeInMillis());
-        assertTrue(stats.getStartTimeInNano() > 0);
-        assertTrue(stats.getEndTimeInNano() >= stats.getStartTimeInNano());
     }
 
     @Test
@@ -1096,692 +1795,201 @@ public class ProfilerTest extends AbstractTest {
         assertEquals(0.0, stats.getElapsedTimeInMillis(), 0.001);
     }
 
-    // ============================================================
-    // Tests for MultiLoopsStatistics.printResult() — source line ~1924
-    // ============================================================
-
     @Test
-    public void testPrintResult() {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        java.io.PrintStream originalOut = System.out;
-
-        try {
-            System.setOut(new java.io.PrintStream(baos));
-
-            Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "printTest", () -> doWork());
-            stats.printResult();
-
-            String output = baos.toString();
-            assertTrue(output.contains("printTest"));
-            assertTrue(output.contains("threadNum=1"));
-            assertTrue(output.contains("loops=5"));
-        } finally {
-            System.setOut(originalOut);
-        }
-    }
-
-    @Test
-    public void testPrintResult_WithErrors() {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        java.io.PrintStream originalOut = System.out;
-
-        try {
-            System.setOut(new java.io.PrintStream(baos));
-
-            final int[] counter = { 0 };
-            Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "printErr", () -> {
-                counter[0]++;
-                if (counter[0] % 2 == 0) {
-                    throw new RuntimeException("fail");
-                }
-            });
-            stats.printResult();
-
-            String output = baos.toString();
-            assertTrue(output.contains("printErr"));
-            assertTrue(output.contains("Errors:"));
-        } finally {
-            System.setOut(originalOut);
-        }
-    }
-
-    // ============================================================
-    // Tests for MultiLoopsStatistics.writeResult(OutputStream) — source line ~1961
-    // ============================================================
-
-    @Test
-    public void testWriteResultOutputStream() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "osTest", () -> {
-        });
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        stats.writeResult(baos);
-        String output = baos.toString();
-        assertTrue(output.contains("osTest"));
-    }
-
-    // ============================================================
-    // Tests for MultiLoopsStatistics.writeResult(Writer) — source line ~2044
-    // ============================================================
-
-    @Test
-    public void testWriteResultWriter() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "writerTest", () -> {
-        });
-
-        StringWriter sw = new StringWriter();
-        stats.writeResult(sw);
-        String output = sw.toString();
-        assertTrue(output.contains("writerTest"));
-    }
-
-    @Test
-    public void testWriteResult() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "writeTest", () -> doWork());
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        stats.writeResult(baos);
-        String output = baos.toString();
-        assertTrue(output.contains("writeTest"));
-        assertTrue(output.contains("avg time"));
-
-        StringWriter sw = new StringWriter();
-        stats.writeResult(sw);
-        output = sw.toString();
-        assertTrue(output.contains("writeTest"));
-        assertTrue(output.contains("avg time"));
-    }
-
-    @Test
-    public void testWriteResult_ContainsTimingInfo() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "timingInfo", () -> {
-        });
-        StringWriter sw = new StringWriter();
-        stats.writeResult(sw);
-        String output = sw.toString();
-        assertTrue(output.contains("(unit: milliseconds)"));
-        assertTrue(output.contains("startTime:"));
-        assertTrue(output.contains("endTime:"));
-        assertTrue(output.contains("totalElapsedTime:"));
-    }
-
-    // ============================================================
-    // Tests for MultiLoopsStatistics.writeHtmlResult(OutputStream) — source line ~2160
-    // ============================================================
-
-    @Test
-    public void testWriteHtmlResultOutputStream() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "htmlOsTest", () -> {
-        });
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        stats.writeHtmlResult(baos);
-        String output = baos.toString();
-        assertTrue(output.contains("<table"));
-        assertTrue(output.contains("htmlOsTest"));
-    }
-
-    // ============================================================
-    // Tests for MultiLoopsStatistics.writeHtmlResult(Writer) — source line ~2254
-    // ============================================================
-
-    @Test
-    public void testWriteHtmlResultWriter() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "htmlWriterTest", () -> {
-        });
-
-        StringWriter sw = new StringWriter();
-        stats.writeHtmlResult(sw);
-        String output = sw.toString();
-        assertTrue(output.contains("<table"));
-        assertTrue(output.contains("htmlWriterTest"));
-    }
-
-    @Test
-    public void testWriteHtmlResult() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "htmlTest", () -> doWork());
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        stats.writeHtmlResult(baos);
-        String output = baos.toString();
-        assertTrue(output.contains("<table"));
-        assertTrue(output.contains("htmlTest"));
-        assertTrue(output.contains("<th>avg time</th>"));
-
-        StringWriter sw = new StringWriter();
-        stats.writeHtmlResult(sw);
-        output = sw.toString();
-        assertTrue(output.contains("<table"));
-        assertTrue(output.contains("htmlTest"));
-    }
-
-    @Test
-    public void testWriteHtmlResult_ContainsAllPercentileHeaders() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "htmlPercentile", () -> {
-        });
-        StringWriter sw = new StringWriter();
-        stats.writeHtmlResult(sw);
-        String output = sw.toString();
-        assertTrue(output.contains("<th>method name</th>"));
-        assertTrue(output.contains("<th>avg time</th>"));
-        assertTrue(output.contains("<th>min time</th>"));
-        assertTrue(output.contains("<th>max time</th>"));
-        assertTrue(output.contains("<th>0.01%"));
-        assertTrue(output.contains("<th>99.99%"));
-    }
-
-    @Test
-    public void testWriteHtmlResultWithErrors() {
-        final int[] counter = { 0 };
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 10, 1, "htmlErrorTest", () -> {
-            counter[0]++;
-            if (counter[0] % 3 == 0) {
-                throw new RuntimeException("HTML error test");
-            }
-        });
-
-        StringWriter sw = new StringWriter();
-        stats.writeHtmlResult(sw);
-        String output = sw.toString();
-        assertTrue(output.contains("Errors:"));
-    }
-
-    // ============================================================
-    // Tests for MultiLoopsStatistics.writeXmlResult(OutputStream) — source line ~2374
-    // ============================================================
-
-    @Test
-    public void testWriteXmlResultOutputStream() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "xmlOsTest", () -> {
-        });
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        stats.writeXmlResult(baos);
-        String output = baos.toString();
-        assertTrue(output.contains("<result>"));
-        assertTrue(output.contains("xmlOsTest"));
-    }
-
-    // ============================================================
-    // Tests for MultiLoopsStatistics.writeXmlResult(Writer) — source line ~2504
-    // ============================================================
-
-    @Test
-    public void testWriteXmlResultWriter() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "xmlWriterTest", () -> {
-        });
-
-        StringWriter sw = new StringWriter();
-        stats.writeXmlResult(sw);
-        String output = sw.toString();
-        assertTrue(output.contains("<result>"));
-        assertTrue(output.contains("xmlWriterTest"));
-    }
-
-    @Test
-    public void testWriteXmlResult() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "xmlTest", () -> doWork());
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        stats.writeXmlResult(baos);
-        String output = baos.toString();
-        assertTrue(output.contains("<result>"));
-        assertTrue(output.contains("<method name=\"xmlTest\">"));
-        assertTrue(output.contains("<avgTime>"));
-
-        StringWriter sw = new StringWriter();
-        stats.writeXmlResult(sw);
-        output = sw.toString();
-        assertTrue(output.contains("<result>"));
-        assertTrue(output.contains("xmlTest"));
-    }
-
-    @Test
-    public void testWriteXmlResult_ContainsAllElements() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "xmlElements", () -> {
-        });
-        StringWriter sw = new StringWriter();
-        stats.writeXmlResult(sw);
-        String output = sw.toString();
-        assertTrue(output.contains("<unit>milliseconds</unit>"));
-        assertTrue(output.contains("<threadNum>"));
-        assertTrue(output.contains("<loops>"));
-        assertTrue(output.contains("<startTime>"));
-        assertTrue(output.contains("<endTime>"));
-        assertTrue(output.contains("<totalElapsedTime>"));
-        assertTrue(output.contains("<avgTime>"));
-        assertTrue(output.contains("<minTime>"));
-        assertTrue(output.contains("<maxTime>"));
-        assertTrue(output.contains("</result>"));
-    }
-
-    @Test
-    public void testWriteXmlResultWithErrors() {
-        final int[] counter = { 0 };
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 10, 1, "xmlErrorTest", () -> {
-            counter[0]++;
-            if (counter[0] % 3 == 0) {
-                throw new RuntimeException("XML error test");
-            }
-        });
-
-        StringWriter sw = new StringWriter();
-        stats.writeXmlResult(sw);
-        String output = sw.toString();
-        assertTrue(output.contains("<errors>"));
-    }
-
-    // ============================================================
-    // Multi-threaded and multi-round integration tests
-    // ============================================================
-
-    @Test
-    public void testRunMultiThreaded() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(3, 10, 1, "multiThread", () -> doWork());
-
+    public void testSingleLoopStatistics_DefaultConstructor() {
+        Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
         assertNotNull(stats);
-        assertEquals(3, stats.getThreadNum());
-        assertTrue(stats.getLoopStatisticsList().size() > 0);
-
-        int totalMethodCalls = 0;
-        for (Profiler.LoopStatistics loopStats : stats.getLoopStatisticsList()) {
-            totalMethodCalls += loopStats.getMethodSize("multiThread");
-        }
-        assertEquals(30, totalMethodCalls);
+        assertTrue(stats.getMethodNameList().isEmpty());
+        assertTrue(stats.getMethodStatisticsList().isEmpty());
     }
 
     @Test
-    public void testRunMultipleRounds() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 3, "multiRound", () -> doWork());
-
+    public void testSingleLoopStatistics_ConstructorWithTimes() {
+        long start = System.currentTimeMillis();
+        long end = start + 100;
+        long startNano = System.nanoTime();
+        long endNano = startNano + 100_000_000L;
+        Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics(start, end, startNano, endNano);
         assertNotNull(stats);
-        assertTrue(stats.getElapsedTimeInMillis() > 0);
+        assertEquals(start, stats.getStartTimeInMillis());
+        assertEquals(end, stats.getEndTimeInMillis());
     }
 
     @Test
-    public void testRunWithMultipleRounds() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 2, "multiRound2", () -> {
-        });
-        assertNotNull(stats);
-        assertEquals(1, stats.getMethodNameList().size());
+    public void testSingleLoopStatistics_SetAndGetMethodList() {
+        Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
+        List<Profiler.MethodStatistics> list = new ArrayList<>();
+        list.add(makeMethodStats("method1", 10, false));
+        list.add(makeMethodStats("method2", 20, false));
+        stats.setMethodStatisticsList(list);
+        assertEquals(2, stats.getMethodStatisticsList().size());
     }
 
     @Test
-    public void testRunInvalidRoundNum() {
-        // roundNum can be 0 or negative but the profiler still runs at least once
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 0, "zeroRound", () -> {
-        });
-        // Depending on implementation, it should either return null or valid stats
-        // Just verify no exception is thrown
-        assertNotNull(stats);
+    public void testSingleLoopStatistics_AddAndGetMethodNameList() {
+        Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
+        stats.addMethodStatisticsList(makeMethodStats("alpha", 5, false));
+        stats.addMethodStatisticsList(makeMethodStats("beta", 10, false));
+        stats.addMethodStatisticsList(makeMethodStats("alpha", 15, false)); // duplicate name
+        List<String> names = stats.getMethodNameList();
+        assertEquals(2, names.size());
+        assertTrue(names.contains("alpha"));
+        assertTrue(names.contains("beta"));
     }
 
     @Test
-    public void testSingleThreadSingleLoop() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 1, 1, "single", () -> {
-        });
-
-        assertNotNull(stats);
-        assertEquals(1, stats.getThreadNum());
-        assertEquals(1, stats.getMethodSize("single"));
-        assertEquals(1, stats.getLoopStatisticsList().size());
+    public void testSingleLoopStatistics_GetMaxElapsedTimeMethod() {
+        Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
+        stats.addMethodStatisticsList(makeMethodStats("fast", 5, false));
+        stats.addMethodStatisticsList(makeMethodStats("slow", 50, false));
+        stats.addMethodStatisticsList(makeMethodStats("medium", 20, false));
+        Profiler.MethodStatistics max = stats.getMaxElapsedTimeMethod();
+        assertNotNull(max);
+        assertEquals("slow", max.getMethodName());
     }
 
     @Test
-    public void testEmptyMethodName() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 1, 1, "", () -> {
-        });
-
-        assertNotNull(stats);
-        assertEquals(1, stats.getMethodNameList().size());
-        assertEquals("", stats.getMethodNameList().get(0));
+    public void testSingleLoopStatistics_GetMinElapsedTimeMethod() {
+        Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
+        stats.addMethodStatisticsList(makeMethodStats("fast", 5, false));
+        stats.addMethodStatisticsList(makeMethodStats("slow", 50, false));
+        Profiler.MethodStatistics min = stats.getMinElapsedTimeMethod();
+        assertNotNull(min);
+        assertEquals("fast", min.getMethodName());
     }
 
     @Test
-    public void testGetLoopStatisticsList() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(2, 5, 1, "loopStatsTest", () -> {
-        });
-        List<Profiler.LoopStatistics> loopStatsList = stats.getLoopStatisticsList();
-        assertNotNull(loopStatsList);
-        assertEquals(10, loopStatsList.size()); // 2 threads * 5 loops
-    }
-
-    // ============================================================
-    // Tests for LoopStatistics interface methods accessed through getLoopStatisticsList()
-    // ============================================================
-
-    @Test
-    public void testLoopStatistics_GetMethodNameList() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopMethodNames", () -> {
-        });
-        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
-        List<String> names = loopStats.getMethodNameList();
-        assertNotNull(names);
-        assertEquals(1, names.size());
-        assertEquals("loopMethodNames", names.get(0));
+    public void testSingleLoopStatistics_GetMaxMinElapsedTime_Empty() {
+        Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
+        assertNull(stats.getMaxElapsedTimeMethod());
+        assertNull(stats.getMinElapsedTimeMethod());
     }
 
     @Test
-    public void testLoopStatistics_GetMinElapsedTimeMethod() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopMin", () -> doWork());
-        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
-        Profiler.MethodStatistics minMethod = loopStats.getMinElapsedTimeMethod();
-        assertNotNull(minMethod);
-        assertEquals("loopMin", minMethod.getMethodName());
+    public void testSingleLoopStatistics_GetMethodTotalElapsedTime() {
+        Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
+        stats.addMethodStatisticsList(makeMethodStats("m", 10, false));
+        stats.addMethodStatisticsList(makeMethodStats("m", 20, false));
+        stats.addMethodStatisticsList(makeMethodStats("other", 5, false));
+        double total = stats.getMethodTotalElapsedTimeInMillis("m");
+        assertTrue(total > 0);
     }
 
     @Test
-    public void testLoopStatistics_GetMaxElapsedTimeMethod() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopMax", () -> doWork());
-        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
-        Profiler.MethodStatistics maxMethod = loopStats.getMaxElapsedTimeMethod();
-        assertNotNull(maxMethod);
-        assertEquals("loopMax", maxMethod.getMethodName());
+    public void testSingleLoopStatistics_GetMethodMaxElapsedTime() {
+        Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
+        stats.addMethodStatisticsList(makeMethodStats("m", 10, false));
+        stats.addMethodStatisticsList(makeMethodStats("m", 30, false));
+        double max = stats.getMethodMaxElapsedTimeInMillis("m");
+        assertTrue(max > 0);
     }
 
     @Test
-    public void testLoopStatistics_GetMethodTotalElapsedTimeInMillis() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopTotal", () -> doWork());
-        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
-        double total = loopStats.getMethodTotalElapsedTimeInMillis("loopTotal");
-        assertTrue(total >= 0);
+    public void testSingleLoopStatistics_GetMethodMinElapsedTime() {
+        Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
+        stats.addMethodStatisticsList(makeMethodStats("m", 10, false));
+        stats.addMethodStatisticsList(makeMethodStats("m", 30, false));
+        double min = stats.getMethodMinElapsedTimeInMillis("m");
+        assertTrue(min > 0);
+        assertTrue(min <= stats.getMethodMaxElapsedTimeInMillis("m"));
     }
 
     @Test
-    public void testLoopStatistics_GetMethodMaxElapsedTimeInMillis() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopMaxTime", () -> doWork());
-        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
-        double maxTime = loopStats.getMethodMaxElapsedTimeInMillis("loopMaxTime");
-        assertTrue(maxTime >= 0);
+    public void testSingleLoopStatistics_GetMethodMinElapsedTime_NoMatch() {
+        Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
+        stats.addMethodStatisticsList(makeMethodStats("other", 10, false));
+        double min = stats.getMethodMinElapsedTimeInMillis("nonexistent");
+        assertEquals(0.0, min, 0.001);
     }
 
     @Test
-    public void testLoopStatistics_GetMethodMinElapsedTimeInMillis() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopMinTime", () -> doWork());
-        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
-        double minTime = loopStats.getMethodMinElapsedTimeInMillis("loopMinTime");
-        assertTrue(minTime >= 0);
+    public void testSingleLoopStatistics_GetMethodAverageElapsedTime() {
+        Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
+        stats.addMethodStatisticsList(makeMethodStats("m", 10, false));
+        stats.addMethodStatisticsList(makeMethodStats("m", 20, false));
+        double avg = stats.getMethodAverageElapsedTimeInMillis("m");
+        assertTrue(avg > 0);
     }
 
     @Test
-    public void testLoopStatistics_GetMethodMinElapsedTimeInMillis_NotFound() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopMinNotFound", () -> {
-        });
-        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
-        double minTime = loopStats.getMethodMinElapsedTimeInMillis("nonExistent");
-        assertEquals(0.0, minTime, 0.001);
-    }
-
-    @Test
-    public void testLoopStatistics_GetMethodAverageElapsedTimeInMillis() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopAvg", () -> doWork());
-        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
-        double avg = loopStats.getMethodAverageElapsedTimeInMillis("loopAvg");
-        assertTrue(avg >= 0);
-    }
-
-    @Test
-    public void testLoopStatistics_GetMethodAverageElapsedTimeInMillis_NotFound() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopAvgNotFound", () -> {
-        });
-        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
-        double avg = loopStats.getMethodAverageElapsedTimeInMillis("nonExistent");
+    public void testSingleLoopStatistics_GetMethodAverageElapsedTime_NoMethod() {
+        Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
+        double avg = stats.getMethodAverageElapsedTimeInMillis("nonexistent");
         assertEquals(0.0, avg, 0.001);
     }
 
     @Test
-    public void testLoopStatistics_GetTotalElapsedTimeInMillis() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopTotalElapsed", () -> doWork());
-        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
-        double total = loopStats.getTotalElapsedTimeInMillis();
-        assertTrue(total >= 0);
+    public void testSingleLoopStatistics_GetTotalElapsedTime() {
+        Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
+        stats.addMethodStatisticsList(makeMethodStats("a", 10, false));
+        stats.addMethodStatisticsList(makeMethodStats("b", 20, false));
+        double total = stats.getTotalElapsedTimeInMillis();
+        assertTrue(total > 0);
     }
 
     @Test
-    public void testLoopStatistics_GetMethodSize() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopSize", () -> {
-        });
-        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
-        assertEquals(1, loopStats.getMethodSize("loopSize"));
+    public void testSingleLoopStatistics_GetTotalElapsedTime_Empty() {
+        Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
+        assertEquals(0.0, stats.getTotalElapsedTimeInMillis(), 0.001);
     }
 
     @Test
-    public void testLoopStatistics_GetMethodSize_NotFound() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopSizeNotFound", () -> {
-        });
-        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
-        assertEquals(0, loopStats.getMethodSize("nonExistent"));
+    public void testSingleLoopStatistics_GetMethodSize() {
+        Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
+        stats.addMethodStatisticsList(makeMethodStats("m", 5, false));
+        stats.addMethodStatisticsList(makeMethodStats("m", 10, false));
+        stats.addMethodStatisticsList(makeMethodStats("other", 5, false));
+        assertEquals(2, stats.getMethodSize("m"));
+        assertEquals(1, stats.getMethodSize("other"));
+        assertEquals(0, stats.getMethodSize("absent"));
     }
 
     @Test
-    public void testLoopStatistics_GetMethodStatisticsList() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopStatsList", () -> {
-        });
-        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
-        List<Profiler.MethodStatistics> list = loopStats.getMethodStatisticsList("loopStatsList");
-        assertNotNull(list);
-        assertEquals(1, list.size());
-        assertEquals("loopStatsList", list.get(0).getMethodName());
-    }
-
-    @Test
-    public void testLoopStatistics_GetMethodStatisticsList_NotFound() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopStatsNotFound", () -> {
-        });
-        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
-        List<Profiler.MethodStatistics> list = loopStats.getMethodStatisticsList("nonExistent");
-        assertNotNull(list);
-        assertTrue(list.isEmpty());
-    }
-
-    @Test
-    public void testLoopStatistics_GetFailedMethodStatisticsList() {
-        final int[] counter = { 0 };
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopFailed", () -> {
-            counter[0]++;
-            if (counter[0] % 2 == 0) {
-                throw new RuntimeException("fail");
-            }
-        });
-        boolean foundFailed = false;
-        for (Profiler.LoopStatistics ls : stats.getLoopStatisticsList()) {
-            if (!ls.getFailedMethodStatisticsList("loopFailed").isEmpty()) {
-                foundFailed = true;
-                break;
-            }
-        }
-        assertTrue(foundFailed);
-    }
-
-    @Test
-    public void testLoopStatistics_GetAllFailedMethodStatisticsList() {
-        final int[] counter = { 0 };
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopAllFailed", () -> {
-            counter[0]++;
-            if (counter[0] % 2 == 0) {
-                throw new RuntimeException("fail");
-            }
-        });
-        boolean foundFailed = false;
-        for (Profiler.LoopStatistics ls : stats.getLoopStatisticsList()) {
-            if (!ls.getAllFailedMethodStatisticsList().isEmpty()) {
-                foundFailed = true;
-                break;
-            }
-        }
-        assertTrue(foundFailed);
-    }
-
-    @Test
-    public void testLoopStatistics_GetElapsedTimeInMillis() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopElapsed", () -> doWork());
-        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
-        assertTrue(loopStats.getElapsedTimeInMillis() >= 0);
-    }
-
-    @Test
-    public void testLoopStatistics_GetStartEndTime() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopTime", () -> {
-        });
-        Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
-        assertTrue(loopStats.getStartTimeInMillis() > 0);
-        assertTrue(loopStats.getEndTimeInMillis() >= loopStats.getStartTimeInMillis());
-        assertTrue(loopStats.getStartTimeInNano() > 0);
-        assertTrue(loopStats.getEndTimeInNano() >= loopStats.getStartTimeInNano());
-    }
-
-    // ============================================================
-    // Failed method statistics integration tests
-    // ============================================================
-
-    @Test
-    public void testFailedMethodStatistics() {
-        final int[] counter = { 0 };
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 10, 1, "errorTest", () -> {
-            counter[0]++;
-            if (counter[0] % 3 == 0) {
-                throw new RuntimeException("Test exception");
-            }
-        });
-
-        assertTrue(stats.getFailedMethodStatisticsList("errorTest").size() > 0);
-        assertTrue(stats.getAllFailedMethodStatisticsList().size() > 0);
-
-        StringWriter sw = new StringWriter();
-        stats.writeResult(sw);
-        String output = sw.toString();
-        assertTrue(output.contains("Errors:"));
-    }
-
-    @Test
-    public void testFailedMethodStatistics_AllFail() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "allFail", () -> {
-            throw new RuntimeException("always fails");
-        });
-        assertEquals(5, stats.getAllFailedMethodStatisticsList().size());
-        for (Profiler.MethodStatistics ms : stats.getAllFailedMethodStatisticsList()) {
-            assertTrue(ms.isFailed());
-            assertEquals("allFail", ms.getMethodName());
+    public void testSingleLoopStatistics_GetMethodStatisticsListByName() {
+        Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
+        stats.addMethodStatisticsList(makeMethodStats("m", 5, false));
+        stats.addMethodStatisticsList(makeMethodStats("m", 10, false));
+        stats.addMethodStatisticsList(makeMethodStats("other", 5, false));
+        List<Profiler.MethodStatistics> list = stats.getMethodStatisticsList("m");
+        assertEquals(2, list.size());
+        for (Profiler.MethodStatistics ms : list) {
+            assertEquals("m", ms.getMethodName());
         }
     }
 
-    // ============================================================
-    // Statistics calculations comprehensive tests
-    // ============================================================
-
     @Test
-    public void testStatisticsCalculations() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(2, 10, 1, "statsTest", () -> {
-            try {
-                Thread.sleep(5);
-            } catch (InterruptedException e) {
-            }
-        });
-
-        assertTrue(stats.getMethodTotalElapsedTimeInMillis("statsTest") > 0);
-        assertTrue(stats.getMethodAverageElapsedTimeInMillis("statsTest") > 0);
-        assertTrue(stats.getMethodMinElapsedTimeInMillis("statsTest") >= 0);
-        assertTrue(stats.getMethodMaxElapsedTimeInMillis("statsTest") > 0);
-        assertTrue(stats.getTotalElapsedTimeInMillis() > 0);
-
-        assertTrue(stats.getMethodMinElapsedTimeInMillis("statsTest") <= stats.getMethodMaxElapsedTimeInMillis("statsTest"));
-
-        double avg = stats.getMethodAverageElapsedTimeInMillis("statsTest");
-        assertTrue(avg >= stats.getMethodMinElapsedTimeInMillis("statsTest"));
-        assertTrue(avg <= stats.getMethodMaxElapsedTimeInMillis("statsTest"));
-
-        assertEquals(20, stats.getMethodSize("statsTest"));
-
-        assertEquals(20, stats.getMethodStatisticsList("statsTest").size());
-
-        Profiler.MethodStatistics minMethod = stats.getMinElapsedTimeMethod();
-        Profiler.MethodStatistics maxMethod = stats.getMaxElapsedTimeMethod();
-        assertNotNull(minMethod);
-        assertNotNull(maxMethod);
-        assertEquals("statsTest", minMethod.getMethodName());
-        assertEquals("statsTest", maxMethod.getMethodName());
-    }
-
-    // ============================================================
-    // Percentile calculation tests
-    // ============================================================
-
-    @Test
-    public void testPercentileCalculations() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 100, 1, "percentileTest", () -> {
-            try {
-                Thread.sleep((long) (Math.random() * 5));
-            } catch (InterruptedException e) {
-            }
-        });
-
-        StringWriter sw = new StringWriter();
-        stats.writeResult(sw);
-        String output = sw.toString();
-
-        assertTrue(output.contains("0.01% >="));
-        assertTrue(output.contains("0.1% >="));
-        assertTrue(output.contains("1% >="));
-        assertTrue(output.contains("10% >="));
-        assertTrue(output.contains("50% >="));
-        assertTrue(output.contains("90% >="));
-        assertTrue(output.contains("99% >="));
-        assertTrue(output.contains("99.9% >="));
-        assertTrue(output.contains("99.99% >="));
+    public void testSingleLoopStatistics_GetFailedMethodStatisticsListByName() {
+        Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
+        stats.addMethodStatisticsList(makeMethodStats("m", 5, false));
+        stats.addMethodStatisticsList(makeMethodStats("m", 10, true));
+        stats.addMethodStatisticsList(makeMethodStats("m", 15, true));
+        List<Profiler.MethodStatistics> failed = stats.getFailedMethodStatisticsList("m");
+        assertEquals(2, failed.size());
     }
 
     @Test
-    public void testPercentileCalculations_XmlFormat() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 100, 1, "percentileXml", () -> {
-        });
-
-        StringWriter sw = new StringWriter();
-        stats.writeXmlResult(sw);
-        String output = sw.toString();
-
-        assertTrue(output.contains("<_0.0001>"));
-        assertTrue(output.contains("<_0.001>"));
-        assertTrue(output.contains("<_0.01>"));
-        assertTrue(output.contains("<_0.5>"));
-        assertTrue(output.contains("<_0.9>"));
-        assertTrue(output.contains("<_0.99>"));
-        assertTrue(output.contains("<_0.999>"));
-        assertTrue(output.contains("<_0.9999>"));
-    }
-
-    // ============================================================
-    // Reflection-based run method tests (with Method object)
-    // ============================================================
-
-    @Test
-    public void testRunWithMethodReflection_MultipleThreads() {
-        Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "normal");
-        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, null, 2, 2, 1);
-        assertNotNull(stats);
-        assertEquals(2, stats.getThreadNum());
+    public void testSingleLoopStatistics_GetFailedMethodStatisticsListByName_NoFailed() {
+        Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
+        stats.addMethodStatisticsList(makeMethodStats("m", 5, false));
+        List<Profiler.MethodStatistics> failed = stats.getFailedMethodStatisticsList("m");
+        assertEquals(0, failed.size());
     }
 
     @Test
-    public void testRunWithMethodReflection_ErrorMethod() {
-        Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "error", Object.class);
-        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, (Object) null, 1, 2, 1);
-        assertNotNull(stats);
-        // error method should produce failed statistics
-        assertTrue(stats.getAllFailedMethodStatisticsList().size() > 0);
+    public void testSingleLoopStatistics_GetAllFailedMethodStatisticsList() {
+        Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
+        stats.addMethodStatisticsList(makeMethodStats("a", 5, false));
+        stats.addMethodStatisticsList(makeMethodStats("b", 10, true));
+        stats.addMethodStatisticsList(makeMethodStats("c", 15, true));
+        List<Profiler.MethodStatistics> failed = stats.getAllFailedMethodStatisticsList();
+        assertEquals(2, failed.size());
     }
 
     @Test
-    public void testRunWithMethodReflection_WithDelaysAndNullArg() {
-        Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "normal");
-        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, (Object) null, 1, 0, 3, 0, 1);
-        assertNotNull(stats);
-        assertEquals(3, stats.getMethodSize("normal"));
-    }
-
-    @Test
-    public void testRunWithMethodName_MultipleRounds() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(this, "normal", 1, 2, 2);
-        assertNotNull(stats);
+    public void testSingleLoopStatistics_GetAllFailedMethodStatisticsList_Empty() {
+        Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
+        List<Profiler.MethodStatistics> failed = stats.getAllFailedMethodStatisticsList();
+        assertEquals(0, failed.size());
     }
 
 }

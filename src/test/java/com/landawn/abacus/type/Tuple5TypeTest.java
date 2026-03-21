@@ -14,31 +14,30 @@
 
 package com.landawn.abacus.type;
 
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.Tuple;
+import com.landawn.abacus.util.Tuple.Tuple5;
 
-@Tag("2025")
 public class Tuple5TypeTest extends TestBase {
 
     private final Tuple5Type type = new Tuple5Type("String", "String", "String", "String", "String");
-
-    @Test
-    public void test_name() {
-        assertNotNull(type.name());
-        assertFalse(type.name().isEmpty());
-    }
 
     @Test
     public void test_valueOf_String() {
@@ -46,6 +45,69 @@ public class Tuple5TypeTest extends TestBase {
         Object result = type.valueOf((String) null);
         // Result may be null or default value depending on type
         assertNull(result);
+    }
+
+    @Test
+    public void test_valueOf_Empty() {
+        assertNull(type.valueOf(""));
+    }
+
+    @Test
+    public void test_valueOf_ValidJson() {
+        Tuple5<String, String, String, String, String> t = Tuple.of("a", "b", "c", "d", "e");
+        String json = type.stringOf(t);
+        @SuppressWarnings("unchecked")
+        Tuple5<String, String, String, String, String> result = (Tuple5<String, String, String, String, String>) type.valueOf(json);
+        assertNotNull(result);
+        assertEquals("a", result._1);
+        assertEquals("e", result._5);
+    }
+
+    @Test
+    public void test_appendTo_Null() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        type.appendTo(sb, null);
+        assertEquals("null", sb.toString());
+    }
+
+    @Test
+    public void test_appendTo_WithStringBuilder() throws IOException {
+        Tuple5<String, String, String, String, String> t = Tuple.of("a", "b", "c", "d", "e");
+        StringBuilder sb = new StringBuilder();
+        type.appendTo(sb, t);
+        String result = sb.toString();
+        assertNotNull(result);
+        assertTrue(result.startsWith("["));
+        assertTrue(result.endsWith("]"));
+    }
+
+    @Test
+    public void test_appendTo_WithWriter() throws IOException {
+        Tuple5<String, String, String, String, String> t = Tuple.of("a", "b", "c", "d", "e");
+        StringWriter sw = new StringWriter();
+        type.appendTo(sw, t);
+        String result = sw.toString();
+        assertNotNull(result);
+        assertTrue(result.startsWith("["));
+    }
+
+    @Test
+    public void test_writeCharacter_Null() throws IOException {
+        var writer = Objectory.createBufferedJsonWriter();
+        assertDoesNotThrow(() -> type.writeCharacter(writer, null, null));
+    }
+
+    @Test
+    public void test_writeCharacter_NonNull() throws IOException {
+        Tuple5<String, String, String, String, String> t = Tuple.of("a", "b", "c", "d", "e");
+        var writer = Objectory.createBufferedJsonWriter();
+        assertDoesNotThrow(() -> type.writeCharacter(writer, t, null));
+    }
+
+    @Test
+    public void test_name() {
+        assertNotNull(type.name());
+        assertFalse(type.name().isEmpty());
     }
 
     @Test

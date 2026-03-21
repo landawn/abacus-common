@@ -7,12 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BiIntObjConsumerTest extends TestBase {
 
     @Test
@@ -49,6 +47,64 @@ public class BiIntObjConsumerTest extends TestBase {
         assertEquals(2, results.size());
         assertEquals(42, results.get(0));
         assertEquals(99, results.get(1));
+    }
+
+    @Test
+    public void testAnonymousClass() {
+        List<String> results = new ArrayList<>();
+        BiIntObjConsumer<String> consumer = new BiIntObjConsumer<>() {
+            @Override
+            public void accept(int i, int j, String s) {
+                results.add(i + "," + j + "," + s);
+            }
+        };
+
+        consumer.accept(1, 2, "value");
+
+        assertEquals(1, results.size());
+        assertEquals("1,2,value", results.get(0));
+    }
+
+    @Test
+    public void testComplexOperation() {
+        StringBuilder sb = new StringBuilder();
+        BiIntObjConsumer<String> consumer = (i, j, s) -> {
+            sb.append(s).append(" [").append(i).append(",").append(j).append("] = ").append(i * j);
+        };
+
+        consumer.accept(7, 6, "Product:");
+
+        assertEquals("Product: [7,6] = 42", sb.toString());
+    }
+
+    @Test
+    public void testWithNullObject() {
+        List<String> results = new ArrayList<>();
+        BiIntObjConsumer<String> consumer = (i, j, s) -> results.add(i + "," + j + "," + s);
+
+        consumer.accept(5, 10, null);
+
+        assertEquals(1, results.size());
+        assertEquals("5,10,null", results.get(0));
+    }
+
+    @Test
+    public void testWithNegativeInts() {
+        AtomicReference<String> result = new AtomicReference<>();
+        BiIntObjConsumer<String> consumer = (i, j, s) -> result.set(s + (i - j));
+
+        consumer.accept(-5, 10, "diff: ");
+
+        assertEquals("diff: -15", result.get());
+    }
+
+    @Test
+    public void testAcceptWithException() {
+        BiIntObjConsumer<String> consumer = (i, j, s) -> {
+            throw new RuntimeException("Test exception");
+        };
+
+        assertThrows(RuntimeException.class, () -> consumer.accept(5, 10, "test"));
     }
 
     @Test
@@ -94,63 +150,5 @@ public class BiIntObjConsumerTest extends TestBase {
         assertThrows(RuntimeException.class, () -> chainedConsumer.accept(5, 10, "test"));
         assertEquals(1, results.size()); // First consumer should have executed
         assertEquals("test", results.get(0));
-    }
-
-    @Test
-    public void testAcceptWithException() {
-        BiIntObjConsumer<String> consumer = (i, j, s) -> {
-            throw new RuntimeException("Test exception");
-        };
-
-        assertThrows(RuntimeException.class, () -> consumer.accept(5, 10, "test"));
-    }
-
-    @Test
-    public void testAnonymousClass() {
-        List<String> results = new ArrayList<>();
-        BiIntObjConsumer<String> consumer = new BiIntObjConsumer<>() {
-            @Override
-            public void accept(int i, int j, String s) {
-                results.add(i + "," + j + "," + s);
-            }
-        };
-
-        consumer.accept(1, 2, "value");
-
-        assertEquals(1, results.size());
-        assertEquals("1,2,value", results.get(0));
-    }
-
-    @Test
-    public void testWithNullObject() {
-        List<String> results = new ArrayList<>();
-        BiIntObjConsumer<String> consumer = (i, j, s) -> results.add(i + "," + j + "," + s);
-
-        consumer.accept(5, 10, null);
-
-        assertEquals(1, results.size());
-        assertEquals("5,10,null", results.get(0));
-    }
-
-    @Test
-    public void testWithNegativeInts() {
-        AtomicReference<String> result = new AtomicReference<>();
-        BiIntObjConsumer<String> consumer = (i, j, s) -> result.set(s + (i - j));
-
-        consumer.accept(-5, 10, "diff: ");
-
-        assertEquals("diff: -15", result.get());
-    }
-
-    @Test
-    public void testComplexOperation() {
-        StringBuilder sb = new StringBuilder();
-        BiIntObjConsumer<String> consumer = (i, j, s) -> {
-            sb.append(s).append(" [").append(i).append(",").append(j).append("] = ").append(i * j);
-        };
-
-        consumer.accept(7, 6, "Product:");
-
-        assertEquals("Product: [7,6] = 42", sb.toString());
     }
 }

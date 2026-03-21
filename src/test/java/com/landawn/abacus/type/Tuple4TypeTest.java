@@ -14,34 +14,163 @@
 
 package com.landawn.abacus.type;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.Tuple;
+import com.landawn.abacus.util.Tuple.Tuple4;
 
-@Tag("2025")
 public class Tuple4TypeTest extends TestBase {
 
     private final Tuple4Type type = new Tuple4Type("String", "String", "String", "String");
 
     @Test
+    public void test_declaringName() {
+        String dn = type.declaringName();
+        assertNotNull(dn);
+        assertTrue(dn.contains("Tuple4"));
+    }
+
+    @Test
+    public void test_javaType() {
+        assertEquals(Tuple4.class, type.javaType());
+    }
+
+    @Test
+    public void test_parameterTypes() {
+        Type<?>[] params = type.parameterTypes();
+        assertNotNull(params);
+        assertEquals(4, params.length);
+    }
+
+    @Test
+    public void test_isParameterizedType() {
+        assertTrue(type.isParameterizedType());
+    }
+
+    @Test
+    public void test_stringOf_Null() {
+        assertNull(type.stringOf(null));
+    }
+
+    @Test
+    public void test_stringOf_NonNull() {
+        Tuple4<String, String, String, String> t = Tuple.of("a", "b", "c", "d");
+        String result = type.stringOf(t);
+        assertNotNull(result);
+        assertTrue(result.contains("a"));
+        assertTrue(result.contains("d"));
+    }
+
+    @Test
+    public void test_valueOf_Null() {
+        assertNull(type.valueOf((String) null));
+    }
+
+    @Test
+    public void test_valueOf_Empty() {
+        assertNull(type.valueOf(""));
+    }
+
+    @Test
+    public void test_valueOf_ValidJson() {
+        Tuple4<String, String, String, String> t = Tuple.of("w", "x", "y", "z");
+        String json = type.stringOf(t);
+        @SuppressWarnings("unchecked")
+        Tuple4<String, String, String, String> result = (Tuple4<String, String, String, String>) type.valueOf(json);
+        assertNotNull(result);
+        assertEquals("w", result._1);
+        assertEquals("x", result._2);
+        assertEquals("y", result._3);
+        assertEquals("z", result._4);
+    }
+
+    @Test
+    public void test_valueOf_MixedTypes() {
+        Tuple4Type mixedType = new Tuple4Type("String", "Integer", "Boolean", "Double");
+        @SuppressWarnings("unchecked")
+        Tuple4<String, Integer, Boolean, Double> result = (Tuple4<String, Integer, Boolean, Double>) mixedType.valueOf("[\"hello\", 42, true, 3.14]");
+        assertNotNull(result);
+        assertEquals("hello", result._1);
+        assertEquals(42, result._2);
+        assertEquals(true, result._3);
+        assertEquals(3.14, (double) result._4, 0.001);
+    }
+
+    @Test
+    public void test_appendTo_Null() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        type.appendTo(sb, null);
+        assertEquals("null", sb.toString());
+    }
+
+    @Test
+    public void test_appendTo_WithStringBuilder() throws IOException {
+        Tuple4<String, String, String, String> t = Tuple.of("a", "b", "c", "d");
+        StringBuilder sb = new StringBuilder();
+        type.appendTo(sb, t);
+        String result = sb.toString();
+        assertNotNull(result);
+        assertTrue(result.startsWith("["));
+        assertTrue(result.endsWith("]"));
+        assertTrue(result.contains("a"));
+        assertTrue(result.contains("d"));
+    }
+
+    @Test
+    public void test_appendTo_WithWriter() throws IOException {
+        Tuple4<String, String, String, String> t = Tuple.of("w", "x", "y", "z");
+        StringWriter sw = new StringWriter();
+        type.appendTo(sw, t);
+        String result = sw.toString();
+        assertNotNull(result);
+        assertTrue(result.startsWith("["));
+        assertTrue(result.contains("w"));
+    }
+
+    @Test
+    public void test_writeCharacter_Null() throws IOException {
+        var writer = Objectory.createBufferedJsonWriter();
+        assertDoesNotThrow(() -> type.writeCharacter(writer, null, null));
+    }
+
+    @Test
+    public void test_writeCharacter_NonNull() throws IOException {
+        Tuple4<String, String, String, String> t = Tuple.of("a", "b", "c", "d");
+        var writer = Objectory.createBufferedJsonWriter();
+        assertDoesNotThrow(() -> type.writeCharacter(writer, t, null));
+    }
+
+    @Test
+    public void test_name() {
+        assertNotNull(type.name());
+        assertFalse(type.name().isEmpty());
+    }
+
+    @Test
     public void test_get_ResultSet_byLabel() throws SQLException {
         ResultSet rs = mock(ResultSet.class);
-        // Basic get test - actual implementation will vary by type
         assertDoesNotThrow(() -> type.get(rs, "col"));
     }
 
     @Test
     public void test_set_CallableStatement() throws SQLException {
         CallableStatement stmt = mock(CallableStatement.class);
-        // Basic set test - actual implementation will vary by type
         assertDoesNotThrow(() -> type.set(stmt, "param", null));
     }
 }

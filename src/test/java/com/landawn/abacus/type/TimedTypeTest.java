@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -19,7 +18,6 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Timed;
 
-@Tag("new-test")
 public class TimedTypeTest extends TestBase {
 
     private TimedType<String> timedType;

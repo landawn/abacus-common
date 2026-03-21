@@ -11,14 +11,12 @@ import java.util.HashSet;
 import java.util.LinkedList;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type.SerializationType;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("new-test")
 public class AbstractArrayTypeTest extends TestBase {
     private Type<Object[]> type;
     private CharacterWriter writer;

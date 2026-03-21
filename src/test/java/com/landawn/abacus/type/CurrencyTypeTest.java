@@ -8,12 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Currency;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class CurrencyTypeTest extends TestBase {
 
     private final CurrencyType type = new CurrencyType();
@@ -21,11 +19,6 @@ public class CurrencyTypeTest extends TestBase {
     @Test
     public void test_clazz() {
         assertEquals(Currency.class, type.javaType());
-    }
-
-    @Test
-    public void test_name() {
-        assertEquals("Currency", type.name());
     }
 
     @Test
@@ -63,13 +56,6 @@ public class CurrencyTypeTest extends TestBase {
     }
 
     @Test
-    public void test_valueOf_String_InvalidCurrency() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            type.valueOf("INVALID");
-        });
-    }
-
-    @Test
     public void test_valueOf_String_CommonCurrencies() {
         assertNotNull(type.valueOf("USD"));
         assertNotNull(type.valueOf("EUR"));
@@ -78,5 +64,17 @@ public class CurrencyTypeTest extends TestBase {
         assertNotNull(type.valueOf("CNY"));
         assertNotNull(type.valueOf("CAD"));
         assertNotNull(type.valueOf("AUD"));
+    }
+
+    @Test
+    public void test_valueOf_String_InvalidCurrency() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            type.valueOf("INVALID");
+        });
+    }
+
+    @Test
+    public void test_name() {
+        assertEquals("Currency", type.name());
     }
 }

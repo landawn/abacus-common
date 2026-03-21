@@ -3,12 +3,10 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ByteTernaryOperatorTest extends TestBase {
 
     @Test
@@ -28,19 +26,6 @@ public class ByteTernaryOperatorTest extends TestBase {
     }
 
     @Test
-    public void testApplyAsByteWithAnonymousClass() {
-        ByteTernaryOperator max = new ByteTernaryOperator() {
-            @Override
-            public byte applyAsByte(byte a, byte b, byte c) {
-                return (byte) Math.max(a, Math.max(b, c));
-            }
-        };
-
-        assertEquals((byte) 10, max.applyAsByte((byte) 5, (byte) 10, (byte) 3));
-        assertEquals((byte) 15, max.applyAsByte((byte) 10, (byte) 5, (byte) 15));
-    }
-
-    @Test
     public void testSum() {
         ByteTernaryOperator sum = (a, b, c) -> (byte) (a + b + c);
 
@@ -55,6 +40,19 @@ public class ByteTernaryOperatorTest extends TestBase {
 
         assertEquals((byte) 2, average.applyAsByte((byte) 1, (byte) 2, (byte) 3));
         assertEquals((byte) 5, average.applyAsByte((byte) 5, (byte) 5, (byte) 5));
+    }
+
+    @Test
+    public void testApplyAsByteWithAnonymousClass() {
+        ByteTernaryOperator max = new ByteTernaryOperator() {
+            @Override
+            public byte applyAsByte(byte a, byte b, byte c) {
+                return (byte) Math.max(a, Math.max(b, c));
+            }
+        };
+
+        assertEquals((byte) 10, max.applyAsByte((byte) 5, (byte) 10, (byte) 3));
+        assertEquals((byte) 15, max.applyAsByte((byte) 10, (byte) 5, (byte) 15));
     }
 
     @Test

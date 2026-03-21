@@ -23,16 +23,16 @@ import com.landawn.abacus.util.ThreadMode;
 
 /**
  * Annotation to mark methods as event subscribers in the EventBus system.
- * Methods annotated with @Subscribe will receive events when registered with an {@link EventBus}.
- * 
+ * Methods annotated with {@code @Subscribe} will receive events when registered with an {@link EventBus}.
+ *
  * <p>The annotated method must meet the following requirements:</p>
  * <ul>
- *   <li>Must be public</li>
+ *   <li>Must be {@code public}</li>
  *   <li>Must have exactly one parameter (the event type)</li>
- *   <li>Must not be static</li>
+ *   <li>Must not be {@code static}</li>
  *   <li>Should not throw checked exceptions</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * public class EventHandler {
@@ -48,7 +48,7 @@ import com.landawn.abacus.util.ThreadMode;
  *     }
  * }
  * }</pre>
- * 
+ *
  * <p><b>Usage Examples with all parameters:</b></p>
  * <pre>{@code
  * public class AdvancedHandler {
@@ -71,7 +71,7 @@ import com.landawn.abacus.util.ThreadMode;
  *     }
  * }
  * }</pre>
- * 
+ *
  * @see EventBus
  * @see Subscriber
  * @see ThreadMode
@@ -83,13 +83,13 @@ public @interface Subscribe {
     /**
      * Specifies the thread mode for event delivery.
      * This determines on which thread the subscriber method will be called.
-     * 
+     *
      * <p>Available options:</p>
      * <ul>
      *   <li>{@link ThreadMode#DEFAULT} - Events are delivered on the same thread that posts them (default)</li>
      *   <li>{@link ThreadMode#THREAD_POOL_EXECUTOR} - Events are delivered on a background thread from a thread pool</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @Subscribe(threadMode = ThreadMode.THREAD_POOL_EXECUTOR)
@@ -98,17 +98,17 @@ public @interface Subscribe {
      *     performExpensiveOperation(event.getData());
      * }
      * }</pre>
-     * 
+     *
      * @return the thread mode for event delivery
      */
     ThreadMode threadMode() default ThreadMode.DEFAULT;
 
     /**
      * Controls whether the subscriber accepts only exact event type matches or includes subtypes.
-     * 
+     *
      * <p>When set to {@code true}, only events of the exact parameter type will be delivered.
      * When {@code false} (default), events of the parameter type and all its subtypes will be delivered.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // With strictEventType = false (default)
@@ -123,17 +123,17 @@ public @interface Subscribe {
      *     // Receives only Animal, not Dog or Cat
      * }
      * }</pre>
-     * 
+     *
      * @return {@code true} to accept only exact type matches, {@code false} to accept subtypes
      */
     boolean strictEventType() default false;
 
     /**
      * Indicates whether this subscriber should receive the most recent sticky event upon registration.
-     * 
+     *
      * <p>When {@code true}, if a sticky event matching this subscriber's type and event ID was previously posted,
      * it will be immediately delivered to this subscriber upon registration.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Post a sticky configuration
@@ -148,7 +148,7 @@ public @interface Subscribe {
      *     }
      * }
      * }</pre>
-     * 
+     *
      * @return {@code true} to receive sticky events upon registration
      */
     boolean sticky() default false;
@@ -156,10 +156,10 @@ public @interface Subscribe {
     /**
      * Specifies an event ID to filter incoming events.
      * Only events posted with the matching event ID will be delivered to this subscriber.
-     * 
+     *
      * <p>If empty (default), the subscriber will receive events based on type matching alone,
      * unless it was registered with a specific event ID.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @Subscribe(eventId = "userUpdates")
@@ -172,7 +172,7 @@ public @interface Subscribe {
      *     // Only receives User events posted with "adminUpdates" ID
      * }
      * }</pre>
-     * 
+     *
      * @return the event ID to filter on, or empty string for no filtering
      */
     String eventId() default "";
@@ -180,9 +180,9 @@ public @interface Subscribe {
     /**
      * Specifies the minimum time interval (in milliseconds) between event deliveries.
      * Events posted within this interval will be ignored.
-     * 
+     *
      * <p>This is useful for throttling high-frequency events to prevent overwhelming the subscriber.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @Subscribe(intervalMillis = 1000)  // Maximum one event per second
@@ -195,19 +195,19 @@ public @interface Subscribe {
      *     saveLocationToServer(location);
      * }
      * }</pre>
-     * 
+     *
      * @return the minimum interval between events in milliseconds, 0 for no throttling
      */
-    long intervalMillis() default 0; // Unit is milliseconds.
+    long intervalMillis() default 0;
 
     /**
      * Controls whether duplicate consecutive events should be ignored.
-     * 
+     *
      * <p>When {@code true}, if an event equal to the previous event is posted, it will be ignored.
-     * Events are compared using their equals() method.</p>
-     * 
+     * Events are compared using their {@code equals()} method.</p>
+     *
      * <p>This is useful for preventing redundant processing of unchanged data.</p>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @Subscribe(deduplicate = true)
@@ -222,7 +222,7 @@ public @interface Subscribe {
      *     applyNewConfiguration(config);
      * }
      * }</pre>
-     * 
+     *
      * @return {@code true} to ignore duplicate consecutive events
      */
     boolean deduplicate() default false;

@@ -45,7 +45,6 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.LinkedMultiValueMap;
 
@@ -97,7 +96,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-@Tag("old-test")
 public class JsonParserTest extends AbstractJsonParserTest {
     private static final String bigBeanStr = jsonParser.serialize(bigXBean);
 
@@ -300,203 +298,475 @@ public class JsonParserTest extends AbstractJsonParserTest {
         private List<Map<String, Date>> json2;
     }
 
-    @Test
-    public void test_2817() throws Exception {
-        final LocalDateTime now = LocalDateTime.now();
-        Bean2817.builder().fieldA(now).build();
+    public static XBean createBigXBean(int size) {
+        Account account = createAccount(Account.class);
+        AccountContact contact = createAccountContact(AccountContact.class);
+        account.setContact(contact);
 
-        final Map<String, Object> map = new HashMap<>();
-        map.put("fieldA", Timestamp.valueOf(now).getTime());
-        final String json = N.toJson(map);
+        XBean xBean = new XBean();
+        xBean.setTypeBoolean(true);
+        xBean.setTypeBoolean2(Boolean.FALSE);
+        xBean.setTypeChar('<');
+        xBean.setTypeChar2('>');
+        xBean.setTypeByte((byte) 0);
+        xBean.setTypeShort((short) 2);
+        xBean.setTypeInt(3);
+        xBean.setTypeLong(4);
+        xBean.setTypeLong2((long) 5);
+        xBean.setTypeFloat(1.01f);
+        xBean.setTypeDouble(2.3134454d);
 
-        N.println(json);
+        xBean.setTypeString(">string< > </ <//");
+        xBean.setWeekDay(WeekDay.FRIDAY);
 
-        final Bean2817 fromJson = N.fromJson(json, Bean2817.class);
+        xBean.setTypeCalendar(Dates.currentCalendar());
 
-        N.println(fromJson);
+        xBean.setTypeDate(new java.util.Date());
+        xBean.setTypeSqlDate(Dates.currentDate());
+        xBean.setTypeSqlTime(Dates.currentTime());
+        xBean.setTypeSqlTimestamp(Dates.currentTimestamp());
 
-        final Map<String, BigDecimal> m = N.fromJson("{\"token\": 2.105465717176397390012604E+2043348}", Type.ofMap(String.class, BigDecimal.class));
-        N.println(m);
+        List<Date> typeGenericList = new LinkedList<>();
+        typeGenericList.add(null);
+        typeGenericList.add(Dates.currentDate());
+        typeGenericList.add(null);
+        typeGenericList.add(Dates.currentDate());
+        typeGenericList.add(Dates.currentDate());
+        typeGenericList.add(null);
+        xBean.setTypeGenericList(typeGenericList);
 
-        final Map<String, Double> m2 = N.fromJson("{\"token\": 2.105465717176397390012604E+2043348}", Type.ofMap(String.class, Double.class));
-        N.println(m2);
-        assertNotNull(m2);
-    }
+        Set<Long> typeGenericSet = N.toSortedSet();
+        typeGenericSet.add(1332333L);
+        typeGenericSet.add(Long.MAX_VALUE);
+        typeGenericSet.add(Long.MIN_VALUE);
+        xBean.setTypeGenericSet(typeGenericSet);
 
-    @Test
-    public void test_2958() throws Exception {
-        N.println(TypeFactory.getType(AtomicDouble.class));
+        List typeList = new ArrayList();
+        typeList.add(account.getFirstName());
 
-        final UnsignedInteger unsignedInteger = UnsignedInteger.valueOf(String.valueOf(Integer.MIN_VALUE).replace("-", ""));
-        final UnsignedLong unsignedLong = UnsignedLong.valueOf(String.valueOf(Long.MIN_VALUE).replace("-", ""));
-        final BeanX bean = BeanX.builder()
-                .count0(unsignedInteger)
-                .count(unsignedLong)
-                .countA(new AtomicInteger(10))
-                .countB(new AtomicLong(Long.MAX_VALUE))
-                .countC(new AtomicDouble(100))
-                .countD(new MutableDouble(100))
-                .fieldA(new MutableBoolean(true))
-                .fieldB(MutableChar.of('a'))
-                .build();
-
-        final Map<String, Object> map = new HashMap<>();
-        map.put("count", unsignedLong);
-
-        System.out.println("fastjson2:  " + JSONObject.toJSONString(map));
-
-        final ObjectMapper objectMapper = new ObjectMapper();
-        System.out.println("jackson:  " + objectMapper.writeValueAsString(map));
-
-        final Gson gson = new GsonBuilder().create();
-        System.out.println("gson:  " + gson.toJson(map));
-
-        N.println(N.toJson(map));
-        N.println(N.toJson(bean));
-        assertEquals(
-                "{\"count0\": 2147483648, \"count\": 9223372036854775808, \"countA\": 10, \"countB\": 9223372036854775807, \"countC\": 100.0, \"countD\": 100.0, \"fieldA\": true, \"fieldB\": \"a\"}",
-                N.toJson(bean));
-        N.fromJson(N.toJson(bean), BeanX.class);
-        assertEquals(map, N.fromJson(N.toJson(map), Type.ofMap(String.class, UnsignedLong.class)));
-    }
-
-    @Test
-    public void test_emptyBean() {
-        final Object obj = new Object();
-        final SerializationConfig serializationConfig = JsonMappers.createSerializationConfig().without(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-        String json = JsonMappers.toJson(obj, serializationConfig);
-        N.println(json);
-        json = JsonMappers.toJson(N.asMap("key1", obj, "key2", "ddd"), serializationConfig);
-        N.println(json);
-        json = JsonMappers.toJson(N.toList("key1", obj, "key2", "ddd"), serializationConfig);
-        N.println(json);
-
-        try {
-            json = N.toJson(obj);
-            fail("Should throw ParseException");
-        } catch (final ParsingException e) {
-
+        for (int i = 0; i < size; i++) {
+            typeList.add(account);
         }
 
-        final JsonSerConfig jsc = JsonSerConfig.create().setFailOnEmptyBean(false);
+        typeList.add(account.getContact());
+        typeList.add(account);
+        typeList.add(null);
+        typeList.add(new HashMap<>());
+        typeList.add(new ArrayList<>());
+        typeList.add(new HashSet<>());
+        xBean.setTypeList(typeList);
 
-        json = N.toJson(obj, jsc);
-        N.println(json);
-        json = N.toJson(N.asMap("key1", obj, "key2", "ddd"), jsc);
-        N.println(json);
-        json = N.toJson(N.toList("key1", obj, "key2", "ddd"), jsc);
-        N.println(json);
-    }
+        Set typeSet = new HashSet<>();
+        typeSet.add(new HashMap<>());
+        typeSet.add(new ArrayList<>());
+        typeSet.add(new HashMap<>());
+        typeSet.add(new HashMap<>());
+        typeSet.add(null);
+        typeSet.add(null);
+        typeSet.add(account);
+        typeSet.add(account.getLastName());
+        typeSet.add(account);
+        typeSet.add(account.getContact());
+        typeSet.add(account);
+        typeSet.add(null);
+        xBean.setTypeSet(typeSet);
 
-    @Test
-    public void test_selfReference() {
-        final List<Object> list = N.toList("a", "b");
-        list.add(list);
+        Map<String, Account> typeGenericMap = new HashMap<>();
+        typeGenericMap.put(account.getFirstName(), createAccount(Account.class));
+        typeGenericMap.put(account.getLastName(), account);
+        typeGenericMap.put("123", createAccount(Account.class));
+        typeGenericMap.put("null", null);
+        xBean.setTypeGenericMap(typeGenericMap);
 
-        final Map<String, Object> map = N.toMap("a", "va", "b", 123);
-        map.put("c", map);
+        Map<String, Object> typeGenericMap2 = new TreeMap<>();
+        typeGenericMap2.put(account.getFirstName(), createAccount(Account.class));
+        typeGenericMap2.put(account.getLastName(), createAccount(Account.class));
+        typeGenericMap2.put("null", null);
+        typeGenericMap2.put("bookList", N.toList(createAccount(Account.class)));
+        xBean.setTypeGenericMap2(typeGenericMap2);
 
-        try {
-            N.toJson(list);
-            fail("Should throw StackOverflowError");
-        } catch (final StackOverflowError e) {
+        Map<Object, Object> typeGenericMap4 = new ConcurrentHashMap<>();
+        typeGenericMap4.put(createAccount(Account.class), createAccount(Account.class));
+        typeGenericMap4.put(createAccount(Account.class), createAccount(Account.class));
+        typeGenericMap4.put("aaabbbccc", "");
+        typeGenericMap4.put("bookList", N.toList(createAccount(Account.class)));
+        typeGenericMap4.put("edse", " ");
+        typeGenericMap4.put(new HashMap<>(), " ");
+        typeGenericMap4.put(new ArrayList<>(), new HashSet<>());
+        typeGenericMap4.put(typeGenericMap2, typeGenericMap);
+        xBean.setTypeGenericMap4(typeGenericMap4);
 
+        Map typeMap = new HashMap<>();
+
+        for (int i = 0; i < size; i++) {
+            typeMap.put(createAccount(Account.class), createAccount(Account.class));
         }
 
+        typeMap.put("null", null);
+        typeMap.put("bookList", N.toList(createAccount(Account.class)));
+        typeMap.put(" ", " ");
+        typeMap.put(new HashMap<>(), " ");
+        typeMap.put(new ArrayList<>(), new HashSet<>());
+        typeMap.put("007", null);
+        typeMap.put(new HashMap<>(), null);
+        typeMap.put(new ArrayList<>(), new HashSet<>());
+        xBean.setTypeMap(typeMap);
+
+        return xBean;
+    }
+
+    @Data
+    public static class Bean_1 {
+        private List<String> strList;
+        private List intList;
+        private List<Short> shortList;
+        private XMLGregorianCalendar xmlGregorianCalendar;
+    }
+
+    @Data
+    @XmlRootElement
+    public static class Customer {
+        String name;
+        char ch;
+        int age;
+        int id;
+
+    }
+
+    @Data
+    public static class Bean {
+        private byte[] bytes;
+        private char[] chars;
+        private Character[] chars2;
+        private String[] strings;
+        private List typeList;
+        private Set typeSet;
+
+    }
+
+    @Data
+    public static class XBean {
+        private boolean typeBoolean;
+        private Boolean typeBoolean2;
+        private char typeChar;
+        private Character typeChar2;
+        private byte typeByte;
+        private short typeShort;
+        private int typeInt;
+        private long typeLong;
+        private Long typeLong2;
+        private float typeFloat;
+        private double typeDouble;
+        private String typeString;
+        private Calendar typeCalendar;
+        private java.util.Date typeDate;
+        private Date typeSqlDate;
+        private Time typeSqlTime;
+        private Timestamp typeSqlTimestamp;
+        private WeekDay weekDay;
+        private List<Date> typeGenericList;
+        private Set<Long> typeGenericSet;
+        private List typeList;
+        private Set typeSet;
+        private Map<String, Account> typeGenericMap;
+        private Map<String, Object> typeGenericMap2;
+        private Map<Object, String> typeGenericMap3;
+        private Map<Object, Object> typeGenericMap4;
+        private Map typeMap;
+
+    }
+
+    @Data
+    public static class JaxbBean {
+        private String string;
+        private List<String> list;
+        private Map<String, String> map;
+
+    }
+
+    @Test
+    public void test_parse_toArray() {
+        String json = "[1,2,3,4,5]";
+        Integer[] array = new Integer[5];
+        parser.parse(json, array);
+
+        Assertions.assertEquals(1, array[0]);
+        Assertions.assertEquals(2, array[1]);
+        Assertions.assertEquals(3, array[2]);
+        Assertions.assertEquals(4, array[3]);
+        Assertions.assertEquals(5, array[4]);
+
+        String strJson = "[\"a\",\"b\",\"c\"]";
+        String[] strArray = new String[3];
+        parser.parse(strJson, strArray);
+        Assertions.assertEquals("a", strArray[0]);
+        Assertions.assertEquals("b", strArray[1]);
+        Assertions.assertEquals("c", strArray[2]);
+    }
+
+    @Test
+    public void test_parse_toCollection() {
+        String json = "[1,2,3,4]";
+        List<Integer> list = new ArrayList<>();
+        parser.parse(json, list);
+
+        Assertions.assertEquals(4, list.size());
+        Assertions.assertEquals(1, list.get(0));
+        Assertions.assertEquals(2, list.get(1));
+        Assertions.assertEquals(3, list.get(2));
+        Assertions.assertEquals(4, list.get(3));
+
+        List<Integer> list2 = new ArrayList<>();
+        list2.add(999);
+        parser.parse(json, list2);
+        Assertions.assertEquals(5, list2.size());
+        Assertions.assertEquals(999, list2.get(0));
+    }
+
+    @Test
+    public void test_parse_toMap() {
+        String json = "{\"key1\":\"value1\",\"key2\":\"value2\",\"key3\":\"value3\"}";
+        Map<String, String> map = new HashMap<>();
+        parser.parse(json, map);
+
+        Assertions.assertEquals(3, map.size());
+        Assertions.assertEquals("value1", map.get("key1"));
+        Assertions.assertEquals("value2", map.get("key2"));
+        Assertions.assertEquals("value3", map.get("key3"));
+
+        Map<String, String> map2 = new HashMap<>();
+        map2.put("old", "data");
+        parser.parse(json, map2);
+        Assertions.assertEquals(4, map2.size());
+        Assertions.assertEquals("data", map2.get("old"));
+    }
+
+    @Test
+    public void testparseToArray() {
+        String json = "[1,2,3]";
+        Integer[] array = new Integer[3];
+        parser.parse(json, array);
+        Assertions.assertEquals(1, array[0]);
+        Assertions.assertEquals(2, array[1]);
+        Assertions.assertEquals(3, array[2]);
+    }
+
+    @Test
+    public void testparseToCollection() {
+        String json = "[1,2,3]";
+        List<Integer> list = new ArrayList<>();
+        parser.parse(json, list);
+        Assertions.assertEquals(3, list.size());
+        Assertions.assertEquals(1, list.get(0));
+        Assertions.assertEquals(2, list.get(1));
+        Assertions.assertEquals(3, list.get(2));
+    }
+
+    @Test
+    public void testparseToMap() {
+        String json = "{\"key1\":\"value1\",\"key2\":\"value2\"}";
+        Map<String, String> map = new HashMap<>();
+        parser.parse(json, map);
+        Assertions.assertEquals("value1", map.get("key1"));
+        Assertions.assertEquals("value2", map.get("key2"));
+    }
+
+    @Test
+    public void test_parse_withClass() {
+        String json = "\"hello\"";
+        String result = parser.parse(json, String.class);
+        Assertions.assertEquals("\"hello\"", result);
+
+        String numJson = "42";
+        Integer numResult = parser.parse(numJson, Integer.class);
+        Assertions.assertEquals(42, numResult);
+
+        String mapJson = "{\"name\":\"John\",\"age\":30}";
+        Map<?, ?> mapResult = parser.parse(mapJson, Map.class);
+        Assertions.assertEquals("John", mapResult.get("name"));
+        Assertions.assertEquals(30, mapResult.get("age"));
+
+        String listJson = "[1,2,3]";
+        List<?> listResult = parser.parse(listJson, List.class);
+        Assertions.assertEquals(3, listResult.size());
+        Assertions.assertEquals(1, listResult.get(0));
+
+        String nullResult = parser.parse(null, String.class);
+        Assertions.assertNull(nullResult);
+    }
+
+    @Test
+    public void test_parse_withConfigAndClass() {
+        String json = "{\"name\":\"Jane\",\"age\":25}";
+        JsonDeserConfig config = new JsonDeserConfig();
+
+        Map<?, ?> result = parser.parse(json, config, Map.class);
+        Assertions.assertEquals("Jane", result.get("name"));
+        Assertions.assertEquals(25, result.get("age"));
+
+        Map<?, ?> result2 = parser.parse(json, null, Map.class);
+        Assertions.assertEquals("Jane", result2.get("name"));
+
+        String boolJson = "true";
+        Boolean boolResult = parser.parse(boolJson, config, Boolean.class);
+        Assertions.assertEquals(true, boolResult);
+    }
+
+    @Test
+    public void test_parse_toArrayWithConfig() {
+        String json = "[10,20,30]";
+        Integer[] array = new Integer[3];
+        JsonDeserConfig config = new JsonDeserConfig();
+
+        parser.parse(json, config, array);
+        Assertions.assertEquals(10, array[0]);
+        Assertions.assertEquals(20, array[1]);
+        Assertions.assertEquals(30, array[2]);
+
+        Integer[] array2 = new Integer[3];
+        parser.parse(json, null, array2);
+        Assertions.assertEquals(10, array2[0]);
+        Assertions.assertEquals(20, array2[1]);
+        Assertions.assertEquals(30, array2[2]);
+    }
+
+    @Test
+    public void test_parse_toCollectionWithConfig() {
+        String json = "[\"x\",\"y\",\"z\"]";
+        List<String> list = new ArrayList<>();
+        JsonDeserConfig config = new JsonDeserConfig();
+
+        parser.parse(json, config, list);
+        Assertions.assertEquals(3, list.size());
+        Assertions.assertEquals("x", list.get(0));
+        Assertions.assertEquals("y", list.get(1));
+        Assertions.assertEquals("z", list.get(2));
+
+        List<String> list2 = new ArrayList<>();
+        parser.parse(json, null, list2);
+        Assertions.assertEquals(3, list2.size());
+    }
+
+    @Test
+    public void test_parse_toMapWithConfig() {
+        String json = "{\"a\":1,\"b\":2,\"c\":3}";
+        Map<String, Integer> map = new LinkedHashMap<>();
+        JsonDeserConfig config = new JsonDeserConfig();
+
+        parser.parse(json, config, map);
+        Assertions.assertEquals(3, map.size());
+        Assertions.assertEquals(1, map.get("a"));
+        Assertions.assertEquals(2, map.get("b"));
+        Assertions.assertEquals(3, map.get("c"));
+
+        Map<String, Integer> map2 = new HashMap<>();
+        parser.parse(json, null, map2);
+        Assertions.assertEquals(3, map2.size());
+    }
+
+    @Test
+    public void test_edgeCases_emptyArray() {
+        String json = "[]";
+        List<Integer> list = new ArrayList<>();
+        parser.parse(json, list);
+        Assertions.assertEquals(0, list.size());
+    }
+
+    @Test
+    public void test_edgeCases_emptyMap() {
+        String json = "{}";
+        Map<String, Object> map = new HashMap<>();
+        parser.parse(json, map);
+        Assertions.assertEquals(0, map.size());
+    }
+
+    @Test
+    public void test_edgeCases_nestedStructures() {
+        String json = "{\"outer\":{\"inner\":{\"value\":42}}}";
+        Map<?, ?> result = parser.parse(json, Map.class);
+        Map<?, ?> outer = (Map<?, ?>) result.get("outer");
+        Map<?, ?> inner = (Map<?, ?>) outer.get("inner");
+        Assertions.assertEquals(42, inner.get("value"));
+    }
+
+    @Test
+    public void test_edgeCases_arrayOfArrays() {
+        String json = "[[1,2],[3,4],[5,6]]";
+        List<?> result = parser.parse(json, List.class);
+        Assertions.assertEquals(3, result.size());
+        List<?> first = (List<?>) result.get(0);
+        Assertions.assertEquals(2, first.size());
+        Assertions.assertEquals(1, first.get(0));
+        Assertions.assertEquals(2, first.get(1));
+    }
+
+    @Test
+    public void testparseWithClass() {
+        String json = "\"test\"";
+        String result = parser.parse(json, String.class);
+        Assertions.assertEquals("\"test\"", result);
+
+        String nullResult = parser.parse(null, String.class);
+        Assertions.assertNull(nullResult);
+    }
+
+    @Test
+    public void testparseWithConfigAndClass() {
+        String json = "{\"name\":\"John\",\"age\":30}";
+        Map<String, Object> result = parser.parse(json, null, Map.class);
+        Assertions.assertEquals("John", result.get("name"));
+        Assertions.assertEquals(30, result.get("age"));
+    }
+
+    @Test
+    public void testparseToArrayWithConfig() {
+        String json = "[\"a\",\"b\",\"c\"]";
+        String[] array = new String[3];
+        parser.parse(json, null, array);
+        Assertions.assertEquals("a", array[0]);
+        Assertions.assertEquals("b", array[1]);
+        Assertions.assertEquals("c", array[2]);
+    }
+
+    @Test
+    public void testparseToCollectionWithConfig() {
+        String json = "[\"x\",\"y\",\"z\"]";
+        List<String> list = new ArrayList<>();
+        parser.parse(json, null, list);
+        Assertions.assertEquals(3, list.size());
+        Assertions.assertEquals("x", list.get(0));
+        Assertions.assertEquals("y", list.get(1));
+        Assertions.assertEquals("z", list.get(2));
+    }
+
+    @Test
+    public void testparseToMapWithConfig() {
+        String json = "{\"a\":1,\"b\":2}";
+        Map<String, Integer> map = new HashMap<>();
+        parser.parse(json, null, map);
+        Assertions.assertEquals(1, map.get("a"));
+        Assertions.assertEquals(2, map.get("b"));
+    }
+
+    @Test
+    public void test_reader() throws Exception {
+        final char[] cbuf = Objectory.createCharArrayBuffer();
+
+        final BufferedReader reader = Objectory.createBufferedReader(bigBeanStr);
+
+        JsonReader jr = JsonStringReader.parse(bigBeanStr, cbuf);
+
         try {
-            N.toJson(map);
-            fail("Should throw StackOverflowError");
-        } catch (final StackOverflowError e) {
-
+            while (jr.nextToken() > -1) {
+                if (jr.hasText()) {
+                    jr.getText();
+                }
+            }
+        } finally {
+            Objectory.recycle(reader);
+            Objectory.recycle(cbuf);
         }
-
-        final JsonSerConfig jsc = JsonSerConfig.create().setSupportCircularReference(true);
-
-        String json = N.toJson(list, jsc);
-        N.println(json);
-
-        json = N.toJson(map, jsc);
-        N.println(json);
-    }
-
-    @Test
-    public void test_Map() {
-        final Map<Object, Object> map = N.asMap(1, "a", "b", 2, 3, 3, "d", "d", 10, "x");
-        final String json = N.toJson(map);
-        N.println(json);
-
-        final Map map2 = N.fromJson(json, Map.class);
-        N.println(map2);
-        assertNotNull(map2);
-    }
-
-    @Test
-    public void test_PropHandler() {
-
-        final Account account = Beans.newRandom(Account.class);
-        N.println(account);
-
-        account.setDevices(Beans.newRandomList(AccountDevice.class, 10));
-
-        final String json = N.toJson(account);
-        assertEquals(account, N.fromJson(json, Account.class));
-
-        final Account account2 = N.fromJson(json, JsonDeserConfig.create().setPropHandler("devices", (c, e) -> {
-            N.println(e);
-        }), Account.class);
-
-        assertEquals(0, account2.getDevices().size());
-
-    }
-
-    @Test
-    public void test_MalformedJsonException() {
-
-        final String str = "\\uXYZ";
-
-        final String result = N.fromJson(str, String.class);
-
-        N.println(result);
-        assertNotNull(result);
-    }
-
-    @Test
-    public void test_escape() {
-        final Map<String, Object> map = N.asMap("a", "kdafs'ksfkd\"", "b", "\"", "c", '\'');
-
-        N.println(N.toJson(map, true));
-
-        N.println(JSON.toJSONString(map));
-        assertNotNull(map);
-    }
-
-    @Test
-    public void test_Convert() {
-        final RoomIdentifier id = RoomIdentifier.ROOM_NAME;
-
-        final Map<RoomIdentifier, String> slots = new HashMap<>();
-        slots.put(RoomIdentifier.ROOM_NAME, "ROOM_NAME_TEST");
-
-        final String strSerialized = gson.toJson(slots);
-
-        final java.lang.reflect.Type type = new TypeToken<Map<RoomIdentifier, String>>() {
-        }.getType();
-        final Map<RoomIdentifier, String> slotsDeserialized = gson.fromJson(strSerialized, type);
-
-        System.out.println(gson.toJson(id));
-        System.out.println(strSerialized);
-        System.out.println(slotsDeserialized);
-
-        N.println(Strings.repeat('=', 80));
-
-        N.println(N.toJson(id));
-        final String json = N.toJson(slots);
-        N.println(json);
-        assertEquals("{\"MARKER_NAME\": \"ROOM_NAME_TEST\"}", json);
-        N.println(N.fromJson(json, new TypeReference<Map<RoomIdentifier, String>>() {
-        }.type()));
-        assertEquals(slots, N.fromJson(json, new TypeReference.TypeToken<Map<RoomIdentifier, String>>() {
-        }.type()));
+        assertNotNull(jr);
     }
 
     @Test
@@ -562,6 +832,54 @@ public class JsonParserTest extends AbstractJsonParserTest {
             assertEquals(xbean, xbeanFromXml);
             assertEquals(xbean, abacusXMLDOMParser.deserialize(IOUtil.stringToReader(xml), TypeBean.class));
         }
+    }
+
+    @Test
+    public void testDeserializeSubstring() {
+        String json = "prefix{\"value\":123}suffix";
+        Map<String, Object> result = parser.deserialize(json, 6, 19, Map.class);
+        Assertions.assertEquals(123, result.get("value"));
+    }
+
+    @Test
+    public void testSerialize_map() {
+        Map<String, Object> m = N.asMap("firstName", "fn", "lastName", "ln", "birthday", "2003-08-08");
+        String str = jsonParser.serialize(m, JsonSerConfig.create().setQuotePropName(false).setQuoteMapKey(false));
+        N.println(str);
+
+        Map<String, Object> m2 = jsonParser.deserialize(str, Map.class);
+
+        N.println(m2);
+        assertEquals(m, m2);
+    }
+
+    @Test
+    public void testSerialize_0() {
+        XBean xBean = new XBean();
+
+        xBean.setTypeChar('<');
+        xBean.setTypeChar2('>');
+        xBean.setTypeString(
+                "‰β,『�?★业€ > \\n sfd \\r ds \\' f d // \\\\  \\\\\\\\ /// /////// \\\\\\\\\\\\\\\\  \\\\\\\\\\\\\\\\n \\\\\\\\\\\\\\\\r  \\t sd \\\" fe stri‰β,『�?★业€ ng黎< > </ <//、\\n");
+
+        String st = jsonParser.serialize(xBean);
+        println(st);
+
+        XBean xBean2 = jsonParser.deserialize(st, XBean.class);
+        println(xBean2);
+        assertEquals(xBean, xBean2);
+
+        Bean bean = new Bean();
+        bean.setBytes(new byte[] { 1, 2 });
+        bean.setStrings(new String[] { "aa", "bb", "<>>" });
+        bean.setChars(new char[] { '\r', '\t', '\"', '\'', ' ', ',', ' ', ',' });
+        bean.setChars2(new Character[] { '\r', '\t', '\"', '\'', ' ', ',', ' ', ',' });
+
+        String jsonStr = jsonParser.serialize(bean);
+        println(jsonStr);
+
+        Bean xmlBean = jsonParser.deserialize(jsonStr, Bean.class);
+        assertEquals(bean, xmlBean);
     }
 
     @Test
@@ -659,293 +977,6 @@ public class JsonParserTest extends AbstractJsonParserTest {
     }
 
     @Test
-    public void test_ignoreProp() {
-        final Account account = createAccount(Account.class);
-
-        final String json = N.toJson(account, JsonSerConfig.create().setIgnoredPropNames(N.toSet("firstName")));
-
-        N.println(json);
-
-        final Account account2 = N.fromJson(json, JsonDeserConfig.create().setIgnoredPropNames(N.toSet("lastName")), Account.class);
-
-        N.println(account2);
-        assertNotNull(account2);
-    }
-
-    @Test
-    public void test_jsonValue() {
-        {
-            final LongEnum[] a = { LongEnum.TWO, LongEnum.ONE };
-            final String json = N.toJson(a);
-            N.println(json);
-
-            final LongEnum[] b = N.fromJson(json, LongEnum[].class);
-
-            assertTrue(N.equals(a, b));
-        }
-
-        {
-            final SingleValueObject[] a = { SingleValueObject.from("abc"), SingleValueObject.from("123") };
-            final String json = N.toJson(a);
-            N.println(json);
-
-            final SingleValueObject[] b = N.fromJson(json, SingleValueObject[].class);
-
-            assertTrue(N.equals(a, b));
-        }
-    }
-
-    @Test
-    public void test_2951() {
-        final String data = "{\"field1\": null, \"field2\": null, \"field3\": \"1\", \"field4\": null}";
-
-        final Model model = JSON.parseObject(data, Model.class);
-
-        assertEquals(model.field1, 0);
-        assertEquals(model.field2, 0F);
-        assertEquals(model.field3, "1");
-        assertNull(model.field4);
-        assertEquals(model.field5, 10000);
-    }
-
-    @Test
-    public void test_3083() {
-        final String s = "{'is_subscribe':1,'subscribe':3,'isHave':5}";
-        final TestBean b = JSON.parseObject(s, TestBean.class);
-        println(b.is_subscribe + "--" + b.subscribe + "--" + b.isHave);
-
-        N.println(N.stringOf(N.fromJson(s, TestBean.class)));
-        assertNotNull(b);
-    }
-
-    @Test
-    public void test_3174() {
-        final TestDemo demo = new TestDemo();
-        demo.setName("测试");
-        demo.setNum(1);
-        demo.setIsFlag(true);
-        final List<TestDemo.Demo> demoList = new ArrayList<>();
-        demoList.add(new TestDemo.Demo("张三", "15566667777"));
-        demoList.add(new TestDemo.Demo("李四", "15577778888"));
-        demoList.add(new TestDemo.Demo("王五", "15588889999"));
-        demo.setDemoList(demoList);
-        final Map<String, List<TestDemo.Demo>> map = new HashMap<>();
-        map.put("11", demoList);
-        demo.setMap(map);
-
-        N.println(JSON.toJSONString(demo));
-        N.println(N.toJson(demo));
-        assertNotNull(map);
-    }
-
-    @Test
-    public void test_stream() throws IOException {
-        final List<Account> accountList = createAccountList(Account.class, 10);
-        accountList.add(accountList.size() / 2, null);
-        accountList.add(0, null);
-
-        String json = jsonParser.serialize(accountList);
-
-        N.println(json);
-
-        final String str = jsonParser.stream(json, Type.of(Account.class)).skip(2).filter(it -> it.getId() >= 0).map(Account::getId).limit(3).join(", ");
-
-        N.println(str);
-
-        assertEquals("0, 0, 0", str);
-
-        assertEquals(accountList.size(), jsonParser.stream(json, Type.of(Account.class)).count());
-        assertEquals(accountList, jsonParser.stream(json, Type.of(Account.class)).toList());
-
-        json = "[ \n ]";
-
-        assertEquals(0, jsonParser.stream(json, Type.of(Account.class)).count());
-    }
-
-    @Test
-    public void test_jsonXmlConfig() throws JsonProcessingException {
-        java.sql.Date currentDate = Dates.currentDate();
-
-        String gui = "271e92c2-a3f1-40ef-af81-18e1bbcef490";
-
-        BeanF bean = BeanF.builder()
-                .id(1001)
-                .gui(gui)
-                .json(N.toJson(N.asMap("key1", 2, "key2", Dates.currentCalendar(), "key3", Dates.currentDate()),
-                        JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP)))
-                .json2(N.toList(N.asMap("aa", currentDate)))
-                .build();
-
-        String json = N.toJson(bean);
-
-        N.println(json);
-
-        N.println(objMapper.writeValueAsString(bean));
-
-        BeanF bean2 = N.fromJson(json, BeanF.class);
-
-        N.println(bean);
-        N.println(bean2);
-
-        assertNotSame(bean, bean2);
-
-        bean2.setGui(bean.getGui());
-        N.println(bean2);
-
-        assertEquals(bean, bean2);
-    }
-
-    @Test
-    public void test_parse_withClass() {
-        String json = "\"hello\"";
-        String result = parser.parse(json, String.class);
-        Assertions.assertEquals("\"hello\"", result);
-
-        String numJson = "42";
-        Integer numResult = parser.parse(numJson, Integer.class);
-        Assertions.assertEquals(42, numResult);
-
-        String mapJson = "{\"name\":\"John\",\"age\":30}";
-        Map<?, ?> mapResult = parser.parse(mapJson, Map.class);
-        Assertions.assertEquals("John", mapResult.get("name"));
-        Assertions.assertEquals(30, mapResult.get("age"));
-
-        String listJson = "[1,2,3]";
-        List<?> listResult = parser.parse(listJson, List.class);
-        Assertions.assertEquals(3, listResult.size());
-        Assertions.assertEquals(1, listResult.get(0));
-
-        String nullResult = parser.parse(null, String.class);
-        Assertions.assertNull(nullResult);
-    }
-
-    @Test
-    public void test_parse_withConfigAndClass() {
-        String json = "{\"name\":\"Jane\",\"age\":25}";
-        JsonDeserConfig config = new JsonDeserConfig();
-
-        Map<?, ?> result = parser.parse(json, config, Map.class);
-        Assertions.assertEquals("Jane", result.get("name"));
-        Assertions.assertEquals(25, result.get("age"));
-
-        Map<?, ?> result2 = parser.parse(json, null, Map.class);
-        Assertions.assertEquals("Jane", result2.get("name"));
-
-        String boolJson = "true";
-        Boolean boolResult = parser.parse(boolJson, config, Boolean.class);
-        Assertions.assertEquals(true, boolResult);
-    }
-
-    @Test
-    public void test_parse_toArray() {
-        String json = "[1,2,3,4,5]";
-        Integer[] array = new Integer[5];
-        parser.parse(json, array);
-
-        Assertions.assertEquals(1, array[0]);
-        Assertions.assertEquals(2, array[1]);
-        Assertions.assertEquals(3, array[2]);
-        Assertions.assertEquals(4, array[3]);
-        Assertions.assertEquals(5, array[4]);
-
-        String strJson = "[\"a\",\"b\",\"c\"]";
-        String[] strArray = new String[3];
-        parser.parse(strJson, strArray);
-        Assertions.assertEquals("a", strArray[0]);
-        Assertions.assertEquals("b", strArray[1]);
-        Assertions.assertEquals("c", strArray[2]);
-    }
-
-    @Test
-    public void test_parse_toArrayWithConfig() {
-        String json = "[10,20,30]";
-        Integer[] array = new Integer[3];
-        JsonDeserConfig config = new JsonDeserConfig();
-
-        parser.parse(json, config, array);
-        Assertions.assertEquals(10, array[0]);
-        Assertions.assertEquals(20, array[1]);
-        Assertions.assertEquals(30, array[2]);
-
-        Integer[] array2 = new Integer[3];
-        parser.parse(json, null, array2);
-        Assertions.assertEquals(10, array2[0]);
-        Assertions.assertEquals(20, array2[1]);
-        Assertions.assertEquals(30, array2[2]);
-    }
-
-    @Test
-    public void test_parse_toCollection() {
-        String json = "[1,2,3,4]";
-        List<Integer> list = new ArrayList<>();
-        parser.parse(json, list);
-
-        Assertions.assertEquals(4, list.size());
-        Assertions.assertEquals(1, list.get(0));
-        Assertions.assertEquals(2, list.get(1));
-        Assertions.assertEquals(3, list.get(2));
-        Assertions.assertEquals(4, list.get(3));
-
-        List<Integer> list2 = new ArrayList<>();
-        list2.add(999);
-        parser.parse(json, list2);
-        Assertions.assertEquals(5, list2.size());
-        Assertions.assertEquals(999, list2.get(0));
-    }
-
-    @Test
-    public void test_parse_toCollectionWithConfig() {
-        String json = "[\"x\",\"y\",\"z\"]";
-        List<String> list = new ArrayList<>();
-        JsonDeserConfig config = new JsonDeserConfig();
-
-        parser.parse(json, config, list);
-        Assertions.assertEquals(3, list.size());
-        Assertions.assertEquals("x", list.get(0));
-        Assertions.assertEquals("y", list.get(1));
-        Assertions.assertEquals("z", list.get(2));
-
-        List<String> list2 = new ArrayList<>();
-        parser.parse(json, null, list2);
-        Assertions.assertEquals(3, list2.size());
-    }
-
-    @Test
-    public void test_parse_toMap() {
-        String json = "{\"key1\":\"value1\",\"key2\":\"value2\",\"key3\":\"value3\"}";
-        Map<String, String> map = new HashMap<>();
-        parser.parse(json, map);
-
-        Assertions.assertEquals(3, map.size());
-        Assertions.assertEquals("value1", map.get("key1"));
-        Assertions.assertEquals("value2", map.get("key2"));
-        Assertions.assertEquals("value3", map.get("key3"));
-
-        Map<String, String> map2 = new HashMap<>();
-        map2.put("old", "data");
-        parser.parse(json, map2);
-        Assertions.assertEquals(4, map2.size());
-        Assertions.assertEquals("data", map2.get("old"));
-    }
-
-    @Test
-    public void test_parse_toMapWithConfig() {
-        String json = "{\"a\":1,\"b\":2,\"c\":3}";
-        Map<String, Integer> map = new LinkedHashMap<>();
-        JsonDeserConfig config = new JsonDeserConfig();
-
-        parser.parse(json, config, map);
-        Assertions.assertEquals(3, map.size());
-        Assertions.assertEquals(1, map.get("a"));
-        Assertions.assertEquals(2, map.get("b"));
-        Assertions.assertEquals(3, map.get("c"));
-
-        Map<String, Integer> map2 = new HashMap<>();
-        parser.parse(json, null, map2);
-        Assertions.assertEquals(3, map2.size());
-    }
-
-    @Test
     public void test_deserialize_substring() {
         String json = "prefix{\"name\":\"Bob\",\"age\":35}suffix";
         int fromIndex = 6;
@@ -978,286 +1009,6 @@ public class JsonParserTest extends AbstractJsonParserTest {
     }
 
     @Test
-    public void test_stream_fromString() {
-        String json = "[{\"id\":1,\"name\":\"Alice\"},{\"id\":2,\"name\":\"Bob\"},{\"id\":3,\"name\":\"Charlie\"}]";
-
-        try (Stream<Map> stream = parser.stream(json, Type.of(Map.class))) {
-            List<Map> list = stream.toList();
-            Assertions.assertEquals(3, list.size());
-            Assertions.assertEquals(1, list.get(0).get("id"));
-            Assertions.assertEquals("Alice", list.get(0).get("name"));
-            Assertions.assertEquals(2, list.get(1).get("id"));
-            Assertions.assertEquals("Bob", list.get(1).get("name"));
-            Assertions.assertEquals(3, list.get(2).get("id"));
-            Assertions.assertEquals("Charlie", list.get(2).get("name"));
-        }
-
-        try (Stream<Map> stream = parser.stream(json, Type.of(Map.class))) {
-            long count = stream.filter(m -> (Integer) m.get("id") > 1).count();
-            Assertions.assertEquals(2, count);
-        }
-    }
-
-    @Test
-    public void test_stream_fromStringWithConfig() {
-        String json = "[{\"value\":10},{\"value\":20},{\"value\":30}]";
-        JsonDeserConfig config = new JsonDeserConfig();
-
-        try (Stream<Map> stream = parser.stream(json, config, Type.of(Map.class))) {
-            List<Map> list = stream.toList();
-            Assertions.assertEquals(3, list.size());
-            Assertions.assertEquals(10, list.get(0).get("value"));
-            Assertions.assertEquals(20, list.get(1).get("value"));
-            Assertions.assertEquals(30, list.get(2).get("value"));
-        }
-
-        try (Stream<Map> stream = parser.stream(json, null, Type.of(Map.class))) {
-            List<Map> list = stream.toList();
-            Assertions.assertEquals(3, list.size());
-        }
-    }
-
-    @Test
-    public void test_stream_fromFile() throws Exception {
-        String json = "[{\"num\":1},{\"num\":2},{\"num\":3}]";
-        tempFile = File.createTempFile("test", ".json");
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            writer.write(json);
-        }
-
-        try (Stream<Map> stream = parser.stream(tempFile, Type.of(Map.class))) {
-            List<Map> list = stream.toList();
-            Assertions.assertEquals(3, list.size());
-            Assertions.assertEquals(1, list.get(0).get("num"));
-            Assertions.assertEquals(2, list.get(1).get("num"));
-            Assertions.assertEquals(3, list.get(2).get("num"));
-        }
-    }
-
-    @Test
-    public void test_stream_fromFileWithConfig() throws Exception {
-        String json = "[{\"data\":\"A\"},{\"data\":\"B\"}]";
-        tempFile = File.createTempFile("test", ".json");
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            writer.write(json);
-        }
-
-        JsonDeserConfig config = new JsonDeserConfig();
-        try (Stream<Map> stream = parser.stream(tempFile, config, Type.of(Map.class))) {
-            List<Map> list = stream.toList();
-            Assertions.assertEquals(2, list.size());
-            Assertions.assertEquals("A", list.get(0).get("data"));
-            Assertions.assertEquals("B", list.get(1).get("data"));
-        }
-
-        try (Stream<Map> stream = parser.stream(tempFile, null, Type.of(Map.class))) {
-            List<Map> list = stream.toList();
-            Assertions.assertEquals(2, list.size());
-        }
-    }
-
-    @Test
-    public void test_stream_fromInputStream() {
-        String json = "[{\"id\":100},{\"id\":200}]";
-        InputStream inputStream = new ByteArrayInputStream(json.getBytes());
-
-        try (Stream<Map> stream = parser.stream(inputStream, true, Type.of(Map.class))) {
-            List<Map> list = stream.toList();
-            Assertions.assertEquals(2, list.size());
-            Assertions.assertEquals(100, list.get(0).get("id"));
-            Assertions.assertEquals(200, list.get(1).get("id"));
-        }
-
-        InputStream inputStream2 = new ByteArrayInputStream(json.getBytes());
-        try (Stream<Map> stream = parser.stream(inputStream2, false, Type.of(Map.class))) {
-            List<Map> list = stream.toList();
-            Assertions.assertEquals(2, list.size());
-        }
-    }
-
-    @Test
-    public void test_stream_fromInputStreamWithConfig() {
-        String json = "[{\"val\":\"X\"},{\"val\":\"Y\"},{\"val\":\"Z\"}]";
-        InputStream inputStream = new ByteArrayInputStream(json.getBytes());
-        JsonDeserConfig config = new JsonDeserConfig();
-
-        try (Stream<Map> stream = parser.stream(inputStream, true, config, Type.of(Map.class))) {
-            List<Map> list = stream.toList();
-            Assertions.assertEquals(3, list.size());
-            Assertions.assertEquals("X", list.get(0).get("val"));
-            Assertions.assertEquals("Y", list.get(1).get("val"));
-            Assertions.assertEquals("Z", list.get(2).get("val"));
-        }
-
-        InputStream inputStream2 = new ByteArrayInputStream(json.getBytes());
-        try (Stream<Map> stream = parser.stream(inputStream2, true, null, Type.of(Map.class))) {
-            List<Map> list = stream.toList();
-            Assertions.assertEquals(3, list.size());
-        }
-    }
-
-    @Test
-    public void test_stream_fromReader() {
-        String json = "[{\"code\":1001},{\"code\":1002}]";
-        Reader reader = new StringReader(json);
-
-        try (Stream<Map> stream = parser.stream(reader, true, Type.of(Map.class))) {
-            List<Map> list = stream.toList();
-            Assertions.assertEquals(2, list.size());
-            Assertions.assertEquals(1001, list.get(0).get("code"));
-            Assertions.assertEquals(1002, list.get(1).get("code"));
-        }
-
-        Reader reader2 = new StringReader(json);
-        try (Stream<Map> stream = parser.stream(reader2, false, Type.of(Map.class))) {
-            List<Map> list = stream.toList();
-            Assertions.assertEquals(2, list.size());
-        }
-    }
-
-    @Test
-    public void test_stream_fromReaderWithConfig() {
-        String json = "[{\"item\":\"apple\"},{\"item\":\"banana\"},{\"item\":\"cherry\"}]";
-        Reader reader = new StringReader(json);
-        JsonDeserConfig config = new JsonDeserConfig();
-
-        try (Stream<Map> stream = parser.stream(reader, true, config, Type.of(Map.class))) {
-            List<Map> list = stream.toList();
-            Assertions.assertEquals(3, list.size());
-            Assertions.assertEquals("apple", list.get(0).get("item"));
-            Assertions.assertEquals("banana", list.get(1).get("item"));
-            Assertions.assertEquals("cherry", list.get(2).get("item"));
-        }
-
-        Reader reader2 = new StringReader(json);
-        try (Stream<Map> stream = parser.stream(reader2, true, null, Type.of(Map.class))) {
-            List<Map> list = stream.toList();
-            Assertions.assertEquals(3, list.size());
-        }
-    }
-
-    @Test
-    public void test_edgeCases_emptyArray() {
-        String json = "[]";
-        List<Integer> list = new ArrayList<>();
-        parser.parse(json, list);
-        Assertions.assertEquals(0, list.size());
-    }
-
-    @Test
-    public void test_edgeCases_emptyMap() {
-        String json = "{}";
-        Map<String, Object> map = new HashMap<>();
-        parser.parse(json, map);
-        Assertions.assertEquals(0, map.size());
-    }
-
-    @Test
-    public void test_edgeCases_nestedStructures() {
-        String json = "{\"outer\":{\"inner\":{\"value\":42}}}";
-        Map<?, ?> result = parser.parse(json, Map.class);
-        Map<?, ?> outer = (Map<?, ?>) result.get("outer");
-        Map<?, ?> inner = (Map<?, ?>) outer.get("inner");
-        Assertions.assertEquals(42, inner.get("value"));
-    }
-
-    @Test
-    public void test_edgeCases_arrayOfArrays() {
-        String json = "[[1,2],[3,4],[5,6]]";
-        List<?> result = parser.parse(json, List.class);
-        Assertions.assertEquals(3, result.size());
-        List<?> first = (List<?>) result.get(0);
-        Assertions.assertEquals(2, first.size());
-        Assertions.assertEquals(1, first.get(0));
-        Assertions.assertEquals(2, first.get(1));
-    }
-
-    @Test
-    public void testparseWithClass() {
-        String json = "\"test\"";
-        String result = parser.parse(json, String.class);
-        Assertions.assertEquals("\"test\"", result);
-
-        String nullResult = parser.parse(null, String.class);
-        Assertions.assertNull(nullResult);
-    }
-
-    @Test
-    public void testparseWithConfigAndClass() {
-        String json = "{\"name\":\"John\",\"age\":30}";
-        Map<String, Object> result = parser.parse(json, null, Map.class);
-        Assertions.assertEquals("John", result.get("name"));
-        Assertions.assertEquals(30, result.get("age"));
-    }
-
-    @Test
-    public void testparseToArray() {
-        String json = "[1,2,3]";
-        Integer[] array = new Integer[3];
-        parser.parse(json, array);
-        Assertions.assertEquals(1, array[0]);
-        Assertions.assertEquals(2, array[1]);
-        Assertions.assertEquals(3, array[2]);
-    }
-
-    @Test
-    public void testparseToArrayWithConfig() {
-        String json = "[\"a\",\"b\",\"c\"]";
-        String[] array = new String[3];
-        parser.parse(json, null, array);
-        Assertions.assertEquals("a", array[0]);
-        Assertions.assertEquals("b", array[1]);
-        Assertions.assertEquals("c", array[2]);
-    }
-
-    @Test
-    public void testparseToCollection() {
-        String json = "[1,2,3]";
-        List<Integer> list = new ArrayList<>();
-        parser.parse(json, list);
-        Assertions.assertEquals(3, list.size());
-        Assertions.assertEquals(1, list.get(0));
-        Assertions.assertEquals(2, list.get(1));
-        Assertions.assertEquals(3, list.get(2));
-    }
-
-    @Test
-    public void testparseToCollectionWithConfig() {
-        String json = "[\"x\",\"y\",\"z\"]";
-        List<String> list = new ArrayList<>();
-        parser.parse(json, null, list);
-        Assertions.assertEquals(3, list.size());
-        Assertions.assertEquals("x", list.get(0));
-        Assertions.assertEquals("y", list.get(1));
-        Assertions.assertEquals("z", list.get(2));
-    }
-
-    @Test
-    public void testparseToMap() {
-        String json = "{\"key1\":\"value1\",\"key2\":\"value2\"}";
-        Map<String, String> map = new HashMap<>();
-        parser.parse(json, map);
-        Assertions.assertEquals("value1", map.get("key1"));
-        Assertions.assertEquals("value2", map.get("key2"));
-    }
-
-    @Test
-    public void testparseToMapWithConfig() {
-        String json = "{\"a\":1,\"b\":2}";
-        Map<String, Integer> map = new HashMap<>();
-        parser.parse(json, null, map);
-        Assertions.assertEquals(1, map.get("a"));
-        Assertions.assertEquals(2, map.get("b"));
-    }
-
-    @Test
-    public void testDeserializeSubstring() {
-        String json = "prefix{\"value\":123}suffix";
-        Map<String, Object> result = parser.deserialize(json, 6, 19, Map.class);
-        Assertions.assertEquals(123, result.get("value"));
-    }
-
-    @Test
     public void testDeserializeSubstringWithConfig() {
         String json = "xxx[1,2,3]yyy";
         List<Integer> result = parser.deserialize(json, 3, 10, null, List.class);
@@ -1265,372 +1016,6 @@ public class JsonParserTest extends AbstractJsonParserTest {
         Assertions.assertEquals(1, result.get(0));
         Assertions.assertEquals(2, result.get(1));
         Assertions.assertEquals(3, result.get(2));
-    }
-
-    //
-    //    @Test
-    //    public void testDeserializeRejectsTrailingTokensAfterList() {
-    //        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[1,2] true", List.class));
-    //    }
-
-    //
-    //
-    //
-    //
-    @Test
-    public void testStreamFromString() {
-        String json = "[{\"id\":1},{\"id\":2},{\"id\":3}]";
-        try (Stream<Map> stream = parser.stream(json, Type.of(Map.class))) {
-            List<Map> list = stream.toList();
-            Assertions.assertEquals(3, list.size());
-            Assertions.assertEquals(1, list.get(0).get("id"));
-            Assertions.assertEquals(2, list.get(1).get("id"));
-            Assertions.assertEquals(3, list.get(2).get("id"));
-        }
-    }
-
-    @Test
-    @Disabled("This test is disabled due to the element type is not supported type: array/collection/map/bean.")
-    public void testStreamFromStringWithConfig() {
-        String json = "[\"a\",\"b\",\"c\"]";
-        try (Stream<String> stream = parser.stream(json, null, Type.of(String.class))) {
-            List<String> list = stream.toList();
-            Assertions.assertEquals(3, list.size());
-            Assertions.assertEquals("a", list.get(0));
-            Assertions.assertEquals("b", list.get(1));
-            Assertions.assertEquals("c", list.get(2));
-        }
-    }
-
-    @Test
-    @Disabled("This test is disabled due to the element type is not supported type: array/collection/map/bean.")
-    public void testStreamFromInputStream() {
-        String json = "[1,2,3]";
-        InputStream is = new ByteArrayInputStream(json.getBytes());
-        try (Stream<Integer> stream = parser.stream(is, true, Type.of(Integer.class))) {
-            List<Integer> list = stream.toList();
-            Assertions.assertEquals(3, list.size());
-            Assertions.assertEquals(1, list.get(0));
-            Assertions.assertEquals(2, list.get(1));
-            Assertions.assertEquals(3, list.get(2));
-        }
-    }
-
-    @Test
-    public void testStreamFromInputStreamWithConfig() {
-        String json = "[{\"x\":1},{\"x\":2}]";
-        InputStream is = new ByteArrayInputStream(json.getBytes());
-        try (Stream<Map> stream = parser.stream(is, true, null, Type.of(Map.class))) {
-            List<Map> list = stream.toList();
-            Assertions.assertEquals(2, list.size());
-            Assertions.assertEquals(1, list.get(0).get("x"));
-            Assertions.assertEquals(2, list.get(1).get("x"));
-        }
-    }
-
-    @Test
-    @Disabled("This test is disabled due to the element type is not supported type: array/collection/map/bean.")
-    public void testStreamFromReader() {
-        String json = "[\"hello\",\"world\"]";
-        Reader reader = new StringReader(json);
-        try (Stream<String> stream = parser.stream(reader, true, Type.of(String.class))) {
-            List<String> list = stream.toList();
-            Assertions.assertEquals(2, list.size());
-            Assertions.assertEquals("hello", list.get(0));
-            Assertions.assertEquals("world", list.get(1));
-        }
-    }
-
-    @Test
-    public void testStreamFromReaderWithConfig() {
-        String json = "[{\"n\":100},{\"n\":200}]";
-        Reader reader = new StringReader(json);
-        try (Stream<Map> stream = parser.stream(reader, true, null, Type.of(Map.class))) {
-            List<Map> list = stream.toList();
-            Assertions.assertEquals(2, list.size());
-            Assertions.assertEquals(100, list.get(0).get("n"));
-            Assertions.assertEquals(200, list.get(1).get("n"));
-        }
-    }
-
-    @Test
-    public void test_writeLongAsString() throws Exception {
-        assertDoesNotThrow(() -> {
-            Map<String, Object> map = N.asMap("key1", Long.valueOf(123), "Long.MAX_VALUE", Long.MAX_VALUE, "Integer.MAX_VALUE", Integer.MAX_VALUE,
-                    "Integer.MIN_VALUE", Integer.MIN_VALUE);
-            N.println(N.toJson(map));
-
-            N.println(N.toJson(map, JsonSerConfig.create().setWriteLongAsString(true)));
-        });
-    }
-
-    @Test
-    public void test_double() throws Exception {
-        String bigNum = Strings.repeat("6", 309) + "." + Strings.repeat("8", 10);
-
-        {
-            Map map = N.asMap("key", new BigDecimal(bigNum));
-            String json = N.toJson(map);
-
-            N.println(json);
-
-            Map map01 = N.fromJson(json, Map.class);
-            N.println(map01);
-
-            assertEquals(map, map01);
-        }
-    }
-
-    @Test
-    public void test_02() {
-        Object obj = N.toList(N.asMap("key", "value", "key2", "value2", "num1", 1, "num2", "92390asdflkj"));
-        String json = N.toJson(obj);
-        N.println(json);
-
-        N.println(N.fromJson(json, Object.class));
-
-        N.println(N.formatJson(json));
-
-        json = "[{\"key2\":\"value2\", \"num2\":92390aef, \"num1\":1, \"key\":\"value\"}]";
-
-        N.println(N.fromJson(json, Object.class));
-
-        N.println(N.formatJson(json));
-        assertNotNull(json);
-    }
-
-    @Test
-    public void test_01() {
-        Object obj = N.toList(N.asMap("key", "value", "key2", "value2"));
-        String json = N.toJson(obj);
-        N.println(json);
-
-        N.println(N.fromJson(json, Object.class));
-
-        N.println(N.formatJson(json));
-        assertNotNull(json);
-    }
-
-    @Test
-    public void test_prettyFormat() {
-        Account account = createAccountWithContact(Account.class);
-        account.setId(100);
-
-        JsonSerConfig config = JsonSerConfig.create().setQuotePropName(true).setQuoteMapKey(true).setPrettyFormat(true).setIndentation("    ");
-
-        String str = jsonParser.serialize(account, config);
-        N.println("============account=====================================================================================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-
-        str = jsonParser.serialize(N.asArray(account, account), config);
-        N.println("============Array.of(account, account)=================================================================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-
-        str = jsonParser.serialize(N.toList(account, account), config);
-        N.println("============N.toList(account, account)===================================================================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-
-        str = jsonParser.serialize(Beans.deepBeanToMap(account), config);
-        N.println("============(N.deepBeanToMap(account)==================================================================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-
-        str = jsonParser.serialize(new Object[] { Beans.deepBeanToMap(account), account }, config);
-        N.println("============Array.of(N.deepBeanToMap(account), account)===============================================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-
-        str = jsonParser.serialize(N.toList(Beans.deepBeanToMap(account), account), config);
-        N.println("============N.toList(N.deepBeanToMap(account), account)================================================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-
-        str = jsonParser.serialize(new Object[] { new Object[] { account, account }, N.toList(account, account) }, config);
-        N.println("============Array.of(Array.of(account, account), N.toList(account, account))==========================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-
-        str = jsonParser.serialize(N.toList(N.asArray(account, account), N.toList(account, account)), config);
-        N.println("============N.toList(Array.of(account, account), N.toList(account, account))===========================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-
-        str = jsonParser.serialize(Seid.of(AccountPNL.ID, "abc123"), config);
-        N.println("============Seid.valueOf(Account.ID, \"abc123\")========================================================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-
-        str = jsonParser.serialize(Seid.of(AccountPNL.ID, "abc123", AccountPNL.LAST_NAME, "lastName"), config);
-        N.println("============Seid.valueOf(Account.ID, \"abc123\", Account.LAST_NAME, \"lastName\")=======================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-
-        XBean xBean = new XBean();
-        xBean.setTypeBoolean(true);
-        xBean.setTypeBoolean2(Boolean.FALSE);
-        xBean.setTypeChar('黎');
-        xBean.setTypeChar2('>');
-        xBean.setTypeByte((byte) 0);
-        xBean.setTypeShort((short) 2);
-        xBean.setTypeInt(3);
-        xBean.setTypeLong(4);
-        xBean.setTypeLong2((long) 5);
-        xBean.setTypeFloat(1.01f);
-        xBean.setTypeDouble(2.3134454d);
-
-        xBean.setTypeString(">string黎< > </ <//、");
-
-        List<Object> typeList = new ArrayList<>();
-        typeList.add(account.getFirstName());
-        typeList.add(account);
-        typeList.add(account.getContact());
-        typeList.add(account);
-        typeList.add(null);
-        typeList.add(null);
-        typeList.add(new HashMap<>());
-        typeList.add(new ArrayList<>());
-        typeList.add(new HashSet<>());
-        xBean.setTypeList(typeList);
-
-        xBean.setWeekDay(WeekDay.THURSDAY);
-
-        str = jsonParser.serialize(xBean, config);
-
-        N.println("============xBean=======================================================================================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-        assertNotNull(str);
-    }
-
-    @Test
-    @Tag("slow-test")
-    public void test_readerPerformance() {
-        assertDoesNotThrow(() -> {
-            Profiler.run(6, 100, 1, this::test_reader).printResult();
-        });
-    }
-
-    @Test
-    public void test_parser_1() throws Exception {
-        Account account = createAccount(Account.class);
-        File file = new File("./src/test/resources/json.txt");
-
-        if (file.exists()) {
-            IOUtil.deleteRecursivelyIfExists(file);
-        }
-
-        OutputStream os = new FileOutputStream(file);
-        jsonParser.serialize(account, os);
-        IOUtil.close(os);
-
-        String str = IOUtil.readAllToString(file);
-        N.println(str);
-
-        Account account2 = jsonParser.deserialize(file, Account.class);
-
-        assertEquals(account, account2);
-
-        file.delete();
-
-        Writer writer = new FileWriter(file);
-        jsonParser.serialize(account, writer);
-        IOUtil.close(writer);
-
-        str = IOUtil.readAllToString(file);
-        N.println(str);
-
-        account2 = jsonParser.deserialize(file, Account.class);
-
-        assertEquals(account, account2);
-
-        IOUtil.deleteIfExists(file);
-    }
-
-    @Test
-    public void test_parser_2() throws Exception {
-        Account account = createAccount(Account.class);
-        File file = new File("./src/test/resources/json.txt");
-
-        if (file.exists()) {
-            IOUtil.deleteRecursivelyIfExists(file);
-        }
-
-        Writer writer = new FileWriter(file);
-        jsonParser.serialize(account, writer);
-        IOUtil.close(writer);
-
-        String str = IOUtil.readAllToString(file);
-        N.println(str);
-
-        Account account2 = jsonParser.deserialize(file, Account.class);
-
-        assertEquals(account, account2);
-        IOUtil.deleteIfExists(file);
-    }
-
-    @Test
-    public void test_reader() throws Exception {
-        final char[] cbuf = Objectory.createCharArrayBuffer();
-
-        final BufferedReader reader = Objectory.createBufferedReader(bigBeanStr);
-
-        JsonReader jr = JsonStringReader.parse(bigBeanStr, cbuf);
-
-        try {
-            while (jr.nextToken() > -1) {
-                if (jr.hasText()) {
-                    jr.getText();
-                }
-            }
-        } finally {
-            Objectory.recycle(reader);
-            Objectory.recycle(cbuf);
-        }
-        assertNotNull(jr);
-    }
-
-    @Test
-    public void testSerialize_map() {
-        Map<String, Object> m = N.asMap("firstName", "fn", "lastName", "ln", "birthday", "2003-08-08");
-        String str = jsonParser.serialize(m, JsonSerConfig.create().setQuotePropName(false).setQuoteMapKey(false));
-        N.println(str);
-
-        Map<String, Object> m2 = jsonParser.deserialize(str, Map.class);
-
-        N.println(m2);
-        assertEquals(m, m2);
-    }
-
-    @Test
-    public void testSerialize_0() {
-        XBean xBean = new XBean();
-
-        xBean.setTypeChar('<');
-        xBean.setTypeChar2('>');
-        xBean.setTypeString(
-                "‰β,『�?★业€ > \\n sfd \\r ds \\' f d // \\\\  \\\\\\\\ /// /////// \\\\\\\\\\\\\\\\  \\\\\\\\\\\\\\\\n \\\\\\\\\\\\\\\\r  \\t sd \\\" fe stri‰β,『�?★业€ ng黎< > </ <//、\\n");
-
-        String st = jsonParser.serialize(xBean);
-        println(st);
-
-        XBean xBean2 = jsonParser.deserialize(st, XBean.class);
-        println(xBean2);
-        assertEquals(xBean, xBean2);
-
-        Bean bean = new Bean();
-        bean.setBytes(new byte[] { 1, 2 });
-        bean.setStrings(new String[] { "aa", "bb", "<>>" });
-        bean.setChars(new char[] { '\r', '\t', '\"', '\'', ' ', ',', ' ', ',' });
-        bean.setChars2(new Character[] { '\r', '\t', '\"', '\'', ' ', ',', ' ', ',' });
-
-        String jsonStr = jsonParser.serialize(bean);
-        println(jsonStr);
-
-        Bean xmlBean = jsonParser.deserialize(jsonStr, Bean.class);
-        assertEquals(bean, xmlBean);
     }
 
     @Test
@@ -1871,15 +1256,764 @@ public class JsonParserTest extends AbstractJsonParserTest {
 
     }
 
-    public static XBean createBigXBean(int size) {
+    @Test
+    public void test_parser_1() throws Exception {
         Account account = createAccount(Account.class);
-        AccountContact contact = createAccountContact(AccountContact.class);
-        account.setContact(contact);
+        File file = new File("./src/test/resources/json.txt");
+
+        if (file.exists()) {
+            IOUtil.deleteRecursivelyIfExists(file);
+        }
+
+        OutputStream os = new FileOutputStream(file);
+        jsonParser.serialize(account, os);
+        IOUtil.close(os);
+
+        String str = IOUtil.readAllToString(file);
+        N.println(str);
+
+        Account account2 = jsonParser.deserialize(file, Account.class);
+
+        assertEquals(account, account2);
+
+        file.delete();
+
+        Writer writer = new FileWriter(file);
+        jsonParser.serialize(account, writer);
+        IOUtil.close(writer);
+
+        str = IOUtil.readAllToString(file);
+        N.println(str);
+
+        account2 = jsonParser.deserialize(file, Account.class);
+
+        assertEquals(account, account2);
+
+        IOUtil.deleteIfExists(file);
+    }
+
+    @Test
+    public void test_parser_2() throws Exception {
+        Account account = createAccount(Account.class);
+        File file = new File("./src/test/resources/json.txt");
+
+        if (file.exists()) {
+            IOUtil.deleteRecursivelyIfExists(file);
+        }
+
+        Writer writer = new FileWriter(file);
+        jsonParser.serialize(account, writer);
+        IOUtil.close(writer);
+
+        String str = IOUtil.readAllToString(file);
+        N.println(str);
+
+        Account account2 = jsonParser.deserialize(file, Account.class);
+
+        assertEquals(account, account2);
+        IOUtil.deleteIfExists(file);
+    }
+
+    @Test
+    public void test_stream_fromString() {
+        String json = "[{\"id\":1,\"name\":\"Alice\"},{\"id\":2,\"name\":\"Bob\"},{\"id\":3,\"name\":\"Charlie\"}]";
+
+        try (Stream<Map> stream = parser.stream(json, Type.of(Map.class))) {
+            List<Map> list = stream.toList();
+            Assertions.assertEquals(3, list.size());
+            Assertions.assertEquals(1, list.get(0).get("id"));
+            Assertions.assertEquals("Alice", list.get(0).get("name"));
+            Assertions.assertEquals(2, list.get(1).get("id"));
+            Assertions.assertEquals("Bob", list.get(1).get("name"));
+            Assertions.assertEquals(3, list.get(2).get("id"));
+            Assertions.assertEquals("Charlie", list.get(2).get("name"));
+        }
+
+        try (Stream<Map> stream = parser.stream(json, Type.of(Map.class))) {
+            long count = stream.filter(m -> (Integer) m.get("id") > 1).count();
+            Assertions.assertEquals(2, count);
+        }
+    }
+
+    @Test
+    public void test_stream_fromReader() {
+        String json = "[{\"code\":1001},{\"code\":1002}]";
+        Reader reader = new StringReader(json);
+
+        try (Stream<Map> stream = parser.stream(reader, true, Type.of(Map.class))) {
+            List<Map> list = stream.toList();
+            Assertions.assertEquals(2, list.size());
+            Assertions.assertEquals(1001, list.get(0).get("code"));
+            Assertions.assertEquals(1002, list.get(1).get("code"));
+        }
+
+        Reader reader2 = new StringReader(json);
+        try (Stream<Map> stream = parser.stream(reader2, false, Type.of(Map.class))) {
+            List<Map> list = stream.toList();
+            Assertions.assertEquals(2, list.size());
+        }
+    }
+
+    //
+    //    @Test
+    //    public void testDeserializeRejectsTrailingTokensAfterList() {
+    //        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[1,2] true", List.class));
+    //    }
+
+    //
+    //
+    //
+    //
+    @Test
+    public void testStreamFromString() {
+        String json = "[{\"id\":1},{\"id\":2},{\"id\":3}]";
+        try (Stream<Map> stream = parser.stream(json, Type.of(Map.class))) {
+            List<Map> list = stream.toList();
+            Assertions.assertEquals(3, list.size());
+            Assertions.assertEquals(1, list.get(0).get("id"));
+            Assertions.assertEquals(2, list.get(1).get("id"));
+            Assertions.assertEquals(3, list.get(2).get("id"));
+        }
+    }
+
+    @Test
+    @Disabled("This test is disabled due to the element type is not supported type: array/collection/map/bean.")
+    public void testStreamFromReader() {
+        String json = "[\"hello\",\"world\"]";
+        Reader reader = new StringReader(json);
+        try (Stream<String> stream = parser.stream(reader, true, Type.of(String.class))) {
+            List<String> list = stream.toList();
+            Assertions.assertEquals(2, list.size());
+            Assertions.assertEquals("hello", list.get(0));
+            Assertions.assertEquals("world", list.get(1));
+        }
+    }
+
+    @Test
+    public void test_stream_fromStringWithConfig() {
+        String json = "[{\"value\":10},{\"value\":20},{\"value\":30}]";
+        JsonDeserConfig config = new JsonDeserConfig();
+
+        try (Stream<Map> stream = parser.stream(json, config, Type.of(Map.class))) {
+            List<Map> list = stream.toList();
+            Assertions.assertEquals(3, list.size());
+            Assertions.assertEquals(10, list.get(0).get("value"));
+            Assertions.assertEquals(20, list.get(1).get("value"));
+            Assertions.assertEquals(30, list.get(2).get("value"));
+        }
+
+        try (Stream<Map> stream = parser.stream(json, null, Type.of(Map.class))) {
+            List<Map> list = stream.toList();
+            Assertions.assertEquals(3, list.size());
+        }
+    }
+
+    @Test
+    public void test_stream_fromInputStream() {
+        String json = "[{\"id\":100},{\"id\":200}]";
+        InputStream inputStream = new ByteArrayInputStream(json.getBytes());
+
+        try (Stream<Map> stream = parser.stream(inputStream, true, Type.of(Map.class))) {
+            List<Map> list = stream.toList();
+            Assertions.assertEquals(2, list.size());
+            Assertions.assertEquals(100, list.get(0).get("id"));
+            Assertions.assertEquals(200, list.get(1).get("id"));
+        }
+
+        InputStream inputStream2 = new ByteArrayInputStream(json.getBytes());
+        try (Stream<Map> stream = parser.stream(inputStream2, false, Type.of(Map.class))) {
+            List<Map> list = stream.toList();
+            Assertions.assertEquals(2, list.size());
+        }
+    }
+
+    @Test
+    public void test_stream_fromInputStreamWithConfig() {
+        String json = "[{\"val\":\"X\"},{\"val\":\"Y\"},{\"val\":\"Z\"}]";
+        InputStream inputStream = new ByteArrayInputStream(json.getBytes());
+        JsonDeserConfig config = new JsonDeserConfig();
+
+        try (Stream<Map> stream = parser.stream(inputStream, true, config, Type.of(Map.class))) {
+            List<Map> list = stream.toList();
+            Assertions.assertEquals(3, list.size());
+            Assertions.assertEquals("X", list.get(0).get("val"));
+            Assertions.assertEquals("Y", list.get(1).get("val"));
+            Assertions.assertEquals("Z", list.get(2).get("val"));
+        }
+
+        InputStream inputStream2 = new ByteArrayInputStream(json.getBytes());
+        try (Stream<Map> stream = parser.stream(inputStream2, true, null, Type.of(Map.class))) {
+            List<Map> list = stream.toList();
+            Assertions.assertEquals(3, list.size());
+        }
+    }
+
+    @Test
+    public void test_stream_fromReaderWithConfig() {
+        String json = "[{\"item\":\"apple\"},{\"item\":\"banana\"},{\"item\":\"cherry\"}]";
+        Reader reader = new StringReader(json);
+        JsonDeserConfig config = new JsonDeserConfig();
+
+        try (Stream<Map> stream = parser.stream(reader, true, config, Type.of(Map.class))) {
+            List<Map> list = stream.toList();
+            Assertions.assertEquals(3, list.size());
+            Assertions.assertEquals("apple", list.get(0).get("item"));
+            Assertions.assertEquals("banana", list.get(1).get("item"));
+            Assertions.assertEquals("cherry", list.get(2).get("item"));
+        }
+
+        Reader reader2 = new StringReader(json);
+        try (Stream<Map> stream = parser.stream(reader2, true, null, Type.of(Map.class))) {
+            List<Map> list = stream.toList();
+            Assertions.assertEquals(3, list.size());
+        }
+    }
+
+    @Test
+    @Disabled("This test is disabled due to the element type is not supported type: array/collection/map/bean.")
+    public void testStreamFromStringWithConfig() {
+        String json = "[\"a\",\"b\",\"c\"]";
+        try (Stream<String> stream = parser.stream(json, null, Type.of(String.class))) {
+            List<String> list = stream.toList();
+            Assertions.assertEquals(3, list.size());
+            Assertions.assertEquals("a", list.get(0));
+            Assertions.assertEquals("b", list.get(1));
+            Assertions.assertEquals("c", list.get(2));
+        }
+    }
+
+    @Test
+    @Disabled("This test is disabled due to the element type is not supported type: array/collection/map/bean.")
+    public void testStreamFromInputStream() {
+        String json = "[1,2,3]";
+        InputStream is = new ByteArrayInputStream(json.getBytes());
+        try (Stream<Integer> stream = parser.stream(is, true, Type.of(Integer.class))) {
+            List<Integer> list = stream.toList();
+            Assertions.assertEquals(3, list.size());
+            Assertions.assertEquals(1, list.get(0));
+            Assertions.assertEquals(2, list.get(1));
+            Assertions.assertEquals(3, list.get(2));
+        }
+    }
+
+    @Test
+    public void testStreamFromInputStreamWithConfig() {
+        String json = "[{\"x\":1},{\"x\":2}]";
+        InputStream is = new ByteArrayInputStream(json.getBytes());
+        try (Stream<Map> stream = parser.stream(is, true, null, Type.of(Map.class))) {
+            List<Map> list = stream.toList();
+            Assertions.assertEquals(2, list.size());
+            Assertions.assertEquals(1, list.get(0).get("x"));
+            Assertions.assertEquals(2, list.get(1).get("x"));
+        }
+    }
+
+    @Test
+    public void testStreamFromReaderWithConfig() {
+        String json = "[{\"n\":100},{\"n\":200}]";
+        Reader reader = new StringReader(json);
+        try (Stream<Map> stream = parser.stream(reader, true, null, Type.of(Map.class))) {
+            List<Map> list = stream.toList();
+            Assertions.assertEquals(2, list.size());
+            Assertions.assertEquals(100, list.get(0).get("n"));
+            Assertions.assertEquals(200, list.get(1).get("n"));
+        }
+    }
+
+    @Test
+    public void test_stream() throws IOException {
+        final List<Account> accountList = createAccountList(Account.class, 10);
+        accountList.add(accountList.size() / 2, null);
+        accountList.add(0, null);
+
+        String json = jsonParser.serialize(accountList);
+
+        N.println(json);
+
+        final String str = jsonParser.stream(json, Type.of(Account.class)).skip(2).filter(it -> it.getId() >= 0).map(Account::getId).limit(3).join(", ");
+
+        N.println(str);
+
+        assertEquals("0, 0, 0", str);
+
+        assertEquals(accountList.size(), jsonParser.stream(json, Type.of(Account.class)).count());
+        assertEquals(accountList, jsonParser.stream(json, Type.of(Account.class)).toList());
+
+        json = "[ \n ]";
+
+        assertEquals(0, jsonParser.stream(json, Type.of(Account.class)).count());
+    }
+
+    @Test
+    public void test_stream_fromFile() throws Exception {
+        String json = "[{\"num\":1},{\"num\":2},{\"num\":3}]";
+        tempFile = File.createTempFile("test", ".json");
+        try (FileWriter writer = new FileWriter(tempFile)) {
+            writer.write(json);
+        }
+
+        try (Stream<Map> stream = parser.stream(tempFile, Type.of(Map.class))) {
+            List<Map> list = stream.toList();
+            Assertions.assertEquals(3, list.size());
+            Assertions.assertEquals(1, list.get(0).get("num"));
+            Assertions.assertEquals(2, list.get(1).get("num"));
+            Assertions.assertEquals(3, list.get(2).get("num"));
+        }
+    }
+
+    @Test
+    public void test_stream_fromFileWithConfig() throws Exception {
+        String json = "[{\"data\":\"A\"},{\"data\":\"B\"}]";
+        tempFile = File.createTempFile("test", ".json");
+        try (FileWriter writer = new FileWriter(tempFile)) {
+            writer.write(json);
+        }
+
+        JsonDeserConfig config = new JsonDeserConfig();
+        try (Stream<Map> stream = parser.stream(tempFile, config, Type.of(Map.class))) {
+            List<Map> list = stream.toList();
+            Assertions.assertEquals(2, list.size());
+            Assertions.assertEquals("A", list.get(0).get("data"));
+            Assertions.assertEquals("B", list.get(1).get("data"));
+        }
+
+        try (Stream<Map> stream = parser.stream(tempFile, null, Type.of(Map.class))) {
+            List<Map> list = stream.toList();
+            Assertions.assertEquals(2, list.size());
+        }
+    }
+
+    @Test
+    public void test_2817() throws Exception {
+        final LocalDateTime now = LocalDateTime.now();
+        Bean2817.builder().fieldA(now).build();
+
+        final Map<String, Object> map = new HashMap<>();
+        map.put("fieldA", Timestamp.valueOf(now).getTime());
+        final String json = N.toJson(map);
+
+        N.println(json);
+
+        final Bean2817 fromJson = N.fromJson(json, Bean2817.class);
+
+        N.println(fromJson);
+
+        final Map<String, BigDecimal> m = N.fromJson("{\"token\": 2.105465717176397390012604E+2043348}", Type.ofMap(String.class, BigDecimal.class));
+        N.println(m);
+
+        final Map<String, Double> m2 = N.fromJson("{\"token\": 2.105465717176397390012604E+2043348}", Type.ofMap(String.class, Double.class));
+        N.println(m2);
+        assertNotNull(m2);
+    }
+
+    @Test
+    public void test_2958() throws Exception {
+        N.println(TypeFactory.getType(AtomicDouble.class));
+
+        final UnsignedInteger unsignedInteger = UnsignedInteger.valueOf(String.valueOf(Integer.MIN_VALUE).replace("-", ""));
+        final UnsignedLong unsignedLong = UnsignedLong.valueOf(String.valueOf(Long.MIN_VALUE).replace("-", ""));
+        final BeanX bean = BeanX.builder()
+                .count0(unsignedInteger)
+                .count(unsignedLong)
+                .countA(new AtomicInteger(10))
+                .countB(new AtomicLong(Long.MAX_VALUE))
+                .countC(new AtomicDouble(100))
+                .countD(new MutableDouble(100))
+                .fieldA(new MutableBoolean(true))
+                .fieldB(MutableChar.of('a'))
+                .build();
+
+        final Map<String, Object> map = new HashMap<>();
+        map.put("count", unsignedLong);
+
+        System.out.println("fastjson2:  " + JSONObject.toJSONString(map));
+
+        final ObjectMapper objectMapper = new ObjectMapper();
+        System.out.println("jackson:  " + objectMapper.writeValueAsString(map));
+
+        final Gson gson = new GsonBuilder().create();
+        System.out.println("gson:  " + gson.toJson(map));
+
+        N.println(N.toJson(map));
+        N.println(N.toJson(bean));
+        assertEquals(
+                "{\"count0\": 2147483648, \"count\": 9223372036854775808, \"countA\": 10, \"countB\": 9223372036854775807, \"countC\": 100.0, \"countD\": 100.0, \"fieldA\": true, \"fieldB\": \"a\"}",
+                N.toJson(bean));
+        N.fromJson(N.toJson(bean), BeanX.class);
+        assertEquals(map, N.fromJson(N.toJson(map), Type.ofMap(String.class, UnsignedLong.class)));
+    }
+
+    @Test
+    public void test_emptyBean() {
+        final Object obj = new Object();
+        final SerializationConfig serializationConfig = JsonMappers.createSerializationConfig().without(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        String json = JsonMappers.toJson(obj, serializationConfig);
+        N.println(json);
+        json = JsonMappers.toJson(N.asMap("key1", obj, "key2", "ddd"), serializationConfig);
+        N.println(json);
+        json = JsonMappers.toJson(N.toList("key1", obj, "key2", "ddd"), serializationConfig);
+        N.println(json);
+
+        try {
+            json = N.toJson(obj);
+            fail("Should throw ParseException");
+        } catch (final ParsingException e) {
+
+        }
+
+        final JsonSerConfig jsc = JsonSerConfig.create().setFailOnEmptyBean(false);
+
+        json = N.toJson(obj, jsc);
+        N.println(json);
+        json = N.toJson(N.asMap("key1", obj, "key2", "ddd"), jsc);
+        N.println(json);
+        json = N.toJson(N.toList("key1", obj, "key2", "ddd"), jsc);
+        N.println(json);
+    }
+
+    @Test
+    public void test_selfReference() {
+        final List<Object> list = N.toList("a", "b");
+        list.add(list);
+
+        final Map<String, Object> map = N.toMap("a", "va", "b", 123);
+        map.put("c", map);
+
+        try {
+            N.toJson(list);
+            fail("Should throw StackOverflowError");
+        } catch (final StackOverflowError e) {
+
+        }
+
+        try {
+            N.toJson(map);
+            fail("Should throw StackOverflowError");
+        } catch (final StackOverflowError e) {
+
+        }
+
+        final JsonSerConfig jsc = JsonSerConfig.create().setSupportCircularReference(true);
+
+        String json = N.toJson(list, jsc);
+        N.println(json);
+
+        json = N.toJson(map, jsc);
+        N.println(json);
+    }
+
+    @Test
+    public void test_Map() {
+        final Map<Object, Object> map = N.asMap(1, "a", "b", 2, 3, 3, "d", "d", 10, "x");
+        final String json = N.toJson(map);
+        N.println(json);
+
+        final Map map2 = N.fromJson(json, Map.class);
+        N.println(map2);
+        assertNotNull(map2);
+    }
+
+    @Test
+    public void test_PropHandler() {
+
+        final Account account = Beans.newRandom(Account.class);
+        N.println(account);
+
+        account.setDevices(Beans.newRandomList(AccountDevice.class, 10));
+
+        final String json = N.toJson(account);
+        assertEquals(account, N.fromJson(json, Account.class));
+
+        final Account account2 = N.fromJson(json, JsonDeserConfig.create().setPropHandler("devices", (c, e) -> {
+            N.println(e);
+        }), Account.class);
+
+        assertEquals(0, account2.getDevices().size());
+
+    }
+
+    @Test
+    public void test_MalformedJsonException() {
+
+        final String str = "\\uXYZ";
+
+        final String result = N.fromJson(str, String.class);
+
+        N.println(result);
+        assertNotNull(result);
+    }
+
+    @Test
+    public void test_escape() {
+        final Map<String, Object> map = N.asMap("a", "kdafs'ksfkd\"", "b", "\"", "c", '\'');
+
+        N.println(N.toJson(map, true));
+
+        N.println(JSON.toJSONString(map));
+        assertNotNull(map);
+    }
+
+    @Test
+    public void test_Convert() {
+        final RoomIdentifier id = RoomIdentifier.ROOM_NAME;
+
+        final Map<RoomIdentifier, String> slots = new HashMap<>();
+        slots.put(RoomIdentifier.ROOM_NAME, "ROOM_NAME_TEST");
+
+        final String strSerialized = gson.toJson(slots);
+
+        final java.lang.reflect.Type type = new TypeToken<Map<RoomIdentifier, String>>() {
+        }.getType();
+        final Map<RoomIdentifier, String> slotsDeserialized = gson.fromJson(strSerialized, type);
+
+        System.out.println(gson.toJson(id));
+        System.out.println(strSerialized);
+        System.out.println(slotsDeserialized);
+
+        N.println(Strings.repeat('=', 80));
+
+        N.println(N.toJson(id));
+        final String json = N.toJson(slots);
+        N.println(json);
+        assertEquals("{\"MARKER_NAME\": \"ROOM_NAME_TEST\"}", json);
+        N.println(N.fromJson(json, new TypeReference<Map<RoomIdentifier, String>>() {
+        }.type()));
+        assertEquals(slots, N.fromJson(json, new TypeReference.TypeToken<Map<RoomIdentifier, String>>() {
+        }.type()));
+    }
+
+    @Test
+    public void test_ignoreProp() {
+        final Account account = createAccount(Account.class);
+
+        final String json = N.toJson(account, JsonSerConfig.create().setIgnoredPropNames(N.toSet("firstName")));
+
+        N.println(json);
+
+        final Account account2 = N.fromJson(json, JsonDeserConfig.create().setIgnoredPropNames(N.toSet("lastName")), Account.class);
+
+        N.println(account2);
+        assertNotNull(account2);
+    }
+
+    @Test
+    public void test_jsonValue() {
+        {
+            final LongEnum[] a = { LongEnum.TWO, LongEnum.ONE };
+            final String json = N.toJson(a);
+            N.println(json);
+
+            final LongEnum[] b = N.fromJson(json, LongEnum[].class);
+
+            assertTrue(N.equals(a, b));
+        }
+
+        {
+            final SingleValueObject[] a = { SingleValueObject.from("abc"), SingleValueObject.from("123") };
+            final String json = N.toJson(a);
+            N.println(json);
+
+            final SingleValueObject[] b = N.fromJson(json, SingleValueObject[].class);
+
+            assertTrue(N.equals(a, b));
+        }
+    }
+
+    @Test
+    public void test_2951() {
+        final String data = "{\"field1\": null, \"field2\": null, \"field3\": \"1\", \"field4\": null}";
+
+        final Model model = JSON.parseObject(data, Model.class);
+
+        assertEquals(model.field1, 0);
+        assertEquals(model.field2, 0F);
+        assertEquals(model.field3, "1");
+        assertNull(model.field4);
+        assertEquals(model.field5, 10000);
+    }
+
+    @Test
+    public void test_3083() {
+        final String s = "{'is_subscribe':1,'subscribe':3,'isHave':5}";
+        final TestBean b = JSON.parseObject(s, TestBean.class);
+        println(b.is_subscribe + "--" + b.subscribe + "--" + b.isHave);
+
+        N.println(N.stringOf(N.fromJson(s, TestBean.class)));
+        assertNotNull(b);
+    }
+
+    @Test
+    public void test_3174() {
+        final TestDemo demo = new TestDemo();
+        demo.setName("测试");
+        demo.setNum(1);
+        demo.setIsFlag(true);
+        final List<TestDemo.Demo> demoList = new ArrayList<>();
+        demoList.add(new TestDemo.Demo("张三", "15566667777"));
+        demoList.add(new TestDemo.Demo("李四", "15577778888"));
+        demoList.add(new TestDemo.Demo("王五", "15588889999"));
+        demo.setDemoList(demoList);
+        final Map<String, List<TestDemo.Demo>> map = new HashMap<>();
+        map.put("11", demoList);
+        demo.setMap(map);
+
+        N.println(JSON.toJSONString(demo));
+        N.println(N.toJson(demo));
+        assertNotNull(map);
+    }
+
+    @Test
+    public void test_jsonXmlConfig() throws JsonProcessingException {
+        java.sql.Date currentDate = Dates.currentDate();
+
+        String gui = "271e92c2-a3f1-40ef-af81-18e1bbcef490";
+
+        BeanF bean = BeanF.builder()
+                .id(1001)
+                .gui(gui)
+                .json(N.toJson(N.asMap("key1", 2, "key2", Dates.currentCalendar(), "key3", Dates.currentDate()),
+                        JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP)))
+                .json2(N.toList(N.asMap("aa", currentDate)))
+                .build();
+
+        String json = N.toJson(bean);
+
+        N.println(json);
+
+        N.println(objMapper.writeValueAsString(bean));
+
+        BeanF bean2 = N.fromJson(json, BeanF.class);
+
+        N.println(bean);
+        N.println(bean2);
+
+        assertNotSame(bean, bean2);
+
+        bean2.setGui(bean.getGui());
+        N.println(bean2);
+
+        assertEquals(bean, bean2);
+    }
+
+    @Test
+    public void test_writeLongAsString() throws Exception {
+        assertDoesNotThrow(() -> {
+            Map<String, Object> map = N.asMap("key1", Long.valueOf(123), "Long.MAX_VALUE", Long.MAX_VALUE, "Integer.MAX_VALUE", Integer.MAX_VALUE,
+                    "Integer.MIN_VALUE", Integer.MIN_VALUE);
+            N.println(N.toJson(map));
+
+            N.println(N.toJson(map, JsonSerConfig.create().setWriteLongAsString(true)));
+        });
+    }
+
+    @Test
+    public void test_double() throws Exception {
+        String bigNum = Strings.repeat("6", 309) + "." + Strings.repeat("8", 10);
+
+        {
+            Map map = N.asMap("key", new BigDecimal(bigNum));
+            String json = N.toJson(map);
+
+            N.println(json);
+
+            Map map01 = N.fromJson(json, Map.class);
+            N.println(map01);
+
+            assertEquals(map, map01);
+        }
+    }
+
+    @Test
+    public void test_02() {
+        Object obj = N.toList(N.asMap("key", "value", "key2", "value2", "num1", 1, "num2", "92390asdflkj"));
+        String json = N.toJson(obj);
+        N.println(json);
+
+        N.println(N.fromJson(json, Object.class));
+
+        N.println(N.formatJson(json));
+
+        json = "[{\"key2\":\"value2\", \"num2\":92390aef, \"num1\":1, \"key\":\"value\"}]";
+
+        N.println(N.fromJson(json, Object.class));
+
+        N.println(N.formatJson(json));
+        assertNotNull(json);
+    }
+
+    @Test
+    public void test_01() {
+        Object obj = N.toList(N.asMap("key", "value", "key2", "value2"));
+        String json = N.toJson(obj);
+        N.println(json);
+
+        N.println(N.fromJson(json, Object.class));
+
+        N.println(N.formatJson(json));
+        assertNotNull(json);
+    }
+
+    @Test
+    public void test_prettyFormat() {
+        Account account = createAccountWithContact(Account.class);
+        account.setId(100);
+
+        JsonSerConfig config = JsonSerConfig.create().setQuotePropName(true).setQuoteMapKey(true).setPrettyFormat(true).setIndentation("    ");
+
+        String str = jsonParser.serialize(account, config);
+        N.println("============account=====================================================================================================");
+        N.println(str);
+        N.println("========================================================================================================================");
+
+        str = jsonParser.serialize(N.asArray(account, account), config);
+        N.println("============Array.of(account, account)=================================================================================");
+        N.println(str);
+        N.println("========================================================================================================================");
+
+        str = jsonParser.serialize(N.toList(account, account), config);
+        N.println("============N.toList(account, account)===================================================================================");
+        N.println(str);
+        N.println("========================================================================================================================");
+
+        str = jsonParser.serialize(Beans.deepBeanToMap(account), config);
+        N.println("============(N.deepBeanToMap(account)==================================================================================");
+        N.println(str);
+        N.println("========================================================================================================================");
+
+        str = jsonParser.serialize(new Object[] { Beans.deepBeanToMap(account), account }, config);
+        N.println("============Array.of(N.deepBeanToMap(account), account)===============================================================");
+        N.println(str);
+        N.println("========================================================================================================================");
+
+        str = jsonParser.serialize(N.toList(Beans.deepBeanToMap(account), account), config);
+        N.println("============N.toList(N.deepBeanToMap(account), account)================================================================");
+        N.println(str);
+        N.println("========================================================================================================================");
+
+        str = jsonParser.serialize(new Object[] { new Object[] { account, account }, N.toList(account, account) }, config);
+        N.println("============Array.of(Array.of(account, account), N.toList(account, account))==========================================");
+        N.println(str);
+        N.println("========================================================================================================================");
+
+        str = jsonParser.serialize(N.toList(N.asArray(account, account), N.toList(account, account)), config);
+        N.println("============N.toList(Array.of(account, account), N.toList(account, account))===========================================");
+        N.println(str);
+        N.println("========================================================================================================================");
+
+        str = jsonParser.serialize(Seid.of(AccountPNL.ID, "abc123"), config);
+        N.println("============Seid.valueOf(Account.ID, \"abc123\")========================================================================");
+        N.println(str);
+        N.println("========================================================================================================================");
+
+        str = jsonParser.serialize(Seid.of(AccountPNL.ID, "abc123", AccountPNL.LAST_NAME, "lastName"), config);
+        N.println("============Seid.valueOf(Account.ID, \"abc123\", Account.LAST_NAME, \"lastName\")=======================================");
+        N.println(str);
+        N.println("========================================================================================================================");
 
         XBean xBean = new XBean();
         xBean.setTypeBoolean(true);
         xBean.setTypeBoolean2(Boolean.FALSE);
-        xBean.setTypeChar('<');
+        xBean.setTypeChar('黎');
         xBean.setTypeChar2('>');
         xBean.setTypeByte((byte) 0);
         xBean.setTypeShort((short) 2);
@@ -1889,172 +2023,35 @@ public class JsonParserTest extends AbstractJsonParserTest {
         xBean.setTypeFloat(1.01f);
         xBean.setTypeDouble(2.3134454d);
 
-        xBean.setTypeString(">string< > </ <//");
-        xBean.setWeekDay(WeekDay.FRIDAY);
+        xBean.setTypeString(">string黎< > </ <//、");
 
-        xBean.setTypeCalendar(Dates.currentCalendar());
-
-        xBean.setTypeDate(new java.util.Date());
-        xBean.setTypeSqlDate(Dates.currentDate());
-        xBean.setTypeSqlTime(Dates.currentTime());
-        xBean.setTypeSqlTimestamp(Dates.currentTimestamp());
-
-        List<Date> typeGenericList = new LinkedList<>();
-        typeGenericList.add(null);
-        typeGenericList.add(Dates.currentDate());
-        typeGenericList.add(null);
-        typeGenericList.add(Dates.currentDate());
-        typeGenericList.add(Dates.currentDate());
-        typeGenericList.add(null);
-        xBean.setTypeGenericList(typeGenericList);
-
-        Set<Long> typeGenericSet = N.toSortedSet();
-        typeGenericSet.add(1332333L);
-        typeGenericSet.add(Long.MAX_VALUE);
-        typeGenericSet.add(Long.MIN_VALUE);
-        xBean.setTypeGenericSet(typeGenericSet);
-
-        List typeList = new ArrayList();
+        List<Object> typeList = new ArrayList<>();
         typeList.add(account.getFirstName());
-
-        for (int i = 0; i < size; i++) {
-            typeList.add(account);
-        }
-
+        typeList.add(account);
         typeList.add(account.getContact());
         typeList.add(account);
+        typeList.add(null);
         typeList.add(null);
         typeList.add(new HashMap<>());
         typeList.add(new ArrayList<>());
         typeList.add(new HashSet<>());
         xBean.setTypeList(typeList);
 
-        Set typeSet = new HashSet<>();
-        typeSet.add(new HashMap<>());
-        typeSet.add(new ArrayList<>());
-        typeSet.add(new HashMap<>());
-        typeSet.add(new HashMap<>());
-        typeSet.add(null);
-        typeSet.add(null);
-        typeSet.add(account);
-        typeSet.add(account.getLastName());
-        typeSet.add(account);
-        typeSet.add(account.getContact());
-        typeSet.add(account);
-        typeSet.add(null);
-        xBean.setTypeSet(typeSet);
+        xBean.setWeekDay(WeekDay.THURSDAY);
 
-        Map<String, Account> typeGenericMap = new HashMap<>();
-        typeGenericMap.put(account.getFirstName(), createAccount(Account.class));
-        typeGenericMap.put(account.getLastName(), account);
-        typeGenericMap.put("123", createAccount(Account.class));
-        typeGenericMap.put("null", null);
-        xBean.setTypeGenericMap(typeGenericMap);
+        str = jsonParser.serialize(xBean, config);
 
-        Map<String, Object> typeGenericMap2 = new TreeMap<>();
-        typeGenericMap2.put(account.getFirstName(), createAccount(Account.class));
-        typeGenericMap2.put(account.getLastName(), createAccount(Account.class));
-        typeGenericMap2.put("null", null);
-        typeGenericMap2.put("bookList", N.toList(createAccount(Account.class)));
-        xBean.setTypeGenericMap2(typeGenericMap2);
-
-        Map<Object, Object> typeGenericMap4 = new ConcurrentHashMap<>();
-        typeGenericMap4.put(createAccount(Account.class), createAccount(Account.class));
-        typeGenericMap4.put(createAccount(Account.class), createAccount(Account.class));
-        typeGenericMap4.put("aaabbbccc", "");
-        typeGenericMap4.put("bookList", N.toList(createAccount(Account.class)));
-        typeGenericMap4.put("edse", " ");
-        typeGenericMap4.put(new HashMap<>(), " ");
-        typeGenericMap4.put(new ArrayList<>(), new HashSet<>());
-        typeGenericMap4.put(typeGenericMap2, typeGenericMap);
-        xBean.setTypeGenericMap4(typeGenericMap4);
-
-        Map typeMap = new HashMap<>();
-
-        for (int i = 0; i < size; i++) {
-            typeMap.put(createAccount(Account.class), createAccount(Account.class));
-        }
-
-        typeMap.put("null", null);
-        typeMap.put("bookList", N.toList(createAccount(Account.class)));
-        typeMap.put(" ", " ");
-        typeMap.put(new HashMap<>(), " ");
-        typeMap.put(new ArrayList<>(), new HashSet<>());
-        typeMap.put("007", null);
-        typeMap.put(new HashMap<>(), null);
-        typeMap.put(new ArrayList<>(), new HashSet<>());
-        xBean.setTypeMap(typeMap);
-
-        return xBean;
+        N.println("============xBean=======================================================================================================");
+        N.println(str);
+        N.println("========================================================================================================================");
+        assertNotNull(str);
     }
 
-    @Data
-    public static class Bean_1 {
-        private List<String> strList;
-        private List intList;
-        private List<Short> shortList;
-        private XMLGregorianCalendar xmlGregorianCalendar;
-    }
-
-    @Data
-    @XmlRootElement
-    public static class Customer {
-        String name;
-        char ch;
-        int age;
-        int id;
-
-    }
-
-    @Data
-    public static class Bean {
-        private byte[] bytes;
-        private char[] chars;
-        private Character[] chars2;
-        private String[] strings;
-        private List typeList;
-        private Set typeSet;
-
-    }
-
-    @Data
-    public static class XBean {
-        private boolean typeBoolean;
-        private Boolean typeBoolean2;
-        private char typeChar;
-        private Character typeChar2;
-        private byte typeByte;
-        private short typeShort;
-        private int typeInt;
-        private long typeLong;
-        private Long typeLong2;
-        private float typeFloat;
-        private double typeDouble;
-        private String typeString;
-        private Calendar typeCalendar;
-        private java.util.Date typeDate;
-        private Date typeSqlDate;
-        private Time typeSqlTime;
-        private Timestamp typeSqlTimestamp;
-        private WeekDay weekDay;
-        private List<Date> typeGenericList;
-        private Set<Long> typeGenericSet;
-        private List typeList;
-        private Set typeSet;
-        private Map<String, Account> typeGenericMap;
-        private Map<String, Object> typeGenericMap2;
-        private Map<Object, String> typeGenericMap3;
-        private Map<Object, Object> typeGenericMap4;
-        private Map typeMap;
-
-    }
-
-    @Data
-    public static class JaxbBean {
-        private String string;
-        private List<String> list;
-        private Map<String, String> map;
-
+    @Test
+    public void test_readerPerformance() {
+        assertDoesNotThrow(() -> {
+            Profiler.run(6, 100, 1, this::test_reader).printResult();
+        });
     }
 
 }

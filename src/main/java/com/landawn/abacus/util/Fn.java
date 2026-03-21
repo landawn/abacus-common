@@ -154,7 +154,18 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Primitive Specializations:</b> Optimized operations for primitive types avoiding boxing overhead</li>
  * </ul>
  *
- * <p><b>IMPORTANT - Final Class &amp; Usage Notes:</b>
+ * <p><b>Naming Convention for Shorthand Abbreviations:</b>
+ * This class provides concise shorthand methods for creating functional interfaces:
+ * <ul>
+ *   <li>{@link #s(Supplier) s} / {@link #ss(Throwables.Supplier) ss} - <b>S</b>upplier / Throwable-safe <b>S</b>upplier</li>
+ *   <li>{@link #p(Predicate) p} / {@link #pp(Throwables.Predicate) pp} - <b>P</b>redicate / Throwable-safe <b>P</b>redicate</li>
+ *   <li>{@link #c(Consumer) c} / {@link #cc(Throwables.Consumer) cc} - <b>C</b>onsumer / Throwable-safe <b>C</b>onsumer</li>
+ *   <li>{@link #f(Function) f} / {@link #ff(Throwables.Function) ff} - <b>F</b>unction / Throwable-safe <b>F</b>unction</li>
+ *   <li>{@link #o(UnaryOperator) o} - <b>O</b>perator (Unary or Binary)</li>
+ * </ul>
+ * These shorthands are particularly useful in stream pipelines and functional compositions to reduce boilerplate.</p>
+ *
+ * <p><b>IMPORTANT - Final Class & Usage Notes:</b>
  * <ul>
  *   <li>This is a <b>final class</b> that cannot be extended for API stability</li>
  *   <li>All methods are static - no instance creation needed or allowed</li>

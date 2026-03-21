@@ -7,13 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Throwables;
 
-@Tag("2025")
 public class BiConsumerTest extends TestBase {
 
     @Test
@@ -47,6 +45,44 @@ public class BiConsumerTest extends TestBase {
 
         assertEquals(1, results.size());
         assertEquals("item", results.get(0));
+    }
+
+    @Test
+    public void testAnonymousClass() {
+        List<String> results = new ArrayList<>();
+        BiConsumer<String, Integer> consumer = new BiConsumer<>() {
+            @Override
+            public void accept(String s, Integer i) {
+                results.add(s + ":" + i);
+            }
+        };
+
+        consumer.accept("anonymous", 42);
+
+        assertEquals(1, results.size());
+        assertEquals("anonymous:42", results.get(0));
+    }
+
+    @Test
+    public void testWithDifferentTypes() {
+        List<String> results = new ArrayList<>();
+        BiConsumer<Integer, Double> consumer = (i, d) -> results.add(i + ":" + d);
+
+        consumer.accept(42, 3.14);
+
+        assertEquals(1, results.size());
+        assertEquals("42:3.14", results.get(0));
+    }
+
+    @Test
+    public void testWithNullValues() {
+        List<String> results = new ArrayList<>();
+        BiConsumer<String, Integer> consumer = (s, i) -> results.add(String.valueOf(s) + ":" + String.valueOf(i));
+
+        consumer.accept(null, null);
+
+        assertEquals(1, results.size());
+        assertEquals("null:null", results.get(0));
     }
 
     @Test
@@ -127,43 +163,5 @@ public class BiConsumerTest extends TestBase {
 
         assertEquals(1, results.size());
         assertEquals("test:100", results.get(0));
-    }
-
-    @Test
-    public void testAnonymousClass() {
-        List<String> results = new ArrayList<>();
-        BiConsumer<String, Integer> consumer = new BiConsumer<>() {
-            @Override
-            public void accept(String s, Integer i) {
-                results.add(s + ":" + i);
-            }
-        };
-
-        consumer.accept("anonymous", 42);
-
-        assertEquals(1, results.size());
-        assertEquals("anonymous:42", results.get(0));
-    }
-
-    @Test
-    public void testWithNullValues() {
-        List<String> results = new ArrayList<>();
-        BiConsumer<String, Integer> consumer = (s, i) -> results.add(String.valueOf(s) + ":" + String.valueOf(i));
-
-        consumer.accept(null, null);
-
-        assertEquals(1, results.size());
-        assertEquals("null:null", results.get(0));
-    }
-
-    @Test
-    public void testWithDifferentTypes() {
-        List<String> results = new ArrayList<>();
-        BiConsumer<Integer, Double> consumer = (i, d) -> results.add(i + ":" + d);
-
-        consumer.accept(42, 3.14);
-
-        assertEquals(1, results.size());
-        assertEquals("42:3.14", results.get(0));
     }
 }

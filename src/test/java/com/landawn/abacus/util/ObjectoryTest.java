@@ -13,12 +13,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class ObjectoryTest extends TestBase {
 
     @Test
@@ -33,6 +31,17 @@ public class ObjectoryTest extends TestBase {
     }
 
     @Test
+    public void testListPoolReuse() {
+        List<String> list1 = Objectory.createList();
+        list1.add("item1");
+        list1.add("item2");
+        Objectory.recycle(list1);
+
+        List<String> list2 = Objectory.createList();
+        Assertions.assertTrue(list2.isEmpty());
+    }
+
+    @Test
     public void testCreateSet() {
         Set<String> set = Objectory.createSet();
         Assertions.assertNotNull(set);
@@ -40,6 +49,17 @@ public class ObjectoryTest extends TestBase {
 
         set.add("test");
         Assertions.assertTrue(set.contains("test"));
+    }
+
+    @Test
+    public void testSetPoolReuse() {
+        Set<String> set1 = Objectory.createSet();
+        set1.add("a");
+        set1.add("b");
+        Objectory.recycle(set1);
+
+        Set<String> set2 = Objectory.createSet();
+        Assertions.assertTrue(set2.isEmpty());
     }
 
     @Test
@@ -54,6 +74,16 @@ public class ObjectoryTest extends TestBase {
     }
 
     @Test
+    public void testLinkedHashSetPoolReuse() {
+        Set<String> set1 = Objectory.createLinkedHashSet();
+        set1.add("x");
+        Objectory.recycle(set1);
+
+        Set<String> set2 = Objectory.createLinkedHashSet();
+        Assertions.assertTrue(set2.isEmpty());
+    }
+
+    @Test
     public void testCreateMap() {
         Map<String, Integer> map = Objectory.createMap();
         Assertions.assertNotNull(map);
@@ -61,6 +91,16 @@ public class ObjectoryTest extends TestBase {
 
         map.put("key", 100);
         Assertions.assertEquals(100, map.get("key"));
+    }
+
+    @Test
+    public void testMapPoolReuse() {
+        Map<String, Integer> map1 = Objectory.createMap();
+        map1.put("key", 1);
+        Objectory.recycle(map1);
+
+        Map<String, Integer> map2 = Objectory.createMap();
+        Assertions.assertTrue(map2.isEmpty());
     }
 
     @Test
@@ -72,6 +112,16 @@ public class ObjectoryTest extends TestBase {
         map.put("key1", 1);
         map.put("key2", 2);
         Assertions.assertEquals(2, map.size());
+    }
+
+    @Test
+    public void testLinkedHashMapPoolReuse() {
+        Map<String, Integer> map1 = Objectory.createLinkedHashMap();
+        map1.put("a", 1);
+        Objectory.recycle(map1);
+
+        Map<String, Integer> map2 = Objectory.createLinkedHashMap();
+        Assertions.assertTrue(map2.isEmpty());
     }
 
     @Test
@@ -99,6 +149,25 @@ public class ObjectoryTest extends TestBase {
         Object[] array = Objectory.createObjectArray(largeSize);
         Assertions.assertNotNull(array);
         Assertions.assertEquals(largeSize, array.length);
+    }
+
+    @Test
+    public void testObjectArrayPoolReuse() {
+        Object[] arr1 = Objectory.createObjectArray(10);
+        arr1[0] = "hello";
+        arr1[1] = 42;
+        Objectory.recycle(arr1);
+
+        Object[] arr2 = Objectory.createObjectArray(10);
+        // After recycling, entries should be nulled
+        Assertions.assertNotNull(arr2);
+    }
+
+    @Test
+    public void testCreateObjectArray_ZeroSize() {
+        Object[] array = Objectory.createObjectArray(0);
+        Assertions.assertNotNull(array);
+        Assertions.assertEquals(0, array.length);
     }
 
     @Test
@@ -138,6 +207,16 @@ public class ObjectoryTest extends TestBase {
     }
 
     @Test
+    public void testPoolReuse() {
+        StringBuilder sb1 = Objectory.createStringBuilder();
+        sb1.append("test");
+        Objectory.recycle(sb1);
+
+        StringBuilder sb2 = Objectory.createStringBuilder();
+        Assertions.assertEquals(0, sb2.length());
+    }
+
+    @Test
     public void testCreateStringBuilder() {
         StringBuilder sb = Objectory.createStringBuilder();
         Assertions.assertNotNull(sb);
@@ -155,6 +234,16 @@ public class ObjectoryTest extends TestBase {
         int largeCapacity = Objectory.BUFFER_SIZE + 1000;
         StringBuilder largeSb = Objectory.createStringBuilder(largeCapacity);
         Assertions.assertTrue(largeSb.capacity() >= largeCapacity);
+    }
+
+    @Test
+    public void testByteArrayOutputStreamPoolReuse() {
+        com.landawn.abacus.util.ByteArrayOutputStream baos1 = Objectory.createByteArrayOutputStream();
+        baos1.write("data".getBytes(), 0, 4);
+        Objectory.recycle(baos1);
+
+        com.landawn.abacus.util.ByteArrayOutputStream baos2 = Objectory.createByteArrayOutputStream();
+        Assertions.assertEquals(0, baos2.size());
     }
 
     @Test
@@ -191,6 +280,13 @@ public class ObjectoryTest extends TestBase {
     }
 
     @Test
+    public void testCreateBufferedWriterAlreadyBuffered() {
+        java.io.BufferedWriter existing = new java.io.BufferedWriter(new StringWriter());
+        java.io.BufferedWriter bw = Objectory.createBufferedWriter(existing);
+        Assertions.assertSame(existing, bw);
+    }
+
+    @Test
     public void testCreateBufferedWriterWithWriter() throws Exception {
         StringWriter writer = new StringWriter();
         java.io.BufferedWriter bw = Objectory.createBufferedWriter(writer);
@@ -202,10 +298,42 @@ public class ObjectoryTest extends TestBase {
     }
 
     @Test
-    public void testCreateBufferedWriterAlreadyBuffered() {
-        java.io.BufferedWriter existing = new java.io.BufferedWriter(new StringWriter());
-        java.io.BufferedWriter bw = Objectory.createBufferedWriter(existing);
-        Assertions.assertSame(existing, bw);
+    public void testCreateBufferedWriterWithOutputStream_WriteAndRead() throws Exception {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        java.io.BufferedWriter bw = Objectory.createBufferedWriter(os);
+        bw.write("hello world");
+        bw.flush();
+        Objectory.recycle(bw);
+
+        Assertions.assertEquals("hello world", os.toString());
+    }
+
+    @Test
+    public void testCreateBufferedWriter_ReusesPooledInternalWriter() throws Exception {
+        java.io.BufferedWriter first = Objectory.createBufferedWriter();
+        first.write("first");
+        Objectory.recycle(first);
+
+        java.io.BufferedWriter second = Objectory.createBufferedWriter();
+        second.write("second");
+
+        Assertions.assertEquals("second", second.toString());
+    }
+
+    @Test
+    public void testCreateBufferedWriterWithWriter_ReusesPooledWriter() throws Exception {
+        StringWriter firstTarget = new StringWriter();
+        java.io.BufferedWriter first = Objectory.createBufferedWriter(firstTarget);
+        first.write("first");
+        Objectory.recycle(first);
+
+        StringWriter secondTarget = new StringWriter();
+        java.io.BufferedWriter second = Objectory.createBufferedWriter(secondTarget);
+        second.write("second");
+        second.flush();
+
+        Assertions.assertEquals("first", firstTarget.toString());
+        Assertions.assertEquals("second", secondTarget.toString());
     }
 
     @Test
@@ -269,6 +397,13 @@ public class ObjectoryTest extends TestBase {
     }
 
     @Test
+    public void testCreateBufferedReaderAlreadyBuffered() {
+        java.io.BufferedReader existing = new java.io.BufferedReader(new StringReader("test"));
+        java.io.BufferedReader reader = Objectory.createBufferedReader(existing);
+        Assertions.assertSame(existing, reader);
+    }
+
+    @Test
     public void testCreateBufferedReaderWithString() throws Exception {
         {
             String text = "Line 1\nLine 2\nLine 3";
@@ -309,10 +444,41 @@ public class ObjectoryTest extends TestBase {
     }
 
     @Test
-    public void testCreateBufferedReaderAlreadyBuffered() {
-        java.io.BufferedReader existing = new java.io.BufferedReader(new StringReader("test"));
-        java.io.BufferedReader reader = Objectory.createBufferedReader(existing);
-        Assertions.assertSame(existing, reader);
+    public void testCreateBufferedReaderWithReader_ReusesPooledReader() throws Exception {
+        java.io.BufferedReader first = Objectory.createBufferedReader(new StringReader("first"));
+        Assertions.assertEquals("first", first.readLine());
+        Objectory.recycle(first);
+
+        java.io.BufferedReader second = Objectory.createBufferedReader(new StringReader("second"));
+        Assertions.assertEquals("second", second.readLine());
+        Assertions.assertNull(second.readLine());
+    }
+
+    @Test
+    public void testRecycleLargeObjectArray() {
+        Object[] array = Objectory.createObjectArray(128 + 100);
+        array[0] = "test";
+
+        Objectory.recycle(array);
+        Assertions.assertEquals("test", array[0]);
+    }
+
+    @Test
+    public void testRecycleStringBuilder() {
+        StringBuilder sb = Objectory.createStringBuilder();
+        sb.append("Hello World");
+
+        Objectory.recycle(sb);
+        Assertions.assertEquals(0, sb.length());
+    }
+
+    @Test
+    public void testRecycleByteArrayOutputStream() {
+        com.landawn.abacus.util.ByteArrayOutputStream baos = Objectory.createByteArrayOutputStream();
+        baos.write("Hello".getBytes(), 0, 5);
+
+        Objectory.recycle(baos);
+        Assertions.assertEquals(0, baos.size());
     }
 
     @Test
@@ -322,13 +488,6 @@ public class ObjectoryTest extends TestBase {
 
         Objectory.recycle(list);
         Assertions.assertTrue(list.isEmpty());
-    }
-
-    @Test
-    public void testRecycleNullList() {
-        assertDoesNotThrow(() -> {
-            Objectory.recycle((List<?>) null);
-        });
     }
 
     @Test
@@ -379,22 +538,6 @@ public class ObjectoryTest extends TestBase {
     }
 
     @Test
-    public void testRecycleNullObjectArray() {
-        assertDoesNotThrow(() -> {
-            Objectory.recycle((Object[]) null);
-        });
-    }
-
-    @Test
-    public void testRecycleLargeObjectArray() {
-        Object[] array = Objectory.createObjectArray(128 + 100);
-        array[0] = "test";
-
-        Objectory.recycle(array);
-        Assertions.assertEquals("test", array[0]);
-    }
-
-    @Test
     public void testRecycleCharArray() {
         char[] buffer = Objectory.createCharArrayBuffer();
         buffer[0] = 'A';
@@ -410,24 +553,6 @@ public class ObjectoryTest extends TestBase {
 
         Objectory.recycle(buffer);
         assertNotNull(buffer);
-    }
-
-    @Test
-    public void testRecycleStringBuilder() {
-        StringBuilder sb = Objectory.createStringBuilder();
-        sb.append("Hello World");
-
-        Objectory.recycle(sb);
-        Assertions.assertEquals(0, sb.length());
-    }
-
-    @Test
-    public void testRecycleByteArrayOutputStream() {
-        com.landawn.abacus.util.ByteArrayOutputStream baos = Objectory.createByteArrayOutputStream();
-        baos.write("Hello".getBytes(), 0, 5);
-
-        Objectory.recycle(baos);
-        Assertions.assertEquals(0, baos.size());
     }
 
     @Test
@@ -480,15 +605,29 @@ public class ObjectoryTest extends TestBase {
     }
 
     @Test
-    public void testRecycleBufferedReader() throws Exception {
-        java.io.BufferedReader reader = Objectory.createBufferedReader("test");
+    public void testRecycleRegularBufferedReader() {
+        java.io.BufferedReader reader = new java.io.BufferedReader(new StringReader("test"));
         Objectory.recycle(reader);
         assertNotNull(reader);
     }
 
     @Test
-    public void testRecycleRegularBufferedReader() {
-        java.io.BufferedReader reader = new java.io.BufferedReader(new StringReader("test"));
+    public void testRecycleNullList() {
+        assertDoesNotThrow(() -> {
+            Objectory.recycle((List<?>) null);
+        });
+    }
+
+    @Test
+    public void testRecycleNullObjectArray() {
+        assertDoesNotThrow(() -> {
+            Objectory.recycle((Object[]) null);
+        });
+    }
+
+    @Test
+    public void testRecycleBufferedReader() throws Exception {
+        java.io.BufferedReader reader = Objectory.createBufferedReader("test");
         Objectory.recycle(reader);
         assertNotNull(reader);
     }
@@ -588,16 +727,6 @@ public class ObjectoryTest extends TestBase {
     }
 
     @Test
-    public void testPoolReuse() {
-        StringBuilder sb1 = Objectory.createStringBuilder();
-        sb1.append("test");
-        Objectory.recycle(sb1);
-
-        StringBuilder sb2 = Objectory.createStringBuilder();
-        Assertions.assertEquals(0, sb2.length());
-    }
-
-    @Test
     public void testRecycleNullBufferedWriter() {
         assertDoesNotThrow(() -> {
             Objectory.recycle((java.io.BufferedWriter) null);
@@ -609,97 +738,5 @@ public class ObjectoryTest extends TestBase {
         assertDoesNotThrow(() -> {
             Objectory.recycle((java.io.BufferedReader) null);
         });
-    }
-
-    @Test
-    public void testListPoolReuse() {
-        List<String> list1 = Objectory.createList();
-        list1.add("item1");
-        list1.add("item2");
-        Objectory.recycle(list1);
-
-        List<String> list2 = Objectory.createList();
-        Assertions.assertTrue(list2.isEmpty());
-    }
-
-    @Test
-    public void testSetPoolReuse() {
-        Set<String> set1 = Objectory.createSet();
-        set1.add("a");
-        set1.add("b");
-        Objectory.recycle(set1);
-
-        Set<String> set2 = Objectory.createSet();
-        Assertions.assertTrue(set2.isEmpty());
-    }
-
-    @Test
-    public void testMapPoolReuse() {
-        Map<String, Integer> map1 = Objectory.createMap();
-        map1.put("key", 1);
-        Objectory.recycle(map1);
-
-        Map<String, Integer> map2 = Objectory.createMap();
-        Assertions.assertTrue(map2.isEmpty());
-    }
-
-    @Test
-    public void testLinkedHashSetPoolReuse() {
-        Set<String> set1 = Objectory.createLinkedHashSet();
-        set1.add("x");
-        Objectory.recycle(set1);
-
-        Set<String> set2 = Objectory.createLinkedHashSet();
-        Assertions.assertTrue(set2.isEmpty());
-    }
-
-    @Test
-    public void testLinkedHashMapPoolReuse() {
-        Map<String, Integer> map1 = Objectory.createLinkedHashMap();
-        map1.put("a", 1);
-        Objectory.recycle(map1);
-
-        Map<String, Integer> map2 = Objectory.createLinkedHashMap();
-        Assertions.assertTrue(map2.isEmpty());
-    }
-
-    @Test
-    public void testObjectArrayPoolReuse() {
-        Object[] arr1 = Objectory.createObjectArray(10);
-        arr1[0] = "hello";
-        arr1[1] = 42;
-        Objectory.recycle(arr1);
-
-        Object[] arr2 = Objectory.createObjectArray(10);
-        // After recycling, entries should be nulled
-        Assertions.assertNotNull(arr2);
-    }
-
-    @Test
-    public void testByteArrayOutputStreamPoolReuse() {
-        com.landawn.abacus.util.ByteArrayOutputStream baos1 = Objectory.createByteArrayOutputStream();
-        baos1.write("data".getBytes(), 0, 4);
-        Objectory.recycle(baos1);
-
-        com.landawn.abacus.util.ByteArrayOutputStream baos2 = Objectory.createByteArrayOutputStream();
-        Assertions.assertEquals(0, baos2.size());
-    }
-
-    @Test
-    public void testCreateObjectArray_ZeroSize() {
-        Object[] array = Objectory.createObjectArray(0);
-        Assertions.assertNotNull(array);
-        Assertions.assertEquals(0, array.length);
-    }
-
-    @Test
-    public void testCreateBufferedWriterWithOutputStream_WriteAndRead() throws Exception {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        java.io.BufferedWriter bw = Objectory.createBufferedWriter(os);
-        bw.write("hello world");
-        bw.flush();
-        Objectory.recycle(bw);
-
-        Assertions.assertEquals("hello world", os.toString());
     }
 }

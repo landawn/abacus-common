@@ -6,12 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class IndexedBooleanTest extends TestBase {
 
     @Test
@@ -30,29 +28,6 @@ public class IndexedBooleanTest extends TestBase {
     }
 
     @Test
-    public void testOfNegativeIntIndex() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            IndexedBoolean.of(true, -1);
-        });
-    }
-
-    @Test
-    public void testOfNegativeLongIndex() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            IndexedBoolean.of(true, -1L);
-        });
-    }
-
-    @Test
-    public void testValue() {
-        IndexedBoolean indexed1 = IndexedBoolean.of(true, 0);
-        assertTrue(indexed1.value());
-
-        IndexedBoolean indexed2 = IndexedBoolean.of(false, 0);
-        assertFalse(indexed2.value());
-    }
-
-    @Test
     public void testIndex() {
         IndexedBoolean indexed = IndexedBoolean.of(true, 42);
         assertEquals(42, indexed.index());
@@ -66,73 +41,25 @@ public class IndexedBooleanTest extends TestBase {
     }
 
     @Test
-    public void testIndexOverflow() {
-        assertThrows(ArithmeticException.class, () -> {
-            IndexedBoolean indexed = IndexedBoolean.of(true, Long.MAX_VALUE);
-            indexed.index(); // Should throw ArithmeticException
-        });
+    public void testOf_WithIntIndex() {
+        boolean value = true;
+        int index = 5;
+
+        IndexedBoolean indexedBoolean = IndexedBoolean.of(value, index);
+
+        assertEquals(value, indexedBoolean.value());
+        assertEquals(index, indexedBoolean.index());
     }
 
     @Test
-    public void testHashCode() {
-        IndexedBoolean indexed1 = IndexedBoolean.of(true, 5);
-        IndexedBoolean indexed2 = IndexedBoolean.of(true, 5);
-        assertEquals(indexed1.hashCode(), indexed2.hashCode());
-    }
+    public void testOf_WithLongIndex() {
+        boolean value = true;
+        long index = 5000000000L;
 
-    @Test
-    public void testHashCodeDifferentValues() {
-        IndexedBoolean indexed1 = IndexedBoolean.of(true, 5);
-        IndexedBoolean indexed2 = IndexedBoolean.of(false, 5);
-        assertNotEquals(indexed1.hashCode(), indexed2.hashCode());
-    }
+        IndexedBoolean indexedBoolean = IndexedBoolean.of(value, index);
 
-    @Test
-    public void testHashCodeDifferentIndices() {
-        IndexedBoolean indexed1 = IndexedBoolean.of(true, 5);
-        IndexedBoolean indexed2 = IndexedBoolean.of(true, 10);
-        assertNotEquals(indexed1.hashCode(), indexed2.hashCode());
-    }
-
-    @Test
-    public void testEquals() {
-        IndexedBoolean indexed1 = IndexedBoolean.of(true, 5);
-        IndexedBoolean indexed2 = IndexedBoolean.of(true, 5);
-        IndexedBoolean indexed3 = IndexedBoolean.of(false, 5);
-        IndexedBoolean indexed4 = IndexedBoolean.of(true, 10);
-
-        assertTrue(indexed1.equals(indexed2));
-        assertFalse(indexed1.equals(indexed3));
-        assertFalse(indexed1.equals(indexed4));
-        assertFalse(indexed1.equals(null));
-        assertFalse(indexed1.equals("string"));
-    }
-
-    @Test
-    public void testEqualsSameInstance() {
-        IndexedBoolean indexed = IndexedBoolean.of(true, 5);
-        assertTrue(indexed.equals(indexed));
-    }
-
-    @Test
-    public void testToString() {
-        IndexedBoolean indexed1 = IndexedBoolean.of(true, 5);
-        assertEquals("[5]=true", indexed1.toString());
-
-        IndexedBoolean indexed2 = IndexedBoolean.of(false, 10);
-        assertEquals("[10]=false", indexed2.toString());
-    }
-
-    @Test
-    public void testToStringZeroIndex() {
-        IndexedBoolean indexed = IndexedBoolean.of(true, 0);
-        assertEquals("[0]=true", indexed.toString());
-    }
-
-    @Test
-    public void testToStringLargeIndex() {
-        IndexedBoolean indexed = IndexedBoolean.of(false, 999999);
-        assertEquals("[999999]=false", indexed.toString());
+        assertEquals(value, indexedBoolean.value());
+        assertEquals(index, indexedBoolean.longIndex());
     }
 
     @Test
@@ -147,17 +74,6 @@ public class IndexedBooleanTest extends TestBase {
         IndexedBoolean indexed = IndexedBoolean.of(true, Integer.MAX_VALUE);
         assertEquals(Integer.MAX_VALUE, indexed.index());
         assertEquals(Integer.MAX_VALUE, indexed.longIndex());
-    }
-
-    @Test
-    public void testOf_WithIntIndex() {
-        boolean value = true;
-        int index = 5;
-
-        IndexedBoolean indexedBoolean = IndexedBoolean.of(value, index);
-
-        assertEquals(value, indexedBoolean.value());
-        assertEquals(index, indexedBoolean.index());
     }
 
     @Test
@@ -183,25 +99,6 @@ public class IndexedBooleanTest extends TestBase {
     }
 
     @Test
-    public void testOf_WithIntIndex_NegativeIndex() {
-        boolean value = true;
-        int index = -1;
-
-        assertThrows(IllegalArgumentException.class, () -> IndexedBoolean.of(value, index));
-    }
-
-    @Test
-    public void testOf_WithLongIndex() {
-        boolean value = true;
-        long index = 5000000000L;
-
-        IndexedBoolean indexedBoolean = IndexedBoolean.of(value, index);
-
-        assertEquals(value, indexedBoolean.value());
-        assertEquals(index, indexedBoolean.longIndex());
-    }
-
-    @Test
     public void testOf_WithLongIndex_Zero() {
         boolean value = false;
         long index = 0L;
@@ -224,11 +121,71 @@ public class IndexedBooleanTest extends TestBase {
     }
 
     @Test
+    public void testOfNegativeIntIndex() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            IndexedBoolean.of(true, -1);
+        });
+    }
+
+    @Test
+    public void testOfNegativeLongIndex() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            IndexedBoolean.of(true, -1L);
+        });
+    }
+
+    @Test
+    public void testIndexOverflow() {
+        assertThrows(ArithmeticException.class, () -> {
+            IndexedBoolean indexed = IndexedBoolean.of(true, Long.MAX_VALUE);
+            indexed.index(); // Should throw ArithmeticException
+        });
+    }
+
+    @Test
+    public void testOf_WithIntIndex_NegativeIndex() {
+        boolean value = true;
+        int index = -1;
+
+        assertThrows(IllegalArgumentException.class, () -> IndexedBoolean.of(value, index));
+    }
+
+    @Test
     public void testOf_WithLongIndex_NegativeIndex() {
         boolean value = true;
         long index = -1L;
 
         assertThrows(IllegalArgumentException.class, () -> IndexedBoolean.of(value, index));
+    }
+
+    @Test
+    public void testValue() {
+        IndexedBoolean indexed1 = IndexedBoolean.of(true, 0);
+        assertTrue(indexed1.value());
+
+        IndexedBoolean indexed2 = IndexedBoolean.of(false, 0);
+        assertFalse(indexed2.value());
+    }
+
+    @Test
+    public void testHashCode() {
+        IndexedBoolean indexed1 = IndexedBoolean.of(true, 5);
+        IndexedBoolean indexed2 = IndexedBoolean.of(true, 5);
+        assertEquals(indexed1.hashCode(), indexed2.hashCode());
+    }
+
+    @Test
+    public void testHashCodeDifferentValues() {
+        IndexedBoolean indexed1 = IndexedBoolean.of(true, 5);
+        IndexedBoolean indexed2 = IndexedBoolean.of(false, 5);
+        assertNotEquals(indexed1.hashCode(), indexed2.hashCode());
+    }
+
+    @Test
+    public void testHashCodeDifferentIndices() {
+        IndexedBoolean indexed1 = IndexedBoolean.of(true, 5);
+        IndexedBoolean indexed2 = IndexedBoolean.of(true, 10);
+        assertNotEquals(indexed1.hashCode(), indexed2.hashCode());
     }
 
     @Test
@@ -258,13 +215,6 @@ public class IndexedBooleanTest extends TestBase {
 
         assertEquals(10, indexedTrue.hashCode());
         assertEquals(41, indexedFalse.hashCode());
-    }
-
-    @Test
-    public void testEquals_SameObject() {
-        IndexedBoolean indexedBoolean = IndexedBoolean.of(true, 5);
-
-        assertTrue(indexedBoolean.equals(indexedBoolean));
     }
 
     @Test
@@ -302,13 +252,6 @@ public class IndexedBooleanTest extends TestBase {
     }
 
     @Test
-    public void testEquals_Null() {
-        IndexedBoolean indexedBoolean = IndexedBoolean.of(true, 5);
-
-        assertFalse(indexedBoolean.equals(null));
-    }
-
-    @Test
     public void testEquals_DifferentClass() {
         IndexedBoolean indexedBoolean = IndexedBoolean.of(true, 5);
 
@@ -333,10 +276,65 @@ public class IndexedBooleanTest extends TestBase {
     }
 
     @Test
+    public void testEquals() {
+        IndexedBoolean indexed1 = IndexedBoolean.of(true, 5);
+        IndexedBoolean indexed2 = IndexedBoolean.of(true, 5);
+        IndexedBoolean indexed3 = IndexedBoolean.of(false, 5);
+        IndexedBoolean indexed4 = IndexedBoolean.of(true, 10);
+
+        assertTrue(indexed1.equals(indexed2));
+        assertFalse(indexed1.equals(indexed3));
+        assertFalse(indexed1.equals(indexed4));
+        assertFalse(indexed1.equals(null));
+        assertFalse(indexed1.equals("string"));
+    }
+
+    @Test
+    public void testEqualsSameInstance() {
+        IndexedBoolean indexed = IndexedBoolean.of(true, 5);
+        assertTrue(indexed.equals(indexed));
+    }
+
+    @Test
+    public void testEquals_SameObject() {
+        IndexedBoolean indexedBoolean = IndexedBoolean.of(true, 5);
+
+        assertTrue(indexedBoolean.equals(indexedBoolean));
+    }
+
+    @Test
+    public void testEquals_Null() {
+        IndexedBoolean indexedBoolean = IndexedBoolean.of(true, 5);
+
+        assertFalse(indexedBoolean.equals(null));
+    }
+
+    @Test
+    public void testToString() {
+        IndexedBoolean indexed1 = IndexedBoolean.of(true, 5);
+        assertEquals("[5]=true", indexed1.toString());
+
+        IndexedBoolean indexed2 = IndexedBoolean.of(false, 10);
+        assertEquals("[10]=false", indexed2.toString());
+    }
+
+    @Test
+    public void testToStringLargeIndex() {
+        IndexedBoolean indexed = IndexedBoolean.of(false, 999999);
+        assertEquals("[999999]=false", indexed.toString());
+    }
+
+    @Test
     public void testToString_LongIndex() {
         IndexedBoolean indexedBoolean = IndexedBoolean.of(true, 1000000L);
 
         assertEquals("[1000000]=true", indexedBoolean.toString());
+    }
+
+    @Test
+    public void testToStringZeroIndex() {
+        IndexedBoolean indexed = IndexedBoolean.of(true, 0);
+        assertEquals("[0]=true", indexed.toString());
     }
 
     @Test

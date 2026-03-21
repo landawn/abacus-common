@@ -22,7 +22,6 @@ import java.util.function.Predicate;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -31,7 +30,6 @@ import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Stream;
 
-@Tag("2025")
 public class HARUtilTest extends TestBase {
 
     private String sampleHAR;
@@ -72,6 +70,36 @@ public class HARUtilTest extends TestBase {
                 + "\"headers\": []" + "}" + "}" + "]" + "}" + "}";
     }
 
+    @Test
+    public void testResetHeaderFilter() {
+        HARUtil.setThreadLocalHeaderFilter((name, value) -> false);
+        HARUtil.resetThreadLocalHeaderFilter();
+        // After reset, should use default filter
+        assertNotNull(HARUtil.class);
+    }
+
+    @Test
+    public void testResetHttpHeaderFilterAfterCustomFilter() {
+        // Set a custom filter
+        HARUtil.setThreadLocalHeaderFilter((name, value) -> false);
+        // Reset to default
+        HARUtil.resetThreadLocalHeaderFilter();
+
+        Map<String, Object> requestEntry = new HashMap<>();
+        List<Map<String, String>> headersList = new ArrayList<>();
+
+        Map<String, String> header = new HashMap<>();
+        header.put("name", "Content-Type");
+        header.put("value", "application/json");
+        headersList.add(header);
+
+        requestEntry.put("headers", headersList);
+
+        HttpHeaders headers = HARUtil.getHeadersByRequestEntry(requestEntry);
+        // After reset, should include headers again (default filter accepts valid headers)
+        assertNotNull(headers);
+    }
+
     // --- setThreadLocalHeaderFilter ---
 
     @Test
@@ -109,33 +137,19 @@ public class HARUtilTest extends TestBase {
     }
 
     @Test
-    public void testResetHeaderFilter() {
-        HARUtil.setThreadLocalHeaderFilter((name, value) -> false);
-        HARUtil.resetThreadLocalHeaderFilter();
-        // After reset, should use default filter
+    public void testLogRequestCurlForHARRequestWithCustomHandler() {
+        AtomicBoolean handlerCalled = new AtomicBoolean(false);
+        HARUtil.configureCurlLoggingForCurrentThread(true, '\'', curl -> handlerCalled.set(true));
+        // The handler will only be called when actually sending a request
         assertNotNull(HARUtil.class);
     }
 
     @Test
-    public void testResetHttpHeaderFilterAfterCustomFilter() {
-        // Set a custom filter
-        HARUtil.setThreadLocalHeaderFilter((name, value) -> false);
-        // Reset to default
-        HARUtil.resetThreadLocalHeaderFilter();
-
-        Map<String, Object> requestEntry = new HashMap<>();
-        List<Map<String, String>> headersList = new ArrayList<>();
-
-        Map<String, String> header = new HashMap<>();
-        header.put("name", "Content-Type");
-        header.put("value", "application/json");
-        headersList.add(header);
-
-        requestEntry.put("headers", headersList);
-
-        HttpHeaders headers = HARUtil.getHeadersByRequestEntry(requestEntry);
-        // After reset, should include headers again (default filter accepts valid headers)
-        assertNotNull(headers);
+    public void testLogRequestCurlForHARRequestWithHandler() {
+        Consumer<String> handler = curl -> System.out.println(curl);
+        HARUtil.configureCurlLoggingForCurrentThread(true, '\'', handler);
+        HARUtil.configureCurlLoggingForCurrentThread(false, '"', handler);
+        assertNotNull(handler);
     }
 
     // --- configureCurlLoggingForCurrentThread(boolean) ---
@@ -198,14 +212,6 @@ public class HARUtilTest extends TestBase {
     }
 
     @Test
-    public void testLogRequestCurlForHARRequestWithCustomHandler() {
-        AtomicBoolean handlerCalled = new AtomicBoolean(false);
-        HARUtil.configureCurlLoggingForCurrentThread(true, '\'', curl -> handlerCalled.set(true));
-        // The handler will only be called when actually sending a request
-        assertNotNull(HARUtil.class);
-    }
-
-    @Test
     public void testLogRequestCurlForHARRequest() {
         assertDoesNotThrow(() -> {
             HARUtil.configureCurlLoggingForCurrentThread(true);
@@ -214,14 +220,6 @@ public class HARUtilTest extends TestBase {
             HARUtil.configureCurlLoggingForCurrentThread(true, '"');
             HARUtil.configureCurlLoggingForCurrentThread(false, '\'');
         });
-    }
-
-    @Test
-    public void testLogRequestCurlForHARRequestWithHandler() {
-        Consumer<String> handler = curl -> System.out.println(curl);
-        HARUtil.configureCurlLoggingForCurrentThread(true, '\'', handler);
-        HARUtil.configureCurlLoggingForCurrentThread(false, '"', handler);
-        assertNotNull(handler);
     }
 
     // --- sendRequest(File, String) ---
@@ -371,13 +369,6 @@ public class HARUtilTest extends TestBase {
     }
 
     @Test
-    public void testFindRequestEntry_File_NoMatch() {
-        Predicate<String> filter = url -> url.contains("/nonexistent");
-        Optional<Map<String, Object>> entry = HARUtil.findRequestEntry(tempHARFile, filter);
-        assertFalse(entry.isPresent());
-    }
-
-    @Test
     public void testGetRequestEntryByUrlFromHARWithFile() {
         Predicate<String> filter = url -> url.contains("/users");
         Optional<Map<String, Object>> entry = HARUtil.findRequestEntry(tempHARFile, filter);
@@ -392,24 +383,6 @@ public class HARUtilTest extends TestBase {
         Optional<Map<String, Object>> entry = HARUtil.findRequestEntry(sampleHAR, filter);
         assertTrue(entry.isPresent());
         assertEquals("https://api.example.com/users", entry.get().get("url"));
-    }
-
-    @Test
-    public void testFindRequestEntry_String_NoMatch() {
-        Predicate<String> filter = url -> url.contains("/nonexistent");
-        Optional<Map<String, Object>> entry = HARUtil.findRequestEntry(sampleHAR, filter);
-        assertFalse(entry.isPresent());
-    }
-
-    @Test
-    public void testGetRequestEntryByUrlFromHARWithString() {
-        Predicate<String> filter = url -> url.contains("/users");
-        Optional<Map<String, Object>> entry = HARUtil.findRequestEntry(sampleHAR, filter);
-        assertTrue(entry.isPresent());
-
-        filter = url -> url.contains("/nonexistent");
-        entry = HARUtil.findRequestEntry(sampleHAR, filter);
-        assertFalse(entry.isPresent());
     }
 
     @Test
@@ -436,6 +409,31 @@ public class HARUtilTest extends TestBase {
 
         Optional<Map<String, Object>> result = HARUtil.findRequestEntry(har, url -> url.contains("/products"));
         assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testFindRequestEntry_File_NoMatch() {
+        Predicate<String> filter = url -> url.contains("/nonexistent");
+        Optional<Map<String, Object>> entry = HARUtil.findRequestEntry(tempHARFile, filter);
+        assertFalse(entry.isPresent());
+    }
+
+    @Test
+    public void testFindRequestEntry_String_NoMatch() {
+        Predicate<String> filter = url -> url.contains("/nonexistent");
+        Optional<Map<String, Object>> entry = HARUtil.findRequestEntry(sampleHAR, filter);
+        assertFalse(entry.isPresent());
+    }
+
+    @Test
+    public void testGetRequestEntryByUrlFromHARWithString() {
+        Predicate<String> filter = url -> url.contains("/users");
+        Optional<Map<String, Object>> entry = HARUtil.findRequestEntry(sampleHAR, filter);
+        assertTrue(entry.isPresent());
+
+        filter = url -> url.contains("/nonexistent");
+        entry = HARUtil.findRequestEntry(sampleHAR, filter);
+        assertFalse(entry.isPresent());
     }
 
     @Test
@@ -497,24 +495,6 @@ public class HARUtilTest extends TestBase {
     }
 
     @Test
-    public void testGetHttpMethodByRequestEntryLowercase() {
-        Map<String, Object> requestEntry = new HashMap<>();
-        requestEntry.put("method", "get");
-
-        HttpMethod method = HARUtil.getHttpMethodByRequestEntry(requestEntry);
-        assertEquals(HttpMethod.GET, method);
-    }
-
-    @Test
-    public void testGetHttpMethodByRequestEntryMixedCase() {
-        Map<String, Object> requestEntry = new HashMap<>();
-        requestEntry.put("method", "PuT");
-
-        HttpMethod method = HARUtil.getHttpMethodByRequestEntry(requestEntry);
-        assertEquals(HttpMethod.PUT, method);
-    }
-
-    @Test
     public void testGetHttpMethodByRequestEntryDelete() {
         Map<String, Object> requestEntry = new HashMap<>();
         requestEntry.put("method", "DELETE");
@@ -548,6 +528,24 @@ public class HARUtilTest extends TestBase {
 
         HttpMethod method = HARUtil.getHttpMethodByRequestEntry(requestEntry);
         assertEquals(HttpMethod.PATCH, method);
+    }
+
+    @Test
+    public void testGetHttpMethodByRequestEntryLowercase() {
+        Map<String, Object> requestEntry = new HashMap<>();
+        requestEntry.put("method", "get");
+
+        HttpMethod method = HARUtil.getHttpMethodByRequestEntry(requestEntry);
+        assertEquals(HttpMethod.GET, method);
+    }
+
+    @Test
+    public void testGetHttpMethodByRequestEntryMixedCase() {
+        Map<String, Object> requestEntry = new HashMap<>();
+        requestEntry.put("method", "PuT");
+
+        HttpMethod method = HARUtil.getHttpMethodByRequestEntry(requestEntry);
+        assertEquals(HttpMethod.PUT, method);
     }
 
     // --- getHeadersByRequestEntry ---

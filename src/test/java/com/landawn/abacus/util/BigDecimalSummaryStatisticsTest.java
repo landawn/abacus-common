@@ -8,12 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BigDecimalSummaryStatisticsTest extends TestBase {
 
     @Test
@@ -39,6 +37,72 @@ public class BigDecimalSummaryStatisticsTest extends TestBase {
         assertEquals(min, stats.getMin());
         assertEquals(max, stats.getMax());
         assertEquals(sum, stats.getSum());
+    }
+
+    @Test
+    public void testLargeNumbers() {
+        BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics();
+        BigDecimal large1 = new BigDecimal("999999999999999999.99");
+        BigDecimal large2 = new BigDecimal("888888888888888888.88");
+
+        stats.accept(large1);
+        stats.accept(large2);
+
+        assertEquals(2L, stats.getCount());
+        assertEquals(large2, stats.getMin());
+        assertEquals(large1, stats.getMax());
+    }
+
+    @Test
+    public void testPrecisionRetained() {
+        BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics();
+        stats.accept(new BigDecimal("1.111111111111111"));
+        stats.accept(new BigDecimal("2.222222222222222"));
+        stats.accept(new BigDecimal("3.333333333333333"));
+
+        BigDecimal sum = stats.getSum();
+        assertNotNull(sum);
+        assertTrue(sum.scale() > 0);
+    }
+
+    @Test
+    public void testSameValues() {
+        BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics();
+        BigDecimal value = new BigDecimal("42.00");
+
+        stats.accept(value);
+        stats.accept(value);
+        stats.accept(value);
+
+        assertEquals(3L, stats.getCount());
+        assertEquals(value, stats.getMin());
+        assertEquals(value, stats.getMax());
+        assertEquals(value, stats.getAverage());
+    }
+
+    @Test
+    public void testVerySmallNumbers() {
+        BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics();
+        stats.accept(new BigDecimal("0.000001"));
+        stats.accept(new BigDecimal("0.000002"));
+        stats.accept(new BigDecimal("0.000003"));
+
+        assertEquals(3L, stats.getCount());
+        assertTrue(stats.getSum().compareTo(BigDecimal.ZERO) > 0);
+    }
+
+    @Test
+    public void testParameterizedConstructor() {
+        BigDecimal min = new BigDecimal("10.00");
+        BigDecimal max = new BigDecimal("30.00");
+        BigDecimal sum = new BigDecimal("60.00");
+        BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics(3L, min, max, sum);
+
+        Assertions.assertEquals(3, stats.getCount());
+        Assertions.assertEquals(sum, stats.getSum());
+        Assertions.assertEquals(min, stats.getMin());
+        Assertions.assertEquals(max, stats.getMax());
+        Assertions.assertEquals(new BigDecimal("20"), stats.getAverage().setScale(0));
     }
 
     @Test
@@ -124,6 +188,19 @@ public class BigDecimalSummaryStatisticsTest extends TestBase {
         assertEquals(BigDecimal.ZERO, stats.getMin());
         assertEquals(BigDecimal.ZERO, stats.getMax());
         assertEquals(BigDecimal.ZERO, stats.getAverage());
+    }
+
+    @Test
+    public void testAccept() {
+        BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics();
+        stats.accept(new BigDecimal("10.50"));
+        stats.accept(new BigDecimal("20.75"));
+        stats.accept(new BigDecimal("15.25"));
+
+        Assertions.assertEquals(3, stats.getCount());
+        Assertions.assertEquals(new BigDecimal("46.50"), stats.getSum());
+        Assertions.assertEquals(new BigDecimal("10.50"), stats.getMin());
+        Assertions.assertEquals(new BigDecimal("20.75"), stats.getMax());
     }
 
     @Test
@@ -301,85 +378,6 @@ public class BigDecimalSummaryStatisticsTest extends TestBase {
         String str = stats.toString();
         assertNotNull(str);
         assertTrue(str.contains("count=0"));
-    }
-
-    @Test
-    public void testLargeNumbers() {
-        BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics();
-        BigDecimal large1 = new BigDecimal("999999999999999999.99");
-        BigDecimal large2 = new BigDecimal("888888888888888888.88");
-
-        stats.accept(large1);
-        stats.accept(large2);
-
-        assertEquals(2L, stats.getCount());
-        assertEquals(large2, stats.getMin());
-        assertEquals(large1, stats.getMax());
-    }
-
-    @Test
-    public void testPrecisionRetained() {
-        BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics();
-        stats.accept(new BigDecimal("1.111111111111111"));
-        stats.accept(new BigDecimal("2.222222222222222"));
-        stats.accept(new BigDecimal("3.333333333333333"));
-
-        BigDecimal sum = stats.getSum();
-        assertNotNull(sum);
-        assertTrue(sum.scale() > 0);
-    }
-
-    @Test
-    public void testSameValues() {
-        BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics();
-        BigDecimal value = new BigDecimal("42.00");
-
-        stats.accept(value);
-        stats.accept(value);
-        stats.accept(value);
-
-        assertEquals(3L, stats.getCount());
-        assertEquals(value, stats.getMin());
-        assertEquals(value, stats.getMax());
-        assertEquals(value, stats.getAverage());
-    }
-
-    @Test
-    public void testVerySmallNumbers() {
-        BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics();
-        stats.accept(new BigDecimal("0.000001"));
-        stats.accept(new BigDecimal("0.000002"));
-        stats.accept(new BigDecimal("0.000003"));
-
-        assertEquals(3L, stats.getCount());
-        assertTrue(stats.getSum().compareTo(BigDecimal.ZERO) > 0);
-    }
-
-    @Test
-    public void testParameterizedConstructor() {
-        BigDecimal min = new BigDecimal("10.00");
-        BigDecimal max = new BigDecimal("30.00");
-        BigDecimal sum = new BigDecimal("60.00");
-        BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics(3L, min, max, sum);
-
-        Assertions.assertEquals(3, stats.getCount());
-        Assertions.assertEquals(sum, stats.getSum());
-        Assertions.assertEquals(min, stats.getMin());
-        Assertions.assertEquals(max, stats.getMax());
-        Assertions.assertEquals(new BigDecimal("20"), stats.getAverage().setScale(0));
-    }
-
-    @Test
-    public void testAccept() {
-        BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics();
-        stats.accept(new BigDecimal("10.50"));
-        stats.accept(new BigDecimal("20.75"));
-        stats.accept(new BigDecimal("15.25"));
-
-        Assertions.assertEquals(3, stats.getCount());
-        Assertions.assertEquals(new BigDecimal("46.50"), stats.getSum());
-        Assertions.assertEquals(new BigDecimal("10.50"), stats.getMin());
-        Assertions.assertEquals(new BigDecimal("20.75"), stats.getMax());
     }
 
 }

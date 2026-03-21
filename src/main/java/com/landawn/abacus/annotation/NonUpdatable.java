@@ -22,36 +22,35 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Marks a field as non-updatable, excluding it from UPDATE operations while allowing INSERTs.
- * Fields annotated with @NonUpdatable can be set during entity creation but cannot be
+ * Marks a field as non-updatable, excluding it from {@code UPDATE} operations while allowing {@code INSERT}s.
+ * Fields annotated with {@code @NonUpdatable} can be set during entity creation but cannot be
  * modified afterwards through standard update operations.
- * 
+ *
  * <p><b>Common use cases:</b></p>
  * <ul>
- *   <li>Creation timestamps that should never change after insert</li>
- *   <li>Creator/owner information that remains constant</li>
- *   <li>Immutable business identifiers (non-primary keys)</li>
- *   <li>Fields that establish permanent relationships</li>
- *   <li>Historical data that must be preserved</li>
+ *   <li>Creation timestamps that should never change after insert.</li>
+ *   <li>Creator/owner information that remains constant.</li>
+ *   <li>Immutable business identifiers (non-primary keys).</li>
+ *   <li>Fields that establish permanent relationships.</li>
+ *   <li>Historical data that must be preserved.</li>
  * </ul>
- * 
+ *
  * <p><b>Behavior comparison:</b></p>
  * <ul>
- *   <li>@NonUpdatable: Can INSERT, cannot UPDATE</li>
- *   <li>@ReadOnly: Cannot INSERT or UPDATE</li>
- *   <li>@Transient: Not persisted at all</li>
+ *   <li>{@code @NonUpdatable}: Can {@code INSERT}, cannot {@code UPDATE}.</li>
+ *   <li>{@link ReadOnly}: Cannot {@code INSERT} or {@code UPDATE}.</li>
+ *   <li>{@link Transient}: Not persisted at all.</li>
  * </ul>
- * 
+ *
  * <p><b>Important notes:</b></p>
  * <ul>
- *   <li>The field can still be modified in the Java object</li>
- *   <li>Direct SQL updates can still modify the database column</li>
- *   <li>Only affects ORM-generated update statements</li>
+ *   <li>The field can still be modified in the Java object.</li>
+ *   <li>Direct SQL updates can still modify the database column.</li>
+ *   <li>Only affects ORM-generated update statements.</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- *
  * @Entity
  * public class Order {
  *     @Id
@@ -76,7 +75,7 @@ import java.lang.annotation.Target;
  *     private BigDecimal totalAmount;  // Can be updated
  * }
  * }</pre>
- * 
+ *
  * @see ReadOnly
  * @see Transient
  * @see Column

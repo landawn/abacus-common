@@ -6,12 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class IndexedDoubleTest extends TestBase {
 
     @Test
@@ -29,75 +27,9 @@ public class IndexedDoubleTest extends TestBase {
     }
 
     @Test
-    public void testOfNegativeIntIndex() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            IndexedDouble.of(1.0, -1);
-        });
-    }
-
-    @Test
-    public void testOfNegativeLongIndex() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            IndexedDouble.of(1.0, -1L);
-        });
-    }
-
-    @Test
-    public void testValue() {
-        IndexedDouble indexed = IndexedDouble.of(123.456, 0);
-        assertEquals(123.456, indexed.value(), 0.001);
-    }
-
-    @Test
-    public void testValueNegative() {
-        IndexedDouble indexed = IndexedDouble.of(-50.5, 0);
-        assertEquals(-50.5, indexed.value(), 0.001);
-    }
-
-    @Test
-    public void testHashCode() {
-        IndexedDouble indexed1 = IndexedDouble.of(3.14, 5);
-        IndexedDouble indexed2 = IndexedDouble.of(3.14, 5);
-        assertEquals(indexed1.hashCode(), indexed2.hashCode());
-    }
-
-    @Test
-    public void testEquals() {
-        IndexedDouble indexed1 = IndexedDouble.of(3.14, 5);
-        IndexedDouble indexed2 = IndexedDouble.of(3.14, 5);
-        IndexedDouble indexed3 = IndexedDouble.of(2.71, 5);
-
-        assertTrue(indexed1.equals(indexed2));
-        assertFalse(indexed1.equals(indexed3));
-        assertFalse(indexed1.equals(null));
-    }
-
-    @Test
-    public void testToString() {
-        IndexedDouble indexed = IndexedDouble.of(3.14159, 5);
-        assertTrue(indexed.toString().contains("[5]="));
-        assertTrue(indexed.toString().contains("3.14159"));
-    }
-
-    @Test
-    public void testZeroValue() {
-        IndexedDouble indexed = IndexedDouble.of(0.0, 0);
-        assertEquals(0.0, indexed.value(), 0.0);
-    }
-
-    @Test
     public void testNaN() {
         IndexedDouble indexed = IndexedDouble.of(Double.NaN, 0);
         assertTrue(Double.isNaN(indexed.value()));
-    }
-
-    @Test
-    public void testInfinity() {
-        IndexedDouble indexed1 = IndexedDouble.of(Double.POSITIVE_INFINITY, 0);
-        assertEquals(Double.POSITIVE_INFINITY, indexed1.value());
-
-        IndexedDouble indexed2 = IndexedDouble.of(Double.NEGATIVE_INFINITY, 0);
-        assertEquals(Double.NEGATIVE_INFINITY, indexed2.value());
     }
 
     @Test
@@ -109,6 +41,32 @@ public class IndexedDoubleTest extends TestBase {
 
         assertEquals(value, indexedDouble.value());
         assertEquals(index, indexedDouble.index());
+    }
+
+    @Test
+    public void testOf_WithLongIndex() {
+        double value = 3.14159;
+        long index = 5000000000L;
+
+        IndexedDouble indexedDouble = IndexedDouble.of(value, index);
+
+        assertEquals(value, indexedDouble.value());
+        assertEquals(index, indexedDouble.longIndex());
+    }
+
+    @Test
+    public void testZeroValue() {
+        IndexedDouble indexed = IndexedDouble.of(0.0, 0);
+        assertEquals(0.0, indexed.value(), 0.0);
+    }
+
+    @Test
+    public void testInfinity() {
+        IndexedDouble indexed1 = IndexedDouble.of(Double.POSITIVE_INFINITY, 0);
+        assertEquals(Double.POSITIVE_INFINITY, indexed1.value());
+
+        IndexedDouble indexed2 = IndexedDouble.of(Double.NEGATIVE_INFINITY, 0);
+        assertEquals(Double.NEGATIVE_INFINITY, indexed2.value());
     }
 
     @Test
@@ -134,25 +92,6 @@ public class IndexedDoubleTest extends TestBase {
     }
 
     @Test
-    public void testOf_WithIntIndex_NegativeIndex() {
-        double value = 3.14159;
-        int index = -1;
-
-        assertThrows(IllegalArgumentException.class, () -> IndexedDouble.of(value, index));
-    }
-
-    @Test
-    public void testOf_WithLongIndex() {
-        double value = 3.14159;
-        long index = 5000000000L;
-
-        IndexedDouble indexedDouble = IndexedDouble.of(value, index);
-
-        assertEquals(value, indexedDouble.value());
-        assertEquals(index, indexedDouble.longIndex());
-    }
-
-    @Test
     public void testOf_WithLongIndex_Zero() {
         double value = -100.5;
         long index = 0L;
@@ -175,11 +114,52 @@ public class IndexedDoubleTest extends TestBase {
     }
 
     @Test
+    public void testOfNegativeIntIndex() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            IndexedDouble.of(1.0, -1);
+        });
+    }
+
+    @Test
+    public void testOfNegativeLongIndex() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            IndexedDouble.of(1.0, -1L);
+        });
+    }
+
+    @Test
+    public void testOf_WithIntIndex_NegativeIndex() {
+        double value = 3.14159;
+        int index = -1;
+
+        assertThrows(IllegalArgumentException.class, () -> IndexedDouble.of(value, index));
+    }
+
+    @Test
     public void testOf_WithLongIndex_NegativeIndex() {
         double value = 3.14159;
         long index = -1L;
 
         assertThrows(IllegalArgumentException.class, () -> IndexedDouble.of(value, index));
+    }
+
+    @Test
+    public void testValue() {
+        IndexedDouble indexed = IndexedDouble.of(123.456, 0);
+        assertEquals(123.456, indexed.value(), 0.001);
+    }
+
+    @Test
+    public void testValueNegative() {
+        IndexedDouble indexed = IndexedDouble.of(-50.5, 0);
+        assertEquals(-50.5, indexed.value(), 0.001);
+    }
+
+    @Test
+    public void testHashCode() {
+        IndexedDouble indexed1 = IndexedDouble.of(3.14, 5);
+        IndexedDouble indexed2 = IndexedDouble.of(3.14, 5);
+        assertEquals(indexed1.hashCode(), indexed2.hashCode());
     }
 
     @Test
@@ -211,13 +191,6 @@ public class IndexedDoubleTest extends TestBase {
         IndexedDouble posInf = IndexedDouble.of(Double.POSITIVE_INFINITY, 0);
         IndexedDouble negInf = IndexedDouble.of(Double.NEGATIVE_INFINITY, 0);
         assertNotEquals(posInf.hashCode(), negInf.hashCode());
-    }
-
-    @Test
-    public void testEquals_SameObject() {
-        IndexedDouble indexedDouble = IndexedDouble.of(3.14159, 5);
-
-        assertTrue(indexedDouble.equals(indexedDouble));
     }
 
     @Test
@@ -255,18 +228,36 @@ public class IndexedDoubleTest extends TestBase {
     }
 
     @Test
-    public void testEquals_Null() {
-        IndexedDouble indexedDouble = IndexedDouble.of(3.14159, 5);
-
-        assertFalse(indexedDouble.equals(null));
-    }
-
-    @Test
     public void testEquals_DifferentClass() {
         IndexedDouble indexedDouble = IndexedDouble.of(3.14159, 5);
 
         assertFalse(indexedDouble.equals("not an IndexedDouble"));
         assertFalse(indexedDouble.equals(3.14159));
+    }
+
+    @Test
+    public void testEquals() {
+        IndexedDouble indexed1 = IndexedDouble.of(3.14, 5);
+        IndexedDouble indexed2 = IndexedDouble.of(3.14, 5);
+        IndexedDouble indexed3 = IndexedDouble.of(2.71, 5);
+
+        assertTrue(indexed1.equals(indexed2));
+        assertFalse(indexed1.equals(indexed3));
+        assertFalse(indexed1.equals(null));
+    }
+
+    @Test
+    public void testEquals_SameObject() {
+        IndexedDouble indexedDouble = IndexedDouble.of(3.14159, 5);
+
+        assertTrue(indexedDouble.equals(indexedDouble));
+    }
+
+    @Test
+    public void testEquals_Null() {
+        IndexedDouble indexedDouble = IndexedDouble.of(3.14159, 5);
+
+        assertFalse(indexedDouble.equals(null));
     }
 
     @Test
@@ -288,13 +279,10 @@ public class IndexedDoubleTest extends TestBase {
     }
 
     @Test
-    public void testToString_NegativeValue() {
-        double value = -42.42;
-        int index = 10;
-
-        IndexedDouble indexedDouble = IndexedDouble.of(value, index);
-
-        assertEquals("[10]=-42.42", indexedDouble.toString());
+    public void testToString() {
+        IndexedDouble indexed = IndexedDouble.of(3.14159, 5);
+        assertTrue(indexed.toString().contains("[5]="));
+        assertTrue(indexed.toString().contains("3.14159"));
     }
 
     @Test
@@ -305,6 +293,16 @@ public class IndexedDoubleTest extends TestBase {
         IndexedDouble indexedDouble = IndexedDouble.of(value, index);
 
         assertEquals("[1000000]=100.001", indexedDouble.toString());
+    }
+
+    @Test
+    public void testToString_NegativeValue() {
+        double value = -42.42;
+        int index = 10;
+
+        IndexedDouble indexedDouble = IndexedDouble.of(value, index);
+
+        assertEquals("[10]=-42.42", indexedDouble.toString());
     }
 
     @Test

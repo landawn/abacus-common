@@ -7,12 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class PoolTest extends TestBase {
 
     private TestPool pool;
@@ -33,12 +31,10 @@ public class PoolTest extends TestBase {
         private int size = 0;
         private boolean closed = false;
 
-        @Override
         public void lock() {
             locked = true;
         }
 
-        @Override
         public void unlock() {
             if (!locked) {
                 throw new IllegalMonitorStateException();
@@ -112,21 +108,6 @@ public class PoolTest extends TestBase {
     }
 
     @Test
-    public void testLock() {
-        assertFalse(pool.isLocked());
-        pool.lock();
-        assertTrue(pool.isLocked());
-    }
-
-    @Test
-    public void testUnlock() {
-        pool.lock();
-        assertTrue(pool.isLocked());
-        pool.unlock();
-        assertFalse(pool.isLocked());
-    }
-
-    @Test
     public void testCapacity() {
         assertEquals(10, pool.capacity());
         pool.setCapacity(20);
@@ -150,49 +131,6 @@ public class PoolTest extends TestBase {
         assertEquals(1, pool.size());
         pool.evict();
         assertEquals(0, pool.size());
-    }
-
-    @Test
-    public void testClear() {
-        pool.setSize(5);
-        assertEquals(5, pool.size());
-        pool.clear();
-        assertEquals(0, pool.size());
-    }
-
-    @Test
-    public void testStats() {
-        PoolStats stats = pool.stats();
-        assertNotNull(stats);
-        assertEquals(10, stats.capacity());
-        assertEquals(0, stats.size());
-        assertEquals(100, stats.putCount());
-        assertEquals(80, stats.getCount());
-        assertEquals(60, stats.hitCount());
-        assertEquals(20, stats.missCount());
-        assertEquals(10, stats.evictionCount());
-        assertEquals(-1, stats.maxMemory());
-        assertEquals(-1, stats.dataSize());
-    }
-
-    @Test
-    public void testClose() {
-        assertFalse(pool.isClosed());
-        pool.setSize(5);
-        pool.close();
-        assertTrue(pool.isClosed());
-        assertEquals(0, pool.size());
-    }
-
-    @Test
-    public void testMultipleLockUnlock() {
-        for (int i = 0; i < 5; i++) {
-            assertFalse(pool.isLocked());
-            pool.lock();
-            assertTrue(pool.isLocked());
-            pool.unlock();
-            assertFalse(pool.isLocked());
-        }
     }
 
     @Test
@@ -228,15 +166,41 @@ public class PoolTest extends TestBase {
     }
 
     @Test
-    public void testIsClosed() {
-        assertFalse(pool.isClosed());
-        pool.close();
-        assertTrue(pool.isClosed());
+    public void testClear() {
+        pool.setSize(5);
+        assertEquals(5, pool.size());
+        pool.clear();
+        assertEquals(0, pool.size());
     }
 
     @Test
-    public void testUnlockWithoutLock() {
-        assertThrows(IllegalMonitorStateException.class, () -> pool.unlock());
+    public void testClearOnClosedPool() {
+        pool.close();
+        assertThrows(IllegalStateException.class, () -> pool.clear());
+    }
+
+    @Test
+    public void testStats() {
+        PoolStats stats = pool.stats();
+        assertNotNull(stats);
+        assertEquals(10, stats.capacity());
+        assertEquals(0, stats.size());
+        assertEquals(100, stats.putCount());
+        assertEquals(80, stats.getCount());
+        assertEquals(60, stats.hitCount());
+        assertEquals(20, stats.missCount());
+        assertEquals(10, stats.evictionCount());
+        assertEquals(-1, stats.maxMemory());
+        assertEquals(-1, stats.dataSize());
+    }
+
+    @Test
+    public void testClose() {
+        assertFalse(pool.isClosed());
+        pool.setSize(5);
+        pool.close();
+        assertTrue(pool.isClosed());
+        assertEquals(0, pool.size());
     }
 
     @Test
@@ -246,8 +210,40 @@ public class PoolTest extends TestBase {
     }
 
     @Test
-    public void testClearOnClosedPool() {
+    public void testIsClosed() {
+        assertFalse(pool.isClosed());
         pool.close();
-        assertThrows(IllegalStateException.class, () -> pool.clear());
+        assertTrue(pool.isClosed());
+    }
+
+    @Test
+    public void testLock() {
+        assertFalse(pool.isLocked());
+        pool.lock();
+        assertTrue(pool.isLocked());
+    }
+
+    @Test
+    public void testUnlock() {
+        pool.lock();
+        assertTrue(pool.isLocked());
+        pool.unlock();
+        assertFalse(pool.isLocked());
+    }
+
+    @Test
+    public void testMultipleLockUnlock() {
+        for (int i = 0; i < 5; i++) {
+            assertFalse(pool.isLocked());
+            pool.lock();
+            assertTrue(pool.isLocked());
+            pool.unlock();
+            assertFalse(pool.isLocked());
+        }
+    }
+
+    @Test
+    public void testUnlockWithoutLock() {
+        assertThrows(IllegalMonitorStateException.class, () -> pool.unlock());
     }
 }

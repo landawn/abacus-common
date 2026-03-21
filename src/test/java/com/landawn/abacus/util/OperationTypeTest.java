@@ -4,13 +4,45 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 
-@Tag("old-test")
 public class OperationTypeTest extends AbstractTest {
+
+    @Test
+    public void testIntValue() {
+        assertEquals(1, OperationType.QUERY.intValue());
+        assertEquals(2, OperationType.ADD.intValue());
+        assertEquals(4, OperationType.UPDATE.intValue());
+        assertEquals(8, OperationType.DELETE.intValue());
+    }
+
+    @Test
+    public void testBitwiseOperations() {
+        // Test that the values are designed for bitwise operations
+        int readWrite = OperationType.QUERY.intValue() | OperationType.UPDATE.intValue();
+        assertEquals(5, readWrite);
+
+        int allOperations = OperationType.QUERY.intValue() | OperationType.ADD.intValue() | OperationType.UPDATE.intValue() | OperationType.DELETE.intValue();
+        assertEquals(15, allOperations);
+    }
+
+    @Test
+    public void testValueOf_withValidIntValues() {
+        assertEquals(OperationType.QUERY, OperationType.valueOf(1));
+        assertEquals(OperationType.ADD, OperationType.valueOf(2));
+        assertEquals(OperationType.UPDATE, OperationType.valueOf(4));
+        assertEquals(OperationType.DELETE, OperationType.valueOf(8));
+    }
+
+    @Test
+    public void testValueOf_withStringName() {
+        assertEquals(OperationType.QUERY, OperationType.valueOf("QUERY"));
+        assertEquals(OperationType.ADD, OperationType.valueOf("ADD"));
+        assertEquals(OperationType.UPDATE, OperationType.valueOf("UPDATE"));
+        assertEquals(OperationType.DELETE, OperationType.valueOf("DELETE"));
+    }
 
     @Test
     public void test_valueOf() {
@@ -30,34 +62,10 @@ public class OperationTypeTest extends AbstractTest {
     }
 
     @Test
-    public void testIntValue() {
-        assertEquals(1, OperationType.QUERY.intValue());
-        assertEquals(2, OperationType.ADD.intValue());
-        assertEquals(4, OperationType.UPDATE.intValue());
-        assertEquals(8, OperationType.DELETE.intValue());
-    }
-
-    @Test
-    public void testValueOf_withValidIntValues() {
-        assertEquals(OperationType.QUERY, OperationType.valueOf(1));
-        assertEquals(OperationType.ADD, OperationType.valueOf(2));
-        assertEquals(OperationType.UPDATE, OperationType.valueOf(4));
-        assertEquals(OperationType.DELETE, OperationType.valueOf(8));
-    }
-
-    @Test
     public void testValueOf_withInvalidIntValue() {
         assertThrows(IllegalArgumentException.class, () -> OperationType.valueOf(0));
         assertThrows(IllegalArgumentException.class, () -> OperationType.valueOf(3));
         assertThrows(IllegalArgumentException.class, () -> OperationType.valueOf(16));
-    }
-
-    @Test
-    public void testValueOf_withStringName() {
-        assertEquals(OperationType.QUERY, OperationType.valueOf("QUERY"));
-        assertEquals(OperationType.ADD, OperationType.valueOf("ADD"));
-        assertEquals(OperationType.UPDATE, OperationType.valueOf("UPDATE"));
-        assertEquals(OperationType.DELETE, OperationType.valueOf("DELETE"));
     }
 
     @Test
@@ -84,16 +92,6 @@ public class OperationTypeTest extends AbstractTest {
         assertEquals("ADD", OperationType.ADD.toString());
         assertEquals("UPDATE", OperationType.UPDATE.toString());
         assertEquals("DELETE", OperationType.DELETE.toString());
-    }
-
-    @Test
-    public void testBitwiseOperations() {
-        // Test that the values are designed for bitwise operations
-        int readWrite = OperationType.QUERY.intValue() | OperationType.UPDATE.intValue();
-        assertEquals(5, readWrite);
-
-        int allOperations = OperationType.QUERY.intValue() | OperationType.ADD.intValue() | OperationType.UPDATE.intValue() | OperationType.DELETE.intValue();
-        assertEquals(15, allOperations);
     }
 
 }

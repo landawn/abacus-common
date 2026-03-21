@@ -24,7 +24,6 @@ import java.util.function.DoubleFunction;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -44,7 +43,6 @@ import com.landawn.abacus.util.Suppliers;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 
-@Tag("2025")
 public class DoubleStreamTest extends TestBase {
 
     protected DoubleStream createDoubleStream(double... a) {
@@ -80,6 +78,14 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testFilter_WithAction() {
+        List<Double> rejected = new ArrayList<>();
+        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0).filter(x -> x % 2 == 0, value -> rejected.add(value)).toArray();
+        assertArrayEquals(new double[] { 2.0, 4.0 }, result, 0.001);
+        assertEquals(Arrays.asList(1.0, 3.0, 5.0), rejected);
+    }
+
+    @Test
     public void testFilter() {
         DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0);
         double[] result = stream.filter(x -> x > 2.5).toArray();
@@ -87,6 +93,11 @@ public class DoubleStreamTest extends TestBase {
 
         DoubleStream emptyStream = DoubleStream.empty();
         assertEquals(0, emptyStream.filter(x -> true).count());
+    }
+
+    @Test
+    public void testFilterWithNull() {
+        assertThrows(NullPointerException.class, () -> DoubleStream.of(1.0, 2.0).filter(null).count());
     }
 
     @Test
@@ -100,6 +111,14 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void test_takeWhile() {
+        DoubleStream stream = createDoubleStream(1.0, 2.0, 3.0, 4.0, 5.0);
+
+        double[] result = stream.takeWhile(x -> x < 4.0).toArray();
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, result, 0.0001);
+    }
+
+    @Test
     public void testDropWhile() {
         DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0);
         double[] result = stream.dropWhile(x -> x < 3.0).toArray();
@@ -110,10 +129,35 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testDropWhile_WithAction() {
+        List<Double> dropped = new ArrayList<>();
+        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0).dropWhile(x -> x <= 3.0, value -> dropped.add(value)).toArray();
+        assertArrayEquals(new double[] { 4.0, 5.0 }, result, 0.001);
+        assertEquals(Arrays.asList(1.0, 2.0, 3.0), dropped);
+    }
+
+    @Test
     public void testMap() {
         DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0);
         double[] result = stream.map(x -> x * 2.0).toArray();
         assertArrayEquals(new double[] { 2.0, 4.0, 6.0 }, result, 0.0001);
+    }
+
+    @Test
+    public void testMapToChar() {
+        char[] result = DoubleStream.of(65.0, 66.0, 67.0)
+                .mapToObj(d -> (char) (int) d)
+                .toList()
+                .stream()
+                .map(c -> c.toString())
+                .reduce("", String::concat)
+                .toCharArray();
+        assertEquals(3, result.length);
+    }
+
+    @Test
+    public void testMapWithNull() {
+        assertThrows(NullPointerException.class, () -> DoubleStream.of(1.0, 2.0).map(null).count());
     }
 
     @Test
@@ -139,6 +183,13 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testMapToFloat_HappyPath2() {
+        float[] result = DoubleStream.of(1.0, 2.0, 3.0).mapToFloat(d -> (float) d).toArray();
+        assertEquals(3, result.length);
+        assertEquals(1.0f, result[0], 0.001f);
+    }
+
+    @Test
     public void testMapToObj() {
         DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0);
         List<String> result = stream.mapToObj(x -> "Value: " + x).toList();
@@ -161,10 +212,47 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testFlatmap_HappyPath() {
+        double[] result = DoubleStream.of(1.0, 2.0, 3.0).flatmap(d -> new double[] { d, d * 10 }).toArray();
+        assertArrayEquals(new double[] { 1.0, 10.0, 2.0, 20.0, 3.0, 30.0 }, result, 0.001);
+    }
+
+    @Test
     public void testFlattMap() {
         DoubleStream stream = DoubleStream.of(1.0, 2.0);
         double[] result = stream.flattMap(x -> java.util.stream.DoubleStream.of(x, x * 2)).toArray();
         assertArrayEquals(new double[] { 1.0, 2.0, 2.0, 4.0 }, result, 0.0001);
+    }
+
+    @Test
+    public void testFlattmapToObj() {
+        DoubleStream stream = DoubleStream.of(1.0, 2.0);
+        List<String> result = stream.flatMapArrayToObj(x -> new String[] { "A" + x, "B" + x }).toList();
+        assertEquals(4, result.size());
+    }
+
+    @Test
+    public void testFlattmap() {
+        DoubleStream stream = createDoubleStream(1.0, 2.0);
+        DoubleFunction<java.util.stream.DoubleStream> mapper = x -> java.util.stream.DoubleStream.of(x, x * 3);
+
+        double[] result = stream.flattMap(mapper).toArray();
+        assertArrayEquals(new double[] { 1.0, 3.0, 2.0, 6.0 }, result, 0.0001);
+    }
+
+    @Test
+    public void testFlattMapToObj() {
+        DoubleStream stream = createDoubleStream(1.0, 2.0);
+        DoubleFunction<String[]> mapper = x -> new String[] { "X" + x, "Y" + x };
+
+        List<String> result = stream.flatMapArrayToObj(mapper).toList();
+        assertEquals(Arrays.asList("X1.0", "Y1.0", "X2.0", "Y2.0"), result);
+    }
+
+    @Test
+    public void testFlattMap_HappyPath() {
+        double[] result = DoubleStream.of(1.0, 2.0, 3.0).flattMap(d -> java.util.stream.DoubleStream.of(d, d * 10)).toArray();
+        assertArrayEquals(new double[] { 1.0, 10.0, 2.0, 20.0, 3.0, 30.0 }, result, 0.001);
     }
 
     @Test
@@ -175,6 +263,12 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testFlatMapToInt_HappyPath() {
+        int[] result = DoubleStream.of(1.0, 2.0).flatMapToInt(d -> IntStream.of((int) d, (int) (d * 10))).toArray();
+        assertArrayEquals(new int[] { 1, 10, 2, 20 }, result);
+    }
+
+    @Test
     public void testFlatMapToLong() {
         DoubleStream stream = DoubleStream.of(1.0, 2.0);
         long[] result = stream.flatMapToLong(x -> LongStream.of((long) x, (long) x * 2)).toArray();
@@ -182,10 +276,24 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testFlatMapToLong_HappyPath() {
+        long[] result = DoubleStream.of(1.0, 2.0).flatMapToLong(d -> LongStream.of((long) d, (long) (d * 10))).toArray();
+        assertArrayEquals(new long[] { 1, 10, 2, 20 }, result);
+    }
+
+    @Test
     public void testFlatMapToFloat() {
         DoubleStream stream = DoubleStream.of(1.0, 2.0);
         float[] result = stream.flatMapToFloat(x -> FloatStream.of((float) x, (float) x * 2)).toArray();
         assertEquals(4, result.length);
+    }
+
+    @Test
+    public void testFlatMapToFloat_HappyPath2() {
+        float[] result = DoubleStream.of(1.0, 2.0).flatMapToFloat(d -> FloatStream.of((float) d, (float) (d * 10))).toArray();
+        assertEquals(4, result.length);
+        assertEquals(1.0f, result[0], 0.001f);
+        assertEquals(10.0f, result[1], 0.001f);
     }
 
     @Test
@@ -203,10 +311,27 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
-    public void testFlattmapToObj() {
-        DoubleStream stream = DoubleStream.of(1.0, 2.0);
-        List<String> result = stream.flatMapArrayToObj(x -> new String[] { "A" + x, "B" + x }).toList();
+    public void testFlatmapToObj_HappyPath() {
+        List<String> result = DoubleStream.of(1.0, 2.0).flatmapToObj(d -> Arrays.asList(String.valueOf(d), String.valueOf(d * 10))).toList();
         assertEquals(4, result.size());
+    }
+
+    @Test
+    public void testFlatMapArrayToObj_HappyPath2() {
+        List<String> result = DoubleStream.of(1.0, 2.0, 3.0).flatMapArrayToObj(d -> new String[] { String.valueOf(d), String.valueOf(d * 10) }).toList();
+        assertEquals(6, result.size());
+    }
+
+    @Test
+    public void testFlatMapArrayToObj_Empty() {
+        List<String> result = DoubleStream.empty().flatMapArrayToObj(d -> new String[] { "A" + d }).toList();
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testFlatMapArrayToObj_Empty2() {
+        List<String> result = DoubleStream.empty().flatMapArrayToObj(d -> new String[] { String.valueOf(d) }).toList();
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -220,6 +345,21 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testMapMulti_HappyPath2() {
+        double[] result = DoubleStream.of(1.0, 2.0, 3.0).mapMulti((value, consumer) -> {
+            consumer.accept(value);
+            consumer.accept(value * 10);
+        }).toArray();
+        assertArrayEquals(new double[] { 1.0, 10.0, 2.0, 20.0, 3.0, 30.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testMapMulti_Empty2() {
+        double[] result = DoubleStream.empty().mapMulti((value, consumer) -> consumer.accept(value)).toArray();
+        assertArrayEquals(new double[0], result, 0.001);
+    }
+
+    @Test
     public void testMapPartial() {
         DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0);
         double[] result = stream.mapPartial(x -> x > 2.0 ? OptionalDouble.of(x * 2) : OptionalDouble.empty()).toArray();
@@ -227,10 +367,24 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testMapPartial_HappyPath2() {
+        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0).mapPartial(d -> d % 2 == 0 ? OptionalDouble.of(d * 10) : OptionalDouble.empty()).toArray();
+        assertArrayEquals(new double[] { 20.0, 40.0 }, result, 0.001);
+    }
+
+    @Test
     public void testMapPartialJdk() {
         DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0);
         double[] result = stream.mapPartialJdk(x -> x > 2.0 ? java.util.OptionalDouble.of(x * 2) : java.util.OptionalDouble.empty()).toArray();
         assertArrayEquals(new double[] { 6.0, 8.0 }, result, 0.0001);
+    }
+
+    @Test
+    public void testMapPartialJdk_HappyPath2() {
+        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0)
+                .mapPartialJdk(d -> d % 2 == 0 ? java.util.OptionalDouble.of(d * 10) : java.util.OptionalDouble.empty())
+                .toArray();
+        assertArrayEquals(new double[] { 20.0, 40.0 }, result, 0.001);
     }
 
     @Test
@@ -242,11 +396,29 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testRangeMap_HappyPath2() {
+        double[] result = DoubleStream.of(1.0, 1.0, 2.0, 2.0, 3.0).rangeMap((a, b) -> a == b, Double::sum).toArray();
+        assertArrayEquals(new double[] { 2.0, 4.0, 6.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testRangeMap_Empty() {
+        double[] result = DoubleStream.empty().rangeMap((a, b) -> a == b, Double::sum).toArray();
+        assertArrayEquals(new double[0], result, 0.001);
+    }
+
+    @Test
     public void testRangeMapToObj() {
         DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 10.0, 11.0);
         List<String> result = stream.rangeMapToObj((first, next) -> next - first < 2.0, (first, last) -> first + "-" + last).toList();
         assertEquals(3, result.size());
         assertEquals(N.toList("1.0-2.0", "3.0-3.0", "10.0-11.0"), result);
+    }
+
+    @Test
+    public void testRangeMapToObj_HappyPath2() {
+        List<String> result = DoubleStream.of(1.0, 1.0, 2.0, 3.0, 3.0).rangeMapToObj((a, b) -> a == b, (a, b) -> a + "-" + b).toList();
+        assertEquals(3, result.size());
     }
 
     @Test
@@ -268,6 +440,34 @@ public class DoubleStreamTest extends TestBase {
         DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 10.0, 11.0);
         double[] result = stream.collapse((first, last, next) -> next - first < 5.0, (a, b) -> a + b).toArray();
         assertEquals(2, result.length);
+    }
+
+    @Test
+    public void testCollapseNonCollapsible() {
+        DoubleStream stream = DoubleStream.of(1.0, 10.0, 100.0);
+        double[] result = stream.collapse((prev, next) -> false, (a, b) -> a + b).toArray();
+        assertArrayEquals(new double[] { 1.0, 10.0, 100.0 }, result, 0.0001);
+    }
+
+    @Test
+    public void testCollapse_ListForm() {
+        List<DoubleList> result = DoubleStream.of(1.0, 1.0, 2.0, 2.0, 3.0).collapse((a, b) -> a == b).toList();
+        assertEquals(3, result.size());
+        assertArrayEquals(new double[] { 1.0, 1.0 }, result.get(0).toArray(), 0.001);
+        assertArrayEquals(new double[] { 2.0, 2.0 }, result.get(1).toArray(), 0.001);
+        assertArrayEquals(new double[] { 3.0 }, result.get(2).toArray(), 0.001);
+    }
+
+    @Test
+    public void testCollapse_WithTriPredicate2() {
+        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 10.0, 11.0, 12.0).collapse((first, previous, current) -> current - first <= 2, Double::sum).toArray();
+        assertArrayEquals(new double[] { 6.0, 33.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testCollapse_WithMergeFunction2() {
+        double[] result = DoubleStream.of(1.0, 1.0, 2.0, 2.0, 3.0).collapse((a, b) -> a == b, Double::sum).toArray();
+        assertArrayEquals(new double[] { 2.0, 4.0, 3.0 }, result, 0.001);
     }
 
     @Test
@@ -293,6 +493,55 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testScanWithInitial() {
+        DoubleStream stream = createDoubleStream(1.0, 2.0, 3.0);
+        DoubleBinaryOperator accumulator = (a, b) -> a * b;
+
+        double[] result = stream.scan(10.0, accumulator).toArray();
+        assertArrayEquals(new double[] { 10.0, 20.0, 60.0 }, result, 0.0001);
+    }
+
+    @Test
+    public void testScanWithInitialIncluded() {
+        DoubleStream stream = createDoubleStream(1.0, 2.0, 3.0);
+        DoubleBinaryOperator accumulator = Double::sum;
+
+        double[] result = stream.scan(100.0, true, accumulator).toArray();
+        assertArrayEquals(new double[] { 100.0, 101.0, 103.0, 106.0 }, result, 0.0001);
+    }
+
+    @Test
+    public void testScan_BasicScan2() {
+        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0).scan(Double::sum).toArray();
+        assertArrayEquals(new double[] { 1.0, 3.0, 6.0, 10.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testScan_WithInit2() {
+        double[] result = DoubleStream.of(1.0, 2.0, 3.0).scan(10.0, Double::sum).toArray();
+        assertArrayEquals(new double[] { 11.0, 13.0, 16.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testScan_WithInitIncluded2() {
+        double[] result = DoubleStream.of(1.0, 2.0, 3.0).scan(10.0, true, Double::sum).toArray();
+        assertArrayEquals(new double[] { 10.0, 11.0, 13.0, 16.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testScanEmptyStream() {
+        DoubleStream stream = DoubleStream.empty();
+        double[] result = stream.scan((a, b) -> a + b).toArray();
+        assertEquals(0, result.length);
+    }
+
+    @Test
+    public void testScan_EmptyStream2() {
+        double[] result = DoubleStream.empty().scan(Double::sum).toArray();
+        assertArrayEquals(new double[0], result, 0.001);
+    }
+
+    @Test
     public void testPrepend() {
         DoubleStream stream = DoubleStream.of(3.0, 4.0);
         double[] result = stream.prepend(1.0, 2.0).toArray();
@@ -300,10 +549,24 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testPrependArray() {
+        DoubleStream stream = createDoubleStream(3.0, 4.0, 5.0);
+        double[] result = stream.prepend(1.0, 2.0).toArray();
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, result, 0.0001);
+    }
+
+    @Test
     public void testAppend() {
         DoubleStream stream = DoubleStream.of(1.0, 2.0);
         double[] result = stream.append(3.0, 4.0).toArray();
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0 }, result, 0.0001);
+    }
+
+    @Test
+    public void testAppendArray() {
+        DoubleStream stream = createDoubleStream(1.0, 2.0, 3.0);
+        double[] result = stream.append(4.0, 5.0).toArray();
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, result, 0.0001);
     }
 
     @Test
@@ -370,6 +633,29 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testToMap_WithMerge() {
+        Map<Boolean, Double> map = createDoubleStream(1.0, 2.0, 3.0, 4.0, 5.0, 6.0).toMap(n -> n % 2 == 0, n -> n, Double::sum);
+        assertEquals(12.0, map.get(true), 0.001);
+        assertEquals(9.0, map.get(false), 0.001);
+    }
+
+    @Test
+    public void testToMap_WithMapSupplier() {
+        Map<String, Double> map = createDoubleStream(1.0, 2.0, 3.0).toMap(n -> "key" + n, n -> n * 10, Suppliers.ofMap());
+        assertEquals(3, map.size());
+        assertEquals(10.0, map.get("key1.0"), 0.001);
+    }
+
+    @Test
+    public void testToMap_WithMergeFunction2() {
+        Map<Double, Double> result = DoubleStream.of(1.0, 2.0, 1.0, 3.0, 2.0).toMap(d -> d, d -> 1.0, Double::sum);
+        assertEquals(3, result.size());
+        assertEquals(2.0, result.get(1.0), 0.001);
+        assertEquals(2.0, result.get(2.0), 0.001);
+        assertEquals(1.0, result.get(3.0), 0.001);
+    }
+
+    @Test
     public void testGroupTo() {
         DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0);
         Map<Boolean, List<Double>> map = stream.groupTo(x -> x > 2.0, java.util.stream.Collectors.toList());
@@ -384,10 +670,24 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testGroupTo_WithMapSupplier() {
+        HashMap<Boolean, List<Double>> grouped = createDoubleStream(1.0, 2.0, 3.0, 4.0, 5.0, 6.0).groupTo(n -> n % 2 == 0, java.util.stream.Collectors.toList(),
+                HashMap::new);
+        assertEquals(2, grouped.size());
+        assertTrue(grouped.get(true).contains(2.0));
+    }
+
+    @Test
     public void testReduce() {
         DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0);
         double result = stream.reduce(0.0, (a, b) -> a + b);
         assertEquals(10.0, result, 0.0001);
+    }
+
+    @Test
+    public void testReduceWithIdentity() {
+        double result = DoubleStream.of(1.0, 2.0, 3.0).reduce(10.0, (a, b) -> a + b);
+        assertEquals(16.0, result);
     }
 
     @Test
@@ -399,6 +699,24 @@ public class DoubleStreamTest extends TestBase {
 
         DoubleStream emptyStream = DoubleStream.empty();
         assertFalse(emptyStream.reduce((a, b) -> a + b).isPresent());
+    }
+
+    @Test
+    public void testReduceOnEmptyStream() {
+        OptionalDouble result = DoubleStream.empty().reduce((a, b) -> a + b);
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testReduceWithoutIdentity() {
+        DoubleStream stream = createDoubleStream(1.0, 2.0, 3.0, 4.0);
+        OptionalDouble result = stream.reduce(Double::max);
+        assertTrue(result.isPresent());
+        assertEquals(4.0, result.getAsDouble(), 0.0001);
+
+        DoubleStream emptyStream = DoubleStream.empty();
+        OptionalDouble emptyResult = emptyStream.reduce(Double::max);
+        assertFalse(emptyResult.isPresent());
     }
 
     @Test
@@ -416,6 +734,27 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testCollectWithoutCombiner() {
+        DoubleStream stream = createDoubleStream(1.0, 2.0, 3.0);
+        DoubleList result = stream.collect(DoubleList::new, DoubleList::add);
+
+        assertEquals(3, result.size());
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, result.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testCollect_WithoutCombiner() {
+        List<Double> result = createDoubleStream(1.0, 2.0, 3.0).collect(ArrayList::new, (list, n) -> list.add(n));
+        assertEquals(Arrays.asList(1.0, 2.0, 3.0), result);
+    }
+
+    @Test
+    public void testCollect_TwoArg2() {
+        List<Double> result = DoubleStream.of(1.0, 2.0, 3.0).collect(ArrayList::new, (list, val) -> list.add(val));
+        assertEquals(Arrays.asList(1.0, 2.0, 3.0), result);
+    }
+
+    @Test
     public void testForeach() {
         DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0);
         List<Double> list = new ArrayList<>();
@@ -429,6 +768,13 @@ public class DoubleStreamTest extends TestBase {
         List<Double> list = new ArrayList<>();
         stream.forEach(list::add);
         assertEquals(3, list.size());
+    }
+
+    @Test
+    public void testForeach_HappyPath2() {
+        List<Double> collected = new ArrayList<>();
+        DoubleStream.of(1.0, 2.0, 3.0).foreach(collected::add);
+        assertEquals(Arrays.asList(1.0, 2.0, 3.0), collected);
     }
 
     @Test
@@ -476,10 +822,57 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testFindFirstWithPredicate() {
+        DoubleStream stream = createDoubleStream(1.0, 2.0, 3.0, 4.0);
+        OptionalDouble result = stream.findFirst(x -> x > 2);
+        assertTrue(result.isPresent());
+        assertEquals(3.0, result.getAsDouble(), 0.0001);
+    }
+
+    @Test
+    public void testFindFirst_NoArg() {
+        OptionalDouble result = createDoubleStream(10.0, 20.0, 30.0).findFirst();
+        assertTrue(result.isPresent());
+        assertEquals(10.0, result.getAsDouble(), 0.001);
+    }
+
+    @Test
+    public void testFindFirstOnEmptyStream() {
+        OptionalDouble first = DoubleStream.empty().first();
+        assertFalse(first.isPresent());
+    }
+
+    @Test
+    public void testFindFirst_NoArg_Empty() {
+        OptionalDouble result = DoubleStream.empty().findFirst();
+        assertFalse(result.isPresent());
+    }
+
+    @Test
     public void testFindAny() {
         DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0);
         OptionalDouble result = stream.findAny(x -> x > 1.5);
         assertTrue(result.isPresent());
+    }
+
+    @Test
+    public void testFindAnyWithPredicate() {
+        DoubleStream stream = createDoubleStream(1.0, 2.0, 3.0, 4.0);
+        OptionalDouble result = stream.findAny(x -> x > 2);
+        assertTrue(result.isPresent());
+        assertTrue(result.getAsDouble() > 2);
+    }
+
+    @Test
+    public void testFindAny_NoArg() {
+        OptionalDouble result = createDoubleStream(10.0, 20.0, 30.0).findAny();
+        assertTrue(result.isPresent());
+    }
+
+    @Test
+    public void testFindAny_NoArg_Empty() {
+        OptionalDouble result = DoubleStream.empty().findAny();
+        assertFalse(result.isPresent());
     }
 
     @Test
@@ -488,6 +881,27 @@ public class DoubleStreamTest extends TestBase {
         OptionalDouble result = stream.findLast(x -> x < 3.5);
         assertTrue(result.isPresent());
         assertEquals(3.0, result.get(), 0.0001);
+    }
+
+    @Test
+    public void testFindLastWithPredicate() {
+        DoubleStream stream = createDoubleStream(1.0, 2.0, 3.0, 4.0);
+        OptionalDouble result = stream.findLast(x -> x < 3);
+        assertTrue(result.isPresent());
+        assertEquals(2.0, result.getAsDouble(), 0.0001);
+    }
+
+    @Test
+    public void testFindLast_HappyPath() {
+        OptionalDouble result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0).findLast(x -> x < 4.0);
+        assertTrue(result.isPresent());
+        assertEquals(3.0, result.get(), 0.001);
+    }
+
+    @Test
+    public void testFindLast_Empty() {
+        OptionalDouble result = DoubleStream.empty().findLast(x -> true);
+        assertFalse(result.isPresent());
     }
 
     @Test
@@ -521,6 +935,21 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testKthLargest_HappyPath2() {
+        OptionalDouble result = DoubleStream.of(3.0, 1.0, 4.0, 1.0, 5.0).kthLargest(2);
+        assertTrue(result.isPresent());
+        assertEquals(4.0, result.get(), 0.001);
+    }
+
+    @Test
+    public void testKthLargest_SortedBranch() {
+        OptionalDouble result = createDoubleStream(1.0, 2.0, 3.0, 4.0).sorted().kthLargest(2);
+
+        assertTrue(result.isPresent());
+        assertEquals(3.0, result.getAsDouble(), 0.001);
+    }
+
+    @Test
     public void testSum() {
         DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0);
         double result = stream.sum();
@@ -542,23 +971,9 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
-    public void testsummaryStatistics() {
-        DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0);
-        DoubleSummaryStatistics stats = stream.summaryStatistics();
-        assertEquals(5, stats.getCount());
-        assertEquals(15.0, stats.getSum(), 0.0001);
-        assertEquals(3.0, stats.getAverage(), 0.0001);
-        assertEquals(1.0, stats.getMin(), 0.0001);
-        assertEquals(5.0, stats.getMax(), 0.0001);
-    }
-
-    @Test
-    public void testsummaryStatisticsAndPercentiles() {
-        DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0);
-        Pair<DoubleSummaryStatistics, Optional<Map<Percentage, Double>>> result = stream.summaryStatisticsAndPercentiles();
-        assertNotNull(result);
-        assertNotNull(result.left());
-        assertEquals(5, result.left().getCount());
+    public void testAverageOnEmptyStream() {
+        OptionalDouble avg = DoubleStream.empty().average();
+        assertFalse(avg.isPresent());
     }
 
     @Test
@@ -567,6 +982,13 @@ public class DoubleStreamTest extends TestBase {
         DoubleStream stream2 = DoubleStream.of(2.0, 4.0, 6.0);
         double[] result = stream1.mergeWith(stream2, (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray();
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }, result, 0.0001);
+    }
+
+    @Test
+    public void testMergeWithCollection() {
+        Collection<DoubleStream> streams = Arrays.asList(DoubleStream.of(1.0, 5.0), DoubleStream.of(2.0, 6.0), DoubleStream.of(3.0, 7.0));
+        DoubleStream result = DoubleStream.merge(streams, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertEquals(6, result.count());
     }
 
     @Test
@@ -603,6 +1025,47 @@ public class DoubleStreamTest extends TestBase {
         assertEquals(3, result.length);
     }
 
+    // Additional coverage tests for 2025
+
+    @Test
+    public void testZipWithCollectionOfStreams() {
+        Collection<DoubleStream> streams = Arrays.asList(DoubleStream.of(1.0, 2.0), DoubleStream.of(10.0, 20.0), DoubleStream.of(100.0, 200.0));
+        DoubleStream result = DoubleStream.zip(streams, doubles -> {
+            double sum = 0.0;
+            for (Double d : doubles)
+                sum += d;
+            return sum;
+        });
+        assertArrayEquals(new double[] { 111.0, 222.0 }, result.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testZipWithCollectionDefaultValues() {
+        Collection<DoubleStream> streams = Arrays.asList(DoubleStream.of(1.0, 2.0), DoubleStream.of(10.0));
+        double[] defaults = new double[] { 0.0, 0.0 };
+        DoubleStream result = DoubleStream.zip(streams, defaults, doubles -> {
+            double sum = 0.0;
+            for (Double d : doubles)
+                sum += d;
+            return sum;
+        });
+        assertEquals(2, result.count());
+    }
+
+    @Test
+    public void testZipWith_CollectionOfStreams() {
+        List<DoubleStream> streams = Arrays.asList(DoubleStream.of(1.0, 2.0, 3.0), DoubleStream.of(10.0, 20.0, 30.0));
+        double[] result = DoubleStream.zip(streams, args -> args[0] + args[1]).toArray();
+        assertArrayEquals(new double[] { 11.0, 22.0, 33.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testZipWith_CollectionOfStreamsWithDefaults() {
+        List<DoubleStream> streams = Arrays.asList(DoubleStream.of(1.0, 2.0), DoubleStream.of(10.0, 20.0, 30.0));
+        double[] result = DoubleStream.zip(streams, new double[] { 0.0, 0.0 }, args -> args[0] + args[1]).toArray();
+        assertArrayEquals(new double[] { 11.0, 22.0, 30.0 }, result, 0.001);
+    }
+
     @Test
     public void testBoxed() {
         DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0);
@@ -616,6 +1079,47 @@ public class DoubleStreamTest extends TestBase {
         DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0);
         java.util.stream.DoubleStream jdkStream = stream.toJdkStream();
         assertEquals(3, jdkStream.count());
+    }
+
+    // TODO: filter(DoublePredicate) is abstract - tested via concrete implementations above
+    // TODO: takeWhile(DoublePredicate) is abstract - tested via concrete implementations above
+    // TODO: dropWhile(DoublePredicate) is abstract - tested via concrete implementations above
+    // TODO: map(DoubleUnaryOperator) is abstract - tested via concrete implementations above
+    // TODO: mapToInt(DoubleToIntFunction) is abstract - tested via concrete implementations above
+    // TODO: mapToLong(DoubleToLongFunction) is abstract - tested via concrete implementations above
+    // TODO: mapToFloat(DoubleToFloatFunction) is abstract - tested via concrete implementations above
+    // TODO: mapToObj(DoubleFunction) is abstract - tested via concrete implementations above
+    // TODO: flatMap(DoubleFunction) is abstract - tested via concrete implementations above
+    // TODO: flatmap(DoubleFunction<double[]>) is abstract - tested via concrete implementations above
+    // TODO: flattMap(DoubleFunction<JDK DoubleStream>) is abstract - tested via concrete implementations above
+    // TODO: flatMapToInt(DoubleFunction) is abstract - tested via concrete implementations above
+    // TODO: flatMapToLong(DoubleFunction) is abstract - tested via concrete implementations above
+    // TODO: flatMapToFloat(DoubleFunction) is abstract - tested via concrete implementations above
+    // TODO: flatMapToObj(DoubleFunction) is abstract - tested via concrete implementations above
+    // TODO: flatmapToObj(DoubleFunction) is abstract - tested via concrete implementations above
+    // TODO: mapMulti(DoubleMapMultiConsumer) is abstract - tested via concrete implementations above
+    // TODO: mapPartial(DoubleFunction) is abstract - tested via concrete implementations above
+    // TODO: mapPartialJdk(DoubleFunction) is abstract - tested via concrete implementations above
+    // TODO: rangeMap(DoubleBiPredicate, DoubleBinaryOperator) is abstract - tested via concrete implementations above
+    // TODO: rangeMapToObj(DoubleBiPredicate, DoubleBiFunction) is abstract - tested via concrete implementations above
+    // TODO: collapse(...) overloads are abstract - tested via concrete implementations above
+    // TODO: scan(...) overloads are abstract - tested via concrete implementations above
+    // TODO: prepend/append/appendIfEmpty are abstract - tested via concrete implementations above
+    // TODO: top(...) overloads are abstract - tested via concrete implementations above
+    // TODO: toDoubleList() is abstract - tested via concrete implementations above
+    // TODO: toMap/groupTo/reduce/collect overloads are abstract - tested via concrete implementations above
+    // TODO: forEach/forEachIndexed/anyMatch/allMatch/noneMatch are abstract - tested via concrete implementations above
+    // TODO: findFirst/findAny/findLast with predicate are abstract - tested via concrete implementations above
+    // TODO: min/max/kthLargest/sum/average/summaryStatistics are abstract - tested via concrete implementations above
+    // TODO: mergeWith/zipWith overloads are abstract - tested via concrete implementations above
+    // TODO: boxed/toJdkStream are abstract - tested via concrete implementations above
+
+    @Test
+    public void testFlatMapArrayToObj() {
+        List<String> result = createDoubleStream(1.0, 2.0, 3.0).flatMapArrayToObj(d -> new String[] { "A" + d, "B" + d }).toList();
+        assertEquals(6, result.size());
+        assertEquals("A1.0", result.get(0));
+        assertEquals("B1.0", result.get(1));
     }
 
     @Test
@@ -633,10 +1137,123 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testTransformB_TwoArg() {
+        double[] result = createDoubleStream(3.0, 1.0, 2.0).transformB(s -> s.sorted(), false).toArray();
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testTransformB_TwoArg_Deferred() {
+        double[] result = createDoubleStream(3.0, 1.0, 2.0).transformB(s -> s.sorted(), true).toArray();
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testTransformB_HappyPath2() {
+        double[] result = DoubleStream.of(1.0, 2.0, 3.0).transformB(s -> s.map(x -> x * 2)).toArray();
+        assertArrayEquals(new double[] { 2.0, 4.0, 6.0 }, result, 0.001);
+    }
+
+    @Test
     public void testEmpty() {
         DoubleStream stream = DoubleStream.empty();
         assertNotNull(stream);
         assertEquals(0, stream.count());
+    }
+
+    @Test
+    public void testEmptyStreamOperations() {
+        DoubleStream empty = DoubleStream.empty();
+        assertEquals(0, empty.count());
+
+        DoubleStream empty2 = DoubleStream.empty();
+        assertFalse(empty2.findFirst(x -> true).isPresent());
+
+        DoubleStream empty3 = DoubleStream.empty();
+        assertTrue(empty3.allMatch(x -> false));
+
+        DoubleStream empty4 = DoubleStream.empty();
+        assertFalse(empty4.anyMatch(x -> true));
+
+        DoubleStream empty5 = DoubleStream.empty();
+        assertTrue(empty5.noneMatch(x -> true));
+    }
+
+    @Test
+    public void testDebounce_EmptyStream() {
+        double[] result = DoubleStream.empty().debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
+
+        assertEquals(0, result.length);
+    }
+
+    @Test
+    public void testStreamCreatedAfterEmpty() {
+        assertEquals(0, DoubleStream.empty().count());
+        assertEquals(0, DoubleStream.empty().skip(1).count());
+        assertArrayEquals(new double[] {}, DoubleStream.empty().toArray(), 0.0);
+        assertArrayEquals(new double[] {}, DoubleStream.empty().skip(1).toArray(), 0.0);
+        assertEquals(N.toList(), DoubleStream.empty().toList());
+        assertEquals(N.toList(), DoubleStream.empty().skip(1).toList());
+        assertEquals(0, DoubleStream.empty().map(e -> e).count());
+        assertEquals(0, DoubleStream.empty().map(e -> e).skip(1).count());
+        assertArrayEquals(new double[] {}, DoubleStream.empty().map(e -> e).toArray(), 0.0);
+        assertArrayEquals(new double[] {}, DoubleStream.empty().map(e -> e).skip(1).toArray(), 0.0);
+        assertEquals(N.toList(), DoubleStream.empty().map(e -> e).toList());
+        assertEquals(N.toList(), DoubleStream.empty().map(e -> e).skip(1).toList());
+    }
+
+    @Test
+    public void testReverseSorted_Empty() {
+        double[] result = DoubleStream.empty().reverseSorted().toArray();
+        assertArrayEquals(new double[0], result, 0.001);
+    }
+
+    @Test
+    public void testFirst_Empty() {
+        OptionalDouble result = DoubleStream.empty().first();
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testLast_Empty() {
+        OptionalDouble result = DoubleStream.empty().last();
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testCount_Empty() {
+        long result = DoubleStream.empty().count();
+        assertEquals(0, result);
+    }
+
+    @Test
+    public void testAcceptIfNotEmpty_EmptyStream() {
+        AtomicInteger called = new AtomicInteger(0);
+        DoubleStream.empty().acceptIfNotEmpty(s -> called.set(1));
+        assertEquals(0, called.get());
+    }
+
+    @Test
+    public void testApplyIfNotEmpty_EmptyStream() {
+        Optional<Double> result = DoubleStream.empty().applyIfNotEmpty(s -> s.sum());
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testOnlyOne_EmptyStream() {
+        OptionalDouble result = DoubleStream.empty().onlyOne();
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testReversed_Empty() {
+        double[] result = DoubleStream.empty().reversed().toArray();
+        assertArrayEquals(new double[0], result, 0.001);
+    }
+
+    @Test
+    public void testThrowIfEmpty_EmptyThrows() {
+        assertThrows(NoSuchElementException.class, () -> DoubleStream.empty().throwIfEmpty().toArray());
     }
 
     @Test
@@ -653,6 +1270,60 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testStreamCreatedAfterDefer() {
+        assertEquals(3, DoubleStream.defer(() -> DoubleStream.of(1, 2, 3)).count());
+        assertEquals(2, DoubleStream.defer(() -> DoubleStream.of(1, 2, 3)).skip(1).count());
+        assertArrayEquals(new double[] { 1, 2, 3 }, DoubleStream.defer(() -> DoubleStream.of(1, 2, 3)).toArray(), 0.0);
+        assertArrayEquals(new double[] { 2, 3 }, DoubleStream.defer(() -> DoubleStream.of(1, 2, 3)).skip(1).toArray(), 0.0);
+        assertEquals(N.toList(1.0, 2.0, 3.0), DoubleStream.defer(() -> DoubleStream.of(1, 2, 3)).toList());
+        assertEquals(N.toList(2.0, 3.0), DoubleStream.defer(() -> DoubleStream.of(1, 2, 3)).skip(1).toList());
+        assertEquals(3, DoubleStream.defer(() -> DoubleStream.of(1, 2, 3)).map(e -> e).count());
+        assertEquals(2, DoubleStream.defer(() -> DoubleStream.of(1, 2, 3)).map(e -> e).skip(1).count());
+        assertArrayEquals(new double[] { 1, 2, 3 }, DoubleStream.defer(() -> DoubleStream.of(1, 2, 3)).map(e -> e).toArray(), 0.0);
+        assertArrayEquals(new double[] { 2, 3 }, DoubleStream.defer(() -> DoubleStream.of(1, 2, 3)).map(e -> e).skip(1).toArray(), 0.0);
+        assertEquals(N.toList(1.0, 2.0, 3.0), DoubleStream.defer(() -> DoubleStream.of(1, 2, 3)).map(e -> e).toList());
+        assertEquals(N.toList(2.0, 3.0), DoubleStream.defer(() -> DoubleStream.of(1, 2, 3)).map(e -> e).skip(1).toList());
+    }
+
+    @Test
+    public void testTransform() {
+        List<Integer> callOrder = new ArrayList<>();
+        DoubleStream stream = createDoubleStream(1, 2, 3).onClose(() -> callOrder.add(1)).onClose(() -> callOrder.add(2)).onClose(() -> callOrder.add(3));
+
+        DoubleStream.defer(() -> stream).close();
+
+        Assertions.assertEquals(Arrays.asList(1, 2, 3), callOrder);
+    }
+
+    @Test
+    public void testDeferWithNullSupplier() {
+        assertThrows(IllegalArgumentException.class, () -> DoubleStream.defer(null));
+    }
+
+    @Test
+    public void testStreamCreatedAfterFrom() {
+        assertEquals(3, DoubleStream.from(java.util.stream.DoubleStream.of(1, 2, 3)).count());
+        assertEquals(2, DoubleStream.from(java.util.stream.DoubleStream.of(1, 2, 3)).skip(1).count());
+        assertArrayEquals(new double[] { 1, 2, 3 }, DoubleStream.from(java.util.stream.DoubleStream.of(1, 2, 3)).toArray(), 0.0);
+        assertArrayEquals(new double[] { 2, 3 }, DoubleStream.from(java.util.stream.DoubleStream.of(1, 2, 3)).skip(1).toArray(), 0.0);
+        assertEquals(N.toList(1.0, 2.0, 3.0), DoubleStream.from(java.util.stream.DoubleStream.of(1, 2, 3)).toList());
+        assertEquals(N.toList(2.0, 3.0), DoubleStream.from(java.util.stream.DoubleStream.of(1, 2, 3)).skip(1).toList());
+        assertEquals(3, DoubleStream.from(java.util.stream.DoubleStream.of(1, 2, 3)).map(e -> e).count());
+        assertEquals(2, DoubleStream.from(java.util.stream.DoubleStream.of(1, 2, 3)).map(e -> e).skip(1).count());
+        assertArrayEquals(new double[] { 1, 2, 3 }, DoubleStream.from(java.util.stream.DoubleStream.of(1, 2, 3)).map(e -> e).toArray(), 0.0);
+        assertArrayEquals(new double[] { 2, 3 }, DoubleStream.from(java.util.stream.DoubleStream.of(1, 2, 3)).map(e -> e).skip(1).toArray(), 0.0);
+        assertEquals(N.toList(1.0, 2.0, 3.0), DoubleStream.from(java.util.stream.DoubleStream.of(1, 2, 3)).map(e -> e).toList());
+        assertEquals(N.toList(2.0, 3.0), DoubleStream.from(java.util.stream.DoubleStream.of(1, 2, 3)).map(e -> e).skip(1).toList());
+    }
+
+    @Test
+    public void testFrom_JdkStream() {
+        java.util.stream.DoubleStream jdkStream = java.util.stream.DoubleStream.of(1.0, 2.0, 3.0);
+        DoubleStream result = DoubleStream.from(jdkStream);
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, result.toArray(), 0.001);
+    }
+
+    @Test
     public void testFromJdkStream() {
         java.util.stream.DoubleStream jdkStream = java.util.stream.DoubleStream.of(1.0, 2.0, 3.0);
         DoubleStream stream = DoubleStream.from(jdkStream);
@@ -660,6 +1331,13 @@ public class DoubleStreamTest extends TestBase {
 
         DoubleStream emptyStream = DoubleStream.from(null);
         assertEquals(0, emptyStream.count());
+    }
+
+    @Test
+    public void testFrom_JdkStream_Empty() {
+        java.util.stream.DoubleStream jdkStream = java.util.stream.DoubleStream.empty();
+        DoubleStream result = DoubleStream.from(jdkStream);
+        assertEquals(0, result.count());
     }
 
     @Test
@@ -672,12 +1350,15 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
-    public void testOf() {
-        DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0);
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, stream.toArray(), 0.0001);
+    public void testOfNullable_Null() {
+        DoubleStream result = DoubleStream.ofNullable(null);
+        assertEquals(0, result.count());
+    }
 
-        DoubleStream emptyStream = DoubleStream.of();
-        assertEquals(0, emptyStream.count());
+    @Test
+    public void testOfNullable_Value() {
+        DoubleStream result = DoubleStream.ofNullable(42.5);
+        assertArrayEquals(new double[] { 42.5 }, result.toArray(), 0.001);
     }
 
     @Test
@@ -699,284 +1380,6 @@ public class DoubleStreamTest extends TestBase {
         Double[] array = { 1.0, 2.0, 3.0, 4.0, 5.0 };
         DoubleStream stream = DoubleStream.of(array, 1, 4);
         assertArrayEquals(new double[] { 2.0, 3.0, 4.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testOfOptionalDouble() {
-        OptionalDouble op = OptionalDouble.of(5.0);
-        DoubleStream stream = DoubleStream.of(op);
-        assertArrayEquals(new double[] { 5.0 }, stream.toArray(), 0.0001);
-
-        OptionalDouble empty = OptionalDouble.empty();
-        DoubleStream emptyStream = DoubleStream.of(empty);
-        assertEquals(0, emptyStream.count());
-    }
-
-    @Test
-    public void testOfJavaOptionalDouble() {
-        java.util.OptionalDouble op = java.util.OptionalDouble.of(5.0);
-        DoubleStream stream = DoubleStream.of(op);
-        assertArrayEquals(new double[] { 5.0 }, stream.toArray(), 0.0001);
-
-        java.util.OptionalDouble empty = java.util.OptionalDouble.empty();
-        DoubleStream emptyStream = DoubleStream.of(empty);
-        assertEquals(0, emptyStream.count());
-    }
-
-    @Test
-    public void testFlatten2D() {
-        double[][] array = { { 1.0, 2.0 }, { 3.0, 4.0 }, { 5.0 } };
-        DoubleStream stream = DoubleStream.flatten(array);
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testFlatten2DVertical() {
-        double[][] array = { { 1.0, 2.0 }, { 3.0, 4.0 }, { 5.0 } };
-        DoubleStream stream = DoubleStream.flatten(array, true);
-        assertArrayEquals(new double[] { 1.0, 3.0, 5.0, 2.0, 4.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testFlatten2DWithAlignment() {
-        double[][] array = { { 1.0, 2.0 }, { 3.0 }, { 4.0, 5.0, 6.0 } };
-        DoubleStream stream = DoubleStream.flatten(array, 0.0, false);
-        assertArrayEquals(new double[] { 1.0, 2.0, 0.0, 3.0, 0.0, 0.0, 4.0, 5.0, 6.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testFlatten2DWithAlignmentVertical() {
-        double[][] array = { { 1.0, 2.0 }, { 3.0 }, { 4.0, 5.0 } };
-        DoubleStream stream = DoubleStream.flatten(array, 0.0, true);
-        assertEquals(6, stream.count());
-    }
-
-    @Test
-    public void testFlatten3D() {
-        double[][][] array = { { { 1.0, 2.0 }, { 3.0 } }, { { 4.0 }, { 5.0, 6.0 } } };
-        DoubleStream stream = DoubleStream.flatten(array);
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testRepeat() {
-        DoubleStream stream = DoubleStream.repeat(7.5, 3);
-        assertArrayEquals(new double[] { 7.5, 7.5, 7.5 }, stream.toArray(), 0.0001);
-
-        DoubleStream emptyStream = DoubleStream.repeat(7.5, 0);
-        assertEquals(0, emptyStream.count());
-    }
-
-    @Test
-    public void testRandom() {
-        DoubleStream stream = DoubleStream.random();
-        double[] values = stream.limit(5).toArray();
-        assertEquals(5, values.length);
-
-        for (double value : values) {
-            assertTrue(value >= 0.0 && value < 1.0);
-        }
-    }
-
-    @Test
-    public void testIterateWithHasNext() {
-        AtomicInteger counter = new AtomicInteger(0);
-        DoubleStream stream = DoubleStream.iterate(() -> counter.get() < 3, () -> counter.getAndIncrement() * 2.0);
-        assertArrayEquals(new double[] { 0.0, 2.0, 4.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testIterateWithInitAndHasNext() {
-        AtomicInteger counter = new AtomicInteger(0);
-        DoubleStream stream = DoubleStream.iterate(10.0, () -> counter.getAndIncrement() < 3, x -> x + 2.0);
-        double[] result = stream.toArray();
-        assertEquals(3, result.length);
-        assertEquals(10.0, result[0], 0.0001);
-    }
-
-    @Test
-    public void testIterateWithPredicate() {
-        DoubleStream stream = DoubleStream.iterate(1.0, x -> x < 10.0, x -> x + 3.0);
-        assertArrayEquals(new double[] { 1.0, 4.0, 7.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testIterateInfinite() {
-        DoubleStream stream = DoubleStream.iterate(1.0, x -> x * 2.0);
-        double[] result = stream.limit(5).toArray();
-        assertArrayEquals(new double[] { 1.0, 2.0, 4.0, 8.0, 16.0 }, result, 0.0001);
-    }
-
-    @Test
-    public void testGenerate() {
-        AtomicInteger counter = new AtomicInteger(1);
-        DoubleStream stream = DoubleStream.generate(() -> counter.getAndIncrement() * 1.5);
-        double[] result = stream.limit(4).toArray();
-        assertArrayEquals(new double[] { 1.5, 3.0, 4.5, 6.0 }, result, 0.0001);
-    }
-
-    @Test
-    public void testConcatArrays() {
-        double[] a1 = { 1.0, 2.0 };
-        double[] a2 = { 3.0, 4.0 };
-        double[] a3 = { 5.0 };
-        DoubleStream stream = DoubleStream.concat(a1, a2, a3);
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testConcatTwoArrays() {
-        double[] a1 = { 1.0, 2.0 };
-        double[] a2 = { 3.0, 4.0 };
-        DoubleStream stream = DoubleStream.concat(a1, a2);
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testConcatIteratorList() {
-        List<DoubleIterator> list = Arrays.asList(DoubleIterator.of(new double[] { 1.0, 2.0 }), DoubleIterator.of(new double[] { 3.0, 4.0 }));
-        DoubleStream stream = DoubleStream.concatIterators(list);
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testConcatStreams() {
-        DoubleStream s1 = DoubleStream.of(1.0, 2.0);
-        DoubleStream s2 = DoubleStream.of(3.0, 4.0);
-        DoubleStream s3 = DoubleStream.of(5.0);
-        DoubleStream stream = DoubleStream.concat(s1, s2, s3);
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testConcatTwoStreams() {
-        DoubleStream s1 = DoubleStream.of(1.0, 2.0);
-        DoubleStream s2 = DoubleStream.of(3.0, 4.0);
-        DoubleStream stream = DoubleStream.concat(s1, s2);
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testConcatListOfArrays() {
-        List<double[]> list = Arrays.asList(new double[] { 1.0, 2.0 }, new double[] { 3.0, 4.0 }, new double[] { 5.0 });
-        DoubleStream stream = DoubleStream.concat(list);
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testConcatCollectionOfStreams() {
-        Collection<DoubleStream> streams = Arrays.asList(DoubleStream.of(1.0, 2.0), DoubleStream.of(3.0, 4.0), DoubleStream.of(5.0));
-        DoubleStream stream = DoubleStream.concat(streams);
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testZipArrays() {
-        double[] a = { 1.0, 2.0, 3.0 };
-        double[] b = { 4.0, 5.0, 6.0 };
-        DoubleStream stream = DoubleStream.zip(a, b, (x, y) -> x + y);
-        assertArrayEquals(new double[] { 5.0, 7.0, 9.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testZipThreeArrays() {
-        double[] a = { 1.0, 2.0 };
-        double[] b = { 3.0, 4.0 };
-        double[] c = { 5.0, 6.0 };
-        DoubleStream stream = DoubleStream.zip(a, b, c, (x, y, z) -> x + y + z);
-        assertArrayEquals(new double[] { 9.0, 12.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testZipArraysWithDefaults() {
-        double[] a = { 1.0, 2.0 };
-        double[] b = { 3.0, 4.0, 5.0 };
-        DoubleStream stream = DoubleStream.zip(a, b, 10.0, 20.0, (x, y) -> x + y);
-        assertArrayEquals(new double[] { 4.0, 6.0, 15.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testZipThreeArraysWithDefaults() {
-        double[] a = { 1.0 };
-        double[] b = { 2.0, 3.0 };
-        double[] c = { 4.0, 5.0, 6.0 };
-        DoubleStream stream = DoubleStream.zip(a, b, c, 100.0, 200.0, 300.0, (x, y, z) -> x + y + z);
-        assertEquals(3, stream.count());
-    }
-
-    @Test
-    public void testZipIterators() {
-        DoubleIterator a = DoubleIterator.of(new double[] { 1.0, 2.0, 3.0 });
-        DoubleIterator b = DoubleIterator.of(new double[] { 4.0, 5.0, 6.0 });
-        DoubleStream stream = DoubleStream.zip(a, b, (x, y) -> x * y);
-        assertArrayEquals(new double[] { 4.0, 10.0, 18.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testZipThreeIterators() {
-        DoubleIterator a = DoubleIterator.of(new double[] { 1.0, 2.0 });
-        DoubleIterator b = DoubleIterator.of(new double[] { 3.0, 4.0 });
-        DoubleIterator c = DoubleIterator.of(new double[] { 5.0, 6.0 });
-        DoubleStream stream = DoubleStream.zip(a, b, c, (x, y, z) -> x + y + z);
-        assertArrayEquals(new double[] { 9.0, 12.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testZipStreams() {
-        DoubleStream a = DoubleStream.of(1.0, 2.0, 3.0);
-        DoubleStream b = DoubleStream.of(4.0, 5.0, 6.0);
-        DoubleStream stream = DoubleStream.zip(a, b, (x, y) -> x - y);
-        assertArrayEquals(new double[] { -3.0, -3.0, -3.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testZipThreeStreams() {
-        DoubleStream a = DoubleStream.of(1.0, 2.0);
-        DoubleStream b = DoubleStream.of(3.0, 4.0);
-        DoubleStream c = DoubleStream.of(5.0, 6.0);
-        DoubleStream stream = DoubleStream.zip(a, b, c, (x, y, z) -> x + y + z);
-        assertArrayEquals(new double[] { 9.0, 12.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testZipStreamsWithDefaults() {
-        DoubleStream a = DoubleStream.of(1.0, 2.0);
-        DoubleStream b = DoubleStream.of(3.0, 4.0, 5.0);
-        DoubleStream stream = DoubleStream.zip(a, b, 10.0, 20.0, (x, y) -> x + y);
-        assertArrayEquals(new double[] { 4.0, 6.0, 15.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testZipThreeStreamsWithDefaults() {
-        DoubleStream a = DoubleStream.of(1.0);
-        DoubleStream b = DoubleStream.of(2.0, 3.0);
-        DoubleStream c = DoubleStream.of(4.0, 5.0, 6.0);
-        DoubleStream stream = DoubleStream.zip(a, b, c, 100.0, 200.0, 300.0, (x, y, z) -> x + y + z);
-        assertEquals(3, stream.count());
-    }
-
-    @Test
-    public void testMergeArrays() {
-        double[] a = { 1.0, 3.0, 5.0 };
-        double[] b = { 2.0, 4.0, 6.0 };
-        DoubleStream stream = DoubleStream.merge(a, b, (x, y) -> x < y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testMergeIterators() {
-        DoubleIterator a = DoubleIterator.of(new double[] { 1.0, 3.0, 5.0 });
-        DoubleIterator b = DoubleIterator.of(new double[] { 2.0, 4.0, 6.0 });
-        DoubleStream stream = DoubleStream.merge(a, b, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testMergeStreams() {
-        DoubleStream a = DoubleStream.of(1.0, 3.0, 5.0);
-        DoubleStream b = DoubleStream.of(2.0, 4.0, 6.0);
-        DoubleStream stream = DoubleStream.merge(a, b, (x, y) -> x < y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }, stream.toArray(), 0.0001);
     }
 
     @Test
@@ -1046,76 +1449,9 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
-    public void testSequential() {
-        DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0);
-        DoubleStream sequential = stream.sequential();
-        assertNotNull(sequential);
-    }
-
-    @Test
-    public void testParallel() {
-        DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0);
-        DoubleStream parallel = stream.parallel();
-        assertNotNull(parallel);
-    }
-
-    @Test
     public void testIsParallel() {
         DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0);
         assertFalse(stream.isParallel());
-    }
-
-    @Test
-    public void testDeferWithNullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> DoubleStream.defer(null));
-    }
-
-    @Test
-    public void testIterateWithNullHasNext() {
-        assertThrows(IllegalArgumentException.class, () -> DoubleStream.iterate(null, () -> 1.0));
-    }
-
-    @Test
-    public void testIterateWithNullNext() {
-        assertThrows(IllegalArgumentException.class, () -> DoubleStream.iterate(() -> true, null));
-    }
-
-    @Test
-    public void testGenerateWithNullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> DoubleStream.generate(null));
-    }
-
-    @Test
-    public void testRepeatWithNegativeCount() {
-        assertThrows(IllegalArgumentException.class, () -> DoubleStream.repeat(1.0, -1));
-    }
-
-    @Test
-    public void testFilterWithNull() {
-        assertThrows(NullPointerException.class, () -> DoubleStream.of(1.0, 2.0).filter(null).count());
-    }
-
-    @Test
-    public void testMapWithNull() {
-        assertThrows(NullPointerException.class, () -> DoubleStream.of(1.0, 2.0).map(null).count());
-    }
-
-    @Test
-    public void testEmptyStreamOperations() {
-        DoubleStream empty = DoubleStream.empty();
-        assertEquals(0, empty.count());
-
-        DoubleStream empty2 = DoubleStream.empty();
-        assertFalse(empty2.findFirst(x -> true).isPresent());
-
-        DoubleStream empty3 = DoubleStream.empty();
-        assertTrue(empty3.allMatch(x -> false));
-
-        DoubleStream empty4 = DoubleStream.empty();
-        assertFalse(empty4.anyMatch(x -> true));
-
-        DoubleStream empty5 = DoubleStream.empty();
-        assertTrue(empty5.noneMatch(x -> true));
     }
 
     @Test
@@ -1155,46 +1491,6 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
-    public void testConcatIteratorVarargs() {
-        DoubleIterator iter1 = DoubleIterator.of(new double[] { 1.0, 2.0 });
-        DoubleIterator iter2 = DoubleIterator.of(new double[] { 3.0, 4.0 });
-        DoubleStream stream = DoubleStream.concat(iter1, iter2);
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testMergeListOfIterators() {
-        DoubleIterator iter1 = DoubleIterator.of(new double[] { 1.0, 3.0 });
-        DoubleIterator iter2 = DoubleIterator.of(new double[] { 2.0, 4.0 });
-        DoubleIterator iter3 = DoubleIterator.of(new double[] { 5.0, 6.0 });
-        Collection<DoubleIterator> iters = Arrays.asList(iter1, iter2, iter3);
-        DoubleStream stream = DoubleStream.concatIterators(iters);
-        assertEquals(6, stream.count());
-    }
-
-    @Test
-    public void testMergeCollectionOfStreams() {
-        Collection<DoubleStream> streams = Arrays.asList(DoubleStream.of(1.0, 3.0), DoubleStream.of(2.0, 4.0));
-        DoubleStream stream = DoubleStream.merge(streams, (x, y) -> x < y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testZipCollection() {
-        Collection<DoubleStream> streams = Arrays.asList(DoubleStream.of(1.0, 2.0), DoubleStream.of(3.0, 4.0), DoubleStream.of(5.0, 6.0));
-        DoubleStream stream = DoubleStream.zip(streams, array -> Arrays.stream(array).sum());
-        assertArrayEquals(new double[] { 9.0, 12.0 }, stream.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testZipCollectionWithDefaults() {
-        Collection<DoubleStream> streams = Arrays.asList(DoubleStream.of(1.0), DoubleStream.of(2.0, 3.0));
-        double[] defaults = new double[] { 100.0, 200.0 };
-        DoubleStream stream = DoubleStream.zip(streams, defaults, array -> Arrays.stream(array).sum());
-        assertEquals(2, stream.count());
-    }
-
-    @Test
     public void testSkipUntil() {
         DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0);
         double[] result = stream.skipUntil(x -> x > 2.5).toArray();
@@ -1218,144 +1514,10 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
-    public void testToSet() {
-        DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 2.0, 1.0);
-        DoubleList list = stream.toDoubleList();
-        assertNotNull(list);
-        assertTrue(list.size() == 5);
-    }
-
-    // Additional coverage tests for 2025
-
-    @Test
-    public void testZipWithCollectionOfStreams() {
-        Collection<DoubleStream> streams = Arrays.asList(DoubleStream.of(1.0, 2.0), DoubleStream.of(10.0, 20.0), DoubleStream.of(100.0, 200.0));
-        DoubleStream result = DoubleStream.zip(streams, doubles -> {
-            double sum = 0.0;
-            for (Double d : doubles)
-                sum += d;
-            return sum;
-        });
-        assertArrayEquals(new double[] { 111.0, 222.0 }, result.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testZipWithCollectionDefaultValues() {
-        Collection<DoubleStream> streams = Arrays.asList(DoubleStream.of(1.0, 2.0), DoubleStream.of(10.0));
-        double[] defaults = new double[] { 0.0, 0.0 };
-        DoubleStream result = DoubleStream.zip(streams, defaults, doubles -> {
-            double sum = 0.0;
-            for (Double d : doubles)
-                sum += d;
-            return sum;
-        });
-        assertEquals(2, result.count());
-    }
-
-    @Test
-    public void testMergeWithCollection() {
-        Collection<DoubleStream> streams = Arrays.asList(DoubleStream.of(1.0, 5.0), DoubleStream.of(2.0, 6.0), DoubleStream.of(3.0, 7.0));
-        DoubleStream result = DoubleStream.merge(streams, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
-        assertEquals(6, result.count());
-    }
-
-    @Test
-    public void testMergeThreeArraysAdditional() {
-        double[] a1 = { 1.0, 7.0 };
-        double[] a2 = { 3.0, 8.0 };
-        double[] a3 = { 5.0, 9.0 };
-        DoubleStream stream = DoubleStream.merge(a1, a2, a3, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
-        assertEquals(6, stream.count());
-    }
-
-    @Test
-    public void testMergeThreeStreamsAdditional() {
-        DoubleStream s1 = DoubleStream.of(1.0, 7.0);
-        DoubleStream s2 = DoubleStream.of(3.0, 8.0);
-        DoubleStream s3 = DoubleStream.of(5.0, 9.0);
-        DoubleStream result = DoubleStream.merge(s1, s2, s3, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
-        assertEquals(6, result.count());
-    }
-
-    @Test
-    public void testFlattenHorizontalWithPadding() {
-        double[][] array = { { 1.0, 2.0 }, { 3.0 }, { 4.0, 5.0, 6.0 } };
-        DoubleStream stream = DoubleStream.flatten(array, 0.0, false);
-        double[] result = stream.toArray();
-        assertArrayEquals(new double[] { 1.0, 2.0, 0.0, 3.0, 0.0, 0.0, 4.0, 5.0, 6.0 }, result, 0.0001);
-    }
-
-    @Test
-    public void testRangeClosedWithNegativeStep() {
-        // DoubleStream doesn't support rangeClosed with step parameter
-        // Testing generate with limited range instead
-        DoubleStream stream = DoubleStream.iterate(5.0, d -> d >= 1.0, d -> d - 1.0);
-        double[] result = stream.toArray();
-        assertArrayEquals(new double[] { 5.0, 4.0, 3.0, 2.0, 1.0 }, result, 0.0001);
-    }
-
-    @Test
-    public void testRangeWithInvalidStepDirection() {
-        // DoubleStream doesn't support range with step parameter
-        // Testing iterate with false condition instead
-        DoubleStream stream = DoubleStream.iterate(1.0, d -> d < 5.0 && d > 10.0, d -> d + 1.0);
-        assertEquals(0, stream.count());
-    }
-
-    @Test
     public void testParallelFilterMap() {
         DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0);
         double[] result = stream.parallel().filter(x -> x % 2 == 0).map(x -> x * 2).toArray();
         assertEquals(4, result.length);
-    }
-
-    @Test
-    public void testIterateWithFalseHasNext() {
-        DoubleStream stream = DoubleStream.iterate(() -> false, () -> 1.0);
-        assertEquals(0, stream.count());
-    }
-
-    @Test
-    public void testCollapseNonCollapsible() {
-        DoubleStream stream = DoubleStream.of(1.0, 10.0, 100.0);
-        double[] result = stream.collapse((prev, next) -> false, (a, b) -> a + b).toArray();
-        assertArrayEquals(new double[] { 1.0, 10.0, 100.0 }, result, 0.0001);
-    }
-
-    @Test
-    public void testScanEmptyStream() {
-        DoubleStream stream = DoubleStream.empty();
-        double[] result = stream.scan((a, b) -> a + b).toArray();
-        assertEquals(0, result.length);
-    }
-
-    @Test
-    public void testZipThreeArraysWithDefaultsAdditional() {
-        double[] a = { 1.0 };
-        double[] b = { 2.0, 3.0 };
-        double[] c = { 4.0, 5.0, 6.0 };
-        DoubleStream stream = DoubleStream.zip(a, b, c, 100.0, 200.0, 300.0, (x, y, z) -> x + y + z);
-        double[] result = stream.toArray();
-        assertEquals(3, result.length);
-    }
-
-    @Test
-    public void testZipThreeIteratorsWithDefaultsAdditional() {
-        DoubleIterator a = DoubleIterator.of(new double[] { 1.0 });
-        DoubleIterator b = DoubleIterator.of(new double[] { 2.0, 3.0 });
-        DoubleIterator c = DoubleIterator.of(new double[] { 4.0, 5.0, 6.0 });
-        DoubleStream stream = DoubleStream.zip(a, b, c, 100.0, 200.0, 300.0, (x, y, z) -> x + y + z);
-        assertEquals(3, stream.count());
-    }
-
-    @Test
-    public void testZipThreeStreamsWithDefaultsAdditional() {
-        DoubleStream a = DoubleStream.of(1.0);
-        DoubleStream b = DoubleStream.of(2.0, 3.0);
-        DoubleStream c = DoubleStream.of(4.0, 5.0, 6.0);
-        DoubleStream stream = DoubleStream.zip(a, b, c, 100.0, 200.0, 300.0, (x, y, z) -> x + y + z);
-        double[] result = stream.toArray();
-        assertEquals(3, result.length);
     }
 
     // ==================== debounce tests ====================
@@ -1381,64 +1543,6 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
-    public void testDebounce_EmptyStream() {
-        double[] result = DoubleStream.empty().debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-
-        assertEquals(0, result.length);
-    }
-
-    @Test
-    public void testDebounce_SingleElement() {
-        double[] result = DoubleStream.of(42.5).debounce(1, com.landawn.abacus.util.Duration.ofMillis(100)).toArray();
-
-        assertEquals(1, result.length);
-        assertEquals(42.5, result[0], 0.001);
-    }
-
-    @Test
-    public void testDebounce_MaxWindowSizeOne() {
-        // Only 1 element allowed per window
-        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0).debounce(1, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-
-        assertEquals(1, result.length);
-        assertEquals(1.0, result[0], 0.001);
-    }
-
-    @Test
-    public void testDebounce_ThrowsExceptionForNonPositiveMaxWindowSize() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            DoubleStream.of(1.0, 2.0, 3.0).debounce(0, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-        });
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            DoubleStream.of(1.0, 2.0, 3.0).debounce(-1, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-        });
-    }
-
-    @Test
-    public void testDebounce_ThrowsExceptionForNonPositiveDuration() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            DoubleStream.of(1.0, 2.0, 3.0).debounce(5, com.landawn.abacus.util.Duration.ofMillis(0)).toArray();
-        });
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            DoubleStream.of(1.0, 2.0, 3.0).debounce(5, com.landawn.abacus.util.Duration.ofMillis(-100)).toArray();
-        });
-    }
-
-    @Test
-    public void testDebounce_WithLargeMaxWindowSize() {
-        double[] input = new double[1000];
-        for (int i = 0; i < 1000; i++) {
-            input[i] = i;
-        }
-
-        double[] result = DoubleStream.of(input).debounce(500, com.landawn.abacus.util.Duration.ofSeconds(10)).toArray();
-
-        assertEquals(500, result.length);
-    }
-
-    @Test
     public void testDebounce_PreservesOrder() {
         double[] result = DoubleStream.of(10.0, 20.0, 30.0, 40.0, 50.0).debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
 
@@ -1455,66 +1559,6 @@ public class DoubleStreamTest extends TestBase {
 
         assertEquals(3, result.length);
         assertArrayEquals(new double[] { 20.0, 40.0, 60.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testDebounce_WithSpecialValues() {
-        double[] result = DoubleStream.of(Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, 1.0, 2.0)
-                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toArray();
-
-        assertEquals(3, result.length);
-        assertTrue(Double.isNaN(result[0]));
-        assertEquals(Double.POSITIVE_INFINITY, result[1], 0.001);
-        assertEquals(Double.NEGATIVE_INFINITY, result[2], 0.001);
-    }
-
-    @Test
-    public void testIterate() {
-        assertArrayEquals(new double[] { 1.0, 2.0, 4.0, 8.0, 16.0 }, DoubleStream.iterate(1.0, d -> d * 2).limit(5).toArray());
-    }
-
-    @Test
-    public void testConcat() {
-        DoubleStream a = DoubleStream.of(1.0, 2.0);
-        DoubleStream b = DoubleStream.of(3.0, 4.0);
-        DoubleStream c = DoubleStream.of(5.0, 6.0);
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }, DoubleStream.concat(a, b, c).toArray());
-    }
-
-    @Test
-    public void testReduceWithIdentity() {
-        double result = DoubleStream.of(1.0, 2.0, 3.0).reduce(10.0, (a, b) -> a + b);
-        assertEquals(16.0, result);
-    }
-
-    @Test
-    public void testReduceOnEmptyStream() {
-        OptionalDouble result = DoubleStream.empty().reduce((a, b) -> a + b);
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testAverageOnEmptyStream() {
-        OptionalDouble avg = DoubleStream.empty().average();
-        assertFalse(avg.isPresent());
-    }
-
-    @Test
-    public void testFindFirstOnEmptyStream() {
-        OptionalDouble first = DoubleStream.empty().first();
-        assertFalse(first.isPresent());
-    }
-
-    @Test
-    public void testIterator() {
-        DoubleIterator it = DoubleStream.of(1.0, 2.0, 3.0).iterator();
-        assertTrue(it.hasNext());
-        assertEquals(1.0, it.nextDouble());
-        assertEquals(2.0, it.nextDouble());
-        assertEquals(3.0, it.nextDouble());
-        assertFalse(it.hasNext());
-        assertThrows(NoSuchElementException.class, it::nextDouble);
     }
 
     @Test
@@ -1880,91 +1924,6 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
-    public void testStreamCreatedAfterMapPartial() {
-        assertEquals(2, DoubleStream.of(1, 2, 3, 4, 5).mapPartial(d -> d > 3 ? OptionalDouble.of(d * 2) : OptionalDouble.empty()).count());
-        assertEquals(1, DoubleStream.of(1, 2, 3, 4, 5).mapPartial(d -> d > 3 ? OptionalDouble.of(d * 2) : OptionalDouble.empty()).skip(1).count());
-        assertArrayEquals(new double[] { 8, 10 },
-                DoubleStream.of(1, 2, 3, 4, 5).mapPartial(d -> d > 3 ? OptionalDouble.of(d * 2) : OptionalDouble.empty()).toArray(), 0.0);
-        assertArrayEquals(new double[] { 10 },
-                DoubleStream.of(1, 2, 3, 4, 5).mapPartial(d -> d > 3 ? OptionalDouble.of(d * 2) : OptionalDouble.empty()).skip(1).toArray(), 0.0);
-        assertEquals(N.toList(8.0, 10.0), DoubleStream.of(1, 2, 3, 4, 5).mapPartial(d -> d > 3 ? OptionalDouble.of(d * 2) : OptionalDouble.empty()).toList());
-        assertEquals(N.toList(10.0),
-                DoubleStream.of(1, 2, 3, 4, 5).mapPartial(d -> d > 3 ? OptionalDouble.of(d * 2) : OptionalDouble.empty()).skip(1).toList());
-        assertEquals(2, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).mapPartial(d -> d > 3 ? OptionalDouble.of(d * 2) : OptionalDouble.empty()).count());
-        assertEquals(1, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).mapPartial(d -> d > 3 ? OptionalDouble.of(d * 2) : OptionalDouble.empty()).skip(1).count());
-        assertArrayEquals(new double[] { 8, 10 },
-                DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).mapPartial(d -> d > 3 ? OptionalDouble.of(d * 2) : OptionalDouble.empty()).toArray(), 0.0);
-        assertArrayEquals(new double[] { 10 },
-                DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).mapPartial(d -> d > 3 ? OptionalDouble.of(d * 2) : OptionalDouble.empty()).skip(1).toArray(), 0.0);
-        assertEquals(N.toList(8.0, 10.0),
-                DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).mapPartial(d -> d > 3 ? OptionalDouble.of(d * 2) : OptionalDouble.empty()).toList());
-        assertEquals(N.toList(10.0),
-                DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).mapPartial(d -> d > 3 ? OptionalDouble.of(d * 2) : OptionalDouble.empty()).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterMapPartialJdk() {
-        assertEquals(2,
-                DoubleStream.of(1, 2, 3, 4, 5).mapPartialJdk(d -> d > 3 ? java.util.OptionalDouble.of(d * 2) : java.util.OptionalDouble.empty()).count());
-        assertEquals(1,
-                DoubleStream.of(1, 2, 3, 4, 5)
-                        .mapPartialJdk(d -> d > 3 ? java.util.OptionalDouble.of(d * 2) : java.util.OptionalDouble.empty())
-                        .skip(1)
-                        .count());
-        assertArrayEquals(new double[] { 8, 10 },
-                DoubleStream.of(1, 2, 3, 4, 5).mapPartialJdk(d -> d > 3 ? java.util.OptionalDouble.of(d * 2) : java.util.OptionalDouble.empty()).toArray(),
-                0.0);
-        assertArrayEquals(new double[] { 10 },
-                DoubleStream.of(1, 2, 3, 4, 5)
-                        .mapPartialJdk(d -> d > 3 ? java.util.OptionalDouble.of(d * 2) : java.util.OptionalDouble.empty())
-                        .skip(1)
-                        .toArray(),
-                0.0);
-        assertEquals(N.toList(8.0, 10.0),
-                DoubleStream.of(1, 2, 3, 4, 5).mapPartialJdk(d -> d > 3 ? java.util.OptionalDouble.of(d * 2) : java.util.OptionalDouble.empty()).toList());
-        assertEquals(N.toList(10.0),
-                DoubleStream.of(1, 2, 3, 4, 5)
-                        .mapPartialJdk(d -> d > 3 ? java.util.OptionalDouble.of(d * 2) : java.util.OptionalDouble.empty())
-                        .skip(1)
-                        .toList());
-        assertEquals(2,
-                DoubleStream.of(1, 2, 3, 4, 5)
-                        .map(e -> e)
-                        .mapPartialJdk(d -> d > 3 ? java.util.OptionalDouble.of(d * 2) : java.util.OptionalDouble.empty())
-                        .count());
-        assertEquals(1,
-                DoubleStream.of(1, 2, 3, 4, 5)
-                        .map(e -> e)
-                        .mapPartialJdk(d -> d > 3 ? java.util.OptionalDouble.of(d * 2) : java.util.OptionalDouble.empty())
-                        .skip(1)
-                        .count());
-        assertArrayEquals(new double[] { 8, 10 },
-                DoubleStream.of(1, 2, 3, 4, 5)
-                        .map(e -> e)
-                        .mapPartialJdk(d -> d > 3 ? java.util.OptionalDouble.of(d * 2) : java.util.OptionalDouble.empty())
-                        .toArray(),
-                0.0);
-        assertArrayEquals(new double[] { 10 },
-                DoubleStream.of(1, 2, 3, 4, 5)
-                        .map(e -> e)
-                        .mapPartialJdk(d -> d > 3 ? java.util.OptionalDouble.of(d * 2) : java.util.OptionalDouble.empty())
-                        .skip(1)
-                        .toArray(),
-                0.0);
-        assertEquals(N.toList(8.0, 10.0),
-                DoubleStream.of(1, 2, 3, 4, 5)
-                        .map(e -> e)
-                        .mapPartialJdk(d -> d > 3 ? java.util.OptionalDouble.of(d * 2) : java.util.OptionalDouble.empty())
-                        .toList());
-        assertEquals(N.toList(10.0),
-                DoubleStream.of(1, 2, 3, 4, 5)
-                        .map(e -> e)
-                        .mapPartialJdk(d -> d > 3 ? java.util.OptionalDouble.of(d * 2) : java.util.OptionalDouble.empty())
-                        .skip(1)
-                        .toList());
-    }
-
-    @Test
     public void testStreamCreatedAfterRangeMap() {
         assertEquals(3, DoubleStream.of(1, 2, 5, 6, 10).rangeMap((a, b) -> b - a <= 1, (a, b) -> a + b).count());
         assertEquals(2, DoubleStream.of(1, 2, 5, 6, 10).rangeMap((a, b) -> b - a <= 1, (a, b) -> a + b).skip(1).count());
@@ -2327,39 +2286,6 @@ public class DoubleStreamTest extends TestBase {
         assertArrayEquals(new double[] { 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).top(5, Comparators.naturalOrder()).skip(1).toArray(), 0.0);
         assertEquals(N.toList(1.0, 2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).top(5, Comparators.naturalOrder()).toList());
         assertEquals(N.toList(2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).top(5, Comparators.naturalOrder()).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterIfEmpty() {
-        assertEquals(5, DoubleStream.of(1, 2, 3, 4, 5).ifEmpty(Fn.emptyAction()).count());
-        assertEquals(4, DoubleStream.of(1, 2, 3, 4, 5).ifEmpty(Fn.emptyAction()).skip(1).count());
-        assertArrayEquals(new double[] { 1, 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).ifEmpty(Fn.emptyAction()).toArray(), 0.0);
-        assertArrayEquals(new double[] { 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).ifEmpty(Fn.emptyAction()).skip(1).toArray(), 0.0);
-        assertEquals(N.toList(1.0, 2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).ifEmpty(Fn.emptyAction()).toList());
-        assertEquals(N.toList(2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).ifEmpty(Fn.emptyAction()).skip(1).toList());
-        assertEquals(5, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(Fn.emptyAction()).count());
-        assertEquals(4, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(Fn.emptyAction()).skip(1).count());
-        assertArrayEquals(new double[] { 1, 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(Fn.emptyAction()).toArray(), 0.0);
-        assertArrayEquals(new double[] { 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(Fn.emptyAction()).skip(1).toArray(), 0.0);
-        assertEquals(N.toList(1.0, 2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(Fn.emptyAction()).toList());
-        assertEquals(N.toList(2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(Fn.emptyAction()).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterAppendIfEmpty() {
-        assertEquals(5, DoubleStream.of(1, 2, 3, 4, 5).appendIfEmpty(() -> DoubleStream.empty()).count());
-        assertEquals(4, DoubleStream.of(1, 2, 3, 4, 5).appendIfEmpty(() -> DoubleStream.empty()).skip(1).count());
-        assertArrayEquals(new double[] { 1, 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).appendIfEmpty(() -> DoubleStream.empty()).toArray(), 0.0);
-        assertArrayEquals(new double[] { 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).appendIfEmpty(() -> DoubleStream.empty()).skip(1).toArray(), 0.0);
-        assertEquals(N.toList(1.0, 2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).appendIfEmpty(() -> DoubleStream.empty()).toList());
-        assertEquals(N.toList(2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).appendIfEmpty(() -> DoubleStream.empty()).skip(1).toList());
-        assertEquals(5, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).appendIfEmpty(() -> DoubleStream.empty()).count());
-        assertEquals(4, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).appendIfEmpty(() -> DoubleStream.empty()).skip(1).count());
-        assertArrayEquals(new double[] { 1, 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).appendIfEmpty(() -> DoubleStream.empty()).toArray(), 0.0);
-        assertArrayEquals(new double[] { 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).appendIfEmpty(() -> DoubleStream.empty()).skip(1).toArray(),
-                0.0);
-        assertEquals(N.toList(1.0, 2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).appendIfEmpty(() -> DoubleStream.empty()).toList());
-        assertEquals(N.toList(2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).appendIfEmpty(() -> DoubleStream.empty()).skip(1).toList());
     }
 
     @Test
@@ -2864,106 +2790,6 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
-    public void testStreamCreatedAfterEmpty() {
-        assertEquals(0, DoubleStream.empty().count());
-        assertEquals(0, DoubleStream.empty().skip(1).count());
-        assertArrayEquals(new double[] {}, DoubleStream.empty().toArray(), 0.0);
-        assertArrayEquals(new double[] {}, DoubleStream.empty().skip(1).toArray(), 0.0);
-        assertEquals(N.toList(), DoubleStream.empty().toList());
-        assertEquals(N.toList(), DoubleStream.empty().skip(1).toList());
-        assertEquals(0, DoubleStream.empty().map(e -> e).count());
-        assertEquals(0, DoubleStream.empty().map(e -> e).skip(1).count());
-        assertArrayEquals(new double[] {}, DoubleStream.empty().map(e -> e).toArray(), 0.0);
-        assertArrayEquals(new double[] {}, DoubleStream.empty().map(e -> e).skip(1).toArray(), 0.0);
-        assertEquals(N.toList(), DoubleStream.empty().map(e -> e).toList());
-        assertEquals(N.toList(), DoubleStream.empty().map(e -> e).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterDefer() {
-        assertEquals(3, DoubleStream.defer(() -> DoubleStream.of(1, 2, 3)).count());
-        assertEquals(2, DoubleStream.defer(() -> DoubleStream.of(1, 2, 3)).skip(1).count());
-        assertArrayEquals(new double[] { 1, 2, 3 }, DoubleStream.defer(() -> DoubleStream.of(1, 2, 3)).toArray(), 0.0);
-        assertArrayEquals(new double[] { 2, 3 }, DoubleStream.defer(() -> DoubleStream.of(1, 2, 3)).skip(1).toArray(), 0.0);
-        assertEquals(N.toList(1.0, 2.0, 3.0), DoubleStream.defer(() -> DoubleStream.of(1, 2, 3)).toList());
-        assertEquals(N.toList(2.0, 3.0), DoubleStream.defer(() -> DoubleStream.of(1, 2, 3)).skip(1).toList());
-        assertEquals(3, DoubleStream.defer(() -> DoubleStream.of(1, 2, 3)).map(e -> e).count());
-        assertEquals(2, DoubleStream.defer(() -> DoubleStream.of(1, 2, 3)).map(e -> e).skip(1).count());
-        assertArrayEquals(new double[] { 1, 2, 3 }, DoubleStream.defer(() -> DoubleStream.of(1, 2, 3)).map(e -> e).toArray(), 0.0);
-        assertArrayEquals(new double[] { 2, 3 }, DoubleStream.defer(() -> DoubleStream.of(1, 2, 3)).map(e -> e).skip(1).toArray(), 0.0);
-        assertEquals(N.toList(1.0, 2.0, 3.0), DoubleStream.defer(() -> DoubleStream.of(1, 2, 3)).map(e -> e).toList());
-        assertEquals(N.toList(2.0, 3.0), DoubleStream.defer(() -> DoubleStream.of(1, 2, 3)).map(e -> e).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterFrom() {
-        assertEquals(3, DoubleStream.from(java.util.stream.DoubleStream.of(1, 2, 3)).count());
-        assertEquals(2, DoubleStream.from(java.util.stream.DoubleStream.of(1, 2, 3)).skip(1).count());
-        assertArrayEquals(new double[] { 1, 2, 3 }, DoubleStream.from(java.util.stream.DoubleStream.of(1, 2, 3)).toArray(), 0.0);
-        assertArrayEquals(new double[] { 2, 3 }, DoubleStream.from(java.util.stream.DoubleStream.of(1, 2, 3)).skip(1).toArray(), 0.0);
-        assertEquals(N.toList(1.0, 2.0, 3.0), DoubleStream.from(java.util.stream.DoubleStream.of(1, 2, 3)).toList());
-        assertEquals(N.toList(2.0, 3.0), DoubleStream.from(java.util.stream.DoubleStream.of(1, 2, 3)).skip(1).toList());
-        assertEquals(3, DoubleStream.from(java.util.stream.DoubleStream.of(1, 2, 3)).map(e -> e).count());
-        assertEquals(2, DoubleStream.from(java.util.stream.DoubleStream.of(1, 2, 3)).map(e -> e).skip(1).count());
-        assertArrayEquals(new double[] { 1, 2, 3 }, DoubleStream.from(java.util.stream.DoubleStream.of(1, 2, 3)).map(e -> e).toArray(), 0.0);
-        assertArrayEquals(new double[] { 2, 3 }, DoubleStream.from(java.util.stream.DoubleStream.of(1, 2, 3)).map(e -> e).skip(1).toArray(), 0.0);
-        assertEquals(N.toList(1.0, 2.0, 3.0), DoubleStream.from(java.util.stream.DoubleStream.of(1, 2, 3)).map(e -> e).toList());
-        assertEquals(N.toList(2.0, 3.0), DoubleStream.from(java.util.stream.DoubleStream.of(1, 2, 3)).map(e -> e).skip(1).toList());
-    }
-
-    @Test
-    public void test_takeWhile() {
-        DoubleStream stream = createDoubleStream(1.0, 2.0, 3.0, 4.0, 5.0);
-
-        double[] result = stream.takeWhile(x -> x < 4.0).toArray();
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, result, 0.0001);
-    }
-
-    @Test
-    public void test_distinct() {
-        {
-            DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0);
-
-            double[] result = stream.sorted().distinct().toArray();
-            assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, result, 0.0001);
-        }
-        {
-            DoubleStream stream = new ArrayDoubleStream(new double[] { 1.0, 2.0, 2.0, 3.0, 4.0, 5.0, 5.0 }, true, null);
-
-            double[] result = stream.distinct().toArray();
-            assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, result, 0.0001);
-        }
-        {
-            DoubleStream stream = new ArrayDoubleStream(new double[] { 1.0, 2.0, 2.0, 3.0, 4.0, 5.0, 5.0 }, true, null);
-
-            double[] result = stream.filter(e -> true).distinct().toArray();
-            assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, result, 0.0001);
-        }
-    }
-
-    @Test
-    public void test_toCollection() {
-        {
-            DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0);
-
-            List<Double> result = stream.toList();
-            assertHaveSameElements(N.toSet(1.0, 2.0, 3.0, 4.0, 5.0), result);
-        }
-        {
-            DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0);
-
-            Set<Double> result = stream.toSet();
-            assertHaveSameElements(N.toSet(1.0, 2.0, 3.0, 4.0, 5.0), result);
-        }
-        {
-            DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0);
-
-            Set<Double> result = stream.toCollection(Suppliers.ofLinkedHashSet());
-            assertHaveSameElements(N.toSet(1.0, 2.0, 3.0, 4.0, 5.0), result);
-        }
-    }
-
-    @Test
     public void test_toMultiset() {
         {
             DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0);
@@ -2992,455 +2818,9 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
-    public void testFlattmap() {
-        DoubleStream stream = createDoubleStream(1.0, 2.0);
-        DoubleFunction<java.util.stream.DoubleStream> mapper = x -> java.util.stream.DoubleStream.of(x, x * 3);
-
-        double[] result = stream.flattMap(mapper).toArray();
-        assertArrayEquals(new double[] { 1.0, 3.0, 2.0, 6.0 }, result, 0.0001);
-    }
-
-    @Test
-    public void testFlattMapToObj() {
-        DoubleStream stream = createDoubleStream(1.0, 2.0);
-        DoubleFunction<String[]> mapper = x -> new String[] { "X" + x, "Y" + x };
-
-        List<String> result = stream.flatMapArrayToObj(mapper).toList();
-        assertEquals(Arrays.asList("X1.0", "Y1.0", "X2.0", "Y2.0"), result);
-    }
-
-    @Test
-    public void testScanWithInitial() {
-        DoubleStream stream = createDoubleStream(1.0, 2.0, 3.0);
-        DoubleBinaryOperator accumulator = (a, b) -> a * b;
-
-        double[] result = stream.scan(10.0, accumulator).toArray();
-        assertArrayEquals(new double[] { 10.0, 20.0, 60.0 }, result, 0.0001);
-    }
-
-    @Test
-    public void testScanWithInitialIncluded() {
-        DoubleStream stream = createDoubleStream(1.0, 2.0, 3.0);
-        DoubleBinaryOperator accumulator = Double::sum;
-
-        double[] result = stream.scan(100.0, true, accumulator).toArray();
-        assertArrayEquals(new double[] { 100.0, 101.0, 103.0, 106.0 }, result, 0.0001);
-    }
-
-    @Test
-    public void testPrependArray() {
-        DoubleStream stream = createDoubleStream(3.0, 4.0, 5.0);
-        double[] result = stream.prepend(1.0, 2.0).toArray();
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, result, 0.0001);
-    }
-
-    @Test
-    public void testAppendArray() {
-        DoubleStream stream = createDoubleStream(1.0, 2.0, 3.0);
-        double[] result = stream.append(4.0, 5.0).toArray();
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, result, 0.0001);
-    }
-
-    @Test
-    public void testReduceWithoutIdentity() {
-        DoubleStream stream = createDoubleStream(1.0, 2.0, 3.0, 4.0);
-        OptionalDouble result = stream.reduce(Double::max);
-        assertTrue(result.isPresent());
-        assertEquals(4.0, result.getAsDouble(), 0.0001);
-
-        DoubleStream emptyStream = DoubleStream.empty();
-        OptionalDouble emptyResult = emptyStream.reduce(Double::max);
-        assertFalse(emptyResult.isPresent());
-    }
-
-    @Test
-    public void testCollectWithoutCombiner() {
-        DoubleStream stream = createDoubleStream(1.0, 2.0, 3.0);
-        DoubleList result = stream.collect(DoubleList::new, DoubleList::add);
-
-        assertEquals(3, result.size());
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, result.toArray(), 0.0001);
-    }
-
-    @Test
-    public void testFindFirstWithPredicate() {
-        DoubleStream stream = createDoubleStream(1.0, 2.0, 3.0, 4.0);
-        OptionalDouble result = stream.findFirst(x -> x > 2);
-        assertTrue(result.isPresent());
-        assertEquals(3.0, result.getAsDouble(), 0.0001);
-    }
-
-    @Test
-    public void testFindAnyWithPredicate() {
-        DoubleStream stream = createDoubleStream(1.0, 2.0, 3.0, 4.0);
-        OptionalDouble result = stream.findAny(x -> x > 2);
-        assertTrue(result.isPresent());
-        assertTrue(result.getAsDouble() > 2);
-    }
-
-    @Test
-    public void testFindLastWithPredicate() {
-        DoubleStream stream = createDoubleStream(1.0, 2.0, 3.0, 4.0);
-        OptionalDouble result = stream.findLast(x -> x < 3);
-        assertTrue(result.isPresent());
-        assertEquals(2.0, result.getAsDouble(), 0.0001);
-    }
-
-    @Test
-    public void testOfArray() {
-        double[] array = { 1.0, 2.0, 3.0, 4.0, 5.0 };
-        DoubleStream stream = createDoubleStream(array);
-        assertArrayEquals(array, stream.toArray(), 0.0001);
-
-        DoubleStream emptyStream = createDoubleStream(new double[0]);
-        assertEquals(0, emptyStream.count());
-
-        DoubleStream rangeStream = createDoubleStream(array, 1, 4);
-        assertArrayEquals(new double[] { 2.0, 3.0, 4.0 }, rangeStream.toArray(), 0.0001);
-    }
-
-    @Test
-    @DisplayName("flatten() should flatten two-dimensional array")
-    public void testFlatten2D_2() {
-        double[][] array = { { 1.0d, 2.0d }, { 3.0d, 4.0d } };
-        double[] result = DoubleStream.flatten(array, false).toArray();
-        assertArrayEquals(new double[] { 1.0d, 2.0d, 3.0d, 4.0d }, result);
-
-        result = DoubleStream.flatten(array, true).toArray();
-        assertArrayEquals(new double[] { 1.0d, 3.0d, 2.0d, 4.0d }, result);
-    }
-
-    @Test
-    @DisplayName("flatten() should flatten two-dimensional array")
-    public void testFlatten2D_3() {
-        double[][] array = { { 1.0d, 2.0d }, { 3.0d, 4.0d, 5.f } };
-        double[] result = DoubleStream.flatten(array, 0.0d, false).toArray();
-        assertArrayEquals(new double[] { 1.0d, 2.0d, 0.0d, 3.0d, 4.0d, 5.0d }, result);
-
-        result = DoubleStream.flatten(array, 0.0d, true).toArray();
-        assertArrayEquals(new double[] { 1.0d, 3.0d, 2.0d, 4.0d, 0.0d, 5.0d }, result);
-    }
-
-    @Test
-    @DisplayName("flatten() with empty array should return empty stream")
-    public void testFlattenEmpty() {
-        double[][] array = {};
-        DoubleStream stream = DoubleStream.flatten(array);
-        assertEquals(0, stream.count());
-    }
-
-    @Test
-    public void testRepeat_02() {
-        DoubleStream stream = DoubleStream.repeat(1.0d, 1000);
-        assertEquals(1000, stream.mapToFloat(e -> (float) e).count());
-    }
-
-    @Test
-    public void test_iterate_02() {
-        DoubleStream stream = DoubleStream.iterate(() -> true, () -> 1.0d);
-        assertEquals(10, stream.limit(10).mapToFloat(e -> (float) e).count());
-
-        stream = DoubleStream.iterate(1.0d, () -> true, it -> it);
-        assertEquals(10, stream.limit(10).mapToInt(e -> (int) e).sum());
-
-        stream = DoubleStream.iterate(1.0d, it -> true, it -> it);
-        assertEquals(10, stream.limit(10).mapToInt(e -> (int) e).sum());
-    }
-
-    @Test
-    public void test_concat_02() {
-        double[] a = { 1.0d, 2.0d, 3.0d };
-        double[] b = { 4.0d, 5.0d, 6.0d };
-        double[] result = DoubleStream.concat(a, b).toArray();
-        assertArrayEquals(new double[] { 1.0d, 2.0d, 3.0d, 4.0d, 5.0d, 6.0d }, result);
-
-        result = DoubleStream.concat(N.toList(a, b)).toArray();
-        assertArrayEquals(new double[] { 1.0d, 2.0d, 3.0d, 4.0d, 5.0d, 6.0d }, result);
-
-        result = DoubleStream.concatIterators(N.toList(DoubleIterator.of(a), DoubleIterator.of(b))).toArray();
-        assertArrayEquals(new double[] { 1.0d, 2.0d, 3.0d, 4.0d, 5.0d, 6.0d }, result);
-    }
-
-    @Test
-    public void test_zip_02() {
-        double[] a = { 1.0d };
-        double[] b = { 4.0d, 5.0d };
-        double[] c = { 7.0d, 8.0d, 9.0d };
-        double[] result = DoubleStream.zip(a, b, c, 100, 200, 300, (x, y, z) -> x + y + z).toArray();
-        assertArrayEquals(new double[] { 12.0d, 113.0d, 309.0d }, result);
-    }
-
-    @Test
-    public void test_merge() {
-        double[] a = { 1.0d, 2.0d, 3.0d };
-        double[] b = { 4.0d, 5.0d, 6.0d };
-        double[] c = { 7.0d, 8.0d, 9.0d };
-        double[] result = DoubleStream.merge(N.toList(DoubleStream.of(a)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray();
-        assertArrayEquals(new double[] { 1.0d, 2.0d, 3.0d }, result);
-
-        result = DoubleStream.merge(N.toList(DoubleStream.of(a), DoubleStream.of(b)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
-                .toArray();
-        assertArrayEquals(new double[] { 1.0d, 2.0d, 3.0d, 4.0d, 5.0d, 6.0d }, result);
-
-        result = DoubleStream
-                .merge(N.toList(DoubleStream.of(a), DoubleStream.of(b), DoubleStream.of(c)),
-                        (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
-                .toArray();
-        assertArrayEquals(new double[] { 1.0d, 2.0d, 3.0d, 4.0d, 5.0d, 6.0d, 7.0d, 8.0d, 9.0d }, result);
-
-    }
-
-    @Test
-    public void testTransform() {
-        List<Integer> callOrder = new ArrayList<>();
-        DoubleStream stream = createDoubleStream(1, 2, 3).onClose(() -> callOrder.add(1)).onClose(() -> callOrder.add(2)).onClose(() -> callOrder.add(3));
-
-        DoubleStream.defer(() -> stream).close();
-
-        Assertions.assertEquals(Arrays.asList(1, 2, 3), callOrder);
-    }
-
-    // TODO: filter(DoublePredicate) is abstract - tested via concrete implementations above
-    // TODO: takeWhile(DoublePredicate) is abstract - tested via concrete implementations above
-    // TODO: dropWhile(DoublePredicate) is abstract - tested via concrete implementations above
-    // TODO: map(DoubleUnaryOperator) is abstract - tested via concrete implementations above
-    // TODO: mapToInt(DoubleToIntFunction) is abstract - tested via concrete implementations above
-    // TODO: mapToLong(DoubleToLongFunction) is abstract - tested via concrete implementations above
-    // TODO: mapToFloat(DoubleToFloatFunction) is abstract - tested via concrete implementations above
-    // TODO: mapToObj(DoubleFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMap(DoubleFunction) is abstract - tested via concrete implementations above
-    // TODO: flatmap(DoubleFunction<double[]>) is abstract - tested via concrete implementations above
-    // TODO: flattMap(DoubleFunction<JDK DoubleStream>) is abstract - tested via concrete implementations above
-    // TODO: flatMapToInt(DoubleFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMapToLong(DoubleFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMapToFloat(DoubleFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMapToObj(DoubleFunction) is abstract - tested via concrete implementations above
-    // TODO: flatmapToObj(DoubleFunction) is abstract - tested via concrete implementations above
-    // TODO: mapMulti(DoubleMapMultiConsumer) is abstract - tested via concrete implementations above
-    // TODO: mapPartial(DoubleFunction) is abstract - tested via concrete implementations above
-    // TODO: mapPartialJdk(DoubleFunction) is abstract - tested via concrete implementations above
-    // TODO: rangeMap(DoubleBiPredicate, DoubleBinaryOperator) is abstract - tested via concrete implementations above
-    // TODO: rangeMapToObj(DoubleBiPredicate, DoubleBiFunction) is abstract - tested via concrete implementations above
-    // TODO: collapse(...) overloads are abstract - tested via concrete implementations above
-    // TODO: scan(...) overloads are abstract - tested via concrete implementations above
-    // TODO: prepend/append/appendIfEmpty are abstract - tested via concrete implementations above
-    // TODO: top(...) overloads are abstract - tested via concrete implementations above
-    // TODO: toDoubleList() is abstract - tested via concrete implementations above
-    // TODO: toMap/groupTo/reduce/collect overloads are abstract - tested via concrete implementations above
-    // TODO: forEach/forEachIndexed/anyMatch/allMatch/noneMatch are abstract - tested via concrete implementations above
-    // TODO: findFirst/findAny/findLast with predicate are abstract - tested via concrete implementations above
-    // TODO: min/max/kthLargest/sum/average/summaryStatistics are abstract - tested via concrete implementations above
-    // TODO: mergeWith/zipWith overloads are abstract - tested via concrete implementations above
-    // TODO: boxed/toJdkStream are abstract - tested via concrete implementations above
-
-    @Test
-    public void testFlatMapArrayToObj() {
-        List<String> result = createDoubleStream(1.0, 2.0, 3.0).flatMapArrayToObj(d -> new String[] { "A" + d, "B" + d }).toList();
-        assertEquals(6, result.size());
-        assertEquals("A1.0", result.get(0));
-        assertEquals("B1.0", result.get(1));
-    }
-
-    @Test
-    public void testFlatMapArrayToObj_Empty() {
-        List<String> result = DoubleStream.empty().flatMapArrayToObj(d -> new String[] { "A" + d }).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testFindFirst_NoArg() {
-        OptionalDouble result = createDoubleStream(10.0, 20.0, 30.0).findFirst();
-        assertTrue(result.isPresent());
-        assertEquals(10.0, result.getAsDouble(), 0.001);
-    }
-
-    @Test
-    public void testFindFirst_NoArg_Empty() {
-        OptionalDouble result = DoubleStream.empty().findFirst();
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testFindAny_NoArg() {
-        OptionalDouble result = createDoubleStream(10.0, 20.0, 30.0).findAny();
-        assertTrue(result.isPresent());
-    }
-
-    @Test
-    public void testFindAny_NoArg_Empty() {
-        OptionalDouble result = DoubleStream.empty().findAny();
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testTransformB_TwoArg() {
-        double[] result = createDoubleStream(3.0, 1.0, 2.0).transformB(s -> s.sorted(), false).toArray();
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testTransformB_TwoArg_Deferred() {
-        double[] result = createDoubleStream(3.0, 1.0, 2.0).transformB(s -> s.sorted(), true).toArray();
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testFrom_JdkStream() {
-        java.util.stream.DoubleStream jdkStream = java.util.stream.DoubleStream.of(1.0, 2.0, 3.0);
-        DoubleStream result = DoubleStream.from(jdkStream);
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, result.toArray(), 0.001);
-    }
-
-    @Test
-    public void testFrom_JdkStream_Empty() {
-        java.util.stream.DoubleStream jdkStream = java.util.stream.DoubleStream.empty();
-        DoubleStream result = DoubleStream.from(jdkStream);
-        assertEquals(0, result.count());
-    }
-
-    @Test
-    public void testOfJdkOptionalDouble() {
-        DoubleStream result = DoubleStream.of(java.util.OptionalDouble.of(42.5));
-        assertArrayEquals(new double[] { 42.5 }, result.toArray(), 0.001);
-
-        result = DoubleStream.of(java.util.OptionalDouble.empty());
-        assertEquals(0, result.count());
-    }
-
-    @Test
-    public void testOfNullable_Null() {
-        DoubleStream result = DoubleStream.ofNullable(null);
-        assertEquals(0, result.count());
-    }
-
-    @Test
-    public void testOfNullable_Value() {
-        DoubleStream result = DoubleStream.ofNullable(42.5);
-        assertArrayEquals(new double[] { 42.5 }, result.toArray(), 0.001);
-    }
-
-    @Test
-    public void testConcatIteratorsCollection() {
-        List<DoubleIterator> iterators = Arrays.asList(DoubleIterator.of(new double[] { 1.0, 2.0 }), DoubleIterator.of(new double[] { 3.0, 4.0 }));
-        DoubleStream result = DoubleStream.concatIterators(iterators);
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0 }, result.toArray(), 0.001);
-    }
-
-    @Test
-    public void testMergeIteratorThreeWay() {
-        DoubleIterator a = DoubleIterator.of(new double[] { 1.0, 4.0, 7.0 });
-        DoubleIterator b = DoubleIterator.of(new double[] { 2.0, 5.0, 8.0 });
-        DoubleIterator c = DoubleIterator.of(new double[] { 3.0, 6.0, 9.0 });
-        double[] result = DoubleStream.merge(a, b, c, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray();
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testZipIteratorsThreeWay() {
-        DoubleIterator a = DoubleIterator.of(new double[] { 1.0, 2.0 });
-        DoubleIterator b = DoubleIterator.of(new double[] { 10.0, 20.0 });
-        DoubleIterator c = DoubleIterator.of(new double[] { 100.0, 200.0 });
-        double[] result = DoubleStream.zip(a, b, c, (x, y, z) -> x + y + z).toArray();
-        assertArrayEquals(new double[] { 111.0, 222.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testZipIteratorsWithDefaults() {
-        DoubleIterator a = DoubleIterator.of(new double[] { 1.0, 2.0, 3.0 });
-        DoubleIterator b = DoubleIterator.of(new double[] { 10.0, 20.0 });
-        double[] result = DoubleStream.zip(a, b, 0.0, 0.0, Double::sum).toArray();
-        assertArrayEquals(new double[] { 11.0, 22.0, 3.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testZipIteratorsThreeWayWithDefaults() {
-        DoubleIterator a = DoubleIterator.of(new double[] { 1.0 });
-        DoubleIterator b = DoubleIterator.of(new double[] { 10.0, 20.0 });
-        DoubleIterator c = DoubleIterator.of(new double[] { 100.0, 200.0, 300.0 });
-        double[] result = DoubleStream.zip(a, b, c, 0.0, 0.0, 0.0, (x, y, z) -> x + y + z).toArray();
-        assertArrayEquals(new double[] { 111.0, 220.0, 300.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testZipStreamsThreeWayWithDefaults() {
-        double[] result = DoubleStream
-                .zip(DoubleStream.of(1.0), DoubleStream.of(10.0, 20.0), DoubleStream.of(100.0, 200.0, 300.0), 0.0, 0.0, 0.0, (x, y, z) -> x + y + z)
-                .toArray();
-        assertArrayEquals(new double[] { 111.0, 220.0, 300.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testZipCollectionOfStreams() {
-        List<DoubleStream> streams = Arrays.asList(DoubleStream.of(1.0, 2.0), DoubleStream.of(10.0, 20.0));
-        double[] result = DoubleStream.zip(streams, values -> values[0] + values[1]).toArray();
-        assertArrayEquals(new double[] { 11.0, 22.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testMergeStreamsThreeWay() {
-        double[] result = DoubleStream
-                .merge(DoubleStream.of(1.0, 4.0, 7.0), DoubleStream.of(2.0, 5.0, 8.0), DoubleStream.of(3.0, 6.0, 9.0),
-                        (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
-                .toArray();
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testToMap_WithMerge() {
-        Map<Boolean, Double> map = createDoubleStream(1.0, 2.0, 3.0, 4.0, 5.0, 6.0).toMap(n -> n % 2 == 0, n -> n, Double::sum);
-        assertEquals(12.0, map.get(true), 0.001);
-        assertEquals(9.0, map.get(false), 0.001);
-    }
-
-    @Test
-    public void testToMap_WithMapSupplier() {
-        Map<String, Double> map = createDoubleStream(1.0, 2.0, 3.0).toMap(n -> "key" + n, n -> n * 10, Suppliers.ofMap());
-        assertEquals(3, map.size());
-        assertEquals(10.0, map.get("key1.0"), 0.001);
-    }
-
-    @Test
-    public void testGroupTo_WithMapSupplier() {
-        HashMap<Boolean, List<Double>> grouped = createDoubleStream(1.0, 2.0, 3.0, 4.0, 5.0, 6.0).groupTo(n -> n % 2 == 0, java.util.stream.Collectors.toList(),
-                HashMap::new);
-        assertEquals(2, grouped.size());
-        assertTrue(grouped.get(true).contains(2.0));
-    }
-
-    @Test
-    public void testCollect_WithoutCombiner() {
-        List<Double> result = createDoubleStream(1.0, 2.0, 3.0).collect(ArrayList::new, (list, n) -> list.add(n));
-        assertEquals(Arrays.asList(1.0, 2.0, 3.0), result);
-    }
-
-    @Test
-    public void testOfOptionalDouble_Empty() {
-        DoubleStream result = DoubleStream.of(OptionalDouble.empty());
-        assertEquals(0, result.count());
-    }
-
-    @Test
     public void testOfOptionalDouble_Present() {
         DoubleStream result = DoubleStream.of(OptionalDouble.of(42.5));
         assertArrayEquals(new double[] { 42.5 }, result.toArray(), 0.001);
-    }
-
-    // ===== New tests for untested methods =====
-
-    @Test
-    public void testConcatIterators_Collection() {
-        List<DoubleIterator> iters = new ArrayList<>();
-        iters.add(DoubleIterator.of(new double[] { 1.0, 2.0 }));
-        iters.add(DoubleIterator.of(new double[] { 3.0, 4.0 }));
-        double[] result = DoubleStream.concatIterators(iters).toArray();
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testConcatIterators_EmptyCollection() {
-        List<DoubleIterator> iters = new ArrayList<>();
-        double[] result = DoubleStream.concatIterators(iters).toArray();
-        assertArrayEquals(new double[0], result, 0.001);
     }
 
     @Test
@@ -3453,92 +2833,6 @@ public class DoubleStreamTest extends TestBase {
     public void testLimit_WithOffsetBeyondSize() {
         double[] result = DoubleStream.of(1.0, 2.0, 3.0).limit(5, 3).toArray();
         assertArrayEquals(new double[0], result, 0.001);
-    }
-
-    @Test
-    public void testFlatMapArrayToObj_HappyPath2() {
-        List<String> result = DoubleStream.of(1.0, 2.0, 3.0).flatMapArrayToObj(d -> new String[] { String.valueOf(d), String.valueOf(d * 10) }).toList();
-        assertEquals(6, result.size());
-    }
-
-    @Test
-    public void testFlatMapArrayToObj_Empty2() {
-        List<String> result = DoubleStream.empty().flatMapArrayToObj(d -> new String[] { String.valueOf(d) }).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testMapMulti_HappyPath2() {
-        double[] result = DoubleStream.of(1.0, 2.0, 3.0).mapMulti((value, consumer) -> {
-            consumer.accept(value);
-            consumer.accept(value * 10);
-        }).toArray();
-        assertArrayEquals(new double[] { 1.0, 10.0, 2.0, 20.0, 3.0, 30.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testMapMulti_Empty2() {
-        double[] result = DoubleStream.empty().mapMulti((value, consumer) -> consumer.accept(value)).toArray();
-        assertArrayEquals(new double[0], result, 0.001);
-    }
-
-    @Test
-    public void testMapPartial_HappyPath2() {
-        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0).mapPartial(d -> d % 2 == 0 ? OptionalDouble.of(d * 10) : OptionalDouble.empty()).toArray();
-        assertArrayEquals(new double[] { 20.0, 40.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testMapPartialJdk_HappyPath2() {
-        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0)
-                .mapPartialJdk(d -> d % 2 == 0 ? java.util.OptionalDouble.of(d * 10) : java.util.OptionalDouble.empty())
-                .toArray();
-        assertArrayEquals(new double[] { 20.0, 40.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testRangeMap_HappyPath2() {
-        double[] result = DoubleStream.of(1.0, 1.0, 2.0, 2.0, 3.0).rangeMap((a, b) -> a == b, Double::sum).toArray();
-        assertArrayEquals(new double[] { 2.0, 4.0, 6.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testRangeMapToObj_HappyPath2() {
-        List<String> result = DoubleStream.of(1.0, 1.0, 2.0, 3.0, 3.0).rangeMapToObj((a, b) -> a == b, (a, b) -> a + "-" + b).toList();
-        assertEquals(3, result.size());
-    }
-
-    @Test
-    public void testScan_BasicScan2() {
-        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0).scan(Double::sum).toArray();
-        assertArrayEquals(new double[] { 1.0, 3.0, 6.0, 10.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testScan_WithInit2() {
-        double[] result = DoubleStream.of(1.0, 2.0, 3.0).scan(10.0, Double::sum).toArray();
-        assertArrayEquals(new double[] { 11.0, 13.0, 16.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testScan_WithInitIncluded2() {
-        double[] result = DoubleStream.of(1.0, 2.0, 3.0).scan(10.0, true, Double::sum).toArray();
-        assertArrayEquals(new double[] { 10.0, 11.0, 13.0, 16.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testCollapse_ListForm() {
-        List<DoubleList> result = DoubleStream.of(1.0, 1.0, 2.0, 2.0, 3.0).collapse((a, b) -> a == b).toList();
-        assertEquals(3, result.size());
-        assertArrayEquals(new double[] { 1.0, 1.0 }, result.get(0).toArray(), 0.001);
-        assertArrayEquals(new double[] { 2.0, 2.0 }, result.get(1).toArray(), 0.001);
-        assertArrayEquals(new double[] { 3.0 }, result.get(2).toArray(), 0.001);
-    }
-
-    @Test
-    public void testCollapse_WithTriPredicate2() {
-        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 10.0, 11.0, 12.0).collapse((first, previous, current) -> current - first <= 2, Double::sum).toArray();
-        assertArrayEquals(new double[] { 6.0, 33.0 }, result, 0.001);
     }
 
     @Test
@@ -3584,12 +2878,6 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
-    public void testReverseSorted_Empty() {
-        double[] result = DoubleStream.empty().reverseSorted().toArray();
-        assertArrayEquals(new double[0], result, 0.001);
-    }
-
-    @Test
     public void testIntersection_HappyPath() {
         Set<Double> other = new java.util.HashSet<>(Arrays.asList(2.0, 4.0, 6.0));
         double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0).intersection(other).toArray();
@@ -3628,30 +2916,10 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
-    public void testFirst_Empty() {
-        OptionalDouble result = DoubleStream.empty().first();
-        assertFalse(result.isPresent());
-    }
-
-    @Test
     public void testLast_HappyPath() {
         OptionalDouble result = DoubleStream.of(5.0, 3.0, 1.0).last();
         assertTrue(result.isPresent());
         assertEquals(1.0, result.get(), 0.001);
-    }
-
-    @Test
-    public void testLast_Empty() {
-        OptionalDouble result = DoubleStream.empty().last();
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testJoin_WithDelimiter() {
-        String result = DoubleStream.of(1.0, 2.0, 3.0).join(", ");
-        assertNotNull(result);
-        assertTrue(result.contains("1.0"));
-        assertTrue(result.contains("2.0"));
     }
 
     @Test
@@ -3703,40 +2971,11 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
-    public void testCount_Empty() {
-        long result = DoubleStream.empty().count();
-        assertEquals(0, result);
-    }
-
-    @Test
     public void testSkip_WithAction() {
         List<Double> skipped = new ArrayList<>();
         double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0).skip(2, value -> skipped.add(value)).toArray();
         assertArrayEquals(new double[] { 3.0, 4.0, 5.0 }, result, 0.001);
         assertEquals(Arrays.asList(1.0, 2.0), skipped);
-    }
-
-    @Test
-    public void testFilter_WithAction() {
-        List<Double> rejected = new ArrayList<>();
-        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0).filter(x -> x % 2 == 0, value -> rejected.add(value)).toArray();
-        assertArrayEquals(new double[] { 2.0, 4.0 }, result, 0.001);
-        assertEquals(Arrays.asList(1.0, 3.0, 5.0), rejected);
-    }
-
-    @Test
-    public void testDropWhile_WithAction() {
-        List<Double> dropped = new ArrayList<>();
-        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0).dropWhile(x -> x <= 3.0, value -> dropped.add(value)).toArray();
-        assertArrayEquals(new double[] { 4.0, 5.0 }, result, 0.001);
-        assertEquals(Arrays.asList(1.0, 2.0, 3.0), dropped);
-    }
-
-    @Test
-    public void testForeach_HappyPath2() {
-        List<Double> collected = new ArrayList<>();
-        DoubleStream.of(1.0, 2.0, 3.0).foreach(collected::add);
-        assertEquals(Arrays.asList(1.0, 2.0, 3.0), collected);
     }
 
     @Test
@@ -3759,110 +2998,12 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
-    public void testTransformB_HappyPath2() {
-        double[] result = DoubleStream.of(1.0, 2.0, 3.0).transformB(s -> s.map(x -> x * 2)).toArray();
-        assertArrayEquals(new double[] { 2.0, 4.0, 6.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testZipWith_CollectionOfStreams() {
-        List<DoubleStream> streams = Arrays.asList(DoubleStream.of(1.0, 2.0, 3.0), DoubleStream.of(10.0, 20.0, 30.0));
-        double[] result = DoubleStream.zip(streams, args -> args[0] + args[1]).toArray();
-        assertArrayEquals(new double[] { 11.0, 22.0, 33.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testZipWith_CollectionOfStreamsWithDefaults() {
-        List<DoubleStream> streams = Arrays.asList(DoubleStream.of(1.0, 2.0), DoubleStream.of(10.0, 20.0, 30.0));
-        double[] result = DoubleStream.zip(streams, new double[] { 0.0, 0.0 }, args -> args[0] + args[1]).toArray();
-        assertArrayEquals(new double[] { 11.0, 22.0, 30.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testMerge_CollectionOfStreams() {
-        List<DoubleStream> streams = Arrays.asList(DoubleStream.of(1.0, 3.0, 5.0), DoubleStream.of(2.0, 4.0, 6.0));
-        double[] result = DoubleStream.merge(streams, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray();
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testMerge_ThreeArrays() {
-        double[] result = DoubleStream
-                .merge(new double[] { 1.0, 4.0 }, new double[] { 2.0, 5.0 }, new double[] { 3.0, 6.0 },
-                        (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
-                .toArray();
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testMerge_ThreeIterators() {
-        double[] result = DoubleStream
-                .merge(DoubleIterator.of(new double[] { 1.0, 4.0 }), DoubleIterator.of(new double[] { 2.0, 5.0 }), DoubleIterator.of(new double[] { 3.0, 6.0 }),
-                        (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
-                .toArray();
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testCollapse_WithMergeFunction2() {
-        double[] result = DoubleStream.of(1.0, 1.0, 2.0, 2.0, 3.0).collapse((a, b) -> a == b, Double::sum).toArray();
-        assertArrayEquals(new double[] { 2.0, 4.0, 3.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testPercentiles_HappyPath() {
-        Pair<DoubleSummaryStatistics, Optional<Map<Percentage, Double>>> result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0).summaryStatisticsAndPercentiles();
-        assertNotNull(result);
-        assertEquals(5, result.left().getCount());
-        assertEquals(1.0, result.left().getMin(), 0.001);
-        assertEquals(5.0, result.left().getMax(), 0.001);
-    }
-
-    @Test
     public void testOnClose_HappyPath() {
         java.util.concurrent.atomic.AtomicBoolean closed = new java.util.concurrent.atomic.AtomicBoolean(false);
         DoubleStream s = DoubleStream.of(1.0, 2.0, 3.0).onClose(() -> closed.set(true));
         s.toArray();
         s.close();
         assertTrue(closed.get());
-    }
-
-    @Test
-    public void testAcceptIfNotEmpty_HappyPath() {
-        AtomicInteger called = new AtomicInteger(0);
-        DoubleStream.of(1.0, 2.0, 3.0).acceptIfNotEmpty(s -> called.set((int) s.sum()));
-        assertEquals(6, called.get());
-    }
-
-    @Test
-    public void testAcceptIfNotEmpty_EmptyStream() {
-        AtomicInteger called = new AtomicInteger(0);
-        DoubleStream.empty().acceptIfNotEmpty(s -> called.set(1));
-        assertEquals(0, called.get());
-    }
-
-    @Test
-    public void testApplyIfNotEmpty_HappyPath() {
-        Optional<Double> result = DoubleStream.of(1.0, 2.0, 3.0).applyIfNotEmpty(s -> s.sum());
-        assertTrue(result.isPresent());
-        assertEquals(6.0, result.get(), 0.001);
-    }
-
-    @Test
-    public void testApplyIfNotEmpty_EmptyStream() {
-        Optional<Double> result = DoubleStream.empty().applyIfNotEmpty(s -> s.sum());
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testThrowIfEmpty_NonEmpty() {
-        double[] result = DoubleStream.of(1.0, 2.0, 3.0).throwIfEmpty().toArray();
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testThrowIfEmpty_EmptyThrows() {
-        assertThrows(NoSuchElementException.class, () -> DoubleStream.empty().throwIfEmpty().toArray());
     }
 
     @Test
@@ -3883,57 +3024,6 @@ public class DoubleStreamTest extends TestBase {
         OptionalDouble result = DoubleStream.of(42.0).onlyOne();
         assertTrue(result.isPresent());
         assertEquals(42.0, result.get(), 0.001);
-    }
-
-    @Test
-    public void testOnlyOne_EmptyStream() {
-        OptionalDouble result = DoubleStream.empty().onlyOne();
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testOnlyOne_TooManyElements() {
-        assertThrows(Exception.class, () -> DoubleStream.of(1.0, 2.0).onlyOne());
-    }
-
-    @Test
-    public void testFlatten_WithAlignment2() {
-        double[][] a = { { 1.0, 2.0, 3.0 }, { 4.0, 5.0 } };
-        double[] result = DoubleStream.flatten(a, 0.0, true).toArray();
-        assertArrayEquals(new double[] { 1.0, 4.0, 2.0, 5.0, 3.0, 0.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testCollect_TwoArg2() {
-        List<Double> result = DoubleStream.of(1.0, 2.0, 3.0).collect(ArrayList::new, (list, val) -> list.add(val));
-        assertEquals(Arrays.asList(1.0, 2.0, 3.0), result);
-    }
-
-    @Test
-    public void testToMap_WithMergeFunction2() {
-        Map<Double, Double> result = DoubleStream.of(1.0, 2.0, 1.0, 3.0, 2.0).toMap(d -> d, d -> 1.0, Double::sum);
-        assertEquals(3, result.size());
-        assertEquals(2.0, result.get(1.0), 0.001);
-        assertEquals(2.0, result.get(2.0), 0.001);
-        assertEquals(1.0, result.get(3.0), 0.001);
-    }
-
-    @Test
-    public void testFlattMap_HappyPath() {
-        double[] result = DoubleStream.of(1.0, 2.0, 3.0).flattMap(d -> java.util.stream.DoubleStream.of(d, d * 10)).toArray();
-        assertArrayEquals(new double[] { 1.0, 10.0, 2.0, 20.0, 3.0, 30.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testFlatmap_HappyPath() {
-        double[] result = DoubleStream.of(1.0, 2.0, 3.0).flatmap(d -> new double[] { d, d * 10 }).toArray();
-        assertArrayEquals(new double[] { 1.0, 10.0, 2.0, 20.0, 3.0, 30.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testFlatmapToObj_HappyPath() {
-        List<String> result = DoubleStream.of(1.0, 2.0).flatmapToObj(d -> Arrays.asList(String.valueOf(d), String.valueOf(d * 10))).toList();
-        assertEquals(4, result.size());
     }
 
     @Test
@@ -3967,21 +3057,9 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
-    public void testRotated_NegativeDistance() {
-        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0).rotated(-2).toArray();
-        assertArrayEquals(new double[] { 3.0, 4.0, 5.0, 1.0, 2.0 }, result, 0.001);
-    }
-
-    @Test
     public void testReversed_HappyPath2() {
         double[] result = DoubleStream.of(1.0, 2.0, 3.0).reversed().toArray();
         assertArrayEquals(new double[] { 3.0, 2.0, 1.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testReversed_Empty() {
-        double[] result = DoubleStream.empty().reversed().toArray();
-        assertArrayEquals(new double[0], result, 0.001);
     }
 
     @Test
@@ -3997,10 +3075,481 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testsummaryStatistics() {
+        DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0);
+        DoubleSummaryStatistics stats = stream.summaryStatistics();
+        assertEquals(5, stats.getCount());
+        assertEquals(15.0, stats.getSum(), 0.0001);
+        assertEquals(3.0, stats.getAverage(), 0.0001);
+        assertEquals(1.0, stats.getMin(), 0.0001);
+        assertEquals(5.0, stats.getMax(), 0.0001);
+    }
+
+    @Test
+    public void testsummaryStatisticsAndPercentiles() {
+        DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0);
+        Pair<DoubleSummaryStatistics, Optional<Map<Percentage, Double>>> result = stream.summaryStatisticsAndPercentiles();
+        assertNotNull(result);
+        assertNotNull(result.left());
+        assertEquals(5, result.left().getCount());
+    }
+
+    @Test
+    public void testOf() {
+        DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0);
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, stream.toArray(), 0.0001);
+
+        DoubleStream emptyStream = DoubleStream.of();
+        assertEquals(0, emptyStream.count());
+    }
+
+    @Test
+    public void testOfOptionalDouble() {
+        OptionalDouble op = OptionalDouble.of(5.0);
+        DoubleStream stream = DoubleStream.of(op);
+        assertArrayEquals(new double[] { 5.0 }, stream.toArray(), 0.0001);
+
+        OptionalDouble empty = OptionalDouble.empty();
+        DoubleStream emptyStream = DoubleStream.of(empty);
+        assertEquals(0, emptyStream.count());
+    }
+
+    @Test
+    public void testOfJavaOptionalDouble() {
+        java.util.OptionalDouble op = java.util.OptionalDouble.of(5.0);
+        DoubleStream stream = DoubleStream.of(op);
+        assertArrayEquals(new double[] { 5.0 }, stream.toArray(), 0.0001);
+
+        java.util.OptionalDouble empty = java.util.OptionalDouble.empty();
+        DoubleStream emptyStream = DoubleStream.of(empty);
+        assertEquals(0, emptyStream.count());
+    }
+
+    @Test
+    public void testSequential() {
+        DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0);
+        DoubleStream sequential = stream.sequential();
+        assertNotNull(sequential);
+    }
+
+    @Test
+    public void testParallel() {
+        DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0);
+        DoubleStream parallel = stream.parallel();
+        assertNotNull(parallel);
+    }
+
+    @Test
+    public void testToSet() {
+        DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 2.0, 1.0);
+        DoubleList list = stream.toDoubleList();
+        assertNotNull(list);
+        assertTrue(list.size() == 5);
+    }
+
+    @Test
+    public void testDebounce_SingleElement() {
+        double[] result = DoubleStream.of(42.5).debounce(1, com.landawn.abacus.util.Duration.ofMillis(100)).toArray();
+
+        assertEquals(1, result.length);
+        assertEquals(42.5, result[0], 0.001);
+    }
+
+    @Test
+    public void testDebounce_MaxWindowSizeOne() {
+        // Only 1 element allowed per window
+        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0).debounce(1, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
+
+        assertEquals(1, result.length);
+        assertEquals(1.0, result[0], 0.001);
+    }
+
+    @Test
+    public void testDebounce_WithLargeMaxWindowSize() {
+        double[] input = new double[1000];
+        for (int i = 0; i < 1000; i++) {
+            input[i] = i;
+        }
+
+        double[] result = DoubleStream.of(input).debounce(500, com.landawn.abacus.util.Duration.ofSeconds(10)).toArray();
+
+        assertEquals(500, result.length);
+    }
+
+    @Test
+    public void testDebounce_WithSpecialValues() {
+        double[] result = DoubleStream.of(Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, 1.0, 2.0)
+                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
+                .toArray();
+
+        assertEquals(3, result.length);
+        assertTrue(Double.isNaN(result[0]));
+        assertEquals(Double.POSITIVE_INFINITY, result[1], 0.001);
+        assertEquals(Double.NEGATIVE_INFINITY, result[2], 0.001);
+    }
+
+    @Test
+    public void testStreamCreatedAfterMapPartial() {
+        assertEquals(2, DoubleStream.of(1, 2, 3, 4, 5).mapPartial(d -> d > 3 ? OptionalDouble.of(d * 2) : OptionalDouble.empty()).count());
+        assertEquals(1, DoubleStream.of(1, 2, 3, 4, 5).mapPartial(d -> d > 3 ? OptionalDouble.of(d * 2) : OptionalDouble.empty()).skip(1).count());
+        assertArrayEquals(new double[] { 8, 10 },
+                DoubleStream.of(1, 2, 3, 4, 5).mapPartial(d -> d > 3 ? OptionalDouble.of(d * 2) : OptionalDouble.empty()).toArray(), 0.0);
+        assertArrayEquals(new double[] { 10 },
+                DoubleStream.of(1, 2, 3, 4, 5).mapPartial(d -> d > 3 ? OptionalDouble.of(d * 2) : OptionalDouble.empty()).skip(1).toArray(), 0.0);
+        assertEquals(N.toList(8.0, 10.0), DoubleStream.of(1, 2, 3, 4, 5).mapPartial(d -> d > 3 ? OptionalDouble.of(d * 2) : OptionalDouble.empty()).toList());
+        assertEquals(N.toList(10.0),
+                DoubleStream.of(1, 2, 3, 4, 5).mapPartial(d -> d > 3 ? OptionalDouble.of(d * 2) : OptionalDouble.empty()).skip(1).toList());
+        assertEquals(2, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).mapPartial(d -> d > 3 ? OptionalDouble.of(d * 2) : OptionalDouble.empty()).count());
+        assertEquals(1, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).mapPartial(d -> d > 3 ? OptionalDouble.of(d * 2) : OptionalDouble.empty()).skip(1).count());
+        assertArrayEquals(new double[] { 8, 10 },
+                DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).mapPartial(d -> d > 3 ? OptionalDouble.of(d * 2) : OptionalDouble.empty()).toArray(), 0.0);
+        assertArrayEquals(new double[] { 10 },
+                DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).mapPartial(d -> d > 3 ? OptionalDouble.of(d * 2) : OptionalDouble.empty()).skip(1).toArray(), 0.0);
+        assertEquals(N.toList(8.0, 10.0),
+                DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).mapPartial(d -> d > 3 ? OptionalDouble.of(d * 2) : OptionalDouble.empty()).toList());
+        assertEquals(N.toList(10.0),
+                DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).mapPartial(d -> d > 3 ? OptionalDouble.of(d * 2) : OptionalDouble.empty()).skip(1).toList());
+    }
+
+    @Test
+    public void testStreamCreatedAfterMapPartialJdk() {
+        assertEquals(2,
+                DoubleStream.of(1, 2, 3, 4, 5).mapPartialJdk(d -> d > 3 ? java.util.OptionalDouble.of(d * 2) : java.util.OptionalDouble.empty()).count());
+        assertEquals(1,
+                DoubleStream.of(1, 2, 3, 4, 5)
+                        .mapPartialJdk(d -> d > 3 ? java.util.OptionalDouble.of(d * 2) : java.util.OptionalDouble.empty())
+                        .skip(1)
+                        .count());
+        assertArrayEquals(new double[] { 8, 10 },
+                DoubleStream.of(1, 2, 3, 4, 5).mapPartialJdk(d -> d > 3 ? java.util.OptionalDouble.of(d * 2) : java.util.OptionalDouble.empty()).toArray(),
+                0.0);
+        assertArrayEquals(new double[] { 10 },
+                DoubleStream.of(1, 2, 3, 4, 5)
+                        .mapPartialJdk(d -> d > 3 ? java.util.OptionalDouble.of(d * 2) : java.util.OptionalDouble.empty())
+                        .skip(1)
+                        .toArray(),
+                0.0);
+        assertEquals(N.toList(8.0, 10.0),
+                DoubleStream.of(1, 2, 3, 4, 5).mapPartialJdk(d -> d > 3 ? java.util.OptionalDouble.of(d * 2) : java.util.OptionalDouble.empty()).toList());
+        assertEquals(N.toList(10.0),
+                DoubleStream.of(1, 2, 3, 4, 5)
+                        .mapPartialJdk(d -> d > 3 ? java.util.OptionalDouble.of(d * 2) : java.util.OptionalDouble.empty())
+                        .skip(1)
+                        .toList());
+        assertEquals(2,
+                DoubleStream.of(1, 2, 3, 4, 5)
+                        .map(e -> e)
+                        .mapPartialJdk(d -> d > 3 ? java.util.OptionalDouble.of(d * 2) : java.util.OptionalDouble.empty())
+                        .count());
+        assertEquals(1,
+                DoubleStream.of(1, 2, 3, 4, 5)
+                        .map(e -> e)
+                        .mapPartialJdk(d -> d > 3 ? java.util.OptionalDouble.of(d * 2) : java.util.OptionalDouble.empty())
+                        .skip(1)
+                        .count());
+        assertArrayEquals(new double[] { 8, 10 },
+                DoubleStream.of(1, 2, 3, 4, 5)
+                        .map(e -> e)
+                        .mapPartialJdk(d -> d > 3 ? java.util.OptionalDouble.of(d * 2) : java.util.OptionalDouble.empty())
+                        .toArray(),
+                0.0);
+        assertArrayEquals(new double[] { 10 },
+                DoubleStream.of(1, 2, 3, 4, 5)
+                        .map(e -> e)
+                        .mapPartialJdk(d -> d > 3 ? java.util.OptionalDouble.of(d * 2) : java.util.OptionalDouble.empty())
+                        .skip(1)
+                        .toArray(),
+                0.0);
+        assertEquals(N.toList(8.0, 10.0),
+                DoubleStream.of(1, 2, 3, 4, 5)
+                        .map(e -> e)
+                        .mapPartialJdk(d -> d > 3 ? java.util.OptionalDouble.of(d * 2) : java.util.OptionalDouble.empty())
+                        .toList());
+        assertEquals(N.toList(10.0),
+                DoubleStream.of(1, 2, 3, 4, 5)
+                        .map(e -> e)
+                        .mapPartialJdk(d -> d > 3 ? java.util.OptionalDouble.of(d * 2) : java.util.OptionalDouble.empty())
+                        .skip(1)
+                        .toList());
+    }
+
+    @Test
+    public void testStreamCreatedAfterIfEmpty() {
+        assertEquals(5, DoubleStream.of(1, 2, 3, 4, 5).ifEmpty(Fn.emptyAction()).count());
+        assertEquals(4, DoubleStream.of(1, 2, 3, 4, 5).ifEmpty(Fn.emptyAction()).skip(1).count());
+        assertArrayEquals(new double[] { 1, 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).ifEmpty(Fn.emptyAction()).toArray(), 0.0);
+        assertArrayEquals(new double[] { 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).ifEmpty(Fn.emptyAction()).skip(1).toArray(), 0.0);
+        assertEquals(N.toList(1.0, 2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).ifEmpty(Fn.emptyAction()).toList());
+        assertEquals(N.toList(2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).ifEmpty(Fn.emptyAction()).skip(1).toList());
+        assertEquals(5, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(Fn.emptyAction()).count());
+        assertEquals(4, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(Fn.emptyAction()).skip(1).count());
+        assertArrayEquals(new double[] { 1, 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(Fn.emptyAction()).toArray(), 0.0);
+        assertArrayEquals(new double[] { 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(Fn.emptyAction()).skip(1).toArray(), 0.0);
+        assertEquals(N.toList(1.0, 2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(Fn.emptyAction()).toList());
+        assertEquals(N.toList(2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(Fn.emptyAction()).skip(1).toList());
+    }
+
+    @Test
+    public void testStreamCreatedAfterAppendIfEmpty() {
+        assertEquals(5, DoubleStream.of(1, 2, 3, 4, 5).appendIfEmpty(() -> DoubleStream.empty()).count());
+        assertEquals(4, DoubleStream.of(1, 2, 3, 4, 5).appendIfEmpty(() -> DoubleStream.empty()).skip(1).count());
+        assertArrayEquals(new double[] { 1, 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).appendIfEmpty(() -> DoubleStream.empty()).toArray(), 0.0);
+        assertArrayEquals(new double[] { 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).appendIfEmpty(() -> DoubleStream.empty()).skip(1).toArray(), 0.0);
+        assertEquals(N.toList(1.0, 2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).appendIfEmpty(() -> DoubleStream.empty()).toList());
+        assertEquals(N.toList(2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).appendIfEmpty(() -> DoubleStream.empty()).skip(1).toList());
+        assertEquals(5, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).appendIfEmpty(() -> DoubleStream.empty()).count());
+        assertEquals(4, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).appendIfEmpty(() -> DoubleStream.empty()).skip(1).count());
+        assertArrayEquals(new double[] { 1, 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).appendIfEmpty(() -> DoubleStream.empty()).toArray(), 0.0);
+        assertArrayEquals(new double[] { 2, 3, 4, 5 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).appendIfEmpty(() -> DoubleStream.empty()).skip(1).toArray(),
+                0.0);
+        assertEquals(N.toList(1.0, 2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).appendIfEmpty(() -> DoubleStream.empty()).toList());
+        assertEquals(N.toList(2.0, 3.0, 4.0, 5.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).appendIfEmpty(() -> DoubleStream.empty()).skip(1).toList());
+    }
+
+    @Test
+    public void test_distinct() {
+        {
+            DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0);
+
+            double[] result = stream.sorted().distinct().toArray();
+            assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, result, 0.0001);
+        }
+        {
+            DoubleStream stream = new ArrayDoubleStream(new double[] { 1.0, 2.0, 2.0, 3.0, 4.0, 5.0, 5.0 }, true, null);
+
+            double[] result = stream.distinct().toArray();
+            assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, result, 0.0001);
+        }
+        {
+            DoubleStream stream = new ArrayDoubleStream(new double[] { 1.0, 2.0, 2.0, 3.0, 4.0, 5.0, 5.0 }, true, null);
+
+            double[] result = stream.filter(e -> true).distinct().toArray();
+            assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, result, 0.0001);
+        }
+    }
+
+    @Test
+    public void test_toCollection() {
+        {
+            DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0);
+
+            List<Double> result = stream.toList();
+            assertHaveSameElements(N.toSet(1.0, 2.0, 3.0, 4.0, 5.0), result);
+        }
+        {
+            DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0);
+
+            Set<Double> result = stream.toSet();
+            assertHaveSameElements(N.toSet(1.0, 2.0, 3.0, 4.0, 5.0), result);
+        }
+        {
+            DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0);
+
+            Set<Double> result = stream.toCollection(Suppliers.ofLinkedHashSet());
+            assertHaveSameElements(N.toSet(1.0, 2.0, 3.0, 4.0, 5.0), result);
+        }
+    }
+
+    @Test
+    public void testOfArray() {
+        double[] array = { 1.0, 2.0, 3.0, 4.0, 5.0 };
+        DoubleStream stream = createDoubleStream(array);
+        assertArrayEquals(array, stream.toArray(), 0.0001);
+
+        DoubleStream emptyStream = createDoubleStream(new double[0]);
+        assertEquals(0, emptyStream.count());
+
+        DoubleStream rangeStream = createDoubleStream(array, 1, 4);
+        assertArrayEquals(new double[] { 2.0, 3.0, 4.0 }, rangeStream.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testOfJdkOptionalDouble() {
+        DoubleStream result = DoubleStream.of(java.util.OptionalDouble.of(42.5));
+        assertArrayEquals(new double[] { 42.5 }, result.toArray(), 0.001);
+
+        result = DoubleStream.of(java.util.OptionalDouble.empty());
+        assertEquals(0, result.count());
+    }
+
+    @Test
+    public void testOfOptionalDouble_Empty() {
+        DoubleStream result = DoubleStream.of(OptionalDouble.empty());
+        assertEquals(0, result.count());
+    }
+
+    @Test
+    public void testJoin_WithDelimiter() {
+        String result = DoubleStream.of(1.0, 2.0, 3.0).join(", ");
+        assertNotNull(result);
+        assertTrue(result.contains("1.0"));
+        assertTrue(result.contains("2.0"));
+    }
+
+    @Test
+    public void testPercentiles_HappyPath() {
+        Pair<DoubleSummaryStatistics, Optional<Map<Percentage, Double>>> result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0).summaryStatisticsAndPercentiles();
+        assertNotNull(result);
+        assertEquals(5, result.left().getCount());
+        assertEquals(1.0, result.left().getMin(), 0.001);
+        assertEquals(5.0, result.left().getMax(), 0.001);
+    }
+
+    @Test
+    public void testAcceptIfNotEmpty_HappyPath() {
+        AtomicInteger called = new AtomicInteger(0);
+        DoubleStream.of(1.0, 2.0, 3.0).acceptIfNotEmpty(s -> called.set((int) s.sum()));
+        assertEquals(6, called.get());
+    }
+
+    @Test
+    public void testApplyIfNotEmpty_HappyPath() {
+        Optional<Double> result = DoubleStream.of(1.0, 2.0, 3.0).applyIfNotEmpty(s -> s.sum());
+        assertTrue(result.isPresent());
+        assertEquals(6.0, result.get(), 0.001);
+    }
+
+    @Test
+    public void testRotated_NegativeDistance() {
+        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0).rotated(-2).toArray();
+        assertArrayEquals(new double[] { 3.0, 4.0, 5.0, 1.0, 2.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testDebounce_ThrowsExceptionForNonPositiveMaxWindowSize() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            DoubleStream.of(1.0, 2.0, 3.0).debounce(0, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            DoubleStream.of(1.0, 2.0, 3.0).debounce(-1, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
+        });
+    }
+
+    @Test
+    public void testDebounce_ThrowsExceptionForNonPositiveDuration() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            DoubleStream.of(1.0, 2.0, 3.0).debounce(5, com.landawn.abacus.util.Duration.ofMillis(0)).toArray();
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            DoubleStream.of(1.0, 2.0, 3.0).debounce(5, com.landawn.abacus.util.Duration.ofMillis(-100)).toArray();
+        });
+    }
+
+    @Test
+    public void testIterator() {
+        DoubleIterator it = DoubleStream.of(1.0, 2.0, 3.0).iterator();
+        assertTrue(it.hasNext());
+        assertEquals(1.0, it.nextDouble());
+        assertEquals(2.0, it.nextDouble());
+        assertEquals(3.0, it.nextDouble());
+        assertFalse(it.hasNext());
+        assertThrows(NoSuchElementException.class, it::nextDouble);
+    }
+
+    @Test
+    public void testThrowIfEmpty_NonEmpty() {
+        double[] result = DoubleStream.of(1.0, 2.0, 3.0).throwIfEmpty().toArray();
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testOnlyOne_TooManyElements() {
+        assertThrows(Exception.class, () -> DoubleStream.of(1.0, 2.0).onlyOne());
+    }
+
+    @Test
+    public void testFlatten2D() {
+        double[][] array = { { 1.0, 2.0 }, { 3.0, 4.0 }, { 5.0 } };
+        DoubleStream stream = DoubleStream.flatten(array);
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, stream.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testFlatten2DVertical() {
+        double[][] array = { { 1.0, 2.0 }, { 3.0, 4.0 }, { 5.0 } };
+        DoubleStream stream = DoubleStream.flatten(array, true);
+        assertArrayEquals(new double[] { 1.0, 3.0, 5.0, 2.0, 4.0 }, stream.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testFlatten2DWithAlignment() {
+        double[][] array = { { 1.0, 2.0 }, { 3.0 }, { 4.0, 5.0, 6.0 } };
+        DoubleStream stream = DoubleStream.flatten(array, 0.0, false);
+        assertArrayEquals(new double[] { 1.0, 2.0, 0.0, 3.0, 0.0, 0.0, 4.0, 5.0, 6.0 }, stream.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testFlatten2DWithAlignmentVertical() {
+        double[][] array = { { 1.0, 2.0 }, { 3.0 }, { 4.0, 5.0 } };
+        DoubleStream stream = DoubleStream.flatten(array, 0.0, true);
+        assertEquals(6, stream.count());
+    }
+
+    @Test
+    public void testFlatten3D() {
+        double[][][] array = { { { 1.0, 2.0 }, { 3.0 } }, { { 4.0 }, { 5.0, 6.0 } } };
+        DoubleStream stream = DoubleStream.flatten(array);
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }, stream.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testFlattenHorizontalWithPadding() {
+        double[][] array = { { 1.0, 2.0 }, { 3.0 }, { 4.0, 5.0, 6.0 } };
+        DoubleStream stream = DoubleStream.flatten(array, 0.0, false);
+        double[] result = stream.toArray();
+        assertArrayEquals(new double[] { 1.0, 2.0, 0.0, 3.0, 0.0, 0.0, 4.0, 5.0, 6.0 }, result, 0.0001);
+    }
+
+    @Test
+    @DisplayName("flatten() should flatten two-dimensional array")
+    public void testFlatten2D_2() {
+        double[][] array = { { 1.0d, 2.0d }, { 3.0d, 4.0d } };
+        double[] result = DoubleStream.flatten(array, false).toArray();
+        assertArrayEquals(new double[] { 1.0d, 2.0d, 3.0d, 4.0d }, result);
+
+        result = DoubleStream.flatten(array, true).toArray();
+        assertArrayEquals(new double[] { 1.0d, 3.0d, 2.0d, 4.0d }, result);
+    }
+
+    @Test
+    @DisplayName("flatten() should flatten two-dimensional array")
+    public void testFlatten2D_3() {
+        double[][] array = { { 1.0d, 2.0d }, { 3.0d, 4.0d, 5.f } };
+        double[] result = DoubleStream.flatten(array, 0.0d, false).toArray();
+        assertArrayEquals(new double[] { 1.0d, 2.0d, 0.0d, 3.0d, 4.0d, 5.0d }, result);
+
+        result = DoubleStream.flatten(array, 0.0d, true).toArray();
+        assertArrayEquals(new double[] { 1.0d, 3.0d, 2.0d, 4.0d, 0.0d, 5.0d }, result);
+    }
+
+    @Test
+    public void testFlatten_WithAlignment2() {
+        double[][] a = { { 1.0, 2.0, 3.0 }, { 4.0, 5.0 } };
+        double[] result = DoubleStream.flatten(a, 0.0, true).toArray();
+        assertArrayEquals(new double[] { 1.0, 4.0, 2.0, 5.0, 3.0, 0.0 }, result, 0.001);
+    }
+
+    @Test
     public void testFlatten_3D() {
         double[][][] a = { { { 1.0, 2.0 }, { 3.0, 4.0 } }, { { 5.0, 6.0 } } };
         double[] result = DoubleStream.flatten(a).toArray();
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }, result, 0.001);
+    }
+
+    @Test
+    @DisplayName("flatten() with empty array should return empty stream")
+    public void testFlattenEmpty() {
+        double[][] array = {};
+        DoubleStream stream = DoubleStream.flatten(array);
+        assertEquals(0, stream.count());
+    }
+
+    @Test
+    public void testRepeat_02() {
+        DoubleStream stream = DoubleStream.repeat(1.0d, 1000);
+        assertEquals(1000, stream.mapToFloat(e -> (float) e).count());
     }
 
     @Test
@@ -4013,80 +3562,544 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testRepeat() {
+        DoubleStream stream = DoubleStream.repeat(7.5, 3);
+        assertArrayEquals(new double[] { 7.5, 7.5, 7.5 }, stream.toArray(), 0.0001);
+
+        DoubleStream emptyStream = DoubleStream.repeat(7.5, 0);
+        assertEquals(0, emptyStream.count());
+    }
+
+    @Test
     public void testRepeat_ZeroTimes() {
         double[] result = DoubleStream.repeat(3.14, 0).toArray();
         assertArrayEquals(new double[0], result, 0.001);
     }
 
     @Test
-    public void testFindLast_HappyPath() {
-        OptionalDouble result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0).findLast(x -> x < 4.0);
-        assertTrue(result.isPresent());
-        assertEquals(3.0, result.get(), 0.001);
+    public void testRepeatWithNegativeCount() {
+        assertThrows(IllegalArgumentException.class, () -> DoubleStream.repeat(1.0, -1));
     }
 
     @Test
-    public void testFindLast_Empty() {
-        OptionalDouble result = DoubleStream.empty().findLast(x -> true);
-        assertFalse(result.isPresent());
+    public void testRandom() {
+        DoubleStream stream = DoubleStream.random();
+        double[] values = stream.limit(5).toArray();
+        assertEquals(5, values.length);
+
+        for (double value : values) {
+            assertTrue(value >= 0.0 && value < 1.0);
+        }
     }
 
     @Test
-    public void testKthLargest_HappyPath2() {
-        OptionalDouble result = DoubleStream.of(3.0, 1.0, 4.0, 1.0, 5.0).kthLargest(2);
-        assertTrue(result.isPresent());
-        assertEquals(4.0, result.get(), 0.001);
+    public void testIterateWithHasNext() {
+        AtomicInteger counter = new AtomicInteger(0);
+        DoubleStream stream = DoubleStream.iterate(() -> counter.get() < 3, () -> counter.getAndIncrement() * 2.0);
+        assertArrayEquals(new double[] { 0.0, 2.0, 4.0 }, stream.toArray(), 0.0001);
     }
 
     @Test
-    public void testMapToFloat_HappyPath2() {
-        float[] result = DoubleStream.of(1.0, 2.0, 3.0).mapToFloat(d -> (float) d).toArray();
+    public void testIterateWithInitAndHasNext() {
+        AtomicInteger counter = new AtomicInteger(0);
+        DoubleStream stream = DoubleStream.iterate(10.0, () -> counter.getAndIncrement() < 3, x -> x + 2.0);
+        double[] result = stream.toArray();
         assertEquals(3, result.length);
-        assertEquals(1.0f, result[0], 0.001f);
+        assertEquals(10.0, result[0], 0.0001);
     }
 
     @Test
-    public void testFlatMapToFloat_HappyPath2() {
-        float[] result = DoubleStream.of(1.0, 2.0).flatMapToFloat(d -> FloatStream.of((float) d, (float) (d * 10))).toArray();
-        assertEquals(4, result.length);
-        assertEquals(1.0f, result[0], 0.001f);
-        assertEquals(10.0f, result[1], 0.001f);
+    public void testIterateWithPredicate() {
+        DoubleStream stream = DoubleStream.iterate(1.0, x -> x < 10.0, x -> x + 3.0);
+        assertArrayEquals(new double[] { 1.0, 4.0, 7.0 }, stream.toArray(), 0.0001);
     }
 
     @Test
-    public void testRangeMap_Empty() {
-        double[] result = DoubleStream.empty().rangeMap((a, b) -> a == b, Double::sum).toArray();
+    public void testIterateInfinite() {
+        DoubleStream stream = DoubleStream.iterate(1.0, x -> x * 2.0);
+        double[] result = stream.limit(5).toArray();
+        assertArrayEquals(new double[] { 1.0, 2.0, 4.0, 8.0, 16.0 }, result, 0.0001);
+    }
+
+    @Test
+    public void testIterateWithFalseHasNext() {
+        DoubleStream stream = DoubleStream.iterate(() -> false, () -> 1.0);
+        assertEquals(0, stream.count());
+    }
+
+    @Test
+    public void testIterate() {
+        assertArrayEquals(new double[] { 1.0, 2.0, 4.0, 8.0, 16.0 }, DoubleStream.iterate(1.0, d -> d * 2).limit(5).toArray());
+    }
+
+    @Test
+    public void test_iterate_02() {
+        DoubleStream stream = DoubleStream.iterate(() -> true, () -> 1.0d);
+        assertEquals(10, stream.limit(10).mapToFloat(e -> (float) e).count());
+
+        stream = DoubleStream.iterate(1.0d, () -> true, it -> it);
+        assertEquals(10, stream.limit(10).mapToInt(e -> (int) e).sum());
+
+        stream = DoubleStream.iterate(1.0d, it -> true, it -> it);
+        assertEquals(10, stream.limit(10).mapToInt(e -> (int) e).sum());
+    }
+
+    @Test
+    public void testRangeClosedWithNegativeStep() {
+        // DoubleStream doesn't support rangeClosed with step parameter
+        // Testing generate with limited range instead
+        DoubleStream stream = DoubleStream.iterate(5.0, d -> d >= 1.0, d -> d - 1.0);
+        double[] result = stream.toArray();
+        assertArrayEquals(new double[] { 5.0, 4.0, 3.0, 2.0, 1.0 }, result, 0.0001);
+    }
+
+    @Test
+    public void testIterateWithNullHasNext() {
+        assertThrows(IllegalArgumentException.class, () -> DoubleStream.iterate(null, () -> 1.0));
+    }
+
+    @Test
+    public void testIterateWithNullNext() {
+        assertThrows(IllegalArgumentException.class, () -> DoubleStream.iterate(() -> true, null));
+    }
+
+    @Test
+    public void testRangeWithInvalidStepDirection() {
+        // DoubleStream doesn't support range with step parameter
+        // Testing iterate with false condition instead
+        DoubleStream stream = DoubleStream.iterate(1.0, d -> d < 5.0 && d > 10.0, d -> d + 1.0);
+        assertEquals(0, stream.count());
+    }
+
+    @Test
+    public void testGenerate() {
+        AtomicInteger counter = new AtomicInteger(1);
+        DoubleStream stream = DoubleStream.generate(() -> counter.getAndIncrement() * 1.5);
+        double[] result = stream.limit(4).toArray();
+        assertArrayEquals(new double[] { 1.5, 3.0, 4.5, 6.0 }, result, 0.0001);
+    }
+
+    @Test
+    public void testGenerateWithNullSupplier() {
+        assertThrows(IllegalArgumentException.class, () -> DoubleStream.generate(null));
+    }
+
+    @Test
+    public void testConcatArrays() {
+        double[] a1 = { 1.0, 2.0 };
+        double[] a2 = { 3.0, 4.0 };
+        double[] a3 = { 5.0 };
+        DoubleStream stream = DoubleStream.concat(a1, a2, a3);
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, stream.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testConcatTwoArrays() {
+        double[] a1 = { 1.0, 2.0 };
+        double[] a2 = { 3.0, 4.0 };
+        DoubleStream stream = DoubleStream.concat(a1, a2);
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0 }, stream.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testConcatIteratorList() {
+        List<DoubleIterator> list = Arrays.asList(DoubleIterator.of(new double[] { 1.0, 2.0 }), DoubleIterator.of(new double[] { 3.0, 4.0 }));
+        DoubleStream stream = DoubleStream.concatIterators(list);
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0 }, stream.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testConcatStreams() {
+        DoubleStream s1 = DoubleStream.of(1.0, 2.0);
+        DoubleStream s2 = DoubleStream.of(3.0, 4.0);
+        DoubleStream s3 = DoubleStream.of(5.0);
+        DoubleStream stream = DoubleStream.concat(s1, s2, s3);
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, stream.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testConcatTwoStreams() {
+        DoubleStream s1 = DoubleStream.of(1.0, 2.0);
+        DoubleStream s2 = DoubleStream.of(3.0, 4.0);
+        DoubleStream stream = DoubleStream.concat(s1, s2);
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0 }, stream.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testConcatListOfArrays() {
+        List<double[]> list = Arrays.asList(new double[] { 1.0, 2.0 }, new double[] { 3.0, 4.0 }, new double[] { 5.0 });
+        DoubleStream stream = DoubleStream.concat(list);
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, stream.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testConcatCollectionOfStreams() {
+        Collection<DoubleStream> streams = Arrays.asList(DoubleStream.of(1.0, 2.0), DoubleStream.of(3.0, 4.0), DoubleStream.of(5.0));
+        DoubleStream stream = DoubleStream.concat(streams);
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, stream.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testConcatIteratorVarargs() {
+        DoubleIterator iter1 = DoubleIterator.of(new double[] { 1.0, 2.0 });
+        DoubleIterator iter2 = DoubleIterator.of(new double[] { 3.0, 4.0 });
+        DoubleStream stream = DoubleStream.concat(iter1, iter2);
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0 }, stream.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testConcat() {
+        DoubleStream a = DoubleStream.of(1.0, 2.0);
+        DoubleStream b = DoubleStream.of(3.0, 4.0);
+        DoubleStream c = DoubleStream.of(5.0, 6.0);
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }, DoubleStream.concat(a, b, c).toArray());
+    }
+
+    @Test
+    public void test_concat_02() {
+        double[] a = { 1.0d, 2.0d, 3.0d };
+        double[] b = { 4.0d, 5.0d, 6.0d };
+        double[] result = DoubleStream.concat(a, b).toArray();
+        assertArrayEquals(new double[] { 1.0d, 2.0d, 3.0d, 4.0d, 5.0d, 6.0d }, result);
+
+        result = DoubleStream.concat(N.toList(a, b)).toArray();
+        assertArrayEquals(new double[] { 1.0d, 2.0d, 3.0d, 4.0d, 5.0d, 6.0d }, result);
+
+        result = DoubleStream.concatIterators(N.toList(DoubleIterator.of(a), DoubleIterator.of(b))).toArray();
+        assertArrayEquals(new double[] { 1.0d, 2.0d, 3.0d, 4.0d, 5.0d, 6.0d }, result);
+    }
+
+    @Test
+    public void testConcatIteratorsCollection() {
+        List<DoubleIterator> iterators = Arrays.asList(DoubleIterator.of(new double[] { 1.0, 2.0 }), DoubleIterator.of(new double[] { 3.0, 4.0 }));
+        DoubleStream result = DoubleStream.concatIterators(iterators);
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0 }, result.toArray(), 0.001);
+    }
+
+    // ===== New tests for untested methods =====
+
+    @Test
+    public void testConcatIterators_Collection() {
+        List<DoubleIterator> iters = new ArrayList<>();
+        iters.add(DoubleIterator.of(new double[] { 1.0, 2.0 }));
+        iters.add(DoubleIterator.of(new double[] { 3.0, 4.0 }));
+        double[] result = DoubleStream.concatIterators(iters).toArray();
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testConcatIterators_EmptyCollection() {
+        List<DoubleIterator> iters = new ArrayList<>();
+        double[] result = DoubleStream.concatIterators(iters).toArray();
         assertArrayEquals(new double[0], result, 0.001);
     }
 
     @Test
-    public void testScan_EmptyStream2() {
-        double[] result = DoubleStream.empty().scan(Double::sum).toArray();
-        assertArrayEquals(new double[0], result, 0.001);
+    public void testZipArrays() {
+        double[] a = { 1.0, 2.0, 3.0 };
+        double[] b = { 4.0, 5.0, 6.0 };
+        DoubleStream stream = DoubleStream.zip(a, b, (x, y) -> x + y);
+        assertArrayEquals(new double[] { 5.0, 7.0, 9.0 }, stream.toArray(), 0.0001);
     }
 
     @Test
-    public void testMapToChar() {
-        char[] result = DoubleStream.of(65.0, 66.0, 67.0)
-                .mapToObj(d -> (char) (int) d)
-                .toList()
-                .stream()
-                .map(c -> c.toString())
-                .reduce("", String::concat)
-                .toCharArray();
+    public void testZipThreeArrays() {
+        double[] a = { 1.0, 2.0 };
+        double[] b = { 3.0, 4.0 };
+        double[] c = { 5.0, 6.0 };
+        DoubleStream stream = DoubleStream.zip(a, b, c, (x, y, z) -> x + y + z);
+        assertArrayEquals(new double[] { 9.0, 12.0 }, stream.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testZipArraysWithDefaults() {
+        double[] a = { 1.0, 2.0 };
+        double[] b = { 3.0, 4.0, 5.0 };
+        DoubleStream stream = DoubleStream.zip(a, b, 10.0, 20.0, (x, y) -> x + y);
+        assertArrayEquals(new double[] { 4.0, 6.0, 15.0 }, stream.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testZipThreeArraysWithDefaults() {
+        double[] a = { 1.0 };
+        double[] b = { 2.0, 3.0 };
+        double[] c = { 4.0, 5.0, 6.0 };
+        DoubleStream stream = DoubleStream.zip(a, b, c, 100.0, 200.0, 300.0, (x, y, z) -> x + y + z);
+        assertEquals(3, stream.count());
+    }
+
+    @Test
+    public void testZipIterators() {
+        DoubleIterator a = DoubleIterator.of(new double[] { 1.0, 2.0, 3.0 });
+        DoubleIterator b = DoubleIterator.of(new double[] { 4.0, 5.0, 6.0 });
+        DoubleStream stream = DoubleStream.zip(a, b, (x, y) -> x * y);
+        assertArrayEquals(new double[] { 4.0, 10.0, 18.0 }, stream.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testZipThreeIterators() {
+        DoubleIterator a = DoubleIterator.of(new double[] { 1.0, 2.0 });
+        DoubleIterator b = DoubleIterator.of(new double[] { 3.0, 4.0 });
+        DoubleIterator c = DoubleIterator.of(new double[] { 5.0, 6.0 });
+        DoubleStream stream = DoubleStream.zip(a, b, c, (x, y, z) -> x + y + z);
+        assertArrayEquals(new double[] { 9.0, 12.0 }, stream.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testZipStreams() {
+        DoubleStream a = DoubleStream.of(1.0, 2.0, 3.0);
+        DoubleStream b = DoubleStream.of(4.0, 5.0, 6.0);
+        DoubleStream stream = DoubleStream.zip(a, b, (x, y) -> x - y);
+        assertArrayEquals(new double[] { -3.0, -3.0, -3.0 }, stream.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testZipThreeStreams() {
+        DoubleStream a = DoubleStream.of(1.0, 2.0);
+        DoubleStream b = DoubleStream.of(3.0, 4.0);
+        DoubleStream c = DoubleStream.of(5.0, 6.0);
+        DoubleStream stream = DoubleStream.zip(a, b, c, (x, y, z) -> x + y + z);
+        assertArrayEquals(new double[] { 9.0, 12.0 }, stream.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testZipStreamsWithDefaults() {
+        DoubleStream a = DoubleStream.of(1.0, 2.0);
+        DoubleStream b = DoubleStream.of(3.0, 4.0, 5.0);
+        DoubleStream stream = DoubleStream.zip(a, b, 10.0, 20.0, (x, y) -> x + y);
+        assertArrayEquals(new double[] { 4.0, 6.0, 15.0 }, stream.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testZipThreeStreamsWithDefaults() {
+        DoubleStream a = DoubleStream.of(1.0);
+        DoubleStream b = DoubleStream.of(2.0, 3.0);
+        DoubleStream c = DoubleStream.of(4.0, 5.0, 6.0);
+        DoubleStream stream = DoubleStream.zip(a, b, c, 100.0, 200.0, 300.0, (x, y, z) -> x + y + z);
+        assertEquals(3, stream.count());
+    }
+
+    @Test
+    public void testZipCollection() {
+        Collection<DoubleStream> streams = Arrays.asList(DoubleStream.of(1.0, 2.0), DoubleStream.of(3.0, 4.0), DoubleStream.of(5.0, 6.0));
+        DoubleStream stream = DoubleStream.zip(streams, array -> Arrays.stream(array).sum());
+        assertArrayEquals(new double[] { 9.0, 12.0 }, stream.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testZipCollectionWithDefaults() {
+        Collection<DoubleStream> streams = Arrays.asList(DoubleStream.of(1.0), DoubleStream.of(2.0, 3.0));
+        double[] defaults = new double[] { 100.0, 200.0 };
+        DoubleStream stream = DoubleStream.zip(streams, defaults, array -> Arrays.stream(array).sum());
+        assertEquals(2, stream.count());
+    }
+
+    @Test
+    public void testZipThreeArraysWithDefaultsAdditional() {
+        double[] a = { 1.0 };
+        double[] b = { 2.0, 3.0 };
+        double[] c = { 4.0, 5.0, 6.0 };
+        DoubleStream stream = DoubleStream.zip(a, b, c, 100.0, 200.0, 300.0, (x, y, z) -> x + y + z);
+        double[] result = stream.toArray();
         assertEquals(3, result.length);
     }
 
     @Test
-    public void testFlatMapToLong_HappyPath() {
-        long[] result = DoubleStream.of(1.0, 2.0).flatMapToLong(d -> LongStream.of((long) d, (long) (d * 10))).toArray();
-        assertArrayEquals(new long[] { 1, 10, 2, 20 }, result);
+    public void testZipThreeIteratorsWithDefaultsAdditional() {
+        DoubleIterator a = DoubleIterator.of(new double[] { 1.0 });
+        DoubleIterator b = DoubleIterator.of(new double[] { 2.0, 3.0 });
+        DoubleIterator c = DoubleIterator.of(new double[] { 4.0, 5.0, 6.0 });
+        DoubleStream stream = DoubleStream.zip(a, b, c, 100.0, 200.0, 300.0, (x, y, z) -> x + y + z);
+        assertEquals(3, stream.count());
     }
 
     @Test
-    public void testFlatMapToInt_HappyPath() {
-        int[] result = DoubleStream.of(1.0, 2.0).flatMapToInt(d -> IntStream.of((int) d, (int) (d * 10))).toArray();
-        assertArrayEquals(new int[] { 1, 10, 2, 20 }, result);
+    public void testZipThreeStreamsWithDefaultsAdditional() {
+        DoubleStream a = DoubleStream.of(1.0);
+        DoubleStream b = DoubleStream.of(2.0, 3.0);
+        DoubleStream c = DoubleStream.of(4.0, 5.0, 6.0);
+        DoubleStream stream = DoubleStream.zip(a, b, c, 100.0, 200.0, 300.0, (x, y, z) -> x + y + z);
+        double[] result = stream.toArray();
+        assertEquals(3, result.length);
+    }
+
+    @Test
+    public void test_zip_02() {
+        double[] a = { 1.0d };
+        double[] b = { 4.0d, 5.0d };
+        double[] c = { 7.0d, 8.0d, 9.0d };
+        double[] result = DoubleStream.zip(a, b, c, 100, 200, 300, (x, y, z) -> x + y + z).toArray();
+        assertArrayEquals(new double[] { 12.0d, 113.0d, 309.0d }, result);
+    }
+
+    @Test
+    public void testZipIteratorsThreeWay() {
+        DoubleIterator a = DoubleIterator.of(new double[] { 1.0, 2.0 });
+        DoubleIterator b = DoubleIterator.of(new double[] { 10.0, 20.0 });
+        DoubleIterator c = DoubleIterator.of(new double[] { 100.0, 200.0 });
+        double[] result = DoubleStream.zip(a, b, c, (x, y, z) -> x + y + z).toArray();
+        assertArrayEquals(new double[] { 111.0, 222.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testZipIteratorsWithDefaults() {
+        DoubleIterator a = DoubleIterator.of(new double[] { 1.0, 2.0, 3.0 });
+        DoubleIterator b = DoubleIterator.of(new double[] { 10.0, 20.0 });
+        double[] result = DoubleStream.zip(a, b, 0.0, 0.0, Double::sum).toArray();
+        assertArrayEquals(new double[] { 11.0, 22.0, 3.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testZipIteratorsThreeWayWithDefaults() {
+        DoubleIterator a = DoubleIterator.of(new double[] { 1.0 });
+        DoubleIterator b = DoubleIterator.of(new double[] { 10.0, 20.0 });
+        DoubleIterator c = DoubleIterator.of(new double[] { 100.0, 200.0, 300.0 });
+        double[] result = DoubleStream.zip(a, b, c, 0.0, 0.0, 0.0, (x, y, z) -> x + y + z).toArray();
+        assertArrayEquals(new double[] { 111.0, 220.0, 300.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testZipStreamsThreeWayWithDefaults() {
+        double[] result = DoubleStream
+                .zip(DoubleStream.of(1.0), DoubleStream.of(10.0, 20.0), DoubleStream.of(100.0, 200.0, 300.0), 0.0, 0.0, 0.0, (x, y, z) -> x + y + z)
+                .toArray();
+        assertArrayEquals(new double[] { 111.0, 220.0, 300.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testZipCollectionOfStreams() {
+        List<DoubleStream> streams = Arrays.asList(DoubleStream.of(1.0, 2.0), DoubleStream.of(10.0, 20.0));
+        double[] result = DoubleStream.zip(streams, values -> values[0] + values[1]).toArray();
+        assertArrayEquals(new double[] { 11.0, 22.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testMergeArrays() {
+        double[] a = { 1.0, 3.0, 5.0 };
+        double[] b = { 2.0, 4.0, 6.0 };
+        DoubleStream stream = DoubleStream.merge(a, b, (x, y) -> x < y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }, stream.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testMergeIterators() {
+        DoubleIterator a = DoubleIterator.of(new double[] { 1.0, 3.0, 5.0 });
+        DoubleIterator b = DoubleIterator.of(new double[] { 2.0, 4.0, 6.0 });
+        DoubleStream stream = DoubleStream.merge(a, b, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }, stream.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testMergeStreams() {
+        DoubleStream a = DoubleStream.of(1.0, 3.0, 5.0);
+        DoubleStream b = DoubleStream.of(2.0, 4.0, 6.0);
+        DoubleStream stream = DoubleStream.merge(a, b, (x, y) -> x < y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }, stream.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testMergeListOfIterators() {
+        DoubleIterator iter1 = DoubleIterator.of(new double[] { 1.0, 3.0 });
+        DoubleIterator iter2 = DoubleIterator.of(new double[] { 2.0, 4.0 });
+        DoubleIterator iter3 = DoubleIterator.of(new double[] { 5.0, 6.0 });
+        Collection<DoubleIterator> iters = Arrays.asList(iter1, iter2, iter3);
+        DoubleStream stream = DoubleStream.concatIterators(iters);
+        assertEquals(6, stream.count());
+    }
+
+    @Test
+    public void testMergeCollectionOfStreams() {
+        Collection<DoubleStream> streams = Arrays.asList(DoubleStream.of(1.0, 3.0), DoubleStream.of(2.0, 4.0));
+        DoubleStream stream = DoubleStream.merge(streams, (x, y) -> x < y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0 }, stream.toArray(), 0.0001);
+    }
+
+    @Test
+    public void testMergeThreeArraysAdditional() {
+        double[] a1 = { 1.0, 7.0 };
+        double[] a2 = { 3.0, 8.0 };
+        double[] a3 = { 5.0, 9.0 };
+        DoubleStream stream = DoubleStream.merge(a1, a2, a3, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertEquals(6, stream.count());
+    }
+
+    @Test
+    public void testMergeThreeStreamsAdditional() {
+        DoubleStream s1 = DoubleStream.of(1.0, 7.0);
+        DoubleStream s2 = DoubleStream.of(3.0, 8.0);
+        DoubleStream s3 = DoubleStream.of(5.0, 9.0);
+        DoubleStream result = DoubleStream.merge(s1, s2, s3, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertEquals(6, result.count());
+    }
+
+    @Test
+    public void test_merge() {
+        double[] a = { 1.0d, 2.0d, 3.0d };
+        double[] b = { 4.0d, 5.0d, 6.0d };
+        double[] c = { 7.0d, 8.0d, 9.0d };
+        double[] result = DoubleStream.merge(N.toList(DoubleStream.of(a)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray();
+        assertArrayEquals(new double[] { 1.0d, 2.0d, 3.0d }, result);
+
+        result = DoubleStream.merge(N.toList(DoubleStream.of(a), DoubleStream.of(b)), (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+                .toArray();
+        assertArrayEquals(new double[] { 1.0d, 2.0d, 3.0d, 4.0d, 5.0d, 6.0d }, result);
+
+        result = DoubleStream
+                .merge(N.toList(DoubleStream.of(a), DoubleStream.of(b), DoubleStream.of(c)),
+                        (p1, p2) -> p1 <= p2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+                .toArray();
+        assertArrayEquals(new double[] { 1.0d, 2.0d, 3.0d, 4.0d, 5.0d, 6.0d, 7.0d, 8.0d, 9.0d }, result);
+
+    }
+
+    @Test
+    public void testMergeIteratorThreeWay() {
+        DoubleIterator a = DoubleIterator.of(new double[] { 1.0, 4.0, 7.0 });
+        DoubleIterator b = DoubleIterator.of(new double[] { 2.0, 5.0, 8.0 });
+        DoubleIterator c = DoubleIterator.of(new double[] { 3.0, 6.0, 9.0 });
+        double[] result = DoubleStream.merge(a, b, c, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray();
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testMergeStreamsThreeWay() {
+        double[] result = DoubleStream
+                .merge(DoubleStream.of(1.0, 4.0, 7.0), DoubleStream.of(2.0, 5.0, 8.0), DoubleStream.of(3.0, 6.0, 9.0),
+                        (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+                .toArray();
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testMerge_CollectionOfStreams() {
+        List<DoubleStream> streams = Arrays.asList(DoubleStream.of(1.0, 3.0, 5.0), DoubleStream.of(2.0, 4.0, 6.0));
+        double[] result = DoubleStream.merge(streams, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray();
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testMerge_ThreeArrays() {
+        double[] result = DoubleStream
+                .merge(new double[] { 1.0, 4.0 }, new double[] { 2.0, 5.0 }, new double[] { 3.0, 6.0 },
+                        (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+                .toArray();
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testMerge_ThreeIterators() {
+        double[] result = DoubleStream
+                .merge(DoubleIterator.of(new double[] { 1.0, 4.0 }), DoubleIterator.of(new double[] { 2.0, 5.0 }), DoubleIterator.of(new double[] { 3.0, 6.0 }),
+                        (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+                .toArray();
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }, result, 0.001);
+    }
+
+    @Test
+    public void testCycled_OneRound() {
+        double[] result = createDoubleStream(1.0, 2.0, 3.0).cycled(1).toArray();
+
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, result, 0.0);
     }
 
 }

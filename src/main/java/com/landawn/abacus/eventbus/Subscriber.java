@@ -18,11 +18,11 @@ package com.landawn.abacus.eventbus;
  * A functional interface for implementing event subscribers in the EventBus system.
  * Classes implementing this interface can be registered with an {@link EventBus} to receive events
  * of the specified type.
- * 
+ *
  * <p>This interface is particularly useful for creating subscribers using lambda expressions
  * or anonymous inner classes. When using lambda expressions, the subscriber must be registered
  * with an event ID to avoid ambiguity.</p>
- * 
+ *
  * <p><b>Usage Examples with lambda expression:</b></p>
  * <pre>{@code
  * EventBus eventBus = EventBus.getDefault();
@@ -37,7 +37,7 @@ package com.landawn.abacus.eventbus;
  *     System.out.println("User logged in: " + event.getUserId());
  * }, "userEvents");
  * }</pre>
- * 
+ *
  * <p><b>Usage Examples with anonymous inner class:</b></p>
  * <pre>{@code
  * Subscriber<Integer> numberSubscriber = new Subscriber<Integer>() {
@@ -48,7 +48,7 @@ package com.landawn.abacus.eventbus;
  * };
  * eventBus.register(numberSubscriber, "numberEvents");
  * }</pre>
- * 
+ *
  * <p><b>Usage Examples with method reference:</b></p>
  * <pre>{@code
  * public class MyHandler {
@@ -60,7 +60,7 @@ package com.landawn.abacus.eventbus;
  * MyHandler handler = new MyHandler();
  * eventBus.register((Subscriber<String>) handler::handleString, "messages");
  * }</pre>
- * 
+ *
  * @param <E> the type of event this subscriber will receive
  * @see EventBus
  * @see Subscribe
@@ -69,17 +69,18 @@ package com.landawn.abacus.eventbus;
 public interface Subscriber<E> {
 
     /**
-     * Called when an event of type E is posted to the EventBus.
-     * This method will be invoked by the EventBus when a matching event is posted.
-     * 
+     * Called when an event of type {@code E} is posted to the {@code EventBus}.
+     * This method will be invoked by the {@code EventBus} when a matching event is posted.
+     *
      * <p>The method will be called on the thread specified during registration,
      * or on the posting thread if no thread mode was specified.</p>
-     * 
+     *
      * <p>Implementations should handle the event appropriately and should not throw
-     * unchecked exceptions. Any exceptions thrown will be caught and logged by the EventBus.</p>
-     * 
+     * unchecked exceptions. Any exceptions thrown will be caught and logged by the {@code EventBus}.</p>
+     *
      * <p><b>Usage Examples for implementation:</b></p>
      * <pre>{@code
+     * @Override
      * public void on(UserEvent event) {
      *     // Process the user event
      *     updateUserInterface(event.getUser());
@@ -87,7 +88,7 @@ public interface Subscriber<E> {
      * }
      * }</pre>
      *
-     * @param event the event instance posted to the EventBus. Never {@code null}.
+     * @param event the event instance posted to the {@code EventBus}. Never {@code null}.
      */
     void on(E event);
 }

@@ -15,17 +15,19 @@
 package com.landawn.abacus.type;
 
 /**
- * Abstract base class for primary types in the type system.
+ * The Abstract base class for primary types in the type system.
+ * <p>
  * Primary types are fundamental, immutable types that can be directly compared
- * and converted from objects. This includes primitive wrappers (Integer, Double, etc.),
- * String, Character, and other basic value types.
+ * and converted from objects. This includes primitive wrappers ({@code Integer}, {@code Double}, etc.),
+ * {@code String}, {@code Character}, and other basic value types.
+ * </p>
  *
- * @param <T> the primary type (e.g., Integer, String, Boolean, Character)
+ * @param <T> the primary type (e.g., {@code Integer}, {@code String}, {@code Boolean}, {@code Character})
  */
 public abstract class AbstractPrimaryType<T> extends AbstractType<T> {
 
     /**
-     * Constructs an AbstractPrimaryType with the specified type name.
+     * Constructs an {@code AbstractPrimaryType} with the specified type name.
      *
      * @param typeName the name of the primary type (e.g., "Integer", "String", "Boolean")
      */
@@ -35,8 +37,10 @@ public abstract class AbstractPrimaryType<T> extends AbstractType<T> {
 
     /**
      * Checks if this type is immutable.
+     * <p>
      * Primary types are always immutable, meaning their values cannot be changed
-     * after creation. This includes all primitive wrappers and String.
+     * after creation. This includes all primitive wrappers and {@code String}.
+     * </p>
      *
      * @return {@code true}, indicating that primary types are immutable
      */
@@ -47,8 +51,10 @@ public abstract class AbstractPrimaryType<T> extends AbstractType<T> {
 
     /**
      * Checks if this type is comparable.
+     * <p>
      * Primary types implement natural ordering and can be compared with each other.
      * This allows them to be used in sorted collections and comparison operations.
+     * </p>
      *
      * @return {@code true}, indicating that primary types support comparison
      */
@@ -59,10 +65,12 @@ public abstract class AbstractPrimaryType<T> extends AbstractType<T> {
 
     /**
      * Converts an object to this primary type.
+     * <p>
      * This method provides a generic way to convert any object to the primary type
      * by first converting it to a string representation using the object's actual type,
      * then parsing that string to create the primary type value.
      * Returns the default value if the input object is {@code null}.
+     * </p>
      *
      * @param obj the object to convert
      * @return the converted primary type value, or default value if input is {@code null}

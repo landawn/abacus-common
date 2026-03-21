@@ -132,7 +132,7 @@ abstract class AbstractJsonReader implements JsonReader { //NOSONAR
      * Reads and returns the next token from the JSON input using String as the default expected type.
      * This is a convenience method that delegates to {@link #nextToken(Type)} with String type.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * JsonReader reader = // obtain reader
      * int token = reader.nextToken();

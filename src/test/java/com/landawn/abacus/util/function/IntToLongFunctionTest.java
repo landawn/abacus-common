@@ -16,21 +16,11 @@ package com.landawn.abacus.util.function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class IntToLongFunctionTest extends TestBase {
-
-    @Test
-    public void test_DEFAULT() {
-        assertEquals(100L, IntToLongFunction.DEFAULT.applyAsLong(100));
-        assertEquals(0L, IntToLongFunction.DEFAULT.applyAsLong(0));
-        assertEquals(-50L, IntToLongFunction.DEFAULT.applyAsLong(-50));
-        assertEquals(Integer.MAX_VALUE, IntToLongFunction.DEFAULT.applyAsLong(Integer.MAX_VALUE));
-    }
 
     @Test
     public void test_applyAsLong() {
@@ -45,5 +35,13 @@ public class IntToLongFunctionTest extends TestBase {
         IntToLongFunction function = value -> value + 1000L;
 
         assertEquals(1100L, function.applyAsLong(100));
+    }
+
+    @Test
+    public void test_DEFAULT() {
+        assertEquals(100L, IntToLongFunction.DEFAULT.applyAsLong(100));
+        assertEquals(0L, IntToLongFunction.DEFAULT.applyAsLong(0));
+        assertEquals(-50L, IntToLongFunction.DEFAULT.applyAsLong(-50));
+        assertEquals(Integer.MAX_VALUE, IntToLongFunction.DEFAULT.applyAsLong(Integer.MAX_VALUE));
     }
 }

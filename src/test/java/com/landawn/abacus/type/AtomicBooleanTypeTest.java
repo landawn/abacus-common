@@ -13,12 +13,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class AtomicBooleanTypeTest extends TestBase {
 
     private final AtomicBooleanType type = new AtomicBooleanType();
@@ -26,11 +24,6 @@ public class AtomicBooleanTypeTest extends TestBase {
     @Test
     public void test_clazz() {
         assertEquals(AtomicBoolean.class, type.javaType());
-    }
-
-    @Test
-    public void test_name() {
-        assertEquals("AtomicBoolean", type.name());
     }
 
     @Test
@@ -117,6 +110,11 @@ public class AtomicBooleanTypeTest extends TestBase {
         sw = new StringWriter();
         type.appendTo(sw, null);
         assertEquals("null", sw.toString());
+    }
+
+    @Test
+    public void test_name() {
+        assertEquals("AtomicBoolean", type.name());
     }
 
     @Test

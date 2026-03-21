@@ -19,13 +19,21 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class IntPredicateTest extends TestBase {
+
+    @Test
+    public void test_test_lambda() {
+        IntPredicate isEven = value -> value % 2 == 0;
+
+        assertTrue(isEven.test(2));
+        assertTrue(isEven.test(100));
+        assertFalse(isEven.test(3));
+        assertFalse(isEven.test(99));
+    }
 
     @Test
     public void test_ALWAYS_TRUE() {
@@ -104,16 +112,6 @@ public class IntPredicateTest extends TestBase {
     }
 
     @Test
-    public void test_test_lambda() {
-        IntPredicate isEven = value -> value % 2 == 0;
-
-        assertTrue(isEven.test(2));
-        assertTrue(isEven.test(100));
-        assertFalse(isEven.test(3));
-        assertFalse(isEven.test(99));
-    }
-
-    @Test
     public void test_test_anonymousClass() {
         IntPredicate isPositiveEven = new IntPredicate() {
             @Override
@@ -126,14 +124,6 @@ public class IntPredicateTest extends TestBase {
         assertTrue(isPositiveEven.test(100));
         assertFalse(isPositiveEven.test(3));
         assertFalse(isPositiveEven.test(-2));
-    }
-
-    @Test
-    public void test_of() {
-        IntPredicate original = value -> value > 10;
-        IntPredicate returned = IntPredicate.of(original);
-
-        assertSame(original, returned);
     }
 
     @Test
@@ -182,6 +172,14 @@ public class IntPredicateTest extends TestBase {
     public void test_orRejectsNullPredicateImmediately() {
         IntPredicate isNegative = value -> value < 0;
         assertThrows(NullPointerException.class, () -> isNegative.or(null));
+    }
+
+    @Test
+    public void test_of() {
+        IntPredicate original = value -> value > 10;
+        IntPredicate returned = IntPredicate.of(original);
+
+        assertSame(original, returned);
     }
 
     @Test

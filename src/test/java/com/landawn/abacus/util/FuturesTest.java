@@ -24,7 +24,6 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -36,7 +35,6 @@ import com.landawn.abacus.util.Tuple.Tuple5;
 import com.landawn.abacus.util.Tuple.Tuple6;
 import com.landawn.abacus.util.Tuple.Tuple7;
 
-@Tag("2025")
 public class FuturesTest extends TestBase {
 
     private ExecutorService executor;
@@ -240,6 +238,208 @@ public class FuturesTest extends TestBase {
     }
 
     @Test
+    public void testComposeWithBiFunction() throws Exception {
+        Future<Integer> future1 = CompletableFuture.completedFuture(5);
+        Future<Integer> future2 = CompletableFuture.completedFuture(10);
+
+        ContinuableFuture<Integer> composed = Futures.compose(future1, future2, (f1, f2) -> f1.get() + f2.get());
+
+        Assertions.assertEquals(15, composed.get());
+
+        Assertions.assertEquals(15, composed.get(1, TimeUnit.SECONDS));
+    }
+
+    @Test
+    public void testComposeWithBiFunctionAndTimeoutFunction() throws Exception {
+        Future<String> slowFuture = CompletableFuture.supplyAsync(() -> {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            return "Slow";
+        });
+        Future<String> fastFuture = CompletableFuture.completedFuture("Fast");
+
+        ContinuableFuture<String> composed = Futures.compose(slowFuture, fastFuture, (f1, f2) -> f1.get() + " + " + f2.get(), tuple -> {
+            try {
+                return "Timeout: " + tuple._2.get(tuple._3, tuple._4);
+            } catch (Exception e) {
+                return "Timeout occurred";
+            }
+        });
+
+        Assertions.assertEquals("Slow + Fast", composed.get());
+
+        Future<String> verySlowFuture = CompletableFuture.supplyAsync(() -> {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            return "Very Slow";
+        });
+
+        ContinuableFuture<String> composed2 = Futures.compose(verySlowFuture, fastFuture, (f1, f2) -> f1.get() + " + " + f2.get(),
+                tuple -> "Timeout: " + tuple._2.get());
+
+        String result = composed2.get(100, TimeUnit.MILLISECONDS);
+        Assertions.assertEquals("Timeout: Fast", result);
+    }
+
+    @Test
+    public void testComposeThreeFutures() throws Exception {
+        Future<String> f1 = CompletableFuture.completedFuture("A");
+        Future<String> f2 = CompletableFuture.completedFuture("B");
+        Future<String> f3 = CompletableFuture.completedFuture("C");
+
+        ContinuableFuture<String> composed = Futures.compose(f1, f2, f3, (fu1, fu2, fu3) -> fu1.get() + fu2.get() + fu3.get());
+
+        Assertions.assertEquals("ABC", composed.get());
+    }
+
+    @Test
+    public void testComposeCollection() throws Exception {
+        List<Future<Integer>> futures = Arrays.asList(CompletableFuture.completedFuture(1), CompletableFuture.completedFuture(2),
+                CompletableFuture.completedFuture(3));
+
+        ContinuableFuture<Integer> sum = Futures.compose(futures, list -> {
+            int total = 0;
+            for (Future<Integer> f : list) {
+                total += f.get();
+            }
+            return total;
+        });
+
+        Assertions.assertEquals(6, sum.get());
+    }
+
+    @Test
+    public void testComposeWithTwoFuturesAndTimeoutFunction() throws Exception {
+        CompletableFuture<Integer> cf1 = CompletableFuture.completedFuture(5);
+        CompletableFuture<Integer> cf2 = CompletableFuture.completedFuture(10);
+
+        Throwables.BiFunction<Future<Integer>, Future<Integer>, Integer, Exception> zipFunction = (f1, f2) -> f1.get() + f2.get();
+        Throwables.Function<Tuple4<Future<Integer>, Future<Integer>, Long, TimeUnit>, Integer, Exception> timeoutFunction = t -> t._1.get() + t._2.get();
+
+        ContinuableFuture<Integer> result = Futures.compose(cf1, cf2, zipFunction, timeoutFunction);
+
+        assertEquals(15, result.get());
+        assertEquals(15, result.get(1, TimeUnit.SECONDS));
+    }
+
+    @Test
+    public void testComposeWithThreeFuturesAndTriFunction() throws Exception {
+        CompletableFuture<Integer> cf1 = CompletableFuture.completedFuture(1);
+        CompletableFuture<Integer> cf2 = CompletableFuture.completedFuture(2);
+        CompletableFuture<Integer> cf3 = CompletableFuture.completedFuture(3);
+
+        Throwables.TriFunction<Future<Integer>, Future<Integer>, Future<Integer>, Integer, Exception> zipFunction = (f1, f2, f3) -> f1.get() + f2.get()
+                + f3.get();
+
+        ContinuableFuture<Integer> result = Futures.compose(cf1, cf2, cf3, zipFunction);
+
+        assertEquals(6, result.get());
+    }
+
+    @Test
+    public void testComposeWithThreeFuturesAndTimeoutFunction() throws Exception {
+        CompletableFuture<String> cf1 = CompletableFuture.completedFuture("A");
+        CompletableFuture<String> cf2 = CompletableFuture.completedFuture("B");
+        CompletableFuture<String> cf3 = CompletableFuture.completedFuture("C");
+
+        Throwables.TriFunction<Future<String>, Future<String>, Future<String>, String, Exception> zipFunction = (f1, f2, f3) -> f1.get() + f2.get() + f3.get();
+        Throwables.Function<Tuple5<Future<String>, Future<String>, Future<String>, Long, TimeUnit>, String, Exception> timeoutFunction = t -> t._1.get()
+                + t._2.get() + t._3.get();
+
+        ContinuableFuture<String> result = Futures.compose(cf1, cf2, cf3, zipFunction, timeoutFunction);
+
+        assertEquals("ABC", result.get(1, TimeUnit.SECONDS));
+    }
+
+    @Test
+    public void testComposeWithCollectionAndFunction() throws Exception {
+        List<CompletableFuture<Integer>> futures = Arrays.asList(CompletableFuture.completedFuture(1), CompletableFuture.completedFuture(2),
+                CompletableFuture.completedFuture(3));
+
+        Throwables.Function<List<CompletableFuture<Integer>>, Integer, Exception> zipFunction = list -> {
+            int sum = 0;
+            for (Future<Integer> f : list) {
+                sum += f.get();
+            }
+            return sum;
+        };
+
+        ContinuableFuture<Integer> result = Futures.compose(futures, zipFunction);
+
+        assertEquals(6, result.get());
+    }
+
+    @Test
+    public void testComposeWithCollectionAndTimeoutFunction() throws Exception {
+        List<CompletableFuture<String>> futures = Arrays.asList(CompletableFuture.completedFuture("X"), CompletableFuture.completedFuture("Y"),
+                CompletableFuture.completedFuture("Z"));
+
+        Throwables.Function<List<CompletableFuture<String>>, String, Exception> zipFunction = list -> {
+            StringBuilder sb = new StringBuilder();
+            for (Future<String> f : list) {
+                sb.append(f.get());
+            }
+            return sb.toString();
+        };
+        Throwables.Function<Tuple3<List<CompletableFuture<String>>, Long, TimeUnit>, String, Exception> timeoutFunction = t -> {
+            StringBuilder sb = new StringBuilder();
+            for (Future<String> f : t._1) {
+                sb.append(f.get(t._2, t._3));
+            }
+            return sb.toString();
+        };
+
+        ContinuableFuture<String> result = Futures.compose(futures, zipFunction, timeoutFunction);
+
+        assertEquals("XYZ", result.get(1, TimeUnit.SECONDS));
+    }
+
+    @Test
+    public void testComposeWithEmptyCollectionThrowsException() {
+        List<CompletableFuture<Integer>> emptyList = new ArrayList<>();
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            Futures.compose(emptyList, list -> 0);
+        });
+    }
+
+    @Test
+    public void testComposeTwoFuturesReturnsNull() throws Exception {
+        CompletableFuture<String> cf1 = CompletableFuture.completedFuture("A");
+        CompletableFuture<String> cf2 = CompletableFuture.completedFuture("B");
+
+        ContinuableFuture<String> result = Futures.compose(cf1, cf2, (f1, f2) -> null);
+
+        assertEquals(null, result.get());
+    }
+
+    @Test
+    public void testComposeThreeFuturesWithException() {
+        CompletableFuture<Integer> cf1 = CompletableFuture.completedFuture(1);
+        CompletableFuture<Integer> cf2 = CompletableFuture.failedFuture(new RuntimeException("fail"));
+        CompletableFuture<Integer> cf3 = CompletableFuture.completedFuture(3);
+
+        ContinuableFuture<Integer> result = Futures.compose(cf1, cf2, cf3, (f1, f2, f3) -> f1.get() + f2.get() + f3.get());
+
+        assertThrows(ExecutionException.class, () -> result.get());
+    }
+
+    @Test
+    public void testComposeCollectionSingleElement() throws Exception {
+        List<CompletableFuture<Integer>> futures = Arrays.asList(CompletableFuture.completedFuture(42));
+
+        ContinuableFuture<Integer> result = Futures.compose(futures, list -> list.get(0).get());
+
+        assertEquals(42, result.get());
+    }
+
+    @Test
     public void testCombineTwoFutures() throws Exception {
         CompletableFuture<Integer> cf1 = CompletableFuture.completedFuture(10);
         CompletableFuture<String> cf2 = CompletableFuture.completedFuture("Hello");
@@ -377,6 +577,144 @@ public class FuturesTest extends TestBase {
     }
 
     @Test
+    public void testCombineFourToSevenFutures() throws Exception {
+        ContinuableFuture<Tuple4<Integer, Integer, Integer, Integer>> t4 = Futures.combine(CompletableFuture.completedFuture(1),
+                CompletableFuture.completedFuture(2), CompletableFuture.completedFuture(3), CompletableFuture.completedFuture(4));
+        Assertions.assertEquals(Tuple.of(1, 2, 3, 4), t4.get());
+
+        ContinuableFuture<Tuple5<Integer, Integer, Integer, Integer, Integer>> t5 = Futures.combine(CompletableFuture.completedFuture(1),
+                CompletableFuture.completedFuture(2), CompletableFuture.completedFuture(3), CompletableFuture.completedFuture(4),
+                CompletableFuture.completedFuture(5));
+        Assertions.assertEquals(Tuple.of(1, 2, 3, 4, 5), t5.get());
+
+        ContinuableFuture<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>> t6 = Futures.combine(CompletableFuture.completedFuture(1),
+                CompletableFuture.completedFuture(2), CompletableFuture.completedFuture(3), CompletableFuture.completedFuture(4),
+                CompletableFuture.completedFuture(5), CompletableFuture.completedFuture(6));
+        Assertions.assertEquals(Tuple.of(1, 2, 3, 4, 5, 6), t6.get());
+
+        ContinuableFuture<Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>> t7 = Futures.combine(CompletableFuture.completedFuture(1),
+                CompletableFuture.completedFuture(2), CompletableFuture.completedFuture(3), CompletableFuture.completedFuture(4),
+                CompletableFuture.completedFuture(5), CompletableFuture.completedFuture(6), CompletableFuture.completedFuture(7));
+        Assertions.assertEquals(Tuple.of(1, 2, 3, 4, 5, 6, 7), t7.get());
+    }
+
+    @Test
+    public void testCombineWithAction() throws Exception {
+        Future<Integer> f1 = CompletableFuture.completedFuture(10);
+        Future<Integer> f2 = CompletableFuture.completedFuture(20);
+
+        ContinuableFuture<Integer> result = Futures.combine(f1, f2, (a, b) -> a + b);
+        Assertions.assertEquals(30, result.get());
+
+        Future<Integer> f3 = CompletableFuture.completedFuture(30);
+        ContinuableFuture<Integer> result3 = Futures.combine(f1, f2, f3, (a, b, c) -> a + b + c);
+        Assertions.assertEquals(60, result3.get());
+    }
+
+    @Test
+    public void testCombineThreeFuturesWithTriFunction() throws Exception {
+        CompletableFuture<String> cf1 = CompletableFuture.completedFuture("A");
+        CompletableFuture<String> cf2 = CompletableFuture.completedFuture("B");
+        CompletableFuture<String> cf3 = CompletableFuture.completedFuture("C");
+
+        Throwables.TriFunction<String, String, String, String, Exception> action = (a, b, c) -> a + b + c;
+
+        ContinuableFuture<String> result = Futures.combine(cf1, cf2, cf3, action);
+
+        assertEquals("ABC", result.get());
+    }
+
+    @Test
+    public void testCombineCollectionWithFunction() throws Exception {
+        Collection<CompletableFuture<Integer>> futures = Arrays.asList(CompletableFuture.completedFuture(1), CompletableFuture.completedFuture(2),
+                CompletableFuture.completedFuture(3), CompletableFuture.completedFuture(4));
+
+        Throwables.Function<List<Integer>, Integer, Exception> action = list -> list.stream().mapToInt(Integer::intValue).sum();
+
+        ContinuableFuture<Integer> result = Futures.combine(futures, action);
+
+        assertEquals(10, result.get());
+    }
+
+    @Test
+    public void testCombineTwoFuturesWithException() {
+        CompletableFuture<Integer> cf1 = CompletableFuture.completedFuture(1);
+        CompletableFuture<Integer> cf2 = CompletableFuture.failedFuture(new RuntimeException("error"));
+
+        ContinuableFuture<Tuple2<Integer, Integer>> result = Futures.combine(cf1, cf2);
+
+        assertThrows(ExecutionException.class, () -> result.get());
+    }
+
+    @Test
+    public void testCombineThreeFuturesWithException() {
+        CompletableFuture<String> cf1 = CompletableFuture.completedFuture("A");
+        CompletableFuture<String> cf2 = CompletableFuture.completedFuture("B");
+        CompletableFuture<String> cf3 = CompletableFuture.failedFuture(new RuntimeException("fail"));
+
+        ContinuableFuture<Tuple3<String, String, String>> result = Futures.combine(cf1, cf2, cf3);
+
+        assertThrows(ExecutionException.class, () -> result.get());
+    }
+
+    @Test
+    public void testCombineTwoFuturesWithActionException() {
+        CompletableFuture<Integer> cf1 = CompletableFuture.completedFuture(1);
+        CompletableFuture<Integer> cf2 = CompletableFuture.failedFuture(new RuntimeException("fail"));
+
+        ContinuableFuture<Integer> result = Futures.combine(cf1, cf2, (Throwables.BiFunction<Integer, Integer, Integer, Exception>) (a, b) -> a + b);
+
+        assertThrows(ExecutionException.class, () -> result.get());
+    }
+
+    @Test
+    public void testCombineCollectionWithActionException() {
+        Collection<CompletableFuture<Integer>> futures = Arrays.asList(CompletableFuture.completedFuture(1),
+                CompletableFuture.failedFuture(new RuntimeException("fail")));
+
+        ContinuableFuture<Integer> result = Futures.combine(futures,
+                (Throwables.Function<List<Integer>, Integer, Exception>) list -> list.stream().mapToInt(Integer::intValue).sum());
+
+        assertThrows(ExecutionException.class, () -> result.get());
+    }
+
+    @Test
+    public void testAllOfVarargsCancel() {
+        CompletableFuture<Integer> cf1 = new CompletableFuture<>();
+        CompletableFuture<Integer> cf2 = new CompletableFuture<>();
+
+        ContinuableFuture<List<Integer>> result = Futures.allOf(cf1, cf2);
+
+        assertTrue(result.cancel(true));
+        assertTrue(cf1.isCancelled());
+        assertTrue(cf2.isCancelled());
+    }
+
+    @Test
+    public void testAllOfVarargsIsDone() {
+        CompletableFuture<Integer> cf1 = CompletableFuture.completedFuture(1);
+        CompletableFuture<Integer> cf2 = new CompletableFuture<>();
+
+        ContinuableFuture<List<Integer>> result = Futures.allOf(cf1, cf2);
+
+        assertFalse(result.isDone());
+        cf2.complete(2);
+        assertTrue(result.isDone());
+    }
+
+    @Test
+    public void testIsDone() {
+        CompletableFuture<String> f1 = new CompletableFuture<>();
+        CompletableFuture<String> f2 = CompletableFuture.completedFuture("Done");
+
+        ContinuableFuture<List<String>> all = Futures.allOf(f1, f2);
+        Assertions.assertFalse(all.isDone());
+
+        f1.complete("Also done");
+        Assertions.assertTrue(all.isDone());
+    }
+
+    @Test
     public void testAllOfVarargs() throws Exception {
         CompletableFuture<Integer> cf1 = CompletableFuture.completedFuture(1);
         CompletableFuture<Integer> cf2 = CompletableFuture.completedFuture(2);
@@ -402,30 +740,6 @@ public class FuturesTest extends TestBase {
         assertEquals(2, list.size());
         assertEquals("A", list.get(0));
         assertEquals("B", list.get(1));
-    }
-
-    @Test
-    public void testAllOfVarargsCancel() {
-        CompletableFuture<Integer> cf1 = new CompletableFuture<>();
-        CompletableFuture<Integer> cf2 = new CompletableFuture<>();
-
-        ContinuableFuture<List<Integer>> result = Futures.allOf(cf1, cf2);
-
-        assertTrue(result.cancel(true));
-        assertTrue(cf1.isCancelled());
-        assertTrue(cf2.isCancelled());
-    }
-
-    @Test
-    public void testAllOfVarargsIsDone() {
-        CompletableFuture<Integer> cf1 = CompletableFuture.completedFuture(1);
-        CompletableFuture<Integer> cf2 = new CompletableFuture<>();
-
-        ContinuableFuture<List<Integer>> result = Futures.allOf(cf1, cf2);
-
-        assertFalse(result.isDone());
-        cf2.complete(2);
-        assertTrue(result.isDone());
     }
 
     @Test
@@ -459,6 +773,206 @@ public class FuturesTest extends TestBase {
         ContinuableFuture<List<Integer>> result = Futures.allOf(cfs);
 
         assertThrows(ExecutionException.class, () -> result.get());
+    }
+
+    @Test
+    public void testAllOf() throws Exception {
+        Future<String> f1 = CompletableFuture.completedFuture("A");
+        Future<String> f2 = CompletableFuture.completedFuture("B");
+        Future<String> f3 = CompletableFuture.completedFuture("C");
+
+        ContinuableFuture<List<String>> allArray = Futures.allOf(f1, f2, f3);
+        List<String> resultArray = allArray.get();
+        Assertions.assertEquals(Arrays.asList("A", "B", "C"), resultArray);
+
+        List<Future<String>> futures = Arrays.asList(f1, f2, f3);
+        ContinuableFuture<List<String>> allCollection = Futures.allOf(futures);
+        List<String> resultCollection = allCollection.get();
+        Assertions.assertEquals(Arrays.asList("A", "B", "C"), resultCollection);
+    }
+
+    @Test
+    public void testAllOfWithFailure() {
+        Future<String> f1 = CompletableFuture.completedFuture("A");
+        Future<String> f2 = CompletableFuture.failedFuture(new RuntimeException("Failed"));
+        Future<String> f3 = CompletableFuture.completedFuture("C");
+
+        ContinuableFuture<List<String>> all = Futures.allOf(f1, f2, f3);
+
+        Assertions.assertThrows(ExecutionException.class, () -> all.get());
+    }
+
+    @Test
+    public void testAllOfWithTimeout() throws Exception {
+        CompletableFuture<String> f1 = new CompletableFuture<>();
+        CompletableFuture<String> f2 = new CompletableFuture<>();
+
+        executor.submit(() -> {
+            try {
+                Thread.sleep(100);
+                f1.complete("A");
+                Thread.sleep(100);
+                f2.complete("B");
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+
+        ContinuableFuture<List<String>> all = Futures.allOf(f1, f2);
+        List<String> result = all.get(500, TimeUnit.MILLISECONDS);
+        Assertions.assertEquals(Arrays.asList("A", "B"), result);
+
+        CompletableFuture<String> f3 = new CompletableFuture<>();
+        ContinuableFuture<List<String>> all2 = Futures.allOf(f3);
+        Assertions.assertThrows(TimeoutException.class, () -> all2.get(100, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void testCancelBehavior() throws Exception {
+        CompletableFuture<String> f1 = new CompletableFuture<>();
+        CompletableFuture<String> f2 = new CompletableFuture<>();
+
+        ContinuableFuture<List<String>> all = Futures.allOf(f1, f2);
+
+        boolean cancelled = all.cancel(true);
+        Assertions.assertTrue(cancelled);
+        Assertions.assertTrue(all.isCancelled());
+        Assertions.assertTrue(f1.isCancelled());
+        Assertions.assertTrue(f2.isCancelled());
+    }
+
+    @Test
+    public void testEmptyCollection() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Futures.allOf(Collections.emptyList());
+        });
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Futures.anyOf(Collections.emptyList());
+        });
+    }
+
+    @Test
+    public void testAllOfWithException() {
+        CompletableFuture<Integer> cf1 = CompletableFuture.completedFuture(1);
+        CompletableFuture<Integer> cf2 = CompletableFuture.failedFuture(new RuntimeException("Test exception"));
+
+        ContinuableFuture<List<Integer>> result = Futures.allOf(cf1, cf2);
+
+        assertThrows(ExecutionException.class, () -> result.get());
+    }
+
+    @Test
+    public void testCancelCompositeFuture() throws Exception {
+        CompletableFuture<Integer> cf1 = new CompletableFuture<>();
+        CompletableFuture<Integer> cf2 = new CompletableFuture<>();
+
+        ContinuableFuture<List<Integer>> allOfFuture = Futures.allOf(cf1, cf2);
+
+        assertFalse(allOfFuture.isDone());
+        assertFalse(allOfFuture.isCancelled());
+
+        boolean cancelled = allOfFuture.cancel(true);
+
+        assertTrue(cancelled);
+        assertTrue(allOfFuture.isCancelled());
+        assertTrue(cf1.isCancelled());
+        assertTrue(cf2.isCancelled());
+    }
+
+    @Test
+    public void testIsDoneForAllOf() throws Exception {
+        CompletableFuture<Integer> cf1 = new CompletableFuture<>();
+        CompletableFuture<Integer> cf2 = CompletableFuture.completedFuture(2);
+
+        ContinuableFuture<List<Integer>> allOfFuture = Futures.allOf(cf1, cf2);
+
+        assertFalse(allOfFuture.isDone());
+
+        cf1.complete(1);
+
+        assertTrue(allOfFuture.isDone());
+        assertEquals(Arrays.asList(1, 2), allOfFuture.get());
+    }
+
+    @Test
+    public void testAllOfWithEmptyCollectionThrowsException() {
+        List<CompletableFuture<Integer>> emptyList = new ArrayList<>();
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            Futures.allOf(emptyList);
+        });
+    }
+
+    @Test
+    public void testAllOfWithMultipleExceptions() {
+        CompletableFuture<Integer> cf1 = CompletableFuture.failedFuture(new RuntimeException("Error 1"));
+        CompletableFuture<Integer> cf2 = CompletableFuture.failedFuture(new RuntimeException("Error 2"));
+
+        ContinuableFuture<List<Integer>> result = Futures.allOf(cf1, cf2);
+
+        assertThrows(ExecutionException.class, () -> result.get());
+    }
+
+    @Test
+    @Timeout(10)
+    public void testAllOfWithManyFutures() throws Exception {
+        List<CompletableFuture<Integer>> futures = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            final int value = i;
+            futures.add(CompletableFuture.supplyAsync(() -> value, executor));
+        }
+
+        ContinuableFuture<List<Integer>> result = Futures.allOf(futures);
+        List<Integer> list = result.get(5, TimeUnit.SECONDS);
+
+        assertEquals(100, list.size());
+        for (int i = 0; i < 100; i++) {
+            assertEquals(i, list.get(i));
+        }
+    }
+
+    @Test
+    public void testAllOfVarargsSingleFuture() throws Exception {
+        CompletableFuture<String> cf = CompletableFuture.completedFuture("only");
+
+        ContinuableFuture<List<String>> result = Futures.allOf(cf);
+
+        assertEquals(Arrays.asList("only"), result.get());
+    }
+
+    @Test
+    public void testAnyOfVarargsCancel() {
+        CompletableFuture<Integer> cf1 = new CompletableFuture<>();
+        CompletableFuture<Integer> cf2 = new CompletableFuture<>();
+
+        ContinuableFuture<Integer> result = Futures.anyOf(cf1, cf2);
+
+        assertTrue(result.cancel(true));
+        assertTrue(cf1.isCancelled());
+        assertTrue(cf2.isCancelled());
+    }
+
+    @Test
+    public void testAnyOfVarargsIsCancelled() {
+        CompletableFuture<Integer> cf1 = new CompletableFuture<>();
+        CompletableFuture<Integer> cf2 = new CompletableFuture<>();
+        cf1.cancel(true);
+        cf2.cancel(true);
+
+        ContinuableFuture<Integer> result = Futures.anyOf(cf1, cf2);
+
+        assertTrue(result.isCancelled());
+    }
+
+    @Test
+    public void testAnyOfVarargsIsDone() {
+        CompletableFuture<Integer> cf1 = CompletableFuture.completedFuture(1);
+        CompletableFuture<Integer> cf2 = new CompletableFuture<>();
+
+        ContinuableFuture<Integer> result = Futures.anyOf(cf1, cf2);
+
+        assertTrue(result.isDone());
     }
 
     @Test
@@ -497,40 +1011,6 @@ public class FuturesTest extends TestBase {
     }
 
     @Test
-    public void testAnyOfVarargsCancel() {
-        CompletableFuture<Integer> cf1 = new CompletableFuture<>();
-        CompletableFuture<Integer> cf2 = new CompletableFuture<>();
-
-        ContinuableFuture<Integer> result = Futures.anyOf(cf1, cf2);
-
-        assertTrue(result.cancel(true));
-        assertTrue(cf1.isCancelled());
-        assertTrue(cf2.isCancelled());
-    }
-
-    @Test
-    public void testAnyOfVarargsIsCancelled() {
-        CompletableFuture<Integer> cf1 = new CompletableFuture<>();
-        CompletableFuture<Integer> cf2 = new CompletableFuture<>();
-        cf1.cancel(true);
-        cf2.cancel(true);
-
-        ContinuableFuture<Integer> result = Futures.anyOf(cf1, cf2);
-
-        assertTrue(result.isCancelled());
-    }
-
-    @Test
-    public void testAnyOfVarargsIsDone() {
-        CompletableFuture<Integer> cf1 = CompletableFuture.completedFuture(1);
-        CompletableFuture<Integer> cf2 = new CompletableFuture<>();
-
-        ContinuableFuture<Integer> result = Futures.anyOf(cf1, cf2);
-
-        assertTrue(result.isDone());
-    }
-
-    @Test
     public void testAnyOfCollection() throws Exception {
         Collection<Future<String>> cfs = Arrays.asList(CompletableFuture.completedFuture("Result"), new CompletableFuture<>(), new CompletableFuture<>());
 
@@ -555,6 +1035,84 @@ public class FuturesTest extends TestBase {
         ContinuableFuture<Integer> result = Futures.anyOf(cfs);
 
         assertEquals(42, result.get(100, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void testAnyOf() throws Exception {
+        CompletableFuture<String> f1 = new CompletableFuture<>();
+        CompletableFuture<String> f2 = new CompletableFuture<>();
+        CompletableFuture<String> f3 = new CompletableFuture<>();
+
+        ContinuableFuture<String> any = Futures.anyOf(f1, f2, f3);
+
+        f2.complete("Second");
+        Assertions.assertEquals("Second", any.get());
+
+        f1.complete("First");
+        f3.complete("Third");
+
+    }
+
+    @Test
+    public void testAnyOfAllFailed() {
+        Future<String> f1 = CompletableFuture.failedFuture(new RuntimeException("Error1"));
+        Future<String> f2 = CompletableFuture.failedFuture(new RuntimeException("Error2"));
+        Future<String> f3 = CompletableFuture.failedFuture(new RuntimeException("Error3"));
+
+        ContinuableFuture<String> any = Futures.anyOf(f1, f2, f3);
+
+        Assertions.assertThrows(RuntimeException.class, () -> any.get());
+    }
+
+    @Test
+    @Timeout(5)
+    public void testAnyOfWithTimeout() throws Exception {
+        CompletableFuture<String> cf1 = CompletableFuture.supplyAsync(() -> {
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            return "Never";
+        });
+        CompletableFuture<String> cf2 = CompletableFuture.completedFuture("Immediate");
+
+        ContinuableFuture<String> result = Futures.anyOf(cf1, cf2);
+
+        assertEquals("Immediate", result.get(1, TimeUnit.SECONDS));
+    }
+
+    @Test
+    public void testIsDoneForAnyOf() throws Exception {
+        CompletableFuture<String> cf1 = new CompletableFuture<>();
+        CompletableFuture<String> cf2 = new CompletableFuture<>();
+
+        ContinuableFuture<String> anyOfFuture = Futures.anyOf(cf1, cf2);
+
+        assertFalse(anyOfFuture.isDone());
+
+        cf2.complete("Second");
+
+        assertTrue(anyOfFuture.isDone());
+        assertEquals("Second", anyOfFuture.get());
+    }
+
+    @Test
+    public void testAnyOfWithEmptyCollectionThrowsException() {
+        List<CompletableFuture<Integer>> emptyList = new ArrayList<>();
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            Futures.anyOf(emptyList);
+        });
+    }
+
+    @Test
+    public void testAnyOfSingleFuture() throws Exception {
+        CompletableFuture<String> cf = CompletableFuture.completedFuture("only");
+
+        ContinuableFuture<String> result = Futures.anyOf(cf);
+
+        assertEquals("only", result.get());
     }
 
     @Test
@@ -750,197 +1308,6 @@ public class FuturesTest extends TestBase {
     }
 
     @Test
-    public void testComposeWithBiFunction() throws Exception {
-        Future<Integer> future1 = CompletableFuture.completedFuture(5);
-        Future<Integer> future2 = CompletableFuture.completedFuture(10);
-
-        ContinuableFuture<Integer> composed = Futures.compose(future1, future2, (f1, f2) -> f1.get() + f2.get());
-
-        Assertions.assertEquals(15, composed.get());
-
-        Assertions.assertEquals(15, composed.get(1, TimeUnit.SECONDS));
-    }
-
-    @Test
-    public void testComposeWithBiFunctionAndTimeoutFunction() throws Exception {
-        Future<String> slowFuture = CompletableFuture.supplyAsync(() -> {
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            return "Slow";
-        });
-        Future<String> fastFuture = CompletableFuture.completedFuture("Fast");
-
-        ContinuableFuture<String> composed = Futures.compose(slowFuture, fastFuture, (f1, f2) -> f1.get() + " + " + f2.get(), tuple -> {
-            try {
-                return "Timeout: " + tuple._2.get(tuple._3, tuple._4);
-            } catch (Exception e) {
-                return "Timeout occurred";
-            }
-        });
-
-        Assertions.assertEquals("Slow + Fast", composed.get());
-
-        Future<String> verySlowFuture = CompletableFuture.supplyAsync(() -> {
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            return "Very Slow";
-        });
-
-        ContinuableFuture<String> composed2 = Futures.compose(verySlowFuture, fastFuture, (f1, f2) -> f1.get() + " + " + f2.get(),
-                tuple -> "Timeout: " + tuple._2.get());
-
-        String result = composed2.get(100, TimeUnit.MILLISECONDS);
-        Assertions.assertEquals("Timeout: Fast", result);
-    }
-
-    @Test
-    public void testComposeThreeFutures() throws Exception {
-        Future<String> f1 = CompletableFuture.completedFuture("A");
-        Future<String> f2 = CompletableFuture.completedFuture("B");
-        Future<String> f3 = CompletableFuture.completedFuture("C");
-
-        ContinuableFuture<String> composed = Futures.compose(f1, f2, f3, (fu1, fu2, fu3) -> fu1.get() + fu2.get() + fu3.get());
-
-        Assertions.assertEquals("ABC", composed.get());
-    }
-
-    @Test
-    public void testComposeCollection() throws Exception {
-        List<Future<Integer>> futures = Arrays.asList(CompletableFuture.completedFuture(1), CompletableFuture.completedFuture(2),
-                CompletableFuture.completedFuture(3));
-
-        ContinuableFuture<Integer> sum = Futures.compose(futures, list -> {
-            int total = 0;
-            for (Future<Integer> f : list) {
-                total += f.get();
-            }
-            return total;
-        });
-
-        Assertions.assertEquals(6, sum.get());
-    }
-
-    @Test
-    public void testCombineFourToSevenFutures() throws Exception {
-        ContinuableFuture<Tuple4<Integer, Integer, Integer, Integer>> t4 = Futures.combine(CompletableFuture.completedFuture(1),
-                CompletableFuture.completedFuture(2), CompletableFuture.completedFuture(3), CompletableFuture.completedFuture(4));
-        Assertions.assertEquals(Tuple.of(1, 2, 3, 4), t4.get());
-
-        ContinuableFuture<Tuple5<Integer, Integer, Integer, Integer, Integer>> t5 = Futures.combine(CompletableFuture.completedFuture(1),
-                CompletableFuture.completedFuture(2), CompletableFuture.completedFuture(3), CompletableFuture.completedFuture(4),
-                CompletableFuture.completedFuture(5));
-        Assertions.assertEquals(Tuple.of(1, 2, 3, 4, 5), t5.get());
-
-        ContinuableFuture<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>> t6 = Futures.combine(CompletableFuture.completedFuture(1),
-                CompletableFuture.completedFuture(2), CompletableFuture.completedFuture(3), CompletableFuture.completedFuture(4),
-                CompletableFuture.completedFuture(5), CompletableFuture.completedFuture(6));
-        Assertions.assertEquals(Tuple.of(1, 2, 3, 4, 5, 6), t6.get());
-
-        ContinuableFuture<Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>> t7 = Futures.combine(CompletableFuture.completedFuture(1),
-                CompletableFuture.completedFuture(2), CompletableFuture.completedFuture(3), CompletableFuture.completedFuture(4),
-                CompletableFuture.completedFuture(5), CompletableFuture.completedFuture(6), CompletableFuture.completedFuture(7));
-        Assertions.assertEquals(Tuple.of(1, 2, 3, 4, 5, 6, 7), t7.get());
-    }
-
-    @Test
-    public void testCombineWithAction() throws Exception {
-        Future<Integer> f1 = CompletableFuture.completedFuture(10);
-        Future<Integer> f2 = CompletableFuture.completedFuture(20);
-
-        ContinuableFuture<Integer> result = Futures.combine(f1, f2, (a, b) -> a + b);
-        Assertions.assertEquals(30, result.get());
-
-        Future<Integer> f3 = CompletableFuture.completedFuture(30);
-        ContinuableFuture<Integer> result3 = Futures.combine(f1, f2, f3, (a, b, c) -> a + b + c);
-        Assertions.assertEquals(60, result3.get());
-    }
-
-    @Test
-    public void testAllOf() throws Exception {
-        Future<String> f1 = CompletableFuture.completedFuture("A");
-        Future<String> f2 = CompletableFuture.completedFuture("B");
-        Future<String> f3 = CompletableFuture.completedFuture("C");
-
-        ContinuableFuture<List<String>> allArray = Futures.allOf(f1, f2, f3);
-        List<String> resultArray = allArray.get();
-        Assertions.assertEquals(Arrays.asList("A", "B", "C"), resultArray);
-
-        List<Future<String>> futures = Arrays.asList(f1, f2, f3);
-        ContinuableFuture<List<String>> allCollection = Futures.allOf(futures);
-        List<String> resultCollection = allCollection.get();
-        Assertions.assertEquals(Arrays.asList("A", "B", "C"), resultCollection);
-    }
-
-    @Test
-    public void testAllOfWithFailure() {
-        Future<String> f1 = CompletableFuture.completedFuture("A");
-        Future<String> f2 = CompletableFuture.failedFuture(new RuntimeException("Failed"));
-        Future<String> f3 = CompletableFuture.completedFuture("C");
-
-        ContinuableFuture<List<String>> all = Futures.allOf(f1, f2, f3);
-
-        Assertions.assertThrows(ExecutionException.class, () -> all.get());
-    }
-
-    @Test
-    public void testAllOfWithTimeout() throws Exception {
-        CompletableFuture<String> f1 = new CompletableFuture<>();
-        CompletableFuture<String> f2 = new CompletableFuture<>();
-
-        executor.submit(() -> {
-            try {
-                Thread.sleep(100);
-                f1.complete("A");
-                Thread.sleep(100);
-                f2.complete("B");
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        });
-
-        ContinuableFuture<List<String>> all = Futures.allOf(f1, f2);
-        List<String> result = all.get(500, TimeUnit.MILLISECONDS);
-        Assertions.assertEquals(Arrays.asList("A", "B"), result);
-
-        CompletableFuture<String> f3 = new CompletableFuture<>();
-        ContinuableFuture<List<String>> all2 = Futures.allOf(f3);
-        Assertions.assertThrows(TimeoutException.class, () -> all2.get(100, TimeUnit.MILLISECONDS));
-    }
-
-    @Test
-    public void testAnyOf() throws Exception {
-        CompletableFuture<String> f1 = new CompletableFuture<>();
-        CompletableFuture<String> f2 = new CompletableFuture<>();
-        CompletableFuture<String> f3 = new CompletableFuture<>();
-
-        ContinuableFuture<String> any = Futures.anyOf(f1, f2, f3);
-
-        f2.complete("Second");
-        Assertions.assertEquals("Second", any.get());
-
-        f1.complete("First");
-        f3.complete("Third");
-
-    }
-
-    @Test
-    public void testAnyOfAllFailed() {
-        Future<String> f1 = CompletableFuture.failedFuture(new RuntimeException("Error1"));
-        Future<String> f2 = CompletableFuture.failedFuture(new RuntimeException("Error2"));
-        Future<String> f3 = CompletableFuture.failedFuture(new RuntimeException("Error3"));
-
-        ContinuableFuture<String> any = Futures.anyOf(f1, f2, f3);
-
-        Assertions.assertThrows(RuntimeException.class, () -> any.get());
-    }
-
-    @Test
     public void testIterate() throws Exception {
         Future<Integer> f1 = CompletableFuture.completedFuture(1);
         Future<Integer> f2 = CompletableFuture.completedFuture(2);
@@ -1043,195 +1410,6 @@ public class FuturesTest extends TestBase {
     }
 
     @Test
-    public void testCancelBehavior() throws Exception {
-        CompletableFuture<String> f1 = new CompletableFuture<>();
-        CompletableFuture<String> f2 = new CompletableFuture<>();
-
-        ContinuableFuture<List<String>> all = Futures.allOf(f1, f2);
-
-        boolean cancelled = all.cancel(true);
-        Assertions.assertTrue(cancelled);
-        Assertions.assertTrue(all.isCancelled());
-        Assertions.assertTrue(f1.isCancelled());
-        Assertions.assertTrue(f2.isCancelled());
-    }
-
-    @Test
-    public void testIsDone() {
-        CompletableFuture<String> f1 = new CompletableFuture<>();
-        CompletableFuture<String> f2 = CompletableFuture.completedFuture("Done");
-
-        ContinuableFuture<List<String>> all = Futures.allOf(f1, f2);
-        Assertions.assertFalse(all.isDone());
-
-        f1.complete("Also done");
-        Assertions.assertTrue(all.isDone());
-    }
-
-    @Test
-    public void testEmptyCollection() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Futures.allOf(Collections.emptyList());
-        });
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Futures.anyOf(Collections.emptyList());
-        });
-    }
-
-    @Test
-    public void testConvertException() {
-        Exception e1 = new RuntimeException("test");
-        Assertions.assertEquals(e1, Futures.convertException(e1));
-
-        Exception cause = new IllegalArgumentException("cause");
-        ExecutionException e2 = new ExecutionException(cause);
-        Assertions.assertEquals(cause, Futures.convertException(e2));
-
-        ExecutionException e3 = new ExecutionException(new Error("error"));
-        Assertions.assertEquals(e3, Futures.convertException(e3));
-    }
-
-    @Test
-    public void testComposeWithTwoFuturesAndTimeoutFunction() throws Exception {
-        CompletableFuture<Integer> cf1 = CompletableFuture.completedFuture(5);
-        CompletableFuture<Integer> cf2 = CompletableFuture.completedFuture(10);
-
-        Throwables.BiFunction<Future<Integer>, Future<Integer>, Integer, Exception> zipFunction = (f1, f2) -> f1.get() + f2.get();
-        Throwables.Function<Tuple4<Future<Integer>, Future<Integer>, Long, TimeUnit>, Integer, Exception> timeoutFunction = t -> t._1.get() + t._2.get();
-
-        ContinuableFuture<Integer> result = Futures.compose(cf1, cf2, zipFunction, timeoutFunction);
-
-        assertEquals(15, result.get());
-        assertEquals(15, result.get(1, TimeUnit.SECONDS));
-    }
-
-    @Test
-    public void testComposeWithThreeFuturesAndTriFunction() throws Exception {
-        CompletableFuture<Integer> cf1 = CompletableFuture.completedFuture(1);
-        CompletableFuture<Integer> cf2 = CompletableFuture.completedFuture(2);
-        CompletableFuture<Integer> cf3 = CompletableFuture.completedFuture(3);
-
-        Throwables.TriFunction<Future<Integer>, Future<Integer>, Future<Integer>, Integer, Exception> zipFunction = (f1, f2, f3) -> f1.get() + f2.get()
-                + f3.get();
-
-        ContinuableFuture<Integer> result = Futures.compose(cf1, cf2, cf3, zipFunction);
-
-        assertEquals(6, result.get());
-    }
-
-    @Test
-    public void testComposeWithThreeFuturesAndTimeoutFunction() throws Exception {
-        CompletableFuture<String> cf1 = CompletableFuture.completedFuture("A");
-        CompletableFuture<String> cf2 = CompletableFuture.completedFuture("B");
-        CompletableFuture<String> cf3 = CompletableFuture.completedFuture("C");
-
-        Throwables.TriFunction<Future<String>, Future<String>, Future<String>, String, Exception> zipFunction = (f1, f2, f3) -> f1.get() + f2.get() + f3.get();
-        Throwables.Function<Tuple5<Future<String>, Future<String>, Future<String>, Long, TimeUnit>, String, Exception> timeoutFunction = t -> t._1.get()
-                + t._2.get() + t._3.get();
-
-        ContinuableFuture<String> result = Futures.compose(cf1, cf2, cf3, zipFunction, timeoutFunction);
-
-        assertEquals("ABC", result.get(1, TimeUnit.SECONDS));
-    }
-
-    @Test
-    public void testComposeWithCollectionAndFunction() throws Exception {
-        List<CompletableFuture<Integer>> futures = Arrays.asList(CompletableFuture.completedFuture(1), CompletableFuture.completedFuture(2),
-                CompletableFuture.completedFuture(3));
-
-        Throwables.Function<List<CompletableFuture<Integer>>, Integer, Exception> zipFunction = list -> {
-            int sum = 0;
-            for (Future<Integer> f : list) {
-                sum += f.get();
-            }
-            return sum;
-        };
-
-        ContinuableFuture<Integer> result = Futures.compose(futures, zipFunction);
-
-        assertEquals(6, result.get());
-    }
-
-    @Test
-    public void testComposeWithCollectionAndTimeoutFunction() throws Exception {
-        List<CompletableFuture<String>> futures = Arrays.asList(CompletableFuture.completedFuture("X"), CompletableFuture.completedFuture("Y"),
-                CompletableFuture.completedFuture("Z"));
-
-        Throwables.Function<List<CompletableFuture<String>>, String, Exception> zipFunction = list -> {
-            StringBuilder sb = new StringBuilder();
-            for (Future<String> f : list) {
-                sb.append(f.get());
-            }
-            return sb.toString();
-        };
-        Throwables.Function<Tuple3<List<CompletableFuture<String>>, Long, TimeUnit>, String, Exception> timeoutFunction = t -> {
-            StringBuilder sb = new StringBuilder();
-            for (Future<String> f : t._1) {
-                sb.append(f.get(t._2, t._3));
-            }
-            return sb.toString();
-        };
-
-        ContinuableFuture<String> result = Futures.compose(futures, zipFunction, timeoutFunction);
-
-        assertEquals("XYZ", result.get(1, TimeUnit.SECONDS));
-    }
-
-    @Test
-    public void testCombineThreeFuturesWithTriFunction() throws Exception {
-        CompletableFuture<String> cf1 = CompletableFuture.completedFuture("A");
-        CompletableFuture<String> cf2 = CompletableFuture.completedFuture("B");
-        CompletableFuture<String> cf3 = CompletableFuture.completedFuture("C");
-
-        Throwables.TriFunction<String, String, String, String, Exception> action = (a, b, c) -> a + b + c;
-
-        ContinuableFuture<String> result = Futures.combine(cf1, cf2, cf3, action);
-
-        assertEquals("ABC", result.get());
-    }
-
-    @Test
-    public void testCombineCollectionWithFunction() throws Exception {
-        Collection<CompletableFuture<Integer>> futures = Arrays.asList(CompletableFuture.completedFuture(1), CompletableFuture.completedFuture(2),
-                CompletableFuture.completedFuture(3), CompletableFuture.completedFuture(4));
-
-        Throwables.Function<List<Integer>, Integer, Exception> action = list -> list.stream().mapToInt(Integer::intValue).sum();
-
-        ContinuableFuture<Integer> result = Futures.combine(futures, action);
-
-        assertEquals(10, result.get());
-    }
-
-    @Test
-    public void testAllOfWithException() {
-        CompletableFuture<Integer> cf1 = CompletableFuture.completedFuture(1);
-        CompletableFuture<Integer> cf2 = CompletableFuture.failedFuture(new RuntimeException("Test exception"));
-
-        ContinuableFuture<List<Integer>> result = Futures.allOf(cf1, cf2);
-
-        assertThrows(ExecutionException.class, () -> result.get());
-    }
-
-    @Test
-    @Timeout(5)
-    public void testAnyOfWithTimeout() throws Exception {
-        CompletableFuture<String> cf1 = CompletableFuture.supplyAsync(() -> {
-            try {
-                Thread.sleep(10000);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            return "Never";
-        });
-        CompletableFuture<String> cf2 = CompletableFuture.completedFuture("Immediate");
-
-        ContinuableFuture<String> result = Futures.anyOf(cf1, cf2);
-
-        assertEquals("Immediate", result.get(1, TimeUnit.SECONDS));
-    }
-
-    @Test
     public void testIterateWithTimeoutAndResultHandler() throws Exception {
         Collection<CompletableFuture<String>> futures = Arrays.asList(CompletableFuture.completedFuture("Quick"), CompletableFuture.supplyAsync(() -> {
             try {
@@ -1263,81 +1441,6 @@ public class FuturesTest extends TestBase {
     }
 
     @Test
-    public void testCancelCompositeFuture() throws Exception {
-        CompletableFuture<Integer> cf1 = new CompletableFuture<>();
-        CompletableFuture<Integer> cf2 = new CompletableFuture<>();
-
-        ContinuableFuture<List<Integer>> allOfFuture = Futures.allOf(cf1, cf2);
-
-        assertFalse(allOfFuture.isDone());
-        assertFalse(allOfFuture.isCancelled());
-
-        boolean cancelled = allOfFuture.cancel(true);
-
-        assertTrue(cancelled);
-        assertTrue(allOfFuture.isCancelled());
-        assertTrue(cf1.isCancelled());
-        assertTrue(cf2.isCancelled());
-    }
-
-    @Test
-    public void testIsDoneForAllOf() throws Exception {
-        CompletableFuture<Integer> cf1 = new CompletableFuture<>();
-        CompletableFuture<Integer> cf2 = CompletableFuture.completedFuture(2);
-
-        ContinuableFuture<List<Integer>> allOfFuture = Futures.allOf(cf1, cf2);
-
-        assertFalse(allOfFuture.isDone());
-
-        cf1.complete(1);
-
-        assertTrue(allOfFuture.isDone());
-        assertEquals(Arrays.asList(1, 2), allOfFuture.get());
-    }
-
-    @Test
-    public void testIsDoneForAnyOf() throws Exception {
-        CompletableFuture<String> cf1 = new CompletableFuture<>();
-        CompletableFuture<String> cf2 = new CompletableFuture<>();
-
-        ContinuableFuture<String> anyOfFuture = Futures.anyOf(cf1, cf2);
-
-        assertFalse(anyOfFuture.isDone());
-
-        cf2.complete("Second");
-
-        assertTrue(anyOfFuture.isDone());
-        assertEquals("Second", anyOfFuture.get());
-    }
-
-    @Test
-    public void testComposeWithEmptyCollectionThrowsException() {
-        List<CompletableFuture<Integer>> emptyList = new ArrayList<>();
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            Futures.compose(emptyList, list -> 0);
-        });
-    }
-
-    @Test
-    public void testAllOfWithEmptyCollectionThrowsException() {
-        List<CompletableFuture<Integer>> emptyList = new ArrayList<>();
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            Futures.allOf(emptyList);
-        });
-    }
-
-    @Test
-    public void testAnyOfWithEmptyCollectionThrowsException() {
-        List<CompletableFuture<Integer>> emptyList = new ArrayList<>();
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            Futures.anyOf(emptyList);
-        });
-    }
-
-    @Test
     public void testIterateNoSuchElementException() {
         CompletableFuture<Integer> cf = CompletableFuture.completedFuture(1);
         ObjIterator<Integer> iter = Futures.iterate(cf);
@@ -1347,124 +1450,6 @@ public class FuturesTest extends TestBase {
         assertFalse(iter.hasNext());
 
         assertThrows(NoSuchElementException.class, () -> iter.next());
-    }
-
-    @Test
-    public void testAllOfWithMultipleExceptions() {
-        CompletableFuture<Integer> cf1 = CompletableFuture.failedFuture(new RuntimeException("Error 1"));
-        CompletableFuture<Integer> cf2 = CompletableFuture.failedFuture(new RuntimeException("Error 2"));
-
-        ContinuableFuture<List<Integer>> result = Futures.allOf(cf1, cf2);
-
-        assertThrows(ExecutionException.class, () -> result.get());
-    }
-
-    @Test
-    @Timeout(10)
-    public void testAllOfWithManyFutures() throws Exception {
-        List<CompletableFuture<Integer>> futures = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
-            final int value = i;
-            futures.add(CompletableFuture.supplyAsync(() -> value, executor));
-        }
-
-        ContinuableFuture<List<Integer>> result = Futures.allOf(futures);
-        List<Integer> list = result.get(5, TimeUnit.SECONDS);
-
-        assertEquals(100, list.size());
-        for (int i = 0; i < 100; i++) {
-            assertEquals(i, list.get(i));
-        }
-    }
-
-    @Test
-    public void testComposeTwoFuturesReturnsNull() throws Exception {
-        CompletableFuture<String> cf1 = CompletableFuture.completedFuture("A");
-        CompletableFuture<String> cf2 = CompletableFuture.completedFuture("B");
-
-        ContinuableFuture<String> result = Futures.compose(cf1, cf2, (f1, f2) -> null);
-
-        assertEquals(null, result.get());
-    }
-
-    @Test
-    public void testComposeThreeFuturesWithException() {
-        CompletableFuture<Integer> cf1 = CompletableFuture.completedFuture(1);
-        CompletableFuture<Integer> cf2 = CompletableFuture.failedFuture(new RuntimeException("fail"));
-        CompletableFuture<Integer> cf3 = CompletableFuture.completedFuture(3);
-
-        ContinuableFuture<Integer> result = Futures.compose(cf1, cf2, cf3, (f1, f2, f3) -> f1.get() + f2.get() + f3.get());
-
-        assertThrows(ExecutionException.class, () -> result.get());
-    }
-
-    @Test
-    public void testComposeCollectionSingleElement() throws Exception {
-        List<CompletableFuture<Integer>> futures = Arrays.asList(CompletableFuture.completedFuture(42));
-
-        ContinuableFuture<Integer> result = Futures.compose(futures, list -> list.get(0).get());
-
-        assertEquals(42, result.get());
-    }
-
-    @Test
-    public void testCombineTwoFuturesWithException() {
-        CompletableFuture<Integer> cf1 = CompletableFuture.completedFuture(1);
-        CompletableFuture<Integer> cf2 = CompletableFuture.failedFuture(new RuntimeException("error"));
-
-        ContinuableFuture<Tuple2<Integer, Integer>> result = Futures.combine(cf1, cf2);
-
-        assertThrows(ExecutionException.class, () -> result.get());
-    }
-
-    @Test
-    public void testCombineThreeFuturesWithException() {
-        CompletableFuture<String> cf1 = CompletableFuture.completedFuture("A");
-        CompletableFuture<String> cf2 = CompletableFuture.completedFuture("B");
-        CompletableFuture<String> cf3 = CompletableFuture.failedFuture(new RuntimeException("fail"));
-
-        ContinuableFuture<Tuple3<String, String, String>> result = Futures.combine(cf1, cf2, cf3);
-
-        assertThrows(ExecutionException.class, () -> result.get());
-    }
-
-    @Test
-    public void testCombineTwoFuturesWithActionException() {
-        CompletableFuture<Integer> cf1 = CompletableFuture.completedFuture(1);
-        CompletableFuture<Integer> cf2 = CompletableFuture.failedFuture(new RuntimeException("fail"));
-
-        ContinuableFuture<Integer> result = Futures.combine(cf1, cf2, (Throwables.BiFunction<Integer, Integer, Integer, Exception>) (a, b) -> a + b);
-
-        assertThrows(ExecutionException.class, () -> result.get());
-    }
-
-    @Test
-    public void testCombineCollectionWithActionException() {
-        Collection<CompletableFuture<Integer>> futures = Arrays.asList(CompletableFuture.completedFuture(1),
-                CompletableFuture.failedFuture(new RuntimeException("fail")));
-
-        ContinuableFuture<Integer> result = Futures.combine(futures,
-                (Throwables.Function<List<Integer>, Integer, Exception>) list -> list.stream().mapToInt(Integer::intValue).sum());
-
-        assertThrows(ExecutionException.class, () -> result.get());
-    }
-
-    @Test
-    public void testAllOfVarargsSingleFuture() throws Exception {
-        CompletableFuture<String> cf = CompletableFuture.completedFuture("only");
-
-        ContinuableFuture<List<String>> result = Futures.allOf(cf);
-
-        assertEquals(Arrays.asList("only"), result.get());
-    }
-
-    @Test
-    public void testAnyOfSingleFuture() throws Exception {
-        CompletableFuture<String> cf = CompletableFuture.completedFuture("only");
-
-        ContinuableFuture<String> result = Futures.anyOf(cf);
-
-        assertEquals("only", result.get());
     }
 
     @Test
@@ -1551,6 +1536,19 @@ public class FuturesTest extends TestBase {
         assertEquals(2, results.get(2));
         assertEquals(1, results.get(3));
         assertEquals(0, results.get(4));
+    }
+
+    @Test
+    public void testConvertException() {
+        Exception e1 = new RuntimeException("test");
+        Assertions.assertEquals(e1, Futures.convertException(e1));
+
+        Exception cause = new IllegalArgumentException("cause");
+        ExecutionException e2 = new ExecutionException(cause);
+        Assertions.assertEquals(cause, Futures.convertException(e2));
+
+        ExecutionException e3 = new ExecutionException(new Error("error"));
+        Assertions.assertEquals(e3, Futures.convertException(e3));
     }
 
 }

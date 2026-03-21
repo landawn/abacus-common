@@ -7,12 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BooleanTriConsumerTest extends TestBase {
 
     @Test
@@ -44,6 +42,31 @@ public class BooleanTriConsumerTest extends TestBase {
     }
 
     @Test
+    public void testAnonymousClass() {
+        List<String> results = new ArrayList<>();
+        BooleanTriConsumer consumer = new BooleanTriConsumer() {
+            @Override
+            public void accept(boolean a, boolean b, boolean c) {
+                results.add(String.format("a=%b,b=%b,c=%b", a, b, c));
+            }
+        };
+
+        consumer.accept(true, false, true);
+
+        assertEquals(1, results.size());
+        assertEquals("a=true,b=false,c=true", results.get(0));
+    }
+
+    @Test
+    public void testAcceptWithException() {
+        BooleanTriConsumer consumer = (a, b, c) -> {
+            throw new RuntimeException("Test exception");
+        };
+
+        assertThrows(RuntimeException.class, () -> consumer.accept(true, false, true));
+    }
+
+    @Test
     public void testAndThen() {
         List<String> results = new ArrayList<>();
         BooleanTriConsumer consumer1 = (a, b, c) -> results.add("first");
@@ -69,30 +92,5 @@ public class BooleanTriConsumerTest extends TestBase {
 
         assertThrows(RuntimeException.class, () -> chainedConsumer.accept(true, false, true));
         assertEquals(1, results.size());
-    }
-
-    @Test
-    public void testAcceptWithException() {
-        BooleanTriConsumer consumer = (a, b, c) -> {
-            throw new RuntimeException("Test exception");
-        };
-
-        assertThrows(RuntimeException.class, () -> consumer.accept(true, false, true));
-    }
-
-    @Test
-    public void testAnonymousClass() {
-        List<String> results = new ArrayList<>();
-        BooleanTriConsumer consumer = new BooleanTriConsumer() {
-            @Override
-            public void accept(boolean a, boolean b, boolean c) {
-                results.add(String.format("a=%b,b=%b,c=%b", a, b, c));
-            }
-        };
-
-        consumer.accept(true, false, true);
-
-        assertEquals(1, results.size());
-        assertEquals("a=true,b=false,c=true", results.get(0));
     }
 }

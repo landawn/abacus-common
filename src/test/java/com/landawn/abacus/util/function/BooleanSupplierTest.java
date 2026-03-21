@@ -7,12 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BooleanSupplierTest extends TestBase {
 
     @Test
@@ -40,26 +38,6 @@ public class BooleanSupplierTest extends TestBase {
     }
 
     @Test
-    public void testRandom() {
-        assertNotNull(BooleanSupplier.RANDOM);
-
-        // Call it multiple times to verify it doesn't throw exception
-        for (int i = 0; i < 10; i++) {
-            boolean result = BooleanSupplier.RANDOM.getAsBoolean();
-            // Result can be either true or false
-        }
-    }
-
-    @Test
-    public void testGetAsBooleanMultipleCalls() {
-        BooleanSupplier supplier = () -> true;
-
-        for (int i = 0; i < 5; i++) {
-            assertTrue(supplier.getAsBoolean());
-        }
-    }
-
-    @Test
     public void testStatefulSupplier() {
         AtomicBoolean state = new AtomicBoolean(false);
         BooleanSupplier supplier = () -> {
@@ -70,15 +48,6 @@ public class BooleanSupplierTest extends TestBase {
         assertTrue(supplier.getAsBoolean()); // First call: false -> true
         assertFalse(supplier.getAsBoolean()); // Second call: true -> false
         assertTrue(supplier.getAsBoolean()); // Third call: false -> true
-    }
-
-    @Test
-    public void testGetAsBooleanWithException() {
-        BooleanSupplier supplier = () -> {
-            throw new RuntimeException("Test exception");
-        };
-
-        assertThrows(RuntimeException.class, supplier::getAsBoolean);
     }
 
     @Test
@@ -102,13 +71,6 @@ public class BooleanSupplierTest extends TestBase {
         };
 
         assertTrue(supplier.getAsBoolean());
-    }
-
-    @Test
-    public void testConstantsNotNull() {
-        assertNotNull(BooleanSupplier.TRUE);
-        assertNotNull(BooleanSupplier.FALSE);
-        assertNotNull(BooleanSupplier.RANDOM);
     }
 
     @Test
@@ -157,5 +119,41 @@ public class BooleanSupplierTest extends TestBase {
 
         value.set(false);
         assertFalse(supplier.getAsBoolean());
+    }
+
+    @Test
+    public void testGetAsBooleanMultipleCalls() {
+        BooleanSupplier supplier = () -> true;
+
+        for (int i = 0; i < 5; i++) {
+            assertTrue(supplier.getAsBoolean());
+        }
+    }
+
+    @Test
+    public void testRandom() {
+        assertNotNull(BooleanSupplier.RANDOM);
+
+        // Call it multiple times to verify it doesn't throw exception
+        for (int i = 0; i < 10; i++) {
+            boolean result = BooleanSupplier.RANDOM.getAsBoolean();
+            // Result can be either true or false
+        }
+    }
+
+    @Test
+    public void testGetAsBooleanWithException() {
+        BooleanSupplier supplier = () -> {
+            throw new RuntimeException("Test exception");
+        };
+
+        assertThrows(RuntimeException.class, supplier::getAsBoolean);
+    }
+
+    @Test
+    public void testConstantsNotNull() {
+        assertNotNull(BooleanSupplier.TRUE);
+        assertNotNull(BooleanSupplier.FALSE);
+        assertNotNull(BooleanSupplier.RANDOM);
     }
 }

@@ -14,14 +14,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("2025")
 public class ShortTypeTest extends TestBase {
 
     private final ShortType shortType = new ShortType();
@@ -32,13 +30,43 @@ public class ShortTypeTest extends TestBase {
     }
 
     @Test
-    public void test_name() {
-        assertEquals("Short", shortType.name());
+    public void test_isPrimitiveWrapper() {
+        assertTrue(shortType.isPrimitiveWrapper());
     }
 
     @Test
-    public void test_isPrimitiveWrapper() {
-        assertTrue(shortType.isPrimitiveWrapper());
+    public void test_get_ResultSet_byIndex() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+
+        // Test with value
+        when(rs.getShort(1)).thenReturn((short) 42);
+        when(rs.wasNull()).thenReturn(false);
+        assertEquals((short) 42, shortType.get(rs, 1));
+
+        // Test with null
+        when(rs.getShort(2)).thenReturn((short) 0);
+        when(rs.wasNull()).thenReturn(true);
+        assertNull(shortType.get(rs, 2));
+    }
+
+    @Test
+    public void test_get_ResultSet_byLabel() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+
+        // Test with value
+        when(rs.getShort("shortCol")).thenReturn((short) 99);
+        when(rs.wasNull()).thenReturn(false);
+        assertEquals((short) 99, shortType.get(rs, "shortCol"));
+
+        // Test with null
+        when(rs.getShort("nullCol")).thenReturn((short) 0);
+        when(rs.wasNull()).thenReturn(true);
+        assertNull(shortType.get(rs, "nullCol"));
+    }
+
+    @Test
+    public void test_name() {
+        assertEquals("Short", shortType.name());
     }
 
     @Test
@@ -105,36 +133,6 @@ public class ShortTypeTest extends TestBase {
     public void test_valueOf_charArray_outOfRange() {
         char[] chars = "99999".toCharArray();
         assertThrows(NumberFormatException.class, () -> shortType.valueOf(chars, 0, 5));
-    }
-
-    @Test
-    public void test_get_ResultSet_byIndex() throws SQLException {
-        ResultSet rs = mock(ResultSet.class);
-
-        // Test with value
-        when(rs.getShort(1)).thenReturn((short) 42);
-        when(rs.wasNull()).thenReturn(false);
-        assertEquals((short) 42, shortType.get(rs, 1));
-
-        // Test with null
-        when(rs.getShort(2)).thenReturn((short) 0);
-        when(rs.wasNull()).thenReturn(true);
-        assertNull(shortType.get(rs, 2));
-    }
-
-    @Test
-    public void test_get_ResultSet_byLabel() throws SQLException {
-        ResultSet rs = mock(ResultSet.class);
-
-        // Test with value
-        when(rs.getShort("shortCol")).thenReturn((short) 99);
-        when(rs.wasNull()).thenReturn(false);
-        assertEquals((short) 99, shortType.get(rs, "shortCol"));
-
-        // Test with null
-        when(rs.getShort("nullCol")).thenReturn((short) 0);
-        when(rs.wasNull()).thenReturn(true);
-        assertNull(shortType.get(rs, "nullCol"));
     }
 
     @Test

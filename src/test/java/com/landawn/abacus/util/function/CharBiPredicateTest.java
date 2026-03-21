@@ -4,12 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class CharBiPredicateTest extends TestBase {
 
     @Test
@@ -40,65 +38,6 @@ public class CharBiPredicateTest extends TestBase {
 
         assertTrue(predicate.test('a', 'a'));
         assertFalse(predicate.test('a', 'b'));
-    }
-
-    @Test
-    public void testNegate() {
-        CharBiPredicate equal = (t, u) -> t == u;
-        CharBiPredicate notEqual = equal.negate();
-
-        assertFalse(notEqual.test('a', 'a'));
-        assertTrue(notEqual.test('a', 'b'));
-    }
-
-    @Test
-    public void testAnd() {
-        CharBiPredicate firstIsLetter = (t, u) -> Character.isLetter(t);
-        CharBiPredicate secondIsDigit = (t, u) -> Character.isDigit(u);
-        CharBiPredicate combined = firstIsLetter.and(secondIsDigit);
-
-        assertTrue(combined.test('a', '5'));
-        assertFalse(combined.test('5', '5'));
-        assertFalse(combined.test('a', 'b'));
-    }
-
-    @Test
-    public void testAndShortCircuit() {
-        final boolean[] secondCalled = { false };
-        CharBiPredicate alwaysFalse = (t, u) -> false;
-        CharBiPredicate checkCalled = (t, u) -> {
-            secondCalled[0] = true;
-            return true;
-        };
-
-        CharBiPredicate combined = alwaysFalse.and(checkCalled);
-        assertFalse(combined.test('a', 'b'));
-        assertFalse(secondCalled[0]);
-    }
-
-    @Test
-    public void testOr() {
-        CharBiPredicate equal = (t, u) -> t == u;
-        CharBiPredicate bothDigits = (t, u) -> Character.isDigit(t) && Character.isDigit(u);
-        CharBiPredicate combined = equal.or(bothDigits);
-
-        assertTrue(combined.test('a', 'a'));
-        assertTrue(combined.test('5', '9'));
-        assertFalse(combined.test('a', 'b'));
-    }
-
-    @Test
-    public void testOrShortCircuit() {
-        final boolean[] secondCalled = { false };
-        CharBiPredicate alwaysTrue = (t, u) -> true;
-        CharBiPredicate checkCalled = (t, u) -> {
-            secondCalled[0] = true;
-            return false;
-        };
-
-        CharBiPredicate combined = alwaysTrue.or(checkCalled);
-        assertTrue(combined.test('a', 'b'));
-        assertFalse(secondCalled[0]);
     }
 
     @Test
@@ -162,6 +101,65 @@ public class CharBiPredicateTest extends TestBase {
         assertTrue(CharBiPredicate.EQUAL.test(Character.MAX_VALUE, Character.MAX_VALUE));
         assertTrue(CharBiPredicate.EQUAL.test(Character.MIN_VALUE, Character.MIN_VALUE));
         assertTrue(CharBiPredicate.LESS_THAN.test(Character.MIN_VALUE, Character.MAX_VALUE));
+    }
+
+    @Test
+    public void testNegate() {
+        CharBiPredicate equal = (t, u) -> t == u;
+        CharBiPredicate notEqual = equal.negate();
+
+        assertFalse(notEqual.test('a', 'a'));
+        assertTrue(notEqual.test('a', 'b'));
+    }
+
+    @Test
+    public void testAnd() {
+        CharBiPredicate firstIsLetter = (t, u) -> Character.isLetter(t);
+        CharBiPredicate secondIsDigit = (t, u) -> Character.isDigit(u);
+        CharBiPredicate combined = firstIsLetter.and(secondIsDigit);
+
+        assertTrue(combined.test('a', '5'));
+        assertFalse(combined.test('5', '5'));
+        assertFalse(combined.test('a', 'b'));
+    }
+
+    @Test
+    public void testAndShortCircuit() {
+        final boolean[] secondCalled = { false };
+        CharBiPredicate alwaysFalse = (t, u) -> false;
+        CharBiPredicate checkCalled = (t, u) -> {
+            secondCalled[0] = true;
+            return true;
+        };
+
+        CharBiPredicate combined = alwaysFalse.and(checkCalled);
+        assertFalse(combined.test('a', 'b'));
+        assertFalse(secondCalled[0]);
+    }
+
+    @Test
+    public void testOr() {
+        CharBiPredicate equal = (t, u) -> t == u;
+        CharBiPredicate bothDigits = (t, u) -> Character.isDigit(t) && Character.isDigit(u);
+        CharBiPredicate combined = equal.or(bothDigits);
+
+        assertTrue(combined.test('a', 'a'));
+        assertTrue(combined.test('5', '9'));
+        assertFalse(combined.test('a', 'b'));
+    }
+
+    @Test
+    public void testOrShortCircuit() {
+        final boolean[] secondCalled = { false };
+        CharBiPredicate alwaysTrue = (t, u) -> true;
+        CharBiPredicate checkCalled = (t, u) -> {
+            secondCalled[0] = true;
+            return false;
+        };
+
+        CharBiPredicate combined = alwaysTrue.or(checkCalled);
+        assertTrue(combined.test('a', 'b'));
+        assertFalse(secondCalled[0]);
     }
 
     @Test

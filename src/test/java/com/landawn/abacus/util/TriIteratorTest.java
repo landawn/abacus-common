@@ -28,7 +28,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -38,7 +37,6 @@ import com.landawn.abacus.util.function.IntObjConsumer;
 import com.landawn.abacus.util.function.TriPredicate;
 import com.landawn.abacus.util.stream.Stream;
 
-@Tag("2025")
 public class TriIteratorTest extends TestBase {
 
     // =====================================================================
@@ -50,12 +48,6 @@ public class TriIteratorTest extends TestBase {
         TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
         assertNotNull(iter);
         assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testEmpty_next_throwsException() {
-        TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
-        assertThrows(NoSuchElementException.class, () -> iter.next());
     }
 
     @Test
@@ -79,12 +71,62 @@ public class TriIteratorTest extends TestBase {
     }
 
     @Test
+    public void testToSet_empty() {
+        TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
+        Set<Triple<String, Integer, Boolean>> set = iter.toSet();
+
+        assertTrue(set.isEmpty());
+    }
+
+    @Test
+    public void testToCollection_empty() {
+        TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
+        ArrayList<Triple<String, Integer, Boolean>> collection = iter.toCollection(ArrayList::new);
+
+        assertTrue(collection.isEmpty());
+    }
+
+    @Test
+    public void testToImmutableList_empty() {
+        TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
+        ImmutableList<Triple<String, Integer, Boolean>> immutableList = iter.toImmutableList();
+
+        assertTrue(immutableList.isEmpty());
+    }
+
+    @Test
+    public void testToImmutableSet_empty() {
+        TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
+        ImmutableSet<Triple<String, Integer, Boolean>> immutableSet = iter.toImmutableSet();
+
+        assertTrue(immutableSet.isEmpty());
+    }
+
+    @Test
+    public void testCount_empty() {
+        TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
+        assertEquals(0, iter.count());
+    }
+
+    @Test
+    public void testEmpty_next_throwsException() {
+        TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
+        assertThrows(NoSuchElementException.class, () -> iter.next());
+    }
+
+    @Test
     public void testEmpty_nextAction_throwsException() {
         TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
         assertThrows(NoSuchElementException.class, () -> {
             iter.next((a, b, c) -> {
             });
         });
+    }
+
+    @Test
+    public void testRemove_empty() {
+        TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
+        assertThrows(UnsupportedOperationException.class, () -> iter.remove());
     }
 
     // =====================================================================
@@ -132,11 +174,6 @@ public class TriIteratorTest extends TestBase {
     }
 
     @Test
-    public void testGenerate_consumer_null() {
-        assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(null));
-    }
-
-    @Test
     public void testGenerate_infinite() {
         AtomicInteger counter = new AtomicInteger(0);
         TriIterator<Integer, Integer, Integer> iter = TriIterator.generate(t -> {
@@ -147,45 +184,6 @@ public class TriIteratorTest extends TestBase {
         assertTrue(iter.hasNext());
         assertEquals(Triple.of(0, 1, 2), iter.next());
         assertEquals(Triple.of(1, 2, 3), iter.next());
-    }
-
-    // =====================================================================
-    // generate(BooleanSupplier, Consumer)
-    // =====================================================================
-
-    @Test
-    public void testGenerateWithBooleanSupplierAndConsumer() {
-        MutableInt counter = MutableInt.of(0);
-        BooleanSupplier hasNext = () -> counter.value() < 3;
-        Consumer<Triple<Integer, String, Boolean>> output = triple -> {
-            triple.set(counter.value(), "value" + counter.value(), counter.value() % 2 == 0);
-            counter.increment();
-        };
-
-        TriIterator<Integer, String, Boolean> iter = TriIterator.generate(hasNext, output);
-
-        List<Triple<Integer, String, Boolean>> results = new ArrayList<>();
-        while (iter.hasNext()) {
-            results.add(iter.next());
-        }
-
-        assertEquals(3, results.size());
-        assertEquals(0, results.get(0).left());
-        assertEquals("value0", results.get(0).middle());
-        assertTrue(results.get(0).right());
-        assertEquals(1, results.get(1).left());
-        assertEquals("value1", results.get(1).middle());
-        assertFalse(results.get(1).right());
-
-        assertFalse(iter.hasNext());
-        assertThrows(NoSuchElementException.class, () -> iter.next());
-    }
-
-    @Test
-    public void testGenerate_booleanSupplierAndConsumer_nullArgs() {
-        assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(null, triple -> {
-        }));
-        assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(() -> true, null));
     }
 
     @Test
@@ -200,29 +198,6 @@ public class TriIteratorTest extends TestBase {
         assertEquals(3, result.size());
         assertEquals(Arrays.asList(Triple.of(0, 0, 0), Triple.of(1, 1, 1), Triple.of(2, 2, 2)), result);
         assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testGenerateEdgeCases() {
-        BooleanSupplier alwaysFalse = () -> false;
-        Consumer<Triple<String, Integer, Double>> output = triple -> {
-            fail("Should never be called");
-        };
-
-        TriIterator<String, Integer, Double> iter = TriIterator.generate(alwaysFalse, output);
-        assertFalse(iter.hasNext());
-
-        IntObjConsumer<Triple<Integer, Integer, Integer>> indexOutput = (idx, triple) -> {
-            triple.set(idx, idx * 2, idx * 3);
-        };
-
-        TriIterator<Integer, Integer, Integer> indexIter = TriIterator.generate(0, 1, indexOutput);
-        assertTrue(indexIter.hasNext());
-        Triple<Integer, Integer, Integer> single = indexIter.next();
-        assertEquals(Integer.valueOf(0), single.left());
-        assertEquals(Integer.valueOf(0), single.middle());
-        assertEquals(Integer.valueOf(0), single.right());
-        assertFalse(indexIter.hasNext());
     }
 
     @Test
@@ -275,6 +250,107 @@ public class TriIteratorTest extends TestBase {
     }
 
     @Test
+    public void testGenerate_withIndex() {
+        TriIterator<Integer, Integer, Integer> iter = TriIterator.generate(1, 4, (i, t) -> t.set(i, i * 2, i * 3));
+        assertEquals(Arrays.asList(Triple.of(1, 2, 3), Triple.of(2, 4, 6), Triple.of(3, 6, 9)), iter.toList());
+    }
+
+    @Test
+    public void testCount_afterPartialConsumption() {
+        TriIterator<Integer, Integer, Integer> iter = TriIterator.generate(0, 5, (i, t) -> t.set(i, i, i));
+        iter.next();
+        iter.next();
+        assertEquals(3, iter.count());
+    }
+
+    @Test
+    public void testCount_exhaustsIterator() {
+        TriIterator<Integer, Integer, Integer> iter = TriIterator.generate(0, 3, (i, t) -> t.set(i, i, i));
+        iter.count();
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testChainedOperations() {
+        TriIterator<Integer, Integer, Integer> iter = TriIterator.generate(0, 10, (i, t) -> t.set(i, i, i));
+        List<Triple<Integer, Integer, Integer>> result = iter.skip(2).limit(5).filter((a, b, c) -> a % 2 == 0).toList();
+        assertEquals(Arrays.asList(Triple.of(2, 2, 2), Triple.of(4, 4, 4), Triple.of(6, 6, 6)), result);
+    }
+
+    @Test
+    public void testGenerateEdgeCases() {
+        BooleanSupplier alwaysFalse = () -> false;
+        Consumer<Triple<String, Integer, Double>> output = triple -> {
+            fail("Should never be called");
+        };
+
+        TriIterator<String, Integer, Double> iter = TriIterator.generate(alwaysFalse, output);
+        assertFalse(iter.hasNext());
+
+        IntObjConsumer<Triple<Integer, Integer, Integer>> indexOutput = (idx, triple) -> {
+            triple.set(idx, idx * 2, idx * 3);
+        };
+
+        TriIterator<Integer, Integer, Integer> indexIter = TriIterator.generate(0, 1, indexOutput);
+        assertTrue(indexIter.hasNext());
+        Triple<Integer, Integer, Integer> single = indexIter.next();
+        assertEquals(Integer.valueOf(0), single.left());
+        assertEquals(Integer.valueOf(0), single.middle());
+        assertEquals(Integer.valueOf(0), single.right());
+        assertFalse(indexIter.hasNext());
+    }
+
+    @Test
+    public void testGenerate_emptyRange() {
+        TriIterator<Integer, Integer, Integer> iter = TriIterator.generate(1, 1, (i, t) -> t.set(i, i, i));
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testGenerate_consumer_null() {
+        assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(null));
+    }
+
+    // =====================================================================
+    // generate(BooleanSupplier, Consumer)
+    // =====================================================================
+
+    @Test
+    public void testGenerateWithBooleanSupplierAndConsumer() {
+        MutableInt counter = MutableInt.of(0);
+        BooleanSupplier hasNext = () -> counter.value() < 3;
+        Consumer<Triple<Integer, String, Boolean>> output = triple -> {
+            triple.set(counter.value(), "value" + counter.value(), counter.value() % 2 == 0);
+            counter.increment();
+        };
+
+        TriIterator<Integer, String, Boolean> iter = TriIterator.generate(hasNext, output);
+
+        List<Triple<Integer, String, Boolean>> results = new ArrayList<>();
+        while (iter.hasNext()) {
+            results.add(iter.next());
+        }
+
+        assertEquals(3, results.size());
+        assertEquals(0, results.get(0).left());
+        assertEquals("value0", results.get(0).middle());
+        assertTrue(results.get(0).right());
+        assertEquals(1, results.get(1).left());
+        assertEquals("value1", results.get(1).middle());
+        assertFalse(results.get(1).right());
+
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, () -> iter.next());
+    }
+
+    @Test
+    public void testGenerate_booleanSupplierAndConsumer_nullArgs() {
+        assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(null, triple -> {
+        }));
+        assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(() -> true, null));
+    }
+
+    @Test
     public void testGenerate_intRange_invalidRange() {
         assertThrows(IndexOutOfBoundsException.class, () -> TriIterator.generate(5, 2, (idx, triple) -> {
         }));
@@ -286,15 +362,13 @@ public class TriIteratorTest extends TestBase {
     }
 
     @Test
-    public void testGenerate_emptyRange() {
-        TriIterator<Integer, Integer, Integer> iter = TriIterator.generate(1, 1, (i, t) -> t.set(i, i, i));
-        assertFalse(iter.hasNext());
-    }
+    public void testArgumentValidation() {
+        assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(null, (Consumer<Triple<String, Integer, Double>>) null));
+        assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(null));
+        assertThrows(IllegalArgumentException.class, () -> TriIterator.empty().skip(-1));
+        assertThrows(IllegalArgumentException.class, () -> TriIterator.empty().limit(-1));
 
-    @Test
-    public void testGenerate_withIndex() {
-        TriIterator<Integer, Integer, Integer> iter = TriIterator.generate(1, 4, (i, t) -> t.set(i, i * 2, i * 3));
-        assertEquals(Arrays.asList(Triple.of(1, 2, 3), Triple.of(2, 4, 6), Triple.of(3, 6, 9)), iter.toList());
+        assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(2, 5, (IntObjConsumer<Triple<String, Integer, Double>>) null));
     }
 
     // =====================================================================
@@ -337,43 +411,10 @@ public class TriIteratorTest extends TestBase {
     }
 
     @Test
-    public void testZipArrays_nullArray() {
-        String[] names = { "Alice" };
-        Integer[] ages = { 25 };
-
-        TriIterator<String, Integer, Boolean> iter = TriIterator.zip(names, ages, (Boolean[]) null);
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
     public void testZipArrays_shortestWins() {
         TriIterator<Integer, String, Boolean> iter = TriIterator.zip(new Integer[] { 1, 2 }, new String[] { "a", "b", "c" }, new Boolean[] { true });
         assertTrue(iter.hasNext());
         assertEquals(Triple.of(1, "a", true), iter.next());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testZipArrays_withNullElements() {
-        String[] arr1 = { "a", null, "c" };
-        Integer[] arr2 = { 1, 2, null };
-        Double[] arr3 = { null, 2.2, 3.3 };
-
-        TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3);
-
-        List<Triple<String, Integer, Double>> results = iter.toList();
-        assertEquals(3, results.size());
-        assertNull(results.get(0).right());
-        assertNull(results.get(1).left());
-        assertNull(results.get(2).middle());
-    }
-
-    @Test
-    public void testZipArrays_nullAndEmpty() {
-        assertFalse(TriIterator.zip(new Integer[] { 1 }, null, new Boolean[] { true }).hasNext());
-        assertFalse(TriIterator.zip(new Integer[] {}, new String[] { "a" }, new Boolean[] { true }).hasNext());
-        assertFalse(TriIterator.zip(new Integer[] {}, new String[] {}, new Boolean[] {}).hasNext());
-        TriIterator<Integer, String, Boolean> iter = TriIterator.zip((Integer[]) null, (String[]) null, (Boolean[]) null, 1, "a", true);
         assertFalse(iter.hasNext());
     }
 
@@ -445,43 +486,6 @@ public class TriIteratorTest extends TestBase {
     }
 
     @Test
-    public void testZipIterables_nullIterable() {
-        List<String> names = CommonUtil.toList("Alice");
-        List<Integer> ages = CommonUtil.toList(25);
-
-        TriIterator<String, Integer, Boolean> iter = TriIterator.zip(names, ages, (Iterable<Boolean>) null);
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testZipIterables_withNulls() {
-        List<String> list1 = Arrays.asList("a", "b");
-        List<Integer> list2 = null;
-        List<Double> list3 = Arrays.asList(1.0, 2.0);
-
-        TriIterator<String, Integer, Double> iter = TriIterator.zip(list1, list2, list3);
-
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testZipIterables_emptyCollections() {
-        List<String> empty1 = Collections.emptyList();
-        List<Integer> empty2 = Collections.emptyList();
-        List<Double> empty3 = Collections.emptyList();
-
-        TriIterator<String, Integer, Double> iter = TriIterator.zip(empty1, empty2, empty3);
-        assertFalse(iter.hasNext());
-
-        List<String> list1 = Arrays.asList("a", "b");
-        List<Integer> list2 = Collections.emptyList();
-        List<Double> list3 = Arrays.asList(1.1, 2.2);
-
-        iter = TriIterator.zip(list1, list2, list3);
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
     public void testZipIterables_shortestWins() {
         TriIterator<Integer, String, Double> iter = TriIterator.zip(Arrays.asList(1, 2), Arrays.asList("a"), Arrays.asList(1.1, 2.2));
         assertTrue(iter.hasNext());
@@ -540,6 +544,169 @@ public class TriIteratorTest extends TestBase {
         assertFalse(mapped.hasNext());
     }
 
+    // =====================================================================
+    // toSet() (inherited from ImmutableIterator)
+    // =====================================================================
+
+    @Test
+    public void testToSet() {
+        TriIterator<Integer, String, Boolean> iter = TriIterator.zip(new Integer[] { 1, 2 }, new String[] { "a", "b" }, new Boolean[] { true, false });
+        Set<Triple<Integer, String, Boolean>> set = iter.toSet();
+
+        assertEquals(2, set.size());
+        assertTrue(set.contains(Triple.of(1, "a", true)));
+        assertTrue(set.contains(Triple.of(2, "b", false)));
+    }
+
+    @Test
+    public void testToSet_duplicates() {
+        TriIterator<Integer, Integer, Integer> iter = TriIterator.zip(new Integer[] { 1, 1 }, new Integer[] { 2, 2 }, new Integer[] { 3, 3 });
+        Set<Triple<Integer, Integer, Integer>> set = iter.toSet();
+
+        assertEquals(1, set.size());
+    }
+
+    // =====================================================================
+    // toCollection(Supplier) (inherited from ImmutableIterator)
+    // =====================================================================
+
+    @Test
+    public void testToCollection() {
+        TriIterator<Integer, String, Boolean> iter = TriIterator.zip(new Integer[] { 1, 2, 3 }, new String[] { "a", "b", "c" },
+                new Boolean[] { true, false, true });
+        LinkedList<Triple<Integer, String, Boolean>> collection = iter.toCollection(LinkedList::new);
+
+        assertEquals(3, collection.size());
+        assertEquals(Triple.of(1, "a", true), collection.getFirst());
+        assertEquals(Triple.of(3, "c", true), collection.getLast());
+    }
+
+    // =====================================================================
+    // toImmutableList() (inherited from ImmutableIterator)
+    // =====================================================================
+
+    @Test
+    public void testToImmutableList() {
+        TriIterator<Integer, String, Boolean> iter = TriIterator.zip(new Integer[] { 1, 2 }, new String[] { "a", "b" }, new Boolean[] { true, false });
+        ImmutableList<Triple<Integer, String, Boolean>> immutableList = iter.toImmutableList();
+
+        assertEquals(2, immutableList.size());
+        assertEquals(Triple.of(1, "a", true), immutableList.get(0));
+        assertEquals(Triple.of(2, "b", false), immutableList.get(1));
+    }
+
+    // =====================================================================
+    // toImmutableSet() (inherited from ImmutableIterator)
+    // =====================================================================
+
+    @Test
+    public void testToImmutableSet() {
+        TriIterator<Integer, String, Boolean> iter = TriIterator.zip(new Integer[] { 1, 2 }, new String[] { "a", "b" }, new Boolean[] { true, false });
+        ImmutableSet<Triple<Integer, String, Boolean>> immutableSet = iter.toImmutableSet();
+
+        assertEquals(2, immutableSet.size());
+        assertTrue(immutableSet.contains(Triple.of(1, "a", true)));
+        assertTrue(immutableSet.contains(Triple.of(2, "b", false)));
+    }
+
+    // =====================================================================
+    // count() (inherited from ImmutableIterator)
+    // =====================================================================
+
+    @Test
+    public void testCount() {
+        TriIterator<Integer, String, Boolean> iter = TriIterator.zip(new Integer[] { 1, 2, 3 }, new String[] { "a", "b", "c" },
+                new Boolean[] { true, false, true });
+        assertEquals(3, iter.count());
+    }
+
+    @Test
+    public void testCombinedOperations() {
+        String[] arr1 = { "a", "b", "c", "d", "e", "f" };
+        Integer[] arr2 = { 1, 2, 3, 4, 5, 6 };
+        Double[] arr3 = { 1.1, 2.2, 3.3, 4.4, 5.5, 6.6 };
+
+        TriPredicate<String, Integer, Double> predicate = (s, i, d) -> i % 2 == 0;
+
+        List<Triple<String, Integer, Double>> result = TriIterator.zip(arr1, arr2, arr3).skip(1).limit(4).filter(predicate).toList();
+
+        assertEquals(2, result.size());
+        assertEquals("b", result.get(0).left());
+        assertEquals(Integer.valueOf(2), result.get(0).middle());
+        assertEquals("d", result.get(1).left());
+        assertEquals(Integer.valueOf(4), result.get(1).middle());
+    }
+
+    @Test
+    public void testZipArrays_nullArray() {
+        String[] names = { "Alice" };
+        Integer[] ages = { 25 };
+
+        TriIterator<String, Integer, Boolean> iter = TriIterator.zip(names, ages, (Boolean[]) null);
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testZipArrays_withNullElements() {
+        String[] arr1 = { "a", null, "c" };
+        Integer[] arr2 = { 1, 2, null };
+        Double[] arr3 = { null, 2.2, 3.3 };
+
+        TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3);
+
+        List<Triple<String, Integer, Double>> results = iter.toList();
+        assertEquals(3, results.size());
+        assertNull(results.get(0).right());
+        assertNull(results.get(1).left());
+        assertNull(results.get(2).middle());
+    }
+
+    @Test
+    public void testZipArrays_nullAndEmpty() {
+        assertFalse(TriIterator.zip(new Integer[] { 1 }, null, new Boolean[] { true }).hasNext());
+        assertFalse(TriIterator.zip(new Integer[] {}, new String[] { "a" }, new Boolean[] { true }).hasNext());
+        assertFalse(TriIterator.zip(new Integer[] {}, new String[] {}, new Boolean[] {}).hasNext());
+        TriIterator<Integer, String, Boolean> iter = TriIterator.zip((Integer[]) null, (String[]) null, (Boolean[]) null, 1, "a", true);
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testZipIterables_nullIterable() {
+        List<String> names = CommonUtil.toList("Alice");
+        List<Integer> ages = CommonUtil.toList(25);
+
+        TriIterator<String, Integer, Boolean> iter = TriIterator.zip(names, ages, (Iterable<Boolean>) null);
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testZipIterables_withNulls() {
+        List<String> list1 = Arrays.asList("a", "b");
+        List<Integer> list2 = null;
+        List<Double> list3 = Arrays.asList(1.0, 2.0);
+
+        TriIterator<String, Integer, Double> iter = TriIterator.zip(list1, list2, list3);
+
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testZipIterables_emptyCollections() {
+        List<String> empty1 = Collections.emptyList();
+        List<Integer> empty2 = Collections.emptyList();
+        List<Double> empty3 = Collections.emptyList();
+
+        TriIterator<String, Integer, Double> iter = TriIterator.zip(empty1, empty2, empty3);
+        assertFalse(iter.hasNext());
+
+        List<String> list1 = Arrays.asList("a", "b");
+        List<Integer> list2 = Collections.emptyList();
+        List<Double> list3 = Arrays.asList(1.1, 2.2);
+
+        iter = TriIterator.zip(list1, list2, list3);
+        assertFalse(iter.hasNext());
+    }
+
     @Test
     public void testZipIterators_nullIterator() {
         List<String> names = CommonUtil.toList("Alice");
@@ -592,6 +759,109 @@ public class TriIteratorTest extends TestBase {
         assertFalse(triIter.hasNext());
     }
 
+    @Test
+    public void testMultipleHasNextCalls() {
+        String[] arr1 = { "a" };
+        Integer[] arr2 = { 1 };
+        Double[] arr3 = { 1.1 };
+
+        TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3);
+
+        assertTrue(iter.hasNext());
+        assertTrue(iter.hasNext());
+        assertTrue(iter.hasNext());
+
+        Triple<String, Integer, Double> element = iter.next();
+        assertEquals("a", element.left());
+
+        assertFalse(iter.hasNext());
+        assertFalse(iter.hasNext());
+    }
+
+    // =====================================================================
+    // remove() (inherited from ImmutableIterator)
+    // =====================================================================
+
+    @Test
+    public void testRemove() {
+        TriIterator<String, Integer, Boolean> iter = TriIterator.zip(new String[] { "a" }, new Integer[] { 1 }, new Boolean[] { true });
+        assertThrows(UnsupportedOperationException.class, () -> iter.remove());
+    }
+
+    @Test
+    public void testToImmutableList_isImmutable() {
+        TriIterator<Integer, String, Boolean> iter = TriIterator.zip(new Integer[] { 1 }, new String[] { "a" }, new Boolean[] { true });
+        ImmutableList<Triple<Integer, String, Boolean>> immutableList = iter.toImmutableList();
+
+        assertThrows(UnsupportedOperationException.class, () -> immutableList.add(Triple.of(2, "b", false)));
+    }
+
+    @Test
+    public void testToImmutableSet_isImmutable() {
+        TriIterator<Integer, String, Boolean> iter = TriIterator.zip(new Integer[] { 1 }, new String[] { "a" }, new Boolean[] { true });
+        ImmutableSet<Triple<Integer, String, Boolean>> immutableSet = iter.toImmutableSet();
+
+        assertThrows(UnsupportedOperationException.class, () -> immutableSet.add(Triple.of(2, "b", false)));
+    }
+
+    @Test
+    public void testIteratorExhaustion() {
+        String[] arr1 = { "a" };
+        Integer[] arr2 = { 1 };
+        Double[] arr3 = { 1.1 };
+
+        TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3);
+
+        iter.next();
+
+        assertFalse(iter.hasNext());
+
+        try {
+            iter.next();
+            fail("Should throw NoSuchElementException");
+        } catch (NoSuchElementException e) {
+        }
+
+        AtomicInteger count = new AtomicInteger(0);
+        iter.forEachRemaining((a, b, c) -> count.incrementAndGet());
+        assertEquals(0, count.get());
+    }
+
+    @Test
+    public void testUnzipIterable_complexObjects() {
+        List<Map<String, Object>> source = new ArrayList<>();
+        Map<String, Object> map1 = new HashMap<>();
+        map1.put("name", "Alice");
+        map1.put("age", 25);
+        map1.put("score", 95.5);
+        source.add(map1);
+
+        Map<String, Object> map2 = new HashMap<>();
+        map2.put("name", "Bob");
+        map2.put("age", 30);
+        map2.put("score", 88.0);
+        source.add(map2);
+
+        BiConsumer<Map<String, Object>, Triple<String, Integer, Double>> unzipFunction = (map, triple) -> {
+            triple.set((String) map.get("name"), (Integer) map.get("age"), (Double) map.get("score"));
+        };
+
+        TriIterator<String, Integer, Double> iter = TriIterator.unzip(source, unzipFunction);
+
+        List<Triple<String, Integer, Double>> result = iter.toList();
+        assertEquals(2, result.size());
+        assertEquals("Alice", result.get(0).left());
+        assertEquals(Integer.valueOf(25), result.get(0).middle());
+        assertEquals(95.5, result.get(0).right(), 0.001);
+    }
+
+    @Test
+    public void testUnzip_withTripleSource() {
+        List<Triple<Integer, String, Boolean>> source = Arrays.asList(Triple.of(1, "a", true), Triple.of(2, "b", false));
+        TriIterator<Integer, String, Boolean> iter = TriIterator.unzip(source, (src, target) -> target.set(src.left(), src.middle(), src.right()));
+        assertEquals(source, iter.toList());
+    }
+
     // =====================================================================
     // unzip(Iterable, BiConsumer)
     // =====================================================================
@@ -625,34 +895,6 @@ public class TriIteratorTest extends TestBase {
         assertFalse(iter.hasNext());
     }
 
-    @Test
-    public void testUnzipIterable_complexObjects() {
-        List<Map<String, Object>> source = new ArrayList<>();
-        Map<String, Object> map1 = new HashMap<>();
-        map1.put("name", "Alice");
-        map1.put("age", 25);
-        map1.put("score", 95.5);
-        source.add(map1);
-
-        Map<String, Object> map2 = new HashMap<>();
-        map2.put("name", "Bob");
-        map2.put("age", 30);
-        map2.put("score", 88.0);
-        source.add(map2);
-
-        BiConsumer<Map<String, Object>, Triple<String, Integer, Double>> unzipFunction = (map, triple) -> {
-            triple.set((String) map.get("name"), (Integer) map.get("age"), (Double) map.get("score"));
-        };
-
-        TriIterator<String, Integer, Double> iter = TriIterator.unzip(source, unzipFunction);
-
-        List<Triple<String, Integer, Double>> result = iter.toList();
-        assertEquals(2, result.size());
-        assertEquals("Alice", result.get(0).left());
-        assertEquals(Integer.valueOf(25), result.get(0).middle());
-        assertEquals(95.5, result.get(0).right(), 0.001);
-    }
-
     // =====================================================================
     // unzip(Iterator, BiConsumer)
     // =====================================================================
@@ -684,26 +926,10 @@ public class TriIteratorTest extends TestBase {
     }
 
     @Test
-    public void testUnzip_withTripleSource() {
-        List<Triple<Integer, String, Boolean>> source = Arrays.asList(Triple.of(1, "a", true), Triple.of(2, "b", false));
-        TriIterator<Integer, String, Boolean> iter = TriIterator.unzip(source, (src, target) -> target.set(src.left(), src.middle(), src.right()));
-        assertEquals(source, iter.toList());
-    }
-
-    // =====================================================================
-    // remove() (inherited from ImmutableIterator)
-    // =====================================================================
-
-    @Test
-    public void testRemove() {
-        TriIterator<String, Integer, Boolean> iter = TriIterator.zip(new String[] { "a" }, new Integer[] { 1 }, new Boolean[] { true });
-        assertThrows(UnsupportedOperationException.class, () -> iter.remove());
-    }
-
-    @Test
-    public void testRemove_empty() {
-        TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
-        assertThrows(UnsupportedOperationException.class, () -> iter.remove());
+    public void testNextActionThrowsException() {
+        TriIterator<Integer, Integer, Integer> iter = TriIterator.zip(new Integer[] { 1 }, new Integer[] { 1 }, new Integer[] { 1 });
+        iter.next();
+        assertThrows(NoSuchElementException.class, () -> iter.next());
     }
 
     // =====================================================================
@@ -727,11 +953,6 @@ public class TriIteratorTest extends TestBase {
         assertEquals(2, collected.size());
         assertEquals("b", collected.get(0).left());
         assertEquals("c", collected.get(1).left());
-    }
-
-    @Test
-    public void testForEachRemainingWithNullAction() {
-        TriIterator.empty().forEachRemaining(s -> Assertions.fail("Should not be called"));
     }
 
     // =====================================================================
@@ -786,6 +1007,11 @@ public class TriIteratorTest extends TestBase {
         assertEquals(Arrays.asList(3, 4), listB);
         assertEquals(Arrays.asList(5, 6), listC);
         assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testForEachRemainingWithNullAction() {
+        TriIterator.empty().forEachRemaining(s -> Assertions.fail("Should not be called"));
     }
 
     // =====================================================================
@@ -876,23 +1102,6 @@ public class TriIteratorTest extends TestBase {
     }
 
     @Test
-    public void testSkip_zero() {
-        Integer[] nums = { 1, 2 };
-        String[] strs = { "a", "b" };
-        Boolean[] flags = { true, false };
-
-        TriIterator<Integer, String, Boolean> iter = TriIterator.zip(nums, strs, flags).skip(0);
-
-        List<Triple<Integer, String, Boolean>> result = iter.toList();
-        assertEquals(2, result.size());
-    }
-
-    @Test
-    public void testSkip_negative() {
-        assertThrows(IllegalArgumentException.class, () -> TriIterator.empty().skip(-1));
-    }
-
-    @Test
     public void testSkip_moreThanAvailable() {
         Integer[] nums = { 1, 2 };
         String[] strs = { "a", "b" };
@@ -917,6 +1126,59 @@ public class TriIteratorTest extends TestBase {
     }
 
     // =====================================================================
+    // Complex / Integration Tests
+    // =====================================================================
+
+    @Test
+    public void testSkipLimitFilter() {
+        Integer[] nums = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+        String[] strs = new String[10];
+        Boolean[] flags = new Boolean[10];
+        for (int i = 0; i < 10; i++) {
+            strs[i] = "str" + i;
+            flags[i] = i % 2 == 0;
+        }
+
+        TriIterator<Integer, String, Boolean> iter = TriIterator.zip(nums, strs, flags).skip(2).limit(5).filter((num, str, flag) -> flag);
+
+        List<Triple<Integer, String, Boolean>> result = iter.toList();
+        assertEquals(3, result.size());
+    }
+
+    @Test
+    public void testSkipAndLimitCombinations() {
+        String[] arr1 = { "a", "b", "c", "d", "e" };
+        Integer[] arr2 = { 1, 2, 3, 4, 5 };
+        Double[] arr3 = { 1.1, 2.2, 3.3, 4.4, 5.5 };
+
+        TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3).skip(0);
+        assertEquals(5, iter.toList().size());
+
+        iter = TriIterator.zip(arr1, arr2, arr3).limit(10);
+        assertEquals(5, iter.toList().size());
+
+        iter = TriIterator.zip(arr1, arr2, arr3).skip(10).limit(5);
+        assertEquals(0, iter.toList().size());
+    }
+
+    @Test
+    public void testSkip_zero() {
+        Integer[] nums = { 1, 2 };
+        String[] strs = { "a", "b" };
+        Boolean[] flags = { true, false };
+
+        TriIterator<Integer, String, Boolean> iter = TriIterator.zip(nums, strs, flags).skip(0);
+
+        List<Triple<Integer, String, Boolean>> result = iter.toList();
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void testSkip_negative() {
+        assertThrows(IllegalArgumentException.class, () -> TriIterator.empty().skip(-1));
+    }
+
+    // =====================================================================
     // limit(long)
     // =====================================================================
 
@@ -930,6 +1192,13 @@ public class TriIteratorTest extends TestBase {
 
         List<Triple<Integer, Integer, Integer>> result = iter.toList();
         assertEquals(5, result.size());
+    }
+
+    @Test
+    public void testLimit_moreThanAvailable() {
+        TriIterator<Integer, Integer, Integer> iter = TriIterator.zip(new Integer[] { 1, 2, 3 }, new Integer[] { 4, 5, 6 }, new Integer[] { 7, 8, 9 });
+        TriIterator<Integer, Integer, Integer> limited = iter.limit(5);
+        assertEquals(3, limited.toList().size());
     }
 
     @Test
@@ -948,13 +1217,6 @@ public class TriIteratorTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> TriIterator.empty().limit(-1));
     }
 
-    @Test
-    public void testLimit_moreThanAvailable() {
-        TriIterator<Integer, Integer, Integer> iter = TriIterator.zip(new Integer[] { 1, 2, 3 }, new Integer[] { 4, 5, 6 }, new Integer[] { 7, 8, 9 });
-        TriIterator<Integer, Integer, Integer> limited = iter.limit(5);
-        assertEquals(3, limited.toList().size());
-    }
-
     // =====================================================================
     // filter(TriPredicate)
     // =====================================================================
@@ -971,22 +1233,6 @@ public class TriIteratorTest extends TestBase {
         assertEquals(2, result.size());
         assertEquals(3, result.get(0).left().intValue());
         assertEquals(5, result.get(1).left().intValue());
-    }
-
-    @Test
-    public void testFilter_nullPredicate() {
-        assertThrows(IllegalArgumentException.class, () -> TriIterator.empty().filter(null));
-    }
-
-    @Test
-    public void testFilter_noneMatch() {
-        Integer[] nums = { 1, 2 };
-        String[] strs = { "a", "b" };
-        Boolean[] flags = { false, false };
-
-        TriIterator<Integer, String, Boolean> iter = TriIterator.zip(nums, strs, flags).filter((num, str, flag) -> flag);
-
-        assertFalse(iter.hasNext());
     }
 
     @Test
@@ -1021,6 +1267,38 @@ public class TriIteratorTest extends TestBase {
         TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3).filter(rejectAll);
         assertFalse(iter.hasNext());
         assertEquals(0, iter.toList().size());
+    }
+
+    @Test
+    public void testFilterMapCombination() {
+        String[] arr1 = { "a", "bb", "ccc", "dddd", "eeeee" };
+        Integer[] arr2 = { 1, 2, 3, 4, 5 };
+        Double[] arr3 = { 1.0, 2.0, 3.0, 4.0, 5.0 };
+
+        ObjIterator<Integer> iter = TriIterator.zip(arr1, arr2, arr3).filter((s, i, d) -> i % 2 == 0).map((s, i, d) -> s.length());
+
+        List<Integer> lengths = new ArrayList<>();
+        iter.forEachRemaining(lengths::add);
+
+        assertEquals(2, lengths.size());
+        assertEquals(Integer.valueOf(2), lengths.get(0));
+        assertEquals(Integer.valueOf(4), lengths.get(1));
+    }
+
+    @Test
+    public void testFilter_noneMatch() {
+        Integer[] nums = { 1, 2 };
+        String[] strs = { "a", "b" };
+        Boolean[] flags = { false, false };
+
+        TriIterator<Integer, String, Boolean> iter = TriIterator.zip(nums, strs, flags).filter((num, str, flag) -> flag);
+
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testFilter_nullPredicate() {
+        assertThrows(IllegalArgumentException.class, () -> TriIterator.empty().filter(null));
     }
 
     // =====================================================================
@@ -1086,22 +1364,6 @@ public class TriIteratorTest extends TestBase {
     }
 
     @Test
-    public void testFilterMapCombination() {
-        String[] arr1 = { "a", "bb", "ccc", "dddd", "eeeee" };
-        Integer[] arr2 = { 1, 2, 3, 4, 5 };
-        Double[] arr3 = { 1.0, 2.0, 3.0, 4.0, 5.0 };
-
-        ObjIterator<Integer> iter = TriIterator.zip(arr1, arr2, arr3).filter((s, i, d) -> i % 2 == 0).map((s, i, d) -> s.length());
-
-        List<Integer> lengths = new ArrayList<>();
-        iter.forEachRemaining(lengths::add);
-
-        assertEquals(2, lengths.size());
-        assertEquals(Integer.valueOf(2), lengths.get(0));
-        assertEquals(Integer.valueOf(4), lengths.get(1));
-    }
-
-    @Test
     public void testMapWithNullMapper() {
         TriIterator.empty().stream(null).forEach(s -> Assertions.fail("Should not be called"));
     }
@@ -1124,18 +1386,18 @@ public class TriIteratorTest extends TestBase {
     }
 
     @Test
+    public void testStream_count() {
+        TriIterator<Integer, String, Double> iter = TriIterator.zip(Arrays.asList(1, 2), Arrays.asList("a", "b"), Arrays.asList(1.1, 2.2));
+        long count = iter.stream((a, b, c) -> a).count();
+        assertEquals(2, count);
+    }
+
+    @Test
     public void testStream_empty() {
         TriIterator<String, Integer, Double> empty = TriIterator.empty();
 
         Stream<String> stream = empty.stream((a, b, c) -> a + b + c);
         assertEquals(0, stream.count());
-    }
-
-    @Test
-    public void testStream_count() {
-        TriIterator<Integer, String, Double> iter = TriIterator.zip(Arrays.asList(1, 2), Arrays.asList("a", "b"), Arrays.asList(1.1, 2.2));
-        long count = iter.stream((a, b, c) -> a).count();
-        assertEquals(2, count);
     }
 
     // =====================================================================
@@ -1153,13 +1415,6 @@ public class TriIteratorTest extends TestBase {
         Triple<String, Integer, Boolean>[] array = iter.toArray();
         assertEquals(2, array.length);
         assertEquals("Alice", array[0].left());
-    }
-
-    @Test
-    public void testToArray_empty() {
-        TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
-        Triple<String, Integer, Boolean>[] array = iter.toArray();
-        assertEquals(0, array.length);
     }
 
     @Test
@@ -1187,6 +1442,13 @@ public class TriIteratorTest extends TestBase {
         Triple[] array = new Triple[0];
         Triple[] result = iter.toArray(array);
         assertEquals(1, result.length);
+    }
+
+    @Test
+    public void testToArray_empty() {
+        TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
+        Triple<String, Integer, Boolean>[] array = iter.toArray();
+        assertEquals(0, array.length);
     }
 
     @Test
@@ -1239,151 +1501,6 @@ public class TriIteratorTest extends TestBase {
     }
 
     // =====================================================================
-    // toSet() (inherited from ImmutableIterator)
-    // =====================================================================
-
-    @Test
-    public void testToSet() {
-        TriIterator<Integer, String, Boolean> iter = TriIterator.zip(new Integer[] { 1, 2 }, new String[] { "a", "b" }, new Boolean[] { true, false });
-        Set<Triple<Integer, String, Boolean>> set = iter.toSet();
-
-        assertEquals(2, set.size());
-        assertTrue(set.contains(Triple.of(1, "a", true)));
-        assertTrue(set.contains(Triple.of(2, "b", false)));
-    }
-
-    @Test
-    public void testToSet_empty() {
-        TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
-        Set<Triple<String, Integer, Boolean>> set = iter.toSet();
-
-        assertTrue(set.isEmpty());
-    }
-
-    @Test
-    public void testToSet_duplicates() {
-        TriIterator<Integer, Integer, Integer> iter = TriIterator.zip(new Integer[] { 1, 1 }, new Integer[] { 2, 2 }, new Integer[] { 3, 3 });
-        Set<Triple<Integer, Integer, Integer>> set = iter.toSet();
-
-        assertEquals(1, set.size());
-    }
-
-    // =====================================================================
-    // toCollection(Supplier) (inherited from ImmutableIterator)
-    // =====================================================================
-
-    @Test
-    public void testToCollection() {
-        TriIterator<Integer, String, Boolean> iter = TriIterator.zip(new Integer[] { 1, 2, 3 }, new String[] { "a", "b", "c" },
-                new Boolean[] { true, false, true });
-        LinkedList<Triple<Integer, String, Boolean>> collection = iter.toCollection(LinkedList::new);
-
-        assertEquals(3, collection.size());
-        assertEquals(Triple.of(1, "a", true), collection.getFirst());
-        assertEquals(Triple.of(3, "c", true), collection.getLast());
-    }
-
-    @Test
-    public void testToCollection_empty() {
-        TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
-        ArrayList<Triple<String, Integer, Boolean>> collection = iter.toCollection(ArrayList::new);
-
-        assertTrue(collection.isEmpty());
-    }
-
-    // =====================================================================
-    // toImmutableList() (inherited from ImmutableIterator)
-    // =====================================================================
-
-    @Test
-    public void testToImmutableList() {
-        TriIterator<Integer, String, Boolean> iter = TriIterator.zip(new Integer[] { 1, 2 }, new String[] { "a", "b" }, new Boolean[] { true, false });
-        ImmutableList<Triple<Integer, String, Boolean>> immutableList = iter.toImmutableList();
-
-        assertEquals(2, immutableList.size());
-        assertEquals(Triple.of(1, "a", true), immutableList.get(0));
-        assertEquals(Triple.of(2, "b", false), immutableList.get(1));
-    }
-
-    @Test
-    public void testToImmutableList_empty() {
-        TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
-        ImmutableList<Triple<String, Integer, Boolean>> immutableList = iter.toImmutableList();
-
-        assertTrue(immutableList.isEmpty());
-    }
-
-    @Test
-    public void testToImmutableList_isImmutable() {
-        TriIterator<Integer, String, Boolean> iter = TriIterator.zip(new Integer[] { 1 }, new String[] { "a" }, new Boolean[] { true });
-        ImmutableList<Triple<Integer, String, Boolean>> immutableList = iter.toImmutableList();
-
-        assertThrows(UnsupportedOperationException.class, () -> immutableList.add(Triple.of(2, "b", false)));
-    }
-
-    // =====================================================================
-    // toImmutableSet() (inherited from ImmutableIterator)
-    // =====================================================================
-
-    @Test
-    public void testToImmutableSet() {
-        TriIterator<Integer, String, Boolean> iter = TriIterator.zip(new Integer[] { 1, 2 }, new String[] { "a", "b" }, new Boolean[] { true, false });
-        ImmutableSet<Triple<Integer, String, Boolean>> immutableSet = iter.toImmutableSet();
-
-        assertEquals(2, immutableSet.size());
-        assertTrue(immutableSet.contains(Triple.of(1, "a", true)));
-        assertTrue(immutableSet.contains(Triple.of(2, "b", false)));
-    }
-
-    @Test
-    public void testToImmutableSet_empty() {
-        TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
-        ImmutableSet<Triple<String, Integer, Boolean>> immutableSet = iter.toImmutableSet();
-
-        assertTrue(immutableSet.isEmpty());
-    }
-
-    @Test
-    public void testToImmutableSet_isImmutable() {
-        TriIterator<Integer, String, Boolean> iter = TriIterator.zip(new Integer[] { 1 }, new String[] { "a" }, new Boolean[] { true });
-        ImmutableSet<Triple<Integer, String, Boolean>> immutableSet = iter.toImmutableSet();
-
-        assertThrows(UnsupportedOperationException.class, () -> immutableSet.add(Triple.of(2, "b", false)));
-    }
-
-    // =====================================================================
-    // count() (inherited from ImmutableIterator)
-    // =====================================================================
-
-    @Test
-    public void testCount() {
-        TriIterator<Integer, String, Boolean> iter = TriIterator.zip(new Integer[] { 1, 2, 3 }, new String[] { "a", "b", "c" },
-                new Boolean[] { true, false, true });
-        assertEquals(3, iter.count());
-    }
-
-    @Test
-    public void testCount_empty() {
-        TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
-        assertEquals(0, iter.count());
-    }
-
-    @Test
-    public void testCount_afterPartialConsumption() {
-        TriIterator<Integer, Integer, Integer> iter = TriIterator.generate(0, 5, (i, t) -> t.set(i, i, i));
-        iter.next();
-        iter.next();
-        assertEquals(3, iter.count());
-    }
-
-    @Test
-    public void testCount_exhaustsIterator() {
-        TriIterator<Integer, Integer, Integer> iter = TriIterator.generate(0, 3, (i, t) -> t.set(i, i, i));
-        iter.count();
-        assertFalse(iter.hasNext());
-    }
-
-    // =====================================================================
     // toList()
     // =====================================================================
 
@@ -1431,16 +1548,6 @@ public class TriIteratorTest extends TestBase {
     }
 
     @Test
-    public void testToMultiList_empty() {
-        TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
-        Triple<List<String>, List<Integer>, List<Boolean>> result = iter.toMultiList(ArrayList::new);
-
-        assertTrue(result.left().isEmpty());
-        assertTrue(result.middle().isEmpty());
-        assertTrue(result.right().isEmpty());
-    }
-
-    @Test
     public void testToMultiList_customImpl() {
         TriIterator<Integer, String, Double> iter = TriIterator.zip(Arrays.asList(1, 2), Arrays.asList("a", "b"), Arrays.asList(1.1, 2.2));
         Triple<List<Integer>, List<String>, List<Double>> result = iter.toMultiList(LinkedList::new);
@@ -1451,6 +1558,16 @@ public class TriIteratorTest extends TestBase {
         assertEquals(Arrays.asList(1, 2), result.left());
         assertEquals(Arrays.asList("a", "b"), result.middle());
         assertEquals(Arrays.asList(1.1, 2.2), result.right());
+    }
+
+    @Test
+    public void testToMultiList_empty() {
+        TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
+        Triple<List<String>, List<Integer>, List<Boolean>> result = iter.toMultiList(ArrayList::new);
+
+        assertTrue(result.left().isEmpty());
+        assertTrue(result.middle().isEmpty());
+        assertTrue(result.right().isEmpty());
     }
 
     // =====================================================================
@@ -1476,16 +1593,6 @@ public class TriIteratorTest extends TestBase {
     }
 
     @Test
-    public void testToMultiSet_empty() {
-        TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
-        Triple<Set<String>, Set<Integer>, Set<Boolean>> result = iter.toMultiSet(HashSet::new);
-
-        assertTrue(result.left().isEmpty());
-        assertTrue(result.middle().isEmpty());
-        assertTrue(result.right().isEmpty());
-    }
-
-    @Test
     public void testToMultiSet_duplicates() {
         TriIterator<Integer, String, String> iter = TriIterator.zip(Arrays.asList(1, 1), Arrays.asList("a", "b"), Arrays.asList("x", "x"));
         Triple<Set<Integer>, Set<String>, Set<String>> result = iter.toMultiSet(HashSet::new);
@@ -1506,31 +1613,14 @@ public class TriIteratorTest extends TestBase {
         assertTrue(result.right() instanceof LinkedHashSet);
     }
 
-    // =====================================================================
-    // Complex / Integration Tests
-    // =====================================================================
-
     @Test
-    public void testSkipLimitFilter() {
-        Integer[] nums = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-        String[] strs = new String[10];
-        Boolean[] flags = new Boolean[10];
-        for (int i = 0; i < 10; i++) {
-            strs[i] = "str" + i;
-            flags[i] = i % 2 == 0;
-        }
+    public void testToMultiSet_empty() {
+        TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
+        Triple<Set<String>, Set<Integer>, Set<Boolean>> result = iter.toMultiSet(HashSet::new);
 
-        TriIterator<Integer, String, Boolean> iter = TriIterator.zip(nums, strs, flags).skip(2).limit(5).filter((num, str, flag) -> flag);
-
-        List<Triple<Integer, String, Boolean>> result = iter.toList();
-        assertEquals(3, result.size());
-    }
-
-    @Test
-    public void testChainedOperations() {
-        TriIterator<Integer, Integer, Integer> iter = TriIterator.generate(0, 10, (i, t) -> t.set(i, i, i));
-        List<Triple<Integer, Integer, Integer>> result = iter.skip(2).limit(5).filter((a, b, c) -> a % 2 == 0).toList();
-        assertEquals(Arrays.asList(Triple.of(2, 2, 2), Triple.of(4, 4, 4), Triple.of(6, 6, 6)), result);
+        assertTrue(result.left().isEmpty());
+        assertTrue(result.middle().isEmpty());
+        assertTrue(result.right().isEmpty());
     }
 
     @Test
@@ -1547,95 +1637,5 @@ public class TriIteratorTest extends TestBase {
         assertEquals("val9=4.5", results.get(2));
     }
 
-    @Test
-    public void testSkipAndLimitCombinations() {
-        String[] arr1 = { "a", "b", "c", "d", "e" };
-        Integer[] arr2 = { 1, 2, 3, 4, 5 };
-        Double[] arr3 = { 1.1, 2.2, 3.3, 4.4, 5.5 };
-
-        TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3).skip(0);
-        assertEquals(5, iter.toList().size());
-
-        iter = TriIterator.zip(arr1, arr2, arr3).limit(10);
-        assertEquals(5, iter.toList().size());
-
-        iter = TriIterator.zip(arr1, arr2, arr3).skip(10).limit(5);
-        assertEquals(0, iter.toList().size());
-    }
-
-    @Test
-    public void testCombinedOperations() {
-        String[] arr1 = { "a", "b", "c", "d", "e", "f" };
-        Integer[] arr2 = { 1, 2, 3, 4, 5, 6 };
-        Double[] arr3 = { 1.1, 2.2, 3.3, 4.4, 5.5, 6.6 };
-
-        TriPredicate<String, Integer, Double> predicate = (s, i, d) -> i % 2 == 0;
-
-        List<Triple<String, Integer, Double>> result = TriIterator.zip(arr1, arr2, arr3).skip(1).limit(4).filter(predicate).toList();
-
-        assertEquals(2, result.size());
-        assertEquals("b", result.get(0).left());
-        assertEquals(Integer.valueOf(2), result.get(0).middle());
-        assertEquals("d", result.get(1).left());
-        assertEquals(Integer.valueOf(4), result.get(1).middle());
-    }
-
-    @Test
-    public void testIteratorExhaustion() {
-        String[] arr1 = { "a" };
-        Integer[] arr2 = { 1 };
-        Double[] arr3 = { 1.1 };
-
-        TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3);
-
-        iter.next();
-
-        assertFalse(iter.hasNext());
-
-        try {
-            iter.next();
-            fail("Should throw NoSuchElementException");
-        } catch (NoSuchElementException e) {
-        }
-
-        AtomicInteger count = new AtomicInteger(0);
-        iter.forEachRemaining((a, b, c) -> count.incrementAndGet());
-        assertEquals(0, count.get());
-    }
-
-    @Test
-    public void testMultipleHasNextCalls() {
-        String[] arr1 = { "a" };
-        Integer[] arr2 = { 1 };
-        Double[] arr3 = { 1.1 };
-
-        TriIterator<String, Integer, Double> iter = TriIterator.zip(arr1, arr2, arr3);
-
-        assertTrue(iter.hasNext());
-        assertTrue(iter.hasNext());
-        assertTrue(iter.hasNext());
-
-        Triple<String, Integer, Double> element = iter.next();
-        assertEquals("a", element.left());
-
-        assertFalse(iter.hasNext());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testNextActionThrowsException() {
-        TriIterator<Integer, Integer, Integer> iter = TriIterator.zip(new Integer[] { 1 }, new Integer[] { 1 }, new Integer[] { 1 });
-        iter.next();
-        assertThrows(NoSuchElementException.class, () -> iter.next());
-    }
-
-    @Test
-    public void testArgumentValidation() {
-        assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(null, (Consumer<Triple<String, Integer, Double>>) null));
-        assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(null));
-        assertThrows(IllegalArgumentException.class, () -> TriIterator.empty().skip(-1));
-        assertThrows(IllegalArgumentException.class, () -> TriIterator.empty().limit(-1));
-
-        assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(2, 5, (IntObjConsumer<Triple<String, Integer, Double>>) null));
-    }
+    // TODO: Remaining TriIterator$5 gaps are anonymous zip-iterator callback wrappers that are not meaningfully isolatable beyond the public TriIterator API already exercised here.
 }

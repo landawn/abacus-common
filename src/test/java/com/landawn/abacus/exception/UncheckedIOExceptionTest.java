@@ -7,12 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class UncheckedIOExceptionTest extends TestBase {
 
     @Test
@@ -31,26 +29,6 @@ public class UncheckedIOExceptionTest extends TestBase {
         assertNotNull(exception);
         assertEquals(message, exception.getMessage());
         assertEquals(cause, exception.getCause());
-    }
-
-    @Test
-    public void testGetCause() {
-        IOException cause = new IOException("IO error");
-        UncheckedIOException exception = new UncheckedIOException(cause);
-        IOException returnedCause = exception.getCause();
-        assertNotNull(returnedCause);
-        assertEquals(cause, returnedCause);
-        assertTrue(returnedCause instanceof IOException);
-    }
-
-    @Test
-    public void testGetCause_WithMessageConstructor() {
-        IOException cause = new IOException("IO error");
-        UncheckedIOException exception = new UncheckedIOException("wrapper message", cause);
-        IOException returnedCause = exception.getCause();
-        assertNotNull(returnedCause);
-        assertEquals(cause, returnedCause);
-        assertEquals("IO error", returnedCause.getMessage());
     }
 
     @Test
@@ -154,6 +132,26 @@ public class UncheckedIOExceptionTest extends TestBase {
         IOException ioException = new IOException((String) null);
         UncheckedIOException exception = new UncheckedIOException(ioException);
         Assertions.assertEquals("java.io.IOException", exception.getMessage());
+    }
+
+    @Test
+    public void testGetCause() {
+        IOException cause = new IOException("IO error");
+        UncheckedIOException exception = new UncheckedIOException(cause);
+        IOException returnedCause = exception.getCause();
+        assertNotNull(returnedCause);
+        assertEquals(cause, returnedCause);
+        assertTrue(returnedCause instanceof IOException);
+    }
+
+    @Test
+    public void testGetCause_WithMessageConstructor() {
+        IOException cause = new IOException("IO error");
+        UncheckedIOException exception = new UncheckedIOException("wrapper message", cause);
+        IOException returnedCause = exception.getCause();
+        assertNotNull(returnedCause);
+        assertEquals(cause, returnedCause);
+        assertEquals("IO error", returnedCause.getMessage());
     }
 
 }

@@ -217,16 +217,20 @@ public final class Reflection<T> {
      */
     public <V> V get(final String fieldName) {
         if (reflectASM != null) {
-            return reflectASM.get(fieldName);
-        } else {
             try {
-                final Field field = getField(fieldName);
-                ClassUtil.setAccessibleQuietly(field, true);
-
-                return (V) field.get(instance);
-            } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-                throw ExceptionUtil.toRuntimeException(e, true);
+                return reflectASM.get(fieldName);
+            } catch (final IllegalArgumentException e) {
+                // ReflectASM only exposes non-private fields; fall back to reflection for private/inherited members.
             }
+        }
+
+        try {
+            final Field field = getField(fieldName);
+            ClassUtil.setAccessibleQuietly(field, true);
+
+            return (V) field.get(instance);
+        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -249,16 +253,21 @@ public final class Reflection<T> {
      */
     public Reflection<T> set(final String fieldName, final Object value) {
         if (reflectASM != null) {
-            reflectASM.set(fieldName, value);
-        } else {
             try {
-                final Field field = getField(fieldName);
-                ClassUtil.setAccessibleQuietly(field, true);
-
-                field.set(instance, value); //NOSONAR
-            } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-                throw ExceptionUtil.toRuntimeException(e, true);
+                reflectASM.set(fieldName, value);
+                return this;
+            } catch (final IllegalArgumentException e) {
+                // ReflectASM only exposes non-private fields; fall back to reflection for private/inherited members.
             }
+        }
+
+        try {
+            final Field field = getField(fieldName);
+            ClassUtil.setAccessibleQuietly(field, true);
+
+            field.set(instance, value); //NOSONAR
+        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
 
         return this;
@@ -336,7 +345,21 @@ public final class Reflection<T> {
         Field field = fieldPool.get(fieldName);
 
         if (field == null) {
-            field = cls.getDeclaredField(fieldName);
+            Class<?> current = cls;
+
+            while (current != null) {
+                try {
+                    field = current.getDeclaredField(fieldName);
+                    break;
+                } catch (final NoSuchFieldException e) {
+                    current = current.getSuperclass();
+                }
+            }
+
+            if (field == null) {
+                throw new NoSuchFieldException(fieldName);
+            }
+
             fieldPool.put(fieldName, field);
         }
 

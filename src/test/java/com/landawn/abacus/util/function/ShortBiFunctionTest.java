@@ -19,12 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ShortBiFunctionTest extends TestBase {
 
     @Test
@@ -46,21 +44,6 @@ public class ShortBiFunctionTest extends TestBase {
     }
 
     @Test
-    public void test_apply_anonymousClass() {
-        ShortBiFunction<Boolean> inRange = new ShortBiFunction<>() {
-            @Override
-            public Boolean apply(short value, short max) {
-                return value >= 0 && value <= max;
-            }
-        };
-
-        assertTrue(inRange.apply((short) 50, (short) 100));
-        assertTrue(inRange.apply((short) 0, (short) 100));
-        assertFalse(inRange.apply((short) 150, (short) 100));
-        assertFalse(inRange.apply((short) -10, (short) 100));
-    }
-
-    @Test
     public void test_apply_returningString() {
         ShortBiFunction<String> concatenate = (t, u) -> t + ":" + u;
 
@@ -78,27 +61,26 @@ public class ShortBiFunctionTest extends TestBase {
     }
 
     @Test
-    public void test_andThen() {
-        ShortBiFunction<Integer> multiply = (t, u) -> (int) (t * u);
-        java.util.function.Function<Integer, String> addPrefix = result -> "Result: " + result;
+    public void test_apply_complexCalculation() {
+        ShortBiFunction<Double> distance = (x, y) -> Math.sqrt(x * x + y * y);
 
-        ShortBiFunction<String> combined = multiply.andThen(addPrefix);
-
-        assertEquals("Result: 30", combined.apply((short) 5, (short) 6));
-        assertEquals("Result: -30", combined.apply((short) 5, (short) -6));
-        assertEquals("Result: 0", combined.apply((short) 0, (short) 10));
+        assertEquals(5.0, distance.apply((short) 3, (short) 4), 0.001);
+        assertEquals(0.0, distance.apply((short) 0, (short) 0), 0.001);
     }
 
     @Test
-    public void test_andThen_multipleChaining() {
-        ShortBiFunction<Integer> add = (t, u) -> (int) (t + u);
-        java.util.function.Function<Integer, Double> toDouble = i -> i * 1.5;
-        java.util.function.Function<Double, String> format = d -> String.format("%.1f", d);
+    public void test_apply_anonymousClass() {
+        ShortBiFunction<Boolean> inRange = new ShortBiFunction<>() {
+            @Override
+            public Boolean apply(short value, short max) {
+                return value >= 0 && value <= max;
+            }
+        };
 
-        ShortBiFunction<String> combined = add.andThen(toDouble).andThen(format);
-
-        assertEquals("15.0", combined.apply((short) 5, (short) 5));
-        assertEquals("22.5", combined.apply((short) 10, (short) 5));
+        assertTrue(inRange.apply((short) 50, (short) 100));
+        assertTrue(inRange.apply((short) 0, (short) 100));
+        assertFalse(inRange.apply((short) 150, (short) 100));
+        assertFalse(inRange.apply((short) -10, (short) 100));
     }
 
     @Test
@@ -126,10 +108,26 @@ public class ShortBiFunctionTest extends TestBase {
     }
 
     @Test
-    public void test_apply_complexCalculation() {
-        ShortBiFunction<Double> distance = (x, y) -> Math.sqrt(x * x + y * y);
+    public void test_andThen() {
+        ShortBiFunction<Integer> multiply = (t, u) -> (int) (t * u);
+        java.util.function.Function<Integer, String> addPrefix = result -> "Result: " + result;
 
-        assertEquals(5.0, distance.apply((short) 3, (short) 4), 0.001);
-        assertEquals(0.0, distance.apply((short) 0, (short) 0), 0.001);
+        ShortBiFunction<String> combined = multiply.andThen(addPrefix);
+
+        assertEquals("Result: 30", combined.apply((short) 5, (short) 6));
+        assertEquals("Result: -30", combined.apply((short) 5, (short) -6));
+        assertEquals("Result: 0", combined.apply((short) 0, (short) 10));
+    }
+
+    @Test
+    public void test_andThen_multipleChaining() {
+        ShortBiFunction<Integer> add = (t, u) -> (int) (t + u);
+        java.util.function.Function<Integer, Double> toDouble = i -> i * 1.5;
+        java.util.function.Function<Double, String> format = d -> String.format("%.1f", d);
+
+        ShortBiFunction<String> combined = add.andThen(toDouble).andThen(format);
+
+        assertEquals("15.0", combined.apply((short) 5, (short) 5));
+        assertEquals("22.5", combined.apply((short) 10, (short) 5));
     }
 }

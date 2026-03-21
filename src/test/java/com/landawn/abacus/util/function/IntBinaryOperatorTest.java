@@ -16,12 +16,10 @@ package com.landawn.abacus.util.function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class IntBinaryOperatorTest extends TestBase {
 
     @Test
@@ -61,6 +59,19 @@ public class IntBinaryOperatorTest extends TestBase {
     }
 
     @Test
+    public void test_applyAsInt_anonymousClass() {
+        IntBinaryOperator modulo = new IntBinaryOperator() {
+            @Override
+            public int applyAsInt(int left, int right) {
+                return left % right;
+            }
+        };
+
+        assertEquals(1, modulo.applyAsInt(10, 3));
+        assertEquals(0, modulo.applyAsInt(10, 5));
+    }
+
+    @Test
     public void test_applyAsInt_max() {
         IntBinaryOperator max = (left, right) -> Math.max(left, right);
 
@@ -76,19 +87,6 @@ public class IntBinaryOperatorTest extends TestBase {
         assertEquals(5, min.applyAsInt(5, 10));
         assertEquals(5, min.applyAsInt(10, 5));
         assertEquals(-10, min.applyAsInt(5, -10));
-    }
-
-    @Test
-    public void test_applyAsInt_anonymousClass() {
-        IntBinaryOperator modulo = new IntBinaryOperator() {
-            @Override
-            public int applyAsInt(int left, int right) {
-                return left % right;
-            }
-        };
-
-        assertEquals(1, modulo.applyAsInt(10, 3));
-        assertEquals(0, modulo.applyAsInt(10, 5));
     }
 
     @Test

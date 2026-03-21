@@ -25,13 +25,13 @@ import java.util.concurrent.ExecutionException;
  * the result of a task that aborted by throwing an exception. It is commonly encountered
  * when working with {@link java.util.concurrent.Future} and other asynchronous computation APIs.</p>
  *
- * <p>This exception is useful in contexts where you need to handle ExecutionException but
+ * <p>This exception is useful in contexts where you need to handle {@code ExecutionException} but
  * cannot change the method signature to declare it, such as in:</p>
  * <ul>
- *   <li>Lambda expressions and functional interfaces that don't declare checked exceptions</li>
- *   <li>Stream operations where checked exceptions are not allowed</li>
- *   <li>Implementing interfaces that don't declare ExecutionException</li>
- *   <li>Simplifying error handling in asynchronous task processing code</li>
+ *   <li>Lambda expressions and functional interfaces that don't declare checked exceptions.</li>
+ *   <li>Stream operations where checked exceptions are not allowed.</li>
+ *   <li>Implementing interfaces that don't declare {@code ExecutionException}.</li>
+ *   <li>Simplifying error handling in asynchronous task processing code.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
@@ -75,7 +75,7 @@ public class UncheckedExecutionException extends UncheckedException {
     /**
      * Constructs a new {@code UncheckedExecutionException} by wrapping the specified {@link ExecutionException}.
      *
-     * <p>This constructor preserves all information from the original ExecutionException including
+     * <p>This constructor preserves all information from the original {@code ExecutionException} including
      * its message, stack trace, and any suppressed exceptions.</p>
      *
      * <p><b>Usage Examples:</b></p>

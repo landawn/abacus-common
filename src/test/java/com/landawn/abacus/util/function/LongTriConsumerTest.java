@@ -8,13 +8,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class LongTriConsumerTest extends TestBase {
+
+    private void processThreeValues(final long a, final long b, final long c) {
+        // Process values (empty for testing)
+    }
 
     @Test
     public void testAccept() {
@@ -54,31 +56,19 @@ public class LongTriConsumerTest extends TestBase {
     }
 
     @Test
-    public void testAndThen() {
-        final List<Long> results = new ArrayList<>();
-        final LongTriConsumer first = (a, b, c) -> results.add(a + b + c);
-        final LongTriConsumer second = (a, b, c) -> results.add(a * b * c);
+    public void testAccept_sideEffects() {
+        final long[] array = new long[3];
+        final LongTriConsumer consumer = (a, b, c) -> {
+            array[0] = a;
+            array[1] = b;
+            array[2] = c;
+        };
 
-        final LongTriConsumer chained = first.andThen(second);
-        chained.accept(2L, 3L, 4L);
+        consumer.accept(10L, 20L, 30L);
 
-        assertEquals(2, results.size());
-        assertEquals(9L, results.get(0)); // 2+3+4
-        assertEquals(24L, results.get(1)); // 2*3*4
-    }
-
-    @Test
-    public void testAndThen_orderOfExecution() {
-        final List<String> executionOrder = new ArrayList<>();
-        final LongTriConsumer first = (a, b, c) -> executionOrder.add("first");
-        final LongTriConsumer second = (a, b, c) -> executionOrder.add("second");
-
-        final LongTriConsumer chained = first.andThen(second);
-        chained.accept(1L, 2L, 3L);
-
-        assertEquals(2, executionOrder.size());
-        assertEquals("first", executionOrder.get(0));
-        assertEquals("second", executionOrder.get(1));
+        assertEquals(10L, array[0]);
+        assertEquals(20L, array[1]);
+        assertEquals(30L, array[2]);
     }
 
     @Test
@@ -115,19 +105,12 @@ public class LongTriConsumerTest extends TestBase {
     }
 
     @Test
-    public void testAccept_sideEffects() {
-        final long[] array = new long[3];
-        final LongTriConsumer consumer = (a, b, c) -> {
-            array[0] = a;
-            array[1] = b;
-            array[2] = c;
-        };
+    public void testMethodReference() {
+        final List<Long> results = new ArrayList<>();
+        final LongTriConsumer consumer = this::processThreeValues;
 
-        consumer.accept(10L, 20L, 30L);
-
-        assertEquals(10L, array[0]);
-        assertEquals(20L, array[1]);
-        assertEquals(30L, array[2]);
+        consumer.accept(1L, 2L, 3L);
+        assertNotNull(consumer);
     }
 
     @Test
@@ -140,15 +123,30 @@ public class LongTriConsumerTest extends TestBase {
     }
 
     @Test
-    public void testMethodReference() {
+    public void testAndThen() {
         final List<Long> results = new ArrayList<>();
-        final LongTriConsumer consumer = this::processThreeValues;
+        final LongTriConsumer first = (a, b, c) -> results.add(a + b + c);
+        final LongTriConsumer second = (a, b, c) -> results.add(a * b * c);
 
-        consumer.accept(1L, 2L, 3L);
-        assertNotNull(consumer);
+        final LongTriConsumer chained = first.andThen(second);
+        chained.accept(2L, 3L, 4L);
+
+        assertEquals(2, results.size());
+        assertEquals(9L, results.get(0)); // 2+3+4
+        assertEquals(24L, results.get(1)); // 2*3*4
     }
 
-    private void processThreeValues(final long a, final long b, final long c) {
-        // Process values (empty for testing)
+    @Test
+    public void testAndThen_orderOfExecution() {
+        final List<String> executionOrder = new ArrayList<>();
+        final LongTriConsumer first = (a, b, c) -> executionOrder.add("first");
+        final LongTriConsumer second = (a, b, c) -> executionOrder.add("second");
+
+        final LongTriConsumer chained = first.andThen(second);
+        chained.accept(1L, 2L, 3L);
+
+        assertEquals(2, executionOrder.size());
+        assertEquals("first", executionOrder.get(0));
+        assertEquals("second", executionOrder.get(1));
     }
 }

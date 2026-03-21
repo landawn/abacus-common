@@ -4,12 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class CallableTest extends TestBase {
 
     @Test
@@ -47,6 +45,22 @@ public class CallableTest extends TestBase {
     }
 
     @Test
+    public void testJavaUtilConcurrentCompatibility() throws Exception {
+        Callable<String> callable = () -> "result";
+        java.util.concurrent.Callable<String> javaCallable = callable;
+
+        String result = javaCallable.call();
+        assertEquals("result", result);
+    }
+
+    @Test
+    public void testFunctionalInterfaceContract() {
+        Callable<String> lambda = () -> "test";
+        assertNotNull(lambda);
+        assertDoesNotThrow(() -> lambda.call());
+    }
+
+    @Test
     public void testToRunnable() {
         final int[] counter = { 0 };
         Callable<String> callable = () -> {
@@ -65,21 +79,5 @@ public class CallableTest extends TestBase {
         Callable<String> callable = () -> "test";
         com.landawn.abacus.util.Throwables.Callable<String, ?> throwableCallable = callable.toThrowable();
         assertNotNull(throwableCallable);
-    }
-
-    @Test
-    public void testJavaUtilConcurrentCompatibility() throws Exception {
-        Callable<String> callable = () -> "result";
-        java.util.concurrent.Callable<String> javaCallable = callable;
-
-        String result = javaCallable.call();
-        assertEquals("result", result);
-    }
-
-    @Test
-    public void testFunctionalInterfaceContract() {
-        Callable<String> lambda = () -> "test";
-        assertNotNull(lambda);
-        assertDoesNotThrow(() -> lambda.call());
     }
 }

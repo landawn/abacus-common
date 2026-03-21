@@ -3,13 +3,15 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ByteUnaryOperatorTest extends TestBase {
+
+    private static byte incrementByte(byte value) {
+        return (byte) (value + 1);
+    }
 
     @Test
     public void testApplyAsByte() {
@@ -41,21 +43,18 @@ public class ByteUnaryOperatorTest extends TestBase {
     }
 
     @Test
+    public void testMethodReference() {
+        ByteUnaryOperator increment = ByteUnaryOperatorTest::incrementByte;
+
+        assertEquals((byte) 6, increment.applyAsByte((byte) 5));
+    }
+
+    @Test
     public void testCompose() {
         ByteUnaryOperator addOne = operand -> (byte) (operand + 1);
         ByteUnaryOperator multiplyTwo = operand -> (byte) (operand * 2);
 
         ByteUnaryOperator composed = multiplyTwo.compose(addOne);
-
-        assertEquals((byte) 12, composed.applyAsByte((byte) 5));
-    }
-
-    @Test
-    public void testAndThen() {
-        ByteUnaryOperator addOne = operand -> (byte) (operand + 1);
-        ByteUnaryOperator multiplyTwo = operand -> (byte) (operand * 2);
-
-        ByteUnaryOperator composed = addOne.andThen(multiplyTwo);
 
         assertEquals((byte) 12, composed.applyAsByte((byte) 5));
     }
@@ -69,6 +68,16 @@ public class ByteUnaryOperatorTest extends TestBase {
         ByteUnaryOperator composed = addOne.compose(multiplyTwo).andThen(subtractThree);
 
         assertEquals((byte) 8, composed.applyAsByte((byte) 5));
+    }
+
+    @Test
+    public void testAndThen() {
+        ByteUnaryOperator addOne = operand -> (byte) (operand + 1);
+        ByteUnaryOperator multiplyTwo = operand -> (byte) (operand * 2);
+
+        ByteUnaryOperator composed = addOne.andThen(multiplyTwo);
+
+        assertEquals((byte) 12, composed.applyAsByte((byte) 5));
     }
 
     @Test
@@ -89,18 +98,7 @@ public class ByteUnaryOperatorTest extends TestBase {
     }
 
     @Test
-    public void testMethodReference() {
-        ByteUnaryOperator increment = ByteUnaryOperatorTest::incrementByte;
-
-        assertEquals((byte) 6, increment.applyAsByte((byte) 5));
-    }
-
-    @Test
     public void testFunctionalInterface() {
         assertNotNull(ByteUnaryOperator.class.getAnnotation(FunctionalInterface.class));
-    }
-
-    private static byte incrementByte(byte value) {
-        return (byte) (value + 1);
     }
 }

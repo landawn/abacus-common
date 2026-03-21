@@ -12,13 +12,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 
-@Tag("2025")
 public class BufferedReaderTest extends AbstractTest {
 
     @Test
@@ -27,6 +26,28 @@ public class BufferedReaderTest extends AbstractTest {
         assertEquals('H', reader.read());
         assertEquals("ello World", reader.readLine());
         assertNull(reader.readLine());
+    }
+
+    @Test
+    public void testConstructorWithInputStream() throws IOException {
+        String content = "Hello from stream";
+        InputStream is = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
+        BufferedReader reader = new BufferedReader(is);
+
+        assertEquals("Hello from stream", reader.readLine());
+        assertNull(reader.readLine());
+        reader.close();
+    }
+
+    @Test
+    public void testConstructorWithReader() throws IOException {
+        StringReader sr = new StringReader("Reader content\nLine two");
+        BufferedReader reader = new BufferedReader((java.io.Reader) sr);
+
+        assertEquals("Reader content", reader.readLine());
+        assertEquals("Line two", reader.readLine());
+        assertNull(reader.readLine());
+        reader.close();
     }
 
     @Test
@@ -108,6 +129,75 @@ public class BufferedReaderTest extends AbstractTest {
     }
 
     @Test
+    public void testRead_EndOfStream() throws IOException {
+        BufferedReader reader = new BufferedReader("");
+        assertEquals(-1, reader.read());
+    }
+
+    @Test
+    public void testReadCharArray_LargeBufferFromInputStream() throws IOException {
+        char[] source = new char[Objectory.BUFFER_SIZE + 8];
+        Arrays.fill(source, 'x');
+
+        InputStream is = new ByteArrayInputStream(new String(source).getBytes(StandardCharsets.UTF_8));
+        BufferedReader reader = new BufferedReader(is);
+        char[] buffer = new char[source.length];
+        int count = reader.read(buffer, 0, buffer.length);
+
+        assertEquals(buffer.length, count);
+        assertEquals('x', buffer[0]);
+        assertEquals('x', buffer[buffer.length - 1]);
+    }
+
+    @Test
+    public void testReadCharArray_EndOfStream() throws IOException {
+        BufferedReader reader = new BufferedReader("");
+        char[] buffer = new char[5];
+        assertEquals(-1, reader.read(buffer, 0, 5));
+    }
+
+    @Test
+    public void testReadMultipleLines_FromStream() throws IOException {
+        String content = "line1\nline2\nline3";
+        InputStream is = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
+        BufferedReader reader = new BufferedReader(is);
+
+        assertEquals("line1", reader.readLine());
+        assertEquals("line2", reader.readLine());
+        assertEquals("line3", reader.readLine());
+        assertNull(reader.readLine());
+        reader.close();
+    }
+
+    @Test
+    public void testReadAfterClose_ThrowsIOException() throws IOException {
+        String content = "test";
+        InputStream is = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
+        BufferedReader reader = new BufferedReader(is);
+        reader.close();
+
+        assertThrows(IOException.class, () -> reader.read());
+        assertThrows(IOException.class, () -> reader.readLine());
+        assertThrows(IOException.class, () -> reader.ready());
+    }
+
+    @Test
+    public void testReadCharArray_FromString() throws IOException {
+        BufferedReader reader = new BufferedReader("ABCDE");
+        char[] buf = new char[3];
+        int n = reader.read(buf, 0, 3);
+        assertEquals(3, n);
+        assertEquals("ABC", new String(buf, 0, n));
+
+        n = reader.read(buf, 0, 3);
+        assertEquals(2, n);
+        assertEquals("DE", new String(buf, 0, n));
+
+        n = reader.read(buf, 0, 3);
+        assertEquals(-1, n);
+    }
+
+    @Test
     public void testReadLine() throws IOException {
         BufferedReader reader = new BufferedReader("Line 1\nLine 2\nLine 3");
         assertEquals("Line 1", reader.readLine());
@@ -131,6 +221,15 @@ public class BufferedReaderTest extends AbstractTest {
         assertEquals("Line 1", reader.readLine());
         assertEquals("Line 2", reader.readLine());
         assertEquals("Line 3", reader.readLine());
+        assertNull(reader.readLine());
+    }
+
+    @Test
+    public void testReadLine_EmptyLines() throws IOException {
+        BufferedReader reader = new BufferedReader("\n\nline3");
+        assertEquals("", reader.readLine());
+        assertEquals("", reader.readLine());
+        assertEquals("line3", reader.readLine());
         assertNull(reader.readLine());
     }
 
@@ -165,9 +264,40 @@ public class BufferedReaderTest extends AbstractTest {
     }
 
     @Test
+    public void testSkip_FromStream() throws IOException {
+        String content = "abcdefghij";
+        InputStream is = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
+        BufferedReader reader = new BufferedReader(is);
+
+        long skipped = reader.skip(3);
+        assertTrue(skipped > 0);
+        reader.close();
+    }
+
+    @Test
     public void testReady() throws IOException {
         BufferedReader reader = new BufferedReader("Hello");
         assertTrue(reader.ready());
+    }
+
+    @Test
+    public void testReady_AfterReadLineSkipsLineFeed() throws IOException {
+        InputStream is = new ByteArrayInputStream("line1\r\nline2".getBytes(StandardCharsets.UTF_8));
+        BufferedReader reader = new BufferedReader(is);
+
+        assertEquals("line1", reader.readLine());
+        assertTrue(reader.ready());
+        assertEquals('l', reader.read());
+    }
+
+    @Test
+    public void testReady_FromStream() throws IOException {
+        String content = "test";
+        InputStream is = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
+        BufferedReader reader = new BufferedReader(is);
+
+        assertTrue(reader.ready());
+        reader.close();
     }
 
     @Test
@@ -184,41 +314,6 @@ public class BufferedReaderTest extends AbstractTest {
         BufferedReader reader = new BufferedReader("Hello");
         reader.close();
         reader.close(); // should not throw
-    }
-
-    @Test
-    public void testRead_EndOfStream() throws IOException {
-        BufferedReader reader = new BufferedReader("");
-        assertEquals(-1, reader.read());
-    }
-
-    @Test
-    public void testReadCharArray_EndOfStream() throws IOException {
-        BufferedReader reader = new BufferedReader("");
-        char[] buffer = new char[5];
-        assertEquals(-1, reader.read(buffer, 0, 5));
-    }
-
-    @Test
-    public void testConstructorWithInputStream() throws IOException {
-        String content = "Hello from stream";
-        InputStream is = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
-        BufferedReader reader = new BufferedReader(is);
-
-        assertEquals("Hello from stream", reader.readLine());
-        assertNull(reader.readLine());
-        reader.close();
-    }
-
-    @Test
-    public void testConstructorWithReader() throws IOException {
-        StringReader sr = new StringReader("Reader content\nLine two");
-        BufferedReader reader = new BufferedReader((java.io.Reader) sr);
-
-        assertEquals("Reader content", reader.readLine());
-        assertEquals("Line two", reader.readLine());
-        assertNull(reader.readLine());
-        reader.close();
     }
 
     @Test
@@ -256,74 +351,25 @@ public class BufferedReaderTest extends AbstractTest {
         reader.close();
     }
 
-    @Test
-    public void testReadMultipleLines_FromStream() throws IOException {
-        String content = "line1\nline2\nline3";
-        InputStream is = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
-        BufferedReader reader = new BufferedReader(is);
-
-        assertEquals("line1", reader.readLine());
-        assertEquals("line2", reader.readLine());
-        assertEquals("line3", reader.readLine());
-        assertNull(reader.readLine());
-        reader.close();
-    }
+    // Exercise package-private pool/reset helpers directly.
 
     @Test
-    public void testReadLine_EmptyLines() throws IOException {
-        BufferedReader reader = new BufferedReader("\n\nline3");
-        assertEquals("", reader.readLine());
-        assertEquals("", reader.readLine());
-        assertEquals("line3", reader.readLine());
+    public void testReadLine_IgnoreLeadingLf() throws IOException {
+        BufferedReader reader = new BufferedReader(new StringReader("\nSecond"));
+
+        assertEquals("Second", reader.readLine(true));
         assertNull(reader.readLine());
     }
 
     @Test
-    public void testReadAfterClose_ThrowsIOException() throws IOException {
-        String content = "test";
-        InputStream is = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
-        BufferedReader reader = new BufferedReader(is);
-        reader.close();
+    public void testResetAndReinitWithString() throws IOException {
+        BufferedReader reader = new BufferedReader(new StringReader("Before"));
+        assertEquals("Before", reader.readLine());
 
-        assertThrows(IOException.class, () -> reader.read());
-        assertThrows(IOException.class, () -> reader.readLine());
-        assertThrows(IOException.class, () -> reader.ready());
-    }
+        reader._reset();
+        reader.reinit("After");
 
-    @Test
-    public void testSkip_FromStream() throws IOException {
-        String content = "abcdefghij";
-        InputStream is = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
-        BufferedReader reader = new BufferedReader(is);
-
-        long skipped = reader.skip(3);
-        assertTrue(skipped > 0);
-        reader.close();
-    }
-
-    @Test
-    public void testReady_FromStream() throws IOException {
-        String content = "test";
-        InputStream is = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
-        BufferedReader reader = new BufferedReader(is);
-
-        assertTrue(reader.ready());
-        reader.close();
-    }
-
-    @Test
-    public void testReadCharArray_FromString() throws IOException {
-        BufferedReader reader = new BufferedReader("ABCDE");
-        char[] buf = new char[3];
-        int n = reader.read(buf, 0, 3);
-        assertEquals(3, n);
-        assertEquals("ABC", new String(buf, 0, n));
-
-        n = reader.read(buf, 0, 3);
-        assertEquals(2, n);
-        assertEquals("DE", new String(buf, 0, n));
-
-        n = reader.read(buf, 0, 3);
-        assertEquals(-1, n);
+        assertEquals("After", reader.readLine());
+        assertNull(reader.readLine());
     }
 }

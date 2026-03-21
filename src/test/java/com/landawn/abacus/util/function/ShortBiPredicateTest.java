@@ -17,27 +17,11 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ShortBiPredicateTest extends TestBase {
-
-    @Test
-    public void test_ALWAYS_TRUE() {
-        assertTrue(ShortBiPredicate.ALWAYS_TRUE.test((short) 0, (short) 0));
-        assertTrue(ShortBiPredicate.ALWAYS_TRUE.test((short) 100, (short) 200));
-        assertTrue(ShortBiPredicate.ALWAYS_TRUE.test(Short.MAX_VALUE, Short.MIN_VALUE));
-    }
-
-    @Test
-    public void test_ALWAYS_FALSE() {
-        assertFalse(ShortBiPredicate.ALWAYS_FALSE.test((short) 0, (short) 0));
-        assertFalse(ShortBiPredicate.ALWAYS_FALSE.test((short) 100, (short) 200));
-        assertFalse(ShortBiPredicate.ALWAYS_FALSE.test(Short.MAX_VALUE, Short.MIN_VALUE));
-    }
 
     @Test
     public void test_EQUAL() {
@@ -98,6 +82,20 @@ public class ShortBiPredicateTest extends TestBase {
     }
 
     @Test
+    public void test_ALWAYS_TRUE() {
+        assertTrue(ShortBiPredicate.ALWAYS_TRUE.test((short) 0, (short) 0));
+        assertTrue(ShortBiPredicate.ALWAYS_TRUE.test((short) 100, (short) 200));
+        assertTrue(ShortBiPredicate.ALWAYS_TRUE.test(Short.MAX_VALUE, Short.MIN_VALUE));
+    }
+
+    @Test
+    public void test_ALWAYS_FALSE() {
+        assertFalse(ShortBiPredicate.ALWAYS_FALSE.test((short) 0, (short) 0));
+        assertFalse(ShortBiPredicate.ALWAYS_FALSE.test((short) 100, (short) 200));
+        assertFalse(ShortBiPredicate.ALWAYS_FALSE.test(Short.MAX_VALUE, Short.MIN_VALUE));
+    }
+
+    @Test
     public void test_test_anonymousClass() {
         ShortBiPredicate productIsPositive = new ShortBiPredicate() {
             @Override
@@ -124,15 +122,16 @@ public class ShortBiPredicateTest extends TestBase {
     }
 
     @Test
-    public void test_and() {
-        ShortBiPredicate bothPositive = (t, u) -> t > 0 && u > 0;
-        ShortBiPredicate sumGreaterThanTen = (t, u) -> (t + u) > 10;
-        ShortBiPredicate combined = bothPositive.and(sumGreaterThanTen);
+    public void test_complexCombination() {
+        ShortBiPredicate bothEven = (t, u) -> t % 2 == 0 && u % 2 == 0;
+        ShortBiPredicate sumLessThanHundred = (t, u) -> (t + u) < 100;
+        ShortBiPredicate firstPositive = (t, u) -> t > 0;
 
-        assertTrue(combined.test((short) 6, (short) 6));
-        assertFalse(combined.test((short) 2, (short) 2)); // positive but sum not > 10
-        assertFalse(combined.test((short) -6, (short) 20)); // sum > 10 but not both positive
-        assertFalse(combined.test((short) -5, (short) -5)); // neither condition
+        ShortBiPredicate complex = bothEven.and(sumLessThanHundred).or(firstPositive.negate());
+
+        assertTrue(complex.test((short) 10, (short) 20)); // both even and sum < 100
+        assertTrue(complex.test((short) -5, (short) 100)); // first not positive
+        assertFalse(complex.test((short) 10, (short) 100)); // even but sum >= 100, and first is positive
     }
 
     @Test
@@ -151,15 +150,15 @@ public class ShortBiPredicateTest extends TestBase {
     }
 
     @Test
-    public void test_or() {
-        ShortBiPredicate firstIsZero = (t, u) -> t == 0;
-        ShortBiPredicate secondIsZero = (t, u) -> u == 0;
-        ShortBiPredicate combined = firstIsZero.or(secondIsZero);
+    public void test_and() {
+        ShortBiPredicate bothPositive = (t, u) -> t > 0 && u > 0;
+        ShortBiPredicate sumGreaterThanTen = (t, u) -> (t + u) > 10;
+        ShortBiPredicate combined = bothPositive.and(sumGreaterThanTen);
 
-        assertTrue(combined.test((short) 0, (short) 5));
-        assertTrue(combined.test((short) 5, (short) 0));
-        assertTrue(combined.test((short) 0, (short) 0));
-        assertFalse(combined.test((short) 5, (short) 5));
+        assertTrue(combined.test((short) 6, (short) 6));
+        assertFalse(combined.test((short) 2, (short) 2)); // positive but sum not > 10
+        assertFalse(combined.test((short) -6, (short) 20)); // sum > 10 but not both positive
+        assertFalse(combined.test((short) -5, (short) -5)); // neither condition
     }
 
     @Test
@@ -178,15 +177,14 @@ public class ShortBiPredicateTest extends TestBase {
     }
 
     @Test
-    public void test_complexCombination() {
-        ShortBiPredicate bothEven = (t, u) -> t % 2 == 0 && u % 2 == 0;
-        ShortBiPredicate sumLessThanHundred = (t, u) -> (t + u) < 100;
-        ShortBiPredicate firstPositive = (t, u) -> t > 0;
+    public void test_or() {
+        ShortBiPredicate firstIsZero = (t, u) -> t == 0;
+        ShortBiPredicate secondIsZero = (t, u) -> u == 0;
+        ShortBiPredicate combined = firstIsZero.or(secondIsZero);
 
-        ShortBiPredicate complex = bothEven.and(sumLessThanHundred).or(firstPositive.negate());
-
-        assertTrue(complex.test((short) 10, (short) 20)); // both even and sum < 100
-        assertTrue(complex.test((short) -5, (short) 100)); // first not positive
-        assertFalse(complex.test((short) 10, (short) 100)); // even but sum >= 100, and first is positive
+        assertTrue(combined.test((short) 0, (short) 5));
+        assertTrue(combined.test((short) 5, (short) 0));
+        assertTrue(combined.test((short) 0, (short) 0));
+        assertFalse(combined.test((short) 5, (short) 5));
     }
 }

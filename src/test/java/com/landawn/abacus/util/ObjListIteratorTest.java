@@ -11,7 +11,6 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -19,7 +18,6 @@ import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Stream;
 
-@Tag("2025")
 public class ObjListIteratorTest extends TestBase {
 
     // --- empty() ---
@@ -31,6 +29,51 @@ public class ObjListIteratorTest extends TestBase {
         Assertions.assertFalse(iter.hasPrevious());
         Assertions.assertEquals(0, iter.nextIndex());
         Assertions.assertEquals(-1, iter.previousIndex());
+    }
+
+    @Test
+    public void testEmpty_ToList() {
+        ObjListIterator<String> iter = ObjListIterator.empty();
+        Assertions.assertTrue(iter.toList().isEmpty());
+    }
+
+    @Test
+    public void testEmpty_ToArray() {
+        ObjListIterator<String> iter = ObjListIterator.empty();
+        Assertions.assertEquals(0, iter.toArray().length);
+    }
+
+    @Test
+    public void testEmpty_Count() {
+        ObjListIterator<String> iter = ObjListIterator.empty();
+        Assertions.assertEquals(0, iter.count());
+    }
+
+    @Test
+    public void testToSet_Empty() {
+        ObjListIterator<String> iter = ObjListIterator.empty();
+        Set<String> set = iter.toSet();
+        Assertions.assertTrue(set.isEmpty());
+    }
+
+    @Test
+    public void testToImmutableList_Empty() {
+        ObjListIterator<String> iter = ObjListIterator.empty();
+        ImmutableList<String> immutable = iter.toImmutableList();
+        Assertions.assertTrue(immutable.isEmpty());
+    }
+
+    @Test
+    public void testToImmutableSet_Empty() {
+        ObjListIterator<String> iter = ObjListIterator.empty();
+        ImmutableSet<String> immutable = iter.toImmutableSet();
+        Assertions.assertTrue(immutable.isEmpty());
+    }
+
+    @Test
+    public void testCount_Empty() {
+        ObjListIterator<String> iter = ObjListIterator.empty();
+        Assertions.assertEquals(0, iter.count());
     }
 
     @Test
@@ -63,24 +106,6 @@ public class ObjListIteratorTest extends TestBase {
         Assertions.assertThrows(UnsupportedOperationException.class, () -> iter.remove());
     }
 
-    @Test
-    public void testEmpty_ToList() {
-        ObjListIterator<String> iter = ObjListIterator.empty();
-        Assertions.assertTrue(iter.toList().isEmpty());
-    }
-
-    @Test
-    public void testEmpty_ToArray() {
-        ObjListIterator<String> iter = ObjListIterator.empty();
-        Assertions.assertEquals(0, iter.toArray().length);
-    }
-
-    @Test
-    public void testEmpty_Count() {
-        ObjListIterator<String> iter = ObjListIterator.empty();
-        Assertions.assertEquals(0, iter.count());
-    }
-
     // --- just() ---
 
     @Test
@@ -94,18 +119,18 @@ public class ObjListIteratorTest extends TestBase {
     }
 
     @Test
+    public void testJust_PreviousAfterNext() {
+        ObjListIterator<String> iter = ObjListIterator.just("val");
+        iter.next();
+        Assertions.assertEquals("val", iter.previous());
+    }
+
+    @Test
     public void testJust_Null() {
         ObjListIterator<String> iter = ObjListIterator.just(null);
         Assertions.assertTrue(iter.hasNext());
         Assertions.assertNull(iter.next());
         Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testJust_PreviousAfterNext() {
-        ObjListIterator<String> iter = ObjListIterator.just("val");
-        iter.next();
-        Assertions.assertEquals("val", iter.previous());
     }
 
     // --- of(T...) ---
@@ -119,26 +144,6 @@ public class ObjListIteratorTest extends TestBase {
         Assertions.assertEquals("one", iter.next());
         Assertions.assertEquals("two", iter.next());
         Assertions.assertEquals("three", iter.next());
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfArray_Empty() {
-        String[] array = {};
-        ObjListIterator<String> iter = ObjListIterator.of(array);
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfArray_Null() {
-        ObjListIterator<String> iter = ObjListIterator.of((String[]) null);
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfArray_Single() {
-        ObjListIterator<Integer> iter = ObjListIterator.of(42);
-        Assertions.assertEquals(42, iter.next());
         Assertions.assertFalse(iter.hasNext());
     }
 
@@ -156,21 +161,6 @@ public class ObjListIteratorTest extends TestBase {
     }
 
     @Test
-    public void testOfArrayRange_Invalid() {
-        Integer[] numbers = { 1, 2, 3 };
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> ObjListIterator.of(numbers, 1, 5));
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> ObjListIterator.of(numbers, -1, 2));
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> ObjListIterator.of(numbers, 2, 1));
-    }
-
-    @Test
-    public void testOfArrayRange_SameIndex() {
-        Integer[] numbers = { 1, 2, 3 };
-        ObjListIterator<Integer> iter = ObjListIterator.of(numbers, 1, 1);
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
     public void testOfArrayRange_FullRange() {
         Integer[] numbers = { 1, 2, 3 };
         ObjListIterator<Integer> iter = ObjListIterator.of(numbers, 0, 3);
@@ -178,11 +168,6 @@ public class ObjListIteratorTest extends TestBase {
         Assertions.assertEquals(2, iter.next());
         Assertions.assertEquals(3, iter.next());
         Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfArrayRange_NullArray() {
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> ObjListIterator.of((Integer[]) null, 0, 1));
     }
 
     // --- of(List) ---
@@ -198,19 +183,6 @@ public class ObjListIteratorTest extends TestBase {
         Assertions.assertFalse(iter.hasNext());
     }
 
-    @Test
-    public void testOfList_Null() {
-        List<String> list = null;
-        ObjListIterator<String> iter = ObjListIterator.of(list);
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfList_Empty() {
-        ObjListIterator<String> iter = ObjListIterator.of(new ArrayList<>());
-        Assertions.assertFalse(iter.hasNext());
-    }
-
     // --- of(ListIterator) ---
 
     @Test
@@ -222,36 +194,6 @@ public class ObjListIteratorTest extends TestBase {
         Assertions.assertEquals("x", iter.next());
         Assertions.assertEquals("y", iter.next());
         Assertions.assertEquals("z", iter.next());
-    }
-
-    @Test
-    public void testOfListIterator_Null() {
-        ListIterator<String> listIter = null;
-        ObjListIterator<String> iter = ObjListIterator.of(listIter);
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfListIterator_WrapsObjListIterator() {
-        ObjListIterator<String> original = ObjListIterator.of(Arrays.asList("a", "b"));
-        ObjListIterator<String> wrapped = ObjListIterator.of((ListIterator<String>) original);
-        // Should return the same instance
-        Assertions.assertSame(original, wrapped);
-    }
-
-    @Test
-    public void testOfListIterator_SetThrows() {
-        List<String> list = Arrays.asList("a", "b");
-        ObjListIterator<String> iter = ObjListIterator.of(list.listIterator());
-        iter.next();
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> iter.set("x"));
-    }
-
-    @Test
-    public void testOfListIterator_AddThrows() {
-        List<String> list = Arrays.asList("a", "b");
-        ObjListIterator<String> iter = ObjListIterator.of(list.listIterator());
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> iter.add("x"));
     }
 
     // --- Bidirectional iteration (hasNext, next, hasPrevious, previous, nextIndex, previousIndex) ---
@@ -292,6 +234,180 @@ public class ObjListIteratorTest extends TestBase {
         Assertions.assertEquals(1, iter.previousIndex());
     }
 
+    // --- toSet() (inherited from ImmutableIterator) ---
+
+    @Test
+    public void testToSet() {
+        ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b", "a", "c"));
+        Set<String> set = iter.toSet();
+        Assertions.assertEquals(3, set.size());
+        Assertions.assertTrue(set.contains("a"));
+        Assertions.assertTrue(set.contains("b"));
+        Assertions.assertTrue(set.contains("c"));
+    }
+
+    // --- toCollection() (inherited from ImmutableIterator) ---
+
+    @Test
+    public void testToCollection() {
+        ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b", "c"));
+        LinkedList<String> linked = iter.toCollection(LinkedList::new);
+        Assertions.assertEquals(3, linked.size());
+        Assertions.assertEquals("a", linked.getFirst());
+        Assertions.assertEquals("c", linked.getLast());
+    }
+
+    @Test
+    public void testToCollection_HashSet() {
+        ObjListIterator<Integer> iter = ObjListIterator.of(Arrays.asList(1, 2, 2, 3));
+        HashSet<Integer> set = iter.toCollection(HashSet::new);
+        Assertions.assertEquals(3, set.size());
+    }
+
+    // --- toImmutableList() (inherited from ImmutableIterator) ---
+
+    @Test
+    public void testToImmutableList() {
+        ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b", "c"));
+        ImmutableList<String> immutable = iter.toImmutableList();
+        Assertions.assertEquals(3, immutable.size());
+        Assertions.assertEquals("a", immutable.get(0));
+        Assertions.assertEquals("c", immutable.get(2));
+    }
+
+    // --- toImmutableSet() (inherited from ImmutableIterator) ---
+
+    @Test
+    public void testToImmutableSet() {
+        ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b", "a"));
+        ImmutableSet<String> immutable = iter.toImmutableSet();
+        Assertions.assertEquals(2, immutable.size());
+        Assertions.assertTrue(immutable.contains("a"));
+        Assertions.assertTrue(immutable.contains("b"));
+    }
+
+    // --- count() (inherited from ImmutableIterator) ---
+
+    @Test
+    public void testCount() {
+        ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b", "c"));
+        Assertions.assertEquals(3, iter.count());
+        Assertions.assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testCount_AfterPartialIteration() {
+        ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b", "c"));
+        iter.next();
+        Assertions.assertEquals(2, iter.count());
+    }
+
+    @Test
+    public void testOfArray_Empty() {
+        String[] array = {};
+        ObjListIterator<String> iter = ObjListIterator.of(array);
+        Assertions.assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testOfArray_Null() {
+        ObjListIterator<String> iter = ObjListIterator.of((String[]) null);
+        Assertions.assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testOfArray_Single() {
+        ObjListIterator<Integer> iter = ObjListIterator.of(42);
+        Assertions.assertEquals(42, iter.next());
+        Assertions.assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testOfArrayRange_SameIndex() {
+        Integer[] numbers = { 1, 2, 3 };
+        ObjListIterator<Integer> iter = ObjListIterator.of(numbers, 1, 1);
+        Assertions.assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testOfList_Null() {
+        List<String> list = null;
+        ObjListIterator<String> iter = ObjListIterator.of(list);
+        Assertions.assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testOfList_Empty() {
+        ObjListIterator<String> iter = ObjListIterator.of(new ArrayList<>());
+        Assertions.assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testOfListIterator_Null() {
+        ListIterator<String> listIter = null;
+        ObjListIterator<String> iter = ObjListIterator.of(listIter);
+        Assertions.assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testOfListIterator_WrapsObjListIterator() {
+        ObjListIterator<String> original = ObjListIterator.of(Arrays.asList("a", "b"));
+        ObjListIterator<String> wrapped = ObjListIterator.of((ListIterator<String>) original);
+        // Should return the same instance
+        Assertions.assertSame(original, wrapped);
+    }
+
+    @Test
+    public void testOfArrayRange_Invalid() {
+        Integer[] numbers = { 1, 2, 3 };
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> ObjListIterator.of(numbers, 1, 5));
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> ObjListIterator.of(numbers, -1, 2));
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> ObjListIterator.of(numbers, 2, 1));
+    }
+
+    @Test
+    public void testOfArrayRange_NullArray() {
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> ObjListIterator.of((Integer[]) null, 0, 1));
+    }
+
+    @Test
+    public void testOfListIterator_SetThrows() {
+        List<String> list = Arrays.asList("a", "b");
+        ObjListIterator<String> iter = ObjListIterator.of(list.listIterator());
+        iter.next();
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> iter.set("x"));
+    }
+
+    @Test
+    public void testOfListIterator_AddThrows() {
+        List<String> list = Arrays.asList("a", "b");
+        ObjListIterator<String> iter = ObjListIterator.of(list.listIterator());
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> iter.add("x"));
+    }
+
+    // --- set() and add() (UnsupportedOperationException) ---
+
+    @Test
+    public void testSetUnsupported() {
+        ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b"));
+        iter.next();
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> iter.set("x"));
+    }
+
+    @Test
+    public void testAddUnsupported() {
+        ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b"));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> iter.add("x"));
+    }
+
+    // --- remove() (inherited from ImmutableIterator) ---
+
+    @Test
+    public void testRemoveUnsupported() {
+        ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b"));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> iter.remove());
+    }
+
     // --- skip() ---
 
     @Test
@@ -306,35 +422,11 @@ public class ObjListIteratorTest extends TestBase {
     }
 
     @Test
-    public void testSkip_Zero() {
-        ObjListIterator<Integer> iter = ObjListIterator.of(Arrays.asList(1, 2, 3));
-        ObjListIterator<Integer> skipped = iter.skip(0);
-
-        Assertions.assertSame(iter, skipped);
-        Assertions.assertEquals(1, skipped.next());
-        Assertions.assertEquals(2, skipped.next());
-        Assertions.assertEquals(3, skipped.next());
-    }
-
-    @Test
     public void testSkip_MoreThanSize() {
         ObjListIterator<Integer> iter = ObjListIterator.of(Arrays.asList(1, 2, 3));
         ObjListIterator<Integer> skipped = iter.skip(5);
 
         Assertions.assertFalse(skipped.hasNext());
-    }
-
-    @Test
-    public void testSkip_Negative() {
-        ObjListIterator<Integer> iter = ObjListIterator.of(Arrays.asList(1, 2, 3));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> iter.skip(-1));
-    }
-
-    @Test
-    public void testSkip_NextThrowsWhenExhausted() {
-        ObjListIterator<Integer> iter = ObjListIterator.of(Arrays.asList(1, 2));
-        ObjListIterator<Integer> skipped = iter.skip(5);
-        Assertions.assertThrows(NoSuchElementException.class, () -> skipped.next());
     }
 
     @Test
@@ -375,6 +467,30 @@ public class ObjListIteratorTest extends TestBase {
     }
 
     @Test
+    public void testSkip_Zero() {
+        ObjListIterator<Integer> iter = ObjListIterator.of(Arrays.asList(1, 2, 3));
+        ObjListIterator<Integer> skipped = iter.skip(0);
+
+        Assertions.assertSame(iter, skipped);
+        Assertions.assertEquals(1, skipped.next());
+        Assertions.assertEquals(2, skipped.next());
+        Assertions.assertEquals(3, skipped.next());
+    }
+
+    @Test
+    public void testSkip_Negative() {
+        ObjListIterator<Integer> iter = ObjListIterator.of(Arrays.asList(1, 2, 3));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> iter.skip(-1));
+    }
+
+    @Test
+    public void testSkip_NextThrowsWhenExhausted() {
+        ObjListIterator<Integer> iter = ObjListIterator.of(Arrays.asList(1, 2));
+        ObjListIterator<Integer> skipped = iter.skip(5);
+        Assertions.assertThrows(NoSuchElementException.class, () -> skipped.next());
+    }
+
+    @Test
     public void testSkip_SetThrows() {
         ObjListIterator<Integer> iter = ObjListIterator.of(Arrays.asList(1, 2, 3));
         ObjListIterator<Integer> skipped = iter.skip(1);
@@ -403,14 +519,6 @@ public class ObjListIteratorTest extends TestBase {
     }
 
     @Test
-    public void testLimit_Zero() {
-        ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b", "c"));
-        ObjListIterator<String> limited = iter.limit(0);
-
-        Assertions.assertFalse(limited.hasNext());
-    }
-
-    @Test
     public void testLimit_MoreThanSize() {
         ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b"));
         ObjListIterator<String> limited = iter.limit(5);
@@ -418,20 +526,6 @@ public class ObjListIteratorTest extends TestBase {
         Assertions.assertEquals("a", limited.next());
         Assertions.assertEquals("b", limited.next());
         Assertions.assertFalse(limited.hasNext());
-    }
-
-    @Test
-    public void testLimit_Negative() {
-        ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b"));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> iter.limit(-1));
-    }
-
-    @Test
-    public void testLimit_NextThrowsWhenExhausted() {
-        ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b", "c"));
-        ObjListIterator<String> limited = iter.limit(1);
-        limited.next();
-        Assertions.assertThrows(NoSuchElementException.class, () -> limited.next());
     }
 
     @Test
@@ -471,6 +565,40 @@ public class ObjListIteratorTest extends TestBase {
         Assertions.assertEquals(-1, limited.previousIndex());
         limited.next();
         Assertions.assertEquals(0, limited.previousIndex());
+    }
+
+    // --- skip + limit combined ---
+
+    @Test
+    public void testSkipAndLimit() {
+        ObjListIterator<Integer> iter = ObjListIterator.of(Arrays.asList(1, 2, 3, 4, 5));
+        ObjListIterator<Integer> sliced = iter.skip(1).limit(2);
+
+        Assertions.assertEquals(2, sliced.next());
+        Assertions.assertEquals(3, sliced.next());
+        Assertions.assertFalse(sliced.hasNext());
+    }
+
+    @Test
+    public void testLimit_Zero() {
+        ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b", "c"));
+        ObjListIterator<String> limited = iter.limit(0);
+
+        Assertions.assertFalse(limited.hasNext());
+    }
+
+    @Test
+    public void testLimit_Negative() {
+        ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> iter.limit(-1));
+    }
+
+    @Test
+    public void testLimit_NextThrowsWhenExhausted() {
+        ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b", "c"));
+        ObjListIterator<String> limited = iter.limit(1);
+        limited.next();
+        Assertions.assertThrows(NoSuchElementException.class, () -> limited.next());
     }
 
     @Test
@@ -535,13 +663,6 @@ public class ObjListIteratorTest extends TestBase {
         Assertions.assertEquals("c", array[2]);
     }
 
-    @Test
-    public void testToArray_Empty() {
-        ObjListIterator<String> iter = ObjListIterator.empty();
-        Object[] array = iter.toArray();
-        Assertions.assertEquals(0, array.length);
-    }
-
     // --- toArray(A[]) ---
 
     @Test
@@ -562,6 +683,13 @@ public class ObjListIteratorTest extends TestBase {
         Assertions.assertEquals(5, array.length);
         Assertions.assertEquals("a", array[0]);
         Assertions.assertEquals("b", array[1]);
+    }
+
+    @Test
+    public void testToArray_Empty() {
+        ObjListIterator<String> iter = ObjListIterator.empty();
+        Object[] array = iter.toArray();
+        Assertions.assertEquals(0, array.length);
     }
 
     // --- toList() ---
@@ -592,6 +720,13 @@ public class ObjListIteratorTest extends TestBase {
         Assertions.assertEquals(2, list.size());
     }
 
+    @Test
+    public void testStream_Filter() {
+        ObjListIterator<Integer> iter = ObjListIterator.of(Arrays.asList(1, 2, 3, 4, 5));
+        long count = iter.stream().filter(x -> x > 3).count();
+        Assertions.assertEquals(2, count);
+    }
+
     // --- stream() ---
 
     @Test
@@ -608,13 +743,6 @@ public class ObjListIteratorTest extends TestBase {
     public void testStream_Empty() {
         ObjListIterator<String> iter = ObjListIterator.empty();
         Assertions.assertEquals(0, iter.stream().count());
-    }
-
-    @Test
-    public void testStream_Filter() {
-        ObjListIterator<Integer> iter = ObjListIterator.of(Arrays.asList(1, 2, 3, 4, 5));
-        long count = iter.stream().filter(x -> x > 3).count();
-        Assertions.assertEquals(2, count);
     }
 
     // --- foreachRemaining() ---
@@ -694,135 +822,5 @@ public class ObjListIteratorTest extends TestBase {
         Assertions.assertEquals(2, results.size());
         Assertions.assertEquals("0=x", results.get(0));
         Assertions.assertEquals("1=y", results.get(1));
-    }
-
-    // --- set() and add() (UnsupportedOperationException) ---
-
-    @Test
-    public void testSetUnsupported() {
-        ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b"));
-        iter.next();
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> iter.set("x"));
-    }
-
-    @Test
-    public void testAddUnsupported() {
-        ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b"));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> iter.add("x"));
-    }
-
-    // --- remove() (inherited from ImmutableIterator) ---
-
-    @Test
-    public void testRemoveUnsupported() {
-        ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b"));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> iter.remove());
-    }
-
-    // --- toSet() (inherited from ImmutableIterator) ---
-
-    @Test
-    public void testToSet() {
-        ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b", "a", "c"));
-        Set<String> set = iter.toSet();
-        Assertions.assertEquals(3, set.size());
-        Assertions.assertTrue(set.contains("a"));
-        Assertions.assertTrue(set.contains("b"));
-        Assertions.assertTrue(set.contains("c"));
-    }
-
-    @Test
-    public void testToSet_Empty() {
-        ObjListIterator<String> iter = ObjListIterator.empty();
-        Set<String> set = iter.toSet();
-        Assertions.assertTrue(set.isEmpty());
-    }
-
-    // --- toCollection() (inherited from ImmutableIterator) ---
-
-    @Test
-    public void testToCollection() {
-        ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b", "c"));
-        LinkedList<String> linked = iter.toCollection(LinkedList::new);
-        Assertions.assertEquals(3, linked.size());
-        Assertions.assertEquals("a", linked.getFirst());
-        Assertions.assertEquals("c", linked.getLast());
-    }
-
-    @Test
-    public void testToCollection_HashSet() {
-        ObjListIterator<Integer> iter = ObjListIterator.of(Arrays.asList(1, 2, 2, 3));
-        HashSet<Integer> set = iter.toCollection(HashSet::new);
-        Assertions.assertEquals(3, set.size());
-    }
-
-    // --- toImmutableList() (inherited from ImmutableIterator) ---
-
-    @Test
-    public void testToImmutableList() {
-        ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b", "c"));
-        ImmutableList<String> immutable = iter.toImmutableList();
-        Assertions.assertEquals(3, immutable.size());
-        Assertions.assertEquals("a", immutable.get(0));
-        Assertions.assertEquals("c", immutable.get(2));
-    }
-
-    @Test
-    public void testToImmutableList_Empty() {
-        ObjListIterator<String> iter = ObjListIterator.empty();
-        ImmutableList<String> immutable = iter.toImmutableList();
-        Assertions.assertTrue(immutable.isEmpty());
-    }
-
-    // --- toImmutableSet() (inherited from ImmutableIterator) ---
-
-    @Test
-    public void testToImmutableSet() {
-        ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b", "a"));
-        ImmutableSet<String> immutable = iter.toImmutableSet();
-        Assertions.assertEquals(2, immutable.size());
-        Assertions.assertTrue(immutable.contains("a"));
-        Assertions.assertTrue(immutable.contains("b"));
-    }
-
-    @Test
-    public void testToImmutableSet_Empty() {
-        ObjListIterator<String> iter = ObjListIterator.empty();
-        ImmutableSet<String> immutable = iter.toImmutableSet();
-        Assertions.assertTrue(immutable.isEmpty());
-    }
-
-    // --- count() (inherited from ImmutableIterator) ---
-
-    @Test
-    public void testCount() {
-        ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b", "c"));
-        Assertions.assertEquals(3, iter.count());
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testCount_Empty() {
-        ObjListIterator<String> iter = ObjListIterator.empty();
-        Assertions.assertEquals(0, iter.count());
-    }
-
-    @Test
-    public void testCount_AfterPartialIteration() {
-        ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b", "c"));
-        iter.next();
-        Assertions.assertEquals(2, iter.count());
-    }
-
-    // --- skip + limit combined ---
-
-    @Test
-    public void testSkipAndLimit() {
-        ObjListIterator<Integer> iter = ObjListIterator.of(Arrays.asList(1, 2, 3, 4, 5));
-        ObjListIterator<Integer> sliced = iter.skip(1).limit(2);
-
-        Assertions.assertEquals(2, sliced.next());
-        Assertions.assertEquals(3, sliced.next());
-        Assertions.assertFalse(sliced.hasNext());
     }
 }

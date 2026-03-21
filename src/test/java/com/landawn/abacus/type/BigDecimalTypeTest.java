@@ -13,7 +13,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -21,7 +20,6 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("2025")
 public class BigDecimalTypeTest extends TestBase {
 
     private final BigDecimalType type = new BigDecimalType();
@@ -32,16 +30,22 @@ public class BigDecimalTypeTest extends TestBase {
     }
 
     @Test
-    public void test_name() {
-        assertEquals("BigDecimal", type.name());
-    }
-
-    @Test
     public void test_stringOf() {
         assertEquals("123.456", new BigDecimal("123.456").toString());
         assertEquals("123.456", type.stringOf(new BigDecimal("123.456")));
         assertEquals("0", type.stringOf(BigDecimal.ZERO));
         assertNull(type.stringOf(null));
+    }
+
+    @Test
+    public void test_valueOf_String_withWhitespace() {
+        assertEquals(new BigDecimal("123.456"), type.valueOf("  123.456  "));
+    }
+
+    @Test
+    public void test_valueOf_String_scientificNotation() {
+        BigDecimal result = type.valueOf("1.5E+10");
+        assertEquals(new BigDecimal("1.5E+10"), result);
     }
 
     @Test
@@ -62,6 +66,11 @@ public class BigDecimalTypeTest extends TestBase {
         assertEquals(new BigDecimal("-555.555"), type.valueOf(negChars, 0, 8));
 
         assertNull(type.valueOf(chars, 0, 0));
+    }
+
+    @Test
+    public void test_valueOf_charArray_null() {
+        assertNull(type.valueOf((char[]) null, 0, 0));
     }
 
     @Test
@@ -121,21 +130,6 @@ public class BigDecimalTypeTest extends TestBase {
     }
 
     @Test
-    public void test_appendTo() throws Exception {
-        StringWriter sw = new StringWriter();
-
-        // Test value
-        BigDecimal value = new BigDecimal("111.222");
-        type.appendTo(sw, value);
-        assertEquals("111.222", sw.toString());
-
-        // Test null
-        sw = new StringWriter();
-        type.appendTo(sw, null);
-        assertEquals("null", sw.toString());
-    }
-
-    @Test
     public void test_writeCharacter_withoutConfig() throws Exception {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
         BigDecimal value = new BigDecimal("123.456");
@@ -164,18 +158,22 @@ public class BigDecimalTypeTest extends TestBase {
     }
 
     @Test
-    public void test_valueOf_String_withWhitespace() {
-        assertEquals(new BigDecimal("123.456"), type.valueOf("  123.456  "));
+    public void test_name() {
+        assertEquals("BigDecimal", type.name());
     }
 
     @Test
-    public void test_valueOf_charArray_null() {
-        assertNull(type.valueOf((char[]) null, 0, 0));
-    }
+    public void test_appendTo() throws Exception {
+        StringWriter sw = new StringWriter();
 
-    @Test
-    public void test_valueOf_String_scientificNotation() {
-        BigDecimal result = type.valueOf("1.5E+10");
-        assertEquals(new BigDecimal("1.5E+10"), result);
+        // Test value
+        BigDecimal value = new BigDecimal("111.222");
+        type.appendTo(sw, value);
+        assertEquals("111.222", sw.toString());
+
+        // Test null
+        sw = new StringWriter();
+        type.appendTo(sw, null);
+        assertEquals("null", sw.toString());
     }
 }

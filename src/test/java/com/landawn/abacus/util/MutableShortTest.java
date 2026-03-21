@@ -6,18 +6,51 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class MutableShortTest extends TestBase {
 
     @Test
     public void testOf() {
         MutableShort ms = MutableShort.of((short) 100);
         assertEquals((short) 100, ms.value());
+    }
+
+    @Test
+    public void testGetAndSubtract() {
+        MutableShort ms = MutableShort.of((short) 100);
+        short old = ms.getAndAdd((short) -30);
+        assertEquals((short) 100, old);
+        assertEquals((short) 70, ms.value());
+    }
+
+    @Test
+    public void testOverflowBehavior() {
+        MutableShort mutableShort = MutableShort.of((short) 32767);
+        mutableShort.increment();
+        Assertions.assertEquals((short) -32768, mutableShort.value());
+
+        mutableShort.setValue((short) -32768);
+        mutableShort.decrement();
+        Assertions.assertEquals((short) 32767, mutableShort.value());
+    }
+
+    @Test
+    public void testLargeAdditions() {
+        MutableShort mutableShort = MutableShort.of((short) 30000);
+        mutableShort.add((short) 30000);
+        Assertions.assertEquals((short) -5536, mutableShort.value());
+    }
+
+    @Test
+    public void testBoundaryValues() {
+        MutableShort mutableShort = MutableShort.of(Short.MIN_VALUE);
+        Assertions.assertEquals(Short.MIN_VALUE, mutableShort.value());
+
+        mutableShort.setValue(Short.MAX_VALUE);
+        Assertions.assertEquals(Short.MAX_VALUE, mutableShort.value());
     }
 
     @Test
@@ -69,6 +102,19 @@ public class MutableShortTest extends TestBase {
         boolean updated = ms.setIf(v -> v > 15, (short) 20);
         assertFalse(updated);
         assertEquals((short) 10, ms.value());
+    }
+
+    @Test
+    public void testSetIf() throws Exception {
+        MutableShort mutableShort = MutableShort.of((short) 10);
+
+        boolean updated = mutableShort.setIf(v -> v < 15, (short) 20);
+        Assertions.assertTrue(updated);
+        Assertions.assertEquals((short) 20, mutableShort.value());
+
+        updated = mutableShort.setIf(v -> v < 15, (short) 30);
+        Assertions.assertFalse(updated);
+        Assertions.assertEquals((short) 20, mutableShort.value());
     }
 
     @Test
@@ -227,9 +273,14 @@ public class MutableShortTest extends TestBase {
     }
 
     @Test
-    public void testEquals_same() {
-        MutableShort ms = MutableShort.of((short) 10);
-        assertEquals(ms, ms);
+    public void testCompareTo() {
+        MutableShort a = MutableShort.of((short) 10);
+        MutableShort b = MutableShort.of((short) 20);
+        MutableShort c = MutableShort.of((short) 10);
+
+        Assertions.assertTrue(a.compareTo(b) < 0);
+        Assertions.assertTrue(b.compareTo(a) > 0);
+        Assertions.assertEquals(0, a.compareTo(c));
     }
 
     @Test
@@ -247,15 +298,33 @@ public class MutableShortTest extends TestBase {
     }
 
     @Test
+    public void testEquals_differentType() {
+        MutableShort ms = MutableShort.of((short) 10);
+        assertNotEquals(ms, Short.valueOf((short) 10));
+    }
+
+    @Test
+    public void testEquals_same() {
+        MutableShort ms = MutableShort.of((short) 10);
+        assertEquals(ms, ms);
+    }
+
+    @Test
     public void testEquals_null() {
         MutableShort ms = MutableShort.of((short) 10);
         assertNotEquals(ms, null);
     }
 
     @Test
-    public void testEquals_differentType() {
-        MutableShort ms = MutableShort.of((short) 10);
-        assertNotEquals(ms, Short.valueOf((short) 10));
+    public void testEquals() {
+        MutableShort a = MutableShort.of((short) 10);
+        MutableShort b = MutableShort.of((short) 10);
+        MutableShort c = MutableShort.of((short) 20);
+
+        Assertions.assertTrue(a.equals(b));
+        Assertions.assertFalse(a.equals(c));
+        Assertions.assertFalse(a.equals(null));
+        Assertions.assertFalse(a.equals("10"));
     }
 
     @Test
@@ -271,6 +340,17 @@ public class MutableShortTest extends TestBase {
         MutableShort ms1 = MutableShort.of((short) 42);
         MutableShort ms2 = MutableShort.of((short) 42);
         assertEquals(ms1.hashCode(), ms2.hashCode());
+    }
+
+    @Test
+    public void testHashCode() {
+        MutableShort a = MutableShort.of((short) 10);
+        MutableShort b = MutableShort.of((short) 10);
+        MutableShort c = MutableShort.of((short) 20);
+
+        Assertions.assertEquals(a.hashCode(), b.hashCode());
+        Assertions.assertNotEquals(a.hashCode(), c.hashCode());
+        Assertions.assertEquals(10, a.hashCode());
     }
 
     @Test
@@ -315,14 +395,6 @@ public class MutableShortTest extends TestBase {
     }
 
     @Test
-    public void testGetAndSubtract() {
-        MutableShort ms = MutableShort.of((short) 100);
-        short old = ms.getAndAdd((short) -30);
-        assertEquals((short) 100, old);
-        assertEquals((short) 70, ms.value());
-    }
-
-    @Test
     public void testIntegration_predicate() throws Exception {
         MutableShort ms = MutableShort.of((short) 50);
 
@@ -333,80 +405,6 @@ public class MutableShortTest extends TestBase {
         updated = ms.setIf(v -> v < 50, (short) 200);
         assertFalse(updated);
         assertEquals((short) 100, ms.value());
-    }
-
-    @Test
-    public void testSetIf() throws Exception {
-        MutableShort mutableShort = MutableShort.of((short) 10);
-
-        boolean updated = mutableShort.setIf(v -> v < 15, (short) 20);
-        Assertions.assertTrue(updated);
-        Assertions.assertEquals((short) 20, mutableShort.value());
-
-        updated = mutableShort.setIf(v -> v < 15, (short) 30);
-        Assertions.assertFalse(updated);
-        Assertions.assertEquals((short) 20, mutableShort.value());
-    }
-
-    @Test
-    public void testCompareTo() {
-        MutableShort a = MutableShort.of((short) 10);
-        MutableShort b = MutableShort.of((short) 20);
-        MutableShort c = MutableShort.of((short) 10);
-
-        Assertions.assertTrue(a.compareTo(b) < 0);
-        Assertions.assertTrue(b.compareTo(a) > 0);
-        Assertions.assertEquals(0, a.compareTo(c));
-    }
-
-    @Test
-    public void testEquals() {
-        MutableShort a = MutableShort.of((short) 10);
-        MutableShort b = MutableShort.of((short) 10);
-        MutableShort c = MutableShort.of((short) 20);
-
-        Assertions.assertTrue(a.equals(b));
-        Assertions.assertFalse(a.equals(c));
-        Assertions.assertFalse(a.equals(null));
-        Assertions.assertFalse(a.equals("10"));
-    }
-
-    @Test
-    public void testHashCode() {
-        MutableShort a = MutableShort.of((short) 10);
-        MutableShort b = MutableShort.of((short) 10);
-        MutableShort c = MutableShort.of((short) 20);
-
-        Assertions.assertEquals(a.hashCode(), b.hashCode());
-        Assertions.assertNotEquals(a.hashCode(), c.hashCode());
-        Assertions.assertEquals(10, a.hashCode());
-    }
-
-    @Test
-    public void testOverflowBehavior() {
-        MutableShort mutableShort = MutableShort.of((short) 32767);
-        mutableShort.increment();
-        Assertions.assertEquals((short) -32768, mutableShort.value());
-
-        mutableShort.setValue((short) -32768);
-        mutableShort.decrement();
-        Assertions.assertEquals((short) 32767, mutableShort.value());
-    }
-
-    @Test
-    public void testBoundaryValues() {
-        MutableShort mutableShort = MutableShort.of(Short.MIN_VALUE);
-        Assertions.assertEquals(Short.MIN_VALUE, mutableShort.value());
-
-        mutableShort.setValue(Short.MAX_VALUE);
-        Assertions.assertEquals(Short.MAX_VALUE, mutableShort.value());
-    }
-
-    @Test
-    public void testLargeAdditions() {
-        MutableShort mutableShort = MutableShort.of((short) 30000);
-        mutableShort.add((short) 30000);
-        Assertions.assertEquals((short) -5536, mutableShort.value());
     }
 
 }

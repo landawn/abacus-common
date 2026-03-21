@@ -18,7 +18,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -26,7 +25,6 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.u.OptionalShort;
 
-@Tag("new-test")
 public class OptionalShortTypeTest extends TestBase {
 
     private OptionalShortType optionalShortType;
@@ -56,6 +54,12 @@ public class OptionalShortTypeTest extends TestBase {
     }
 
     @Test
+    public void testStringOfWithValue() {
+        OptionalShort opt = OptionalShort.of((short) 1234);
+        assertEquals("1234", optionalShortType.stringOf(opt));
+    }
+
+    @Test
     public void testStringOfWithNull() {
         assertNull(optionalShortType.stringOf(null));
     }
@@ -64,12 +68,6 @@ public class OptionalShortTypeTest extends TestBase {
     public void testStringOfWithEmpty() {
         OptionalShort empty = OptionalShort.empty();
         assertNull(optionalShortType.stringOf(empty));
-    }
-
-    @Test
-    public void testStringOfWithValue() {
-        OptionalShort opt = OptionalShort.of((short) 1234);
-        assertEquals("1234", optionalShortType.stringOf(opt));
     }
 
     @Test

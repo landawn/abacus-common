@@ -9,12 +9,10 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BooleanConsumerTest extends TestBase {
 
     @Test
@@ -52,59 +50,6 @@ public class BooleanConsumerTest extends TestBase {
         consumer.accept(true);
 
         assertEquals(2, trueCount.get());
-    }
-
-    @Test
-    public void testAndThen() {
-        List<String> results = new ArrayList<>();
-        BooleanConsumer consumer1 = value -> results.add("first:" + value);
-        BooleanConsumer consumer2 = value -> results.add("second:" + value);
-
-        BooleanConsumer chainedConsumer = consumer1.andThen(consumer2);
-        chainedConsumer.accept(true);
-
-        assertEquals(2, results.size());
-        assertEquals("first:true", results.get(0));
-        assertEquals("second:true", results.get(1));
-    }
-
-    @Test
-    public void testAndThenMultipleChains() {
-        List<String> results = new ArrayList<>();
-        BooleanConsumer consumer1 = value -> results.add("1");
-        BooleanConsumer consumer2 = value -> results.add("2");
-        BooleanConsumer consumer3 = value -> results.add("3");
-
-        BooleanConsumer chainedConsumer = consumer1.andThen(consumer2).andThen(consumer3);
-        chainedConsumer.accept(true);
-
-        assertEquals(3, results.size());
-        assertEquals("1", results.get(0));
-        assertEquals("2", results.get(1));
-        assertEquals("3", results.get(2));
-    }
-
-    @Test
-    public void testAndThenWithException() {
-        List<String> results = new ArrayList<>();
-        BooleanConsumer consumer1 = value -> results.add("executed");
-        BooleanConsumer consumer2 = value -> {
-            throw new RuntimeException("Test exception");
-        };
-
-        BooleanConsumer chainedConsumer = consumer1.andThen(consumer2);
-
-        assertThrows(RuntimeException.class, () -> chainedConsumer.accept(true));
-        assertEquals(1, results.size()); // First consumer should have executed
-    }
-
-    @Test
-    public void testAcceptWithException() {
-        BooleanConsumer consumer = value -> {
-            throw new RuntimeException("Test exception");
-        };
-
-        assertThrows(RuntimeException.class, () -> consumer.accept(true));
     }
 
     @Test
@@ -153,5 +98,58 @@ public class BooleanConsumerTest extends TestBase {
         }
 
         assertEquals(5, callCount.get());
+    }
+
+    @Test
+    public void testAcceptWithException() {
+        BooleanConsumer consumer = value -> {
+            throw new RuntimeException("Test exception");
+        };
+
+        assertThrows(RuntimeException.class, () -> consumer.accept(true));
+    }
+
+    @Test
+    public void testAndThen() {
+        List<String> results = new ArrayList<>();
+        BooleanConsumer consumer1 = value -> results.add("first:" + value);
+        BooleanConsumer consumer2 = value -> results.add("second:" + value);
+
+        BooleanConsumer chainedConsumer = consumer1.andThen(consumer2);
+        chainedConsumer.accept(true);
+
+        assertEquals(2, results.size());
+        assertEquals("first:true", results.get(0));
+        assertEquals("second:true", results.get(1));
+    }
+
+    @Test
+    public void testAndThenMultipleChains() {
+        List<String> results = new ArrayList<>();
+        BooleanConsumer consumer1 = value -> results.add("1");
+        BooleanConsumer consumer2 = value -> results.add("2");
+        BooleanConsumer consumer3 = value -> results.add("3");
+
+        BooleanConsumer chainedConsumer = consumer1.andThen(consumer2).andThen(consumer3);
+        chainedConsumer.accept(true);
+
+        assertEquals(3, results.size());
+        assertEquals("1", results.get(0));
+        assertEquals("2", results.get(1));
+        assertEquals("3", results.get(2));
+    }
+
+    @Test
+    public void testAndThenWithException() {
+        List<String> results = new ArrayList<>();
+        BooleanConsumer consumer1 = value -> results.add("executed");
+        BooleanConsumer consumer2 = value -> {
+            throw new RuntimeException("Test exception");
+        };
+
+        BooleanConsumer chainedConsumer = consumer1.andThen(consumer2);
+
+        assertThrows(RuntimeException.class, () -> chainedConsumer.accept(true));
+        assertEquals(1, results.size()); // First consumer should have executed
     }
 }

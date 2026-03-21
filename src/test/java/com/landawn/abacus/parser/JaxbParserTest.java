@@ -23,7 +23,6 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.w3c.dom.Node;
@@ -37,7 +36,6 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 
-@Tag("2025")
 public class JaxbParserTest extends TestBase {
 
     private JaxbParser parser;
@@ -131,6 +129,20 @@ public class JaxbParserTest extends TestBase {
     }
 
     @Test
+    public void testConstructorWithConfigs() {
+        XmlSerConfig xsc = new XmlSerConfig();
+        XmlDeserConfig xdc = new XmlDeserConfig();
+
+        JaxbParser parserWithConfig = new JaxbParser(xsc, xdc);
+        assertNotNull(parserWithConfig);
+
+        Person person = new Person("Test", 30);
+        String xml = parserWithConfig.serialize(person, (XmlSerConfig) null);
+        Person deserialized = parserWithConfig.deserialize(xml, null, Person.class);
+        assertEquals(person, deserialized);
+    }
+
+    @Test
     public void testSerializeToString() {
         Person person = new Person("John", 30);
         String xml = parser.serialize(person, (XmlSerConfig) null);
@@ -144,6 +156,27 @@ public class JaxbParserTest extends TestBase {
     public void testSerializeNull() {
         String result = parser.serialize(null, (XmlSerConfig) null);
         assertEquals("", result);
+    }
+
+    @Test
+    public void testRoundTrip() {
+        Person original = new Person("Henry", 33);
+        String xml = parser.serialize(original, (XmlSerConfig) null);
+        Person deserialized = parser.deserialize(xml, null, Person.class);
+
+        assertEquals(original, deserialized);
+    }
+
+    @Test
+    public void testSerializeWithAttributes() {
+        Book book = new Book();
+        book.setTitle("Java Programming");
+        book.setIsbn("123-456-789");
+
+        String xml = parser.serialize(book, (XmlSerConfig) null);
+
+        assertTrue(xml.contains("isbn=\"123-456-789\""));
+        assertTrue(xml.contains("<title>Java Programming</title>"));
     }
 
     @Test
@@ -184,6 +217,42 @@ public class JaxbParserTest extends TestBase {
     }
 
     @Test
+    public void testSerializeWithIgnoredPropNames() {
+        Person person = new Person("Test", 100);
+        XmlSerConfig config = new XmlSerConfig();
+        Map<Class<?>, Set<String>> ignoredProps = new HashMap<>();
+        ignoredProps.put(Person.class, new HashSet<>(Arrays.asList("age")));
+        config.setIgnoredPropNames(ignoredProps);
+
+        assertThrows(ParsingException.class, () -> parser.serialize(person, config));
+    }
+
+    @Test
+    public void testSerializeNullToFile() throws IOException {
+        File file = tempDir.resolve("null.xml").toFile();
+        parser.serialize(null, null, file);
+
+        assertTrue(file.exists());
+        assertEquals("", IOUtil.readAllToString(file));
+    }
+
+    @Test
+    public void testSerializeNullToOutputStream() throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        parser.serialize(null, null, baos);
+
+        assertEquals("", baos.toString());
+    }
+
+    @Test
+    public void testSerializeNullToWriter() throws IOException {
+        StringWriter writer = new StringWriter();
+        parser.serialize(null, null, writer);
+
+        assertEquals("", writer.toString());
+    }
+
+    @Test
     public void testDeserializeFromString() {
         String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" + "<person><name>David</name><age>45</age></person>";
 
@@ -197,6 +266,17 @@ public class JaxbParserTest extends TestBase {
     public void testDeserializeEmptyString() {
         Person person = parser.deserialize("", null, Person.class);
         assertNull(person);
+    }
+
+    @Test
+    public void testDeserializeFromInputStreamUtf16() {
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-16\" standalone=\"yes\"?>" + "<person><name>\u4f60\u597d</name><age>50</age></person>";
+        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_16));
+
+        Person person = parser.deserialize(bais, null, Person.class);
+
+        assertEquals("\u4f60\u597d", person.getName());
+        assertEquals(50, person.getAge());
     }
 
     @Test
@@ -223,17 +303,6 @@ public class JaxbParserTest extends TestBase {
     }
 
     @Test
-    public void testDeserializeFromInputStreamUtf16() {
-        String xml = "<?xml version=\"1.0\" encoding=\"UTF-16\" standalone=\"yes\"?>" + "<person><name>\u4f60\u597d</name><age>50</age></person>";
-        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_16));
-
-        Person person = parser.deserialize(bais, null, Person.class);
-
-        assertEquals("\u4f60\u597d", person.getName());
-        assertEquals(50, person.getAge());
-    }
-
-    @Test
     public void testDeserializeFromReader() throws IOException {
         String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" + "<person><name>Grace</name><age>28</age></person>";
         StringReader reader = new StringReader(xml);
@@ -254,38 +323,6 @@ public class JaxbParserTest extends TestBase {
 
         assertEquals("\u4e16\u754c", person.getName());
         assertEquals(22, person.getAge());
-    }
-
-    @Test
-    public void testRoundTrip() {
-        Person original = new Person("Henry", 33);
-        String xml = parser.serialize(original, (XmlSerConfig) null);
-        Person deserialized = parser.deserialize(xml, null, Person.class);
-
-        assertEquals(original, deserialized);
-    }
-
-    @Test
-    public void testSerializeWithAttributes() {
-        Book book = new Book();
-        book.setTitle("Java Programming");
-        book.setIsbn("123-456-789");
-
-        String xml = parser.serialize(book, (XmlSerConfig) null);
-
-        assertTrue(xml.contains("isbn=\"123-456-789\""));
-        assertTrue(xml.contains("<title>Java Programming</title>"));
-    }
-
-    @Test
-    public void testSerializeWithIgnoredPropNames() {
-        Person person = new Person("Test", 100);
-        XmlSerConfig config = new XmlSerConfig();
-        Map<Class<?>, Set<String>> ignoredProps = new HashMap<>();
-        ignoredProps.put(Person.class, new HashSet<>(Arrays.asList("age")));
-        config.setIgnoredPropNames(ignoredProps);
-
-        assertThrows(ParsingException.class, () -> parser.serialize(person, config));
     }
 
     @Test
@@ -325,45 +362,6 @@ public class JaxbParserTest extends TestBase {
         Map<String, Type<?>> nodeClasses = new HashMap<>();
 
         assertThrows(UnsupportedOperationException.class, () -> parser.deserialize((Node) null, null, nodeClasses));
-    }
-
-    @Test
-    public void testSerializeNullToFile() throws IOException {
-        File file = tempDir.resolve("null.xml").toFile();
-        parser.serialize(null, null, file);
-
-        assertTrue(file.exists());
-        assertEquals("", IOUtil.readAllToString(file));
-    }
-
-    @Test
-    public void testSerializeNullToOutputStream() throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        parser.serialize(null, null, baos);
-
-        assertEquals("", baos.toString());
-    }
-
-    @Test
-    public void testSerializeNullToWriter() throws IOException {
-        StringWriter writer = new StringWriter();
-        parser.serialize(null, null, writer);
-
-        assertEquals("", writer.toString());
-    }
-
-    @Test
-    public void testConstructorWithConfigs() {
-        XmlSerConfig xsc = new XmlSerConfig();
-        XmlDeserConfig xdc = new XmlDeserConfig();
-
-        JaxbParser parserWithConfig = new JaxbParser(xsc, xdc);
-        assertNotNull(parserWithConfig);
-
-        Person person = new Person("Test", 30);
-        String xml = parserWithConfig.serialize(person, (XmlSerConfig) null);
-        Person deserialized = parserWithConfig.deserialize(xml, null, Person.class);
-        assertEquals(person, deserialized);
     }
 
 }

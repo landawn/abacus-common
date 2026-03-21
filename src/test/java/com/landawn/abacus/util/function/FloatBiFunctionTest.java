@@ -4,12 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class FloatBiFunctionTest extends TestBase {
 
     @Test
@@ -40,17 +38,6 @@ public class FloatBiFunctionTest extends TestBase {
     }
 
     @Test
-    public void testAndThen() {
-        final FloatBiFunction<Float> function = (t, u) -> t + u;
-        final java.util.function.Function<Float, String> after = val -> "Result: " + val;
-
-        final FloatBiFunction<String> composed = function.andThen(after);
-        final String result = composed.apply(10.5f, 20.3f);
-
-        assertEquals("Result: 30.8", result);
-    }
-
-    @Test
     public void testApply_returnsNull() {
         final FloatBiFunction<String> function = (t, u) -> null;
         final String result = function.apply(1.0f, 2.0f);
@@ -68,5 +55,16 @@ public class FloatBiFunctionTest extends TestBase {
     public void testFunctionalInterfaceContract() {
         final FloatBiFunction<String> function = (t, u) -> "test";
         assertNotNull(function.apply(1.0f, 2.0f));
+    }
+
+    @Test
+    public void testAndThen() {
+        final FloatBiFunction<Float> function = (t, u) -> t + u;
+        final java.util.function.Function<Float, String> after = val -> "Result: " + val;
+
+        final FloatBiFunction<String> composed = function.andThen(after);
+        final String result = composed.apply(10.5f, 20.3f);
+
+        assertEquals("Result: 30.8", result);
     }
 }

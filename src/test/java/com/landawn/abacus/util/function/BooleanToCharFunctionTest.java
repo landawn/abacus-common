@@ -3,12 +3,10 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BooleanToCharFunctionTest extends TestBase {
 
     @Test
@@ -36,15 +34,6 @@ public class BooleanToCharFunctionTest extends TestBase {
     }
 
     @Test
-    public void testApplyAsCharWithException() {
-        BooleanToCharFunction function = value -> {
-            throw new RuntimeException("Test exception");
-        };
-
-        assertThrows(RuntimeException.class, () -> function.applyAsChar(true));
-    }
-
-    @Test
     public void testAnonymousClass() {
         BooleanToCharFunction function = new BooleanToCharFunction() {
             @Override
@@ -55,6 +44,15 @@ public class BooleanToCharFunctionTest extends TestBase {
 
         assertEquals('A', function.applyAsChar(true));
         assertEquals('Z', function.applyAsChar(false));
+    }
+
+    @Test
+    public void testApplyAsCharWithException() {
+        BooleanToCharFunction function = value -> {
+            throw new RuntimeException("Test exception");
+        };
+
+        assertThrows(RuntimeException.class, () -> function.applyAsChar(true));
     }
 
     @Test

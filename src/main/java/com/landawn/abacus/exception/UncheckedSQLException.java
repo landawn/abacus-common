@@ -22,23 +22,23 @@ import com.landawn.abacus.annotation.MayReturnNull;
 /**
  * A runtime exception that wraps {@link SQLException}, allowing SQL exceptions to be thrown
  * without being declared in method signatures. This exception preserves the SQL-specific
- * information from the original SQLException, including the SQL state and vendor error code.
- * 
- * <p>This exception is particularly useful in contexts where SQLException cannot be declared:</p>
+ * information from the original {@code SQLException}, including the SQL state and vendor error code.
+ *
+ * <p>This exception is particularly useful in contexts where {@code SQLException} cannot be declared:</p>
  * <ul>
  *   <li>Lambda expressions and functional interfaces used with database operations</li>
  *   <li>Stream operations processing database results</li>
  *   <li>DAO implementations where you want to avoid checked exceptions</li>
  *   <li>Transaction management code using functional programming patterns</li>
  * </ul>
- * 
+ *
  * <p>The exception preserves important SQL-specific information:</p>
  * <ul>
  *   <li>SQL State - A string identifying the exception per SQL standard</li>
  *   <li>Error Code - A vendor-specific error code</li>
  *   <li>Complete exception chain for debugging</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // In a stream operation processing database results
@@ -53,7 +53,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *         }
  *     })
  *     .collect(Collectors.toList());
- * 
+ *
  * // In a lambda expression
  * Supplier<Connection> connectionSupplier = () -> {
  *     try {
@@ -62,7 +62,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *         throw new UncheckedSQLException(e);
  *     }
  * };
- * 
+ *
  * // Handling the exception with SQL-specific information
  * try {
  *     performDatabaseOperation();
@@ -72,7 +72,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *     throw e;
  * }
  * }</pre>
- * 
+ *
  * @see UncheckedException
  * @see SQLException
  * @see java.sql.SQLWarning
@@ -84,7 +84,7 @@ public class UncheckedSQLException extends UncheckedException {
     private static final long serialVersionUID = 9083988895292299710L;
 
     /**
-     * The wrapped SQLException that caused this unchecked exception.
+     * The wrapped {@code SQLException} that caused this unchecked exception.
      * Contains the original SQL error details including SQL state and error code.
      */
     private final SQLException cause;
@@ -92,7 +92,7 @@ public class UncheckedSQLException extends UncheckedException {
     /**
      * Constructs a new {@code UncheckedSQLException} by wrapping the specified {@link SQLException}.
      *
-     * <p>This constructor preserves all information from the original SQLException including
+     * <p>This constructor preserves all information from the original {@code SQLException} including
      * its message, SQL state, vendor error code, stack trace, and any suppressed exceptions.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -140,8 +140,8 @@ public class UncheckedSQLException extends UncheckedException {
     }
 
     /**
-     * Retrieves the SQL state string from the underlying SQLException.
-     * 
+     * Retrieves the SQL state string from the underlying {@code SQLException}.
+     *
      * <p>The SQL state is a five-character string defined by the SQL standard (XOPEN or SQL:2003)
      * that identifies the type of error. Common SQL states include:</p>
      * <ul>
@@ -151,7 +151,7 @@ public class UncheckedSQLException extends UncheckedException {
      *   <li>40xxx - Transaction rollback</li>
      *   <li>42xxx - Syntax errors or access violations</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
@@ -163,7 +163,7 @@ public class UncheckedSQLException extends UncheckedException {
      * }
      * }</pre>
      *
-     * @return the SQL state string from the wrapped SQLException, or {@code null} if not available
+     * @return the SQL state string from the wrapped {@code SQLException}, or {@code null} if not available
      * @see SQLException#getSQLState()
      */
     @MayReturnNull
@@ -172,7 +172,7 @@ public class UncheckedSQLException extends UncheckedException {
     }
 
     /**
-     * Retrieves the vendor-specific error code from the underlying SQLException.
+     * Retrieves the vendor-specific error code from the underlying {@code SQLException}.
      *
      * <p>This method provides access to the database vendor-specific error code that identifies
      * the specific error that occurred during a database operation. Unlike SQL state codes,
@@ -201,7 +201,7 @@ public class UncheckedSQLException extends UncheckedException {
      * }
      * }</pre>
      *
-     * @return the vendor-specific error code from the wrapped SQLException
+     * @return the vendor-specific error code from the wrapped {@code SQLException}
      * @see #getSQLState()
      * @see SQLException#getErrorCode()
      */

@@ -7,12 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.LongConsumer;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class LongMapMultiConsumerTest extends TestBase {
 
     @Test
@@ -28,23 +26,6 @@ public class LongMapMultiConsumerTest extends TestBase {
         assertEquals(2, result.size());
         assertEquals(5L, result.get(0));
         assertEquals(10L, result.get(1));
-    }
-
-    @Test
-    public void testAcceptWithMultipleValues() {
-        final List<Long> result = new ArrayList<>();
-        LongMapMultiConsumer consumer = (value, ic) -> {
-            ic.accept(value);
-            ic.accept(value + 1);
-            ic.accept(value + 2);
-        };
-
-        consumer.accept(10L, result::add);
-
-        assertEquals(3, result.size());
-        assertEquals(10L, result.get(0));
-        assertEquals(11L, result.get(1));
-        assertEquals(12L, result.get(2));
     }
 
     @Test
@@ -96,38 +77,6 @@ public class LongMapMultiConsumerTest extends TestBase {
     }
 
     @Test
-    public void testAcceptWithNegativeValues() {
-        final List<Long> result = new ArrayList<>();
-        LongMapMultiConsumer consumer = (value, ic) -> {
-            ic.accept(value);
-            ic.accept(value * -1);
-        };
-
-        consumer.accept(-5L, result::add);
-
-        assertEquals(2, result.size());
-        assertEquals(-5L, result.get(0));
-        assertEquals(5L, result.get(1));
-    }
-
-    @Test
-    public void testAcceptWithBoundaryValues() {
-        final List<Long> result = new ArrayList<>();
-        LongMapMultiConsumer consumer = (value, ic) -> {
-            ic.accept(value);
-        };
-
-        consumer.accept(Long.MAX_VALUE, result::add);
-        consumer.accept(Long.MIN_VALUE, result::add);
-        consumer.accept(0L, result::add);
-
-        assertEquals(3, result.size());
-        assertEquals(Long.MAX_VALUE, result.get(0));
-        assertEquals(Long.MIN_VALUE, result.get(1));
-        assertEquals(0L, result.get(2));
-    }
-
-    @Test
     public void testAcceptFlatMapScenario() {
         final List<Long> result = new ArrayList<>();
         LongMapMultiConsumer consumer = (value, ic) -> {
@@ -159,6 +108,55 @@ public class LongMapMultiConsumerTest extends TestBase {
         assertEquals(0L, result.get(0));
         assertEquals(1L, result.get(1));
         assertEquals(2L, result.get(2));
+    }
+
+    @Test
+    public void testAcceptWithMultipleValues() {
+        final List<Long> result = new ArrayList<>();
+        LongMapMultiConsumer consumer = (value, ic) -> {
+            ic.accept(value);
+            ic.accept(value + 1);
+            ic.accept(value + 2);
+        };
+
+        consumer.accept(10L, result::add);
+
+        assertEquals(3, result.size());
+        assertEquals(10L, result.get(0));
+        assertEquals(11L, result.get(1));
+        assertEquals(12L, result.get(2));
+    }
+
+    @Test
+    public void testAcceptWithNegativeValues() {
+        final List<Long> result = new ArrayList<>();
+        LongMapMultiConsumer consumer = (value, ic) -> {
+            ic.accept(value);
+            ic.accept(value * -1);
+        };
+
+        consumer.accept(-5L, result::add);
+
+        assertEquals(2, result.size());
+        assertEquals(-5L, result.get(0));
+        assertEquals(5L, result.get(1));
+    }
+
+    @Test
+    public void testAcceptWithBoundaryValues() {
+        final List<Long> result = new ArrayList<>();
+        LongMapMultiConsumer consumer = (value, ic) -> {
+            ic.accept(value);
+        };
+
+        consumer.accept(Long.MAX_VALUE, result::add);
+        consumer.accept(Long.MIN_VALUE, result::add);
+        consumer.accept(0L, result::add);
+
+        assertEquals(3, result.size());
+        assertEquals(Long.MAX_VALUE, result.get(0));
+        assertEquals(Long.MIN_VALUE, result.get(1));
+        assertEquals(0L, result.get(2));
     }
 
     @Test

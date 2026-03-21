@@ -25,28 +25,29 @@ import org.slf4j.spi.LocationAwareLogger;
 
 /**
  * Logger implementation that delegates to SLF4J (Simple Logging Facade for Java).
- * 
+ *
  * <p>This implementation provides a bridge to SLF4J, allowing the use of any SLF4J-compatible
  * logging backend (Logback, Log4j, etc.). It supports location-aware logging when the underlying
  * SLF4J implementation provides it, ensuring accurate caller location information in log output.</p>
- * 
+ *
  * <p>Key features:</p>
  * <ul>
  *   <li>Direct delegation to SLF4J logger methods</li>
- *   <li>Support for LocationAwareLogger for accurate caller information (used for WARN and ERROR levels)</li>
+ *   <li>Support for LocationAwareLogger for accurate caller information</li>
  *   <li>Throws RuntimeException if SLF4J is not properly initialized</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // SLF4JLogger is automatically used by LoggerFactory when SLF4J is on classpath
  * Logger logger = LoggerFactory.getLogger(MyClass.class);
+ *
  * String backendName = "Logback";
  * logger.info("Using SLF4J with {}", backendName);
+ *
  * Exception exception = new Exception("Processing error");
  * logger.error("Operation failed", exception);
  * }</pre>
- * 
  */
 class SLF4JLogger extends AbstractLogger {
 

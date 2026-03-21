@@ -13,14 +13,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("2025")
 public class AtomicIntegerTypeTest extends TestBase {
 
     private final AtomicIntegerType type = new AtomicIntegerType();
@@ -28,11 +26,6 @@ public class AtomicIntegerTypeTest extends TestBase {
     @Test
     public void test_clazz() {
         assertEquals(AtomicInteger.class, type.javaType());
-    }
-
-    @Test
-    public void test_name() {
-        assertEquals("AtomicInteger", type.name());
     }
 
     @Test
@@ -129,5 +122,10 @@ public class AtomicIntegerTypeTest extends TestBase {
         // Test null
         type.writeCharacter(writer, null, null);
         verify(writer).write("null".toCharArray());
+    }
+
+    @Test
+    public void test_name() {
+        assertEquals("AtomicInteger", type.name());
     }
 }

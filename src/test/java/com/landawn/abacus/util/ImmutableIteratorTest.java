@@ -10,12 +10,10 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class ImmutableIteratorTest extends TestBase {
 
     private static class TestImmutableIterator<T> extends ImmutableIterator<T> {
@@ -86,6 +84,18 @@ public class ImmutableIteratorTest extends TestBase {
     }
 
     @Test
+    public void testWithNullElements() {
+        List<String> list = Arrays.asList("a", null, "c");
+        ImmutableIterator<String> iter = new TestImmutableIterator<>(list.iterator());
+
+        ImmutableList<String> result = iter.toImmutableList();
+        Assertions.assertEquals(3, result.size());
+        Assertions.assertEquals("a", result.get(0));
+        Assertions.assertNull(result.get(1));
+        Assertions.assertEquals("c", result.get(2));
+    }
+
+    @Test
     public void testToImmutableList() {
         List<String> list = Arrays.asList("one", "two", "three");
         ImmutableIterator<String> iter = new TestImmutableIterator<>(list.iterator());
@@ -125,15 +135,6 @@ public class ImmutableIteratorTest extends TestBase {
     }
 
     @Test
-    public void testCount_Empty() {
-        List<String> list = Collections.emptyList();
-        ImmutableIterator<String> iter = new TestImmutableIterator<>(list.iterator());
-
-        long count = iter.count();
-        Assertions.assertEquals(0L, count);
-    }
-
-    @Test
     public void testCount_PartiallyConsumed() {
         List<String> list = Arrays.asList("a", "b", "c", "d", "e");
         ImmutableIterator<String> iter = new TestImmutableIterator<>(list.iterator());
@@ -144,6 +145,15 @@ public class ImmutableIteratorTest extends TestBase {
         long count = iter.count();
         Assertions.assertEquals(3L, count);
         Assertions.assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testCount_Empty() {
+        List<String> list = Collections.emptyList();
+        ImmutableIterator<String> iter = new TestImmutableIterator<>(list.iterator());
+
+        long count = iter.count();
+        Assertions.assertEquals(0L, count);
     }
 
     @Test
@@ -163,18 +173,6 @@ public class ImmutableIteratorTest extends TestBase {
         Assertions.assertFalse(iter.hasNext());
 
         Assertions.assertThrows(NoSuchElementException.class, () -> iter.next());
-    }
-
-    @Test
-    public void testWithNullElements() {
-        List<String> list = Arrays.asList("a", null, "c");
-        ImmutableIterator<String> iter = new TestImmutableIterator<>(list.iterator());
-
-        ImmutableList<String> result = iter.toImmutableList();
-        Assertions.assertEquals(3, result.size());
-        Assertions.assertEquals("a", result.get(0));
-        Assertions.assertNull(result.get(1));
-        Assertions.assertEquals("c", result.get(2));
     }
 
     @Test

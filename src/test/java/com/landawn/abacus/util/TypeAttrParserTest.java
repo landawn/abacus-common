@@ -1,13 +1,29 @@
 package com.landawn.abacus.util;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class TypeAttrParserTest extends TestBase {
+
+    static class SingleArrayArg {
+        final String[] values;
+
+        SingleArrayArg(final String[] values) {
+            this.values = values;
+        }
+    }
+
+    static class PrefixedSingleArrayArg {
+        final int prefix;
+        final String[] values;
+
+        PrefixedSingleArrayArg(final Integer prefix, final String[] values) {
+            this.prefix = prefix;
+            this.values = values;
+        }
+    }
 
     @Test
     public void testGetClassName() {
@@ -67,39 +83,12 @@ public class TypeAttrParserTest extends TestBase {
     }
 
     @Test
-    public void testParseMultipleTypeParameters() {
-        TypeAttrParser parser = TypeAttrParser.parse("Map<String, Integer>");
-
-        Assertions.assertEquals("Map", parser.getClassName());
-        Assertions.assertArrayEquals(new String[] { "String", "Integer" }, parser.getTypeParameters());
-        Assertions.assertArrayEquals(new String[0], parser.getParameters());
-    }
-
-    @Test
-    public void testParseNestedGenerics() {
-        TypeAttrParser parser = TypeAttrParser.parse("Map<String, List<Integer>>");
-
-        Assertions.assertEquals("Map", parser.getClassName());
-        Assertions.assertArrayEquals(new String[] { "String", "List<Integer>" }, parser.getTypeParameters());
-        Assertions.assertArrayEquals(new String[0], parser.getParameters());
-    }
-
-    @Test
     public void testParseConstructorParameters() {
         TypeAttrParser parser = TypeAttrParser.parse("StringBuilder(100)");
 
         Assertions.assertEquals("StringBuilder", parser.getClassName());
         Assertions.assertArrayEquals(new String[0], parser.getTypeParameters());
         Assertions.assertArrayEquals(new String[] { "100" }, parser.getParameters());
-    }
-
-    @Test
-    public void testParseMultipleConstructorParameters() {
-        TypeAttrParser parser = TypeAttrParser.parse("HashMap(16, 0.75f)");
-
-        Assertions.assertEquals("HashMap", parser.getClassName());
-        Assertions.assertArrayEquals(new String[0], parser.getTypeParameters());
-        Assertions.assertArrayEquals(new String[] { "16", "0.75f" }, parser.getParameters());
     }
 
     @Test
@@ -112,30 +101,12 @@ public class TypeAttrParserTest extends TestBase {
     }
 
     @Test
-    public void testParseComplexNestedGenerics() {
-        TypeAttrParser parser = TypeAttrParser.parse("Map<String, Map<Integer, List<String>>>");
-
-        Assertions.assertEquals("Map", parser.getClassName());
-        Assertions.assertArrayEquals(new String[] { "String", "Map<Integer, List<String>>" }, parser.getTypeParameters());
-        Assertions.assertArrayEquals(new String[0], parser.getParameters());
-    }
-
-    @Test
     public void testParseWithSpaces() {
         TypeAttrParser parser = TypeAttrParser.parse("Map< String , Integer >( 16 , 0.75f )");
 
         Assertions.assertEquals("Map", parser.getClassName());
         Assertions.assertArrayEquals(new String[] { "String", "Integer" }, parser.getTypeParameters());
         Assertions.assertArrayEquals(new String[] { "16", "0.75f" }, parser.getParameters());
-    }
-
-    @Test
-    public void testParseEmptyConstructor() {
-        TypeAttrParser parser = TypeAttrParser.parse("ArrayList()");
-
-        Assertions.assertEquals("ArrayList", parser.getClassName());
-        Assertions.assertArrayEquals(new String[0], parser.getTypeParameters());
-        Assertions.assertArrayEquals(new String[0], parser.getParameters());
     }
 
     @Test
@@ -157,30 +128,12 @@ public class TypeAttrParserTest extends TestBase {
     }
 
     @Test
-    public void testToString() {
-        TypeAttrParser parser = TypeAttrParser.parse("HashMap<String, Integer>(16, 0.75f)");
-        String str = parser.toString();
-
-        Assertions.assertTrue(str.contains("className=HashMap"));
-        Assertions.assertTrue(str.contains("typeParameters=[String, Integer]"));
-        Assertions.assertTrue(str.contains("parameters=[16, 0.75f]"));
-    }
-
-    @Test
     public void testComplexRealWorldExample() {
         TypeAttrParser parser = TypeAttrParser.parse("ConcurrentHashMap<String, List<Map<Integer, String>>>(32, 0.85f, 16)");
 
         Assertions.assertEquals("ConcurrentHashMap", parser.getClassName());
         Assertions.assertArrayEquals(new String[] { "String", "List<Map<Integer, String>>" }, parser.getTypeParameters());
         Assertions.assertArrayEquals(new String[] { "32", "0.85f", "16" }, parser.getParameters());
-    }
-
-    @Test
-    public void testEdgeCaseMultipleNestedBrackets() {
-        TypeAttrParser parser = TypeAttrParser.parse("Map<Map<String, Integer>, Map<Long, Double>>");
-
-        Assertions.assertEquals("Map", parser.getClassName());
-        Assertions.assertArrayEquals(new String[] { "Map<String, Integer>", "Map<Long, Double>" }, parser.getTypeParameters());
     }
 
     @Test
@@ -226,6 +179,59 @@ public class TypeAttrParserTest extends TestBase {
     }
 
     @Test
+    public void testParseMultipleTypeParameters() {
+        TypeAttrParser parser = TypeAttrParser.parse("Map<String, Integer>");
+
+        Assertions.assertEquals("Map", parser.getClassName());
+        Assertions.assertArrayEquals(new String[] { "String", "Integer" }, parser.getTypeParameters());
+        Assertions.assertArrayEquals(new String[0], parser.getParameters());
+    }
+
+    @Test
+    public void testParseNestedGenerics() {
+        TypeAttrParser parser = TypeAttrParser.parse("Map<String, List<Integer>>");
+
+        Assertions.assertEquals("Map", parser.getClassName());
+        Assertions.assertArrayEquals(new String[] { "String", "List<Integer>" }, parser.getTypeParameters());
+        Assertions.assertArrayEquals(new String[0], parser.getParameters());
+    }
+
+    @Test
+    public void testParseMultipleConstructorParameters() {
+        TypeAttrParser parser = TypeAttrParser.parse("HashMap(16, 0.75f)");
+
+        Assertions.assertEquals("HashMap", parser.getClassName());
+        Assertions.assertArrayEquals(new String[0], parser.getTypeParameters());
+        Assertions.assertArrayEquals(new String[] { "16", "0.75f" }, parser.getParameters());
+    }
+
+    @Test
+    public void testParseComplexNestedGenerics() {
+        TypeAttrParser parser = TypeAttrParser.parse("Map<String, Map<Integer, List<String>>>");
+
+        Assertions.assertEquals("Map", parser.getClassName());
+        Assertions.assertArrayEquals(new String[] { "String", "Map<Integer, List<String>>" }, parser.getTypeParameters());
+        Assertions.assertArrayEquals(new String[0], parser.getParameters());
+    }
+
+    @Test
+    public void testParseEmptyConstructor() {
+        TypeAttrParser parser = TypeAttrParser.parse("ArrayList()");
+
+        Assertions.assertEquals("ArrayList", parser.getClassName());
+        Assertions.assertArrayEquals(new String[0], parser.getTypeParameters());
+        Assertions.assertArrayEquals(new String[0], parser.getParameters());
+    }
+
+    @Test
+    public void testEdgeCaseMultipleNestedBrackets() {
+        TypeAttrParser parser = TypeAttrParser.parse("Map<Map<String, Integer>, Map<Long, Double>>");
+
+        Assertions.assertEquals("Map", parser.getClassName());
+        Assertions.assertArrayEquals(new String[] { "Map<String, Integer>", "Map<Long, Double>" }, parser.getTypeParameters());
+    }
+
+    @Test
     public void testNewInstanceSupportsSingleStringArrayConstructor() {
         SingleArrayArg result = TypeAttrParser.newInstance(SingleArrayArg.class, "SingleArrayArg(alpha)");
 
@@ -240,21 +246,13 @@ public class TypeAttrParserTest extends TestBase {
         Assertions.assertArrayEquals(new String[] { "beta" }, result.values);
     }
 
-    static class SingleArrayArg {
-        final String[] values;
+    @Test
+    public void testToString() {
+        TypeAttrParser parser = TypeAttrParser.parse("HashMap<String, Integer>(16, 0.75f)");
+        String str = parser.toString();
 
-        SingleArrayArg(final String[] values) {
-            this.values = values;
-        }
-    }
-
-    static class PrefixedSingleArrayArg {
-        final int prefix;
-        final String[] values;
-
-        PrefixedSingleArrayArg(final Integer prefix, final String[] values) {
-            this.prefix = prefix;
-            this.values = values;
-        }
+        Assertions.assertTrue(str.contains("className=HashMap"));
+        Assertions.assertTrue(str.contains("typeParameters=[String, Integer]"));
+        Assertions.assertTrue(str.contains("parameters=[16, 0.75f]"));
     }
 }

@@ -6,12 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ObjShortConsumerTest extends TestBase {
 
     @Test
@@ -28,21 +26,6 @@ public class ObjShortConsumerTest extends TestBase {
     }
 
     @Test
-    public void testAcceptWithLambda() {
-        final short[] shortResult = new short[1];
-        final String[] stringResult = new String[1];
-        ObjShortConsumer<String> consumer = (t, value) -> {
-            shortResult[0] = (short) (value * 2);
-            stringResult[0] = t.toUpperCase();
-        };
-
-        consumer.accept("hello", (short) 7);
-
-        assertEquals((short) 14, shortResult[0]);
-        assertEquals("HELLO", stringResult[0]);
-    }
-
-    @Test
     public void testAcceptWithAnonymousClass() {
         final List<String> result = new ArrayList<>();
         ObjShortConsumer<String> consumer = new ObjShortConsumer<>() {
@@ -56,6 +39,33 @@ public class ObjShortConsumerTest extends TestBase {
 
         assertEquals(1, result.size());
         assertEquals("test[42]", result.get(0));
+    }
+
+    @Test
+    public void testSideEffects() {
+        final int[] sum = { 0 };
+        ObjShortConsumer<String> consumer = (t, value) -> sum[0] += value;
+
+        consumer.accept("a", (short) 10);
+        consumer.accept("b", (short) 20);
+        consumer.accept("c", (short) 30);
+
+        assertEquals(60, sum[0]);
+    }
+
+    @Test
+    public void testAcceptWithLambda() {
+        final short[] shortResult = new short[1];
+        final String[] stringResult = new String[1];
+        ObjShortConsumer<String> consumer = (t, value) -> {
+            shortResult[0] = (short) (value * 2);
+            stringResult[0] = t.toUpperCase();
+        };
+
+        consumer.accept("hello", (short) 7);
+
+        assertEquals((short) 14, shortResult[0]);
+        assertEquals("HELLO", stringResult[0]);
     }
 
     @Test
@@ -95,18 +105,6 @@ public class ObjShortConsumerTest extends TestBase {
 
         assertEquals(1, result.size());
         assertEquals("null:5", result.get(0));
-    }
-
-    @Test
-    public void testSideEffects() {
-        final int[] sum = { 0 };
-        ObjShortConsumer<String> consumer = (t, value) -> sum[0] += value;
-
-        consumer.accept("a", (short) 10);
-        consumer.accept("b", (short) 20);
-        consumer.accept("c", (short) 30);
-
-        assertEquals(60, sum[0]);
     }
 
     @Test

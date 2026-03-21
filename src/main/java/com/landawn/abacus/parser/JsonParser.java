@@ -91,8 +91,8 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param <T> the target type parameter
      * @param source the JSON string to parse (must not be {@code null})
      * @param targetType the type of the target object to deserialize into (must not be {@code null})
-     * @return the parsed object of type T, never {@code null}
-     * @throws IllegalArgumentException if source or targetType is {@code null}, or if the source contains invalid JSON
+     * @return an instance of {@code T} parsed from the JSON string
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}, or if the source contains invalid JSON
      */
     <T> T parse(String source, Type<? extends T> targetType);
 
@@ -113,8 +113,8 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param <T> the target type parameter
      * @param source the JSON string to parse (must not be {@code null})
      * @param targetType the class of the target object to deserialize into (must not be {@code null})
-     * @return the parsed object of type T, never {@code null}
-     * @throws IllegalArgumentException if source or targetType is {@code null}, or if the source contains invalid JSON
+     * @return an instance of {@code T} parsed from the JSON string
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}, or if the source contains invalid JSON
      */
     <T> T parse(String source, Class<? extends T> targetType);
 
@@ -138,8 +138,8 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param source the JSON string to parse (must not be {@code null})
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the type of the target object to deserialize into (must not be {@code null})
-     * @return the parsed object of type T, never {@code null}
-     * @throws IllegalArgumentException if source or targetType is {@code null}, or if the source contains invalid JSON
+     * @return an instance of {@code T} parsed from the JSON string
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}, or if the source contains invalid JSON
      */
     <T> T parse(String source, JsonDeserConfig config, Type<? extends T> targetType);
 
@@ -163,8 +163,8 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param source the JSON string to parse (must not be {@code null})
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the class of the target object to deserialize into (must not be {@code null})
-     * @return the parsed object of type T, never {@code null}
-     * @throws IllegalArgumentException if source or targetType is {@code null}, or if the source contains invalid JSON
+     * @return an instance of {@code T} parsed from the JSON string
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}, or if the source contains invalid JSON
      */
     <T> T parse(String source, JsonDeserConfig config, Class<? extends T> targetType);
 
@@ -305,8 +305,8 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param fromIndex the starting index (inclusive) of the JSON content
      * @param toIndex the ending index (exclusive) of the JSON content
      * @param targetType the type of the target object
-     * @return the deserialized object of type T
-     * @throws IndexOutOfBoundsException if the indices are out of bounds or fromIndex &gt; toIndex
+     * @return an instance of {@code T} deserialized from the JSON string
+     * @throws IndexOutOfBoundsException if the indices are out of bounds or {@code fromIndex > toIndex}
      */
     <T> T deserialize(String source, int fromIndex, int toIndex, Type<? extends T> targetType);
 
@@ -327,8 +327,8 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param fromIndex the starting index (inclusive) of the JSON content
      * @param toIndex the ending index (exclusive) of the JSON content
      * @param targetType the class of the target object
-     * @return the deserialized object of type T
-     * @throws IndexOutOfBoundsException if the indices are out of bounds or fromIndex &gt; toIndex
+     * @return an instance of {@code T} deserialized from the JSON string
+     * @throws IndexOutOfBoundsException if the indices are out of bounds or {@code fromIndex > toIndex}
      */
     <T> T deserialize(String source, int fromIndex, int toIndex, Class<? extends T> targetType);
 
@@ -351,8 +351,8 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param toIndex the ending index (exclusive) of the JSON content
      * @param config the deserialization configuration to control parsing behavior
      * @param targetType the type of the target object
-     * @return the deserialized object of type T
-     * @throws IndexOutOfBoundsException if the indices are out of bounds or fromIndex &gt; toIndex
+     * @return an instance of {@code T} deserialized from the JSON string
+     * @throws IndexOutOfBoundsException if the indices are out of bounds or {@code fromIndex > toIndex}
      */
     <T> T deserialize(String source, int fromIndex, int toIndex, JsonDeserConfig config, Type<? extends T> targetType);
 
@@ -375,8 +375,8 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param toIndex the ending index (exclusive) of the JSON content
      * @param config the deserialization configuration to control parsing behavior
      * @param targetType the class of the target object
-     * @return the deserialized object of type T
-     * @throws IndexOutOfBoundsException if the indices are out of bounds or fromIndex &gt; toIndex
+     * @return an instance of {@code T} deserialized from the JSON string
+     * @throws IndexOutOfBoundsException if the indices are out of bounds or {@code fromIndex > toIndex}
      */
     <T> T deserialize(String source, int fromIndex, int toIndex, JsonDeserConfig config, Class<? extends T> targetType);
 
@@ -399,7 +399,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param <T> the element type parameter
      * @param source the JSON string containing a JSON array
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
-     * @return a Stream of parsed elements that must be closed after use
+     * @return a {@code Stream} of parsed elements that must be closed after use
      * @throws IllegalArgumentException if the source is {@code null}, invalid JSON, or not a JSON array
      */
     <T> Stream<T> stream(String source, Type<? extends T> elementType);
@@ -422,7 +422,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param source the JSON string containing a JSON array
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
-     * @return a Stream of parsed elements that must be closed after use
+     * @return a {@code Stream} of parsed elements that must be closed after use
      * @throws IllegalArgumentException if the source is {@code null}, invalid JSON, or not a JSON array
      */
     <T> Stream<T> stream(String source, JsonDeserConfig config, Type<? extends T> elementType);
@@ -446,7 +446,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param <T> the element type parameter
      * @param source the JSON file containing a JSON array, must exist and be readable
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
-     * @return a Stream of parsed elements that must be closed after use
+     * @return a {@code Stream} of parsed elements that must be closed after use
      * @throws IllegalArgumentException if the source is {@code null} or the file contains invalid JSON
      */
     <T> Stream<T> stream(File source, Type<? extends T> elementType);
@@ -469,7 +469,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param source the JSON file containing a JSON array, must exist and be readable
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
-     * @return a Stream of parsed elements that must be closed after use
+     * @return a {@code Stream} of parsed elements that must be closed after use
      * @throws IllegalArgumentException if the source is {@code null} or the file contains invalid JSON
      */
     <T> Stream<T> stream(File source, JsonDeserConfig config, Type<? extends T> elementType);
@@ -493,7 +493,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param source the input stream containing a JSON array, must not be null
      * @param closeInputStreamWhenStreamIsClosed if {@code true}, the input stream will be closed when the returned stream is closed
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
-     * @return a Stream of parsed elements that must be closed after use
+     * @return a {@code Stream} of parsed elements that must be closed after use
      * @throws IllegalArgumentException if the source is {@code null} or contains invalid JSON
      */
     <T> Stream<T> stream(InputStream source, boolean closeInputStreamWhenStreamIsClosed, Type<? extends T> elementType);
@@ -518,7 +518,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param closeInputStreamWhenStreamIsClosed if {@code true}, the input stream will be closed when the returned stream is closed
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
-     * @return a Stream of parsed elements that must be closed after use
+     * @return a {@code Stream} of parsed elements that must be closed after use
      * @throws IllegalArgumentException if the source is {@code null} or contains invalid JSON
      */
     <T> Stream<T> stream(InputStream source, boolean closeInputStreamWhenStreamIsClosed, JsonDeserConfig config, Type<? extends T> elementType);
@@ -542,7 +542,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param source the reader containing a JSON array, must not be null
      * @param closeReaderWhenStreamIsClosed if {@code true}, the reader will be closed when the returned stream is closed
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
-     * @return a Stream of parsed elements that must be closed after use
+     * @return a {@code Stream} of parsed elements that must be closed after use
      * @throws IllegalArgumentException if the source is {@code null} or contains invalid JSON
      */
     <T> Stream<T> stream(Reader source, boolean closeReaderWhenStreamIsClosed, Type<? extends T> elementType);
@@ -567,7 +567,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param closeReaderWhenStreamIsClosed if {@code true}, the reader will be closed when the returned stream is closed
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
-     * @return a Stream of parsed elements that must be closed after use
+     * @return a {@code Stream} of parsed elements that must be closed after use
      * @throws IllegalArgumentException if the source is {@code null} or contains invalid JSON
      */
     <T> Stream<T> stream(Reader source, boolean closeReaderWhenStreamIsClosed, JsonDeserConfig config, Type<? extends T> elementType);

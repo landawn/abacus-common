@@ -8,31 +8,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.StringReader;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
 
-@Tag("2025")
 public class AbstractJsonReaderTest extends TestBase {
-
-    @Test
-    public void test_constants() {
-        assertEquals(-1, JsonReader.EOF);
-        assertEquals(0, JsonReader.UNDEFINED);
-        assertEquals(1, JsonReader.START_BRACE);
-        assertEquals(2, JsonReader.END_BRACE);
-        assertEquals(3, JsonReader.START_BRACKET);
-        assertEquals(4, JsonReader.END_BRACKET);
-        assertEquals(5, JsonReader.START_DOUBLE_QUOTE);
-        assertEquals(6, JsonReader.END_DOUBLE_QUOTE);
-        assertEquals(7, JsonReader.START_SINGLE_QUOTE);
-        assertEquals(8, JsonReader.END_SINGLE_QUOTE);
-        assertEquals(9, JsonReader.COLON);
-        assertEquals(10, JsonReader.COMMA);
-    }
 
     @Test
     public void test_nextToken_string() {
@@ -41,31 +23,6 @@ public class AbstractJsonReaderTest extends TestBase {
 
         int token = reader.nextToken();
         assertEquals(JsonReader.START_BRACE, token);
-
-        reader.close();
-    }
-
-    @Test
-    public void test_hasText() {
-        String json = "\"test\"";
-        JsonReader reader = JsonStringReader.parse(json, new char[256]);
-
-        reader.nextToken();
-        reader.nextToken();
-
-        reader.close();
-        assertNotNull(reader);
-    }
-
-    @Test
-    public void test_getText() {
-        String json = "\"test\"";
-        JsonReader reader = JsonStringReader.parse(json, new char[256]);
-
-        reader.nextToken();
-        reader.nextToken();
-        String text = reader.getText();
-        assertNotNull(text);
 
         reader.close();
     }
@@ -108,18 +65,6 @@ public class AbstractJsonReaderTest extends TestBase {
     }
 
     @Test
-    public void testNextTokenNoArgWithNull() {
-        String json = "null";
-        JsonReader reader = JsonStringReader.parse(json, new char[256]);
-
-        reader.nextToken();
-        assertTrue(reader.hasText());
-        assertEquals("null", reader.getText());
-
-        reader.close();
-    }
-
-    @Test
     public void testNextTokenNoArgWithArray() {
         String json = "[1,2]";
         JsonReader reader = JsonStringReader.parse(json, new char[256]);
@@ -138,30 +83,6 @@ public class AbstractJsonReaderTest extends TestBase {
     }
 
     @Test
-    public void testNextTokenNoArgWithEmptyObject() {
-        String json = "{}";
-        JsonReader reader = JsonStringReader.parse(json, new char[256]);
-
-        assertEquals(JsonReader.START_BRACE, reader.nextToken());
-        assertEquals(JsonReader.END_BRACE, reader.nextToken());
-        assertEquals(JsonReader.EOF, reader.nextToken());
-
-        reader.close();
-    }
-
-    @Test
-    public void testNextTokenNoArgWithEmptyArray() {
-        String json = "[]";
-        JsonReader reader = JsonStringReader.parse(json, new char[256]);
-
-        assertEquals(JsonReader.START_BRACKET, reader.nextToken());
-        assertEquals(JsonReader.END_BRACKET, reader.nextToken());
-        assertEquals(JsonReader.EOF, reader.nextToken());
-
-        reader.close();
-    }
-
-    @Test
     public void testNextTokenNoArgViaStreamReader() {
         String json = "{\"a\":1}";
         StringReader stringReader = new StringReader(json);
@@ -172,37 +93,6 @@ public class AbstractJsonReaderTest extends TestBase {
         assertEquals(JsonReader.START_BRACE, token);
 
         reader.close();
-    }
-
-    @Test
-    public void testNextTokenWithTypeVsNoArg() {
-        String json = "42";
-        // With no-arg (String type)
-        JsonReader reader1 = JsonStringReader.parse(json, new char[256]);
-        reader1.nextToken();
-        String text1 = reader1.getText();
-        reader1.close();
-
-        // With Integer type
-        JsonReader reader2 = JsonStringReader.parse(json, new char[256]);
-        reader2.nextToken(N.typeOf(Integer.class));
-        String text2 = reader2.getText();
-        reader2.close();
-
-        // Both should produce same text
-        assertEquals(text1, text2);
-    }
-
-    @Test
-    public void testReadValueWithObjectTypeForNull() {
-        String json = "null";
-        JsonReader reader = JsonStringReader.parse(json, new char[256]);
-        reader.nextToken();
-
-        Type<Object> objType = N.typeOf(Object.class);
-        // null read as null for Object type returns null
-        Object value = reader.readValue(objType);
-        assertNull(value);
     }
 
     @Test
@@ -247,5 +137,113 @@ public class AbstractJsonReaderTest extends TestBase {
         assertTrue(reader.hasText());
 
         reader.close();
+    }
+
+    @Test
+    public void test_hasText() {
+        String json = "\"test\"";
+        JsonReader reader = JsonStringReader.parse(json, new char[256]);
+
+        reader.nextToken();
+        reader.nextToken();
+
+        reader.close();
+        assertNotNull(reader);
+    }
+
+    @Test
+    public void test_getText() {
+        String json = "\"test\"";
+        JsonReader reader = JsonStringReader.parse(json, new char[256]);
+
+        reader.nextToken();
+        reader.nextToken();
+        String text = reader.getText();
+        assertNotNull(text);
+
+        reader.close();
+    }
+
+    @Test
+    public void testNextTokenNoArgWithNull() {
+        String json = "null";
+        JsonReader reader = JsonStringReader.parse(json, new char[256]);
+
+        reader.nextToken();
+        assertTrue(reader.hasText());
+        assertEquals("null", reader.getText());
+
+        reader.close();
+    }
+
+    @Test
+    public void testNextTokenNoArgWithEmptyObject() {
+        String json = "{}";
+        JsonReader reader = JsonStringReader.parse(json, new char[256]);
+
+        assertEquals(JsonReader.START_BRACE, reader.nextToken());
+        assertEquals(JsonReader.END_BRACE, reader.nextToken());
+        assertEquals(JsonReader.EOF, reader.nextToken());
+
+        reader.close();
+    }
+
+    @Test
+    public void testNextTokenNoArgWithEmptyArray() {
+        String json = "[]";
+        JsonReader reader = JsonStringReader.parse(json, new char[256]);
+
+        assertEquals(JsonReader.START_BRACKET, reader.nextToken());
+        assertEquals(JsonReader.END_BRACKET, reader.nextToken());
+        assertEquals(JsonReader.EOF, reader.nextToken());
+
+        reader.close();
+    }
+
+    @Test
+    public void testNextTokenWithTypeVsNoArg() {
+        String json = "42";
+        // With no-arg (String type)
+        JsonReader reader1 = JsonStringReader.parse(json, new char[256]);
+        reader1.nextToken();
+        String text1 = reader1.getText();
+        reader1.close();
+
+        // With Integer type
+        JsonReader reader2 = JsonStringReader.parse(json, new char[256]);
+        reader2.nextToken(N.typeOf(Integer.class));
+        String text2 = reader2.getText();
+        reader2.close();
+
+        // Both should produce same text
+        assertEquals(text1, text2);
+    }
+
+    @Test
+    public void testReadValueWithObjectTypeForNull() {
+        String json = "null";
+        JsonReader reader = JsonStringReader.parse(json, new char[256]);
+        reader.nextToken();
+
+        Type<Object> objType = N.typeOf(Object.class);
+        // null read as null for Object type returns null
+        Object value = reader.readValue(objType);
+        assertNull(value);
+    }
+
+    @Test
+    public void test_constants() {
+        assertEquals(-1, JsonReader.EOF);
+        assertEquals(0, JsonReader.UNDEFINED);
+        assertEquals(1, JsonReader.START_BRACE);
+        assertEquals(2, JsonReader.END_BRACE);
+        assertEquals(3, JsonReader.START_BRACKET);
+        assertEquals(4, JsonReader.END_BRACKET);
+        assertEquals(5, JsonReader.START_DOUBLE_QUOTE);
+        assertEquals(6, JsonReader.END_DOUBLE_QUOTE);
+        assertEquals(7, JsonReader.START_SINGLE_QUOTE);
+        assertEquals(8, JsonReader.END_SINGLE_QUOTE);
+        assertEquals(9, JsonReader.COLON);
+        assertEquals(10, JsonReader.COMMA);
     }
 }

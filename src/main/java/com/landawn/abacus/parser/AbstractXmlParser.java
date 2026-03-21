@@ -108,7 +108,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * Deserializes an XML DOM node into an object of the specified target type using default deserialization configuration.
      * This method provides a convenient way to convert XML node structures into Java objects.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * Document doc = XmlUtil.parse(xmlString);
      * Node node = doc.getDocumentElement();
@@ -129,7 +129,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * Deserializes an XML DOM node into an object of the specified target class using default deserialization configuration.
      * This method provides a convenient way to convert XML node structures into Java objects.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * Document doc = XmlUtil.parse(xmlString);
      * Node node = doc.getDocumentElement();
@@ -150,7 +150,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * Deserializes XML content from a file into an object using default deserialization configuration.
      * This method is not supported in the abstract base class and should be implemented by subclasses.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * File xmlFile = new File("data.xml");
      * MyObject obj = parser.deserialize(xmlFile, config, nodeTypes);
@@ -172,7 +172,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * Deserializes XML content from an input stream into an object using default deserialization configuration.
      * This method is not supported in the abstract base class and should be implemented by subclasses.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * InputStream inputStream = new FileInputStream("data.xml");
      * MyObject obj = parser.deserialize(inputStream, config, nodeTypes);
@@ -194,7 +194,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * Deserializes XML content from a reader into an object using default deserialization configuration.
      * This method is not supported in the abstract base class and should be implemented by subclasses.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * Reader reader = new FileReader("data.xml");
      * MyObject obj = parser.deserialize(reader, config, nodeTypes);
@@ -216,7 +216,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * Deserializes XML content from a DOM node into an object using default deserialization configuration.
      * This method is not supported in the abstract base class and should be implemented by subclasses.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * Document doc = XmlUtil.parse(xmlString);
      * Node node = doc.getDocumentElement();
@@ -239,7 +239,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * Creates an XML stream reader that filters out whitespace and comments from the input.
      * This method provides a clean stream reader that only processes meaningful XML content.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * Reader reader = new StringReader("<root><item>value</item></root>");
      * XMLStreamReader streamReader = createXMLStreamReader(reader);
@@ -269,7 +269,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * Extracts and converts a property value from an XML node to the appropriate Java type.
      * This method handles {@code null} values, type conversions, and formatted property values.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * Node propNode = element.getChildNodes().item(0);
      * Object value = getPropValue("age", Type.of(Integer.class), propInfo, propNode);
@@ -333,7 +333,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * Creates a new instance of a property class, using type information from XML attributes if needed.
      * This method attempts to instantiate the property class directly, falling back to type attribute information.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * Attributes attrs = getAttributes(element);
      * List<String> list = newPropInstance(List.class, attrs);
@@ -365,7 +365,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * Retrieves the value of a named attribute from an XML stream reader.
      * This method efficiently searches through the attributes of the current element.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * XMLStreamReader reader = createXMLStreamReader(inputReader);
      * String typeValue = getAttribute(reader, "type");
@@ -402,7 +402,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * Extracts the Java class specified in the "type" attribute of an XML node.
      * This method is used to determine the runtime type for deserialization when explicit type information is provided.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * Node node = doc.getElementsByTagName("item").item(0);
      * Class<?> typeClass = getAttributeTypeClass(node);
@@ -425,7 +425,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * Extracts the Java class specified in the "type" attribute from XML attributes.
      * This method is used to determine the runtime type for deserialization from SAX attributes.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * Attributes attrs = getAttributes();
      * Class<?> typeClass = getAttributeTypeClass(attrs);
@@ -452,7 +452,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * Extracts the Java class specified in the "type" attribute from an XML stream reader.
      * This method is used to determine the runtime type for deserialization during streaming.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * XMLStreamReader reader = createXMLStreamReader(inputReader);
      * Class<?> typeClass = getAttributeTypeClass(reader);
@@ -479,7 +479,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * Determines the concrete class to use for deserialization by examining XML node attributes.
      * This method resolves the actual class to instantiate, preferring type attribute information over the target class.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * Node node = doc.getElementsByTagName("item").item(0);
      * Class<?> concreteClass = getConcreteClass(node, Collection.class);
@@ -502,7 +502,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * Determines the concrete class to use for deserialization by examining XML attributes.
      * This method resolves the actual class to instantiate from SAX attributes during parsing.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * Attributes attrs = getAttributes();
      * Class<?> concreteClass = getConcreteClass(attrs, List.class);
@@ -525,7 +525,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * Determines the concrete class to use for deserialization by examining XML stream reader attributes.
      * This method resolves the actual class to instantiate during streaming deserialization.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * XMLStreamReader reader = createXMLStreamReader(inputReader);
      * Class<?> concreteClass = getConcreteClass(reader, Map.class);
@@ -548,7 +548,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * Validates and extracts a single child element node from an XML element.
      * This method ensures that an element contains exactly one meaningful child node, ignoring text nodes.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * Node element = doc.getElementsByTagName("wrapper").item(0);
      * Node singleChild = checkOneNode(element);
@@ -588,7 +588,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * Retrieves the appropriate JSON serialization configuration based on XML serialization settings.
      * This method maps XML serialization options to JSON serialization configurations for internal processing.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p>Usage Examples:</p>
      * <pre>{@code
      * XmlSerConfig xmlConfig = new XmlSerConfig().setSupportCircularReference(true);
      * JsonSerConfig jsonConfig = getJSC(xmlConfig);

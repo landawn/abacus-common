@@ -18,7 +18,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
 import org.slf4j.Marker;
@@ -26,7 +25,6 @@ import org.slf4j.spi.LocationAwareLogger;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class SLFJLoggerTest extends TestBase {
 
     private static boolean isSLF4JAvailable() {

@@ -4,33 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BooleanTriFunctionTest extends TestBase {
-    @Test
-    public void testAndThenWithException() {
-        BooleanTriFunction<String> function = (a, b, c) -> "test";
-        java.util.function.Function<String, Integer> afterFunction = s -> {
-            throw new RuntimeException("Test exception");
-        };
-
-        BooleanTriFunction<Integer> chainedFunction = function.andThen(afterFunction);
-
-        assertThrows(RuntimeException.class, () -> chainedFunction.apply(true, false, true));
-    }
-
-    @Test
-    public void testApplyWithException() {
-        BooleanTriFunction<String> function = (a, b, c) -> {
-            throw new RuntimeException("Apply exception");
-        };
-
-        assertThrows(RuntimeException.class, () -> function.apply(true, false, true));
-    }
 
     @Test
     public void testAnonymousClass() {
@@ -47,6 +25,17 @@ public class BooleanTriFunctionTest extends TestBase {
     }
 
     @Test
+    public void testMajorityVote() {
+        BooleanTriFunction<String> function = (a, b, c) -> {
+            int count = (a ? 1 : 0) + (b ? 1 : 0) + (c ? 1 : 0);
+            return count >= 2 ? "Majority true" : "Majority false";
+        };
+
+        assertEquals("Majority true", function.apply(true, true, false));
+        assertEquals("Majority false", function.apply(true, false, false));
+    }
+
+    @Test
     public void testReturnsNull() {
         BooleanTriFunction<String> function = (a, b, c) -> null;
 
@@ -56,13 +45,23 @@ public class BooleanTriFunctionTest extends TestBase {
     }
 
     @Test
-    public void testMajorityVote() {
+    public void testApplyWithException() {
         BooleanTriFunction<String> function = (a, b, c) -> {
-            int count = (a ? 1 : 0) + (b ? 1 : 0) + (c ? 1 : 0);
-            return count >= 2 ? "Majority true" : "Majority false";
+            throw new RuntimeException("Apply exception");
         };
 
-        assertEquals("Majority true", function.apply(true, true, false));
-        assertEquals("Majority false", function.apply(true, false, false));
+        assertThrows(RuntimeException.class, () -> function.apply(true, false, true));
+    }
+
+    @Test
+    public void testAndThenWithException() {
+        BooleanTriFunction<String> function = (a, b, c) -> "test";
+        java.util.function.Function<String, Integer> afterFunction = s -> {
+            throw new RuntimeException("Test exception");
+        };
+
+        BooleanTriFunction<Integer> chainedFunction = function.andThen(afterFunction);
+
+        assertThrows(RuntimeException.class, () -> chainedFunction.apply(true, false, true));
     }
 }

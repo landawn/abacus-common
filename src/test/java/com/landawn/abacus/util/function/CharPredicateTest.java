@@ -5,12 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class CharPredicateTest extends TestBase {
 
     @Test
@@ -32,6 +30,20 @@ public class CharPredicateTest extends TestBase {
     }
 
     @Test
+    public void testAlwaysTrue() {
+        assertTrue(CharPredicate.ALWAYS_TRUE.test('a'));
+        assertTrue(CharPredicate.ALWAYS_TRUE.test('5'));
+        assertTrue(CharPredicate.ALWAYS_TRUE.test('\0'));
+    }
+
+    @Test
+    public void testAlwaysFalse() {
+        assertFalse(CharPredicate.ALWAYS_FALSE.test('a'));
+        assertFalse(CharPredicate.ALWAYS_FALSE.test('5'));
+        assertFalse(CharPredicate.ALWAYS_FALSE.test('\0'));
+    }
+
+    @Test
     public void testTestWithAnonymousClass() {
         CharPredicate isUpperCase = new CharPredicate() {
             @Override
@@ -42,6 +54,20 @@ public class CharPredicateTest extends TestBase {
 
         assertTrue(isUpperCase.test('A'));
         assertFalse(isUpperCase.test('a'));
+    }
+
+    @Test
+    public void testIsZero() {
+        assertTrue(CharPredicate.IS_ZERO.test('\0'));
+        assertFalse(CharPredicate.IS_ZERO.test('a'));
+        assertFalse(CharPredicate.IS_ZERO.test('0'));
+    }
+
+    @Test
+    public void testNotZero() {
+        assertFalse(CharPredicate.NOT_ZERO.test('\0'));
+        assertTrue(CharPredicate.NOT_ZERO.test('a'));
+        assertTrue(CharPredicate.NOT_ZERO.test('0'));
     }
 
     @Test
@@ -62,17 +88,6 @@ public class CharPredicateTest extends TestBase {
     }
 
     @Test
-    public void testAnd() {
-        CharPredicate isLetter = Character::isLetter;
-        CharPredicate isUpperCase = Character::isUpperCase;
-        CharPredicate combined = isLetter.and(isUpperCase);
-
-        assertTrue(combined.test('A'));
-        assertFalse(combined.test('a'));
-        assertFalse(combined.test('5'));
-    }
-
-    @Test
     public void testAndShortCircuit() {
         final boolean[] secondCalled = { false };
         CharPredicate alwaysFalse = c -> false;
@@ -84,6 +99,17 @@ public class CharPredicateTest extends TestBase {
         CharPredicate combined = alwaysFalse.and(checkCalled);
         assertFalse(combined.test('a'));
         assertFalse(secondCalled[0]);
+    }
+
+    @Test
+    public void testAnd() {
+        CharPredicate isLetter = Character::isLetter;
+        CharPredicate isUpperCase = Character::isUpperCase;
+        CharPredicate combined = isLetter.and(isUpperCase);
+
+        assertTrue(combined.test('A'));
+        assertFalse(combined.test('a'));
+        assertFalse(combined.test('5'));
     }
 
     @Test
@@ -112,40 +138,21 @@ public class CharPredicateTest extends TestBase {
     }
 
     @Test
-    public void testAlwaysTrue() {
-        assertTrue(CharPredicate.ALWAYS_TRUE.test('a'));
-        assertTrue(CharPredicate.ALWAYS_TRUE.test('5'));
-        assertTrue(CharPredicate.ALWAYS_TRUE.test('\0'));
-    }
-
-    @Test
-    public void testAlwaysFalse() {
-        assertFalse(CharPredicate.ALWAYS_FALSE.test('a'));
-        assertFalse(CharPredicate.ALWAYS_FALSE.test('5'));
-        assertFalse(CharPredicate.ALWAYS_FALSE.test('\0'));
-    }
-
-    @Test
-    public void testIsZero() {
-        assertTrue(CharPredicate.IS_ZERO.test('\0'));
-        assertFalse(CharPredicate.IS_ZERO.test('a'));
-        assertFalse(CharPredicate.IS_ZERO.test('0'));
-    }
-
-    @Test
-    public void testNotZero() {
-        assertFalse(CharPredicate.NOT_ZERO.test('\0'));
-        assertTrue(CharPredicate.NOT_ZERO.test('a'));
-        assertTrue(CharPredicate.NOT_ZERO.test('0'));
-    }
-
-    @Test
     public void testEqual() {
         CharPredicate equalToA = CharPredicate.equal('a');
 
         assertTrue(equalToA.test('a'));
         assertFalse(equalToA.test('b'));
         assertFalse(equalToA.test('A'));
+    }
+
+    @Test
+    public void testBoundaryValues() {
+        CharPredicate isMax = CharPredicate.equal(Character.MAX_VALUE);
+        CharPredicate isMin = CharPredicate.equal(Character.MIN_VALUE);
+
+        assertTrue(isMax.test(Character.MAX_VALUE));
+        assertTrue(isMin.test(Character.MIN_VALUE));
     }
 
     @Test
@@ -201,15 +208,6 @@ public class CharPredicateTest extends TestBase {
         assertFalse(betweenAandZ.test('a'));
         assertFalse(betweenAandZ.test('z'));
         assertFalse(betweenAandZ.test('A'));
-    }
-
-    @Test
-    public void testBoundaryValues() {
-        CharPredicate isMax = CharPredicate.equal(Character.MAX_VALUE);
-        CharPredicate isMin = CharPredicate.equal(Character.MIN_VALUE);
-
-        assertTrue(isMax.test(Character.MAX_VALUE));
-        assertTrue(isMin.test(Character.MIN_VALUE));
     }
 
     @Test

@@ -3,13 +3,15 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class LongToIntFunctionTest extends TestBase {
+
+    private int convertToInt(final long value) {
+        return (int) (value * 2);
+    }
 
     @Test
     public void testApplyAsInt() {
@@ -45,6 +47,36 @@ public class LongToIntFunctionTest extends TestBase {
     }
 
     @Test
+    public void testApplyAsInt_hashCode() {
+        final LongToIntFunction function = value -> Long.hashCode(value);
+        final int result = function.applyAsInt(12345L);
+        assertEquals(Long.hashCode(12345L), result);
+    }
+
+    @Test
+    public void testApplyAsInt_bitExtraction() {
+        final LongToIntFunction function = value -> (int) (value & 0xFFFFFFFF);
+        final int result = function.applyAsInt(0x123456789L);
+        assertEquals(0x23456789, result);
+    }
+
+    @Test
+    public void testMethodReference() {
+        final LongToIntFunction function = this::convertToInt;
+        final int result = function.applyAsInt(42L);
+        assertEquals(84, result);
+    }
+
+    @Test
+    public void testCompatibilityWithJavaUtilFunction() {
+        final java.util.function.LongToIntFunction javaFunction = value -> (int) value;
+        final LongToIntFunction abacusFunction = javaFunction::applyAsInt;
+
+        final int result = abacusFunction.applyAsInt(42L);
+        assertEquals(42, result);
+    }
+
+    @Test
     public void testApplyAsInt_withNegativeValue() {
         final LongToIntFunction function = value -> (int) value;
         final int result = function.applyAsInt(-42L);
@@ -66,43 +98,9 @@ public class LongToIntFunctionTest extends TestBase {
     }
 
     @Test
-    public void testApplyAsInt_hashCode() {
-        final LongToIntFunction function = value -> Long.hashCode(value);
-        final int result = function.applyAsInt(12345L);
-        assertEquals(Long.hashCode(12345L), result);
-    }
-
-    @Test
-    public void testApplyAsInt_bitExtraction() {
-        final LongToIntFunction function = value -> (int) (value & 0xFFFFFFFF);
-        final int result = function.applyAsInt(0x123456789L);
-        assertEquals(0x23456789, result);
-    }
-
-    @Test
     public void testFunctionalInterfaceContract() {
         final LongToIntFunction function = value -> (int) value;
         assertNotNull(function);
         assertEquals(42, function.applyAsInt(42L));
-    }
-
-    @Test
-    public void testMethodReference() {
-        final LongToIntFunction function = this::convertToInt;
-        final int result = function.applyAsInt(42L);
-        assertEquals(84, result);
-    }
-
-    private int convertToInt(final long value) {
-        return (int) (value * 2);
-    }
-
-    @Test
-    public void testCompatibilityWithJavaUtilFunction() {
-        final java.util.function.LongToIntFunction javaFunction = value -> (int) value;
-        final LongToIntFunction abacusFunction = javaFunction::applyAsInt;
-
-        final int result = abacusFunction.applyAsInt(42L);
-        assertEquals(42, result);
     }
 }

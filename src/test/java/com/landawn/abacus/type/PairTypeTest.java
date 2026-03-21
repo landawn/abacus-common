@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -22,7 +21,6 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Pair;
 
-@Tag("new-test")
 public class PairTypeTest extends TestBase {
 
     private PairType<String, Integer> stringIntPairType;
@@ -87,6 +85,17 @@ public class PairTypeTest extends TestBase {
         String result = stringIntPairType.stringOf(pair);
         assertNotNull(result);
         assertTrue(result.contains("null"));
+    }
+
+    @Test
+    public void testComplexPairTypes() {
+        PairType<Object, Object> objectPairType = (PairType<Object, Object>) createType("Pair<Object, Object>");
+        Pair<Object, Object> pair = Pair.of("string", 123);
+        String result = objectPairType.stringOf(pair);
+        assertNotNull(result);
+
+        Pair<Object, Object> parsed = objectPairType.valueOf(result);
+        assertNotNull(parsed);
     }
 
     @Test
@@ -190,16 +199,5 @@ public class PairTypeTest extends TestBase {
         assertNotNull(longStringPairType);
         assertTrue(longStringPairType.name().contains("Long"));
         assertTrue(longStringPairType.name().contains("String"));
-    }
-
-    @Test
-    public void testComplexPairTypes() {
-        PairType<Object, Object> objectPairType = (PairType<Object, Object>) createType("Pair<Object, Object>");
-        Pair<Object, Object> pair = Pair.of("string", 123);
-        String result = objectPairType.stringOf(pair);
-        assertNotNull(result);
-
-        Pair<Object, Object> parsed = objectPairType.valueOf(result);
-        assertNotNull(parsed);
     }
 }

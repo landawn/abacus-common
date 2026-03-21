@@ -1364,6 +1364,10 @@ public final class XmlUtil {
      * @return {@code true} if the node is a text element, {@code false} otherwise
      */
     public static boolean isTextElement(final Node node) {
+        if (node == null) {
+            return false;
+        }
+
         final NodeList childNodeList = node.getChildNodes();
 
         for (int i = 0; i < childNodeList.getLength(); i++) {
@@ -1376,41 +1380,59 @@ public final class XmlUtil {
     }
 
     /**
-     * Gets the text content of the given XML node.
-     * This method returns the text content with leading and trailing whitespace preserved.
-     * 
+     * Returns the DOM text content of the specified node.
+     *
+     * <p>This is a null-safe wrapper around {@link Node#getTextContent()}. If the node is not
+     * {@code null}, the returned value contains the concatenated text of the node and its descendants
+     * exactly as reported by the DOM implementation.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Element elem = doc.createElement("message");
      * elem.setTextContent("  Hello World  ");
+     *
      * String content = XmlUtil.getTextContent(elem);   // Returns "  Hello World  "
+     * String missing = XmlUtil.getTextContent(null);   // Returns null
      * }</pre>
      *
-     * @param node The XML node from which to get the text content
-     * @return The text content of the specified node
+     * @param node the XML node to read text from
+     * @return the value of {@code node.getTextContent()}, or {@code null} if {@code node} is {@code null}
      */
     public static String getTextContent(final Node node) {
-        return node.getTextContent();
+        return node == null ? null : node.getTextContent();
     }
 
     /**
-     * Gets the text content of the given XML node, optionally processing whitespace characters.
-     * When ignoreWhiteChar is {@code true}, all whitespace characters (tabs, newlines, etc.) within
-     * the text content are normalized to single spaces, and leading/trailing spaces are removed.
-     * 
+     * Returns the text content of the specified node, optionally normalizing selected whitespace
+     * control characters.
+     *
+     * <p>If {@code ignoreWhiteChar} is {@code false}, this method behaves the same as
+     * {@link #getTextContent(Node)}. If it is {@code true}, the method first reads
+     * {@link Node#getTextContent()} and then replaces tab, backspace, newline, carriage return,
+     * and form-feed characters with single spaces, suppresses repeated inserted spaces, and trims
+     * leading and trailing spaces from the final result. Regular space characters that are already
+     * present in the text are otherwise preserved.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Element elem = doc.createElement("message");
      * elem.setTextContent("  Hello\n\tWorld  ");
-     * String content = XmlUtil.getTextContent(elem, true);       // Returns "Hello World"
-     * String rawContent = XmlUtil.getTextContent(elem, false);   // Returns "  Hello\n\tWorld  "
+     *
+     * String normalized = XmlUtil.getTextContent(elem, true);   // Returns "Hello World"
+     * String raw = XmlUtil.getTextContent(elem, false);         // Returns "  Hello\n\tWorld  "
+     * String missing = XmlUtil.getTextContent(null, true);      // Returns null
      * }</pre>
      *
-     * @param node The XML node from which to get the text content
-     * @param ignoreWhiteChar Whether to normalize whitespace characters in the text content
-     * @return The text content of the specified node, with whitespace processed if requested
+     * @param node the XML node to read text from
+     * @param ignoreWhiteChar {@code true} to normalize tab/backspace/newline/carriage-return/form-feed
+     *        characters and trim outer spaces; {@code false} to return the raw DOM text content
+     * @return the processed text content, or {@code null} if {@code node} is {@code null}
      */
     public static String getTextContent(final Node node, final boolean ignoreWhiteChar) {
+        if (node == null) {
+            return null;
+        }
+
         String textContent = node.getTextContent();
 
         if (ignoreWhiteChar && Strings.isNotEmpty(textContent)) {

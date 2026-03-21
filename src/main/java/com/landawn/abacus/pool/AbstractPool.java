@@ -235,30 +235,18 @@ public abstract class AbstractPool implements Pool {
      * Acquires the lock for this pool.
      * This method blocks until the lock is available.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * pool.lock();
-     * try {
-     *     // perform thread-safe operations
-     * } finally {
-     *     pool.unlock();
-     * }
-     * }</pre>
-     *
      */
-    @Override
-    public void lock() {
+    void lock() {
         lock.lock();
     }
 
     /**
      * Releases the lock for this pool.
      * This method should always be called in a finally block after {@link #lock()}.
-     * 
+     *
      * @throws IllegalMonitorStateException if the current thread does not hold the lock
      */
-    @Override
-    public void unlock() {
+    void unlock() {
         lock.unlock();
     }
 

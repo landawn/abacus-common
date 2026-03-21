@@ -4,13 +4,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ByteSupplierTest extends TestBase {
+
+    private static class TestObject {
+        byte getValue() {
+            return (byte) 25;
+        }
+    }
 
     @Test
     public void testGetAsByte() {
@@ -40,21 +44,6 @@ public class ByteSupplierTest extends TestBase {
     }
 
     @Test
-    public void testZero() {
-        assertEquals((byte) 0, ByteSupplier.ZERO.getAsByte());
-        assertEquals((byte) 0, ByteSupplier.ZERO.getAsByte());
-    }
-
-    @Test
-    public void testRandom() {
-        byte first = ByteSupplier.RANDOM.getAsByte();
-        byte second = ByteSupplier.RANDOM.getAsByte();
-
-        assertTrue(first >= Byte.MIN_VALUE && first <= Byte.MAX_VALUE);
-        assertTrue(second >= Byte.MIN_VALUE && second <= Byte.MAX_VALUE);
-    }
-
-    @Test
     public void testRandomProducesDifferentValues() {
         boolean foundDifferent = false;
         byte first = ByteSupplier.RANDOM.getAsByte();
@@ -80,6 +69,29 @@ public class ByteSupplierTest extends TestBase {
     }
 
     @Test
+    public void testMethodReference() {
+        TestObject obj = new TestObject();
+        ByteSupplier supplier = obj::getValue;
+
+        assertEquals((byte) 25, supplier.getAsByte());
+    }
+
+    @Test
+    public void testZero() {
+        assertEquals((byte) 0, ByteSupplier.ZERO.getAsByte());
+        assertEquals((byte) 0, ByteSupplier.ZERO.getAsByte());
+    }
+
+    @Test
+    public void testRandom() {
+        byte first = ByteSupplier.RANDOM.getAsByte();
+        byte second = ByteSupplier.RANDOM.getAsByte();
+
+        assertTrue(first >= Byte.MIN_VALUE && first <= Byte.MAX_VALUE);
+        assertTrue(second >= Byte.MIN_VALUE && second <= Byte.MAX_VALUE);
+    }
+
+    @Test
     public void testBoundaryValues() {
         ByteSupplier maxSupplier = () -> Byte.MAX_VALUE;
         ByteSupplier minSupplier = () -> Byte.MIN_VALUE;
@@ -89,21 +101,7 @@ public class ByteSupplierTest extends TestBase {
     }
 
     @Test
-    public void testMethodReference() {
-        TestObject obj = new TestObject();
-        ByteSupplier supplier = obj::getValue;
-
-        assertEquals((byte) 25, supplier.getAsByte());
-    }
-
-    @Test
     public void testFunctionalInterface() {
         assertNotNull(ByteSupplier.class.getAnnotation(FunctionalInterface.class));
-    }
-
-    private static class TestObject {
-        byte getValue() {
-            return (byte) 25;
-        }
     }
 }

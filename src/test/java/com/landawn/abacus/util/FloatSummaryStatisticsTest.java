@@ -5,13 +5,22 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class FloatSummaryStatisticsTest extends TestBase {
+
+    @Test
+    public void testVerySmallNumbers() {
+        FloatSummaryStatistics stats = new FloatSummaryStatistics();
+        stats.accept(0.0001f);
+        stats.accept(0.0002f);
+        stats.accept(0.0003f);
+
+        assertEquals(3L, stats.getCount());
+        assertTrue(stats.getSum() > 0);
+    }
 
     @Test
     public void testDefaultConstructor() {
@@ -30,6 +39,17 @@ public class FloatSummaryStatisticsTest extends TestBase {
         assertEquals(1.0f, stats.getMin());
         assertEquals(10.0f, stats.getMax());
         assertEquals(15.0, stats.getSum(), 0.0001);
+    }
+
+    @Test
+    public void testZeroValue() {
+        FloatSummaryStatistics stats = new FloatSummaryStatistics();
+        stats.accept(0.0f);
+
+        assertEquals(1L, stats.getCount());
+        assertEquals(0.0, stats.getSum());
+        assertEquals(0.0f, stats.getMin());
+        assertEquals(0.0f, stats.getMax());
     }
 
     @Test
@@ -72,6 +92,21 @@ public class FloatSummaryStatisticsTest extends TestBase {
     }
 
     @Test
+    public void testAccept() {
+        FloatSummaryStatistics stats = new FloatSummaryStatistics();
+
+        stats.accept(1.0f);
+        stats.accept(2.0f);
+        stats.accept(3.0f);
+
+        Assertions.assertEquals(3, stats.getCount());
+        Assertions.assertEquals(6.0, stats.getSum(), 0.0001);
+        Assertions.assertEquals(1.0f, stats.getMin());
+        Assertions.assertEquals(3.0f, stats.getMax());
+        Assertions.assertEquals(2.0, stats.getAverage(), 0.0001);
+    }
+
+    @Test
     public void testCombine() {
         FloatSummaryStatistics stats1 = new FloatSummaryStatistics();
         stats1.accept(1.0f);
@@ -110,6 +145,30 @@ public class FloatSummaryStatisticsTest extends TestBase {
     }
 
     @Test
+    public void testGetCount() {
+        FloatSummaryStatistics stats = new FloatSummaryStatistics();
+        Assertions.assertEquals(0, stats.getCount());
+
+        stats.accept(1.0f);
+        Assertions.assertEquals(1, stats.getCount());
+
+        stats.accept(2.0f);
+        Assertions.assertEquals(2, stats.getCount());
+    }
+
+    @Test
+    public void testGetSum() {
+        FloatSummaryStatistics stats = new FloatSummaryStatistics();
+        Assertions.assertEquals(0.0, stats.getSum());
+
+        stats.accept(1.1f);
+        stats.accept(2.2f);
+        stats.accept(3.3f);
+
+        Assertions.assertEquals(6.6, stats.getSum(), 0.0001);
+    }
+
+    @Test
     public void testGetAverage() {
         FloatSummaryStatistics stats = new FloatSummaryStatistics();
         stats.accept(2.0f);
@@ -138,67 +197,6 @@ public class FloatSummaryStatisticsTest extends TestBase {
         assertTrue(str.contains("count="));
         assertTrue(str.contains("sum="));
         assertTrue(str.contains("average="));
-    }
-
-    @Test
-    public void testVerySmallNumbers() {
-        FloatSummaryStatistics stats = new FloatSummaryStatistics();
-        stats.accept(0.0001f);
-        stats.accept(0.0002f);
-        stats.accept(0.0003f);
-
-        assertEquals(3L, stats.getCount());
-        assertTrue(stats.getSum() > 0);
-    }
-
-    @Test
-    public void testZeroValue() {
-        FloatSummaryStatistics stats = new FloatSummaryStatistics();
-        stats.accept(0.0f);
-
-        assertEquals(1L, stats.getCount());
-        assertEquals(0.0, stats.getSum());
-        assertEquals(0.0f, stats.getMin());
-        assertEquals(0.0f, stats.getMax());
-    }
-
-    @Test
-    public void testAccept() {
-        FloatSummaryStatistics stats = new FloatSummaryStatistics();
-
-        stats.accept(1.0f);
-        stats.accept(2.0f);
-        stats.accept(3.0f);
-
-        Assertions.assertEquals(3, stats.getCount());
-        Assertions.assertEquals(6.0, stats.getSum(), 0.0001);
-        Assertions.assertEquals(1.0f, stats.getMin());
-        Assertions.assertEquals(3.0f, stats.getMax());
-        Assertions.assertEquals(2.0, stats.getAverage(), 0.0001);
-    }
-
-    @Test
-    public void testGetCount() {
-        FloatSummaryStatistics stats = new FloatSummaryStatistics();
-        Assertions.assertEquals(0, stats.getCount());
-
-        stats.accept(1.0f);
-        Assertions.assertEquals(1, stats.getCount());
-
-        stats.accept(2.0f);
-        Assertions.assertEquals(2, stats.getCount());
-    }
-
-    @Test
-    public void testGetSum() {
-        FloatSummaryStatistics stats = new FloatSummaryStatistics();
-        Assertions.assertEquals(0.0, stats.getSum());
-
-        stats.accept(1.1f);
-        stats.accept(2.2f);
-        stats.accept(3.3f);
-
-        Assertions.assertEquals(6.6, stats.getSum(), 0.0001);
     }
 
 }

@@ -14,14 +14,12 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type.SerializationType;
 import com.landawn.abacus.util.ImmutableMap;
 
-@Tag("new-test")
 public class ImmutableMapTypeTest extends TestBase {
 
     private ImmutableMapType<String, Integer, ImmutableMap<String, Integer>> immutableMapType;
@@ -33,6 +31,15 @@ public class ImmutableMapTypeTest extends TestBase {
         immutableMapType = new ImmutableMapType<>("String", "Integer");
         objectMapType = new ImmutableMapType<>("Object", "Object");
         stringMapType = new ImmutableMapType<>("String", "String");
+    }
+
+    @Test
+    @DisplayName("Test declaringName() format verification")
+    public void testDeclaringNameFormat() {
+        String declaringName = immutableMapType.declaringName();
+        assertTrue(declaringName.startsWith("ImmutableMap<"));
+        assertTrue(declaringName.endsWith(">"));
+        assertTrue(declaringName.contains(", "));
     }
 
     @Test
@@ -65,9 +72,28 @@ public class ImmutableMapTypeTest extends TestBase {
     }
 
     @Test
+    @DisplayName("Test getParameterTypes() consistency")
+    public void testGetParameterTypesConsistency() {
+        Type<?>[] params1 = immutableMapType.parameterTypes();
+        Type<?>[] params2 = immutableMapType.parameterTypes();
+
+        assertSame(params1, params2);
+        assertEquals(params1.length, params2.length);
+    }
+
+    @Test
     @DisplayName("Test isMap() returns true")
     public void testIsMap() {
         assertTrue(immutableMapType.isMap());
+    }
+
+    @Test
+    @DisplayName("Test with Object,Object generic types")
+    public void testObjectObjectMapType() {
+        assertTrue(objectMapType.isMap());
+        assertTrue(objectMapType.isParameterizedType());
+        assertFalse(objectMapType.isSerializable());
+        assertEquals(SerializationType.MAP, objectMapType.serializationType());
     }
 
     @Test
@@ -121,6 +147,21 @@ public class ImmutableMapTypeTest extends TestBase {
     }
 
     @Test
+    @DisplayName("Test with different generic types - String,String")
+    public void testStringStringMapType() {
+        Map<String, String> map = new HashMap<>();
+        map.put("name", "value");
+        ImmutableMap<String, String> immutableMap = ImmutableMap.wrap(map);
+
+        String jsonStr = stringMapType.stringOf(immutableMap);
+        assertNotNull(jsonStr);
+
+        ImmutableMap<String, String> parsed = stringMapType.valueOf(jsonStr);
+        assertNotNull(parsed);
+        assertEquals("value", parsed.get("name"));
+    }
+
+    @Test
     @DisplayName("Test valueOf() with null returns null")
     public void testValueOfNull() {
         ImmutableMap<String, Integer> result = immutableMapType.valueOf(null);
@@ -160,6 +201,25 @@ public class ImmutableMapTypeTest extends TestBase {
         ImmutableMap<String, Integer> result = immutableMapType.valueOf(json);
         assertNotNull(result);
         assertEquals(3, result.size());
+    }
+
+    @Test
+    @DisplayName("Test valueOf() and stringOf() round trip")
+    public void testValueOfStringOfRoundTrip() {
+        Map<String, Integer> originalMap = new HashMap<>();
+        originalMap.put("one", 1);
+        originalMap.put("two", 2);
+        originalMap.put("three", 3);
+        ImmutableMap<String, Integer> immutableMap = ImmutableMap.wrap(originalMap);
+
+        String json = immutableMapType.stringOf(immutableMap);
+        ImmutableMap<String, Integer> result = immutableMapType.valueOf(json);
+
+        assertNotNull(result);
+        assertEquals(3, result.size());
+        assertEquals(Integer.valueOf(1), result.get("one"));
+        assertEquals(Integer.valueOf(2), result.get("two"));
+        assertEquals(Integer.valueOf(3), result.get("three"));
     }
 
     @Test
@@ -219,49 +279,6 @@ public class ImmutableMapTypeTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test with different generic types - String,String")
-    public void testStringStringMapType() {
-        Map<String, String> map = new HashMap<>();
-        map.put("name", "value");
-        ImmutableMap<String, String> immutableMap = ImmutableMap.wrap(map);
-
-        String jsonStr = stringMapType.stringOf(immutableMap);
-        assertNotNull(jsonStr);
-
-        ImmutableMap<String, String> parsed = stringMapType.valueOf(jsonStr);
-        assertNotNull(parsed);
-        assertEquals("value", parsed.get("name"));
-    }
-
-    @Test
-    @DisplayName("Test with Object,Object generic types")
-    public void testObjectObjectMapType() {
-        assertTrue(objectMapType.isMap());
-        assertTrue(objectMapType.isParameterizedType());
-        assertFalse(objectMapType.isSerializable());
-        assertEquals(SerializationType.MAP, objectMapType.serializationType());
-    }
-
-    @Test
-    @DisplayName("Test valueOf() and stringOf() round trip")
-    public void testValueOfStringOfRoundTrip() {
-        Map<String, Integer> originalMap = new HashMap<>();
-        originalMap.put("one", 1);
-        originalMap.put("two", 2);
-        originalMap.put("three", 3);
-        ImmutableMap<String, Integer> immutableMap = ImmutableMap.wrap(originalMap);
-
-        String json = immutableMapType.stringOf(immutableMap);
-        ImmutableMap<String, Integer> result = immutableMapType.valueOf(json);
-
-        assertNotNull(result);
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(1), result.get("one"));
-        assertEquals(Integer.valueOf(2), result.get("two"));
-        assertEquals(Integer.valueOf(3), result.get("three"));
-    }
-
-    @Test
     @DisplayName("Test appendTo() with large map")
     public void testAppendToLargeMap() throws IOException {
         StringBuilder sb = new StringBuilder();
@@ -277,24 +294,5 @@ public class ImmutableMapTypeTest extends TestBase {
         assertTrue(result.length() > 100);
         assertTrue(result.contains("key0"));
         assertTrue(result.contains("key99"));
-    }
-
-    @Test
-    @DisplayName("Test declaringName() format verification")
-    public void testDeclaringNameFormat() {
-        String declaringName = immutableMapType.declaringName();
-        assertTrue(declaringName.startsWith("ImmutableMap<"));
-        assertTrue(declaringName.endsWith(">"));
-        assertTrue(declaringName.contains(", "));
-    }
-
-    @Test
-    @DisplayName("Test getParameterTypes() consistency")
-    public void testGetParameterTypesConsistency() {
-        Type<?>[] params1 = immutableMapType.parameterTypes();
-        Type<?>[] params2 = immutableMapType.parameterTypes();
-
-        assertSame(params1, params2);
-        assertEquals(params1.length, params2.length);
     }
 }

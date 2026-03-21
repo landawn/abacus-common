@@ -13,14 +13,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("2025")
 public class AtomicLongTypeTest extends TestBase {
 
     private final AtomicLongType type = new AtomicLongType();
@@ -28,28 +26,6 @@ public class AtomicLongTypeTest extends TestBase {
     @Test
     public void test_clazz() {
         assertEquals(AtomicLong.class, type.javaType());
-    }
-
-    @Test
-    public void test_name() {
-        assertEquals("AtomicLong", type.name());
-    }
-
-    @Test
-    public void test_stringOf() {
-        assertEquals("123456789", type.stringOf(new AtomicLong(123456789L)));
-        assertEquals("-987654321", type.stringOf(new AtomicLong(-987654321L)));
-        assertEquals("0", type.stringOf(new AtomicLong(0L)));
-        assertNull(type.stringOf(null));
-    }
-
-    @Test
-    public void test_valueOf_String() {
-        assertEquals(123456789L, type.valueOf("123456789").get());
-        assertEquals(-987654321L, type.valueOf("-987654321").get());
-        assertEquals(0L, type.valueOf("0").get());
-        assertNull(type.valueOf((String) null));
-        assertNull(type.valueOf(""));
     }
 
     @Test
@@ -105,6 +81,23 @@ public class AtomicLongTypeTest extends TestBase {
     }
 
     @Test
+    public void test_stringOf() {
+        assertEquals("123456789", type.stringOf(new AtomicLong(123456789L)));
+        assertEquals("-987654321", type.stringOf(new AtomicLong(-987654321L)));
+        assertEquals("0", type.stringOf(new AtomicLong(0L)));
+        assertNull(type.stringOf(null));
+    }
+
+    @Test
+    public void test_valueOf_String() {
+        assertEquals(123456789L, type.valueOf("123456789").get());
+        assertEquals(-987654321L, type.valueOf("-987654321").get());
+        assertEquals(0L, type.valueOf("0").get());
+        assertNull(type.valueOf((String) null));
+        assertNull(type.valueOf(""));
+    }
+
+    @Test
     public void test_appendTo() throws Exception {
         StringWriter sw = new StringWriter();
 
@@ -129,5 +122,10 @@ public class AtomicLongTypeTest extends TestBase {
         // Test null
         type.writeCharacter(writer, null, null);
         verify(writer).write("null".toCharArray());
+    }
+
+    @Test
+    public void test_name() {
+        assertEquals("AtomicLong", type.name());
     }
 }

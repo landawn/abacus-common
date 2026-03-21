@@ -19,16 +19,16 @@ import java.io.Serial;
 /**
  * Exception thrown when an expected object cannot be found.
  * This exception extends {@link IllegalStateException} to indicate that the application
- * is in an illegal state due to the absence of a required object.
- * 
+ * is in an illegal state because a required object is absent.
+ *
  * <p>Common use cases include:</p>
  * <ul>
- *   <li>Database queries expecting to find a record but returning no results</li>
- *   <li>Cache lookups that fail to find the requested entry</li>
- *   <li>Resource loading operations where the resource doesn't exist</li>
- *   <li>API calls expecting an entity that has been deleted or never existed</li>
+ *   <li>Database queries expecting to find a record but returning no results.</li>
+ *   <li>Cache lookups that fail to find the requested entry.</li>
+ *   <li>Resource loading operations where the resource doesn't exist.</li>
+ *   <li>API calls expecting an entity that has been deleted or never existed.</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // In a service method
@@ -37,7 +37,7 @@ import java.io.Serial;
  *     throw new ObjectNotFoundException("User not found with ID: " + userId);
  * }
  * }</pre>
- * 
+ *
  * @see IllegalStateException
  */
 public class ObjectNotFoundException extends IllegalStateException {
@@ -55,6 +55,7 @@ public class ObjectNotFoundException extends IllegalStateException {
      * }</pre>
      */
     public ObjectNotFoundException() {
+        super();
     }
 
     /**
@@ -91,7 +92,7 @@ public class ObjectNotFoundException extends IllegalStateException {
      * @param message the detail message. The detail message is saved for later retrieval
      *                by the {@link #getMessage()} method.
      * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
-     *              A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.
+     *              (A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.)
      */
     public ObjectNotFoundException(final String message, final Throwable cause) {
         super(message, cause);
@@ -107,13 +108,15 @@ public class ObjectNotFoundException extends IllegalStateException {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * catch (DataAccessException e) {
+     * try {
+     *     // database operation
+     * } catch (DataAccessException e) {
      *     throw new ObjectNotFoundException(e);
      * }
      * }</pre>
      *
      * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
-     *              A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.
+     *              (A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.)
      */
     public ObjectNotFoundException(final Throwable cause) {
         super(cause);

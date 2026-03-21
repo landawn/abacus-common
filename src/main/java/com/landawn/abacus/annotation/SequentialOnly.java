@@ -31,23 +31,22 @@ import java.lang.annotation.Target;
  *
  * <p>This annotation is used to mark:</p>
  * <ul>
- *   <li>Stream operations that cannot be parallelized</li>
- *   <li>Stateful operations that require sequential processing</li>
- *   <li>Algorithms that depend on processing order</li>
- *   <li>Non-thread-safe utility methods</li>
+ *   <li>Stream operations that cannot be parallelized.</li>
+ *   <li>Stateful operations that require sequential processing.</li>
+ *   <li>Algorithms that depend on processing order.</li>
+ *   <li>Non-thread-safe utility methods.</li>
  * </ul>
  *
  * <p><b>Common reasons for sequential-only operations:</b></p>
  * <ul>
- *   <li>Maintaining mutable state across invocations</li>
- *   <li>Order-dependent processing requirements</li>
- *   <li>External resource constraints (file handles, connections)</li>
- *   <li>Complex side effects that must occur in a specific order</li>
+ *   <li>Maintaining mutable state across invocations.</li>
+ *   <li>Order-dependent processing requirements.</li>
+ *   <li>External resource constraints (file handles, connections).</li>
+ *   <li>Complex side effects that must occur in a specific order.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- *
  * public class DataProcessor {
  *     private int counter = 0;
  *

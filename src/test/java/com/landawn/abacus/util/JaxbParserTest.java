@@ -18,7 +18,6 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractParserTest;
@@ -32,12 +31,11 @@ import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
 
 public class JaxbParserTest extends AbstractParserTest {
-    private static final String contextPath = "com.landawn.abacus.parser_0.entity";
+    private static final String contextPath = "com.landawn.abacus.entity";
     private static final File persons_jaxb_xml = new File("./src/test/resources/persons_jaxb.xml");
     private static final File persons_abacus_xml = new File("./src/test/resources/persons_abacus.xml");
 
     @Test
-    @Tag("slow-test")
     public void testPerformance() throws Exception {
         createXmlFile(1000);
 

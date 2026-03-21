@@ -4,12 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class LongBiPredicateTest extends TestBase {
 
     @Test
@@ -40,12 +38,47 @@ public class LongBiPredicateTest extends TestBase {
     }
 
     @Test
+    public void testWithNegativeValues() {
+        final LongBiPredicate predicate = (t, u) -> Math.abs(t - u) < 10;
+        assertTrue(predicate.test(-5L, -2L));
+        assertFalse(predicate.test(-20L, -5L));
+    }
+
+    @Test
+    public void testFunctionalInterfaceContract() {
+        final LongBiPredicate predicate = (t, u) -> true;
+        assertNotNull(predicate);
+        assertTrue(predicate.test(1L, 2L));
+    }
+
+    @Test
     public void testNegate() {
         final LongBiPredicate predicate = (t, u) -> t > u;
         final LongBiPredicate negated = predicate.negate();
 
         assertFalse(negated.test(10L, 5L));
         assertTrue(negated.test(5L, 10L));
+    }
+
+    @Test
+    public void testAndThen_shortCircuit() {
+        final boolean[] firstCalled = { false };
+        final boolean[] secondCalled = { false };
+
+        final LongBiPredicate first = (t, u) -> {
+            firstCalled[0] = true;
+            return false;
+        };
+        final LongBiPredicate second = (t, u) -> {
+            secondCalled[0] = true;
+            return true;
+        };
+
+        final LongBiPredicate combined = first.and(second);
+        assertFalse(combined.test(1L, 2L));
+
+        assertTrue(firstCalled[0]);
+        assertFalse(secondCalled[0]); // Should not be called due to short-circuit
     }
 
     @Test
@@ -58,6 +91,27 @@ public class LongBiPredicateTest extends TestBase {
         assertTrue(combined.test(10L, 20L));
         assertFalse(combined.test(10L, 100L)); // sum not less than 100
         assertFalse(combined.test(-10L, 20L)); // not all positive
+    }
+
+    @Test
+    public void testOr_shortCircuit() {
+        final boolean[] firstCalled = { false };
+        final boolean[] secondCalled = { false };
+
+        final LongBiPredicate first = (t, u) -> {
+            firstCalled[0] = true;
+            return true;
+        };
+        final LongBiPredicate second = (t, u) -> {
+            secondCalled[0] = true;
+            return false;
+        };
+
+        final LongBiPredicate combined = first.or(second);
+        assertTrue(combined.test(1L, 2L));
+
+        assertTrue(firstCalled[0]);
+        assertFalse(secondCalled[0]); // Should not be called due to short-circuit
     }
 
     @Test
@@ -127,67 +181,11 @@ public class LongBiPredicateTest extends TestBase {
     }
 
     @Test
-    public void testAndThen_shortCircuit() {
-        final boolean[] firstCalled = { false };
-        final boolean[] secondCalled = { false };
-
-        final LongBiPredicate first = (t, u) -> {
-            firstCalled[0] = true;
-            return false;
-        };
-        final LongBiPredicate second = (t, u) -> {
-            secondCalled[0] = true;
-            return true;
-        };
-
-        final LongBiPredicate combined = first.and(second);
-        assertFalse(combined.test(1L, 2L));
-
-        assertTrue(firstCalled[0]);
-        assertFalse(secondCalled[0]); // Should not be called due to short-circuit
-    }
-
-    @Test
-    public void testOr_shortCircuit() {
-        final boolean[] firstCalled = { false };
-        final boolean[] secondCalled = { false };
-
-        final LongBiPredicate first = (t, u) -> {
-            firstCalled[0] = true;
-            return true;
-        };
-        final LongBiPredicate second = (t, u) -> {
-            secondCalled[0] = true;
-            return false;
-        };
-
-        final LongBiPredicate combined = first.or(second);
-        assertTrue(combined.test(1L, 2L));
-
-        assertTrue(firstCalled[0]);
-        assertFalse(secondCalled[0]); // Should not be called due to short-circuit
-    }
-
-    @Test
     public void testComplexChaining() {
         final LongBiPredicate predicate = LongBiPredicate.GREATER_THAN.and((t, u) -> t + u < 100).or((t, u) -> t == u);
 
         assertTrue(predicate.test(10L, 5L)); // 10 > 5 AND 15 < 100
         assertTrue(predicate.test(5L, 5L)); // 5 == 5
         assertFalse(predicate.test(5L, 10L)); // 5 < 10 AND 5 != 10
-    }
-
-    @Test
-    public void testWithNegativeValues() {
-        final LongBiPredicate predicate = (t, u) -> Math.abs(t - u) < 10;
-        assertTrue(predicate.test(-5L, -2L));
-        assertFalse(predicate.test(-20L, -5L));
-    }
-
-    @Test
-    public void testFunctionalInterfaceContract() {
-        final LongBiPredicate predicate = (t, u) -> true;
-        assertNotNull(predicate);
-        assertTrue(predicate.test(1L, 2L));
     }
 }

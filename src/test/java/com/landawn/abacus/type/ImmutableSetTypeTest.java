@@ -12,21 +12,21 @@ import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.ImmutableSet;
 
-@Tag("2025")
 public class ImmutableSetTypeTest extends TestBase {
 
     private final ImmutableSetType type = new ImmutableSetType("String");
 
     @Test
-    public void test_name() {
-        assertNotNull(type.name());
-        assertFalse(type.name().isEmpty());
+    public void testStringOf() {
+    }
+
+    @Test
+    public void testValueOf() {
     }
 
     @Test
@@ -35,28 +35,6 @@ public class ImmutableSetTypeTest extends TestBase {
         Object result = type.valueOf((String) null);
         // Result may be null or default value depending on type
         assertNull(result);
-    }
-
-    @Test
-    public void test_get_ResultSet_byLabel() throws SQLException {
-        ResultSet rs = mock(ResultSet.class);
-        // Basic get test - actual implementation will vary by type
-        assertDoesNotThrow(() -> type.get(rs, "col"));
-    }
-
-    @Test
-    public void test_set_CallableStatement() throws SQLException {
-        CallableStatement stmt = mock(CallableStatement.class);
-        // Basic set test - actual implementation will vary by type
-        assertDoesNotThrow(() -> type.set(stmt, "param", null));
-    }
-
-    @Test
-    public void testStringOf() {
-    }
-
-    @Test
-    public void testValueOf() {
     }
 
     @Test
@@ -78,6 +56,26 @@ public class ImmutableSetTypeTest extends TestBase {
         assertNotNull(typeName);
         assertTrue(typeName.contains("ImmutableSet"));
         assertTrue(typeName.contains("String"));
+    }
+
+    @Test
+    public void test_name() {
+        assertNotNull(type.name());
+        assertFalse(type.name().isEmpty());
+    }
+
+    @Test
+    public void test_get_ResultSet_byLabel() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+        // Basic get test - actual implementation will vary by type
+        assertDoesNotThrow(() -> type.get(rs, "col"));
+    }
+
+    @Test
+    public void test_set_CallableStatement() throws SQLException {
+        CallableStatement stmt = mock(CallableStatement.class);
+        // Basic set test - actual implementation will vary by type
+        assertDoesNotThrow(() -> type.set(stmt, "param", null));
     }
 
 }

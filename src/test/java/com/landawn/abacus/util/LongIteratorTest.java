@@ -15,14 +15,12 @@ import java.util.function.BooleanSupplier;
 import java.util.function.LongPredicate;
 import java.util.function.LongSupplier;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.stream.LongStream;
 
-@Tag("2025")
 public class LongIteratorTest extends TestBase {
 
     @Test
@@ -33,20 +31,79 @@ public class LongIteratorTest extends TestBase {
     }
 
     @Test
+    public void testEmptyConstant() {
+        assertSame(LongIterator.EMPTY, LongIterator.empty());
+    }
+
+    @Test
     public void testEmptyNextThrowsException() {
         LongIterator iter = LongIterator.empty();
         assertThrows(NoSuchElementException.class, () -> iter.nextLong());
     }
 
     @Test
-    public void testEmptyConstant() {
-        assertSame(LongIterator.EMPTY, LongIterator.empty());
-    }
-
-    @Test
     public void testOf() {
         LongIterator iter = LongIterator.of(1L, 2L, 3L);
         assertTrue(iter.hasNext());
+        assertEquals(1L, iter.nextLong());
+        assertEquals(2L, iter.nextLong());
+        assertEquals(3L, iter.nextLong());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testOfRange() {
+        long[] array = { 10L, 20L, 30L, 40L, 50L };
+        LongIterator iter = LongIterator.of(array, 1, 4);
+        assertEquals(20L, iter.nextLong());
+        assertEquals(30L, iter.nextLong());
+        assertEquals(40L, iter.nextLong());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testOfRangeFullArray() {
+        long[] array = { 1L, 2L, 3L };
+        LongIterator iter = LongIterator.of(array, 0, 3);
+        assertEquals(1L, iter.nextLong());
+        assertEquals(2L, iter.nextLong());
+        assertEquals(3L, iter.nextLong());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testChainedOperations() {
+        long result = LongIterator.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L).filter(x -> x % 2 == 0).skip(1).limit(2).toArray()[0];
+        assertEquals(4L, result);
+    }
+
+    @Test
+    public void testComplexChain() {
+        LongList list = LongIterator.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L).skip(2).filter(x -> x > 4).limit(3).toList();
+
+        assertEquals(3, list.size());
+        assertEquals(5L, list.get(0));
+        assertEquals(6L, list.get(1));
+        assertEquals(7L, list.get(2));
+    }
+
+    @Test
+    public void testOf_WithRange() {
+        long[] array = { 1L, 2L, 3L, 4L, 5L };
+        LongIterator iter = LongIterator.of(array, 1, 4);
+
+        assertTrue(iter.hasNext());
+        assertEquals(2L, iter.nextLong());
+        assertEquals(3L, iter.nextLong());
+        assertEquals(4L, iter.nextLong());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testOf_WithRange_FullArray() {
+        long[] array = { 1L, 2L, 3L };
+        LongIterator iter = LongIterator.of(array, 0, array.length);
+
         assertEquals(1L, iter.nextLong());
         assertEquals(2L, iter.nextLong());
         assertEquals(3L, iter.nextLong());
@@ -74,29 +131,49 @@ public class LongIteratorTest extends TestBase {
     }
 
     @Test
-    public void testOfRange() {
-        long[] array = { 10L, 20L, 30L, 40L, 50L };
-        LongIterator iter = LongIterator.of(array, 1, 4);
-        assertEquals(20L, iter.nextLong());
-        assertEquals(30L, iter.nextLong());
-        assertEquals(40L, iter.nextLong());
+    public void testOfRangeEmpty() {
+        long[] array = { 1L, 2L, 3L };
+        LongIterator iter = LongIterator.of(array, 1, 1);
         assertFalse(iter.hasNext());
     }
 
     @Test
-    public void testOfRangeFullArray() {
-        long[] array = { 1L, 2L, 3L };
-        LongIterator iter = LongIterator.of(array, 0, 3);
+    public void testMultipleHasNextCalls() {
+        LongIterator iter = LongIterator.of(1L, 2L);
+        assertTrue(iter.hasNext());
+        assertTrue(iter.hasNext());
+        assertTrue(iter.hasNext());
         assertEquals(1L, iter.nextLong());
+        assertTrue(iter.hasNext());
         assertEquals(2L, iter.nextLong());
+        assertFalse(iter.hasNext());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testOf_MultipleElements() {
+        long[] array = { 1L, 2L, 3L };
+        LongIterator iter = LongIterator.of(array);
+
+        assertTrue(iter.hasNext());
+        assertEquals(1L, iter.nextLong());
+        assertTrue(iter.hasNext());
+        assertEquals(2L, iter.nextLong());
+        assertTrue(iter.hasNext());
         assertEquals(3L, iter.nextLong());
         assertFalse(iter.hasNext());
     }
 
     @Test
-    public void testOfRangeEmpty() {
-        long[] array = { 1L, 2L, 3L };
-        LongIterator iter = LongIterator.of(array, 1, 1);
+    public void testOf_SpecialValues() {
+        long[] array = { Long.MIN_VALUE, -1L, 0L, 1L, Long.MAX_VALUE };
+        LongIterator iter = LongIterator.of(array);
+
+        assertEquals(Long.MIN_VALUE, iter.nextLong());
+        assertEquals(-1L, iter.nextLong());
+        assertEquals(0L, iter.nextLong());
+        assertEquals(1L, iter.nextLong());
+        assertEquals(Long.MAX_VALUE, iter.nextLong());
         assertFalse(iter.hasNext());
     }
 
@@ -106,6 +183,33 @@ public class LongIteratorTest extends TestBase {
         assertThrows(IndexOutOfBoundsException.class, () -> LongIterator.of(array, -1, 2));
         assertThrows(IndexOutOfBoundsException.class, () -> LongIterator.of(array, 0, 4));
         assertThrows(IndexOutOfBoundsException.class, () -> LongIterator.of(array, 2, 1));
+    }
+
+    @Test
+    public void testOf_EmptyArray() {
+        LongIterator iter = LongIterator.of();
+
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, () -> iter.nextLong());
+    }
+
+    @Test
+    public void testOf_NullArray() {
+        LongIterator iter = LongIterator.of((long[]) null);
+
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, () -> iter.nextLong());
+    }
+
+    @Test
+    public void testOf_SingleElement() {
+        long[] array = { 42L };
+        LongIterator iter = LongIterator.of(array);
+
+        assertTrue(iter.hasNext());
+        assertEquals(42L, iter.nextLong());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, () -> iter.nextLong());
     }
 
     @Test
@@ -123,11 +227,6 @@ public class LongIteratorTest extends TestBase {
     }
 
     @Test
-    public void testDeferNull() {
-        assertThrows(IllegalArgumentException.class, () -> LongIterator.defer(null));
-    }
-
-    @Test
     public void testDeferMultipleCalls() {
         AtomicInteger callCount = new AtomicInteger(0);
         LongIterator iter = LongIterator.defer(() -> {
@@ -138,6 +237,11 @@ public class LongIteratorTest extends TestBase {
         iter.nextLong();
         iter.hasNext();
         assertEquals(1, callCount.get());
+    }
+
+    @Test
+    public void testDeferNull() {
+        assertThrows(IllegalArgumentException.class, () -> LongIterator.defer(null));
     }
 
     @Test
@@ -152,11 +256,6 @@ public class LongIteratorTest extends TestBase {
     }
 
     @Test
-    public void testGenerateNull() {
-        assertThrows(IllegalArgumentException.class, () -> LongIterator.generate(null));
-    }
-
-    @Test
     public void testGenerateWithCondition() {
         AtomicInteger count = new AtomicInteger(0);
         LongIterator iter = LongIterator.generate(() -> count.get() < 3, () -> count.getAndIncrement());
@@ -164,6 +263,27 @@ public class LongIteratorTest extends TestBase {
         assertEquals(1L, iter.nextLong());
         assertEquals(2L, iter.nextLong());
         assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testGenerate_Infinite() {
+        AtomicLong counter = new AtomicLong(0);
+        LongSupplier supplier = () -> counter.getAndIncrement();
+
+        LongIterator iter = LongIterator.generate(supplier);
+
+        assertTrue(iter.hasNext());
+        assertEquals(0L, iter.nextLong());
+        assertTrue(iter.hasNext());
+        assertEquals(1L, iter.nextLong());
+        assertTrue(iter.hasNext());
+        assertEquals(2L, iter.nextLong());
+        assertTrue(iter.hasNext());
+    }
+
+    @Test
+    public void testGenerateNull() {
+        assertThrows(IllegalArgumentException.class, () -> LongIterator.generate(null));
     }
 
     @Test
@@ -180,6 +300,34 @@ public class LongIteratorTest extends TestBase {
     }
 
     @Test
+    public void testGenerate_WithHasNext() {
+        AtomicLong counter = new AtomicLong(0);
+        BooleanSupplier hasNext = () -> counter.get() < 3;
+        LongSupplier supplier = () -> counter.getAndIncrement();
+
+        LongIterator iter = LongIterator.generate(hasNext, supplier);
+
+        assertTrue(iter.hasNext());
+        assertEquals(0L, iter.nextLong());
+        assertTrue(iter.hasNext());
+        assertEquals(1L, iter.nextLong());
+        assertTrue(iter.hasNext());
+        assertEquals(2L, iter.nextLong());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, () -> iter.nextLong());
+    }
+
+    @Test
+    public void testGenerate_NullArguments() {
+        LongSupplier supplier = () -> 0L;
+        BooleanSupplier hasNext = () -> true;
+
+        assertThrows(IllegalArgumentException.class, () -> LongIterator.generate((LongSupplier) null));
+        assertThrows(IllegalArgumentException.class, () -> LongIterator.generate(null, supplier));
+        assertThrows(IllegalArgumentException.class, () -> LongIterator.generate(hasNext, null));
+    }
+
+    @Test
     public void testNext() {
         LongIterator iter = LongIterator.of(10L, 20L);
         Long value = iter.next();
@@ -192,6 +340,14 @@ public class LongIteratorTest extends TestBase {
         Object obj = iter.next();
         assertTrue(obj instanceof Long);
         assertEquals(100L, obj);
+    }
+
+    @Test
+    public void testNext_Deprecated() {
+        LongIterator iter = LongIterator.of(42L);
+
+        Long value = iter.next();
+        assertEquals(Long.valueOf(42L), value);
     }
 
     @Test
@@ -219,22 +375,9 @@ public class LongIteratorTest extends TestBase {
     }
 
     @Test
-    public void testSkipZero() {
-        LongIterator iter = LongIterator.of(1L, 2L, 3L).skip(0);
-        assertEquals(1L, iter.nextLong());
-        assertEquals(2L, iter.nextLong());
-        assertEquals(3L, iter.nextLong());
-    }
-
-    @Test
     public void testSkipAll() {
         LongIterator iter = LongIterator.of(1L, 2L, 3L).skip(10);
         assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testSkipNegative() {
-        assertThrows(IllegalArgumentException.class, () -> LongIterator.of(1L, 2L).skip(-1));
     }
 
     @Test
@@ -251,17 +394,55 @@ public class LongIteratorTest extends TestBase {
     }
 
     @Test
+    public void testSkipAndLimit() {
+        LongIterator iter = LongIterator.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L).skip(3).limit(4);
+
+        long[] array = iter.toArray();
+        assertArrayEquals(new long[] { 4L, 5L, 6L, 7L }, array);
+    }
+
+    @Test
+    public void testSkip_MoreThanAvailable() {
+        LongIterator iter = LongIterator.of(1L, 2L, 3L);
+        LongIterator skipped = iter.skip(5);
+
+        assertFalse(skipped.hasNext());
+    }
+
+    @Test
+    public void testSkipZero() {
+        LongIterator iter = LongIterator.of(1L, 2L, 3L).skip(0);
+        assertEquals(1L, iter.nextLong());
+        assertEquals(2L, iter.nextLong());
+        assertEquals(3L, iter.nextLong());
+    }
+
+    @Test
+    public void testSkip_Zero() {
+        LongIterator iter = LongIterator.of(1L, 2L, 3L);
+        LongIterator skipped = iter.skip(0);
+
+        assertSame(iter, skipped);
+    }
+
+    @Test
+    public void testSkipNegative() {
+        assertThrows(IllegalArgumentException.class, () -> LongIterator.of(1L, 2L).skip(-1));
+    }
+
+    @Test
+    public void testSkip_Negative() {
+        LongIterator iter = LongIterator.of(1L, 2L, 3L);
+
+        assertThrows(IllegalArgumentException.class, () -> iter.skip(-1));
+    }
+
+    @Test
     public void testLimit() {
         LongIterator iter = LongIterator.of(1L, 2L, 3L, 4L, 5L).limit(3);
         assertEquals(1L, iter.nextLong());
         assertEquals(2L, iter.nextLong());
         assertEquals(3L, iter.nextLong());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testLimitZero() {
-        LongIterator iter = LongIterator.of(1L, 2L, 3L).limit(0);
         assertFalse(iter.hasNext());
     }
 
@@ -274,8 +455,40 @@ public class LongIteratorTest extends TestBase {
     }
 
     @Test
+    public void testLimit_MoreThanAvailable() {
+        LongIterator iter = LongIterator.of(1L, 2L, 3L);
+        LongIterator limited = iter.limit(5);
+
+        assertEquals(1L, limited.nextLong());
+        assertEquals(2L, limited.nextLong());
+        assertEquals(3L, limited.nextLong());
+        assertFalse(limited.hasNext());
+    }
+
+    @Test
+    public void testLimitZero() {
+        LongIterator iter = LongIterator.of(1L, 2L, 3L).limit(0);
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testLimit_Zero() {
+        LongIterator iter = LongIterator.of(1L, 2L, 3L);
+        LongIterator limited = iter.limit(0);
+
+        assertFalse(limited.hasNext());
+    }
+
+    @Test
     public void testLimitNegative() {
         assertThrows(IllegalArgumentException.class, () -> LongIterator.of(1L, 2L).limit(-1));
+    }
+
+    @Test
+    public void testLimit_Negative() {
+        LongIterator iter = LongIterator.of(1L, 2L, 3L);
+
+        assertThrows(IllegalArgumentException.class, () -> iter.limit(-1));
     }
 
     @Test
@@ -284,12 +497,6 @@ public class LongIteratorTest extends TestBase {
         assertEquals(2L, iter.nextLong());
         assertEquals(4L, iter.nextLong());
         assertEquals(6L, iter.nextLong());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testFilterNoneMatch() {
-        LongIterator iter = LongIterator.of(1L, 3L, 5L).filter(x -> x % 2 == 0);
         assertFalse(iter.hasNext());
     }
 
@@ -303,20 +510,58 @@ public class LongIteratorTest extends TestBase {
     }
 
     @Test
+    public void testFilter_AllMatch() {
+        LongIterator iter = LongIterator.of(2L, 4L, 6L);
+        LongPredicate evenPredicate = x -> x % 2 == 0;
+        LongIterator filtered = iter.filter(evenPredicate);
+
+        assertEquals(2L, filtered.nextLong());
+        assertEquals(4L, filtered.nextLong());
+        assertEquals(6L, filtered.nextLong());
+        assertFalse(filtered.hasNext());
+    }
+
+    @Test
+    public void testFilterNoneMatch() {
+        LongIterator iter = LongIterator.of(1L, 3L, 5L).filter(x -> x % 2 == 0);
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testFilterWithMultipleConditions() {
+        LongIterator iter = LongIterator.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L).filter(x -> x > 3).filter(x -> x < 8).filter(x -> x % 2 == 0);
+
+        assertEquals(4L, iter.nextLong());
+        assertEquals(6L, iter.nextLong());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
     public void testFilterNull() {
         assertThrows(IllegalArgumentException.class, () -> LongIterator.of(1L, 2L).filter(null));
+    }
+
+    @Test
+    public void testFilter_NoneMatch() {
+        LongIterator iter = LongIterator.of(1L, 3L, 5L);
+        LongPredicate evenPredicate = x -> x % 2 == 0;
+        LongIterator filtered = iter.filter(evenPredicate);
+
+        assertFalse(filtered.hasNext());
+        assertThrows(NoSuchElementException.class, () -> filtered.nextLong());
+    }
+
+    @Test
+    public void testFilter_NullPredicate() {
+        LongIterator iter = LongIterator.of(1L, 2L, 3L);
+
+        assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
     }
 
     @Test
     public void testToArray() {
         long[] array = LongIterator.of(1L, 2L, 3L, 4L).toArray();
         assertArrayEquals(new long[] { 1L, 2L, 3L, 4L }, array);
-    }
-
-    @Test
-    public void testToArrayEmpty() {
-        long[] array = LongIterator.empty().toArray();
-        assertEquals(0, array.length);
     }
 
     @Test
@@ -336,6 +581,27 @@ public class LongIteratorTest extends TestBase {
     }
 
     @Test
+    public void testToArrayFromRange() {
+        long[] array = { 10L, 20L, 30L, 40L, 50L };
+        long[] result = LongIterator.of(array, 1, 4).toArray();
+        assertArrayEquals(new long[] { 20L, 30L, 40L }, result);
+    }
+
+    @Test
+    public void testToArrayEmpty() {
+        long[] array = LongIterator.empty().toArray();
+        assertEquals(0, array.length);
+    }
+
+    @Test
+    public void testToArray_Empty() {
+        LongIterator iter = LongIterator.empty();
+        long[] array = iter.toArray();
+
+        assertEquals(0, array.length);
+    }
+
+    @Test
     public void testToList() {
         LongList list = LongIterator.of(1L, 2L, 3L).toList();
         assertEquals(3, list.size());
@@ -345,16 +611,24 @@ public class LongIteratorTest extends TestBase {
     }
 
     @Test
+    public void testToListConsumesIterator() {
+        LongIterator iter = LongIterator.of(1L, 2L, 3L);
+        iter.toList();
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
     public void testToListEmpty() {
         LongList list = LongIterator.empty().toList();
         assertEquals(0, list.size());
     }
 
     @Test
-    public void testToListConsumesIterator() {
-        LongIterator iter = LongIterator.of(1L, 2L, 3L);
-        iter.toList();
-        assertFalse(iter.hasNext());
+    public void testToList_Empty() {
+        LongIterator iter = LongIterator.empty();
+        LongList list = iter.toList();
+
+        assertTrue(list.isEmpty());
     }
 
     @Test
@@ -398,12 +672,6 @@ public class LongIteratorTest extends TestBase {
     }
 
     @Test
-    public void testIndexedEmpty() {
-        ObjIterator<IndexedLong> iter = LongIterator.empty().indexed();
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
     public void testIndexedWithStart() {
         ObjIterator<IndexedLong> iter = LongIterator.of(100L, 200L).indexed(5);
 
@@ -417,8 +685,27 @@ public class LongIteratorTest extends TestBase {
     }
 
     @Test
-    public void testIndexedWithStartNegative() {
-        assertThrows(IllegalArgumentException.class, () -> LongIterator.of(1L).indexed(-1));
+    public void testIndexed_WithStartIndex() {
+        LongIterator iter = LongIterator.of(10L, 20L, 30L);
+        ObjIterator<IndexedLong> indexed = iter.indexed(100);
+
+        IndexedLong first = indexed.next();
+        assertEquals(100, first.index());
+        assertEquals(10L, first.value());
+
+        IndexedLong second = indexed.next();
+        assertEquals(101, second.index());
+        assertEquals(20L, second.value());
+
+        IndexedLong third = indexed.next();
+        assertEquals(102, third.index());
+        assertEquals(30L, third.value());
+    }
+
+    @Test
+    public void testIndexedEmpty() {
+        ObjIterator<IndexedLong> iter = LongIterator.empty().indexed();
+        assertFalse(iter.hasNext());
     }
 
     @Test
@@ -426,6 +713,18 @@ public class LongIteratorTest extends TestBase {
         ObjIterator<IndexedLong> iter = LongIterator.of(10L).indexed(0);
         IndexedLong indexed = iter.next();
         assertEquals(0L, indexed.index());
+    }
+
+    @Test
+    public void testIndexedWithStartNegative() {
+        assertThrows(IllegalArgumentException.class, () -> LongIterator.of(1L).indexed(-1));
+    }
+
+    @Test
+    public void testIndexed_NegativeStartIndex() {
+        LongIterator iter = LongIterator.of(1L, 2L, 3L);
+
+        assertThrows(IllegalArgumentException.class, () -> iter.indexed(-1));
     }
 
     @Test
@@ -445,19 +744,6 @@ public class LongIteratorTest extends TestBase {
     }
 
     @Test
-    public void testForeachRemainingEmpty() {
-        LongIterator iter = LongIterator.empty();
-        AtomicInteger count = new AtomicInteger(0);
-        iter.foreachRemaining(value -> count.incrementAndGet());
-        assertEquals(0, count.get());
-    }
-
-    @Test
-    public void testForeachRemainingNull() {
-        assertThrows(IllegalArgumentException.class, () -> LongIterator.of(1L).foreachRemaining(null));
-    }
-
-    @Test
     public void testForeachRemainingPartiallyConsumed() {
         LongIterator iter = LongIterator.of(1L, 2L, 3L, 4L, 5L);
         iter.nextLong();
@@ -466,6 +752,39 @@ public class LongIteratorTest extends TestBase {
         AtomicLong sum = new AtomicLong(0);
         iter.foreachRemaining(sum::addAndGet);
         assertEquals(12L, sum.get());
+    }
+
+    @Test
+    public void testForEachRemaining_Deprecated() {
+        LongIterator iter = LongIterator.of(1L, 2L, 3L);
+        AtomicLong sum = new AtomicLong(0);
+
+        iter.forEachRemaining((Long l) -> sum.addAndGet(l));
+
+        assertEquals(6L, sum.get());
+    }
+
+    @Test
+    public void testForeachRemainingEmpty() {
+        LongIterator iter = LongIterator.empty();
+        AtomicInteger count = new AtomicInteger(0);
+        iter.foreachRemaining(value -> count.incrementAndGet());
+        assertEquals(0, count.get());
+    }
+
+    @Test
+    public void testForeachRemaining_Empty() {
+        LongIterator iter = LongIterator.empty();
+        AtomicInteger count = new AtomicInteger(0);
+
+        iter.foreachRemaining(l -> count.incrementAndGet());
+
+        assertEquals(0, count.get());
+    }
+
+    @Test
+    public void testForeachRemainingNull() {
+        assertThrows(IllegalArgumentException.class, () -> LongIterator.of(1L).foreachRemaining(null));
     }
 
     @Test
@@ -491,19 +810,6 @@ public class LongIteratorTest extends TestBase {
     }
 
     @Test
-    public void testForeachIndexedEmpty() {
-        LongIterator iter = LongIterator.empty();
-        AtomicInteger count = new AtomicInteger(0);
-        iter.foreachIndexed((index, value) -> count.incrementAndGet());
-        assertEquals(0, count.get());
-    }
-
-    @Test
-    public void testForeachIndexedNull() {
-        assertThrows(IllegalArgumentException.class, () -> LongIterator.of(1L).foreachIndexed(null));
-    }
-
-    @Test
     public void testForeachIndexedPartiallyConsumed() {
         LongIterator iter = LongIterator.of(100L, 200L, 300L, 400L);
         iter.nextLong();
@@ -518,324 +824,16 @@ public class LongIteratorTest extends TestBase {
     }
 
     @Test
-    public void testChainedOperations() {
-        long result = LongIterator.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L).filter(x -> x % 2 == 0).skip(1).limit(2).toArray()[0];
-        assertEquals(4L, result);
-    }
-
-    @Test
-    public void testComplexChain() {
-        LongList list = LongIterator.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L).skip(2).filter(x -> x > 4).limit(3).toList();
-
-        assertEquals(3, list.size());
-        assertEquals(5L, list.get(0));
-        assertEquals(6L, list.get(1));
-        assertEquals(7L, list.get(2));
-    }
-
-    @Test
-    public void testToArrayFromRange() {
-        long[] array = { 10L, 20L, 30L, 40L, 50L };
-        long[] result = LongIterator.of(array, 1, 4).toArray();
-        assertArrayEquals(new long[] { 20L, 30L, 40L }, result);
-    }
-
-    @Test
-    public void testMultipleHasNextCalls() {
-        LongIterator iter = LongIterator.of(1L, 2L);
-        assertTrue(iter.hasNext());
-        assertTrue(iter.hasNext());
-        assertTrue(iter.hasNext());
-        assertEquals(1L, iter.nextLong());
-        assertTrue(iter.hasNext());
-        assertEquals(2L, iter.nextLong());
-        assertFalse(iter.hasNext());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testFilterWithMultipleConditions() {
-        LongIterator iter = LongIterator.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L).filter(x -> x > 3).filter(x -> x < 8).filter(x -> x % 2 == 0);
-
-        assertEquals(4L, iter.nextLong());
-        assertEquals(6L, iter.nextLong());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testSkipAndLimit() {
-        LongIterator iter = LongIterator.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L).skip(3).limit(4);
-
-        long[] array = iter.toArray();
-        assertArrayEquals(new long[] { 4L, 5L, 6L, 7L }, array);
-    }
-
-    @Test
-    public void testOf_EmptyArray() {
-        LongIterator iter = LongIterator.of();
-
-        assertFalse(iter.hasNext());
-        assertThrows(NoSuchElementException.class, () -> iter.nextLong());
-    }
-
-    @Test
-    public void testOf_NullArray() {
-        LongIterator iter = LongIterator.of((long[]) null);
-
-        assertFalse(iter.hasNext());
-        assertThrows(NoSuchElementException.class, () -> iter.nextLong());
-    }
-
-    @Test
-    public void testOf_SingleElement() {
-        long[] array = { 42L };
-        LongIterator iter = LongIterator.of(array);
-
-        assertTrue(iter.hasNext());
-        assertEquals(42L, iter.nextLong());
-        assertFalse(iter.hasNext());
-        assertThrows(NoSuchElementException.class, () -> iter.nextLong());
-    }
-
-    @Test
-    public void testOf_MultipleElements() {
-        long[] array = { 1L, 2L, 3L };
-        LongIterator iter = LongIterator.of(array);
-
-        assertTrue(iter.hasNext());
-        assertEquals(1L, iter.nextLong());
-        assertTrue(iter.hasNext());
-        assertEquals(2L, iter.nextLong());
-        assertTrue(iter.hasNext());
-        assertEquals(3L, iter.nextLong());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOf_SpecialValues() {
-        long[] array = { Long.MIN_VALUE, -1L, 0L, 1L, Long.MAX_VALUE };
-        LongIterator iter = LongIterator.of(array);
-
-        assertEquals(Long.MIN_VALUE, iter.nextLong());
-        assertEquals(-1L, iter.nextLong());
-        assertEquals(0L, iter.nextLong());
-        assertEquals(1L, iter.nextLong());
-        assertEquals(Long.MAX_VALUE, iter.nextLong());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOf_WithRange() {
-        long[] array = { 1L, 2L, 3L, 4L, 5L };
-        LongIterator iter = LongIterator.of(array, 1, 4);
-
-        assertTrue(iter.hasNext());
-        assertEquals(2L, iter.nextLong());
-        assertEquals(3L, iter.nextLong());
-        assertEquals(4L, iter.nextLong());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOf_WithRange_FullArray() {
-        long[] array = { 1L, 2L, 3L };
-        LongIterator iter = LongIterator.of(array, 0, array.length);
-
-        assertEquals(1L, iter.nextLong());
-        assertEquals(2L, iter.nextLong());
-        assertEquals(3L, iter.nextLong());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testGenerate_Infinite() {
-        AtomicLong counter = new AtomicLong(0);
-        LongSupplier supplier = () -> counter.getAndIncrement();
-
-        LongIterator iter = LongIterator.generate(supplier);
-
-        assertTrue(iter.hasNext());
-        assertEquals(0L, iter.nextLong());
-        assertTrue(iter.hasNext());
-        assertEquals(1L, iter.nextLong());
-        assertTrue(iter.hasNext());
-        assertEquals(2L, iter.nextLong());
-        assertTrue(iter.hasNext());
-    }
-
-    @Test
-    public void testGenerate_WithHasNext() {
-        AtomicLong counter = new AtomicLong(0);
-        BooleanSupplier hasNext = () -> counter.get() < 3;
-        LongSupplier supplier = () -> counter.getAndIncrement();
-
-        LongIterator iter = LongIterator.generate(hasNext, supplier);
-
-        assertTrue(iter.hasNext());
-        assertEquals(0L, iter.nextLong());
-        assertTrue(iter.hasNext());
-        assertEquals(1L, iter.nextLong());
-        assertTrue(iter.hasNext());
-        assertEquals(2L, iter.nextLong());
-        assertFalse(iter.hasNext());
-        assertThrows(NoSuchElementException.class, () -> iter.nextLong());
-    }
-
-    @Test
-    public void testGenerate_NullArguments() {
-        LongSupplier supplier = () -> 0L;
-        BooleanSupplier hasNext = () -> true;
-
-        assertThrows(IllegalArgumentException.class, () -> LongIterator.generate((LongSupplier) null));
-        assertThrows(IllegalArgumentException.class, () -> LongIterator.generate(null, supplier));
-        assertThrows(IllegalArgumentException.class, () -> LongIterator.generate(hasNext, null));
-    }
-
-    @Test
-    public void testNext_Deprecated() {
-        LongIterator iter = LongIterator.of(42L);
-
-        Long value = iter.next();
-        assertEquals(Long.valueOf(42L), value);
-    }
-
-    @Test
-    public void testSkip_Zero() {
-        LongIterator iter = LongIterator.of(1L, 2L, 3L);
-        LongIterator skipped = iter.skip(0);
-
-        assertSame(iter, skipped);
-    }
-
-    @Test
-    public void testSkip_MoreThanAvailable() {
-        LongIterator iter = LongIterator.of(1L, 2L, 3L);
-        LongIterator skipped = iter.skip(5);
-
-        assertFalse(skipped.hasNext());
-    }
-
-    @Test
-    public void testSkip_Negative() {
-        LongIterator iter = LongIterator.of(1L, 2L, 3L);
-
-        assertThrows(IllegalArgumentException.class, () -> iter.skip(-1));
-    }
-
-    @Test
-    public void testLimit_Zero() {
-        LongIterator iter = LongIterator.of(1L, 2L, 3L);
-        LongIterator limited = iter.limit(0);
-
-        assertFalse(limited.hasNext());
-    }
-
-    @Test
-    public void testLimit_MoreThanAvailable() {
-        LongIterator iter = LongIterator.of(1L, 2L, 3L);
-        LongIterator limited = iter.limit(5);
-
-        assertEquals(1L, limited.nextLong());
-        assertEquals(2L, limited.nextLong());
-        assertEquals(3L, limited.nextLong());
-        assertFalse(limited.hasNext());
-    }
-
-    @Test
-    public void testLimit_Negative() {
-        LongIterator iter = LongIterator.of(1L, 2L, 3L);
-
-        assertThrows(IllegalArgumentException.class, () -> iter.limit(-1));
-    }
-
-    @Test
-    public void testFilter_NoneMatch() {
-        LongIterator iter = LongIterator.of(1L, 3L, 5L);
-        LongPredicate evenPredicate = x -> x % 2 == 0;
-        LongIterator filtered = iter.filter(evenPredicate);
-
-        assertFalse(filtered.hasNext());
-        assertThrows(NoSuchElementException.class, () -> filtered.nextLong());
-    }
-
-    @Test
-    public void testFilter_AllMatch() {
-        LongIterator iter = LongIterator.of(2L, 4L, 6L);
-        LongPredicate evenPredicate = x -> x % 2 == 0;
-        LongIterator filtered = iter.filter(evenPredicate);
-
-        assertEquals(2L, filtered.nextLong());
-        assertEquals(4L, filtered.nextLong());
-        assertEquals(6L, filtered.nextLong());
-        assertFalse(filtered.hasNext());
-    }
-
-    @Test
-    public void testFilter_NullPredicate() {
-        LongIterator iter = LongIterator.of(1L, 2L, 3L);
-
-        assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
-    }
-
-    @Test
-    public void testToArray_Empty() {
-        LongIterator iter = LongIterator.empty();
-        long[] array = iter.toArray();
-
-        assertEquals(0, array.length);
-    }
-
-    @Test
-    public void testToList_Empty() {
-        LongIterator iter = LongIterator.empty();
-        LongList list = iter.toList();
-
-        assertTrue(list.isEmpty());
-    }
-
-    @Test
-    public void testIndexed_WithStartIndex() {
-        LongIterator iter = LongIterator.of(10L, 20L, 30L);
-        ObjIterator<IndexedLong> indexed = iter.indexed(100);
-
-        IndexedLong first = indexed.next();
-        assertEquals(100, first.index());
-        assertEquals(10L, first.value());
-
-        IndexedLong second = indexed.next();
-        assertEquals(101, second.index());
-        assertEquals(20L, second.value());
-
-        IndexedLong third = indexed.next();
-        assertEquals(102, third.index());
-        assertEquals(30L, third.value());
-    }
-
-    @Test
-    public void testIndexed_NegativeStartIndex() {
-        LongIterator iter = LongIterator.of(1L, 2L, 3L);
-
-        assertThrows(IllegalArgumentException.class, () -> iter.indexed(-1));
-    }
-
-    @Test
-    public void testForEachRemaining_Deprecated() {
-        LongIterator iter = LongIterator.of(1L, 2L, 3L);
-        AtomicLong sum = new AtomicLong(0);
-
-        iter.forEachRemaining((Long l) -> sum.addAndGet(l));
-
-        assertEquals(6L, sum.get());
-    }
-
-    @Test
-    public void testForeachRemaining_Empty() {
+    public void testForeachIndexedEmpty() {
         LongIterator iter = LongIterator.empty();
         AtomicInteger count = new AtomicInteger(0);
-
-        iter.foreachRemaining(l -> count.incrementAndGet());
-
+        iter.foreachIndexed((index, value) -> count.incrementAndGet());
         assertEquals(0, count.get());
+    }
+
+    @Test
+    public void testForeachIndexedNull() {
+        assertThrows(IllegalArgumentException.class, () -> LongIterator.of(1L).foreachIndexed(null));
     }
 
     @Test

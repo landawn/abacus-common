@@ -6,12 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class LongConsumerTest extends TestBase {
     private void addToList(final long value) {
         // Intentionally empty for testing
@@ -28,18 +26,6 @@ public class LongConsumerTest extends TestBase {
     }
 
     @Test
-    public void testAccept_multipleInvocations() {
-        final AtomicLong counter = new AtomicLong(0);
-        final LongConsumer consumer = val -> counter.addAndGet(val);
-
-        consumer.accept(10L);
-        consumer.accept(20L);
-        consumer.accept(30L);
-
-        assertEquals(60L, counter.get());
-    }
-
-    @Test
     public void testCompatibilityWithJavaUtilFunction() {
         final List<Long> results = new ArrayList<>();
         final java.util.function.LongConsumer javaConsumer = results::add;
@@ -49,5 +35,17 @@ public class LongConsumerTest extends TestBase {
 
         assertEquals(1, results.size());
         assertEquals(42L, results.get(0));
+    }
+
+    @Test
+    public void testAccept_multipleInvocations() {
+        final AtomicLong counter = new AtomicLong(0);
+        final LongConsumer consumer = val -> counter.addAndGet(val);
+
+        consumer.accept(10L);
+        consumer.accept(20L);
+        consumer.accept(30L);
+
+        assertEquals(60L, counter.get());
     }
 }

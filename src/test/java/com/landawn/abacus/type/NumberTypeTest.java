@@ -12,14 +12,12 @@ import static org.mockito.Mockito.verify;
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("new-test")
 public class NumberTypeTest extends TestBase {
 
     private NumberType<Integer> intNumberType;
@@ -35,6 +33,32 @@ public class NumberTypeTest extends TestBase {
         longNumberType = (NumberType<Long>) createType(Long.class);
         writer = createCharacterWriter();
         config = mock(JsonXmlSerConfig.class);
+    }
+
+    @Test
+    public void testNumberTypeWithTypeName() {
+        NumberType<Number> numberType = (NumberType<Number>) createType("Number");
+        assertNotNull(numberType);
+        assertEquals(Number.class, numberType.javaType());
+    }
+
+    @Test
+    public void testNumberTypeConstructorWithClass() {
+        // Test creating NumberType via Class directly (uses reflection constructor)
+        NumberType<Integer> intType = (NumberType<Integer>) createType(Integer.class);
+        assertNotNull(intType);
+        assertEquals(Integer.class, intType.javaType());
+        assertEquals(Integer.valueOf(42), intType.valueOf("42"));
+        assertEquals("42", intType.stringOf(42));
+    }
+
+    @Test
+    public void testNumberTypeWithBigInteger() {
+        NumberType<java.math.BigInteger> bigIntType = (NumberType<java.math.BigInteger>) createType(java.math.BigInteger.class);
+        assertNotNull(bigIntType);
+        java.math.BigInteger result = bigIntType.valueOf("12345678901234567890");
+        assertEquals(new java.math.BigInteger("12345678901234567890"), result);
+        assertEquals("12345678901234567890", bigIntType.stringOf(new java.math.BigInteger("12345678901234567890")));
     }
 
     @Test
@@ -59,6 +83,28 @@ public class NumberTypeTest extends TestBase {
     }
 
     @Test
+    public void testValueOfWithValidString() {
+        assertEquals(Integer.valueOf(123), intNumberType.valueOf("123"));
+        assertEquals(Double.valueOf(123.45), doubleNumberType.valueOf("123.45"));
+        assertEquals(Long.valueOf(9876543210L), longNumberType.valueOf("9876543210"));
+    }
+
+    @Test
+    public void testSpecialNumberTypes() {
+        NumberType<Float> floatType = (NumberType<Float>) createType(Float.class);
+        assertEquals(Float.valueOf(3.14f), floatType.valueOf("3.14"));
+        assertEquals("3.14", floatType.stringOf(3.14f));
+
+        NumberType<Short> shortType = (NumberType<Short>) createType(Short.class);
+        assertEquals(Short.valueOf((short) 100), shortType.valueOf("100"));
+        assertEquals("100", shortType.stringOf((short) 100));
+
+        NumberType<Byte> byteType = (NumberType<Byte>) createType(Byte.class);
+        assertEquals(Byte.valueOf((byte) 50), byteType.valueOf("50"));
+        assertEquals("50", byteType.stringOf((byte) 50));
+    }
+
+    @Test
     public void testValueOfWithNull() {
         assertNull(intNumberType.valueOf(null));
         assertNull(doubleNumberType.valueOf(null));
@@ -73,13 +119,6 @@ public class NumberTypeTest extends TestBase {
     }
 
     @Test
-    public void testValueOfWithValidString() {
-        assertEquals(Integer.valueOf(123), intNumberType.valueOf("123"));
-        assertEquals(Double.valueOf(123.45), doubleNumberType.valueOf("123.45"));
-        assertEquals(Long.valueOf(9876543210L), longNumberType.valueOf("9876543210"));
-    }
-
-    @Test
     public void testValueOfWithInvalidString() {
         assertThrows(NumberFormatException.class, () -> intNumberType.valueOf("abc"));
         assertThrows(NumberFormatException.class, () -> doubleNumberType.valueOf("xyz"));
@@ -87,17 +126,17 @@ public class NumberTypeTest extends TestBase {
     }
 
     @Test
-    public void testStringOfWithNull() {
-        assertNull(intNumberType.stringOf(null));
-        assertNull(doubleNumberType.stringOf(null));
-        assertNull(longNumberType.stringOf(null));
-    }
-
-    @Test
     public void testStringOfWithValue() {
         assertEquals("123", intNumberType.stringOf(123));
         assertEquals("123.45", doubleNumberType.stringOf(123.45));
         assertEquals("9876543210", longNumberType.stringOf(9876543210L));
+    }
+
+    @Test
+    public void testStringOfWithNull() {
+        assertNull(intNumberType.stringOf(null));
+        assertNull(doubleNumberType.stringOf(null));
+        assertNull(longNumberType.stringOf(null));
     }
 
     @Test
@@ -131,27 +170,5 @@ public class NumberTypeTest extends TestBase {
 
         doubleNumberType.writeCharacter(writer, 123.45, config);
         verify(writer).write(123.45);
-    }
-
-    @Test
-    public void testNumberTypeWithTypeName() {
-        NumberType<Number> numberType = (NumberType<Number>) createType("Number");
-        assertNotNull(numberType);
-        assertEquals(Number.class, numberType.javaType());
-    }
-
-    @Test
-    public void testSpecialNumberTypes() {
-        NumberType<Float> floatType = (NumberType<Float>) createType(Float.class);
-        assertEquals(Float.valueOf(3.14f), floatType.valueOf("3.14"));
-        assertEquals("3.14", floatType.stringOf(3.14f));
-
-        NumberType<Short> shortType = (NumberType<Short>) createType(Short.class);
-        assertEquals(Short.valueOf((short) 100), shortType.valueOf("100"));
-        assertEquals("100", shortType.stringOf((short) 100));
-
-        NumberType<Byte> byteType = (NumberType<Byte>) createType(Byte.class);
-        assertEquals(Byte.valueOf((byte) 50), byteType.valueOf("50"));
-        assertEquals("50", byteType.stringOf((byte) 50));
     }
 }

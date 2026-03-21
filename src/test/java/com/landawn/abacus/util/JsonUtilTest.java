@@ -20,13 +20,11 @@ import java.util.TreeMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type;
 
-@Tag("2025")
 public class JsonUtilTest extends TestBase {
 
     public static class SimpleBean {
@@ -133,6 +131,29 @@ public class JsonUtilTest extends TestBase {
 
         public void setTags(List<String> tags) {
             this.tags = tags;
+        }
+    }
+
+    @Test
+    public void testWrapAndUnwrapRoundTrip() {
+        SimpleBean original = new SimpleBean("Liam", 27, true);
+        JSONObject json = JsonUtil.wrap(original);
+        SimpleBean restored = JsonUtil.unwrap(json, SimpleBean.class);
+
+        assertEquals(original.getName(), restored.getName());
+        assertEquals(original.getAge(), restored.getAge());
+        assertEquals(original.isActive(), restored.isActive());
+    }
+
+    @Test
+    public void testWrapCollectionAndUnwrapRoundTrip() {
+        List<Integer> original = Arrays.asList(5, 10, 15, 20);
+        JSONArray json = JsonUtil.wrap(original);
+        List<Integer> restored = JsonUtil.toList(json, Integer.class);
+
+        assertEquals(original.size(), restored.size());
+        for (int i = 0; i < original.size(); i++) {
+            assertEquals(original.get(i), restored.get(i));
         }
     }
 
@@ -692,35 +713,6 @@ public class JsonUtilTest extends TestBase {
     }
 
     @Test
-    public void testUnwrapJSONObjectWithInvalidType() {
-        JSONObject json = new JSONObject();
-        json.put("key", "value");
-
-        Type<String> type = CommonUtil.typeOf(String.class);
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            JsonUtil.unwrap(json, type);
-        });
-    }
-
-    @Test
-    public void testExceptionHandling() {
-        JSONObject json = new JSONObject();
-        json.put("key", "value");
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            JsonUtil.unwrap(json, String.class);
-        });
-
-        JSONArray array = new JSONArray();
-        array.put(1);
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            JsonUtil.unwrap(array, String.class);
-        });
-    }
-
-    @Test
     public void testUnwrapJSONArrayToList() {
         JSONArray json = new JSONArray();
         json.put("text");
@@ -962,18 +954,6 @@ public class JsonUtilTest extends TestBase {
     }
 
     @Test
-    public void testUnwrapJSONArrayWithInvalidType() {
-        JSONArray json = new JSONArray();
-        json.put("value");
-
-        Type<String> type = CommonUtil.typeOf(String.class);
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            JsonUtil.unwrap(json, type);
-        });
-    }
-
-    @Test
     public void testUnwrapJSONArrayWithNestedObjects() {
         JSONObject obj1 = new JSONObject();
         obj1.put("name", "John");
@@ -1040,6 +1020,148 @@ public class JsonUtilTest extends TestBase {
         Assertions.assertEquals(3, result.get(0).size());
         Assertions.assertEquals(1, result.get(0).get(0));
         Assertions.assertEquals(6, result.get(1).get(2));
+    }
+
+    @Test
+    public void testUnwrapJSONArrayToPrimitiveArraysWithNull() {
+        JSONArray json = new JSONArray();
+        json.put(1);
+        json.put(JSONObject.NULL);
+        json.put(3);
+
+        int[] array = JsonUtil.unwrap(json, int[].class);
+
+        assertNotNull(array);
+        assertEquals(3, array.length);
+        assertEquals(1, array[0]);
+        assertEquals(0, array[1]);
+        assertEquals(3, array[2]);
+    }
+
+    @Test
+    public void testUnwrapWithDifferentCollectionTypes() {
+        JSONArray json = new JSONArray();
+        json.put("a");
+        json.put("b");
+
+        Type<ArrayList<String>> arrayListType = CommonUtil.typeOf("ArrayList<String>");
+        ArrayList<String> arrayList = JsonUtil.unwrap(json, arrayListType);
+
+        assertNotNull(arrayList);
+        assertTrue(arrayList instanceof ArrayList);
+        assertEquals(2, arrayList.size());
+    }
+
+    @Test
+    public void testUnwrapJSONArrayToDoubleArray() {
+        JSONArray json = new JSONArray();
+        json.put(1.1);
+        json.put(2.2);
+        json.put(3.3);
+
+        double[] array = JsonUtil.unwrap(json, double[].class);
+
+        assertNotNull(array);
+        assertEquals(3, array.length);
+        assertEquals(1.1, array[0], 0.001);
+        assertEquals(2.2, array[1], 0.001);
+        assertEquals(3.3, array[2], 0.001);
+    }
+
+    @Test
+    public void testUnwrapJSONArrayToLongArray() {
+        JSONArray json = new JSONArray();
+        json.put(1000000L);
+        json.put(2000000L);
+
+        long[] array = JsonUtil.unwrap(json, long[].class);
+
+        assertNotNull(array);
+        assertEquals(2, array.length);
+        assertEquals(1000000L, array[0]);
+        assertEquals(2000000L, array[1]);
+    }
+
+    @Test
+    public void testUnwrapJSONArrayToFloatArray() {
+        JSONArray json = new JSONArray();
+        json.put(1.5f);
+        json.put(2.5f);
+
+        float[] array = JsonUtil.unwrap(json, float[].class);
+
+        assertNotNull(array);
+        assertEquals(2, array.length);
+        assertEquals(1.5f, array[0], 0.001f);
+        assertEquals(2.5f, array[1], 0.001f);
+    }
+
+    @Test
+    public void testUnwrapJSONObjectWithInvalidType() {
+        JSONObject json = new JSONObject();
+        json.put("key", "value");
+
+        Type<String> type = CommonUtil.typeOf(String.class);
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            JsonUtil.unwrap(json, type);
+        });
+    }
+
+    @Test
+    public void testExceptionHandling() {
+        JSONObject json = new JSONObject();
+        json.put("key", "value");
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            JsonUtil.unwrap(json, String.class);
+        });
+
+        JSONArray array = new JSONArray();
+        array.put(1);
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            JsonUtil.unwrap(array, String.class);
+        });
+    }
+
+    @Test
+    public void testUnwrapJSONArrayWithInvalidType() {
+        JSONArray json = new JSONArray();
+        json.put("value");
+
+        Type<String> type = CommonUtil.typeOf(String.class);
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            JsonUtil.unwrap(json, type);
+        });
+    }
+
+    @Test
+    public void testUnwrapJSONArrayToByteArray() {
+        JSONArray json = new JSONArray();
+        json.put((byte) 10);
+        json.put((byte) 20);
+
+        assertThrows(IllegalArgumentException.class, () -> JsonUtil.unwrap(json, byte[].class));
+    }
+
+    @Test
+    public void testUnwrapJSONArrayToShortArray() {
+        JSONArray json = new JSONArray();
+        json.put((short) 100);
+        json.put((short) 200);
+
+        assertThrows(IllegalArgumentException.class, () -> JsonUtil.unwrap(json, short[].class));
+    }
+
+    @Test
+    public void testUnwrapJSONArrayToCharArray() {
+        JSONArray json = new JSONArray();
+        json.put("A");
+        json.put("B");
+
+        assertThrows(IllegalArgumentException.class, () -> JsonUtil.unwrap(json, char[].class));
     }
 
     @Test
@@ -1196,130 +1318,6 @@ public class JsonUtilTest extends TestBase {
         assertEquals("first", list.get(0));
         assertNull(list.get(1));
         assertEquals("third", list.get(2));
-    }
-
-    @Test
-    public void testWrapAndUnwrapRoundTrip() {
-        SimpleBean original = new SimpleBean("Liam", 27, true);
-        JSONObject json = JsonUtil.wrap(original);
-        SimpleBean restored = JsonUtil.unwrap(json, SimpleBean.class);
-
-        assertEquals(original.getName(), restored.getName());
-        assertEquals(original.getAge(), restored.getAge());
-        assertEquals(original.isActive(), restored.isActive());
-    }
-
-    @Test
-    public void testWrapCollectionAndUnwrapRoundTrip() {
-        List<Integer> original = Arrays.asList(5, 10, 15, 20);
-        JSONArray json = JsonUtil.wrap(original);
-        List<Integer> restored = JsonUtil.toList(json, Integer.class);
-
-        assertEquals(original.size(), restored.size());
-        for (int i = 0; i < original.size(); i++) {
-            assertEquals(original.get(i), restored.get(i));
-        }
-    }
-
-    @Test
-    public void testUnwrapJSONArrayToPrimitiveArraysWithNull() {
-        JSONArray json = new JSONArray();
-        json.put(1);
-        json.put(JSONObject.NULL);
-        json.put(3);
-
-        int[] array = JsonUtil.unwrap(json, int[].class);
-
-        assertNotNull(array);
-        assertEquals(3, array.length);
-        assertEquals(1, array[0]);
-        assertEquals(0, array[1]);
-        assertEquals(3, array[2]);
-    }
-
-    @Test
-    public void testUnwrapWithDifferentCollectionTypes() {
-        JSONArray json = new JSONArray();
-        json.put("a");
-        json.put("b");
-
-        Type<ArrayList<String>> arrayListType = CommonUtil.typeOf("ArrayList<String>");
-        ArrayList<String> arrayList = JsonUtil.unwrap(json, arrayListType);
-
-        assertNotNull(arrayList);
-        assertTrue(arrayList instanceof ArrayList);
-        assertEquals(2, arrayList.size());
-    }
-
-    @Test
-    public void testUnwrapJSONArrayToDoubleArray() {
-        JSONArray json = new JSONArray();
-        json.put(1.1);
-        json.put(2.2);
-        json.put(3.3);
-
-        double[] array = JsonUtil.unwrap(json, double[].class);
-
-        assertNotNull(array);
-        assertEquals(3, array.length);
-        assertEquals(1.1, array[0], 0.001);
-        assertEquals(2.2, array[1], 0.001);
-        assertEquals(3.3, array[2], 0.001);
-    }
-
-    @Test
-    public void testUnwrapJSONArrayToLongArray() {
-        JSONArray json = new JSONArray();
-        json.put(1000000L);
-        json.put(2000000L);
-
-        long[] array = JsonUtil.unwrap(json, long[].class);
-
-        assertNotNull(array);
-        assertEquals(2, array.length);
-        assertEquals(1000000L, array[0]);
-        assertEquals(2000000L, array[1]);
-    }
-
-    @Test
-    public void testUnwrapJSONArrayToFloatArray() {
-        JSONArray json = new JSONArray();
-        json.put(1.5f);
-        json.put(2.5f);
-
-        float[] array = JsonUtil.unwrap(json, float[].class);
-
-        assertNotNull(array);
-        assertEquals(2, array.length);
-        assertEquals(1.5f, array[0], 0.001f);
-        assertEquals(2.5f, array[1], 0.001f);
-    }
-
-    @Test
-    public void testUnwrapJSONArrayToByteArray() {
-        JSONArray json = new JSONArray();
-        json.put((byte) 10);
-        json.put((byte) 20);
-
-        assertThrows(IllegalArgumentException.class, () -> JsonUtil.unwrap(json, byte[].class));
-    }
-
-    @Test
-    public void testUnwrapJSONArrayToShortArray() {
-        JSONArray json = new JSONArray();
-        json.put((short) 100);
-        json.put((short) 200);
-
-        assertThrows(IllegalArgumentException.class, () -> JsonUtil.unwrap(json, short[].class));
-    }
-
-    @Test
-    public void testUnwrapJSONArrayToCharArray() {
-        JSONArray json = new JSONArray();
-        json.put("A");
-        json.put("B");
-
-        assertThrows(IllegalArgumentException.class, () -> JsonUtil.unwrap(json, char[].class));
     }
 
 }

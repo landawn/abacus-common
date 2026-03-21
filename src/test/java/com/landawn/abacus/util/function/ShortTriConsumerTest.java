@@ -16,12 +16,10 @@ package com.landawn.abacus.util.function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ShortTriConsumerTest extends TestBase {
 
     @Test
@@ -66,6 +64,26 @@ public class ShortTriConsumerTest extends TestBase {
     }
 
     @Test
+    public void test_accept_withNegativeValues() {
+        final short[] result = { 0 };
+
+        ShortTriConsumer consumer = (a, b, c) -> result[0] = (short) (a + b + c);
+
+        consumer.accept((short) -10, (short) -20, (short) -30);
+        assertEquals(-60, result[0]);
+    }
+
+    @Test
+    public void test_accept_withZero() {
+        final short[] result = { 1 };
+
+        ShortTriConsumer consumer = (a, b, c) -> result[0] = (short) (a * b * c);
+
+        consumer.accept((short) 0, (short) 10, (short) 20);
+        assertEquals(0, result[0]);
+    }
+
+    @Test
     public void test_andThen() {
         final short[] results = new short[2];
 
@@ -93,25 +111,5 @@ public class ShortTriConsumerTest extends TestBase {
         assertEquals(15, results[0]);
         assertEquals(5, results[1]);
         assertEquals(60, results[2]);
-    }
-
-    @Test
-    public void test_accept_withNegativeValues() {
-        final short[] result = { 0 };
-
-        ShortTriConsumer consumer = (a, b, c) -> result[0] = (short) (a + b + c);
-
-        consumer.accept((short) -10, (short) -20, (short) -30);
-        assertEquals(-60, result[0]);
-    }
-
-    @Test
-    public void test_accept_withZero() {
-        final short[] result = { 1 };
-
-        ShortTriConsumer consumer = (a, b, c) -> result[0] = (short) (a * b * c);
-
-        consumer.accept((short) 0, (short) 10, (short) 20);
-        assertEquals(0, result[0]);
     }
 }

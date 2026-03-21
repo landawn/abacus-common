@@ -13,25 +13,22 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class StringBufferTypeTest extends TestBase {
 
     private final StringBufferType stringBufferType = new StringBufferType();
 
     @Test
-    public void test_clazz() {
-        assertNotNull(stringBufferType.javaType());
+    public void testClazz() {
+        assertEquals(StringBuffer.class, stringBufferType.javaType());
     }
 
     @Test
-    public void test_name() {
-        assertNotNull(stringBufferType.name());
-        assertFalse(stringBufferType.name().isEmpty());
+    public void test_clazz() {
+        assertNotNull(stringBufferType.javaType());
     }
 
     @Test
@@ -46,6 +43,17 @@ public class StringBufferTypeTest extends TestBase {
         Object result = stringBufferType.valueOf((String) null);
         // Result may be null or default value depending on type
         assertNull(result);
+    }
+
+    @Test
+    public void testIsImmutable() {
+        assertFalse(stringBufferType.isImmutable());
+    }
+
+    @Test
+    public void test_name() {
+        assertNotNull(stringBufferType.name());
+        assertFalse(stringBufferType.name().isEmpty());
     }
 
     @Test
@@ -74,16 +82,6 @@ public class StringBufferTypeTest extends TestBase {
         PreparedStatement stmt = mock(PreparedStatement.class);
         // Basic set test - actual implementation will vary by type
         assertDoesNotThrow(() -> stringBufferType.set(stmt, 1, null));
-    }
-
-    @Test
-    public void testClazz() {
-        assertEquals(StringBuffer.class, stringBufferType.javaType());
-    }
-
-    @Test
-    public void testIsImmutable() {
-        assertFalse(stringBufferType.isImmutable());
     }
 
 }

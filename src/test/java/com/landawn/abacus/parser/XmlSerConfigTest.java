@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -23,7 +22,6 @@ import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.SK;
 
-@Tag("2025")
 public class XmlSerConfigTest extends TestBase {
 
     private XmlSerConfig config;
@@ -31,6 +29,54 @@ public class XmlSerConfigTest extends TestBase {
     @BeforeEach
     public void setUp() {
         config = new XmlSerConfig();
+    }
+
+    // isPrettyFormat / setPrettyFormat
+    @Test
+    public void test_prettyFormat() {
+        XmlSerConfig config = new XmlSerConfig();
+        assertFalse(config.isPrettyFormat());
+
+        config.setPrettyFormat(true);
+        assertTrue(config.isPrettyFormat());
+    }
+
+    // getDateTimeFormat / setDateTimeFormat
+    @Test
+    public void test_setDateTimeFormat() {
+        XmlSerConfig config = new XmlSerConfig();
+        config.setDateTimeFormat(DateTimeFormat.ISO_8601_DATE_TIME);
+        assertEquals(DateTimeFormat.ISO_8601_DATE_TIME, config.getDateTimeFormat());
+    }
+
+    // isSkipTransientField / setSkipTransientField
+    @Test
+    public void test_skipTransientField() {
+        XmlSerConfig config = new XmlSerConfig();
+        config.setSkipTransientField(true);
+        assertTrue(config.isSkipTransientField());
+
+        config.setSkipTransientField(false);
+        assertFalse(config.isSkipTransientField());
+    }
+
+    // constructor
+    @Test
+    public void test_constructor() {
+        XmlSerConfig config = new XmlSerConfig();
+        assertNotNull(config);
+        assertEquals(SK.CHAR_ZERO, config.getCharQuotation());
+        assertEquals(SK.CHAR_ZERO, config.getStringQuotation());
+        assertTrue(config.isTagByPropertyName());
+        assertFalse(config.isWriteTypeInfo());
+    }
+
+    // getExclusion / setExclusion
+    @Test
+    public void test_setExclusion() {
+        XmlSerConfig config = new XmlSerConfig();
+        config.setExclusion(Exclusion.NULL);
+        assertEquals(Exclusion.NULL, config.getExclusion());
     }
 
     // setStringQuotation
@@ -65,6 +111,13 @@ public class XmlSerConfigTest extends TestBase {
         assertEquals('\'', config.getCharQuotation());
     }
 
+    @Test
+    public void testNoCharQuotation() {
+        config.setCharQuotation('"');
+        config.noCharQuotation();
+        assertEquals((char) 0, config.getCharQuotation());
+    }
+
     // noCharQuotation
     @Test
     public void test_noCharQuotation() {
@@ -75,10 +128,10 @@ public class XmlSerConfigTest extends TestBase {
     }
 
     @Test
-    public void testNoCharQuotation() {
-        config.setCharQuotation('"');
-        config.noCharQuotation();
-        assertEquals((char) 0, config.getCharQuotation());
+    public void testNoStringQuotation() {
+        config.setStringQuotation('"');
+        config.noStringQuotation();
+        assertEquals((char) 0, config.getStringQuotation());
     }
 
     // noStringQuotation
@@ -91,9 +144,11 @@ public class XmlSerConfigTest extends TestBase {
     }
 
     @Test
-    public void testNoStringQuotation() {
+    public void testNoQuotation() {
+        config.setCharQuotation('"');
         config.setStringQuotation('"');
-        config.noStringQuotation();
+        config.noQuotation();
+        assertEquals((char) 0, config.getCharQuotation());
         assertEquals((char) 0, config.getStringQuotation());
     }
 
@@ -108,12 +163,10 @@ public class XmlSerConfigTest extends TestBase {
     }
 
     @Test
-    public void testNoQuotation() {
-        config.setCharQuotation('"');
-        config.setStringQuotation('"');
-        config.noQuotation();
-        assertEquals((char) 0, config.getCharQuotation());
-        assertEquals((char) 0, config.getStringQuotation());
+    public void testIsTagByPropertyName() {
+        assertTrue(config.isTagByPropertyName());
+        config.setTagByPropertyName(false);
+        assertFalse(config.isTagByPropertyName());
     }
 
     // isTagByPropertyName
@@ -130,19 +183,34 @@ public class XmlSerConfigTest extends TestBase {
         assertTrue(config.isTagByPropertyName());
     }
 
-    @Test
-    public void testIsTagByPropertyName() {
-        assertTrue(config.isTagByPropertyName());
-        config.setTagByPropertyName(false);
-        assertFalse(config.isTagByPropertyName());
-    }
-
     // setTagByPropertyName
     @Test
     public void testSetTagByPropertyName() {
         XmlSerConfig result = config.setTagByPropertyName(false);
         assertSame(config, result);
         assertFalse(config.isTagByPropertyName());
+    }
+
+    // copy
+    @Test
+    public void testCopy() {
+        config.setTagByPropertyName(false);
+        config.setWriteTypeInfo(true);
+        config.setPrettyFormat(true);
+
+        XmlSerConfig copy = config.copy();
+        assertNotNull(copy);
+        assertNotSame(config, copy);
+        assertFalse(copy.isTagByPropertyName());
+        assertTrue(copy.isWriteTypeInfo());
+        assertTrue(copy.isPrettyFormat());
+    }
+
+    @Test
+    public void testIsWriteTypeInfo() {
+        assertFalse(config.isWriteTypeInfo());
+        config.setWriteTypeInfo(true);
+        assertTrue(config.isWriteTypeInfo());
     }
 
     // isWriteTypeInfo
@@ -157,13 +225,6 @@ public class XmlSerConfigTest extends TestBase {
 
         config.setWriteTypeInfo(false);
         assertFalse(config.isWriteTypeInfo());
-    }
-
-    @Test
-    public void testIsWriteTypeInfo() {
-        assertFalse(config.isWriteTypeInfo());
-        config.setWriteTypeInfo(true);
-        assertTrue(config.isWriteTypeInfo());
     }
 
     // setWriteTypeInfo
@@ -276,40 +337,54 @@ public class XmlSerConfigTest extends TestBase {
         assertFalse(newConfig.isWriteTypeInfo());
     }
 
-    // copy
+    // combined config tests
     @Test
-    public void testCopy() {
-        config.setTagByPropertyName(false);
-        config.setWriteTypeInfo(true);
-        config.setPrettyFormat(true);
-
-        XmlSerConfig copy = config.copy();
-        assertNotNull(copy);
-        assertNotSame(config, copy);
-        assertFalse(copy.isTagByPropertyName());
-        assertTrue(copy.isWriteTypeInfo());
-        assertTrue(copy.isPrettyFormat());
-    }
-
-    // constructor
-    @Test
-    public void test_constructor() {
-        XmlSerConfig config = new XmlSerConfig();
+    public void test_XSC_of_tagByPropertyName_writeTypeInfo() {
+        XmlSerConfig config = XmlSerConfig.create().setTagByPropertyName(true).setWriteTypeInfo(true);
         assertNotNull(config);
-        assertEquals(SK.CHAR_ZERO, config.getCharQuotation());
-        assertEquals(SK.CHAR_ZERO, config.getStringQuotation());
         assertTrue(config.isTagByPropertyName());
-        assertFalse(config.isWriteTypeInfo());
+        assertTrue(config.isWriteTypeInfo());
     }
 
-    // isPrettyFormat / setPrettyFormat
     @Test
-    public void test_prettyFormat() {
-        XmlSerConfig config = new XmlSerConfig();
-        assertFalse(config.isPrettyFormat());
+    public void test_XSC_of_dateTimeFormat() {
+        XmlSerConfig config = XmlSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_DATE_TIME);
+        assertNotNull(config);
+        assertEquals(DateTimeFormat.ISO_8601_DATE_TIME, config.getDateTimeFormat());
+    }
 
-        config.setPrettyFormat(true);
-        assertTrue(config.isPrettyFormat());
+    @Test
+    public void test_XSC_of_exclusion_ignoredPropNames() {
+        Map<Class<?>, Set<String>> ignoredPropNames = new HashMap<>();
+        Set<String> props = new HashSet<>();
+        props.add("prop1");
+        ignoredPropNames.put(String.class, props);
+
+        XmlSerConfig config = XmlSerConfig.create().setExclusion(Exclusion.NULL).setIgnoredPropNames(ignoredPropNames);
+        assertNotNull(config);
+        assertEquals(Exclusion.NULL, config.getExclusion());
+        assertNotNull(config.getIgnoredPropNames());
+    }
+
+    @Test
+    public void test_XSC_of_all_parameters() {
+        Map<Class<?>, Set<String>> ignoredPropNames = new HashMap<>();
+        Set<String> props = new HashSet<>();
+        props.add("prop1");
+        ignoredPropNames.put(String.class, props);
+
+        XmlSerConfig config = XmlSerConfig.create()
+                .setTagByPropertyName(true)
+                .setWriteTypeInfo(true)
+                .setDateTimeFormat(DateTimeFormat.ISO_8601_DATE_TIME)
+                .setExclusion(Exclusion.NULL)
+                .setIgnoredPropNames(ignoredPropNames);
+        assertNotNull(config);
+        assertTrue(config.isTagByPropertyName());
+        assertTrue(config.isWriteTypeInfo());
+        assertEquals(DateTimeFormat.ISO_8601_DATE_TIME, config.getDateTimeFormat());
+        assertEquals(Exclusion.NULL, config.getExclusion());
+        assertNotNull(config.getIgnoredPropNames());
     }
 
     @Test
@@ -320,14 +395,6 @@ public class XmlSerConfigTest extends TestBase {
 
         config.setPrettyFormat(false);
         assertFalse(config.isPrettyFormat());
-    }
-
-    // getDateTimeFormat / setDateTimeFormat
-    @Test
-    public void test_setDateTimeFormat() {
-        XmlSerConfig config = new XmlSerConfig();
-        config.setDateTimeFormat(DateTimeFormat.ISO_8601_DATE_TIME);
-        assertEquals(DateTimeFormat.ISO_8601_DATE_TIME, config.getDateTimeFormat());
     }
 
     @Test
@@ -342,14 +409,6 @@ public class XmlSerConfigTest extends TestBase {
         assertEquals(DateTimeFormat.ISO_8601_DATE_TIME, config.getDateTimeFormat());
     }
 
-    // getExclusion / setExclusion
-    @Test
-    public void test_setExclusion() {
-        XmlSerConfig config = new XmlSerConfig();
-        config.setExclusion(Exclusion.NULL);
-        assertEquals(Exclusion.NULL, config.getExclusion());
-    }
-
     @Test
     public void testGetExclusion() {
         assertNull(config.getExclusion());
@@ -360,17 +419,6 @@ public class XmlSerConfigTest extends TestBase {
         XmlSerConfig result = config.setExclusion(Exclusion.NULL);
         assertSame(config, result);
         assertEquals(Exclusion.NULL, config.getExclusion());
-    }
-
-    // isSkipTransientField / setSkipTransientField
-    @Test
-    public void test_skipTransientField() {
-        XmlSerConfig config = new XmlSerConfig();
-        config.setSkipTransientField(true);
-        assertTrue(config.isSkipTransientField());
-
-        config.setSkipTransientField(false);
-        assertFalse(config.isSkipTransientField());
     }
 
     @Test
@@ -486,56 +534,6 @@ public class XmlSerConfigTest extends TestBase {
     @Test
     public void testGetStringQuotation() {
         assertEquals(SK.CHAR_ZERO, config.getStringQuotation());
-    }
-
-    // combined config tests
-    @Test
-    public void test_XSC_of_tagByPropertyName_writeTypeInfo() {
-        XmlSerConfig config = XmlSerConfig.create().setTagByPropertyName(true).setWriteTypeInfo(true);
-        assertNotNull(config);
-        assertTrue(config.isTagByPropertyName());
-        assertTrue(config.isWriteTypeInfo());
-    }
-
-    @Test
-    public void test_XSC_of_dateTimeFormat() {
-        XmlSerConfig config = XmlSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_DATE_TIME);
-        assertNotNull(config);
-        assertEquals(DateTimeFormat.ISO_8601_DATE_TIME, config.getDateTimeFormat());
-    }
-
-    @Test
-    public void test_XSC_of_exclusion_ignoredPropNames() {
-        Map<Class<?>, Set<String>> ignoredPropNames = new HashMap<>();
-        Set<String> props = new HashSet<>();
-        props.add("prop1");
-        ignoredPropNames.put(String.class, props);
-
-        XmlSerConfig config = XmlSerConfig.create().setExclusion(Exclusion.NULL).setIgnoredPropNames(ignoredPropNames);
-        assertNotNull(config);
-        assertEquals(Exclusion.NULL, config.getExclusion());
-        assertNotNull(config.getIgnoredPropNames());
-    }
-
-    @Test
-    public void test_XSC_of_all_parameters() {
-        Map<Class<?>, Set<String>> ignoredPropNames = new HashMap<>();
-        Set<String> props = new HashSet<>();
-        props.add("prop1");
-        ignoredPropNames.put(String.class, props);
-
-        XmlSerConfig config = XmlSerConfig.create()
-                .setTagByPropertyName(true)
-                .setWriteTypeInfo(true)
-                .setDateTimeFormat(DateTimeFormat.ISO_8601_DATE_TIME)
-                .setExclusion(Exclusion.NULL)
-                .setIgnoredPropNames(ignoredPropNames);
-        assertNotNull(config);
-        assertTrue(config.isTagByPropertyName());
-        assertTrue(config.isWriteTypeInfo());
-        assertEquals(DateTimeFormat.ISO_8601_DATE_TIME, config.getDateTimeFormat());
-        assertEquals(Exclusion.NULL, config.getExclusion());
-        assertNotNull(config.getIgnoredPropNames());
     }
 
 }

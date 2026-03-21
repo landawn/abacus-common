@@ -11,20 +11,21 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.CodeGenerationUtil.PropNameTableCodeConfig;
+import com.landawn.abacus.util.function.TriFunction;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Tag("2025")
 public class CodeGenerationUtilTest extends TestBase {
 
     @Data
@@ -100,13 +101,6 @@ public class CodeGenerationUtilTest extends TestBase {
     }
 
     @Test
-    public void test_generatePropNameTableClass_singleParam_nullClass() {
-        assertThrows(Exception.class, () -> {
-            CodeGenerationUtil.generatePropNameTableClass(null);
-        });
-    }
-
-    @Test
     public void test_generatePropNameTableClass_withCustomClassName() {
         final String code = CodeGenerationUtil.generatePropNameTableClass(User.class, "Props");
 
@@ -127,6 +121,31 @@ public class CodeGenerationUtilTest extends TestBase {
     }
 
     @Test
+    public void test_generatePropNameTableClass_threeParams_noSrcDir() {
+        final String code = CodeGenerationUtil.generatePropNameTableClass(User.class, "x", null);
+
+        assertNotNull(code);
+        assertTrue(code.contains("public interface x"));
+        assertTrue(code.contains("String id = \"id\";"));
+    }
+
+    @Test
+    public void test_generatePropNameTableClass_threeParams_withEmptySrcDir() {
+        final String code = CodeGenerationUtil.generatePropNameTableClass(User.class, "x", "");
+
+        assertNotNull(code);
+        assertTrue(code.contains("public interface x"));
+        assertTrue(code.contains("String id = \"id\";"));
+    }
+
+    @Test
+    public void test_generatePropNameTableClass_singleParam_nullClass() {
+        assertThrows(Exception.class, () -> {
+            CodeGenerationUtil.generatePropNameTableClass(null);
+        });
+    }
+
+    @Test
     public void test_generatePropNameTableClass_withEmptyClassName() {
         assertThrows(Exception.class, () -> {
             CodeGenerationUtil.generatePropNameTableClass(User.class, "");
@@ -138,15 +157,6 @@ public class CodeGenerationUtilTest extends TestBase {
         assertThrows(Exception.class, () -> {
             CodeGenerationUtil.generatePropNameTableClass(User.class, null);
         });
-    }
-
-    @Test
-    public void test_generatePropNameTableClass_threeParams_noSrcDir() {
-        final String code = CodeGenerationUtil.generatePropNameTableClass(User.class, "x", null);
-
-        assertNotNull(code);
-        assertTrue(code.contains("public interface x"));
-        assertTrue(code.contains("String id = \"id\";"));
     }
 
     @Test
@@ -168,15 +178,6 @@ public class CodeGenerationUtilTest extends TestBase {
         assertTrue(code.contains("String id = \"id\";"));
 
         IOUtil.deleteRecursivelyIfExists(tempDir);
-    }
-
-    @Test
-    public void test_generatePropNameTableClass_threeParams_withEmptySrcDir() {
-        final String code = CodeGenerationUtil.generatePropNameTableClass(User.class, "x", "");
-
-        assertNotNull(code);
-        assertTrue(code.contains("public interface x"));
-        assertTrue(code.contains("String id = \"id\";"));
     }
 
     @Test
@@ -204,20 +205,6 @@ public class CodeGenerationUtilTest extends TestBase {
     }
 
     @Test
-    public void test_generatePropNameTableClasses_singleParam_emptyCollection() {
-        assertThrows(Exception.class, () -> {
-            CodeGenerationUtil.generatePropNameTableClasses(Arrays.asList());
-        });
-    }
-
-    @Test
-    public void test_generatePropNameTableClasses_singleParam_nullCollection() {
-        assertThrows(Exception.class, () -> {
-            CodeGenerationUtil.generatePropNameTableClasses((Collection<Class<?>>) null);
-        });
-    }
-
-    @Test
     public void test_generatePropNameTableClasses_withClassName() {
         final List<Class<?>> classes = Arrays.asList(User.class, Order.class);
         final String code = CodeGenerationUtil.generatePropNameTableClasses(classes, "PropNames");
@@ -240,13 +227,6 @@ public class CodeGenerationUtilTest extends TestBase {
     }
 
     @Test
-    public void test_generatePropNameTableClasses_withNullClassName() {
-        assertThrows(Exception.class, () -> {
-            CodeGenerationUtil.generatePropNameTableClasses(Arrays.asList(User.class), null);
-        });
-    }
-
-    @Test
     public void test_generatePropNameTableClasses_fourParams_basic() {
         final List<Class<?>> classes = Arrays.asList(User.class, Order.class);
         final String code = CodeGenerationUtil.generatePropNameTableClasses(classes, "s", null, null);
@@ -264,39 +244,6 @@ public class CodeGenerationUtilTest extends TestBase {
         assertNotNull(code);
         assertTrue(code.contains("package com.test.generated;"));
         assertTrue(code.contains("public interface s"));
-    }
-
-    @Test
-    public void test_generatePropNameTableClasses_fourParams_withPackageAndSrcDir() throws IOException {
-        final List<Class<?>> classes = Arrays.asList(User.class);
-
-        final File tempDir = Files.createTempDirectory("test-codegen").toFile();
-        tempDir.deleteOnExit();
-
-        final String code = CodeGenerationUtil.generatePropNameTableClasses(classes, "s", "com.test", tempDir.getAbsolutePath());
-
-        assertNotNull(code);
-        assertTrue(code.contains("package com.test;"));
-
-        final File packageDir = new File(tempDir, "com/test");
-        tempGeneratedFile = new File(packageDir, "s.java");
-        assertTrue(tempGeneratedFile.exists());
-
-        IOUtil.deleteRecursivelyIfExists(tempDir);
-    }
-
-    @Test
-    public void test_generatePropNameTableClasses_fourParams_nullCollection() {
-        assertThrows(Exception.class, () -> {
-            CodeGenerationUtil.generatePropNameTableClasses(null, "s", null, null);
-        });
-    }
-
-    @Test
-    public void test_generatePropNameTableClasses_fourParams_nullClassName() {
-        assertThrows(Exception.class, () -> {
-            CodeGenerationUtil.generatePropNameTableClasses(Arrays.asList(User.class), null, null, null);
-        });
     }
 
     @Test
@@ -448,57 +395,6 @@ public class CodeGenerationUtilTest extends TestBase {
     }
 
     @Test
-    public void test_generatePropNameTableClasses_config_nullConfig() {
-        assertThrows(Exception.class, () -> {
-            CodeGenerationUtil.generatePropNameTableClasses((PropNameTableCodeConfig) null);
-        });
-    }
-
-    @Test
-    public void test_generatePropNameTableClasses_config_nullEntityClasses() {
-        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder().className("s").build();
-
-        assertThrows(Exception.class, () -> {
-            CodeGenerationUtil.generatePropNameTableClasses(config);
-        });
-    }
-
-    @Test
-    public void test_generatePropNameTableClasses_config_emptyEntityClasses() {
-        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder().entityClasses(Arrays.asList()).className("s").build();
-
-        assertThrows(Exception.class, () -> {
-            CodeGenerationUtil.generatePropNameTableClasses(config);
-        });
-    }
-
-    @Test
-    public void test_generatePropNameTableClasses_config_nullClassName() {
-        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder().entityClasses(Arrays.asList(User.class)).build();
-
-        assertThrows(Exception.class, () -> {
-            CodeGenerationUtil.generatePropNameTableClasses(config);
-        });
-    }
-
-    @Test
-    public void test_generatePropNameTableClasses_config_duplicateSimpleClassNames() {
-        @Data
-        @NoArgsConstructor
-        @AllArgsConstructor
-        class User {
-            private String id;
-        }
-
-        final List<Class<?>> classes = Arrays.asList(CodeGenerationUtilTest.User.class, User.class);
-        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder().entityClasses(classes).className("s").generateClassPropNameList(true).build();
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            CodeGenerationUtil.generatePropNameTableClasses(config);
-        });
-    }
-
-    @Test
     public void test_generatePropNameTableClasses_config_customPropNameConverterForLowerCase() {
         final List<Class<?>> classes = Arrays.asList(User.class);
         final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
@@ -584,30 +480,6 @@ public class CodeGenerationUtilTest extends TestBase {
     }
 
     @Test
-    public void test_MIN_FUNC_withComparable() {
-        final String result = CodeGenerationUtil.MIN_FUNC.apply(User.class, Integer.class, "age");
-        assertEquals("min(age)", result);
-    }
-
-    @Test
-    public void test_MIN_FUNC_withNonComparable() {
-        final String result = CodeGenerationUtil.MIN_FUNC.apply(User.class, Object.class, "obj");
-        assertEquals(null, result);
-    }
-
-    @Test
-    public void test_MAX_FUNC_withComparable() {
-        final String result = CodeGenerationUtil.MAX_FUNC.apply(User.class, String.class, "name");
-        assertEquals("max(name)", result);
-    }
-
-    @Test
-    public void test_MAX_FUNC_withNonComparable() {
-        final String result = CodeGenerationUtil.MAX_FUNC.apply(User.class, Object.class, "obj");
-        assertEquals(null, result);
-    }
-
-    @Test
     public void test_javaKeywordHandling() {
         @Data
         @NoArgsConstructor
@@ -634,4 +506,157 @@ public class CodeGenerationUtilTest extends TestBase {
         assertTrue(code.contains("String productId"));
         assertTrue(code.contains("String productName"));
     }
+
+    @Test
+    public void test_generatePropNameTableClasses_singleParam_emptyCollection() {
+        assertThrows(Exception.class, () -> {
+            CodeGenerationUtil.generatePropNameTableClasses(Arrays.asList());
+        });
+    }
+
+    @Test
+    public void test_generatePropNameTableClasses_singleParam_nullCollection() {
+        assertThrows(Exception.class, () -> {
+            CodeGenerationUtil.generatePropNameTableClasses((Collection<Class<?>>) null);
+        });
+    }
+
+    @Test
+    public void test_generatePropNameTableClasses_withNullClassName() {
+        assertThrows(Exception.class, () -> {
+            CodeGenerationUtil.generatePropNameTableClasses(Arrays.asList(User.class), null);
+        });
+    }
+
+    @Test
+    public void test_generatePropNameTableClasses_fourParams_withPackageAndSrcDir() throws IOException {
+        final List<Class<?>> classes = Arrays.asList(User.class);
+
+        final File tempDir = Files.createTempDirectory("test-codegen").toFile();
+        tempDir.deleteOnExit();
+
+        final String code = CodeGenerationUtil.generatePropNameTableClasses(classes, "s", "com.test", tempDir.getAbsolutePath());
+
+        assertNotNull(code);
+        assertTrue(code.contains("package com.test;"));
+
+        final File packageDir = new File(tempDir, "com/test");
+        tempGeneratedFile = new File(packageDir, "s.java");
+        assertTrue(tempGeneratedFile.exists());
+
+        IOUtil.deleteRecursivelyIfExists(tempDir);
+    }
+
+    @Test
+    public void test_generatePropNameTableClasses_fourParams_nullCollection() {
+        assertThrows(Exception.class, () -> {
+            CodeGenerationUtil.generatePropNameTableClasses(null, "s", null, null);
+        });
+    }
+
+    @Test
+    public void test_generatePropNameTableClasses_fourParams_nullClassName() {
+        assertThrows(Exception.class, () -> {
+            CodeGenerationUtil.generatePropNameTableClasses(Arrays.asList(User.class), null, null, null);
+        });
+    }
+
+    @Test
+    public void test_generatePropNameTableClasses_config_nullConfig() {
+        assertThrows(Exception.class, () -> {
+            CodeGenerationUtil.generatePropNameTableClasses((PropNameTableCodeConfig) null);
+        });
+    }
+
+    @Test
+    public void test_generatePropNameTableClasses_config_nullEntityClasses() {
+        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder().className("s").build();
+
+        assertThrows(Exception.class, () -> {
+            CodeGenerationUtil.generatePropNameTableClasses(config);
+        });
+    }
+
+    @Test
+    public void test_generatePropNameTableClasses_config_emptyEntityClasses() {
+        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder().entityClasses(Arrays.asList()).className("s").build();
+
+        assertThrows(Exception.class, () -> {
+            CodeGenerationUtil.generatePropNameTableClasses(config);
+        });
+    }
+
+    @Test
+    public void test_generatePropNameTableClasses_config_nullClassName() {
+        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder().entityClasses(Arrays.asList(User.class)).build();
+
+        assertThrows(Exception.class, () -> {
+            CodeGenerationUtil.generatePropNameTableClasses(config);
+        });
+    }
+
+    @Test
+    public void test_generatePropNameTableClasses_config_duplicateSimpleClassNames() {
+        @Data
+        @NoArgsConstructor
+        @AllArgsConstructor
+        class User {
+            private String id;
+        }
+
+        final List<Class<?>> classes = Arrays.asList(CodeGenerationUtilTest.User.class, User.class);
+        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder().entityClasses(classes).className("s").generateClassPropNameList(true).build();
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            CodeGenerationUtil.generatePropNameTableClasses(config);
+        });
+    }
+
+    @Test
+    public void test_MIN_FUNC_withComparable() {
+        final String result = CodeGenerationUtil.MIN_FUNC.apply(User.class, Integer.class, "age");
+        assertEquals("min(age)", result);
+    }
+
+    @Test
+    public void test_MIN_FUNC_withNonComparable() {
+        final String result = CodeGenerationUtil.MIN_FUNC.apply(User.class, Object.class, "obj");
+        assertEquals(null, result);
+    }
+
+    @Test
+    public void test_MAX_FUNC_withComparable() {
+        final String result = CodeGenerationUtil.MAX_FUNC.apply(User.class, String.class, "name");
+        assertEquals("max(name)", result);
+    }
+
+    @Test
+    public void test_MAX_FUNC_withNonComparable() {
+        final String result = CodeGenerationUtil.MAX_FUNC.apply(User.class, Object.class, "obj");
+        assertEquals(null, result);
+    }
+
+    @Test
+    public void test_generatePropNameTableClasses_config_withFunctionProps() {
+        final Map<String, TriFunction<Class<?>, Class<?>, String, String>> propFunctions = new LinkedHashMap<>();
+        propFunctions.put("min", CodeGenerationUtil.MIN_FUNC);
+        propFunctions.put("max", CodeGenerationUtil.MAX_FUNC);
+
+        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
+                .entityClasses(Arrays.asList(User.class))
+                .className("s")
+                .generateFunctionPropName(true)
+                .functionClassName("funcs")
+                .propFunctions(propFunctions)
+                .build();
+
+        final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
+
+        assertNotNull(code);
+        assertTrue(code.contains("public interface funcs"));
+        assertTrue(code.contains("String min_age = \"min(age)\";"));
+        assertTrue(code.contains("String max_name = \"max(name)\";"));
+    }
+
+    // TODO: Remaining CodeGenerationUtil gaps are generator filtering/file-emission branches that depend on broader source-tree layouts than this isolated test fixture currently provides.
 }

@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.junit.jupiter.api.Tag;
+
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.BiIterator;
 import com.landawn.abacus.util.BufferedJsonWriter;
@@ -27,6 +29,7 @@ import com.landawn.abacus.util.TriIterator;
 import com.landawn.abacus.util.Triple;
 import com.landawn.abacus.util.TypeReference;
 
+@Tag("unit")
 public abstract class TestBase {
 
     public static final char[] NULL_CHAR_ARRAY = "null".toCharArray();

@@ -15,12 +15,10 @@ import java.util.Map;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class HttpSettingsTest extends TestBase {
 
     // --- constructor ---
@@ -31,130 +29,28 @@ public class HttpSettingsTest extends TestBase {
         assertNotNull(settings);
     }
 
-    // --- create ---
-
     @Test
-    public void testCreate() {
-        HttpSettings settings = HttpSettings.create();
-        assertNotNull(settings);
-    }
-
-    // --- getConnectTimeout / setConnectTimeout ---
-
-    @Test
-    public void testGetConnectTimeout() {
+    public void testSetDoInput() {
         HttpSettings settings = new HttpSettings();
-        assertEquals(0, settings.getConnectTimeout());
-
-        settings.setConnectTimeout(5000L);
-        assertEquals(5000L, settings.getConnectTimeout());
-    }
-
-    @Test
-    public void testGetconnectTimeoutDefault() {
-        HttpSettings settings = HttpSettings.create();
-        assertEquals(0L, settings.getConnectTimeout());
-    }
-
-    @Test
-    public void testSetConnectTimeout() {
-        HttpSettings settings = HttpSettings.create();
-        HttpSettings result = settings.setConnectTimeout(5000L);
-        assertEquals(5000L, settings.getConnectTimeout());
-        assertEquals(settings, result); // Verify method chaining
-    }
-
-    @Test
-    public void testSetConnectTimeout_Zero() {
-        HttpSettings settings = HttpSettings.create();
-        HttpSettings result = settings.setConnectTimeout(0L);
-        assertEquals(0L, settings.getConnectTimeout());
+        HttpSettings result = settings.doInput(false);
         assertSame(settings, result);
+        assertFalse(settings.doInput());
     }
 
-    // --- getReadTimeout / setReadTimeout ---
-
     @Test
-    public void testGetReadTimeout() {
+    public void testSetDoOutput() {
         HttpSettings settings = new HttpSettings();
-        assertEquals(0, settings.getReadTimeout());
-
-        settings.setReadTimeout(8000L);
-        assertEquals(8000L, settings.getReadTimeout());
+        HttpSettings result = settings.doOutput(false);
+        assertSame(settings, result);
+        assertFalse(settings.doOutput());
     }
 
     @Test
-    public void testGetReadTimeoutDefault() {
-        HttpSettings settings = HttpSettings.create();
-        assertEquals(0L, settings.getReadTimeout());
-    }
-
-    @Test
-    public void testSetReadTimeout() {
-        HttpSettings settings = HttpSettings.create();
-        HttpSettings result = settings.setReadTimeout(10000L);
-        assertEquals(10000L, settings.getReadTimeout());
-        assertEquals(settings, result);
-    }
-
-    // --- getSSLSocketFactory / setSSLSocketFactory ---
-
-    @Test
-    public void testGetSSLSocketFactory() {
+    public void testSetIsOneWayRequest() {
         HttpSettings settings = new HttpSettings();
-        assertNull(settings.getSSLSocketFactory());
-    }
-
-    @Test
-    public void testGetSSLSocketFactoryDefault() {
-        HttpSettings settings = HttpSettings.create();
-        assertNull(settings.getSSLSocketFactory());
-    }
-
-    @Test
-    public void testSetSSLSocketFactory() throws Exception {
-        HttpSettings settings = HttpSettings.create();
-        SSLContext sslContext = SSLContext.getDefault();
-        SSLSocketFactory factory = sslContext.getSocketFactory();
-
-        HttpSettings result = settings.setSSLSocketFactory(factory);
-        assertEquals(factory, settings.getSSLSocketFactory());
-        assertEquals(settings, result);
-    }
-
-    // --- getProxy / setProxy ---
-
-    @Test
-    public void testGetProxy() {
-        HttpSettings settings = new HttpSettings();
-        assertNull(settings.getProxy());
-    }
-
-    @Test
-    public void testGetProxyDefault() {
-        HttpSettings settings = HttpSettings.create();
-        assertNull(settings.getProxy());
-    }
-
-    @Test
-    public void testSetProxy() {
-        HttpSettings settings = HttpSettings.create();
-        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxy.example.com", 8080));
-
-        HttpSettings result = settings.setProxy(proxy);
-        assertEquals(proxy, settings.getProxy());
-        assertEquals(settings, result);
-    }
-
-    // --- useCaches (getter) / useCaches (setter) ---
-
-    @Test
-    public void testUseCaches() {
-        HttpSettings settings = new HttpSettings();
-        assertFalse(settings.useCaches());
-
-        settings.useCaches(true);
-        assertTrue(settings.useCaches());
+        HttpSettings result = settings.setOneWayRequest(true);
+        assertSame(settings, result);
+        assertTrue(settings.isOneWayRequest());
     }
 
     @Test
@@ -176,6 +72,153 @@ public class HttpSettingsTest extends TestBase {
         HttpSettings settings = HttpSettings.create();
         settings.useCaches(false);
         assertFalse(settings.useCaches());
+    }
+
+    @Test
+    public void testOverwriteHeader() {
+        HttpSettings settings = HttpSettings.create();
+        settings.header("X-Custom", "original");
+        settings.header("X-Custom", "updated");
+
+        assertEquals("updated", settings.headers().get("X-Custom"));
+    }
+
+    // --- create ---
+
+    @Test
+    public void testCreate() {
+        HttpSettings settings = HttpSettings.create();
+        assertNotNull(settings);
+    }
+
+    @Test
+    public void testMultipleHeaderCalls() {
+        HttpSettings settings = HttpSettings.create();
+        settings.header("Header1", "value1");
+        settings.header("Header2", "value2");
+        settings.header("Header3", "value3");
+
+        assertEquals("value1", settings.headers().get("Header1"));
+        assertEquals("value2", settings.headers().get("Header2"));
+        assertEquals("value3", settings.headers().get("Header3"));
+    }
+
+    @Test
+    public void testGetconnectTimeoutDefault() {
+        HttpSettings settings = HttpSettings.create();
+        assertEquals(0L, settings.getConnectTimeout());
+    }
+
+    // --- getConnectTimeout / setConnectTimeout ---
+
+    @Test
+    public void testGetConnectTimeout() {
+        HttpSettings settings = new HttpSettings();
+        assertEquals(0, settings.getConnectTimeout());
+
+        settings.setConnectTimeout(5000L);
+        assertEquals(5000L, settings.getConnectTimeout());
+    }
+
+    @Test
+    public void testSetConnectTimeout() {
+        HttpSettings settings = HttpSettings.create();
+        HttpSettings result = settings.setConnectTimeout(5000L);
+        assertEquals(5000L, settings.getConnectTimeout());
+        assertEquals(settings, result); // Verify method chaining
+    }
+
+    @Test
+    public void testSetConnectTimeout_Zero() {
+        HttpSettings settings = HttpSettings.create();
+        HttpSettings result = settings.setConnectTimeout(0L);
+        assertEquals(0L, settings.getConnectTimeout());
+        assertSame(settings, result);
+    }
+
+    @Test
+    public void testGetReadTimeoutDefault() {
+        HttpSettings settings = HttpSettings.create();
+        assertEquals(0L, settings.getReadTimeout());
+    }
+
+    // --- getReadTimeout / setReadTimeout ---
+
+    @Test
+    public void testGetReadTimeout() {
+        HttpSettings settings = new HttpSettings();
+        assertEquals(0, settings.getReadTimeout());
+
+        settings.setReadTimeout(8000L);
+        assertEquals(8000L, settings.getReadTimeout());
+    }
+
+    @Test
+    public void testSetReadTimeout() {
+        HttpSettings settings = HttpSettings.create();
+        HttpSettings result = settings.setReadTimeout(10000L);
+        assertEquals(10000L, settings.getReadTimeout());
+        assertEquals(settings, result);
+    }
+
+    @Test
+    public void testGetSSLSocketFactoryDefault() {
+        HttpSettings settings = HttpSettings.create();
+        assertNull(settings.getSSLSocketFactory());
+    }
+
+    // --- getSSLSocketFactory / setSSLSocketFactory ---
+
+    @Test
+    public void testGetSSLSocketFactory() {
+        HttpSettings settings = new HttpSettings();
+        assertNull(settings.getSSLSocketFactory());
+    }
+
+    @Test
+    public void testSetSSLSocketFactory() throws Exception {
+        HttpSettings settings = HttpSettings.create();
+        SSLContext sslContext = SSLContext.getDefault();
+        SSLSocketFactory factory = sslContext.getSocketFactory();
+
+        HttpSettings result = settings.setSSLSocketFactory(factory);
+        assertEquals(factory, settings.getSSLSocketFactory());
+        assertEquals(settings, result);
+    }
+
+    @Test
+    public void testGetProxyDefault() {
+        HttpSettings settings = HttpSettings.create();
+        assertNull(settings.getProxy());
+    }
+
+    @Test
+    public void testSetProxy() {
+        HttpSettings settings = HttpSettings.create();
+        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxy.example.com", 8080));
+
+        HttpSettings result = settings.setProxy(proxy);
+        assertEquals(proxy, settings.getProxy());
+        assertEquals(settings, result);
+    }
+
+    // --- getProxy / setProxy ---
+
+    @Test
+    public void testGetProxy() {
+        HttpSettings settings = new HttpSettings();
+        assertNull(settings.getProxy());
+    }
+
+    // --- useCaches (getter) / useCaches (setter) ---
+
+    @Test
+    public void testUseCaches() {
+        HttpSettings settings = new HttpSettings();
+        assertFalse(settings.useCaches());
+
+        settings.useCaches(true);
+        assertTrue(settings.useCaches());
     }
 
     // --- doInput (getter) / doInput (setter) ---
@@ -201,14 +244,6 @@ public class HttpSettingsTest extends TestBase {
         HttpSettings result = settings.doInput(false);
         assertFalse(settings.doInput());
         assertEquals(settings, result);
-    }
-
-    @Test
-    public void testSetDoInput() {
-        HttpSettings settings = new HttpSettings();
-        HttpSettings result = settings.doInput(false);
-        assertSame(settings, result);
-        assertFalse(settings.doInput());
     }
 
     // --- doOutput (getter) / doOutput (setter) ---
@@ -237,11 +272,17 @@ public class HttpSettingsTest extends TestBase {
     }
 
     @Test
-    public void testSetDoOutput() {
-        HttpSettings settings = new HttpSettings();
-        HttpSettings result = settings.doOutput(false);
-        assertSame(settings, result);
-        assertFalse(settings.doOutput());
+    public void testIsOneWayRequestDefault() {
+        HttpSettings settings = HttpSettings.create();
+        assertFalse(settings.isOneWayRequest());
+    }
+
+    @Test
+    public void testIsOneWayRequestSet() {
+        HttpSettings settings = HttpSettings.create();
+        HttpSettings result = settings.setOneWayRequest(true);
+        assertTrue(settings.isOneWayRequest());
+        assertEquals(settings, result);
     }
 
     // --- isOneWayRequest / setOneWayRequest ---
@@ -256,45 +297,6 @@ public class HttpSettingsTest extends TestBase {
     }
 
     @Test
-    public void testIsOneWayRequestDefault() {
-        HttpSettings settings = HttpSettings.create();
-        assertFalse(settings.isOneWayRequest());
-    }
-
-    @Test
-    public void testIsOneWayRequestSet() {
-        HttpSettings settings = HttpSettings.create();
-        HttpSettings result = settings.setOneWayRequest(true);
-        assertTrue(settings.isOneWayRequest());
-        assertEquals(settings, result);
-    }
-
-    @Test
-    public void testSetIsOneWayRequest() {
-        HttpSettings settings = new HttpSettings();
-        HttpSettings result = settings.setOneWayRequest(true);
-        assertSame(settings, result);
-        assertTrue(settings.isOneWayRequest());
-    }
-
-    // --- getContentFormat / setContentFormat ---
-
-    @Test
-    public void testGetContentFormat() {
-        HttpSettings settings = new HttpSettings();
-        assertNull(settings.getContentFormat());
-
-        settings.setContentFormat(ContentFormat.JSON);
-        assertEquals(ContentFormat.JSON, settings.getContentFormat());
-    }
-
-    @Test
-    public void testGetContentFormatDefault() {
-        HttpSettings settings = HttpSettings.create();
-        assertNull(settings.getContentFormat());
-    }
-
-    @Test
     public void testGetContentFormatFromHeaders() {
         HttpSettings settings = new HttpSettings();
         settings.header(HttpHeaders.Names.CONTENT_TYPE, "application/json");
@@ -302,6 +304,12 @@ public class HttpSettingsTest extends TestBase {
 
         ContentFormat format = settings.getContentFormat();
         assertEquals(ContentFormat.JSON_GZIP, format);
+    }
+
+    @Test
+    public void testGetContentFormatDefault() {
+        HttpSettings settings = HttpSettings.create();
+        assertNull(settings.getContentFormat());
     }
 
     @Test
@@ -329,28 +337,22 @@ public class HttpSettingsTest extends TestBase {
         assertEquals(ContentFormat.JSON_GZIP, settings.getContentFormat());
     }
 
+    // --- getContentFormat / setContentFormat ---
+
+    @Test
+    public void testGetContentFormat() {
+        HttpSettings settings = new HttpSettings();
+        assertNull(settings.getContentFormat());
+
+        settings.setContentFormat(ContentFormat.JSON);
+        assertEquals(ContentFormat.JSON, settings.getContentFormat());
+    }
+
     @Test
     public void testSetContentFormatNONE() {
         HttpSettings settings = HttpSettings.create();
         settings.setContentFormat(ContentFormat.NONE);
         assertEquals(ContentFormat.NONE, settings.getContentFormat());
-    }
-
-    // --- getContentType / setContentType ---
-
-    @Test
-    public void testGetContentType() {
-        HttpSettings settings = new HttpSettings();
-        assertNull(settings.getContentType());
-
-        settings.setContentType("application/json");
-        assertEquals("application/json", settings.getContentType());
-    }
-
-    @Test
-    public void testGetContentTypeDefault() {
-        HttpSettings settings = HttpSettings.create();
-        assertNull(settings.getContentType());
     }
 
     @Test
@@ -368,6 +370,12 @@ public class HttpSettingsTest extends TestBase {
     }
 
     @Test
+    public void testGetContentTypeDefault() {
+        HttpSettings settings = HttpSettings.create();
+        assertNull(settings.getContentType());
+    }
+
+    @Test
     public void testSetContentType() {
         HttpSettings settings = HttpSettings.create();
         HttpSettings result = settings.setContentType("application/json");
@@ -375,21 +383,15 @@ public class HttpSettingsTest extends TestBase {
         assertEquals(settings, result);
     }
 
-    // --- getContentEncoding / setContentEncoding ---
+    // --- getContentType / setContentType ---
 
     @Test
-    public void testGetContentEncoding() {
+    public void testGetContentType() {
         HttpSettings settings = new HttpSettings();
-        assertNull(settings.getContentEncoding());
+        assertNull(settings.getContentType());
 
-        settings.setContentEncoding("gzip");
-        assertEquals("gzip", settings.getContentEncoding());
-    }
-
-    @Test
-    public void testGetContentEncodingDefault() {
-        HttpSettings settings = HttpSettings.create();
-        assertNull(settings.getContentEncoding());
+        settings.setContentType("application/json");
+        assertEquals("application/json", settings.getContentType());
     }
 
     @Test
@@ -407,11 +409,28 @@ public class HttpSettingsTest extends TestBase {
     }
 
     @Test
+    public void testGetContentEncodingDefault() {
+        HttpSettings settings = HttpSettings.create();
+        assertNull(settings.getContentEncoding());
+    }
+
+    @Test
     public void testSetContentEncoding() {
         HttpSettings settings = HttpSettings.create();
         HttpSettings result = settings.setContentEncoding("gzip");
         assertEquals("gzip", settings.getContentEncoding());
         assertEquals(settings, result);
+    }
+
+    // --- getContentEncoding / setContentEncoding ---
+
+    @Test
+    public void testGetContentEncoding() {
+        HttpSettings settings = new HttpSettings();
+        assertNull(settings.getContentEncoding());
+
+        settings.setContentEncoding("gzip");
+        assertEquals("gzip", settings.getContentEncoding());
     }
 
     // --- basicAuth ---
@@ -460,24 +479,46 @@ public class HttpSettingsTest extends TestBase {
     }
 
     @Test
-    public void testMultipleHeaderCalls() {
+    public void testHeadersTwo() {
         HttpSettings settings = HttpSettings.create();
-        settings.header("Header1", "value1");
-        settings.header("Header2", "value2");
-        settings.header("Header3", "value3");
-
+        HttpSettings result = settings.headers("Header1", "value1", "Header2", "value2");
         assertEquals("value1", settings.headers().get("Header1"));
         assertEquals("value2", settings.headers().get("Header2"));
-        assertEquals("value3", settings.headers().get("Header3"));
+        assertEquals(settings, result);
     }
 
     @Test
-    public void testOverwriteHeader() {
+    public void testHeadersThree() {
         HttpSettings settings = HttpSettings.create();
-        settings.header("X-Custom", "original");
-        settings.header("X-Custom", "updated");
+        HttpSettings result = settings.headers("Header1", "value1", "Header2", "value2", "Header3", "value3");
+        assertEquals("value1", settings.headers().get("Header1"));
+        assertEquals("value2", settings.headers().get("Header2"));
+        assertEquals("value3", settings.headers().get("Header3"));
+        assertEquals(settings, result);
+    }
 
-        assertEquals("updated", settings.headers().get("X-Custom"));
+    @Test
+    public void testHeadersMap() {
+        HttpSettings settings = HttpSettings.create();
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Header1", "value1");
+        headers.put("Header2", "value2");
+
+        HttpSettings result = settings.headers(headers);
+        assertEquals("value1", settings.headers().get("Header1"));
+        assertEquals("value2", settings.headers().get("Header2"));
+        assertEquals(settings, result);
+    }
+
+    @Test
+    public void testHeadersHttpHeaders() {
+        HttpSettings settings = HttpSettings.create();
+        HttpHeaders headers = HttpHeaders.create().set("Header1", "value1").set("Header2", "value2");
+
+        HttpSettings result = settings.headers(headers);
+        assertEquals("value1", settings.headers().get("Header1"));
+        assertEquals("value2", settings.headers().get("Header2"));
+        assertEquals(settings, result);
     }
 
     // --- headers(String, Object, String, Object) ---
@@ -491,15 +532,6 @@ public class HttpSettingsTest extends TestBase {
         assertEquals("value2", settings.headers().get("Header2"));
     }
 
-    @Test
-    public void testHeadersTwo() {
-        HttpSettings settings = HttpSettings.create();
-        HttpSettings result = settings.headers("Header1", "value1", "Header2", "value2");
-        assertEquals("value1", settings.headers().get("Header1"));
-        assertEquals("value2", settings.headers().get("Header2"));
-        assertEquals(settings, result);
-    }
-
     // --- headers(String, Object, String, Object, String, Object) ---
 
     @Test
@@ -510,16 +542,6 @@ public class HttpSettingsTest extends TestBase {
         assertEquals("value1", settings.headers().get("Header1"));
         assertEquals("value2", settings.headers().get("Header2"));
         assertEquals("value3", settings.headers().get("Header3"));
-    }
-
-    @Test
-    public void testHeadersThree() {
-        HttpSettings settings = HttpSettings.create();
-        HttpSettings result = settings.headers("Header1", "value1", "Header2", "value2", "Header3", "value3");
-        assertEquals("value1", settings.headers().get("Header1"));
-        assertEquals("value2", settings.headers().get("Header2"));
-        assertEquals("value3", settings.headers().get("Header3"));
-        assertEquals(settings, result);
     }
 
     // --- headers(Map) ---
@@ -537,19 +559,6 @@ public class HttpSettingsTest extends TestBase {
         assertEquals("value2", settings.headers().get("Header2"));
     }
 
-    @Test
-    public void testHeadersMap() {
-        HttpSettings settings = HttpSettings.create();
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Header1", "value1");
-        headers.put("Header2", "value2");
-
-        HttpSettings result = settings.headers(headers);
-        assertEquals("value1", settings.headers().get("Header1"));
-        assertEquals("value2", settings.headers().get("Header2"));
-        assertEquals(settings, result);
-    }
-
     // --- headers(HttpHeaders) ---
 
     @Test
@@ -561,17 +570,6 @@ public class HttpSettingsTest extends TestBase {
         assertSame(settings, result);
         assertEquals("value1", settings.headers().get("Header1"));
         assertEquals("value2", settings.headers().get("Header2"));
-    }
-
-    @Test
-    public void testHeadersHttpHeaders() {
-        HttpSettings settings = HttpSettings.create();
-        HttpHeaders headers = HttpHeaders.create().set("Header1", "value1").set("Header2", "value2");
-
-        HttpSettings result = settings.headers(headers);
-        assertEquals("value1", settings.headers().get("Header1"));
-        assertEquals("value2", settings.headers().get("Header2"));
-        assertEquals(settings, result);
     }
 
     @Test
@@ -635,6 +633,16 @@ public class HttpSettingsTest extends TestBase {
         assertNotNull(headers);
     }
 
+    @Test
+    public void testCopyWithProxy() {
+        HttpSettings original = HttpSettings.create();
+        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxy.example.com", 8080));
+        original.setProxy(proxy);
+
+        HttpSettings copy = original.copy();
+        assertEquals(proxy, copy.getProxy());
+    }
+
     // --- copy ---
 
     @Test
@@ -675,27 +683,6 @@ public class HttpSettingsTest extends TestBase {
     }
 
     @Test
-    public void testCopyWithSSLSocketFactory() throws Exception {
-        HttpSettings original = HttpSettings.create();
-        SSLContext sslContext = SSLContext.getDefault();
-        SSLSocketFactory factory = sslContext.getSocketFactory();
-        original.setSSLSocketFactory(factory);
-
-        HttpSettings copy = original.copy();
-        assertEquals(factory, copy.getSSLSocketFactory());
-    }
-
-    @Test
-    public void testCopyWithProxy() {
-        HttpSettings original = HttpSettings.create();
-        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxy.example.com", 8080));
-        original.setProxy(proxy);
-
-        HttpSettings copy = original.copy();
-        assertEquals(proxy, copy.getProxy());
-    }
-
-    @Test
     public void testCopyWithNullHeaders() {
         HttpSettings original = new HttpSettings();
         original.setConnectTimeout(5000L);
@@ -704,6 +691,17 @@ public class HttpSettingsTest extends TestBase {
         assertEquals(5000L, copy.getConnectTimeout());
         assertNotNull(copy.headers());
         assertTrue(copy.headers().isEmpty());
+    }
+
+    @Test
+    public void testCopyWithSSLSocketFactory() throws Exception {
+        HttpSettings original = HttpSettings.create();
+        SSLContext sslContext = SSLContext.getDefault();
+        SSLSocketFactory factory = sslContext.getSocketFactory();
+        original.setSSLSocketFactory(factory);
+
+        HttpSettings copy = original.copy();
+        assertEquals(factory, copy.getSSLSocketFactory());
     }
 
     // --- toString ---

@@ -5,12 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class DoubleBinaryOperatorTest extends TestBase {
 
     @Test
@@ -39,6 +37,28 @@ public class DoubleBinaryOperatorTest extends TestBase {
         DoubleBinaryOperator operator = (left, right) -> left / right;
         double result = operator.applyAsDouble(20.0, 4.0);
         assertEquals(5.0, result, 0.0001);
+    }
+
+    @Test
+    public void testApplyAsDouble_PowerOperation() {
+        DoubleBinaryOperator operator = Math::pow;
+        double result = operator.applyAsDouble(2.0, 3.0);
+        assertEquals(8.0, result, 0.0001);
+    }
+
+    @Test
+    public void testApplyAsDouble_ModuloOperation() {
+        DoubleBinaryOperator operator = (left, right) -> left % right;
+        double result = operator.applyAsDouble(10.0, 3.0);
+        assertEquals(1.0, result, 0.0001);
+    }
+
+    @Test
+    public void testJavaUtilFunctionCompatibility() {
+        DoubleBinaryOperator operator = (left, right) -> left + right;
+        java.util.function.DoubleBinaryOperator javaOperator = operator;
+        double result = javaOperator.applyAsDouble(5.0, 3.0);
+        assertEquals(8.0, result, 0.0001);
     }
 
     @Test
@@ -99,28 +119,6 @@ public class DoubleBinaryOperatorTest extends TestBase {
         DoubleBinaryOperator operator = Math::max;
         double result = operator.applyAsDouble(15.5, 10.5);
         assertEquals(15.5, result, 0.0001);
-    }
-
-    @Test
-    public void testApplyAsDouble_PowerOperation() {
-        DoubleBinaryOperator operator = Math::pow;
-        double result = operator.applyAsDouble(2.0, 3.0);
-        assertEquals(8.0, result, 0.0001);
-    }
-
-    @Test
-    public void testApplyAsDouble_ModuloOperation() {
-        DoubleBinaryOperator operator = (left, right) -> left % right;
-        double result = operator.applyAsDouble(10.0, 3.0);
-        assertEquals(1.0, result, 0.0001);
-    }
-
-    @Test
-    public void testJavaUtilFunctionCompatibility() {
-        DoubleBinaryOperator operator = (left, right) -> left + right;
-        java.util.function.DoubleBinaryOperator javaOperator = operator;
-        double result = javaOperator.applyAsDouble(5.0, 3.0);
-        assertEquals(8.0, result, 0.0001);
     }
 
     @Test

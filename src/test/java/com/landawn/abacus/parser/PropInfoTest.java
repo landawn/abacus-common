@@ -13,7 +13,6 @@ import java.util.Date;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -27,7 +26,6 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.Objectory;
 
-@Tag("new-test")
 public class PropInfoTest extends TestBase {
 
     private ParserUtil.BeanInfo beanInfo;
@@ -420,5 +418,181 @@ public class PropInfoTest extends TestBase {
     public static class TestObject {
         public String value;
     }
+
+    @Test
+    public void testSetPropValue_withNullValue() {
+        ParserUtil.PropInfo nameProp = beanInfo.getPropInfo("name");
+        nameProp.setPropValue(testBean, null);
+        Assertions.assertNull(testBean.getName());
+    }
+
+    @Test
+    public void testSetPropValue_withNumericStringConversion() {
+        ParserUtil.PropInfo idProp = beanInfo.getPropInfo("id");
+        idProp.setPropValue(testBean, "100");
+        Assertions.assertEquals(100L, testBean.getId());
+    }
+
+    @Test
+    public void testSetPropValue_withDirectLongValue() {
+        ParserUtil.PropInfo idProp = beanInfo.getPropInfo("id");
+        idProp.setPropValue(testBean, 200L);
+        Assertions.assertEquals(200L, testBean.getId());
+    }
+
+    @Test
+    public void testGetPropValue_returnsNull_whenNotSet() {
+        ParserUtil.PropInfo nameProp = beanInfo.getPropInfo("name");
+        Assertions.assertNull(nameProp.getPropValue(testBean));
+    }
+
+    @Test
+    public void testGetPropValue_returnsCorrectValue() {
+        testBean.setName("GetTest");
+        testBean.setId(999L);
+        ParserUtil.PropInfo nameProp = beanInfo.getPropInfo("name");
+        ParserUtil.PropInfo idProp = beanInfo.getPropInfo("id");
+        Assertions.assertEquals("GetTest", nameProp.getPropValue(testBean));
+        Assertions.assertEquals(999L, (Long) idProp.getPropValue(testBean));
+    }
+
+    @Test
+    public void testReadPropValue_stringType() {
+        ParserUtil.PropInfo nameProp = beanInfo.getPropInfo("name");
+        String result = (String) nameProp.readPropValue("hello");
+        Assertions.assertEquals("hello", result);
+    }
+
+    @Test
+    public void testReadPropValue_longType() {
+        ParserUtil.PropInfo idProp = beanInfo.getPropInfo("id");
+        Long result = (Long) idProp.readPropValue("12345");
+        Assertions.assertEquals(12345L, result);
+    }
+
+    @Test
+    public void testReadPropValue_withNullFormatField() {
+        ParserUtil.PropInfo columnProp = beanInfo.getPropInfo("columnField");
+        Assertions.assertFalse(columnProp.hasFormat);
+        String result = (String) columnProp.readPropValue("colValue");
+        Assertions.assertEquals("colValue", result);
+    }
+
+    @Test
+    public void testWritePropValue_withNullValue() throws java.io.IOException {
+        com.landawn.abacus.util.CharacterWriter writer = Objectory.createBufferedJsonWriter();
+        try {
+            ParserUtil.PropInfo idProp = beanInfo.getPropInfo("id");
+            idProp.writePropValue(writer, null, JsonSerConfig.create());
+            String result = writer.toString();
+            Assertions.assertEquals("null", result);
+        } finally {
+            Objectory.recycle(writer);
+        }
+    }
+
+    @Test
+    public void testWritePropValue_stringTypeNoFormat() throws java.io.IOException {
+        com.landawn.abacus.util.CharacterWriter writer = Objectory.createBufferedJsonWriter();
+        try {
+            ParserUtil.PropInfo nameProp = beanInfo.getPropInfo("name");
+            nameProp.writePropValue(writer, "plainValue", JsonSerConfig.create());
+            String result = writer.toString();
+            Assertions.assertTrue(result.contains("plainValue"));
+        } finally {
+            Objectory.recycle(writer);
+        }
+    }
+
+    @Test
+    public void testPropInfo_isTransientField() {
+        ParserUtil.PropInfo transientProp = beanInfo.getPropInfo("transientField");
+        Assertions.assertNotNull(transientProp);
+        Assertions.assertTrue(transientProp.isTransient);
+    }
+
+    @Test
+    public void testPropInfo_isMarkedAsReadOnlyId() {
+        ParserUtil.PropInfo readOnlyIdProp = beanInfo.getPropInfo("readOnlyId");
+        Assertions.assertNotNull(readOnlyIdProp);
+        Assertions.assertTrue(readOnlyIdProp.isMarkedAsReadOnlyId);
+    }
+
+    @Test
+    public void testGetAnnotations_nonNullForAnnotatedField() {
+        ParserUtil.PropInfo idProp = beanInfo.getPropInfo("id");
+        Assertions.assertNotNull(idProp.annotations);
+        Assertions.assertFalse(idProp.annotations.isEmpty());
+    }
+
+    @Test
+    public void testPropInfoHasFormat_forDateField() {
+        ParserUtil.PropInfo dateProp = beanInfo.getPropInfo("dateField");
+        Assertions.assertTrue(dateProp.hasFormat);
+        Assertions.assertNotNull(dateProp.dateFormat);
+    }
+
+    @Test
+    public void testPropInfoHasFormat_forNumberField() {
+        ParserUtil.PropInfo numProp = beanInfo.getPropInfo("numberField");
+        Assertions.assertTrue(numProp.hasFormat);
+        Assertions.assertNotNull(numProp.numberFormat);
+    }
+
+    @Test
+    public void testBeanInfoWithEnumField() {
+        ParserUtil.BeanInfo enumBeanInfo = ParserUtil.getBeanInfo(BeanWithEnum.class);
+        ParserUtil.PropInfo statusProp = enumBeanInfo.getPropInfo("status");
+        Assertions.assertNotNull(statusProp);
+        Assertions.assertNotNull(statusProp.type);
+    }
+
+    @Test
+    public void testSetAndGetPropValue_allDateTimeTypes() {
+        java.util.Date now = new java.util.Date();
+        ParserUtil.PropInfo dateProp = beanInfo.getPropInfo("dateField");
+        dateProp.setPropValue(testBean, now);
+        Assertions.assertEquals(now, dateProp.getPropValue(testBean));
+
+        java.sql.Timestamp ts = new java.sql.Timestamp(System.currentTimeMillis());
+        ParserUtil.PropInfo tsProp = beanInfo.getPropInfo("timestampField");
+        tsProp.setPropValue(testBean, ts);
+        Assertions.assertEquals(ts, tsProp.getPropValue(testBean));
+    }
+
+    @Test
+    public void testWritePropValue_withDateFormatAndNoQuote() throws java.io.IOException {
+        com.landawn.abacus.util.CharacterWriter writer = Objectory.createBufferedJsonWriter();
+        try {
+            ParserUtil.PropInfo dateProp = beanInfo.getPropInfo("dateField");
+            // No quotation in config
+            JsonXmlSerConfig<?> noQuoteConfig = JsonSerConfig.create().setStringQuotation((char) 0);
+            java.util.Date date = new java.util.Date();
+            dateProp.writePropValue(writer, date, noQuoteConfig);
+            String result = writer.toString();
+            Assertions.assertNotNull(result);
+            Assertions.assertFalse(result.isEmpty());
+        } finally {
+            Objectory.recycle(writer);
+        }
+    }
+
+    public enum Status {
+        ACTIVE, INACTIVE
+    }
+
+    public static class BeanWithEnum {
+        private Status status;
+
+        public Status getStatus() {
+            return status;
+        }
+
+        public void setStatus(Status status) {
+            this.status = status;
+        }
+    }
+
+    // TODO: Remaining PropInfo gaps are low-level field-handle/object-array assignment branches that need synthetic BeanInfo wiring not exposed through normal property APIs.
 
 }

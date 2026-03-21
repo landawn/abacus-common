@@ -19,12 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class IntBiFunctionTest extends TestBase {
 
     @Test
@@ -61,6 +59,13 @@ public class IntBiFunctionTest extends TestBase {
     }
 
     @Test
+    public void test_apply_returningNull() {
+        IntBiFunction<String> alwaysNull = (t, u) -> null;
+
+        assertNull(alwaysNull.apply(10, 20));
+    }
+
+    @Test
     public void test_andThen() {
         IntBiFunction<Long> multiply = (t, u) -> (long) t * u;
         java.util.function.Function<Long, String> addPrefix = result -> "Result: " + result;
@@ -69,12 +74,5 @@ public class IntBiFunctionTest extends TestBase {
 
         assertEquals("Result: 30", combined.apply(5, 6));
         assertEquals("Result: 0", combined.apply(0, 10));
-    }
-
-    @Test
-    public void test_apply_returningNull() {
-        IntBiFunction<String> alwaysNull = (t, u) -> null;
-
-        assertNull(alwaysNull.apply(10, 20));
     }
 }

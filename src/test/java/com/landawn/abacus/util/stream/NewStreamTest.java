@@ -1,5 +1,7 @@
 package com.landawn.abacus.util.stream;
 
+import com.landawn.abacus.TestBase;
+
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import org.junit.jupiter.api.Test;
@@ -9,7 +11,7 @@ import com.landawn.abacus.util.Fnn;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Seq;
 
-public class NewStreamTest {
+public class NewStreamTest extends TestBase {
 
     @Test
     public void test_peek_last() throws Exception {

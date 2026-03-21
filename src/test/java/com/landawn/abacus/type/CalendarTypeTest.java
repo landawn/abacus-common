@@ -17,20 +17,18 @@ import java.util.Calendar;
 import java.util.Date;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class CalendarTypeTest extends TestBase {
 
     private final CalendarType type = new CalendarType();
 
     @Test
-    public void test_name() {
-        assertNotNull(type.name());
-        assertFalse(type.name().isEmpty());
+    public void testClazz() {
+        Class<Calendar> result = type.javaType();
+        assertEquals(Calendar.class, result);
     }
 
     @Test
@@ -39,26 +37,6 @@ public class CalendarTypeTest extends TestBase {
         Object result = type.valueOf((String) null);
         // Result may be null or default value depending on type
         assertNull(result);
-    }
-
-    @Test
-    public void test_get_ResultSet_byLabel() throws SQLException {
-        ResultSet rs = mock(ResultSet.class);
-        // Basic get test - actual implementation will vary by type
-        assertDoesNotThrow(() -> type.get(rs, "col"));
-    }
-
-    @Test
-    public void test_set_CallableStatement() throws SQLException {
-        CallableStatement stmt = mock(CallableStatement.class);
-        // Basic set test - actual implementation will vary by type
-        assertDoesNotThrow(() -> type.set(stmt, "param", null));
-    }
-
-    @Test
-    public void testClazz() {
-        Class<Calendar> result = type.javaType();
-        assertEquals(Calendar.class, result);
     }
 
     @Test
@@ -194,6 +172,13 @@ public class CalendarTypeTest extends TestBase {
     }
 
     @Test
+    public void test_get_ResultSet_byLabel() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+        // Basic get test - actual implementation will vary by type
+        assertDoesNotThrow(() -> type.get(rs, "col"));
+    }
+
+    @Test
     public void testGet_ResultSet_Int() throws SQLException {
         ResultSet rs = mock(ResultSet.class);
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
@@ -239,6 +224,19 @@ public class CalendarTypeTest extends TestBase {
 
         Assertions.assertNull(result);
         verify(rs).getTimestamp("dateColumn");
+    }
+
+    @Test
+    public void test_name() {
+        assertNotNull(type.name());
+        assertFalse(type.name().isEmpty());
+    }
+
+    @Test
+    public void test_set_CallableStatement() throws SQLException {
+        CallableStatement stmt = mock(CallableStatement.class);
+        // Basic set test - actual implementation will vary by type
+        assertDoesNotThrow(() -> type.set(stmt, "param", null));
     }
 
 }

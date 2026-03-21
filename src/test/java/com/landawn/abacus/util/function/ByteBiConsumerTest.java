@@ -6,13 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Pair;
 
-@Tag("2025")
 public class ByteBiConsumerTest extends TestBase {
 
     @Test
@@ -55,6 +53,27 @@ public class ByteBiConsumerTest extends TestBase {
     }
 
     @Test
+    public void testWithNegativeValues() {
+        final List<Byte> result = new ArrayList<>();
+        ByteBiConsumer consumer = (t, u) -> result.add((byte) (t + u));
+
+        consumer.accept((byte) -5, (byte) 3);
+        assertEquals(1, result.size());
+        assertEquals((byte) -2, result.get(0));
+    }
+
+    @Test
+    public void testWithBoundaryValues() {
+        final List<Pair<Byte, Byte>> result = new ArrayList<>();
+        ByteBiConsumer consumer = (t, u) -> result.add(Pair.of(t, u));
+
+        consumer.accept(Byte.MIN_VALUE, Byte.MAX_VALUE);
+        assertEquals(1, result.size());
+        assertEquals(Byte.MIN_VALUE, result.get(0).left());
+        assertEquals(Byte.MAX_VALUE, result.get(0).right());
+    }
+
+    @Test
     public void testAndThen() {
         final List<Byte> result = new ArrayList<>();
         ByteBiConsumer first = (t, u) -> result.add((byte) (t + u));
@@ -82,27 +101,6 @@ public class ByteBiConsumerTest extends TestBase {
         assertEquals((byte) 5, result.get(0));
         assertEquals((byte) 7, result.get(1));
         assertEquals((byte) 12, result.get(2));
-    }
-
-    @Test
-    public void testWithNegativeValues() {
-        final List<Byte> result = new ArrayList<>();
-        ByteBiConsumer consumer = (t, u) -> result.add((byte) (t + u));
-
-        consumer.accept((byte) -5, (byte) 3);
-        assertEquals(1, result.size());
-        assertEquals((byte) -2, result.get(0));
-    }
-
-    @Test
-    public void testWithBoundaryValues() {
-        final List<Pair<Byte, Byte>> result = new ArrayList<>();
-        ByteBiConsumer consumer = (t, u) -> result.add(Pair.of(t, u));
-
-        consumer.accept(Byte.MIN_VALUE, Byte.MAX_VALUE);
-        assertEquals(1, result.size());
-        assertEquals(Byte.MIN_VALUE, result.get(0).left());
-        assertEquals(Byte.MAX_VALUE, result.get(0).right());
     }
 
     @Test

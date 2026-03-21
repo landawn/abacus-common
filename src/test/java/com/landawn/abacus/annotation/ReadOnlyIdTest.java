@@ -13,12 +13,10 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ReadOnlyIdTest extends TestBase {
     @ReadOnlyId
     static class TestEntity1 {
@@ -28,25 +26,6 @@ public class ReadOnlyIdTest extends TestBase {
 
     @ReadOnlyId({ "order_id", "line_number" })
     static class TestEntity2 {
-    }
-
-    @Test
-    public void testTypeAnnotation() {
-        assertTrue(TestEntity1.class.isAnnotationPresent(ReadOnlyId.class));
-    }
-
-    @Test
-    public void testFieldAnnotation() throws NoSuchFieldException {
-        Field field = TestEntity1.class.getDeclaredField("id");
-        assertTrue(field.isAnnotationPresent(ReadOnlyId.class));
-    }
-
-    @Test
-    public void testDefaultValue() throws NoSuchFieldException {
-        Field field = TestEntity1.class.getDeclaredField("id");
-        ReadOnlyId annotation = field.getAnnotation(ReadOnlyId.class);
-        assertNotNull(annotation);
-        assertArrayEquals(new String[] {}, annotation.value());
     }
 
     @Test
@@ -71,6 +50,32 @@ public class ReadOnlyIdTest extends TestBase {
     }
 
     @Test
+    public void testDefaultValue() throws NoSuchFieldException {
+        Field field = TestEntity1.class.getDeclaredField("id");
+        ReadOnlyId annotation = field.getAnnotation(ReadOnlyId.class);
+        assertNotNull(annotation);
+        assertArrayEquals(new String[] {}, annotation.value());
+    }
+
+    @Test
+    public void testValueMethodExists() throws NoSuchMethodException {
+        Method valueMethod = ReadOnlyId.class.getDeclaredMethod("value");
+        assertNotNull(valueMethod);
+        assertEquals(String[].class, valueMethod.getReturnType());
+    }
+
+    @Test
+    public void testTypeAnnotation() {
+        assertTrue(TestEntity1.class.isAnnotationPresent(ReadOnlyId.class));
+    }
+
+    @Test
+    public void testFieldAnnotation() throws NoSuchFieldException {
+        Field field = TestEntity1.class.getDeclaredField("id");
+        assertTrue(field.isAnnotationPresent(ReadOnlyId.class));
+    }
+
+    @Test
     public void testDocumented() {
         assertTrue(ReadOnlyId.class.isAnnotationPresent(Documented.class));
     }
@@ -85,12 +90,5 @@ public class ReadOnlyIdTest extends TestBase {
         ReadOnlyId annotation = TestEntity1.class.getAnnotation(ReadOnlyId.class);
         assertNotNull(annotation);
         assertEquals(ReadOnlyId.class, annotation.annotationType());
-    }
-
-    @Test
-    public void testValueMethodExists() throws NoSuchMethodException {
-        Method valueMethod = ReadOnlyId.class.getDeclaredMethod("value");
-        assertNotNull(valueMethod);
-        assertEquals(String[].class, valueMethod.getReturnType());
     }
 }

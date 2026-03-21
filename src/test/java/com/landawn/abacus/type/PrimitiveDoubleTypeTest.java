@@ -15,12 +15,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class PrimitiveDoubleTypeTest extends TestBase {
 
     private final PrimitiveDoubleType type = new PrimitiveDoubleType();
@@ -31,13 +29,20 @@ public class PrimitiveDoubleTypeTest extends TestBase {
     }
 
     @Test
-    public void test_name() {
-        assertEquals("double", type.name());
+    public void test_defaultValue() {
+        assertEquals(Double.valueOf(0.0), type.defaultValue());
     }
 
     @Test
-    public void test_defaultValue() {
-        assertEquals(Double.valueOf(0.0), type.defaultValue());
+    public void testDefaultValue() {
+        Double defaultValue = type.defaultValue();
+        assertNotNull(defaultValue);
+        assertEquals(0.0, defaultValue);
+    }
+
+    @Test
+    public void test_name() {
+        assertEquals("double", type.name());
     }
 
     @Test
@@ -146,13 +151,6 @@ public class PrimitiveDoubleTypeTest extends TestBase {
     @Test
     public void test_isComparable() {
         assertTrue(type.isComparable());
-    }
-
-    @Test
-    public void testDefaultValue() {
-        Double defaultValue = type.defaultValue();
-        assertNotNull(defaultValue);
-        assertEquals(0.0, defaultValue);
     }
 
 }

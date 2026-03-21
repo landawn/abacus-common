@@ -4,13 +4,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class CharSupplierTest extends TestBase {
+
+    private static class TestObject {
+        char getValue() {
+            return 'M';
+        }
+    }
 
     @Test
     public void testGetAsChar() {
@@ -40,21 +44,6 @@ public class CharSupplierTest extends TestBase {
     }
 
     @Test
-    public void testZero() {
-        assertEquals('\0', CharSupplier.ZERO.getAsChar());
-        assertEquals('\0', CharSupplier.ZERO.getAsChar());
-    }
-
-    @Test
-    public void testRandom() {
-        char first = CharSupplier.RANDOM.getAsChar();
-        char second = CharSupplier.RANDOM.getAsChar();
-
-        assertTrue(first >= Character.MIN_VALUE && first <= Character.MAX_VALUE);
-        assertTrue(second >= Character.MIN_VALUE && second <= Character.MAX_VALUE);
-    }
-
-    @Test
     public void testRandomProducesDifferentValues() {
         boolean foundDifferent = false;
         char first = CharSupplier.RANDOM.getAsChar();
@@ -80,6 +69,29 @@ public class CharSupplierTest extends TestBase {
     }
 
     @Test
+    public void testMethodReference() {
+        TestObject obj = new TestObject();
+        CharSupplier supplier = obj::getValue;
+
+        assertEquals('M', supplier.getAsChar());
+    }
+
+    @Test
+    public void testZero() {
+        assertEquals('\0', CharSupplier.ZERO.getAsChar());
+        assertEquals('\0', CharSupplier.ZERO.getAsChar());
+    }
+
+    @Test
+    public void testRandom() {
+        char first = CharSupplier.RANDOM.getAsChar();
+        char second = CharSupplier.RANDOM.getAsChar();
+
+        assertTrue(first >= Character.MIN_VALUE && first <= Character.MAX_VALUE);
+        assertTrue(second >= Character.MIN_VALUE && second <= Character.MAX_VALUE);
+    }
+
+    @Test
     public void testBoundaryValues() {
         CharSupplier maxSupplier = () -> Character.MAX_VALUE;
         CharSupplier minSupplier = () -> Character.MIN_VALUE;
@@ -89,21 +101,7 @@ public class CharSupplierTest extends TestBase {
     }
 
     @Test
-    public void testMethodReference() {
-        TestObject obj = new TestObject();
-        CharSupplier supplier = obj::getValue;
-
-        assertEquals('M', supplier.getAsChar());
-    }
-
-    @Test
     public void testFunctionalInterface() {
         assertNotNull(CharSupplier.class.getAnnotation(FunctionalInterface.class));
-    }
-
-    private static class TestObject {
-        char getValue() {
-            return 'M';
-        }
     }
 }

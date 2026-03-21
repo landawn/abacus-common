@@ -14,28 +14,11 @@ import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class DurationTest extends TestBase {
-
-    // --- ZERO constant ---
-
-    @Test
-    public void testZeroConstant() {
-        assertNotNull(Duration.ZERO);
-        assertTrue(Duration.ZERO.isZero());
-        assertEquals(0L, Duration.ZERO.toMillis());
-
-        assertSame(Duration.ZERO, Duration.ofMillis(0));
-        assertSame(Duration.ZERO, Duration.ofSeconds(0));
-        assertSame(Duration.ZERO, Duration.ofMinutes(0));
-        assertSame(Duration.ZERO, Duration.ofHours(0));
-        assertSame(Duration.ZERO, Duration.ofDays(0));
-    }
 
     // --- ofDays ---
 
@@ -52,6 +35,37 @@ public class DurationTest extends TestBase {
         assertEquals(-86400000L, negative.toMillis());
 
         assertThrows(ArithmeticException.class, () -> Duration.ofDays(Long.MAX_VALUE / 1000));
+    }
+
+    @Test
+    public void testOverflowHandling() {
+        Assertions.assertThrows(ArithmeticException.class, () -> Duration.ofDays(Long.MAX_VALUE / 86400000L + 1));
+
+        Assertions.assertThrows(ArithmeticException.class, () -> Duration.ofHours(Long.MAX_VALUE / 3600000L + 1));
+
+        Duration large = Duration.ofMillis(Long.MAX_VALUE - 1000);
+        Assertions.assertThrows(ArithmeticException.class, () -> large.plusMillis(2000));
+
+        Duration small = Duration.ofMillis(Long.MIN_VALUE + 1000);
+        Assertions.assertThrows(ArithmeticException.class, () -> small.minusMillis(2000));
+
+        Duration d = Duration.ofDays(1000000);
+        Assertions.assertThrows(ArithmeticException.class, () -> d.multipliedBy(1000000));
+    }
+
+    @Test
+    public void testCombinedOperations() {
+        Duration workDay = Duration.ofHours(8);
+        Duration lunch = Duration.ofMinutes(30);
+        Duration meeting = Duration.ofMinutes(45);
+
+        Duration actualWork = workDay.minus(lunch).minus(meeting);
+        Assertions.assertEquals(405L, actualWork.toMinutes());
+
+        Duration result = Duration.ofDays(1).plusHours(2).plusMinutes(30).plusSeconds(15).plusMillis(500);
+
+        long expectedMillis = 86400000L + 7200000L + 1800000L + 15000L + 500L;
+        Assertions.assertEquals(expectedMillis, result.toMillis());
     }
 
     // --- ofHours ---
@@ -133,14 +147,6 @@ public class DurationTest extends TestBase {
         assertEquals(Duration.ZERO, zeroDiff);
     }
 
-    @Test
-    public void testBetween_dates_null() {
-        java.util.Date date = new java.util.Date();
-
-        assertThrows(IllegalArgumentException.class, () -> Duration.between(date, null));
-        assertThrows(IllegalArgumentException.class, () -> Duration.between(null, date));
-    }
-
     // --- between(Calendar, Calendar) ---
 
     @Test
@@ -160,14 +166,6 @@ public class DurationTest extends TestBase {
         cal1.setTimeInMillis(5_000L);
         Duration zeroDiff = Duration.between(cal1, cal2);
         assertEquals(Duration.ZERO, zeroDiff);
-    }
-
-    @Test
-    public void testBetween_calendars_null() {
-        Calendar cal = Calendar.getInstance();
-
-        assertThrows(IllegalArgumentException.class, () -> Duration.between(cal, null));
-        assertThrows(IllegalArgumentException.class, () -> Duration.between(null, cal));
     }
 
     // --- between(Temporal, Temporal) ---
@@ -197,6 +195,22 @@ public class DurationTest extends TestBase {
 
         Duration negativeDiff = Duration.between(ldt2, ldt1);
         assertEquals(Duration.ofMillis(-(TimeUnit.DAYS.toMillis(1) + 123)), negativeDiff);
+    }
+
+    @Test
+    public void testBetween_dates_null() {
+        java.util.Date date = new java.util.Date();
+
+        assertThrows(IllegalArgumentException.class, () -> Duration.between(date, null));
+        assertThrows(IllegalArgumentException.class, () -> Duration.between(null, date));
+    }
+
+    @Test
+    public void testBetween_calendars_null() {
+        Calendar cal = Calendar.getInstance();
+
+        assertThrows(IllegalArgumentException.class, () -> Duration.between(cal, null));
+        assertThrows(IllegalArgumentException.class, () -> Duration.between(null, cal));
     }
 
     @Test
@@ -697,35 +711,19 @@ public class DurationTest extends TestBase {
         assertEquals(10000L, abs.toMillis());
     }
 
-    @Test
-    public void testOverflowHandling() {
-        Assertions.assertThrows(ArithmeticException.class, () -> Duration.ofDays(Long.MAX_VALUE / 86400000L + 1));
-
-        Assertions.assertThrows(ArithmeticException.class, () -> Duration.ofHours(Long.MAX_VALUE / 3600000L + 1));
-
-        Duration large = Duration.ofMillis(Long.MAX_VALUE - 1000);
-        Assertions.assertThrows(ArithmeticException.class, () -> large.plusMillis(2000));
-
-        Duration small = Duration.ofMillis(Long.MIN_VALUE + 1000);
-        Assertions.assertThrows(ArithmeticException.class, () -> small.minusMillis(2000));
-
-        Duration d = Duration.ofDays(1000000);
-        Assertions.assertThrows(ArithmeticException.class, () -> d.multipliedBy(1000000));
-    }
+    // --- ZERO constant ---
 
     @Test
-    public void testCombinedOperations() {
-        Duration workDay = Duration.ofHours(8);
-        Duration lunch = Duration.ofMinutes(30);
-        Duration meeting = Duration.ofMinutes(45);
+    public void testZeroConstant() {
+        assertNotNull(Duration.ZERO);
+        assertTrue(Duration.ZERO.isZero());
+        assertEquals(0L, Duration.ZERO.toMillis());
 
-        Duration actualWork = workDay.minus(lunch).minus(meeting);
-        Assertions.assertEquals(405L, actualWork.toMinutes());
-
-        Duration result = Duration.ofDays(1).plusHours(2).plusMinutes(30).plusSeconds(15).plusMillis(500);
-
-        long expectedMillis = 86400000L + 7200000L + 1800000L + 15000L + 500L;
-        Assertions.assertEquals(expectedMillis, result.toMillis());
+        assertSame(Duration.ZERO, Duration.ofMillis(0));
+        assertSame(Duration.ZERO, Duration.ofSeconds(0));
+        assertSame(Duration.ZERO, Duration.ofMinutes(0));
+        assertSame(Duration.ZERO, Duration.ofHours(0));
+        assertSame(Duration.ZERO, Duration.ofDays(0));
     }
 
 }

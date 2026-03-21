@@ -8,13 +8,32 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class IndexedTest extends TestBase {
+
+    @Test
+    public void test_of_long_largeIndex() {
+        Indexed<String> indexed = Indexed.of("Test", 5000000000L);
+        assertEquals("Test", indexed.value());
+        assertEquals(5000000000L, indexed.longIndex());
+    }
+
+    @Test
+    public void test_index_large() {
+        Indexed<String> indexed = Indexed.of("Test", 999999999L);
+        assertEquals(999999999L, indexed.index());
+    }
+
+    @Test
+    public void test_differentGenericTypes() {
+        Indexed<String> stringIdx = Indexed.of("text", 0);
+        Indexed<Number> numberIdx = Indexed.of(100, 0);
+
+        assertFalse(stringIdx.equals(numberIdx));
+    }
 
     @Test
     public void test_of_int_basicCreation() {
@@ -46,12 +65,6 @@ public class IndexedTest extends TestBase {
     }
 
     @Test
-    public void test_of_int_negativeIndexThrows() {
-        assertThrows(IllegalArgumentException.class, () -> Indexed.of("Test", -1));
-        assertThrows(IllegalArgumentException.class, () -> Indexed.of("Test", -100));
-    }
-
-    @Test
     public void test_of_int_maxIntValue() {
         Indexed<String> indexed = Indexed.of("Max", Integer.MAX_VALUE);
         assertEquals("Max", indexed.value());
@@ -64,13 +77,6 @@ public class IndexedTest extends TestBase {
         assertNotNull(indexed);
         assertEquals("Hello", indexed.value());
         assertEquals(0L, indexed.index());
-    }
-
-    @Test
-    public void test_of_long_largeIndex() {
-        Indexed<String> indexed = Indexed.of("Test", 5000000000L);
-        assertEquals("Test", indexed.value());
-        assertEquals(5000000000L, indexed.longIndex());
     }
 
     @Test
@@ -88,41 +94,10 @@ public class IndexedTest extends TestBase {
     }
 
     @Test
-    public void test_of_long_negativeIndexThrows() {
-        assertThrows(IllegalArgumentException.class, () -> Indexed.of("Test", -1L));
-        assertThrows(IllegalArgumentException.class, () -> Indexed.of("Test", -1000L));
-    }
-
-    @Test
     public void test_of_long_maxLongValue() {
         Indexed<String> indexed = Indexed.of("Max", Long.MAX_VALUE);
         assertEquals("Max", indexed.value());
         assertEquals(Long.MAX_VALUE, indexed.longIndex());
-    }
-
-    @Test
-    public void test_value_string() {
-        Indexed<String> indexed = Indexed.of("Hello World", 0);
-        assertEquals("Hello World", indexed.value());
-    }
-
-    @Test
-    public void test_value_integer() {
-        Indexed<Integer> indexed = Indexed.of(42, 5);
-        assertEquals(42, indexed.value());
-    }
-
-    @Test
-    public void test_value_null() {
-        Indexed<String> indexed = Indexed.of(null, 10);
-        assertEquals(null, indexed.value());
-    }
-
-    @Test
-    public void test_value_complexObject() {
-        java.util.List<String> list = java.util.Arrays.asList("a", "b", "c");
-        Indexed<java.util.List<String>> indexed = Indexed.of(list, 3);
-        assertEquals(list, indexed.value());
     }
 
     @Test
@@ -138,16 +113,115 @@ public class IndexedTest extends TestBase {
     }
 
     @Test
-    public void test_index_large() {
-        Indexed<String> indexed = Indexed.of("Test", 999999999L);
-        assertEquals(999999999L, indexed.index());
+    public void test_multipleTypesOfValues() {
+        Indexed<String> stringIndexed = Indexed.of("Hello", 0);
+        Indexed<Integer> intIndexed = Indexed.of(42, 1);
+        Indexed<Double> doubleIndexed = Indexed.of(3.14, 2);
+        Indexed<Boolean> boolIndexed = Indexed.of(true, 3);
+
+        assertEquals("Hello", stringIndexed.value());
+        assertEquals(42, intIndexed.value());
+        assertEquals(3.14, doubleIndexed.value());
+        assertEquals(true, boolIndexed.value());
     }
 
     @Test
-    public void test_hashCode_sameValuesProduceSameHash() {
-        Indexed<String> indexed1 = Indexed.of("Hello", 5);
-        Indexed<String> indexed2 = Indexed.of("Hello", 5);
-        assertEquals(indexed1.hashCode(), indexed2.hashCode());
+    public void test_largeIndexWithIntOverload() {
+        Indexed<String> indexed = Indexed.of("Test", Integer.MAX_VALUE);
+        assertEquals(Integer.MAX_VALUE, indexed.index());
+    }
+
+    @Test
+    public void test_veryLargeIndexWithLongOverload() {
+        long largeIndex = Integer.MAX_VALUE + 1000L;
+        Indexed<String> indexed = Indexed.of("Test", largeIndex);
+        assertEquals(largeIndex, indexed.longIndex());
+    }
+
+    @Test
+    public void testOfWithValueAndIntIndex() {
+        Indexed<String> stringIndexed = Indexed.of("Hello", 5);
+        Assertions.assertEquals("Hello", stringIndexed.value());
+        Assertions.assertEquals(5, stringIndexed.index());
+
+        Indexed<Integer> intIndexed = Indexed.of(42, 0);
+        Assertions.assertEquals(42, intIndexed.value());
+        Assertions.assertEquals(0, intIndexed.index());
+
+        Indexed<String> nullIndexed = Indexed.of(null, 10);
+        Assertions.assertNull(nullIndexed.value());
+        Assertions.assertEquals(10, nullIndexed.index());
+    }
+
+    @Test
+    public void testOfWithValueAndLongIndex() {
+        Indexed<String> indexed = Indexed.of("World", 1000000000000L);
+        Assertions.assertEquals("World", indexed.value());
+        Assertions.assertEquals(1000000000000L, indexed.longIndex());
+
+        Indexed<Double> maxIndexed = Indexed.of(3.14, Long.MAX_VALUE);
+        Assertions.assertEquals(3.14, maxIndexed.value());
+        Assertions.assertEquals(Long.MAX_VALUE, maxIndexed.longIndex());
+    }
+
+    @Test
+    public void test_of_int_negativeIndexThrows() {
+        assertThrows(IllegalArgumentException.class, () -> Indexed.of("Test", -1));
+        assertThrows(IllegalArgumentException.class, () -> Indexed.of("Test", -100));
+    }
+
+    @Test
+    public void test_of_long_negativeIndexThrows() {
+        assertThrows(IllegalArgumentException.class, () -> Indexed.of("Test", -1L));
+        assertThrows(IllegalArgumentException.class, () -> Indexed.of("Test", -1000L));
+    }
+
+    @Test
+    public void testOfWithNegativeIndexThrowsException() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Indexed.of("test", -1);
+        });
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Indexed.of("test", -1L);
+        });
+    }
+
+    @Test
+    public void test_value_string() {
+        Indexed<String> indexed = Indexed.of("Hello World", 0);
+        assertEquals("Hello World", indexed.value());
+    }
+
+    @Test
+    public void test_value_integer() {
+        Indexed<Integer> indexed = Indexed.of(42, 5);
+        assertEquals(42, indexed.value());
+    }
+
+    @Test
+    public void test_value_complexObject() {
+        java.util.List<String> list = java.util.Arrays.asList("a", "b", "c");
+        Indexed<java.util.List<String>> indexed = Indexed.of(list, 3);
+        assertEquals(list, indexed.value());
+    }
+
+    @Test
+    public void test_value_null() {
+        Indexed<String> indexed = Indexed.of(null, 10);
+        assertEquals(null, indexed.value());
+    }
+
+    @Test
+    public void testValue() {
+        Indexed<String> indexed = Indexed.of("test value", 3);
+        Assertions.assertEquals("test value", indexed.value());
+
+        Indexed<Integer> intIndexed = Indexed.of(100, 5);
+        Assertions.assertEquals(100, intIndexed.value());
+
+        Indexed<Object> objIndexed = Indexed.of(new Object(), 7);
+        Assertions.assertNotNull(objIndexed.value());
     }
 
     @Test
@@ -165,13 +239,6 @@ public class IndexedTest extends TestBase {
     }
 
     @Test
-    public void test_hashCode_nullValue() {
-        Indexed<String> indexed1 = Indexed.of(null, 5);
-        Indexed<String> indexed2 = Indexed.of(null, 5);
-        assertEquals(indexed1.hashCode(), indexed2.hashCode());
-    }
-
-    @Test
     public void test_hashCode_consistency() {
         Indexed<String> indexed = Indexed.of("Test", 10);
         int hash1 = indexed.hashCode();
@@ -180,9 +247,35 @@ public class IndexedTest extends TestBase {
     }
 
     @Test
-    public void test_equals_sameObject() {
-        Indexed<String> indexed = Indexed.of("Hello", 5);
-        assertTrue(indexed.equals(indexed));
+    public void test_hashCode_sameValuesProduceSameHash() {
+        Indexed<String> indexed1 = Indexed.of("Hello", 5);
+        Indexed<String> indexed2 = Indexed.of("Hello", 5);
+        assertEquals(indexed1.hashCode(), indexed2.hashCode());
+    }
+
+    @Test
+    public void test_hashCode_nullValue() {
+        Indexed<String> indexed1 = Indexed.of(null, 5);
+        Indexed<String> indexed2 = Indexed.of(null, 5);
+        assertEquals(indexed1.hashCode(), indexed2.hashCode());
+    }
+
+    @Test
+    public void testHashCode() {
+        Indexed<String> indexed1 = Indexed.of("test", 5);
+        Indexed<String> indexed2 = Indexed.of("test", 5);
+        Indexed<String> indexed3 = Indexed.of("test", 6);
+        Indexed<String> indexed4 = Indexed.of("different", 5);
+        Indexed<String> indexed5 = Indexed.of(null, 5);
+
+        Assertions.assertEquals(indexed1.hashCode(), indexed2.hashCode());
+
+        Assertions.assertNotEquals(indexed1.hashCode(), indexed3.hashCode());
+
+        Assertions.assertNotEquals(indexed1.hashCode(), indexed4.hashCode());
+
+        int nullHash = indexed5.hashCode();
+        Assertions.assertEquals(5 * 31, nullHash);
     }
 
     @Test
@@ -215,27 +308,6 @@ public class IndexedTest extends TestBase {
     }
 
     @Test
-    public void test_equals_nullValues() {
-        Indexed<String> indexed1 = Indexed.of(null, 5);
-        Indexed<String> indexed2 = Indexed.of(null, 5);
-        assertTrue(indexed1.equals(indexed2));
-    }
-
-    @Test
-    public void test_equals_oneNullValue() {
-        Indexed<String> indexed1 = Indexed.of(null, 5);
-        Indexed<String> indexed2 = Indexed.of("Hello", 5);
-        assertFalse(indexed1.equals(indexed2));
-        assertFalse(indexed2.equals(indexed1));
-    }
-
-    @Test
-    public void test_equals_nullObject() {
-        Indexed<String> indexed = Indexed.of("Hello", 5);
-        assertFalse(indexed.equals(null));
-    }
-
-    @Test
     public void test_equals_differentType() {
         Indexed<String> indexed = Indexed.of("Hello", 5);
         assertFalse(indexed.equals("Hello"));
@@ -262,151 +334,30 @@ public class IndexedTest extends TestBase {
     }
 
     @Test
-    public void test_toString_basicFormat() {
+    public void test_equals_sameObject() {
         Indexed<String> indexed = Indexed.of("Hello", 5);
-        String result = indexed.toString();
-        assertEquals("[5]=Hello", result);
+        assertTrue(indexed.equals(indexed));
     }
 
     @Test
-    public void test_toString_zeroIndex() {
-        Indexed<String> indexed = Indexed.of("Test", 0);
-        assertEquals("[0]=Test", indexed.toString());
+    public void test_equals_nullValues() {
+        Indexed<String> indexed1 = Indexed.of(null, 5);
+        Indexed<String> indexed2 = Indexed.of(null, 5);
+        assertTrue(indexed1.equals(indexed2));
     }
 
     @Test
-    public void test_toString_largeIndex() {
-        Indexed<String> indexed = Indexed.of("Test", 999999);
-        assertEquals("[999999]=Test", indexed.toString());
+    public void test_equals_oneNullValue() {
+        Indexed<String> indexed1 = Indexed.of(null, 5);
+        Indexed<String> indexed2 = Indexed.of("Hello", 5);
+        assertFalse(indexed1.equals(indexed2));
+        assertFalse(indexed2.equals(indexed1));
     }
 
     @Test
-    public void test_toString_nullValue() {
-        Indexed<String> indexed = Indexed.of(null, 5);
-        assertEquals("[5]=null", indexed.toString());
-    }
-
-    @Test
-    public void test_toString_integerValue() {
-        Indexed<Integer> indexed = Indexed.of(42, 10);
-        assertEquals("[10]=42", indexed.toString());
-    }
-
-    @Test
-    public void test_toString_longIndex() {
-        Indexed<String> indexed = Indexed.of("Test", 5000000000L);
-        assertEquals("[5000000000]=Test", indexed.toString());
-    }
-
-    @Test
-    public void test_toString_complexValue() {
-        java.util.List<String> list = java.util.Arrays.asList("a", "b");
-        Indexed<java.util.List<String>> indexed = Indexed.of(list, 3);
-        String result = indexed.toString();
-        assertTrue(result.startsWith("[3]="));
-        assertTrue(result.contains("a"));
-        assertTrue(result.contains("b"));
-    }
-
-    @Test
-    public void test_multipleTypesOfValues() {
-        Indexed<String> stringIndexed = Indexed.of("Hello", 0);
-        Indexed<Integer> intIndexed = Indexed.of(42, 1);
-        Indexed<Double> doubleIndexed = Indexed.of(3.14, 2);
-        Indexed<Boolean> boolIndexed = Indexed.of(true, 3);
-
-        assertEquals("Hello", stringIndexed.value());
-        assertEquals(42, intIndexed.value());
-        assertEquals(3.14, doubleIndexed.value());
-        assertEquals(true, boolIndexed.value());
-    }
-
-    @Test
-    public void test_largeIndexWithIntOverload() {
-        Indexed<String> indexed = Indexed.of("Test", Integer.MAX_VALUE);
-        assertEquals(Integer.MAX_VALUE, indexed.index());
-    }
-
-    @Test
-    public void test_veryLargeIndexWithLongOverload() {
-        long largeIndex = Integer.MAX_VALUE + 1000L;
-        Indexed<String> indexed = Indexed.of("Test", largeIndex);
-        assertEquals(largeIndex, indexed.longIndex());
-    }
-
-    @Test
-    public void test_differentGenericTypes() {
-        Indexed<String> stringIdx = Indexed.of("text", 0);
-        Indexed<Number> numberIdx = Indexed.of(100, 0);
-
-        assertFalse(stringIdx.equals(numberIdx));
-    }
-
-    @Test
-    public void testOfWithValueAndIntIndex() {
-        Indexed<String> stringIndexed = Indexed.of("Hello", 5);
-        Assertions.assertEquals("Hello", stringIndexed.value());
-        Assertions.assertEquals(5, stringIndexed.index());
-
-        Indexed<Integer> intIndexed = Indexed.of(42, 0);
-        Assertions.assertEquals(42, intIndexed.value());
-        Assertions.assertEquals(0, intIndexed.index());
-
-        Indexed<String> nullIndexed = Indexed.of(null, 10);
-        Assertions.assertNull(nullIndexed.value());
-        Assertions.assertEquals(10, nullIndexed.index());
-    }
-
-    @Test
-    public void testOfWithValueAndLongIndex() {
-        Indexed<String> indexed = Indexed.of("World", 1000000000000L);
-        Assertions.assertEquals("World", indexed.value());
-        Assertions.assertEquals(1000000000000L, indexed.longIndex());
-
-        Indexed<Double> maxIndexed = Indexed.of(3.14, Long.MAX_VALUE);
-        Assertions.assertEquals(3.14, maxIndexed.value());
-        Assertions.assertEquals(Long.MAX_VALUE, maxIndexed.longIndex());
-    }
-
-    @Test
-    public void testOfWithNegativeIndexThrowsException() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Indexed.of("test", -1);
-        });
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Indexed.of("test", -1L);
-        });
-    }
-
-    @Test
-    public void testValue() {
-        Indexed<String> indexed = Indexed.of("test value", 3);
-        Assertions.assertEquals("test value", indexed.value());
-
-        Indexed<Integer> intIndexed = Indexed.of(100, 5);
-        Assertions.assertEquals(100, intIndexed.value());
-
-        Indexed<Object> objIndexed = Indexed.of(new Object(), 7);
-        Assertions.assertNotNull(objIndexed.value());
-    }
-
-    @Test
-    public void testHashCode() {
-        Indexed<String> indexed1 = Indexed.of("test", 5);
-        Indexed<String> indexed2 = Indexed.of("test", 5);
-        Indexed<String> indexed3 = Indexed.of("test", 6);
-        Indexed<String> indexed4 = Indexed.of("different", 5);
-        Indexed<String> indexed5 = Indexed.of(null, 5);
-
-        Assertions.assertEquals(indexed1.hashCode(), indexed2.hashCode());
-
-        Assertions.assertNotEquals(indexed1.hashCode(), indexed3.hashCode());
-
-        Assertions.assertNotEquals(indexed1.hashCode(), indexed4.hashCode());
-
-        int nullHash = indexed5.hashCode();
-        Assertions.assertEquals(5 * 31, nullHash);
+    public void test_equals_nullObject() {
+        Indexed<String> indexed = Indexed.of("Hello", 5);
+        assertFalse(indexed.equals(null));
     }
 
     @Test
@@ -439,19 +390,38 @@ public class IndexedTest extends TestBase {
     }
 
     @Test
-    public void testToString() {
-        Indexed<String> stringIndexed = Indexed.of("Hello", 5);
-        Assertions.assertEquals("[5]=Hello", stringIndexed.toString());
+    public void test_toString_basicFormat() {
+        Indexed<String> indexed = Indexed.of("Hello", 5);
+        String result = indexed.toString();
+        assertEquals("[5]=Hello", result);
+    }
 
-        Indexed<Integer> intIndexed = Indexed.of(42, 10);
-        Assertions.assertEquals("[10]=42", intIndexed.toString());
+    @Test
+    public void test_toString_largeIndex() {
+        Indexed<String> indexed = Indexed.of("Test", 999999);
+        assertEquals("[999999]=Test", indexed.toString());
+    }
 
-        Indexed<String> nullIndexed = Indexed.of(null, 3);
-        String nullStr = nullIndexed.toString();
-        Assertions.assertTrue(nullStr.startsWith("[3]="));
+    @Test
+    public void test_toString_integerValue() {
+        Indexed<Integer> indexed = Indexed.of(42, 10);
+        assertEquals("[10]=42", indexed.toString());
+    }
 
-        Indexed<String> longIndexed = Indexed.of("test", 9999999999L);
-        Assertions.assertEquals("[9999999999]=test", longIndexed.toString());
+    @Test
+    public void test_toString_longIndex() {
+        Indexed<String> indexed = Indexed.of("Test", 5000000000L);
+        assertEquals("[5000000000]=Test", indexed.toString());
+    }
+
+    @Test
+    public void test_toString_complexValue() {
+        java.util.List<String> list = java.util.Arrays.asList("a", "b");
+        Indexed<java.util.List<String>> indexed = Indexed.of(list, 3);
+        String result = indexed.toString();
+        assertTrue(result.startsWith("[3]="));
+        assertTrue(result.contains("a"));
+        assertTrue(result.contains("b"));
     }
 
     @Test
@@ -467,6 +437,34 @@ public class IndexedTest extends TestBase {
         Assertions.assertEquals(customObj, objIndexed.value());
         Assertions.assertEquals(7, objIndexed.index());
         Assertions.assertEquals("[7]=CustomObject", objIndexed.toString());
+    }
+
+    @Test
+    public void test_toString_zeroIndex() {
+        Indexed<String> indexed = Indexed.of("Test", 0);
+        assertEquals("[0]=Test", indexed.toString());
+    }
+
+    @Test
+    public void test_toString_nullValue() {
+        Indexed<String> indexed = Indexed.of(null, 5);
+        assertEquals("[5]=null", indexed.toString());
+    }
+
+    @Test
+    public void testToString() {
+        Indexed<String> stringIndexed = Indexed.of("Hello", 5);
+        Assertions.assertEquals("[5]=Hello", stringIndexed.toString());
+
+        Indexed<Integer> intIndexed = Indexed.of(42, 10);
+        Assertions.assertEquals("[10]=42", intIndexed.toString());
+
+        Indexed<String> nullIndexed = Indexed.of(null, 3);
+        String nullStr = nullIndexed.toString();
+        Assertions.assertTrue(nullStr.startsWith("[3]="));
+
+        Indexed<String> longIndexed = Indexed.of("test", 9999999999L);
+        Assertions.assertEquals("[9999999999]=test", longIndexed.toString());
     }
 
 }

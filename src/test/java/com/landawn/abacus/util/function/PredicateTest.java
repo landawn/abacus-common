@@ -6,12 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class PredicateTest extends TestBase {
 
     @Test
@@ -35,12 +33,53 @@ public class PredicateTest extends TestBase {
     }
 
     @Test
+    public void testJavaUtilFunctionCompatibility() {
+        Predicate<String> predicate = s -> s.length() > 3;
+        java.util.function.Predicate<String> javaPredicate = predicate;
+
+        assertTrue(javaPredicate.test("hello"));
+        assertFalse(javaPredicate.test("hi"));
+    }
+
+    @Test
+    public void testFunctionalInterfaceContract() {
+        Predicate<String> lambda = s -> true;
+        assertNotNull(lambda);
+        assertDoesNotThrow(() -> lambda.test("test"));
+    }
+
+    @Test
+    public void testComplex_AndOrNegate() {
+        Predicate<Integer> predicate = ((Predicate<Integer>) n -> n > 5).and(n -> n < 10).or(n -> n == 15).negate();
+
+        assertFalse(predicate.test(7)); // (7>5 && 7<10) = true, negated = false
+        assertFalse(predicate.test(15)); // (15==15) = true, negated = false
+        assertTrue(predicate.test(3)); // (3>5 && 3<10) = false, (3==15) = false, negated = true
+    }
+
+    @Test
     public void testNegate() {
         Predicate<String> predicate = s -> s.isEmpty();
         Predicate<String> negated = predicate.negate();
 
         assertFalse(negated.test(""));
         assertTrue(negated.test("hello"));
+    }
+
+    @Test
+    public void testAnd_ShortCircuit() {
+        boolean[] called = new boolean[1];
+        called[0] = false;
+
+        Predicate<Integer> alwaysFalse = n -> false;
+        Predicate<Integer> shouldNotBeCalled = n -> {
+            called[0] = true;
+            return true;
+        };
+
+        Predicate<Integer> combined = alwaysFalse.and(shouldNotBeCalled);
+        assertFalse(combined.test(5));
+        assertFalse(called[0]);
     }
 
     @Test
@@ -62,18 +101,18 @@ public class PredicateTest extends TestBase {
     }
 
     @Test
-    public void testAnd_ShortCircuit() {
+    public void testOr_ShortCircuit() {
         boolean[] called = new boolean[1];
         called[0] = false;
 
-        Predicate<Integer> alwaysFalse = n -> false;
+        Predicate<Integer> alwaysTrue = n -> true;
         Predicate<Integer> shouldNotBeCalled = n -> {
             called[0] = true;
-            return true;
+            return false;
         };
 
-        Predicate<Integer> combined = alwaysFalse.and(shouldNotBeCalled);
-        assertFalse(combined.test(5));
+        Predicate<Integer> combined = alwaysTrue.or(shouldNotBeCalled);
+        assertTrue(combined.test(5));
         assertFalse(called[0]);
     }
 
@@ -96,50 +135,9 @@ public class PredicateTest extends TestBase {
     }
 
     @Test
-    public void testOr_ShortCircuit() {
-        boolean[] called = new boolean[1];
-        called[0] = false;
-
-        Predicate<Integer> alwaysTrue = n -> true;
-        Predicate<Integer> shouldNotBeCalled = n -> {
-            called[0] = true;
-            return false;
-        };
-
-        Predicate<Integer> combined = alwaysTrue.or(shouldNotBeCalled);
-        assertTrue(combined.test(5));
-        assertFalse(called[0]);
-    }
-
-    @Test
-    public void testComplex_AndOrNegate() {
-        Predicate<Integer> predicate = ((Predicate<Integer>) n -> n > 5).and(n -> n < 10).or(n -> n == 15).negate();
-
-        assertFalse(predicate.test(7)); // (7>5 && 7<10) = true, negated = false
-        assertFalse(predicate.test(15)); // (15==15) = true, negated = false
-        assertTrue(predicate.test(3)); // (3>5 && 3<10) = false, (3==15) = false, negated = true
-    }
-
-    @Test
     public void testToThrowable() {
         Predicate<String> predicate = s -> s.isEmpty();
         com.landawn.abacus.util.Throwables.Predicate<String, ?> throwablePredicate = predicate.toThrowable();
         assertNotNull(throwablePredicate);
-    }
-
-    @Test
-    public void testJavaUtilFunctionCompatibility() {
-        Predicate<String> predicate = s -> s.length() > 3;
-        java.util.function.Predicate<String> javaPredicate = predicate;
-
-        assertTrue(javaPredicate.test("hello"));
-        assertFalse(javaPredicate.test("hi"));
-    }
-
-    @Test
-    public void testFunctionalInterfaceContract() {
-        Predicate<String> lambda = s -> true;
-        assertNotNull(lambda);
-        assertDoesNotThrow(() -> lambda.test("test"));
     }
 }

@@ -74,11 +74,11 @@ public enum ContentFormat {
 
     /**
      * Returns the MIME content type associated with this format.
-     * 
+     *
      * <p>The content type indicates the media type of the resource, such as
-     * "application/json" for JSON data or "application/xml" for XML data.
+     * {@code "application/json"} for JSON data or {@code "application/xml"} for XML data.
      * An empty string is returned for formats that don't have a specific content type.</p>
-     * 
+     *
      * @return the content type string, or an empty string if not applicable
      */
     public String contentType() {
@@ -87,11 +87,11 @@ public enum ContentFormat {
 
     /**
      * Returns the content encoding (compression algorithm) associated with this format.
-     * 
+     *
      * <p>The content encoding indicates how the content has been compressed, such as
-     * "gzip" for GZIP compression, "lz4" for LZ4 compression, or "br" for Brotli compression.
+     * {@code "gzip"} for GZIP compression, {@code "lz4"} for LZ4 compression, or {@code "br"} for Brotli compression.
      * An empty string is returned for uncompressed formats.</p>
-     * 
+     *
      * @return the content encoding string, or an empty string if no compression is used
      */
     public String contentEncoding() {

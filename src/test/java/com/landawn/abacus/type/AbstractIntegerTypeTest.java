@@ -16,14 +16,12 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("new-test")
 public class AbstractIntegerTypeTest extends TestBase {
 
     private Type<Number> integerType;
@@ -48,6 +46,20 @@ public class AbstractIntegerTypeTest extends TestBase {
     }
 
     @Test
+    public void testValueOfCharArray() {
+        assertEquals(null, integerType.valueOf(null, 0, 0));
+        assertEquals(null, integerType.valueOf(new char[0], 0, 0));
+
+        char[] chars = "12345".toCharArray();
+        assertEquals(12345, integerType.valueOf(chars, 0, 5));
+        assertEquals(234, integerType.valueOf(chars, 1, 3));
+        assertEquals(5, integerType.valueOf(chars, 4, 1));
+
+        char[] negChars = "-789".toCharArray();
+        assertEquals(-789, integerType.valueOf(negChars, 0, 4));
+    }
+
+    @Test
     public void testValueOfString() {
         assertEquals(null, integerType.valueOf(""));
         assertEquals(null, integerType.valueOf((String) null));
@@ -62,20 +74,6 @@ public class AbstractIntegerTypeTest extends TestBase {
 
         assertThrows(NumberFormatException.class, () -> integerType.valueOf("abc"));
         assertThrows(NumberFormatException.class, () -> integerType.valueOf("12.34"));
-    }
-
-    @Test
-    public void testValueOfCharArray() {
-        assertEquals(null, integerType.valueOf(null, 0, 0));
-        assertEquals(null, integerType.valueOf(new char[0], 0, 0));
-
-        char[] chars = "12345".toCharArray();
-        assertEquals(12345, integerType.valueOf(chars, 0, 5));
-        assertEquals(234, integerType.valueOf(chars, 1, 3));
-        assertEquals(5, integerType.valueOf(chars, 4, 1));
-
-        char[] negChars = "-789".toCharArray();
-        assertEquals(-789, integerType.valueOf(negChars, 0, 4));
     }
 
     @Test

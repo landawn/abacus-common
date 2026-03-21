@@ -1,12 +1,14 @@
 package com.landawn.abacus.util;
 
+import com.landawn.abacus.TestBase;
+
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.math.RoundingMode;
 
 import org.junit.jupiter.api.Test;
 
-public class MathsTest {
+public class MathsTest extends TestBase {
 
     @Test
     public void test_log() {

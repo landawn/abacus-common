@@ -53,7 +53,7 @@ public class UUIDType extends AbstractType<UUID> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * UUIDType uuidType = new UUIDType();
-     * Class&lt;UUID&gt; clazz = uuidType.javaType();   // Returns UUID.class
+     * Class<UUID> clazz = uuidType.javaType();   // Returns UUID.class
      * }</pre>
      *
      * @return the Class object for UUID.class

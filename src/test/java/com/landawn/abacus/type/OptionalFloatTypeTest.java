@@ -18,7 +18,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -26,7 +25,6 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.u.OptionalFloat;
 
-@Tag("new-test")
 public class OptionalFloatTypeTest extends TestBase {
 
     private OptionalFloatType optionalFloatType;
@@ -56,6 +54,12 @@ public class OptionalFloatTypeTest extends TestBase {
     }
 
     @Test
+    public void testStringOfWithValue() {
+        OptionalFloat opt = OptionalFloat.of(3.14f);
+        assertEquals("3.14", optionalFloatType.stringOf(opt));
+    }
+
+    @Test
     public void testStringOfWithNull() {
         assertNull(optionalFloatType.stringOf(null));
     }
@@ -64,12 +68,6 @@ public class OptionalFloatTypeTest extends TestBase {
     public void testStringOfWithEmpty() {
         OptionalFloat empty = OptionalFloat.empty();
         assertNull(optionalFloatType.stringOf(empty));
-    }
-
-    @Test
-    public void testStringOfWithValue() {
-        OptionalFloat opt = OptionalFloat.of(3.14f);
-        assertEquals("3.14", optionalFloatType.stringOf(opt));
     }
 
     @Test

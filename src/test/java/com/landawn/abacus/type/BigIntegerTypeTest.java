@@ -14,12 +14,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BigIntegerTypeTest extends TestBase {
 
     private final BigIntegerType type = new BigIntegerType();
@@ -30,16 +28,22 @@ public class BigIntegerTypeTest extends TestBase {
     }
 
     @Test
-    public void test_name() {
-        assertEquals("BigInteger", type.name());
-    }
-
-    @Test
     public void test_stringOf() {
         assertEquals("123456789", type.stringOf(new BigInteger("123456789")));
         assertEquals("-987654321", type.stringOf(new BigInteger("-987654321")));
         assertEquals("0", type.stringOf(BigInteger.ZERO));
         assertNull(type.stringOf(null));
+    }
+
+    @Test
+    public void test_valueOf_String_withWhitespace() {
+        assertEquals(new BigInteger("123"), type.valueOf("  123  "));
+    }
+
+    @Test
+    public void test_valueOf_String_veryLarge() {
+        String largeNum = "99999999999999999999999999999999999999";
+        assertEquals(new BigInteger(largeNum), type.valueOf(largeNum));
     }
 
     @Test
@@ -52,19 +56,8 @@ public class BigIntegerTypeTest extends TestBase {
     }
 
     @Test
-    public void test_valueOf_String_withWhitespace() {
-        assertEquals(new BigInteger("123"), type.valueOf("  123  "));
-    }
-
-    @Test
     public void test_valueOf_String_invalid() {
         assertThrows(NumberFormatException.class, () -> type.valueOf("abc"));
-    }
-
-    @Test
-    public void test_valueOf_String_veryLarge() {
-        String largeNum = "99999999999999999999999999999999999999";
-        assertEquals(new BigInteger(largeNum), type.valueOf(largeNum));
     }
 
     @Test
@@ -130,6 +123,11 @@ public class BigIntegerTypeTest extends TestBase {
         // Test with null
         type.set(stmt, "param2", null);
         verify(stmt).setString("param2", null);
+    }
+
+    @Test
+    public void test_name() {
+        assertEquals("BigInteger", type.name());
     }
 
     @Test

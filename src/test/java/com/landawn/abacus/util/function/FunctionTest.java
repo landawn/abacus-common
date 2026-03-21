@@ -5,33 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class FunctionTest extends TestBase {
-
-    @Test
-    public void testApply() {
-        Function<String, Integer> function = String::length;
-        Integer result = function.apply("hello");
-        assertEquals(5, result);
-    }
-
-    @Test
-    public void testApply_WithAnonymousClass() {
-        Function<String, String> function = new Function<>() {
-            @Override
-            public String apply(String t) {
-                return t.toUpperCase();
-            }
-        };
-
-        String result = function.apply("hello");
-        assertEquals("HELLO", result);
-    }
 
     @Test
     public void testIdentity() {
@@ -52,6 +30,18 @@ public class FunctionTest extends TestBase {
     }
 
     @Test
+    public void testCompose_MultipleChains() {
+        Function<Integer, Integer> add1 = n -> n + 1;
+        Function<Integer, Integer> multiplyBy2 = n -> n * 2;
+        Function<Integer, Integer> subtract3 = n -> n - 3;
+
+        Function<Integer, Integer> composed = subtract3.compose(multiplyBy2).compose(add1);
+        Integer result = composed.apply(5);
+
+        assertEquals(9, result); // ((5 + 1) * 2) - 3 = 9
+    }
+
+    @Test
     public void testComposeRejectsNullFunctionImmediately() {
         Function<Integer, String> toString = n -> String.valueOf(n);
         assertThrows(NullPointerException.class, () -> toString.compose(null));
@@ -69,24 +59,6 @@ public class FunctionTest extends TestBase {
     }
 
     @Test
-    public void testAndThenRejectsNullFunctionImmediately() {
-        Function<String, Integer> length = String::length;
-        assertThrows(NullPointerException.class, () -> length.andThen(null));
-    }
-
-    @Test
-    public void testCompose_MultipleChains() {
-        Function<Integer, Integer> add1 = n -> n + 1;
-        Function<Integer, Integer> multiplyBy2 = n -> n * 2;
-        Function<Integer, Integer> subtract3 = n -> n - 3;
-
-        Function<Integer, Integer> composed = subtract3.compose(multiplyBy2).compose(add1);
-        Integer result = composed.apply(5);
-
-        assertEquals(9, result); // ((5 + 1) * 2) - 3 = 9
-    }
-
-    @Test
     public void testAndThen_MultipleChains() {
         Function<Integer, Integer> add1 = n -> n + 1;
         Function<Integer, Integer> multiplyBy2 = n -> n * 2;
@@ -99,10 +71,36 @@ public class FunctionTest extends TestBase {
     }
 
     @Test
+    public void testAndThenRejectsNullFunctionImmediately() {
+        Function<String, Integer> length = String::length;
+        assertThrows(NullPointerException.class, () -> length.andThen(null));
+    }
+
+    @Test
     public void testToThrowable() {
         Function<String, Integer> function = String::length;
         com.landawn.abacus.util.Throwables.Function<String, Integer, ?> throwableFunction = function.toThrowable();
         assertNotNull(throwableFunction);
+    }
+
+    @Test
+    public void testApply() {
+        Function<String, Integer> function = String::length;
+        Integer result = function.apply("hello");
+        assertEquals(5, result);
+    }
+
+    @Test
+    public void testApply_WithAnonymousClass() {
+        Function<String, String> function = new Function<>() {
+            @Override
+            public String apply(String t) {
+                return t.toUpperCase();
+            }
+        };
+
+        String result = function.apply("hello");
+        assertEquals("HELLO", result);
     }
 
     @Test

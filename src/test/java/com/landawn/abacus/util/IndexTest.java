@@ -1,5 +1,7 @@
 package com.landawn.abacus.util;
 
+import com.landawn.abacus.TestBase;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -22,7 +24,7 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.util.u.OptionalInt;
 
-public class IndexTest {
+public class IndexTest extends TestBase {
 
     @Test
     public void test_indexOfSubArray() {
@@ -53,6 +55,146 @@ public class IndexTest {
         assertEquals(8, Index.last(Strings.join(a, ""), Strings.join(b, 2, 5, ""), a.length - 1).orElse(-1));
         assertEquals(8, Index.last(Strings.join(a, ""), Strings.join(b, 2, 5, ""), a.length - 2).orElse(-1));
         assertEquals(4, Index.last(Strings.join(a, ""), Strings.join(b, 2, 5, ""), a.length - 4).orElse(-1));
+    }
+
+    @Test
+    public void testOfDoubleArrayWithTolerance() {
+        double[] array = { 1.0, 2.0, 3.0, 1.05 };
+        assertEquals(OptionalInt.of(0), Index.of(array, 1.0, 0.1));
+        assertEquals(OptionalInt.of(0), Index.of(array, 1.0, 0.01));
+        assertEquals(OptionalInt.of(3), Index.of(array, 1.0, 0.1, 1));
+
+    }
+
+    @Test
+    public void testOf_ShortArray() {
+        short[] array = { 10, 20, 30, 20, 40 };
+
+        OptionalInt result = Index.of(array, (short) 20);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(1, result.get());
+
+        result = Index.of(array, (short) 50);
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testOf_IntArray() {
+        int[] array = { 100, 200, 300, 200, 400 };
+
+        OptionalInt result = Index.of(array, 200);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(1, result.get());
+
+        result = Index.of(array, 500);
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testOf_LongArray() {
+        long[] array = { 1000L, 2000L, 3000L, 2000L, 4000L };
+
+        OptionalInt result = Index.of(array, 2000L);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(1, result.get());
+
+        result = Index.of(array, 5000L);
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testOf_FloatArray() {
+        float[] array = { 1.1f, 2.2f, 3.3f, 2.2f, 4.4f };
+
+        OptionalInt result = Index.of(array, 2.2f);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(1, result.get());
+
+        result = Index.of(array, 5.5f);
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testOf_DoubleArray() {
+        double[] array = { 1.11, 2.22, 3.33, 2.22, 4.44 };
+
+        OptionalInt result = Index.of(array, 2.22);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(1, result.get());
+
+        result = Index.of(array, 5.55);
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testOf_DoubleArray_WithTolerance() {
+        double[] array = { 1.0, 2.001, 3.0, 2.999, 4.0 };
+
+        OptionalInt result = Index.of(array, 2.0, 0.01);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(1, result.get());
+
+        result = Index.of(array, 3.0, 0.01);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(2, result.get());
+
+        result = Index.of(array, 2.5, 0.1);
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testOf_CharArray_UnicodeCharacters() {
+        char[] arr = { 'a', '中', '文', '\u0000', '\uffff' };
+
+        assertEquals(OptionalInt.of(1), Index.of(arr, '中'));
+        assertEquals(OptionalInt.of(2), Index.of(arr, '文'));
+        assertEquals(OptionalInt.of(3), Index.of(arr, '\u0000'));
+        assertEquals(OptionalInt.of(4), Index.of(arr, '\uffff'));
+    }
+
+    @Test
+    public void testOf_Collection_VariousImplementations() {
+        String[] data = { "a", "b", "c", "b", "d" };
+
+        Vector<String> vector = new Vector<>(Arrays.asList(data));
+        assertEquals(OptionalInt.of(1), Index.of(vector, "b"));
+        assertEquals(OptionalInt.of(3), Index.of(vector, "b", 2));
+
+        Stack<String> stack = new Stack<>();
+        Collections.addAll(stack, data);
+        assertEquals(OptionalInt.of(1), Index.of(stack, "b"));
+
+        List<String> unmodifiable = Collections.unmodifiableList(Arrays.asList(data));
+        assertEquals(OptionalInt.of(1), Index.of(unmodifiable, "b"));
+    }
+
+    @Test
+    public void testThreadSafety_Considerations() {
+
+        final int[] sharedArray = { 1, 2, 3, 2, 1, 2, 3 };
+        final int iterations = 100;
+
+        for (int i = 0; i < iterations; i++) {
+            assertEquals(OptionalInt.of(1), Index.of(sharedArray, 2));
+            assertEquals(OptionalInt.of(5), Index.last(sharedArray, 2));
+            BitSet all2s = Index.allOf(sharedArray, 2);
+            assertEquals(3, all2s.cardinality());
+        }
+    }
+
+    @Test
+    public void testSpecialValues_NaN() {
+        double[] arr = { 1.0, Double.NaN, 3.0, Double.NaN, 5.0 };
+
+        assertEquals(OptionalInt.of(1), Index.of(arr, Double.NaN));
+        assertEquals(OptionalInt.of(3), Index.last(arr, Double.NaN));
+
+        BitSet result = Index.allOf(arr, Double.NaN);
+        assertTrue(result.get(1));
+        assertTrue(result.get(3));
+        assertFalse(result.get(0));
+        assertFalse(result.get(2));
+        assertFalse(result.get(4));
     }
 
     @Test
@@ -521,6 +663,612 @@ public class IndexTest {
     }
 
     @Test
+    public void testOfBooleanArray() {
+        boolean[] array = { true, false, true, false };
+        assertEquals(OptionalInt.of(0), Index.of(array, true));
+        assertEquals(OptionalInt.of(1), Index.of(array, false));
+        assertEquals(OptionalInt.of(2), Index.of(array, true, 2));
+        assertEquals(OptionalInt.empty(), Index.of(array, true, 3));
+    }
+
+    @Test
+    public void testOfCharArray() {
+        char[] array = { 'a', 'b', 'c', 'a' };
+        assertEquals(OptionalInt.of(0), Index.of(array, 'a'));
+        assertEquals(OptionalInt.of(1), Index.of(array, 'b'));
+        assertEquals(OptionalInt.of(3), Index.of(array, 'a', 1));
+        assertEquals(OptionalInt.empty(), Index.of(array, 'd'));
+    }
+
+    @Test
+    public void testOfByteArray() {
+        byte[] array = { 1, 2, 3, 1 };
+        assertEquals(OptionalInt.of(0), Index.of(array, (byte) 1));
+        assertEquals(OptionalInt.of(1), Index.of(array, (byte) 2));
+        assertEquals(OptionalInt.of(3), Index.of(array, (byte) 1, 1));
+        assertEquals(OptionalInt.empty(), Index.of(array, (byte) 4));
+    }
+
+    @Test
+    public void testOfShortArray() {
+        short[] array = { 1, 2, 3, 1 };
+        assertEquals(OptionalInt.of(0), Index.of(array, (short) 1));
+        assertEquals(OptionalInt.of(1), Index.of(array, (short) 2));
+        assertEquals(OptionalInt.of(3), Index.of(array, (short) 1, 1));
+        assertEquals(OptionalInt.empty(), Index.of(array, (short) 4));
+    }
+
+    @Test
+    public void testOfIntArray() {
+        int[] array = { 1, 2, 3, 1 };
+        assertEquals(OptionalInt.of(0), Index.of(array, 1));
+        assertEquals(OptionalInt.of(1), Index.of(array, 2));
+        assertEquals(OptionalInt.of(3), Index.of(array, 1, 1));
+        assertEquals(OptionalInt.empty(), Index.of(array, 4));
+    }
+
+    @Test
+    public void testOfLongArray() {
+        long[] array = { 1L, 2L, 3L, 1L };
+        assertEquals(OptionalInt.of(0), Index.of(array, 1L));
+        assertEquals(OptionalInt.of(1), Index.of(array, 2L));
+        assertEquals(OptionalInt.of(3), Index.of(array, 1L, 1));
+        assertEquals(OptionalInt.empty(), Index.of(array, 4L));
+    }
+
+    @Test
+    public void testOfFloatArray() {
+        float[] array = { 1.0f, 2.0f, 3.0f, 1.0f };
+        assertEquals(OptionalInt.of(0), Index.of(array, 1.0f));
+        assertEquals(OptionalInt.of(1), Index.of(array, 2.0f));
+        assertEquals(OptionalInt.of(3), Index.of(array, 1.0f, 1));
+        assertEquals(OptionalInt.empty(), Index.of(array, 4.0f));
+    }
+
+    @Test
+    public void testOfDoubleArray() {
+        double[] array = { 1.0, 2.0, 3.0, 1.0 };
+        assertEquals(OptionalInt.of(0), Index.of(array, 1.0));
+        assertEquals(OptionalInt.of(1), Index.of(array, 2.0));
+        assertEquals(OptionalInt.of(3), Index.of(array, 1.0, 1));
+        assertEquals(OptionalInt.empty(), Index.of(array, 4.0));
+    }
+
+    @Test
+    public void testOfObjectArray() {
+        String[] array = { "a", "b", "c", "a" };
+        assertEquals(OptionalInt.of(0), Index.of(array, "a"));
+        assertEquals(OptionalInt.of(1), Index.of(array, "b"));
+        assertEquals(OptionalInt.of(3), Index.of(array, "a", 1));
+        assertEquals(OptionalInt.empty(), Index.of(array, "d"));
+        assertEquals(OptionalInt.empty(), Index.of((Object[]) null, "a"));
+    }
+
+    @Test
+    public void testOfCollection() {
+        List<String> list = Arrays.asList("a", "b", "c", "a");
+        assertEquals(OptionalInt.of(0), Index.of(list, "a"));
+        assertEquals(OptionalInt.of(1), Index.of(list, "b"));
+        assertEquals(OptionalInt.of(3), Index.of(list, "a", 1));
+        assertEquals(OptionalInt.empty(), Index.of(list, "d"));
+    }
+
+    @Test
+    public void testOfString() {
+        String str = "abcadef";
+        assertEquals(OptionalInt.of(0), Index.of(str, 'a'));
+        assertEquals(OptionalInt.of(1), Index.of(str, 'b'));
+        assertEquals(OptionalInt.of(3), Index.of(str, 'a', 1));
+        assertEquals(OptionalInt.empty(), Index.of(str, 'g'));
+        assertEquals(OptionalInt.of(0), Index.of(str, "a"));
+        assertEquals(OptionalInt.of(3), Index.of(str, "ad"));
+        assertEquals(OptionalInt.empty(), Index.of(str, "g"));
+    }
+
+    @Test
+    public void testOf_withNullAndEmptyInputs() {
+        assertEquals(OptionalInt.empty(), Index.of((boolean[]) null, true));
+        assertEquals(OptionalInt.empty(), Index.of(new boolean[0], true));
+        assertEquals(OptionalInt.empty(), Index.of((char[]) null, 'a'));
+        assertEquals(OptionalInt.empty(), Index.of(new char[0], 'a'));
+        assertEquals(OptionalInt.empty(), Index.of((byte[]) null, (byte) 1));
+        assertEquals(OptionalInt.empty(), Index.of(new byte[0], (byte) 1));
+        assertEquals(OptionalInt.empty(), Index.of((short[]) null, (short) 1));
+        assertEquals(OptionalInt.empty(), Index.of(new short[0], (short) 1));
+        assertEquals(OptionalInt.empty(), Index.of((int[]) null, 1));
+        assertEquals(OptionalInt.empty(), Index.of(new int[0], 1));
+        assertEquals(OptionalInt.empty(), Index.of((long[]) null, 1L));
+        assertEquals(OptionalInt.empty(), Index.of(new long[0], 1L));
+        assertEquals(OptionalInt.empty(), Index.of((float[]) null, 1.0f));
+        assertEquals(OptionalInt.empty(), Index.of(new float[0], 1.0f));
+        assertEquals(OptionalInt.empty(), Index.of((double[]) null, 1.0));
+        assertEquals(OptionalInt.empty(), Index.of(new double[0], 1.0));
+
+        assertEquals(OptionalInt.empty(), Index.of((Object[]) null, "a"));
+        assertEquals(OptionalInt.empty(), Index.of(new Object[0], "a"));
+
+        assertEquals(OptionalInt.empty(), Index.of((List<String>) null, "a"));
+        assertEquals(OptionalInt.empty(), Index.of(Collections.emptyList(), "a"));
+
+        assertEquals(OptionalInt.empty(), Index.of((Iterator<String>) null, "a"));
+        assertEquals(OptionalInt.empty(), Index.of(Collections.emptyIterator(), "a"));
+
+        assertEquals(OptionalInt.empty(), Index.of((String) null, 'a'));
+        assertEquals(OptionalInt.empty(), Index.of("", 'a'));
+        assertEquals(OptionalInt.empty(), Index.of((String) null, "a"));
+        assertEquals(OptionalInt.empty(), Index.of("", "a"));
+    }
+
+    @Test
+    public void testOfIterator() {
+        List<String> list = Arrays.asList("a", "b", "c", "a", "b");
+        assertEquals(OptionalInt.of(0), Index.of(list.iterator(), "a"));
+        assertEquals(OptionalInt.of(1), Index.of(list.iterator(), "b"));
+        assertEquals(OptionalInt.of(3), Index.of(list.iterator(), "a", 3));
+        assertEquals(OptionalInt.empty(), Index.of(list.iterator(), "d"));
+    }
+
+    @Test
+    public void testOfDoubleWithTolerance_EdgeCases() {
+        double[] array = { 1.0, 1.05, 1.1, 1.15, 1.2 };
+        assertEquals(OptionalInt.of(2), Index.of(array, 1.1, 0.0));
+        assertEquals(OptionalInt.of(1), Index.of(array, 1.0, 0.051, 1));
+        assertEquals(OptionalInt.of(0), Index.of(array, 1.0, 0.04999));
+        assertEquals(OptionalInt.empty(), Index.of(array, 0.9, 0.05));
+    }
+
+    @Test
+    public void testOf_BooleanArray() {
+        boolean[] array = { true, false, true, false, true };
+
+        OptionalInt result = Index.of(array, true);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(0, result.get());
+
+        result = Index.of(array, false);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(1, result.get());
+
+        result = Index.of(null, true);
+        Assertions.assertFalse(result.isPresent());
+
+        result = Index.of(new boolean[0], true);
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testOf_BooleanArray_WithFromIndex() {
+        boolean[] array = { true, false, true, false, true };
+
+        OptionalInt result = Index.of(array, true, 1);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(2, result.get());
+
+        result = Index.of(array, false, 2);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+
+        result = Index.of(array, true, 5);
+        Assertions.assertFalse(result.isPresent());
+
+        result = Index.of(array, true, -1);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(0, result.get());
+    }
+
+    @Test
+    public void testOf_CharArray() {
+        char[] array = { 'a', 'b', 'c', 'b', 'd' };
+
+        OptionalInt result = Index.of(array, 'b');
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(1, result.get());
+
+        result = Index.of(array, 'e');
+        Assertions.assertFalse(result.isPresent());
+
+        result = Index.of((char[]) null, 'a');
+        Assertions.assertFalse(result.isPresent());
+
+        result = Index.of(new char[0], 'a');
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testOf_CharArray_WithFromIndex() {
+        char[] array = { 'a', 'b', 'c', 'b', 'd' };
+
+        OptionalInt result = Index.of(array, 'b', 2);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+
+        result = Index.of(array, 'a', 1);
+        Assertions.assertFalse(result.isPresent());
+
+        result = Index.of(array, 'b', -1);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(1, result.get());
+    }
+
+    @Test
+    public void testOf_ByteArray() {
+        byte[] array = { 1, 2, 3, 2, 4 };
+
+        OptionalInt result = Index.of(array, (byte) 2);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(1, result.get());
+
+        result = Index.of(array, (byte) 5);
+        Assertions.assertFalse(result.isPresent());
+
+        result = Index.of((byte[]) null, (byte) 1);
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testOf_ByteArray_WithFromIndex() {
+        byte[] array = { 1, 2, 3, 2, 4 };
+
+        OptionalInt result = Index.of(array, (byte) 2, 2);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+
+        result = Index.of(array, (byte) 1, 1);
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testOf_ShortArray_WithFromIndex() {
+        short[] array = { 10, 20, 30, 20, 40 };
+
+        OptionalInt result = Index.of(array, (short) 20, 2);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+    }
+
+    @Test
+    public void testOf_IntArray_WithFromIndex() {
+        int[] array = { 100, 200, 300, 200, 400 };
+
+        OptionalInt result = Index.of(array, 200, 2);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+    }
+
+    @Test
+    public void testOf_LongArray_WithFromIndex() {
+        long[] array = { 1000L, 2000L, 3000L, 2000L, 4000L };
+
+        OptionalInt result = Index.of(array, 2000L, 2);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+    }
+
+    @Test
+    public void testOf_FloatArray_WithFromIndex() {
+        float[] array = { 1.1f, 2.2f, 3.3f, 2.2f, 4.4f };
+
+        OptionalInt result = Index.of(array, 2.2f, 2);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+    }
+
+    @Test
+    public void testOf_DoubleArray_WithFromIndex() {
+        double[] array = { 1.11, 2.22, 3.33, 2.22, 4.44 };
+
+        OptionalInt result = Index.of(array, 2.22, 2);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+    }
+
+    @Test
+    public void testOf_DoubleArray_WithToleranceAndFromIndex() {
+        double[] array = { 1.0, 2.001, 3.0, 2.999, 4.0 };
+
+        OptionalInt result = Index.of(array, 3.0, 0.01, 2);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(2, result.get());
+
+        result = Index.of(array, 3.0, 0.01, 3);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+    }
+
+    @Test
+    public void testOf_ObjectArray() {
+        String[] array = { "apple", "banana", "cherry", "banana", "date" };
+
+        OptionalInt result = Index.of(array, "banana");
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(1, result.get());
+
+        result = Index.of(array, "grape");
+        Assertions.assertFalse(result.isPresent());
+
+        result = Index.of(array, null);
+        Assertions.assertFalse(result.isPresent());
+
+        String[] arrayWithNull = { "apple", null, "cherry" };
+        result = Index.of(arrayWithNull, null);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(1, result.get());
+    }
+
+    @Test
+    public void testOf_ObjectArray_WithFromIndex() {
+        String[] array = { "apple", "banana", "cherry", "banana", "date" };
+
+        OptionalInt result = Index.of(array, "banana", 2);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+
+        result = Index.of(array, "apple", 1);
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testOf_Collection() {
+        List<String> list = Arrays.asList("apple", "banana", "cherry", "banana", "date");
+
+        OptionalInt result = Index.of(list, "banana");
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(1, result.get());
+
+        result = Index.of(list, "grape");
+        Assertions.assertFalse(result.isPresent());
+
+        result = Index.of((Collection<?>) null, "apple");
+        Assertions.assertFalse(result.isPresent());
+
+        result = Index.of(new ArrayList<>(), "apple");
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testOf_Collection_WithFromIndex() {
+        List<String> list = Arrays.asList("apple", "banana", "cherry", "banana", "date");
+
+        OptionalInt result = Index.of(list, "banana", 2);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+
+        result = Index.of(list, "apple", 1);
+        Assertions.assertFalse(result.isPresent());
+
+        LinkedList<String> linkedList = new LinkedList<>(list);
+        result = Index.of(linkedList, "banana", 2);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+    }
+
+    @Test
+    public void testOf_Iterator() {
+        List<String> list = Arrays.asList("apple", "banana", "cherry", "banana", "date");
+
+        OptionalInt result = Index.of(list.iterator(), "banana");
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(1, result.get());
+
+        result = Index.of(list.iterator(), "grape");
+        Assertions.assertFalse(result.isPresent());
+
+        result = Index.of((Iterator<?>) null, "apple");
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testOf_Iterator_WithFromIndex() {
+        List<String> list = Arrays.asList("apple", "banana", "cherry", "banana", "date");
+
+        OptionalInt result = Index.of(list.iterator(), "banana", 2);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+
+        result = Index.of(list.iterator(), "apple", 1);
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testOf_String_Char() {
+        String str = "hello world";
+
+        OptionalInt result = Index.of(str, 'o');
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(4, result.get());
+
+        result = Index.of(str, 'z');
+        Assertions.assertFalse(result.isPresent());
+
+        result = Index.of((String) null, 'a');
+        Assertions.assertFalse(result.isPresent());
+
+        result = Index.of("", 'a');
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testOf_String_Char_WithFromIndex() {
+        String str = "hello world";
+
+        OptionalInt result = Index.of(str, 'o', 5);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(7, result.get());
+
+        result = Index.of(str, 'h', 1);
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testOf_String_String() {
+        String str = "hello world hello";
+
+        OptionalInt result = Index.of(str, "hello");
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(0, result.get());
+
+        result = Index.of(str, "world");
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(6, result.get());
+
+        result = Index.of(str, "goodbye");
+        Assertions.assertFalse(result.isPresent());
+
+        result = Index.of((String) null, "hello");
+        Assertions.assertFalse(result.isPresent());
+
+        result = Index.of(str, null);
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testOf_String_String_WithFromIndex() {
+        String str = "hello world hello";
+
+        OptionalInt result = Index.of(str, "hello", 1);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(12, result.get());
+
+        result = Index.of(str, "world", 10);
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testEdgeCases_EmptyArrays() {
+        OptionalInt result = Index.of(new int[0], 1);
+        Assertions.assertFalse(result.isPresent());
+
+        result = Index.last(new int[0], 1);
+        Assertions.assertFalse(result.isPresent());
+
+        BitSet bitSet = Index.allOf(new int[0], 1);
+        Assertions.assertEquals(0, bitSet.cardinality());
+    }
+
+    @Test
+    public void testEdgeCases_NullInputs() {
+        OptionalInt result = Index.of((int[]) null, 1);
+        Assertions.assertFalse(result.isPresent());
+
+        result = Index.last((int[]) null, 1);
+        Assertions.assertFalse(result.isPresent());
+
+        BitSet bitSet = Index.allOf((int[]) null, 1);
+        Assertions.assertEquals(0, bitSet.cardinality());
+    }
+
+    @Test
+    public void testEdgeCases_LargeFromIndex() {
+        int[] array = { 1, 2, 3, 4, 5 };
+
+        OptionalInt result = Index.of(array, 3, 100);
+        Assertions.assertFalse(result.isPresent());
+
+        BitSet bitSet = Index.allOf(array, 3, 100);
+        Assertions.assertEquals(0, bitSet.cardinality());
+    }
+
+    @Test
+    public void testEdgeCases_NegativeFromIndex() {
+        int[] array = { 1, 2, 3, 4, 5 };
+
+        OptionalInt result = Index.of(array, 1, -10);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(0, result.get());
+
+        BitSet bitSet = Index.allOf(array, 1, -10);
+        Assertions.assertEquals(1, bitSet.cardinality());
+        Assertions.assertTrue(bitSet.get(0));
+    }
+
+    @Test
+    public void testOf_FloatArray_SpecialValues() {
+        float[] arr = { 1.0f, -0.0f, 0.0f, Float.NaN, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY, Float.NaN };
+
+        assertEquals(OptionalInt.of(1), Index.of(arr, -0.0f));
+        assertEquals(OptionalInt.of(2), Index.of(arr, 0.0f));
+
+        assertEquals(OptionalInt.of(3), Index.of(arr, Float.NaN));
+        assertEquals(OptionalInt.of(6), Index.of(arr, Float.NaN, 4));
+
+        assertEquals(OptionalInt.of(4), Index.of(arr, Float.POSITIVE_INFINITY));
+        assertEquals(OptionalInt.of(5), Index.of(arr, Float.NEGATIVE_INFINITY));
+    }
+
+    @Test
+    public void testOf_String_ComplexCases() {
+        assertEquals(OptionalInt.of(0), Index.of("", ""));
+        assertEquals(OptionalInt.of(0), Index.of("hello", ""));
+        assertEquals(OptionalInt.of(3), Index.of("hello", "", 3));
+        assertEquals(OptionalInt.empty(), Index.of("hello", "", 10));
+
+        String special = "a\tb\nc\rd\0e";
+        assertEquals(OptionalInt.of(1), Index.of(special, '\t'));
+        assertEquals(OptionalInt.of(3), Index.of(special, '\n'));
+        assertEquals(OptionalInt.of(5), Index.of(special, '\r'));
+        assertEquals(OptionalInt.of(7), Index.of(special, '\0'));
+
+        String pattern = "aabaabaaab";
+        assertEquals(OptionalInt.of(0), Index.of(pattern, "aab"));
+        assertEquals(OptionalInt.of(3), Index.of(pattern, "aab", 1));
+        assertEquals(OptionalInt.of(7), Index.of(pattern, "aab", 4));
+    }
+
+    @Test
+    public void testOf_String() {
+        String str = "hello world";
+
+        assertEquals(OptionalInt.of(0), Index.of(str, 'h'));
+        assertEquals(OptionalInt.of(2), Index.of(str, 'l'));
+        assertEquals(OptionalInt.of(3), Index.of(str, 'l', 3));
+        assertEquals(OptionalInt.empty(), Index.of(str, 'z'));
+
+        assertEquals(OptionalInt.of(0), Index.of(str, "hello"));
+        assertEquals(OptionalInt.of(6), Index.of(str, "world"));
+        assertEquals(OptionalInt.empty(), Index.of(str, "test"));
+        assertEquals(OptionalInt.of(2), Index.of(str, "ll"));
+
+        assertEquals(OptionalInt.empty(), Index.of((String) null, 'a'));
+        assertEquals(OptionalInt.empty(), Index.of((String) null, "test"));
+    }
+
+    @Test
+    public void testEdgeCases_EmptyArraysAndCollections() {
+        assertEquals(OptionalInt.empty(), Index.of(new int[0], 1));
+        assertEquals(OptionalInt.empty(), Index.last(new int[0], 1));
+        assertTrue(Index.allOf(new int[0], 1).isEmpty());
+
+        List<String> emptyList = new ArrayList<>();
+        assertEquals(OptionalInt.empty(), Index.of(emptyList, "a"));
+        assertEquals(OptionalInt.empty(), Index.last(emptyList, "a"));
+        assertTrue(Index.allOf(emptyList, "a").isEmpty());
+    }
+
+    @Test
+    public void testSpecialValues_InfinityValues() {
+        double[] arr = { 1.0, Double.POSITIVE_INFINITY, 3.0, Double.NEGATIVE_INFINITY, 5.0 };
+
+        assertEquals(OptionalInt.of(1), Index.of(arr, Double.POSITIVE_INFINITY));
+        assertEquals(OptionalInt.of(3), Index.of(arr, Double.NEGATIVE_INFINITY));
+    }
+
+    @Test
+    public void testOf_DoubleArray_EdgeCases() {
+        double[] arr = { Double.MIN_VALUE, Double.MAX_VALUE, -Double.MIN_VALUE, -Double.MAX_VALUE };
+
+        assertEquals(OptionalInt.of(0), Index.of(arr, Double.MIN_VALUE));
+        assertEquals(OptionalInt.of(1), Index.of(arr, Double.MAX_VALUE));
+        assertEquals(OptionalInt.of(2), Index.of(arr, -Double.MIN_VALUE));
+        assertEquals(OptionalInt.of(3), Index.of(arr, -Double.MAX_VALUE));
+
+        double[] toleranceArr = { 1.0, 1.1, 1.2, 1.3, 1.4, 1.5 };
+        assertEquals(OptionalInt.of(2), Index.of(toleranceArr, 1.25, 0.051));
+        assertEquals(OptionalInt.empty(), Index.of(toleranceArr, 1.25, 0.04));
+
+        assertThrows(IllegalArgumentException.class, () -> Index.of(toleranceArr, 1.25, -0.05));
+    }
+
+    @Test
     public void test_ofIgnoreCase_String() {
         String str = "aBcAbC";
         OptionalInt result = Index.ofIgnoreCase(str, "BC");
@@ -551,6 +1299,165 @@ public class IndexTest {
 
         result = Index.ofIgnoreCase(str, "bc", 10);
         assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testOfIgnoreCase() {
+        String str = "aBcDeF";
+        assertEquals(OptionalInt.of(0), Index.ofIgnoreCase(str, "abc"));
+        assertEquals(OptionalInt.of(3), Index.ofIgnoreCase(str, "def"));
+        assertEquals(OptionalInt.empty(), Index.ofIgnoreCase(str, "ghi"));
+    }
+
+    @Test
+    public void testOfIgnoreCase_String() {
+        String str = "Hello World HELLO";
+
+        OptionalInt result = Index.ofIgnoreCase(str, "hello");
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(0, result.get());
+
+        result = Index.ofIgnoreCase(str, "WORLD");
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(6, result.get());
+
+        result = Index.ofIgnoreCase(str, "goodbye");
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testOfIgnoreCase_String_WithFromIndex() {
+        String str = "Hello World HELLO";
+
+        OptionalInt result = Index.ofIgnoreCase(str, "hello", 1);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(12, result.get());
+
+        result = Index.ofIgnoreCase(str, "world", 10);
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testOfSubArray() {
+        int[] source = { 1, 2, 3, 4, 5, 1, 2, 3 };
+        int[] target = { 1, 2, 3 };
+        assertEquals(OptionalInt.of(0), Index.ofSubArray(source, target));
+        assertEquals(OptionalInt.of(5), Index.ofSubArray(source, 1, target));
+    }
+
+    @Test
+    public void testOfSubArray_BooleanArray_WithRange() {
+        boolean[] array = { true, false, true, false, true };
+        boolean[] subArray = { false, true, false, true };
+
+        OptionalInt result = Index.ofSubArray(array, 0, subArray, 1, 2);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(0, result.get());
+
+        result = Index.ofSubArray(array, 0, subArray, 0, 3);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(1, result.get());
+
+        result = Index.ofSubArray(array, 0, subArray, 0, 0);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(0, result.get());
+
+        result = Index.ofSubArray(array, 10, subArray, 0, 0);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(5, result.get());
+    }
+
+    @Test
+    public void testOfSubArray_CharArray() {
+        char[] array = { 'a', 'b', 'c', 'd', 'e' };
+        char[] subArray = { 'c', 'd' };
+
+        OptionalInt result = Index.ofSubArray(array, subArray);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(2, result.get());
+    }
+
+    @Test
+    public void testOfSubArray_ByteArray() {
+        byte[] array = { 1, 2, 3, 4, 5 };
+        byte[] subArray = { 3, 4 };
+
+        OptionalInt result = Index.ofSubArray(array, subArray);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(2, result.get());
+    }
+
+    @Test
+    public void testOfSubArray_ShortArray() {
+        short[] array = { 10, 20, 30, 40, 50 };
+        short[] subArray = { 30, 40 };
+
+        OptionalInt result = Index.ofSubArray(array, subArray);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(2, result.get());
+    }
+
+    @Test
+    public void testOfSubArray_IntArray() {
+        int[] array = { 100, 200, 300, 400, 500 };
+        int[] subArray = { 300, 400 };
+
+        OptionalInt result = Index.ofSubArray(array, subArray);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(2, result.get());
+    }
+
+    @Test
+    public void testOfSubArray_LongArray() {
+        long[] array = { 1000L, 2000L, 3000L, 4000L, 5000L };
+        long[] subArray = { 3000L, 4000L };
+
+        OptionalInt result = Index.ofSubArray(array, subArray);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(2, result.get());
+    }
+
+    @Test
+    public void testOfSubArray_FloatArray() {
+        float[] array = { 1.1f, 2.2f, 3.3f, 4.4f, 5.5f };
+        float[] subArray = { 3.3f, 4.4f };
+
+        OptionalInt result = Index.ofSubArray(array, subArray);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(2, result.get());
+    }
+
+    @Test
+    public void testOfSubArray_DoubleArray() {
+        double[] array = { 1.11, 2.22, 3.33, 4.44, 5.55 };
+        double[] subArray = { 3.33, 4.44 };
+
+        OptionalInt result = Index.ofSubArray(array, subArray);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(2, result.get());
+    }
+
+    @Test
+    public void testOfSubArray_ObjectArray() {
+        String[] array = { "apple", "banana", "cherry", "date", "elderberry" };
+        String[] subArray = { "cherry", "date" };
+
+        OptionalInt result = Index.ofSubArray(array, subArray);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(2, result.get());
+
+        String[] notFound = { "banana", "date" };
+        result = Index.ofSubArray(array, notFound);
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testOfSubArray_SubRangeForAdditionalTypes() {
+        assertEquals(OptionalInt.of(1), Index.ofSubArray(new long[] { 9L, 4L, 5L, 6L }, 0, new long[] { 0L, 4L, 5L, 7L }, 1, 2));
+        assertEquals(OptionalInt.of(1), Index.ofSubArray(new float[] { 9f, 4f, 5f, 6f }, 0, new float[] { 0f, 4f, 5f, 7f }, 1, 2));
+        assertEquals(OptionalInt.of(1), Index.ofSubArray(new double[] { 3d, 7d, 8d, 9d }, 0, new double[] { 0d, 7d, 8d, 1d }, 1, 2));
+        assertEquals(OptionalInt.of(2), Index.ofSubArray(new String[] { "x", "y", "b", "c", "d" }, 1, new String[] { "a", "b", "c", "z" }, 1, 2));
+        assertEquals(OptionalInt.of(3), Index.lastOfSubArray(new String[] { "a", "b", "c", "b", "c" }, 4, new String[] { "x", "b", "c", "y" }, 1, 2));
     }
 
     @Test
@@ -977,6 +1884,323 @@ public class IndexTest {
     }
 
     @Test
+    public void testOfSubArray_EdgeCases() {
+        int[] source = { 1, 2, 3, 4 };
+        assertEquals(OptionalInt.of(0), Index.ofSubArray(source, new int[0]));
+        assertEquals(OptionalInt.of(2), Index.ofSubArray(source, 2, new int[0]));
+        assertEquals(OptionalInt.of(4), Index.ofSubArray(source, 5, new int[0]));
+        assertEquals(OptionalInt.of(0), Index.ofSubArray(source, -1, new int[0]));
+
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, new int[] { 1, 2, 3, 4, 5 }));
+
+        assertEquals(OptionalInt.empty(), Index.ofSubArray((int[]) null, new int[] { 1 }));
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, null));
+        assertEquals(OptionalInt.empty(), Index.ofSubArray((int[]) null, null));
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, 2, null));
+
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, new int[] { 5, 6 }));
+    }
+
+    @Test
+    public void testOfSubArray_BooleanArray() {
+        boolean[] array = { true, false, true, false, true };
+        boolean[] subArray = { true, false };
+
+        OptionalInt result = Index.ofSubArray(array, subArray);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(0, result.get());
+
+        boolean[] subArray2 = { false, true };
+        result = Index.ofSubArray(array, subArray2);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(1, result.get());
+
+        boolean[] notFound = { false, false, false };
+        result = Index.ofSubArray(array, notFound);
+        Assertions.assertFalse(result.isPresent());
+
+        result = Index.ofSubArray(null, subArray);
+        Assertions.assertFalse(result.isPresent());
+
+        result = Index.ofSubArray(array, null);
+        Assertions.assertFalse(result.isPresent());
+
+        result = Index.ofSubArray(array, new boolean[0]);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(0, result.get());
+    }
+
+    @Test
+    public void testOfSubArray_BooleanArray_WithFromIndex() {
+        boolean[] array = { true, false, true, false, true };
+        boolean[] subArray = { true, false };
+
+        OptionalInt result = Index.ofSubArray(array, 2, subArray);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(2, result.get());
+
+        result = Index.ofSubArray(array, 4, subArray);
+        Assertions.assertFalse(result.isPresent());
+
+        result = Index.ofSubArray(array, -1, subArray);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(0, result.get());
+    }
+
+    @Test
+    public void testOfSubArray_EmptySubArray() {
+        int[] array = { 1, 2, 3, 4, 5 };
+        int[] emptySubArray = {};
+
+        OptionalInt result = Index.ofSubArray(array, emptySubArray);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(0, result.get());
+
+        result = Index.ofSubArray(array, 2, emptySubArray);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(2, result.get());
+    }
+
+    @Test
+    public void testOfSubArray_BoundaryConditions() {
+        int[] source = { 1, 2, 3, 4, 5 };
+
+        int[] largeSub = { 1, 2, 3, 4, 5, 6 };
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, largeSub));
+
+        int[] equalSub = { 1, 2, 3, 4, 5 };
+        assertEquals(OptionalInt.of(0), Index.ofSubArray(source, equalSub));
+
+        int[] singleSub = { 3 };
+        assertEquals(OptionalInt.of(2), Index.ofSubArray(source, singleSub));
+
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(null, singleSub));
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, null));
+        assertEquals(OptionalInt.empty(), Index.ofSubArray((int[]) null, (int[]) null));
+    }
+
+    @Test
+    public void testOfSubArray_ObjectEmptySubArrayWithFromIndex() {
+        final Object[] source = { "a", "b", "c" };
+        final Object[] empty = {};
+
+        assertEquals(OptionalInt.of(0), Index.ofSubArray(source, -1, empty, 0, 0));
+        assertEquals(OptionalInt.of(source.length), Index.ofSubArray(source, 10, empty, 0, 0));
+        assertEquals(OptionalInt.empty(), Index.ofSubArray((Object[]) null, 0, empty, 0, 0));
+    }
+
+    @Test
+    public void testOfSubArray_LongFullCoverage() {
+        // found
+        long[] source = { 1L, 2L, 3L, 4L, 5L };
+        long[] sub = { 2L, 3L, 4L };
+        assertEquals(OptionalInt.of(1), Index.ofSubArray(source, 0, sub, 0, 3));
+
+        // not found (break path)
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, 0, new long[] { 2L, 9L }, 0, 2));
+
+        // not found fallthrough
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, 0, new long[] { 9L, 9L }, 0, 2));
+
+        // null source
+        assertEquals(OptionalInt.empty(), Index.ofSubArray((long[]) null, 0, sub, 0, 2));
+
+        // null subarray
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, 0, (long[]) null, 0, 0));
+
+        // fromIndex >= len
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, 10, sub, 0, 3));
+
+        // sizeToMatch > remaining
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, 4, sub, 0, 3));
+
+        // sizeToMatch == 0 with both non-null
+        assertEquals(OptionalInt.of(2), Index.ofSubArray(source, 2, sub, 0, 0));
+
+        // sizeToMatch == 0 with null source
+        assertEquals(OptionalInt.empty(), Index.ofSubArray((long[]) null, 0, sub, 0, 0));
+
+        // negative fromIndex
+        assertEquals(OptionalInt.of(1), Index.ofSubArray(source, -1, sub, 0, 3));
+    }
+
+    @Test
+    public void testOfSubArray_FloatFullCoverage() {
+        float[] source = { 1f, 2f, 3f, 4f, 5f };
+        float[] sub = { 2f, 3f, 4f };
+
+        // found
+        assertEquals(OptionalInt.of(1), Index.ofSubArray(source, 0, sub, 0, 3));
+
+        // not found (break path - first matches, second doesn't)
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, 0, new float[] { 2f, 9f }, 0, 2));
+
+        // not found fallthrough
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, 0, new float[] { 9f, 9f }, 0, 2));
+
+        // null source
+        assertEquals(OptionalInt.empty(), Index.ofSubArray((float[]) null, 0, sub, 0, 2));
+
+        // null subarray
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, 0, (float[]) null, 0, 0));
+
+        // fromIndex >= len
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, 10, sub, 0, 3));
+
+        // sizeToMatch == 0 with both non-null
+        assertEquals(OptionalInt.of(2), Index.ofSubArray(source, 2, sub, 0, 0));
+
+        // sizeToMatch == 0 with null source
+        assertEquals(OptionalInt.empty(), Index.ofSubArray((float[]) null, 0, sub, 0, 0));
+    }
+
+    @Test
+    public void testOfSubArray_DoubleFullCoverage() {
+        double[] source = { 1d, 2d, 3d, 4d, 5d };
+        double[] sub = { 2d, 3d, 4d };
+
+        // found
+        assertEquals(OptionalInt.of(1), Index.ofSubArray(source, 0, sub, 0, 3));
+
+        // not found (break path)
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, 0, new double[] { 2d, 9d }, 0, 2));
+
+        // not found fallthrough
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, 0, new double[] { 9d, 9d }, 0, 2));
+
+        // null source
+        assertEquals(OptionalInt.empty(), Index.ofSubArray((double[]) null, 0, sub, 0, 2));
+
+        // null subarray
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, 0, (double[]) null, 0, 0));
+
+        // fromIndex >= len
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, 10, sub, 0, 3));
+
+        // sizeToMatch == 0 with both non-null
+        assertEquals(OptionalInt.of(2), Index.ofSubArray(source, 2, sub, 0, 0));
+
+        // sizeToMatch == 0 with null source
+        assertEquals(OptionalInt.empty(), Index.ofSubArray((double[]) null, 0, sub, 0, 0));
+    }
+
+    @Test
+    public void testOfSubArray_ObjectFullCoverage() {
+        String[] source = { "a", "b", "c", "d", "e" };
+        String[] sub = { "b", "c", "d" };
+
+        // found
+        assertEquals(OptionalInt.of(1), Index.ofSubArray(source, 0, sub, 0, 3));
+
+        // not found (break path)
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, 0, new String[] { "b", "z" }, 0, 2));
+
+        // not found fallthrough
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, 0, new String[] { "z", "z" }, 0, 2));
+
+        // null source
+        assertEquals(OptionalInt.empty(), Index.ofSubArray((Object[]) null, 0, sub, 0, 2));
+
+        // null subarray
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, 0, (Object[]) null, 0, 0));
+
+        // fromIndex >= len
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, 10, sub, 0, 3));
+
+        // sizeToMatch == 0 with both non-null
+        assertEquals(OptionalInt.of(2), Index.ofSubArray(source, 2, sub, 0, 0));
+
+        // sizeToMatch == 0 with null source
+        assertEquals(OptionalInt.empty(), Index.ofSubArray((Object[]) null, 0, sub, 0, 0));
+
+        // null element matching
+        String[] withNulls = { "a", null, "c" };
+        assertEquals(OptionalInt.of(1), Index.ofSubArray(withNulls, 0, new String[] { null, "c" }, 0, 2));
+    }
+
+    @Test
+    public void test_ofSubArray_StartIndexSizeEdgeCases() {
+        assertFalse(Index.ofSubArray((long[]) null, 2, new long[0], 0, 0).isPresent());
+        assertEquals(3, Index.ofSubArray(new long[] { 1L, 2L, 3L }, 10, new long[0], 0, 0).getAsInt());
+
+        assertFalse(Index.ofSubArray(new float[] { 1F, 2F }, 5, new float[] { 1F }, 0, 1).isPresent());
+        assertFalse(Index.ofSubArray(new double[] { 1D, 2D }, 5, new double[] { 1D }, 0, 1).isPresent());
+        assertFalse(Index.ofSubArray(new Object[] { "a", "b" }, 5, new Object[] { "a" }, 0, 1).isPresent());
+    }
+
+    @Test
+    public void test_ofSubArray_char_NullArraySizeMustBeZero() {
+        assertFalse(Index.ofSubArray((char[]) null, 0, new char[0], 0, 0).isPresent());
+        assertFalse(Index.ofSubArray(new char[] { 'a' }, 0, (char[]) null, 0, 0).isPresent());
+    }
+
+    @Test
+    public void test_ofSubArray_byte_NullArraySizeMustBeZero() {
+        assertFalse(Index.ofSubArray((byte[]) null, 0, new byte[0], 0, 0).isPresent());
+        assertFalse(Index.ofSubArray(new byte[] { 1 }, 0, (byte[]) null, 0, 0).isPresent());
+    }
+
+    @Test
+    public void test_ofSubArray_short_NullArraySizeMustBeZero() {
+        assertFalse(Index.ofSubArray((short[]) null, 0, new short[0], 0, 0).isPresent());
+        assertFalse(Index.ofSubArray(new short[] { 1 }, 0, (short[]) null, 0, 0).isPresent());
+    }
+
+    @Test
+    public void testOfSubArray_IndexOutOfBounds() {
+        int[] array = { 1, 2, 3, 4, 5 };
+        int[] subArray = { 2, 3, 4 };
+
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> {
+            Index.ofSubArray(array, 0, subArray, -1, 2);
+        });
+
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> {
+            Index.ofSubArray(array, 0, subArray, 0, 10);
+        });
+
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> {
+            Index.ofSubArray(array, 0, subArray, 2, 2);
+        });
+    }
+
+    @Test
+    public void testOfSubArray_InvalidRange() {
+        int[] source = { 1, 2, 3, 4, 5 };
+        int[] sub = { 2, 3, 4 };
+
+        assertThrows(IndexOutOfBoundsException.class, () -> Index.ofSubArray(source, 0, sub, 1, 5));
+    }
+
+    @Test
+    public void testOfSubList() {
+        List<Integer> source = Arrays.asList(1, 2, 3, 4, 5, 1, 2, 3);
+        List<Integer> target = Arrays.asList(1, 2, 3);
+        assertEquals(OptionalInt.of(0), Index.ofSubList(source, target));
+        assertEquals(OptionalInt.of(5), Index.ofSubList(source, 1, target));
+    }
+
+    @Test
+    public void testOfSubList_WithRange() {
+        List<String> list = Arrays.asList("apple", "banana", "cherry", "date", "elderberry");
+        List<String> subList = Arrays.asList("extra", "cherry", "date", "extra");
+
+        OptionalInt result = Index.ofSubList(list, 0, subList, 1, 2);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(2, result.get());
+    }
+
+    @Test
+    public void testOfSubList_NonRandomAccess() {
+        LinkedList<String> list = new LinkedList<>(Arrays.asList("apple", "banana", "cherry", "date"));
+        LinkedList<String> subList = new LinkedList<>(Arrays.asList("banana", "cherry"));
+
+        OptionalInt result = Index.ofSubList(list, subList);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(1, result.get());
+    }
+
+    @Test
     public void test_ofSubList() {
         List<String> source = Arrays.asList("a", "b", "c", "d", "e");
         List<String> sub = Arrays.asList("c", "d");
@@ -1020,6 +2244,386 @@ public class IndexTest {
         result = Index.ofSubList(source, 0, sub, 0, 0);
         assertTrue(result.isPresent());
         assertEquals(0, result.getAsInt());
+    }
+
+    @Test
+    public void testOfSubList_EdgeCases() {
+        List<Integer> source = Arrays.asList(1, 2, 3, 4);
+        assertEquals(OptionalInt.of(0), Index.ofSubList(source, Collections.emptyList()));
+        assertEquals(OptionalInt.of(2), Index.ofSubList(source, 2, Collections.emptyList()));
+
+        assertEquals(OptionalInt.empty(), Index.ofSubList(source, Arrays.asList(1, 2, 3, 4, 5)));
+
+        assertEquals(OptionalInt.empty(), Index.ofSubList(null, Arrays.asList(1)));
+        assertEquals(OptionalInt.empty(), Index.ofSubList(source, null));
+        assertEquals(OptionalInt.empty(), Index.ofSubList(null, null));
+    }
+
+    @Test
+    public void testOfSubList_WithFromIndex() {
+        List<String> list = Arrays.asList("apple", "banana", "apple", "banana", "cherry");
+        List<String> subList = Arrays.asList("apple", "banana");
+
+        OptionalInt result = Index.ofSubList(list, 1, subList);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(2, result.get());
+
+        result = Index.ofSubList(list, 3, subList);
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testOfSubList_FullCoverage() {
+        // RandomAccess path - not found
+        List<String> source = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e"));
+        List<String> sub = Arrays.asList("b", "c", "d");
+        assertEquals(OptionalInt.of(1), Index.ofSubList(source, 0, sub, 0, 3));
+        assertEquals(OptionalInt.empty(), Index.ofSubList(source, 0, Arrays.asList("x", "y"), 0, 2));
+
+        // sizeToMatch == 0 with null source
+        assertEquals(OptionalInt.empty(), Index.ofSubList(null, 0, sub, 0, 0));
+
+        // sizeToMatch == 0 with null subList
+        assertEquals(OptionalInt.empty(), Index.ofSubList(source, 0, null, 0, 0));
+
+        // fromIndex >= size
+        assertEquals(OptionalInt.empty(), Index.ofSubList(source, 10, sub, 0, 3));
+
+        // Non-RandomAccess list path (LinkedList)
+        List<String> linkedSource = new LinkedList<>(Arrays.asList("a", "b", "c", "d", "e"));
+        List<String> linkedSub = new LinkedList<>(Arrays.asList("b", "c", "d"));
+        assertEquals(OptionalInt.of(1), Index.ofSubList(linkedSource, 0, linkedSub, 0, 3));
+
+        // Non-RandomAccess not found
+        assertEquals(OptionalInt.empty(), Index.ofSubList(linkedSource, 0, new LinkedList<>(Arrays.asList("x", "y")), 0, 2));
+    }
+
+    @Test
+    public void test_last_char_array_startIndexFromBack() {
+        char[] a = { 'a', 'b', 'c', 'b' };
+        OptionalInt result = Index.last(a, 'b', 2);
+        assertTrue(result.isPresent());
+        assertEquals(1, result.getAsInt());
+
+        result = Index.last(a, 'b', 10);
+        assertTrue(result.isPresent());
+        assertEquals(3, result.getAsInt());
+    }
+
+    @Test
+    public void test_last_byte_array_startIndexFromBack() {
+        byte[] a = { 1, 2, 3, 2 };
+        OptionalInt result = Index.last(a, (byte) 2, 2);
+        assertTrue(result.isPresent());
+        assertEquals(1, result.getAsInt());
+
+        result = Index.last(a, (byte) 2, 10);
+        assertTrue(result.isPresent());
+        assertEquals(3, result.getAsInt());
+    }
+
+    @Test
+    public void test_last_short_array_startIndexFromBack() {
+        short[] a = { 1, 2, 3, 2 };
+        OptionalInt result = Index.last(a, (short) 2, 2);
+        assertTrue(result.isPresent());
+        assertEquals(1, result.getAsInt());
+
+        result = Index.last(a, (short) 2, 10);
+        assertTrue(result.isPresent());
+        assertEquals(3, result.getAsInt());
+    }
+
+    @Test
+    public void test_last_int_array_startIndexFromBack() {
+        int[] a = { 1, 2, 3, 2 };
+        OptionalInt result = Index.last(a, 2, 2);
+        assertTrue(result.isPresent());
+        assertEquals(1, result.getAsInt());
+
+        result = Index.last(a, 2, 10);
+        assertTrue(result.isPresent());
+        assertEquals(3, result.getAsInt());
+    }
+
+    @Test
+    public void test_last_long_array_startIndexFromBack() {
+        long[] a = { 1L, 2L, 3L, 2L };
+        OptionalInt result = Index.last(a, 2L, 2);
+        assertTrue(result.isPresent());
+        assertEquals(1, result.getAsInt());
+
+        result = Index.last(a, 2L, 10);
+        assertTrue(result.isPresent());
+        assertEquals(3, result.getAsInt());
+    }
+
+    @Test
+    public void test_last_float_array_startIndexFromBack() {
+        float[] a = { 1.0f, 2.0f, 3.0f, 2.0f };
+        OptionalInt result = Index.last(a, 2.0f, 2);
+        assertTrue(result.isPresent());
+        assertEquals(1, result.getAsInt());
+
+        result = Index.last(a, 2.0f, 10);
+        assertTrue(result.isPresent());
+        assertEquals(3, result.getAsInt());
+    }
+
+    @Test
+    public void test_last_double_array_startIndexFromBack() {
+        double[] a = { 1.0, 2.0, 3.0, 2.0 };
+        OptionalInt result = Index.last(a, 2.0, 2);
+        assertTrue(result.isPresent());
+        assertEquals(1, result.getAsInt());
+
+        result = Index.last(a, 2.0, 10);
+        assertTrue(result.isPresent());
+        assertEquals(3, result.getAsInt());
+    }
+
+    @Test
+    public void test_last_double_array_tolerance_startIndexFromBack() {
+        double[] a = { 1.0, 2.0, 3.0, 2.1 };
+        OptionalInt result = Index.last(a, 2.0, 0.2, 2);
+        assertTrue(result.isPresent());
+        assertEquals(1, result.getAsInt());
+
+        result = Index.last(a, 2.0, 0.2, 10);
+        assertTrue(result.isPresent());
+        assertEquals(3, result.getAsInt());
+    }
+
+    @Test
+    public void test_last_Object_array_startIndexFromBack() {
+        String[] a = { "a", "b", "c", "b" };
+        OptionalInt result = Index.last(a, "b", 2);
+        assertTrue(result.isPresent());
+        assertEquals(1, result.getAsInt());
+
+        result = Index.last(a, "b", 10);
+        assertTrue(result.isPresent());
+        assertEquals(3, result.getAsInt());
+    }
+
+    @Test
+    public void test_last_Collection_startIndexFromBack() {
+        List<String> c = Arrays.asList("a", "b", "c", "b");
+        OptionalInt result = Index.last(c, "b", 2);
+        assertTrue(result.isPresent());
+        assertEquals(1, result.getAsInt());
+
+        result = Index.last(c, "b", 10);
+        assertTrue(result.isPresent());
+        assertEquals(3, result.getAsInt());
+    }
+
+    @Test
+    public void test_last_String_char_startIndexFromBack() {
+        String str = "abcb";
+        OptionalInt result = Index.last(str, 'b', 2);
+        assertTrue(result.isPresent());
+        assertEquals(1, result.getAsInt());
+
+        result = Index.last(str, 'b', 10);
+        assertTrue(result.isPresent());
+        assertEquals(3, result.getAsInt());
+    }
+
+    @Test
+    public void test_last_String_String_startIndexFromBack() {
+        String str = "abcabc";
+        OptionalInt result = Index.last(str, "bc", 3);
+        assertTrue(result.isPresent());
+        assertEquals(1, result.getAsInt());
+
+        result = Index.last(str, "bc", 10);
+        assertTrue(result.isPresent());
+        assertEquals(4, result.getAsInt());
+    }
+
+    @Test
+    public void testLast() {
+        int[] array = { 1, 2, 3, 1, 2, 3 };
+        assertEquals(OptionalInt.of(3), Index.last(array, 1));
+        assertEquals(OptionalInt.of(3), Index.last(array, 1, 3));
+    }
+
+    @Test
+    public void testLast_BooleanArray_WithStartIndex() {
+        boolean[] array = { true, false, true, false, true };
+
+        OptionalInt result = Index.last(array, true, 3);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(2, result.get());
+
+        result = Index.last(array, false, 2);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(1, result.get());
+
+        result = Index.last(array, true, -1);
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testLast_CharArray() {
+        char[] array = { 'a', 'b', 'c', 'b', 'd' };
+
+        OptionalInt result = Index.last(array, 'b');
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+    }
+
+    @Test
+    public void testLast_ByteArray() {
+        byte[] array = { 1, 2, 3, 2, 4 };
+
+        OptionalInt result = Index.last(array, (byte) 2);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+    }
+
+    @Test
+    public void testLast_ShortArray() {
+        short[] array = { 10, 20, 30, 20, 40 };
+
+        OptionalInt result = Index.last(array, (short) 20);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+    }
+
+    @Test
+    public void testLast_IntArray() {
+        int[] array = { 100, 200, 300, 200, 400 };
+
+        OptionalInt result = Index.last(array, 200);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+    }
+
+    @Test
+    public void testLast_LongArray() {
+        long[] array = { 1000L, 2000L, 3000L, 2000L, 4000L };
+
+        OptionalInt result = Index.last(array, 2000L);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+    }
+
+    @Test
+    public void testLast_FloatArray() {
+        float[] array = { 1.1f, 2.2f, 3.3f, 2.2f, 4.4f };
+
+        OptionalInt result = Index.last(array, 2.2f);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+    }
+
+    @Test
+    public void testLast_DoubleArray() {
+        double[] array = { 1.11, 2.22, 3.33, 2.22, 4.44 };
+
+        OptionalInt result = Index.last(array, 2.22);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+    }
+
+    @Test
+    public void testLast_DoubleArray_WithTolerance() {
+        double[] array = { 1.0, 2.001, 3.0, 2.999, 4.0 };
+
+        OptionalInt result = Index.last(array, 3.0, 0.01);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+    }
+
+    @Test
+    public void testLast_DoubleArray_WithToleranceAndStartIndex() {
+        double[] array = { 1.0, 2.001, 3.0, 2.999, 4.0 };
+
+        OptionalInt result = Index.last(array, 3.0, 0.01, 3);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+
+        result = Index.last(array, 3.0, 0.01, 2);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(2, result.get());
+    }
+
+    @Test
+    public void testLast_ObjectArray() {
+        String[] array = { "apple", "banana", "cherry", "banana", "date" };
+
+        OptionalInt result = Index.last(array, "banana");
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+    }
+
+    @Test
+    public void testLast_Collection() {
+        List<String> list = Arrays.asList("apple", "banana", "cherry", "banana", "date");
+
+        OptionalInt result = Index.last(list, "banana");
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+
+        LinkedList<String> linkedList = new LinkedList<>(list);
+        result = Index.last(linkedList, "banana");
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+    }
+
+    @Test
+    public void testLast_String_Char() {
+        String str = "hello world";
+
+        OptionalInt result = Index.last(str, 'o');
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(7, result.get());
+
+        result = Index.last(str, 'z');
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testLast_String_String() {
+        String str = "hello world hello";
+
+        OptionalInt result = Index.last(str, "hello");
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(12, result.get());
+
+        result = Index.last(str, "world");
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(6, result.get());
+    }
+
+    @Test
+    public void testLast_PrimitiveArrays_AllTypes() {
+        boolean[] boolArr = { true, false, true, false, true };
+        assertEquals(OptionalInt.of(4), Index.last(boolArr, true));
+        assertEquals(OptionalInt.of(3), Index.last(boolArr, false));
+        assertEquals(OptionalInt.of(2), Index.last(boolArr, true, 3));
+
+        char[] charArr = { 'a', 'b', 'c', 'b', 'a' };
+        assertEquals(OptionalInt.of(4), Index.last(charArr, 'a'));
+        assertEquals(OptionalInt.of(3), Index.last(charArr, 'b'));
+
+        byte[] byteArr = { 1, 2, 3, 2, 1 };
+        assertEquals(OptionalInt.of(4), Index.last(byteArr, (byte) 1));
+        assertEquals(OptionalInt.of(3), Index.last(byteArr, (byte) 2));
+
+        short[] shortArr = { 10, 20, 30, 20, 10 };
+        assertEquals(OptionalInt.of(4), Index.last(shortArr, (short) 10));
+        assertEquals(OptionalInt.of(3), Index.last(shortArr, (short) 20));
+
+        long[] longArr = { 100L, 200L, 300L, 200L, 100L };
+        assertEquals(OptionalInt.of(4), Index.last(longArr, 100L));
+        assertEquals(OptionalInt.of(3), Index.last(longArr, 200L));
+
+        float[] floatArr = { 1.1f, 2.2f, 3.3f, 2.2f, 1.1f };
+        assertEquals(OptionalInt.of(4), Index.last(floatArr, 1.1f));
+        assertEquals(OptionalInt.of(3), Index.last(floatArr, 2.2f));
     }
 
     @Test
@@ -1080,18 +2684,6 @@ public class IndexTest {
     }
 
     @Test
-    public void test_last_char_array_startIndexFromBack() {
-        char[] a = { 'a', 'b', 'c', 'b' };
-        OptionalInt result = Index.last(a, 'b', 2);
-        assertTrue(result.isPresent());
-        assertEquals(1, result.getAsInt());
-
-        result = Index.last(a, 'b', 10);
-        assertTrue(result.isPresent());
-        assertEquals(3, result.getAsInt());
-    }
-
-    @Test
     public void test_last_byte_array() {
         byte[] a = { 1, 2, 3, 2 };
         OptionalInt result = Index.last(a, (byte) 2);
@@ -1106,18 +2698,6 @@ public class IndexTest {
 
         result = Index.last(new byte[0], (byte) 1);
         assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void test_last_byte_array_startIndexFromBack() {
-        byte[] a = { 1, 2, 3, 2 };
-        OptionalInt result = Index.last(a, (byte) 2, 2);
-        assertTrue(result.isPresent());
-        assertEquals(1, result.getAsInt());
-
-        result = Index.last(a, (byte) 2, 10);
-        assertTrue(result.isPresent());
-        assertEquals(3, result.getAsInt());
     }
 
     @Test
@@ -1138,18 +2718,6 @@ public class IndexTest {
     }
 
     @Test
-    public void test_last_short_array_startIndexFromBack() {
-        short[] a = { 1, 2, 3, 2 };
-        OptionalInt result = Index.last(a, (short) 2, 2);
-        assertTrue(result.isPresent());
-        assertEquals(1, result.getAsInt());
-
-        result = Index.last(a, (short) 2, 10);
-        assertTrue(result.isPresent());
-        assertEquals(3, result.getAsInt());
-    }
-
-    @Test
     public void test_last_int_array() {
         int[] a = { 1, 2, 3, 2 };
         OptionalInt result = Index.last(a, 2);
@@ -1164,18 +2732,6 @@ public class IndexTest {
 
         result = Index.last(new int[0], 1);
         assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void test_last_int_array_startIndexFromBack() {
-        int[] a = { 1, 2, 3, 2 };
-        OptionalInt result = Index.last(a, 2, 2);
-        assertTrue(result.isPresent());
-        assertEquals(1, result.getAsInt());
-
-        result = Index.last(a, 2, 10);
-        assertTrue(result.isPresent());
-        assertEquals(3, result.getAsInt());
     }
 
     @Test
@@ -1196,18 +2752,6 @@ public class IndexTest {
     }
 
     @Test
-    public void test_last_long_array_startIndexFromBack() {
-        long[] a = { 1L, 2L, 3L, 2L };
-        OptionalInt result = Index.last(a, 2L, 2);
-        assertTrue(result.isPresent());
-        assertEquals(1, result.getAsInt());
-
-        result = Index.last(a, 2L, 10);
-        assertTrue(result.isPresent());
-        assertEquals(3, result.getAsInt());
-    }
-
-    @Test
     public void test_last_float_array() {
         float[] a = { 1.0f, 2.0f, 3.0f, 2.0f };
         OptionalInt result = Index.last(a, 2.0f);
@@ -1222,18 +2766,6 @@ public class IndexTest {
 
         result = Index.last(new float[0], 1.0f);
         assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void test_last_float_array_startIndexFromBack() {
-        float[] a = { 1.0f, 2.0f, 3.0f, 2.0f };
-        OptionalInt result = Index.last(a, 2.0f, 2);
-        assertTrue(result.isPresent());
-        assertEquals(1, result.getAsInt());
-
-        result = Index.last(a, 2.0f, 10);
-        assertTrue(result.isPresent());
-        assertEquals(3, result.getAsInt());
     }
 
     @Test
@@ -1254,18 +2786,6 @@ public class IndexTest {
     }
 
     @Test
-    public void test_last_double_array_startIndexFromBack() {
-        double[] a = { 1.0, 2.0, 3.0, 2.0 };
-        OptionalInt result = Index.last(a, 2.0, 2);
-        assertTrue(result.isPresent());
-        assertEquals(1, result.getAsInt());
-
-        result = Index.last(a, 2.0, 10);
-        assertTrue(result.isPresent());
-        assertEquals(3, result.getAsInt());
-    }
-
-    @Test
     public void test_last_double_array_tolerance() {
         double[] a = { 1.0, 2.0, 3.0, 2.1 };
         OptionalInt result = Index.last(a, 2.0, 0.2);
@@ -1278,18 +2798,6 @@ public class IndexTest {
 
         result = Index.last((double[]) null, 2.0, 0.1);
         assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void test_last_double_array_tolerance_startIndexFromBack() {
-        double[] a = { 1.0, 2.0, 3.0, 2.1 };
-        OptionalInt result = Index.last(a, 2.0, 0.2, 2);
-        assertTrue(result.isPresent());
-        assertEquals(1, result.getAsInt());
-
-        result = Index.last(a, 2.0, 0.2, 10);
-        assertTrue(result.isPresent());
-        assertEquals(3, result.getAsInt());
     }
 
     @Test
@@ -1315,18 +2823,6 @@ public class IndexTest {
     }
 
     @Test
-    public void test_last_Object_array_startIndexFromBack() {
-        String[] a = { "a", "b", "c", "b" };
-        OptionalInt result = Index.last(a, "b", 2);
-        assertTrue(result.isPresent());
-        assertEquals(1, result.getAsInt());
-
-        result = Index.last(a, "b", 10);
-        assertTrue(result.isPresent());
-        assertEquals(3, result.getAsInt());
-    }
-
-    @Test
     public void test_last_Collection() {
         List<String> c = Arrays.asList("a", "b", "c", "b");
         OptionalInt result = Index.last(c, "b");
@@ -1349,18 +2845,6 @@ public class IndexTest {
     }
 
     @Test
-    public void test_last_Collection_startIndexFromBack() {
-        List<String> c = Arrays.asList("a", "b", "c", "b");
-        OptionalInt result = Index.last(c, "b", 2);
-        assertTrue(result.isPresent());
-        assertEquals(1, result.getAsInt());
-
-        result = Index.last(c, "b", 10);
-        assertTrue(result.isPresent());
-        assertEquals(3, result.getAsInt());
-    }
-
-    @Test
     public void test_last_String_char() {
         String str = "abcb";
         OptionalInt result = Index.last(str, 'b');
@@ -1375,18 +2859,6 @@ public class IndexTest {
 
         result = Index.last("", 'a');
         assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void test_last_String_char_startIndexFromBack() {
-        String str = "abcb";
-        OptionalInt result = Index.last(str, 'b', 2);
-        assertTrue(result.isPresent());
-        assertEquals(1, result.getAsInt());
-
-        result = Index.last(str, 'b', 10);
-        assertTrue(result.isPresent());
-        assertEquals(3, result.getAsInt());
     }
 
     @Test
@@ -1407,15 +2879,61 @@ public class IndexTest {
     }
 
     @Test
-    public void test_last_String_String_startIndexFromBack() {
-        String str = "abcabc";
-        OptionalInt result = Index.last(str, "bc", 3);
-        assertTrue(result.isPresent());
-        assertEquals(1, result.getAsInt());
+    public void testLast_withNullAndEmptyInputs() {
+        assertEquals(OptionalInt.empty(), Index.last((boolean[]) null, true));
+        assertEquals(OptionalInt.empty(), Index.last(new boolean[0], true));
 
-        result = Index.last(str, "bc", 10);
-        assertTrue(result.isPresent());
-        assertEquals(4, result.getAsInt());
+        assertEquals(OptionalInt.empty(), Index.last((Object[]) null, "a"));
+        assertEquals(OptionalInt.empty(), Index.last(new Object[0], "a"));
+
+        assertEquals(OptionalInt.empty(), Index.last((List<String>) null, "a"));
+        assertEquals(OptionalInt.empty(), Index.last(Collections.emptyList(), "a"));
+
+        assertEquals(OptionalInt.empty(), Index.last((String) null, 'a'));
+        assertEquals(OptionalInt.empty(), Index.last("", 'a'));
+        assertEquals(OptionalInt.empty(), Index.last((String) null, "a"));
+        assertEquals(OptionalInt.empty(), Index.last("", "a"));
+    }
+
+    @Test
+    public void testLast_BooleanArray() {
+        boolean[] array = { true, false, true, false, true };
+
+        OptionalInt result = Index.last(array, true);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(4, result.get());
+
+        result = Index.last(array, false);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+
+        result = Index.last(null, true);
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testLast_String_SpecialCases() {
+        assertEquals(OptionalInt.of(5), Index.last("hello", ""));
+        assertEquals(OptionalInt.of(3), Index.last("hello", "", 3));
+        assertEquals(OptionalInt.empty(), Index.last("hello", "", -1));
+
+        String repeating = "abababab";
+        assertEquals(OptionalInt.of(6), Index.last(repeating, "ab"));
+        assertEquals(OptionalInt.of(4), Index.last(repeating, "ab", 5));
+        assertEquals(OptionalInt.of(2), Index.last(repeating, "ab", 3));
+    }
+
+    @Test
+    public void testLast_String() {
+        String str = "hello world hello";
+
+        assertEquals(OptionalInt.of(15), Index.last(str, 'l'));
+        assertEquals(OptionalInt.of(12), Index.last(str, 'h'));
+        assertEquals(OptionalInt.empty(), Index.last(str, 'z'));
+
+        assertEquals(OptionalInt.of(12), Index.last(str, "hello"));
+        assertEquals(OptionalInt.of(6), Index.last(str, "world"));
+        assertEquals(OptionalInt.empty(), Index.last(str, "test"));
     }
 
     @Test
@@ -1449,23 +2967,20 @@ public class IndexTest {
     }
 
     @Test
-    public void test_lastOfSubArray_boolean() {
-        boolean[] source = { true, false, true, true, false, true, true };
-        boolean[] sub = { true, true };
-        OptionalInt result = Index.lastOfSubArray(source, sub);
-        assertTrue(result.isPresent());
-        assertEquals(5, result.getAsInt());
+    public void testLastOfIgnoreCase() {
+        String str = "AbcDefAbc";
+        assertEquals(OptionalInt.of(6), Index.lastOfIgnoreCase(str, "ABC"));
+        assertEquals(OptionalInt.of(0), Index.lastOfIgnoreCase(str, "ABC", 5));
+        assertEquals(OptionalInt.empty(), Index.lastOfIgnoreCase(str, "XYZ"));
+    }
 
-        boolean[] notFound = { false, false };
-        result = Index.lastOfSubArray(source, notFound);
-        assertFalse(result.isPresent());
+    @Test
+    public void testLastOfIgnoreCase_String() {
+        String str = "Hello World HELLO";
 
-        result = Index.lastOfSubArray(source, new boolean[0]);
-        assertTrue(result.isPresent());
-        assertEquals(source.length, result.getAsInt());
-
-        result = Index.lastOfSubArray((boolean[]) null, sub);
-        assertFalse(result.isPresent());
+        OptionalInt result = Index.lastOfIgnoreCase(str, "hello");
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(12, result.get());
     }
 
     @Test
@@ -1830,6 +3345,342 @@ public class IndexTest {
     }
 
     @Test
+    public void testLastOfSubArray() {
+        int[] source = { 1, 2, 3, 4, 5, 1, 2, 3 };
+        int[] target = { 1, 2, 3 };
+        assertEquals(OptionalInt.of(5), Index.lastOfSubArray(source, target));
+        assertEquals(OptionalInt.of(5), Index.lastOfSubArray(source, 5, target));
+        assertEquals(OptionalInt.of(0), Index.lastOfSubArray(source, 4, target));
+    }
+
+    @Test
+    public void testLastOfSubArray_BooleanArray() {
+        boolean[] array = { true, false, true, false, true };
+        boolean[] subArray = { true, false };
+
+        OptionalInt result = Index.lastOfSubArray(array, subArray);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(2, result.get());
+
+        result = Index.lastOfSubArray(array, new boolean[0]);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(5, result.get());
+    }
+
+    @Test
+    public void testLastOfSubArray_BooleanArray_WithStartIndex() {
+        boolean[] array = { true, false, true, false, true };
+        boolean[] subArray = { true, false };
+
+        OptionalInt result = Index.lastOfSubArray(array, 1, subArray);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(0, result.get());
+
+        result = Index.lastOfSubArray(array, -1, subArray);
+        Assertions.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testLastOfSubArray_CharArray() {
+        char[] array = { 'a', 'b', 'c', 'a', 'b', 'c' };
+        char[] subArray = { 'a', 'b' };
+
+        OptionalInt result = Index.lastOfSubArray(array, subArray);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+    }
+
+    @Test
+    public void testLastOfSubArray_ObjectArray() {
+        String[] array = { "apple", "banana", "apple", "banana", "cherry" };
+        String[] subArray = { "apple", "banana" };
+
+        OptionalInt result = Index.lastOfSubArray(array, subArray);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(2, result.get());
+    }
+
+    @Test
+    public void testLastOfSubArray_AllPrimitiveTypes() {
+        boolean[] boolSource = { true, false, true, false, true, false };
+        boolean[] boolSub = { true, false };
+        assertEquals(OptionalInt.of(4), Index.lastOfSubArray(boolSource, boolSub));
+        assertEquals(OptionalInt.of(2), Index.lastOfSubArray(boolSource, 3, boolSub));
+
+        char[] charSource = "abcabcabc".toCharArray();
+        char[] charSub = "abc".toCharArray();
+        assertEquals(OptionalInt.of(6), Index.lastOfSubArray(charSource, charSub));
+        assertEquals(OptionalInt.of(3), Index.lastOfSubArray(charSource, 5, charSub));
+
+        byte[] byteSource = { 1, 2, 3, 1, 2, 3, 1, 2, 3 };
+        byte[] byteSub = { 1, 2, 3 };
+        assertEquals(OptionalInt.of(6), Index.lastOfSubArray(byteSource, byteSub));
+
+        short[] shortSource = { 10, 20, 30, 10, 20, 30 };
+        short[] shortSub = { 10, 20, 30 };
+        assertEquals(OptionalInt.of(3), Index.lastOfSubArray(shortSource, shortSub));
+
+        int[] intSource = { 10, 20, 30, 10, 20, 30 };
+        int[] intSub = { 10, 20, 30 };
+        assertEquals(OptionalInt.of(3), Index.lastOfSubArray(intSource, intSub));
+
+        long[] longSource = { 100L, 200L, 300L, 100L, 200L, 300L };
+        long[] longSub = { 100L, 200L, 300L };
+        assertEquals(OptionalInt.of(3), Index.lastOfSubArray(longSource, longSub));
+
+        float[] floatSource = { 1.1f, 2.2f, 3.3f, 1.1f, 2.2f, 3.3f };
+        float[] floatSub = { 1.1f, 2.2f };
+        assertEquals(OptionalInt.of(3), Index.lastOfSubArray(floatSource, floatSub));
+
+        double[] doubleSource = { 1.1, 2.2, 3.3, 1.1, 2.2, 3.3 };
+        double[] doubleSub = { 1.1, 2.2 };
+        assertEquals(OptionalInt.of(3), Index.lastOfSubArray(doubleSource, doubleSub));
+
+        String[] strSource = { "10", "20", "30", "10", "20", "30" };
+        String[] strSub = { "10", "20", "30" };
+        assertEquals(OptionalInt.of(3), Index.lastOfSubArray(strSource, strSub));
+    }
+
+    @Test
+    public void test_lastOfSubArray_boolean() {
+        boolean[] source = { true, false, true, true, false, true, true };
+        boolean[] sub = { true, true };
+        OptionalInt result = Index.lastOfSubArray(source, sub);
+        assertTrue(result.isPresent());
+        assertEquals(5, result.getAsInt());
+
+        boolean[] notFound = { false, false };
+        result = Index.lastOfSubArray(source, notFound);
+        assertFalse(result.isPresent());
+
+        result = Index.lastOfSubArray(source, new boolean[0]);
+        assertTrue(result.isPresent());
+        assertEquals(source.length, result.getAsInt());
+
+        result = Index.lastOfSubArray((boolean[]) null, sub);
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testLastOfSubArray_EdgeCases() {
+        int[] source = { 1, 2, 3, 1, 2, 3, 4 };
+        assertEquals(OptionalInt.of(7), Index.lastOfSubArray(source, new int[0]));
+        assertEquals(OptionalInt.of(5), Index.lastOfSubArray(source, 5, new int[0]));
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, -1, new int[0]));
+
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(new int[] { 1, 2 }, new int[] { 1, 2, 3 }));
+
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(null, new int[] { 1 }));
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, null));
+
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, new int[] { 5, 6 }));
+    }
+
+    @Test
+    public void testLastOfSubArray_EmptySubArray() {
+        int[] array = { 1, 2, 3, 4, 5 };
+        int[] emptySubArray = {};
+
+        OptionalInt result = Index.lastOfSubArray(array, emptySubArray);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(5, result.get());
+
+        result = Index.lastOfSubArray(array, 3, emptySubArray);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(3, result.get());
+    }
+
+    @Test
+    public void testLastOfSubArray_SpecialCases() {
+        int[] source = { 1, 2, 3, 4, 5 };
+
+        assertEquals(OptionalInt.of(5), Index.lastOfSubArray(source, 10, new int[0]));
+
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, -1, new int[] { 1 }));
+
+        int[] endSource = { 1, 2, 3, 4, 5, 6, 7 };
+        int[] endSub = { 6, 7 };
+        assertEquals(OptionalInt.of(5), Index.lastOfSubArray(endSource, endSub));
+    }
+
+    @Test
+    public void testLastOfSubArray_IntArray() {
+        int[] source = { 1, 2, 3, 4, 2, 3, 5, 2, 3 };
+        int[] sub1 = { 2, 3 };
+        int[] sub2 = { 3, 5 };
+        int[] sub3 = { 1, 3 };
+
+        assertEquals(OptionalInt.of(7), Index.lastOfSubArray(source, sub1));
+        assertEquals(OptionalInt.of(5), Index.lastOfSubArray(source, sub2));
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, sub3));
+        assertEquals(OptionalInt.of(4), Index.lastOfSubArray(source, 6, sub1));
+
+        assertEquals(OptionalInt.of(9), Index.lastOfSubArray(source, new int[0]));
+        assertEquals(OptionalInt.of(5), Index.lastOfSubArray(source, 5, new int[0]));
+    }
+
+    @Test
+    public void testLastOfSubArray_DoubleEmptySubArrayWithStartIndex() {
+        final double[] source = { 1.0, 2.0, 3.0 };
+        final double[] empty = {};
+
+        assertEquals(OptionalInt.of(source.length), Index.lastOfSubArray(source, 10, empty, 0, 0));
+        assertEquals(OptionalInt.of(1), Index.lastOfSubArray(source, 1, empty, 0, 0));
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, -1, empty, 0, 0));
+    }
+
+    @Test
+    public void testLastOfSubArray_LongFullCoverage() {
+        long[] source = { 1L, 2L, 3L, 2L, 3L };
+        long[] sub = { 2L, 3L };
+
+        // found last
+        assertEquals(OptionalInt.of(3), Index.lastOfSubArray(source, 5, sub, 0, 2));
+
+        // found at limited start index
+        assertEquals(OptionalInt.of(1), Index.lastOfSubArray(source, 2, sub, 0, 2));
+
+        // not found (break path)
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, 5, new long[] { 2L, 9L }, 0, 2));
+
+        // not found fallthrough
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, 5, new long[] { 9L, 9L }, 0, 2));
+
+        // null source
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray((long[]) null, 5, sub, 0, 2));
+
+        // null subarray
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, 5, (long[]) null, 0, 0));
+
+        // startIndexFromBack < 0
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, -1, sub, 0, 2));
+
+        // sizeToMatch == 0 with null source
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray((long[]) null, 2, sub, 0, 0));
+
+        // sizeToMatch == 0 with valid inputs
+        assertEquals(OptionalInt.of(2), Index.lastOfSubArray(source, 2, sub, 0, 0));
+    }
+
+    @Test
+    public void testLastOfSubArray_FloatFullCoverage() {
+        float[] source = { 1f, 2f, 3f, 2f, 3f };
+        float[] sub = { 2f, 3f };
+
+        // found last
+        assertEquals(OptionalInt.of(3), Index.lastOfSubArray(source, 5, sub, 0, 2));
+
+        // not found (break path - first matches, second doesn't)
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, 5, new float[] { 2f, 9f }, 0, 2));
+
+        // not found fallthrough
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, 5, new float[] { 9f, 9f }, 0, 2));
+
+        // null source
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray((float[]) null, 5, sub, 0, 2));
+
+        // null subarray
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, 5, (float[]) null, 0, 0));
+
+        // startIndexFromBack < 0
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, -1, sub, 0, 2));
+
+        // sizeToMatch == 0
+        assertEquals(OptionalInt.of(2), Index.lastOfSubArray(source, 2, sub, 0, 0));
+
+        // sizeToMatch == 0 with null source
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray((float[]) null, 2, sub, 0, 0));
+    }
+
+    @Test
+    public void testLastOfSubArray_DoubleFullCoverage() {
+        double[] source = { 1d, 2d, 3d, 2d, 3d };
+        double[] sub = { 2d, 3d };
+
+        // found last
+        assertEquals(OptionalInt.of(3), Index.lastOfSubArray(source, 5, sub, 0, 2));
+
+        // not found (break path)
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, 5, new double[] { 2d, 9d }, 0, 2));
+
+        // not found fallthrough
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, 5, new double[] { 9d, 9d }, 0, 2));
+
+        // null source
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray((double[]) null, 5, sub, 0, 2));
+
+        // null subarray
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, 5, (double[]) null, 0, 0));
+
+        // startIndexFromBack < 0
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, -1, sub, 0, 2));
+
+        // sizeToMatch == 0
+        assertEquals(OptionalInt.of(2), Index.lastOfSubArray(source, 2, sub, 0, 0));
+
+        // sizeToMatch == 0 with null source
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray((double[]) null, 2, sub, 0, 0));
+    }
+
+    @Test
+    public void testLastOfSubArray_ObjectFullCoverage() {
+        String[] source = { "a", "b", "c", "b", "c" };
+        String[] sub = { "b", "c" };
+
+        // found last
+        assertEquals(OptionalInt.of(3), Index.lastOfSubArray(source, 5, sub, 0, 2));
+
+        // not found (break path)
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, 5, new String[] { "b", "z" }, 0, 2));
+
+        // not found fallthrough
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, 5, new String[] { "z", "z" }, 0, 2));
+
+        // null source
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray((Object[]) null, 5, sub, 0, 2));
+
+        // null subarray
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, 5, (Object[]) null, 0, 0));
+
+        // startIndexFromBack < 0
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, -1, sub, 0, 2));
+
+        // sizeToMatch == 0
+        assertEquals(OptionalInt.of(2), Index.lastOfSubArray(source, 2, sub, 0, 0));
+
+        // sizeToMatch == 0 with null source
+        assertEquals(OptionalInt.empty(), Index.lastOfSubArray((Object[]) null, 2, sub, 0, 0));
+    }
+
+    @Test
+    public void test_lastOfSubArray_boolean_NullArrayOrNegativeIndex() {
+        assertFalse(Index.lastOfSubArray((boolean[]) null, 5, new boolean[0], 0, 0).isPresent());
+        assertFalse(Index.lastOfSubArray(new boolean[] { true }, 5, (boolean[]) null, 0, 0).isPresent());
+        assertFalse(Index.lastOfSubArray(new boolean[] { true }, -1, new boolean[0], 0, 0).isPresent());
+    }
+
+    @Test
+    public void test_lastOfSubArray_char_NullArrayOrNegativeIndex() {
+        assertFalse(Index.lastOfSubArray((char[]) null, 5, new char[0], 0, 0).isPresent());
+        assertFalse(Index.lastOfSubArray(new char[] { 'a' }, 5, (char[]) null, 0, 0).isPresent());
+        assertFalse(Index.lastOfSubArray(new char[] { 'a' }, -1, new char[0], 0, 0).isPresent());
+    }
+
+    @Test
+    public void test_lastOfSubArray_byte_NullArrayOrNegativeIndex() {
+        assertFalse(Index.lastOfSubArray((byte[]) null, 5, new byte[0], 0, 0).isPresent());
+        assertFalse(Index.lastOfSubArray(new byte[] { 1 }, 5, (byte[]) null, 0, 0).isPresent());
+        assertFalse(Index.lastOfSubArray(new byte[] { 1 }, -1, new byte[0], 0, 0).isPresent());
+    }
+
+    @Test
+    public void test_lastOfSubArray_short_NullArrayOrNegativeIndex() {
+        assertFalse(Index.lastOfSubArray((short[]) null, 5, new short[0], 0, 0).isPresent());
+        assertFalse(Index.lastOfSubArray(new short[] { 1 }, 5, (short[]) null, 0, 0).isPresent());
+        assertFalse(Index.lastOfSubArray(new short[] { 1 }, -1, new short[0], 0, 0).isPresent());
+    }
+
+    @Test
     public void test_lastOfSubList() {
         List<String> source = Arrays.asList("a", "b", "c", "d", "c", "d");
         List<String> sub = Arrays.asList("c", "d");
@@ -1869,6 +3720,305 @@ public class IndexTest {
         result = Index.lastOfSubList(source, 5, sub, 0, 0);
         assertTrue(result.isPresent());
         assertEquals(5, result.getAsInt());
+    }
+
+    @Test
+    public void testLastOfSubList() {
+        List<String> list = Arrays.asList("apple", "banana", "apple", "banana", "cherry");
+        List<String> subList = Arrays.asList("apple", "banana");
+
+        OptionalInt result = Index.lastOfSubList(list, subList);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(2, result.get());
+
+        result = Index.lastOfSubList(list, new ArrayList<>());
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(5, result.get());
+    }
+
+    @Test
+    public void testLastOfSubList_NonRandomAccess() {
+        LinkedList<String> list = new LinkedList<>(Arrays.asList("apple", "banana", "apple", "banana"));
+        LinkedList<String> subList = new LinkedList<>(Arrays.asList("apple", "banana"));
+
+        OptionalInt result = Index.lastOfSubList(list, subList);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(2, result.get());
+    }
+
+    @Test
+    public void testLastOfSubList_EdgeCases() {
+        List<Integer> source = Arrays.asList(1, 2, 3, 1, 2, 3, 4);
+        List<Integer> target = Arrays.asList(1, 2, 3);
+        assertEquals(OptionalInt.of(3), Index.lastOfSubList(source, target));
+        assertEquals(OptionalInt.of(3), Index.lastOfSubList(source, 3, target));
+        assertEquals(OptionalInt.of(0), Index.lastOfSubList(source, 2, target));
+    }
+
+    @Test
+    public void test_lastOfSubList_NullOrNegativeIndex() {
+        assertFalse(Index.lastOfSubList((java.util.List<?>) null, 5, new java.util.ArrayList<>(), 0, 0).isPresent());
+        assertFalse(Index.lastOfSubList(Arrays.asList(1), 5, (java.util.List<?>) null, 0, 0).isPresent());
+        assertFalse(Index.lastOfSubList(Arrays.asList(1), -1, new java.util.ArrayList<>(), 0, 0).isPresent());
+    }
+
+    @Test
+    public void testAllOf() {
+        int[] array = { 1, 2, 1, 3, 1 };
+        BitSet expected = new BitSet();
+        expected.set(0);
+        expected.set(2);
+        expected.set(4);
+        assertEquals(expected, Index.allOf(array, 1));
+    }
+
+    @Test
+    public void testAllOfWithPredicate() {
+        String[] array = { "apple", "banana", "avocado", "orange" };
+        Predicate<String> startsWithA = s -> s.startsWith("a");
+        BitSet expected = new BitSet();
+        expected.set(0);
+        expected.set(2);
+        assertEquals(expected, Index.allOf(array, startsWithA));
+    }
+
+    @Test
+    public void testAllOf_ByteArray() {
+        byte[] array = { 1, 2, 1, 2, 1 };
+
+        BitSet result = Index.allOf(array, (byte) 1);
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(2));
+        Assertions.assertTrue(result.get(4));
+    }
+
+    @Test
+    public void testAllOf_CharArray() {
+        char[] array = { 'a', 'b', 'a', 'b', 'a' };
+
+        BitSet result = Index.allOf(array, 'a');
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(2));
+        Assertions.assertTrue(result.get(4));
+    }
+
+    @Test
+    public void testAllOf_ShortArray() {
+        short[] array = { 10, 20, 10, 20, 10 };
+
+        BitSet result = Index.allOf(array, (short) 10);
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(2));
+        Assertions.assertTrue(result.get(4));
+    }
+
+    @Test
+    public void testAllOf_IntArray() {
+        int[] array = { 100, 200, 100, 200, 100 };
+
+        BitSet result = Index.allOf(array, 100);
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(2));
+        Assertions.assertTrue(result.get(4));
+    }
+
+    @Test
+    public void testAllOf_LongArray() {
+        long[] array = { 1000L, 2000L, 1000L, 2000L, 1000L };
+
+        BitSet result = Index.allOf(array, 1000L);
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(2));
+        Assertions.assertTrue(result.get(4));
+    }
+
+    @Test
+    public void testAllOf_FloatArray() {
+        float[] array = { 1.1f, 2.2f, 1.1f, 2.2f, 1.1f };
+
+        BitSet result = Index.allOf(array, 1.1f);
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(2));
+        Assertions.assertTrue(result.get(4));
+    }
+
+    @Test
+    public void testAllOf_DoubleArray() {
+        double[] array = { 1.11, 2.22, 1.11, 2.22, 1.11 };
+
+        BitSet result = Index.allOf(array, 1.11);
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(2));
+        Assertions.assertTrue(result.get(4));
+    }
+
+    @Test
+    public void testAllOf_DoubleArray_WithTolerance() {
+        double[] array = { 1.0, 2.001, 1.01, 2.999, 0.99 };
+
+        BitSet result = Index.allOf(array, 1.0, 0.02);
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(2));
+        Assertions.assertTrue(result.get(4));
+    }
+
+    @Test
+    public void testAllOf_Collection() {
+        List<String> list = Arrays.asList("apple", "banana", "apple", "banana", "apple");
+
+        BitSet result = Index.allOf(list, "apple");
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(2));
+        Assertions.assertTrue(result.get(4));
+
+        LinkedList<String> linkedList = new LinkedList<>(list);
+        result = Index.allOf(linkedList, "apple");
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(2));
+        Assertions.assertTrue(result.get(4));
+    }
+
+    @Test
+    public void testAllOf_Array_WithPredicate() {
+        String[] array = { "apple", "apricot", "banana", "avocado", "cherry" };
+
+        BitSet result = Index.allOf(array, s -> s.startsWith("a"));
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(1));
+        Assertions.assertTrue(result.get(3));
+
+        result = Index.allOf(array, s -> s.length() > 10);
+        Assertions.assertEquals(0, result.cardinality());
+    }
+
+    @Test
+    public void testAllOf_Collection_WithPredicate() {
+        List<String> list = Arrays.asList("apple", "apricot", "banana", "avocado", "cherry");
+
+        BitSet result = Index.allOf(list, s -> s.startsWith("a"));
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(1));
+        Assertions.assertTrue(result.get(3));
+
+        LinkedList<String> linkedList = new LinkedList<>(list);
+        result = Index.allOf(linkedList, s -> s.startsWith("a"));
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(1));
+        Assertions.assertTrue(result.get(3));
+    }
+
+    @Test
+    public void testAllOf_AllPrimitiveTypes() {
+        boolean[] boolArr = { true, false, true, false, true };
+        BitSet boolResult = Index.allOf(boolArr, true);
+        assertTrue(boolResult.get(0));
+        assertTrue(boolResult.get(2));
+        assertTrue(boolResult.get(4));
+        assertEquals(3, boolResult.cardinality());
+
+        char[] charArr = { 'a', 'b', 'a', 'c', 'a' };
+        BitSet charResult = Index.allOf(charArr, 'a');
+        assertTrue(charResult.get(0));
+        assertTrue(charResult.get(2));
+        assertTrue(charResult.get(4));
+        assertEquals(3, charResult.cardinality());
+
+        byte[] byteArr = { 1, 2, 1, 3, 1 };
+        BitSet byteResult = Index.allOf(byteArr, (byte) 1);
+        assertTrue(byteResult.get(0));
+        assertTrue(byteResult.get(2));
+        assertTrue(byteResult.get(4));
+        assertEquals(3, byteResult.cardinality());
+
+        short[] shortArr = { 10, 20, 10, 30, 10 };
+        BitSet shortResult = Index.allOf(shortArr, (short) 10);
+        assertTrue(shortResult.get(0));
+        assertTrue(shortResult.get(2));
+        assertTrue(shortResult.get(4));
+        assertEquals(3, shortResult.cardinality());
+
+        long[] longArr = { 100L, 200L, 100L, 300L, 100L };
+        BitSet longResult = Index.allOf(longArr, 100L);
+        assertTrue(longResult.get(0));
+        assertTrue(longResult.get(2));
+        assertTrue(longResult.get(4));
+        assertEquals(3, longResult.cardinality());
+
+        float[] floatArr = { 1.1f, 2.2f, 1.1f, 3.3f, 1.1f };
+        BitSet floatResult = Index.allOf(floatArr, 1.1f);
+        assertTrue(floatResult.get(0));
+        assertTrue(floatResult.get(2));
+        assertTrue(floatResult.get(4));
+        assertEquals(3, floatResult.cardinality());
+    }
+
+    @Test
+    public void testAllOf_LargeArrayPerformance() {
+        int size = 10000;
+        int[] largeArray = new int[size];
+        for (int i = 0; i < size; i++) {
+            largeArray[i] = i % 10;
+        }
+
+        BitSet result = Index.allOf(largeArray, 5);
+        assertEquals(1000, result.cardinality());
+
+        assertTrue(result.get(5));
+        assertTrue(result.get(15));
+        assertTrue(result.get(9995));
+        assertFalse(result.get(0));
+        assertFalse(result.get(9999));
+    }
+
+    @Test
+    public void testAllOf_WithPredicate_Array() {
+        Integer[] arr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+
+        BitSet result = Index.allOf(arr, n -> n % 2 == 0);
+        assertTrue(result.get(1));
+        assertTrue(result.get(3));
+        assertTrue(result.get(5));
+        assertTrue(result.get(7));
+        assertTrue(result.get(9));
+        assertFalse(result.get(0));
+        assertFalse(result.get(2));
+        assertFalse(result.get(4));
+        assertFalse(result.get(6));
+        assertFalse(result.get(8));
+
+        result = Index.allOf(arr, n -> n > 5, 5);
+        assertTrue(result.get(5));
+        assertTrue(result.get(6));
+        assertTrue(result.get(7));
+        assertTrue(result.get(8));
+        assertTrue(result.get(9));
+        assertFalse(result.get(0));
+        assertFalse(result.get(4));
+    }
+
+    @Test
+    public void testAllOf_WithPredicate_Collection() {
+        List<String> list = Arrays.asList("apple", "banana", "apricot", "cherry", "avocado");
+
+        BitSet result = Index.allOf(list, s -> s.startsWith("a"));
+        assertTrue(result.get(0));
+        assertTrue(result.get(2));
+        assertTrue(result.get(4));
+        assertFalse(result.get(1));
+        assertFalse(result.get(3));
     }
 
     @Test
@@ -2268,310 +4418,6 @@ public class IndexTest {
     }
 
     @Test
-    public void testOfBooleanArray() {
-        boolean[] array = { true, false, true, false };
-        assertEquals(OptionalInt.of(0), Index.of(array, true));
-        assertEquals(OptionalInt.of(1), Index.of(array, false));
-        assertEquals(OptionalInt.of(2), Index.of(array, true, 2));
-        assertEquals(OptionalInt.empty(), Index.of(array, true, 3));
-    }
-
-    @Test
-    public void testOfCharArray() {
-        char[] array = { 'a', 'b', 'c', 'a' };
-        assertEquals(OptionalInt.of(0), Index.of(array, 'a'));
-        assertEquals(OptionalInt.of(1), Index.of(array, 'b'));
-        assertEquals(OptionalInt.of(3), Index.of(array, 'a', 1));
-        assertEquals(OptionalInt.empty(), Index.of(array, 'd'));
-    }
-
-    @Test
-    public void testOfByteArray() {
-        byte[] array = { 1, 2, 3, 1 };
-        assertEquals(OptionalInt.of(0), Index.of(array, (byte) 1));
-        assertEquals(OptionalInt.of(1), Index.of(array, (byte) 2));
-        assertEquals(OptionalInt.of(3), Index.of(array, (byte) 1, 1));
-        assertEquals(OptionalInt.empty(), Index.of(array, (byte) 4));
-    }
-
-    @Test
-    public void testOfShortArray() {
-        short[] array = { 1, 2, 3, 1 };
-        assertEquals(OptionalInt.of(0), Index.of(array, (short) 1));
-        assertEquals(OptionalInt.of(1), Index.of(array, (short) 2));
-        assertEquals(OptionalInt.of(3), Index.of(array, (short) 1, 1));
-        assertEquals(OptionalInt.empty(), Index.of(array, (short) 4));
-    }
-
-    @Test
-    public void testOfIntArray() {
-        int[] array = { 1, 2, 3, 1 };
-        assertEquals(OptionalInt.of(0), Index.of(array, 1));
-        assertEquals(OptionalInt.of(1), Index.of(array, 2));
-        assertEquals(OptionalInt.of(3), Index.of(array, 1, 1));
-        assertEquals(OptionalInt.empty(), Index.of(array, 4));
-    }
-
-    @Test
-    public void testOfLongArray() {
-        long[] array = { 1L, 2L, 3L, 1L };
-        assertEquals(OptionalInt.of(0), Index.of(array, 1L));
-        assertEquals(OptionalInt.of(1), Index.of(array, 2L));
-        assertEquals(OptionalInt.of(3), Index.of(array, 1L, 1));
-        assertEquals(OptionalInt.empty(), Index.of(array, 4L));
-    }
-
-    @Test
-    public void testOfFloatArray() {
-        float[] array = { 1.0f, 2.0f, 3.0f, 1.0f };
-        assertEquals(OptionalInt.of(0), Index.of(array, 1.0f));
-        assertEquals(OptionalInt.of(1), Index.of(array, 2.0f));
-        assertEquals(OptionalInt.of(3), Index.of(array, 1.0f, 1));
-        assertEquals(OptionalInt.empty(), Index.of(array, 4.0f));
-    }
-
-    @Test
-    public void testOfDoubleArray() {
-        double[] array = { 1.0, 2.0, 3.0, 1.0 };
-        assertEquals(OptionalInt.of(0), Index.of(array, 1.0));
-        assertEquals(OptionalInt.of(1), Index.of(array, 2.0));
-        assertEquals(OptionalInt.of(3), Index.of(array, 1.0, 1));
-        assertEquals(OptionalInt.empty(), Index.of(array, 4.0));
-    }
-
-    @Test
-    public void testOfDoubleArrayWithTolerance() {
-        double[] array = { 1.0, 2.0, 3.0, 1.05 };
-        assertEquals(OptionalInt.of(0), Index.of(array, 1.0, 0.1));
-        assertEquals(OptionalInt.of(0), Index.of(array, 1.0, 0.01));
-        assertEquals(OptionalInt.of(3), Index.of(array, 1.0, 0.1, 1));
-
-    }
-
-    @Test
-    public void testOfObjectArray() {
-        String[] array = { "a", "b", "c", "a" };
-        assertEquals(OptionalInt.of(0), Index.of(array, "a"));
-        assertEquals(OptionalInt.of(1), Index.of(array, "b"));
-        assertEquals(OptionalInt.of(3), Index.of(array, "a", 1));
-        assertEquals(OptionalInt.empty(), Index.of(array, "d"));
-        assertEquals(OptionalInt.empty(), Index.of((Object[]) null, "a"));
-    }
-
-    @Test
-    public void testOfCollection() {
-        List<String> list = Arrays.asList("a", "b", "c", "a");
-        assertEquals(OptionalInt.of(0), Index.of(list, "a"));
-        assertEquals(OptionalInt.of(1), Index.of(list, "b"));
-        assertEquals(OptionalInt.of(3), Index.of(list, "a", 1));
-        assertEquals(OptionalInt.empty(), Index.of(list, "d"));
-    }
-
-    @Test
-    public void testOfString() {
-        String str = "abcadef";
-        assertEquals(OptionalInt.of(0), Index.of(str, 'a'));
-        assertEquals(OptionalInt.of(1), Index.of(str, 'b'));
-        assertEquals(OptionalInt.of(3), Index.of(str, 'a', 1));
-        assertEquals(OptionalInt.empty(), Index.of(str, 'g'));
-        assertEquals(OptionalInt.of(0), Index.of(str, "a"));
-        assertEquals(OptionalInt.of(3), Index.of(str, "ad"));
-        assertEquals(OptionalInt.empty(), Index.of(str, "g"));
-    }
-
-    @Test
-    public void testOfIgnoreCase() {
-        String str = "aBcDeF";
-        assertEquals(OptionalInt.of(0), Index.ofIgnoreCase(str, "abc"));
-        assertEquals(OptionalInt.of(3), Index.ofIgnoreCase(str, "def"));
-        assertEquals(OptionalInt.empty(), Index.ofIgnoreCase(str, "ghi"));
-    }
-
-    @Test
-    public void testOfSubArray() {
-        int[] source = { 1, 2, 3, 4, 5, 1, 2, 3 };
-        int[] target = { 1, 2, 3 };
-        assertEquals(OptionalInt.of(0), Index.ofSubArray(source, target));
-        assertEquals(OptionalInt.of(5), Index.ofSubArray(source, 1, target));
-    }
-
-    @Test
-    public void testOfSubList() {
-        List<Integer> source = Arrays.asList(1, 2, 3, 4, 5, 1, 2, 3);
-        List<Integer> target = Arrays.asList(1, 2, 3);
-        assertEquals(OptionalInt.of(0), Index.ofSubList(source, target));
-        assertEquals(OptionalInt.of(5), Index.ofSubList(source, 1, target));
-    }
-
-    @Test
-    public void testLast() {
-        int[] array = { 1, 2, 3, 1, 2, 3 };
-        assertEquals(OptionalInt.of(3), Index.last(array, 1));
-        assertEquals(OptionalInt.of(3), Index.last(array, 1, 3));
-    }
-
-    @Test
-    public void testLastOfSubArray() {
-        int[] source = { 1, 2, 3, 4, 5, 1, 2, 3 };
-        int[] target = { 1, 2, 3 };
-        assertEquals(OptionalInt.of(5), Index.lastOfSubArray(source, target));
-        assertEquals(OptionalInt.of(5), Index.lastOfSubArray(source, 5, target));
-        assertEquals(OptionalInt.of(0), Index.lastOfSubArray(source, 4, target));
-    }
-
-    @Test
-    public void testAllOf() {
-        int[] array = { 1, 2, 1, 3, 1 };
-        BitSet expected = new BitSet();
-        expected.set(0);
-        expected.set(2);
-        expected.set(4);
-        assertEquals(expected, Index.allOf(array, 1));
-    }
-
-    @Test
-    public void testAllOfWithPredicate() {
-        String[] array = { "apple", "banana", "avocado", "orange" };
-        Predicate<String> startsWithA = s -> s.startsWith("a");
-        BitSet expected = new BitSet();
-        expected.set(0);
-        expected.set(2);
-        assertEquals(expected, Index.allOf(array, startsWithA));
-    }
-
-    @Test
-    public void testOf_withNullAndEmptyInputs() {
-        assertEquals(OptionalInt.empty(), Index.of((boolean[]) null, true));
-        assertEquals(OptionalInt.empty(), Index.of(new boolean[0], true));
-        assertEquals(OptionalInt.empty(), Index.of((char[]) null, 'a'));
-        assertEquals(OptionalInt.empty(), Index.of(new char[0], 'a'));
-        assertEquals(OptionalInt.empty(), Index.of((byte[]) null, (byte) 1));
-        assertEquals(OptionalInt.empty(), Index.of(new byte[0], (byte) 1));
-        assertEquals(OptionalInt.empty(), Index.of((short[]) null, (short) 1));
-        assertEquals(OptionalInt.empty(), Index.of(new short[0], (short) 1));
-        assertEquals(OptionalInt.empty(), Index.of((int[]) null, 1));
-        assertEquals(OptionalInt.empty(), Index.of(new int[0], 1));
-        assertEquals(OptionalInt.empty(), Index.of((long[]) null, 1L));
-        assertEquals(OptionalInt.empty(), Index.of(new long[0], 1L));
-        assertEquals(OptionalInt.empty(), Index.of((float[]) null, 1.0f));
-        assertEquals(OptionalInt.empty(), Index.of(new float[0], 1.0f));
-        assertEquals(OptionalInt.empty(), Index.of((double[]) null, 1.0));
-        assertEquals(OptionalInt.empty(), Index.of(new double[0], 1.0));
-
-        assertEquals(OptionalInt.empty(), Index.of((Object[]) null, "a"));
-        assertEquals(OptionalInt.empty(), Index.of(new Object[0], "a"));
-
-        assertEquals(OptionalInt.empty(), Index.of((List<String>) null, "a"));
-        assertEquals(OptionalInt.empty(), Index.of(Collections.emptyList(), "a"));
-
-        assertEquals(OptionalInt.empty(), Index.of((Iterator<String>) null, "a"));
-        assertEquals(OptionalInt.empty(), Index.of(Collections.emptyIterator(), "a"));
-
-        assertEquals(OptionalInt.empty(), Index.of((String) null, 'a'));
-        assertEquals(OptionalInt.empty(), Index.of("", 'a'));
-        assertEquals(OptionalInt.empty(), Index.of((String) null, "a"));
-        assertEquals(OptionalInt.empty(), Index.of("", "a"));
-    }
-
-    @Test
-    public void testOfIterator() {
-        List<String> list = Arrays.asList("a", "b", "c", "a", "b");
-        assertEquals(OptionalInt.of(0), Index.of(list.iterator(), "a"));
-        assertEquals(OptionalInt.of(1), Index.of(list.iterator(), "b"));
-        assertEquals(OptionalInt.of(3), Index.of(list.iterator(), "a", 3));
-        assertEquals(OptionalInt.empty(), Index.of(list.iterator(), "d"));
-    }
-
-    @Test
-    public void testOfDoubleWithTolerance_EdgeCases() {
-        double[] array = { 1.0, 1.05, 1.1, 1.15, 1.2 };
-        assertEquals(OptionalInt.of(2), Index.of(array, 1.1, 0.0));
-        assertEquals(OptionalInt.of(1), Index.of(array, 1.0, 0.051, 1));
-        assertEquals(OptionalInt.of(0), Index.of(array, 1.0, 0.04999));
-        assertEquals(OptionalInt.empty(), Index.of(array, 0.9, 0.05));
-    }
-
-    @Test
-    public void testOfSubArray_EdgeCases() {
-        int[] source = { 1, 2, 3, 4 };
-        assertEquals(OptionalInt.of(0), Index.ofSubArray(source, new int[0]));
-        assertEquals(OptionalInt.of(2), Index.ofSubArray(source, 2, new int[0]));
-        assertEquals(OptionalInt.of(4), Index.ofSubArray(source, 5, new int[0]));
-        assertEquals(OptionalInt.of(0), Index.ofSubArray(source, -1, new int[0]));
-
-        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, new int[] { 1, 2, 3, 4, 5 }));
-
-        assertEquals(OptionalInt.empty(), Index.ofSubArray((int[]) null, new int[] { 1 }));
-        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, null));
-        assertEquals(OptionalInt.empty(), Index.ofSubArray((int[]) null, null));
-        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, 2, null));
-
-        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, new int[] { 5, 6 }));
-    }
-
-    @Test
-    public void testOfSubList_EdgeCases() {
-        List<Integer> source = Arrays.asList(1, 2, 3, 4);
-        assertEquals(OptionalInt.of(0), Index.ofSubList(source, Collections.emptyList()));
-        assertEquals(OptionalInt.of(2), Index.ofSubList(source, 2, Collections.emptyList()));
-
-        assertEquals(OptionalInt.empty(), Index.ofSubList(source, Arrays.asList(1, 2, 3, 4, 5)));
-
-        assertEquals(OptionalInt.empty(), Index.ofSubList(null, Arrays.asList(1)));
-        assertEquals(OptionalInt.empty(), Index.ofSubList(source, null));
-        assertEquals(OptionalInt.empty(), Index.ofSubList(null, null));
-    }
-
-    @Test
-    public void testLast_withNullAndEmptyInputs() {
-        assertEquals(OptionalInt.empty(), Index.last((boolean[]) null, true));
-        assertEquals(OptionalInt.empty(), Index.last(new boolean[0], true));
-
-        assertEquals(OptionalInt.empty(), Index.last((Object[]) null, "a"));
-        assertEquals(OptionalInt.empty(), Index.last(new Object[0], "a"));
-
-        assertEquals(OptionalInt.empty(), Index.last((List<String>) null, "a"));
-        assertEquals(OptionalInt.empty(), Index.last(Collections.emptyList(), "a"));
-
-        assertEquals(OptionalInt.empty(), Index.last((String) null, 'a'));
-        assertEquals(OptionalInt.empty(), Index.last("", 'a'));
-        assertEquals(OptionalInt.empty(), Index.last((String) null, "a"));
-        assertEquals(OptionalInt.empty(), Index.last("", "a"));
-    }
-
-    @Test
-    public void testLastOfIgnoreCase() {
-        String str = "AbcDefAbc";
-        assertEquals(OptionalInt.of(6), Index.lastOfIgnoreCase(str, "ABC"));
-        assertEquals(OptionalInt.of(0), Index.lastOfIgnoreCase(str, "ABC", 5));
-        assertEquals(OptionalInt.empty(), Index.lastOfIgnoreCase(str, "XYZ"));
-    }
-
-    @Test
-    public void testLastOfSubArray_EdgeCases() {
-        int[] source = { 1, 2, 3, 1, 2, 3, 4 };
-        assertEquals(OptionalInt.of(7), Index.lastOfSubArray(source, new int[0]));
-        assertEquals(OptionalInt.of(5), Index.lastOfSubArray(source, 5, new int[0]));
-        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, -1, new int[0]));
-
-        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(new int[] { 1, 2 }, new int[] { 1, 2, 3 }));
-
-        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(null, new int[] { 1 }));
-        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, null));
-
-        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, new int[] { 5, 6 }));
-    }
-
-    @Test
-    public void testLastOfSubList_EdgeCases() {
-        List<Integer> source = Arrays.asList(1, 2, 3, 1, 2, 3, 4);
-        List<Integer> target = Arrays.asList(1, 2, 3);
-        assertEquals(OptionalInt.of(3), Index.lastOfSubList(source, target));
-        assertEquals(OptionalInt.of(3), Index.lastOfSubList(source, 3, target));
-        assertEquals(OptionalInt.of(0), Index.lastOfSubList(source, 2, target));
-    }
-
-    @Test
     public void testAllOf_withNullAndEmpty() {
         assertTrue(Index.allOf((int[]) null, 1).isEmpty());
         assertTrue(Index.allOf(new int[0], 1).isEmpty());
@@ -2641,856 +4487,6 @@ public class IndexTest {
     }
 
     @Test
-    public void testOf_BooleanArray() {
-        boolean[] array = { true, false, true, false, true };
-
-        OptionalInt result = Index.of(array, true);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(0, result.get());
-
-        result = Index.of(array, false);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(1, result.get());
-
-        result = Index.of(null, true);
-        Assertions.assertFalse(result.isPresent());
-
-        result = Index.of(new boolean[0], true);
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testOf_BooleanArray_WithFromIndex() {
-        boolean[] array = { true, false, true, false, true };
-
-        OptionalInt result = Index.of(array, true, 1);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(2, result.get());
-
-        result = Index.of(array, false, 2);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-
-        result = Index.of(array, true, 5);
-        Assertions.assertFalse(result.isPresent());
-
-        result = Index.of(array, true, -1);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(0, result.get());
-    }
-
-    @Test
-    public void testOf_CharArray() {
-        char[] array = { 'a', 'b', 'c', 'b', 'd' };
-
-        OptionalInt result = Index.of(array, 'b');
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(1, result.get());
-
-        result = Index.of(array, 'e');
-        Assertions.assertFalse(result.isPresent());
-
-        result = Index.of((char[]) null, 'a');
-        Assertions.assertFalse(result.isPresent());
-
-        result = Index.of(new char[0], 'a');
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testOf_CharArray_WithFromIndex() {
-        char[] array = { 'a', 'b', 'c', 'b', 'd' };
-
-        OptionalInt result = Index.of(array, 'b', 2);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-
-        result = Index.of(array, 'a', 1);
-        Assertions.assertFalse(result.isPresent());
-
-        result = Index.of(array, 'b', -1);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(1, result.get());
-    }
-
-    @Test
-    public void testOf_ByteArray() {
-        byte[] array = { 1, 2, 3, 2, 4 };
-
-        OptionalInt result = Index.of(array, (byte) 2);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(1, result.get());
-
-        result = Index.of(array, (byte) 5);
-        Assertions.assertFalse(result.isPresent());
-
-        result = Index.of((byte[]) null, (byte) 1);
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testOf_ByteArray_WithFromIndex() {
-        byte[] array = { 1, 2, 3, 2, 4 };
-
-        OptionalInt result = Index.of(array, (byte) 2, 2);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-
-        result = Index.of(array, (byte) 1, 1);
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testOf_ShortArray() {
-        short[] array = { 10, 20, 30, 20, 40 };
-
-        OptionalInt result = Index.of(array, (short) 20);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(1, result.get());
-
-        result = Index.of(array, (short) 50);
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testOf_ShortArray_WithFromIndex() {
-        short[] array = { 10, 20, 30, 20, 40 };
-
-        OptionalInt result = Index.of(array, (short) 20, 2);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-    }
-
-    @Test
-    public void testOf_IntArray() {
-        int[] array = { 100, 200, 300, 200, 400 };
-
-        OptionalInt result = Index.of(array, 200);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(1, result.get());
-
-        result = Index.of(array, 500);
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testOf_IntArray_WithFromIndex() {
-        int[] array = { 100, 200, 300, 200, 400 };
-
-        OptionalInt result = Index.of(array, 200, 2);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-    }
-
-    @Test
-    public void testOf_LongArray() {
-        long[] array = { 1000L, 2000L, 3000L, 2000L, 4000L };
-
-        OptionalInt result = Index.of(array, 2000L);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(1, result.get());
-
-        result = Index.of(array, 5000L);
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testOf_LongArray_WithFromIndex() {
-        long[] array = { 1000L, 2000L, 3000L, 2000L, 4000L };
-
-        OptionalInt result = Index.of(array, 2000L, 2);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-    }
-
-    @Test
-    public void testOf_FloatArray() {
-        float[] array = { 1.1f, 2.2f, 3.3f, 2.2f, 4.4f };
-
-        OptionalInt result = Index.of(array, 2.2f);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(1, result.get());
-
-        result = Index.of(array, 5.5f);
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testOf_FloatArray_WithFromIndex() {
-        float[] array = { 1.1f, 2.2f, 3.3f, 2.2f, 4.4f };
-
-        OptionalInt result = Index.of(array, 2.2f, 2);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-    }
-
-    @Test
-    public void testOf_DoubleArray() {
-        double[] array = { 1.11, 2.22, 3.33, 2.22, 4.44 };
-
-        OptionalInt result = Index.of(array, 2.22);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(1, result.get());
-
-        result = Index.of(array, 5.55);
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testOf_DoubleArray_WithFromIndex() {
-        double[] array = { 1.11, 2.22, 3.33, 2.22, 4.44 };
-
-        OptionalInt result = Index.of(array, 2.22, 2);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-    }
-
-    @Test
-    public void testOf_DoubleArray_WithTolerance() {
-        double[] array = { 1.0, 2.001, 3.0, 2.999, 4.0 };
-
-        OptionalInt result = Index.of(array, 2.0, 0.01);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(1, result.get());
-
-        result = Index.of(array, 3.0, 0.01);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(2, result.get());
-
-        result = Index.of(array, 2.5, 0.1);
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testOf_DoubleArray_WithToleranceAndFromIndex() {
-        double[] array = { 1.0, 2.001, 3.0, 2.999, 4.0 };
-
-        OptionalInt result = Index.of(array, 3.0, 0.01, 2);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(2, result.get());
-
-        result = Index.of(array, 3.0, 0.01, 3);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-    }
-
-    @Test
-    public void testOf_ObjectArray() {
-        String[] array = { "apple", "banana", "cherry", "banana", "date" };
-
-        OptionalInt result = Index.of(array, "banana");
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(1, result.get());
-
-        result = Index.of(array, "grape");
-        Assertions.assertFalse(result.isPresent());
-
-        result = Index.of(array, null);
-        Assertions.assertFalse(result.isPresent());
-
-        String[] arrayWithNull = { "apple", null, "cherry" };
-        result = Index.of(arrayWithNull, null);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(1, result.get());
-    }
-
-    @Test
-    public void testOf_ObjectArray_WithFromIndex() {
-        String[] array = { "apple", "banana", "cherry", "banana", "date" };
-
-        OptionalInt result = Index.of(array, "banana", 2);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-
-        result = Index.of(array, "apple", 1);
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testOf_Collection() {
-        List<String> list = Arrays.asList("apple", "banana", "cherry", "banana", "date");
-
-        OptionalInt result = Index.of(list, "banana");
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(1, result.get());
-
-        result = Index.of(list, "grape");
-        Assertions.assertFalse(result.isPresent());
-
-        result = Index.of((Collection<?>) null, "apple");
-        Assertions.assertFalse(result.isPresent());
-
-        result = Index.of(new ArrayList<>(), "apple");
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testOf_Collection_WithFromIndex() {
-        List<String> list = Arrays.asList("apple", "banana", "cherry", "banana", "date");
-
-        OptionalInt result = Index.of(list, "banana", 2);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-
-        result = Index.of(list, "apple", 1);
-        Assertions.assertFalse(result.isPresent());
-
-        LinkedList<String> linkedList = new LinkedList<>(list);
-        result = Index.of(linkedList, "banana", 2);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-    }
-
-    @Test
-    public void testOf_Iterator() {
-        List<String> list = Arrays.asList("apple", "banana", "cherry", "banana", "date");
-
-        OptionalInt result = Index.of(list.iterator(), "banana");
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(1, result.get());
-
-        result = Index.of(list.iterator(), "grape");
-        Assertions.assertFalse(result.isPresent());
-
-        result = Index.of((Iterator<?>) null, "apple");
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testOf_Iterator_WithFromIndex() {
-        List<String> list = Arrays.asList("apple", "banana", "cherry", "banana", "date");
-
-        OptionalInt result = Index.of(list.iterator(), "banana", 2);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-
-        result = Index.of(list.iterator(), "apple", 1);
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testOf_String_Char() {
-        String str = "hello world";
-
-        OptionalInt result = Index.of(str, 'o');
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(4, result.get());
-
-        result = Index.of(str, 'z');
-        Assertions.assertFalse(result.isPresent());
-
-        result = Index.of((String) null, 'a');
-        Assertions.assertFalse(result.isPresent());
-
-        result = Index.of("", 'a');
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testOf_String_Char_WithFromIndex() {
-        String str = "hello world";
-
-        OptionalInt result = Index.of(str, 'o', 5);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(7, result.get());
-
-        result = Index.of(str, 'h', 1);
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testOf_String_String() {
-        String str = "hello world hello";
-
-        OptionalInt result = Index.of(str, "hello");
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(0, result.get());
-
-        result = Index.of(str, "world");
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(6, result.get());
-
-        result = Index.of(str, "goodbye");
-        Assertions.assertFalse(result.isPresent());
-
-        result = Index.of((String) null, "hello");
-        Assertions.assertFalse(result.isPresent());
-
-        result = Index.of(str, null);
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testOf_String_String_WithFromIndex() {
-        String str = "hello world hello";
-
-        OptionalInt result = Index.of(str, "hello", 1);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(12, result.get());
-
-        result = Index.of(str, "world", 10);
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testOfIgnoreCase_String() {
-        String str = "Hello World HELLO";
-
-        OptionalInt result = Index.ofIgnoreCase(str, "hello");
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(0, result.get());
-
-        result = Index.ofIgnoreCase(str, "WORLD");
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(6, result.get());
-
-        result = Index.ofIgnoreCase(str, "goodbye");
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testOfIgnoreCase_String_WithFromIndex() {
-        String str = "Hello World HELLO";
-
-        OptionalInt result = Index.ofIgnoreCase(str, "hello", 1);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(12, result.get());
-
-        result = Index.ofIgnoreCase(str, "world", 10);
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testOfSubArray_BooleanArray() {
-        boolean[] array = { true, false, true, false, true };
-        boolean[] subArray = { true, false };
-
-        OptionalInt result = Index.ofSubArray(array, subArray);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(0, result.get());
-
-        boolean[] subArray2 = { false, true };
-        result = Index.ofSubArray(array, subArray2);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(1, result.get());
-
-        boolean[] notFound = { false, false, false };
-        result = Index.ofSubArray(array, notFound);
-        Assertions.assertFalse(result.isPresent());
-
-        result = Index.ofSubArray(null, subArray);
-        Assertions.assertFalse(result.isPresent());
-
-        result = Index.ofSubArray(array, null);
-        Assertions.assertFalse(result.isPresent());
-
-        result = Index.ofSubArray(array, new boolean[0]);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(0, result.get());
-    }
-
-    @Test
-    public void testOfSubArray_BooleanArray_WithFromIndex() {
-        boolean[] array = { true, false, true, false, true };
-        boolean[] subArray = { true, false };
-
-        OptionalInt result = Index.ofSubArray(array, 2, subArray);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(2, result.get());
-
-        result = Index.ofSubArray(array, 4, subArray);
-        Assertions.assertFalse(result.isPresent());
-
-        result = Index.ofSubArray(array, -1, subArray);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(0, result.get());
-    }
-
-    @Test
-    public void testOfSubArray_BooleanArray_WithRange() {
-        boolean[] array = { true, false, true, false, true };
-        boolean[] subArray = { false, true, false, true };
-
-        OptionalInt result = Index.ofSubArray(array, 0, subArray, 1, 2);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(0, result.get());
-
-        result = Index.ofSubArray(array, 0, subArray, 0, 3);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(1, result.get());
-
-        result = Index.ofSubArray(array, 0, subArray, 0, 0);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(0, result.get());
-
-        result = Index.ofSubArray(array, 10, subArray, 0, 0);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(5, result.get());
-    }
-
-    @Test
-    public void testOfSubArray_CharArray() {
-        char[] array = { 'a', 'b', 'c', 'd', 'e' };
-        char[] subArray = { 'c', 'd' };
-
-        OptionalInt result = Index.ofSubArray(array, subArray);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(2, result.get());
-    }
-
-    @Test
-    public void testOfSubArray_ByteArray() {
-        byte[] array = { 1, 2, 3, 4, 5 };
-        byte[] subArray = { 3, 4 };
-
-        OptionalInt result = Index.ofSubArray(array, subArray);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(2, result.get());
-    }
-
-    @Test
-    public void testOfSubArray_ShortArray() {
-        short[] array = { 10, 20, 30, 40, 50 };
-        short[] subArray = { 30, 40 };
-
-        OptionalInt result = Index.ofSubArray(array, subArray);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(2, result.get());
-    }
-
-    @Test
-    public void testOfSubArray_IntArray() {
-        int[] array = { 100, 200, 300, 400, 500 };
-        int[] subArray = { 300, 400 };
-
-        OptionalInt result = Index.ofSubArray(array, subArray);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(2, result.get());
-    }
-
-    @Test
-    public void testOfSubArray_LongArray() {
-        long[] array = { 1000L, 2000L, 3000L, 4000L, 5000L };
-        long[] subArray = { 3000L, 4000L };
-
-        OptionalInt result = Index.ofSubArray(array, subArray);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(2, result.get());
-    }
-
-    @Test
-    public void testOfSubArray_FloatArray() {
-        float[] array = { 1.1f, 2.2f, 3.3f, 4.4f, 5.5f };
-        float[] subArray = { 3.3f, 4.4f };
-
-        OptionalInt result = Index.ofSubArray(array, subArray);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(2, result.get());
-    }
-
-    @Test
-    public void testOfSubArray_DoubleArray() {
-        double[] array = { 1.11, 2.22, 3.33, 4.44, 5.55 };
-        double[] subArray = { 3.33, 4.44 };
-
-        OptionalInt result = Index.ofSubArray(array, subArray);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(2, result.get());
-    }
-
-    @Test
-    public void testOfSubArray_ObjectArray() {
-        String[] array = { "apple", "banana", "cherry", "date", "elderberry" };
-        String[] subArray = { "cherry", "date" };
-
-        OptionalInt result = Index.ofSubArray(array, subArray);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(2, result.get());
-
-        String[] notFound = { "banana", "date" };
-        result = Index.ofSubArray(array, notFound);
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testOfSubList_WithFromIndex() {
-        List<String> list = Arrays.asList("apple", "banana", "apple", "banana", "cherry");
-        List<String> subList = Arrays.asList("apple", "banana");
-
-        OptionalInt result = Index.ofSubList(list, 1, subList);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(2, result.get());
-
-        result = Index.ofSubList(list, 3, subList);
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testOfSubList_WithRange() {
-        List<String> list = Arrays.asList("apple", "banana", "cherry", "date", "elderberry");
-        List<String> subList = Arrays.asList("extra", "cherry", "date", "extra");
-
-        OptionalInt result = Index.ofSubList(list, 0, subList, 1, 2);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(2, result.get());
-    }
-
-    @Test
-    public void testOfSubList_NonRandomAccess() {
-        LinkedList<String> list = new LinkedList<>(Arrays.asList("apple", "banana", "cherry", "date"));
-        LinkedList<String> subList = new LinkedList<>(Arrays.asList("banana", "cherry"));
-
-        OptionalInt result = Index.ofSubList(list, subList);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(1, result.get());
-    }
-
-    @Test
-    public void testLast_BooleanArray() {
-        boolean[] array = { true, false, true, false, true };
-
-        OptionalInt result = Index.last(array, true);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(4, result.get());
-
-        result = Index.last(array, false);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-
-        result = Index.last(null, true);
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testLast_BooleanArray_WithStartIndex() {
-        boolean[] array = { true, false, true, false, true };
-
-        OptionalInt result = Index.last(array, true, 3);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(2, result.get());
-
-        result = Index.last(array, false, 2);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(1, result.get());
-
-        result = Index.last(array, true, -1);
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testLast_CharArray() {
-        char[] array = { 'a', 'b', 'c', 'b', 'd' };
-
-        OptionalInt result = Index.last(array, 'b');
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-    }
-
-    @Test
-    public void testLast_ByteArray() {
-        byte[] array = { 1, 2, 3, 2, 4 };
-
-        OptionalInt result = Index.last(array, (byte) 2);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-    }
-
-    @Test
-    public void testLast_ShortArray() {
-        short[] array = { 10, 20, 30, 20, 40 };
-
-        OptionalInt result = Index.last(array, (short) 20);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-    }
-
-    @Test
-    public void testLast_IntArray() {
-        int[] array = { 100, 200, 300, 200, 400 };
-
-        OptionalInt result = Index.last(array, 200);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-    }
-
-    @Test
-    public void testLast_LongArray() {
-        long[] array = { 1000L, 2000L, 3000L, 2000L, 4000L };
-
-        OptionalInt result = Index.last(array, 2000L);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-    }
-
-    @Test
-    public void testLast_FloatArray() {
-        float[] array = { 1.1f, 2.2f, 3.3f, 2.2f, 4.4f };
-
-        OptionalInt result = Index.last(array, 2.2f);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-    }
-
-    @Test
-    public void testLast_DoubleArray() {
-        double[] array = { 1.11, 2.22, 3.33, 2.22, 4.44 };
-
-        OptionalInt result = Index.last(array, 2.22);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-    }
-
-    @Test
-    public void testLast_DoubleArray_WithTolerance() {
-        double[] array = { 1.0, 2.001, 3.0, 2.999, 4.0 };
-
-        OptionalInt result = Index.last(array, 3.0, 0.01);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-    }
-
-    @Test
-    public void testLast_DoubleArray_WithToleranceAndStartIndex() {
-        double[] array = { 1.0, 2.001, 3.0, 2.999, 4.0 };
-
-        OptionalInt result = Index.last(array, 3.0, 0.01, 3);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-
-        result = Index.last(array, 3.0, 0.01, 2);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(2, result.get());
-    }
-
-    @Test
-    public void testLast_ObjectArray() {
-        String[] array = { "apple", "banana", "cherry", "banana", "date" };
-
-        OptionalInt result = Index.last(array, "banana");
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-    }
-
-    @Test
-    public void testLast_Collection() {
-        List<String> list = Arrays.asList("apple", "banana", "cherry", "banana", "date");
-
-        OptionalInt result = Index.last(list, "banana");
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-
-        LinkedList<String> linkedList = new LinkedList<>(list);
-        result = Index.last(linkedList, "banana");
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-    }
-
-    @Test
-    public void testLast_String_Char() {
-        String str = "hello world";
-
-        OptionalInt result = Index.last(str, 'o');
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(7, result.get());
-
-        result = Index.last(str, 'z');
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testLast_String_String() {
-        String str = "hello world hello";
-
-        OptionalInt result = Index.last(str, "hello");
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(12, result.get());
-
-        result = Index.last(str, "world");
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(6, result.get());
-    }
-
-    @Test
-    public void testLastOfIgnoreCase_String() {
-        String str = "Hello World HELLO";
-
-        OptionalInt result = Index.lastOfIgnoreCase(str, "hello");
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(12, result.get());
-    }
-
-    @Test
-    public void testLastOfSubArray_BooleanArray() {
-        boolean[] array = { true, false, true, false, true };
-        boolean[] subArray = { true, false };
-
-        OptionalInt result = Index.lastOfSubArray(array, subArray);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(2, result.get());
-
-        result = Index.lastOfSubArray(array, new boolean[0]);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(5, result.get());
-    }
-
-    @Test
-    public void testLastOfSubArray_BooleanArray_WithStartIndex() {
-        boolean[] array = { true, false, true, false, true };
-        boolean[] subArray = { true, false };
-
-        OptionalInt result = Index.lastOfSubArray(array, 1, subArray);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(0, result.get());
-
-        result = Index.lastOfSubArray(array, -1, subArray);
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testLastOfSubArray_CharArray() {
-        char[] array = { 'a', 'b', 'c', 'a', 'b', 'c' };
-        char[] subArray = { 'a', 'b' };
-
-        OptionalInt result = Index.lastOfSubArray(array, subArray);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-    }
-
-    @Test
-    public void testLastOfSubArray_ObjectArray() {
-        String[] array = { "apple", "banana", "apple", "banana", "cherry" };
-        String[] subArray = { "apple", "banana" };
-
-        OptionalInt result = Index.lastOfSubArray(array, subArray);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(2, result.get());
-    }
-
-    @Test
-    public void testLastOfSubList() {
-        List<String> list = Arrays.asList("apple", "banana", "apple", "banana", "cherry");
-        List<String> subList = Arrays.asList("apple", "banana");
-
-        OptionalInt result = Index.lastOfSubList(list, subList);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(2, result.get());
-
-        result = Index.lastOfSubList(list, new ArrayList<>());
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(5, result.get());
-    }
-
-    @Test
-    public void testLastOfSubList_NonRandomAccess() {
-        LinkedList<String> list = new LinkedList<>(Arrays.asList("apple", "banana", "apple", "banana"));
-        LinkedList<String> subList = new LinkedList<>(Arrays.asList("apple", "banana"));
-
-        OptionalInt result = Index.lastOfSubList(list, subList);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(2, result.get());
-    }
-
-    @Test
     public void testAllOf_BooleanArray() {
         boolean[] array = { true, false, true, false, true };
 
@@ -3523,94 +4519,6 @@ public class IndexTest {
     }
 
     @Test
-    public void testAllOf_ByteArray() {
-        byte[] array = { 1, 2, 1, 2, 1 };
-
-        BitSet result = Index.allOf(array, (byte) 1);
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(2));
-        Assertions.assertTrue(result.get(4));
-    }
-
-    @Test
-    public void testAllOf_CharArray() {
-        char[] array = { 'a', 'b', 'a', 'b', 'a' };
-
-        BitSet result = Index.allOf(array, 'a');
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(2));
-        Assertions.assertTrue(result.get(4));
-    }
-
-    @Test
-    public void testAllOf_ShortArray() {
-        short[] array = { 10, 20, 10, 20, 10 };
-
-        BitSet result = Index.allOf(array, (short) 10);
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(2));
-        Assertions.assertTrue(result.get(4));
-    }
-
-    @Test
-    public void testAllOf_IntArray() {
-        int[] array = { 100, 200, 100, 200, 100 };
-
-        BitSet result = Index.allOf(array, 100);
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(2));
-        Assertions.assertTrue(result.get(4));
-    }
-
-    @Test
-    public void testAllOf_LongArray() {
-        long[] array = { 1000L, 2000L, 1000L, 2000L, 1000L };
-
-        BitSet result = Index.allOf(array, 1000L);
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(2));
-        Assertions.assertTrue(result.get(4));
-    }
-
-    @Test
-    public void testAllOf_FloatArray() {
-        float[] array = { 1.1f, 2.2f, 1.1f, 2.2f, 1.1f };
-
-        BitSet result = Index.allOf(array, 1.1f);
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(2));
-        Assertions.assertTrue(result.get(4));
-    }
-
-    @Test
-    public void testAllOf_DoubleArray() {
-        double[] array = { 1.11, 2.22, 1.11, 2.22, 1.11 };
-
-        BitSet result = Index.allOf(array, 1.11);
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(2));
-        Assertions.assertTrue(result.get(4));
-    }
-
-    @Test
-    public void testAllOf_DoubleArray_WithTolerance() {
-        double[] array = { 1.0, 2.001, 1.01, 2.999, 0.99 };
-
-        BitSet result = Index.allOf(array, 1.0, 0.02);
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(2));
-        Assertions.assertTrue(result.get(4));
-    }
-
-    @Test
     public void testAllOf_ObjectArray() {
         String[] array = { "apple", "banana", "apple", "banana", "apple" };
 
@@ -3631,61 +4539,11 @@ public class IndexTest {
     }
 
     @Test
-    public void testAllOf_Collection() {
-        List<String> list = Arrays.asList("apple", "banana", "apple", "banana", "apple");
-
-        BitSet result = Index.allOf(list, "apple");
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(2));
-        Assertions.assertTrue(result.get(4));
-
-        LinkedList<String> linkedList = new LinkedList<>(list);
-        result = Index.allOf(linkedList, "apple");
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(2));
-        Assertions.assertTrue(result.get(4));
-    }
-
-    @Test
-    public void testAllOf_Array_WithPredicate() {
-        String[] array = { "apple", "apricot", "banana", "avocado", "cherry" };
-
-        BitSet result = Index.allOf(array, s -> s.startsWith("a"));
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(1));
-        Assertions.assertTrue(result.get(3));
-
-        result = Index.allOf(array, s -> s.length() > 10);
-        Assertions.assertEquals(0, result.cardinality());
-    }
-
-    @Test
     public void testAllOf_Array_WithPredicate_FromIndex() {
         String[] array = { "apple", "apricot", "banana", "avocado", "cherry" };
 
         BitSet result = Index.allOf(array, s -> s.startsWith("a"), 2);
         Assertions.assertEquals(1, result.cardinality());
-        Assertions.assertTrue(result.get(3));
-    }
-
-    @Test
-    public void testAllOf_Collection_WithPredicate() {
-        List<String> list = Arrays.asList("apple", "apricot", "banana", "avocado", "cherry");
-
-        BitSet result = Index.allOf(list, s -> s.startsWith("a"));
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(1));
-        Assertions.assertTrue(result.get(3));
-
-        LinkedList<String> linkedList = new LinkedList<>(list);
-        result = Index.allOf(linkedList, s -> s.startsWith("a"));
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(1));
         Assertions.assertTrue(result.get(3));
     }
 
@@ -3696,332 +4554,6 @@ public class IndexTest {
         BitSet result = Index.allOf(list, s -> s.startsWith("a"), 2);
         Assertions.assertEquals(1, result.cardinality());
         Assertions.assertTrue(result.get(3));
-    }
-
-    @Test
-    public void testEdgeCases_EmptyArrays() {
-        OptionalInt result = Index.of(new int[0], 1);
-        Assertions.assertFalse(result.isPresent());
-
-        result = Index.last(new int[0], 1);
-        Assertions.assertFalse(result.isPresent());
-
-        BitSet bitSet = Index.allOf(new int[0], 1);
-        Assertions.assertEquals(0, bitSet.cardinality());
-    }
-
-    @Test
-    public void testEdgeCases_NullInputs() {
-        OptionalInt result = Index.of((int[]) null, 1);
-        Assertions.assertFalse(result.isPresent());
-
-        result = Index.last((int[]) null, 1);
-        Assertions.assertFalse(result.isPresent());
-
-        BitSet bitSet = Index.allOf((int[]) null, 1);
-        Assertions.assertEquals(0, bitSet.cardinality());
-    }
-
-    @Test
-    public void testEdgeCases_LargeFromIndex() {
-        int[] array = { 1, 2, 3, 4, 5 };
-
-        OptionalInt result = Index.of(array, 3, 100);
-        Assertions.assertFalse(result.isPresent());
-
-        BitSet bitSet = Index.allOf(array, 3, 100);
-        Assertions.assertEquals(0, bitSet.cardinality());
-    }
-
-    @Test
-    public void testEdgeCases_NegativeFromIndex() {
-        int[] array = { 1, 2, 3, 4, 5 };
-
-        OptionalInt result = Index.of(array, 1, -10);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(0, result.get());
-
-        BitSet bitSet = Index.allOf(array, 1, -10);
-        Assertions.assertEquals(1, bitSet.cardinality());
-        Assertions.assertTrue(bitSet.get(0));
-    }
-
-    @Test
-    public void testOfSubArray_EmptySubArray() {
-        int[] array = { 1, 2, 3, 4, 5 };
-        int[] emptySubArray = {};
-
-        OptionalInt result = Index.ofSubArray(array, emptySubArray);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(0, result.get());
-
-        result = Index.ofSubArray(array, 2, emptySubArray);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(2, result.get());
-    }
-
-    @Test
-    public void testLastOfSubArray_EmptySubArray() {
-        int[] array = { 1, 2, 3, 4, 5 };
-        int[] emptySubArray = {};
-
-        OptionalInt result = Index.lastOfSubArray(array, emptySubArray);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(5, result.get());
-
-        result = Index.lastOfSubArray(array, 3, emptySubArray);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(3, result.get());
-    }
-
-    @Test
-    public void testOfSubArray_IndexOutOfBounds() {
-        int[] array = { 1, 2, 3, 4, 5 };
-        int[] subArray = { 2, 3, 4 };
-
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> {
-            Index.ofSubArray(array, 0, subArray, -1, 2);
-        });
-
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> {
-            Index.ofSubArray(array, 0, subArray, 0, 10);
-        });
-
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> {
-            Index.ofSubArray(array, 0, subArray, 2, 2);
-        });
-    }
-
-    @Test
-    public void testOf_FloatArray_SpecialValues() {
-        float[] arr = { 1.0f, -0.0f, 0.0f, Float.NaN, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY, Float.NaN };
-
-        assertEquals(OptionalInt.of(1), Index.of(arr, -0.0f));
-        assertEquals(OptionalInt.of(2), Index.of(arr, 0.0f));
-
-        assertEquals(OptionalInt.of(3), Index.of(arr, Float.NaN));
-        assertEquals(OptionalInt.of(6), Index.of(arr, Float.NaN, 4));
-
-        assertEquals(OptionalInt.of(4), Index.of(arr, Float.POSITIVE_INFINITY));
-        assertEquals(OptionalInt.of(5), Index.of(arr, Float.NEGATIVE_INFINITY));
-    }
-
-    @Test
-    public void testOf_DoubleArray_EdgeCases() {
-        double[] arr = { Double.MIN_VALUE, Double.MAX_VALUE, -Double.MIN_VALUE, -Double.MAX_VALUE };
-
-        assertEquals(OptionalInt.of(0), Index.of(arr, Double.MIN_VALUE));
-        assertEquals(OptionalInt.of(1), Index.of(arr, Double.MAX_VALUE));
-        assertEquals(OptionalInt.of(2), Index.of(arr, -Double.MIN_VALUE));
-        assertEquals(OptionalInt.of(3), Index.of(arr, -Double.MAX_VALUE));
-
-        double[] toleranceArr = { 1.0, 1.1, 1.2, 1.3, 1.4, 1.5 };
-        assertEquals(OptionalInt.of(2), Index.of(toleranceArr, 1.25, 0.051));
-        assertEquals(OptionalInt.empty(), Index.of(toleranceArr, 1.25, 0.04));
-
-        assertThrows(IllegalArgumentException.class, () -> Index.of(toleranceArr, 1.25, -0.05));
-    }
-
-    @Test
-    public void testOf_CharArray_UnicodeCharacters() {
-        char[] arr = { 'a', '中', '文', '\u0000', '\uffff' };
-
-        assertEquals(OptionalInt.of(1), Index.of(arr, '中'));
-        assertEquals(OptionalInt.of(2), Index.of(arr, '文'));
-        assertEquals(OptionalInt.of(3), Index.of(arr, '\u0000'));
-        assertEquals(OptionalInt.of(4), Index.of(arr, '\uffff'));
-    }
-
-    @Test
-    public void testOf_Collection_VariousImplementations() {
-        String[] data = { "a", "b", "c", "b", "d" };
-
-        Vector<String> vector = new Vector<>(Arrays.asList(data));
-        assertEquals(OptionalInt.of(1), Index.of(vector, "b"));
-        assertEquals(OptionalInt.of(3), Index.of(vector, "b", 2));
-
-        Stack<String> stack = new Stack<>();
-        Collections.addAll(stack, data);
-        assertEquals(OptionalInt.of(1), Index.of(stack, "b"));
-
-        List<String> unmodifiable = Collections.unmodifiableList(Arrays.asList(data));
-        assertEquals(OptionalInt.of(1), Index.of(unmodifiable, "b"));
-    }
-
-    @Test
-    public void testOf_String_ComplexCases() {
-        assertEquals(OptionalInt.of(0), Index.of("", ""));
-        assertEquals(OptionalInt.of(0), Index.of("hello", ""));
-        assertEquals(OptionalInt.of(3), Index.of("hello", "", 3));
-        assertEquals(OptionalInt.empty(), Index.of("hello", "", 10));
-
-        String special = "a\tb\nc\rd\0e";
-        assertEquals(OptionalInt.of(1), Index.of(special, '\t'));
-        assertEquals(OptionalInt.of(3), Index.of(special, '\n'));
-        assertEquals(OptionalInt.of(5), Index.of(special, '\r'));
-        assertEquals(OptionalInt.of(7), Index.of(special, '\0'));
-
-        String pattern = "aabaabaaab";
-        assertEquals(OptionalInt.of(0), Index.of(pattern, "aab"));
-        assertEquals(OptionalInt.of(3), Index.of(pattern, "aab", 1));
-        assertEquals(OptionalInt.of(7), Index.of(pattern, "aab", 4));
-    }
-
-    @Test
-    public void testOfSubArray_BoundaryConditions() {
-        int[] source = { 1, 2, 3, 4, 5 };
-
-        int[] largeSub = { 1, 2, 3, 4, 5, 6 };
-        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, largeSub));
-
-        int[] equalSub = { 1, 2, 3, 4, 5 };
-        assertEquals(OptionalInt.of(0), Index.ofSubArray(source, equalSub));
-
-        int[] singleSub = { 3 };
-        assertEquals(OptionalInt.of(2), Index.ofSubArray(source, singleSub));
-
-        assertEquals(OptionalInt.empty(), Index.ofSubArray(null, singleSub));
-        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, null));
-        assertEquals(OptionalInt.empty(), Index.ofSubArray((int[]) null, (int[]) null));
-    }
-
-    @Test
-    public void testLast_PrimitiveArrays_AllTypes() {
-        boolean[] boolArr = { true, false, true, false, true };
-        assertEquals(OptionalInt.of(4), Index.last(boolArr, true));
-        assertEquals(OptionalInt.of(3), Index.last(boolArr, false));
-        assertEquals(OptionalInt.of(2), Index.last(boolArr, true, 3));
-
-        char[] charArr = { 'a', 'b', 'c', 'b', 'a' };
-        assertEquals(OptionalInt.of(4), Index.last(charArr, 'a'));
-        assertEquals(OptionalInt.of(3), Index.last(charArr, 'b'));
-
-        byte[] byteArr = { 1, 2, 3, 2, 1 };
-        assertEquals(OptionalInt.of(4), Index.last(byteArr, (byte) 1));
-        assertEquals(OptionalInt.of(3), Index.last(byteArr, (byte) 2));
-
-        short[] shortArr = { 10, 20, 30, 20, 10 };
-        assertEquals(OptionalInt.of(4), Index.last(shortArr, (short) 10));
-        assertEquals(OptionalInt.of(3), Index.last(shortArr, (short) 20));
-
-        long[] longArr = { 100L, 200L, 300L, 200L, 100L };
-        assertEquals(OptionalInt.of(4), Index.last(longArr, 100L));
-        assertEquals(OptionalInt.of(3), Index.last(longArr, 200L));
-
-        float[] floatArr = { 1.1f, 2.2f, 3.3f, 2.2f, 1.1f };
-        assertEquals(OptionalInt.of(4), Index.last(floatArr, 1.1f));
-        assertEquals(OptionalInt.of(3), Index.last(floatArr, 2.2f));
-    }
-
-    @Test
-    public void testLast_String_SpecialCases() {
-        assertEquals(OptionalInt.of(5), Index.last("hello", ""));
-        assertEquals(OptionalInt.of(3), Index.last("hello", "", 3));
-        assertEquals(OptionalInt.empty(), Index.last("hello", "", -1));
-
-        String repeating = "abababab";
-        assertEquals(OptionalInt.of(6), Index.last(repeating, "ab"));
-        assertEquals(OptionalInt.of(4), Index.last(repeating, "ab", 5));
-        assertEquals(OptionalInt.of(2), Index.last(repeating, "ab", 3));
-    }
-
-    @Test
-    public void testLastOfSubArray_AllPrimitiveTypes() {
-        boolean[] boolSource = { true, false, true, false, true, false };
-        boolean[] boolSub = { true, false };
-        assertEquals(OptionalInt.of(4), Index.lastOfSubArray(boolSource, boolSub));
-        assertEquals(OptionalInt.of(2), Index.lastOfSubArray(boolSource, 3, boolSub));
-
-        char[] charSource = "abcabcabc".toCharArray();
-        char[] charSub = "abc".toCharArray();
-        assertEquals(OptionalInt.of(6), Index.lastOfSubArray(charSource, charSub));
-        assertEquals(OptionalInt.of(3), Index.lastOfSubArray(charSource, 5, charSub));
-
-        byte[] byteSource = { 1, 2, 3, 1, 2, 3, 1, 2, 3 };
-        byte[] byteSub = { 1, 2, 3 };
-        assertEquals(OptionalInt.of(6), Index.lastOfSubArray(byteSource, byteSub));
-
-        short[] shortSource = { 10, 20, 30, 10, 20, 30 };
-        short[] shortSub = { 10, 20, 30 };
-        assertEquals(OptionalInt.of(3), Index.lastOfSubArray(shortSource, shortSub));
-
-        int[] intSource = { 10, 20, 30, 10, 20, 30 };
-        int[] intSub = { 10, 20, 30 };
-        assertEquals(OptionalInt.of(3), Index.lastOfSubArray(intSource, intSub));
-
-        long[] longSource = { 100L, 200L, 300L, 100L, 200L, 300L };
-        long[] longSub = { 100L, 200L, 300L };
-        assertEquals(OptionalInt.of(3), Index.lastOfSubArray(longSource, longSub));
-
-        float[] floatSource = { 1.1f, 2.2f, 3.3f, 1.1f, 2.2f, 3.3f };
-        float[] floatSub = { 1.1f, 2.2f };
-        assertEquals(OptionalInt.of(3), Index.lastOfSubArray(floatSource, floatSub));
-
-        double[] doubleSource = { 1.1, 2.2, 3.3, 1.1, 2.2, 3.3 };
-        double[] doubleSub = { 1.1, 2.2 };
-        assertEquals(OptionalInt.of(3), Index.lastOfSubArray(doubleSource, doubleSub));
-
-        String[] strSource = { "10", "20", "30", "10", "20", "30" };
-        String[] strSub = { "10", "20", "30" };
-        assertEquals(OptionalInt.of(3), Index.lastOfSubArray(strSource, strSub));
-    }
-
-    @Test
-    public void testLastOfSubArray_SpecialCases() {
-        int[] source = { 1, 2, 3, 4, 5 };
-
-        assertEquals(OptionalInt.of(5), Index.lastOfSubArray(source, 10, new int[0]));
-
-        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, -1, new int[] { 1 }));
-
-        int[] endSource = { 1, 2, 3, 4, 5, 6, 7 };
-        int[] endSub = { 6, 7 };
-        assertEquals(OptionalInt.of(5), Index.lastOfSubArray(endSource, endSub));
-    }
-
-    @Test
-    public void testAllOf_AllPrimitiveTypes() {
-        boolean[] boolArr = { true, false, true, false, true };
-        BitSet boolResult = Index.allOf(boolArr, true);
-        assertTrue(boolResult.get(0));
-        assertTrue(boolResult.get(2));
-        assertTrue(boolResult.get(4));
-        assertEquals(3, boolResult.cardinality());
-
-        char[] charArr = { 'a', 'b', 'a', 'c', 'a' };
-        BitSet charResult = Index.allOf(charArr, 'a');
-        assertTrue(charResult.get(0));
-        assertTrue(charResult.get(2));
-        assertTrue(charResult.get(4));
-        assertEquals(3, charResult.cardinality());
-
-        byte[] byteArr = { 1, 2, 1, 3, 1 };
-        BitSet byteResult = Index.allOf(byteArr, (byte) 1);
-        assertTrue(byteResult.get(0));
-        assertTrue(byteResult.get(2));
-        assertTrue(byteResult.get(4));
-        assertEquals(3, byteResult.cardinality());
-
-        short[] shortArr = { 10, 20, 10, 30, 10 };
-        BitSet shortResult = Index.allOf(shortArr, (short) 10);
-        assertTrue(shortResult.get(0));
-        assertTrue(shortResult.get(2));
-        assertTrue(shortResult.get(4));
-        assertEquals(3, shortResult.cardinality());
-
-        long[] longArr = { 100L, 200L, 100L, 300L, 100L };
-        BitSet longResult = Index.allOf(longArr, 100L);
-        assertTrue(longResult.get(0));
-        assertTrue(longResult.get(2));
-        assertTrue(longResult.get(4));
-        assertEquals(3, longResult.cardinality());
-
-        float[] floatArr = { 1.1f, 2.2f, 1.1f, 3.3f, 1.1f };
-        BitSet floatResult = Index.allOf(floatArr, 1.1f);
-        assertTrue(floatResult.get(0));
-        assertTrue(floatResult.get(2));
-        assertTrue(floatResult.get(4));
-        assertEquals(3, floatResult.cardinality());
     }
 
     @Test
@@ -4095,24 +4627,6 @@ public class IndexTest {
     }
 
     @Test
-    public void testAllOf_LargeArrayPerformance() {
-        int size = 10000;
-        int[] largeArray = new int[size];
-        for (int i = 0; i < size; i++) {
-            largeArray[i] = i % 10;
-        }
-
-        BitSet result = Index.allOf(largeArray, 5);
-        assertEquals(1000, result.cardinality());
-
-        assertTrue(result.get(5));
-        assertTrue(result.get(15));
-        assertTrue(result.get(9995));
-        assertFalse(result.get(0));
-        assertFalse(result.get(9999));
-    }
-
-    @Test
     public void testStressTest_MixedNullElements() {
         Object[] arr = new Object[100];
         for (int i = 0; i < arr.length; i++) {
@@ -4142,174 +4656,130 @@ public class IndexTest {
     }
 
     @Test
-    public void testThreadSafety_Considerations() {
-
-        final int[] sharedArray = { 1, 2, 3, 2, 1, 2, 3 };
-        final int iterations = 100;
-
-        for (int i = 0; i < iterations; i++) {
-            assertEquals(OptionalInt.of(1), Index.of(sharedArray, 2));
-            assertEquals(OptionalInt.of(5), Index.last(sharedArray, 2));
-            BitSet all2s = Index.allOf(sharedArray, 2);
-            assertEquals(3, all2s.cardinality());
-        }
-    }
-
-    @Test
-    public void testOf_String() {
-        String str = "hello world";
-
-        assertEquals(OptionalInt.of(0), Index.of(str, 'h'));
-        assertEquals(OptionalInt.of(2), Index.of(str, 'l'));
-        assertEquals(OptionalInt.of(3), Index.of(str, 'l', 3));
-        assertEquals(OptionalInt.empty(), Index.of(str, 'z'));
-
-        assertEquals(OptionalInt.of(0), Index.of(str, "hello"));
-        assertEquals(OptionalInt.of(6), Index.of(str, "world"));
-        assertEquals(OptionalInt.empty(), Index.of(str, "test"));
-        assertEquals(OptionalInt.of(2), Index.of(str, "ll"));
-
-        assertEquals(OptionalInt.empty(), Index.of((String) null, 'a'));
-        assertEquals(OptionalInt.empty(), Index.of((String) null, "test"));
-    }
-
-    @Test
-    public void testLast_String() {
-        String str = "hello world hello";
-
-        assertEquals(OptionalInt.of(15), Index.last(str, 'l'));
-        assertEquals(OptionalInt.of(12), Index.last(str, 'h'));
-        assertEquals(OptionalInt.empty(), Index.last(str, 'z'));
-
-        assertEquals(OptionalInt.of(12), Index.last(str, "hello"));
-        assertEquals(OptionalInt.of(6), Index.last(str, "world"));
-        assertEquals(OptionalInt.empty(), Index.last(str, "test"));
-    }
-
-    @Test
-    public void testLastOfSubArray_IntArray() {
-        int[] source = { 1, 2, 3, 4, 2, 3, 5, 2, 3 };
-        int[] sub1 = { 2, 3 };
-        int[] sub2 = { 3, 5 };
-        int[] sub3 = { 1, 3 };
-
-        assertEquals(OptionalInt.of(7), Index.lastOfSubArray(source, sub1));
-        assertEquals(OptionalInt.of(5), Index.lastOfSubArray(source, sub2));
-        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, sub3));
-        assertEquals(OptionalInt.of(4), Index.lastOfSubArray(source, 6, sub1));
-
-        assertEquals(OptionalInt.of(9), Index.lastOfSubArray(source, new int[0]));
-        assertEquals(OptionalInt.of(5), Index.lastOfSubArray(source, 5, new int[0]));
-    }
-
-    @Test
-    public void testAllOf_WithPredicate_Array() {
-        Integer[] arr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-
-        BitSet result = Index.allOf(arr, n -> n % 2 == 0);
-        assertTrue(result.get(1));
-        assertTrue(result.get(3));
-        assertTrue(result.get(5));
-        assertTrue(result.get(7));
-        assertTrue(result.get(9));
-        assertFalse(result.get(0));
-        assertFalse(result.get(2));
-        assertFalse(result.get(4));
-        assertFalse(result.get(6));
-        assertFalse(result.get(8));
-
-        result = Index.allOf(arr, n -> n > 5, 5);
-        assertTrue(result.get(5));
-        assertTrue(result.get(6));
-        assertTrue(result.get(7));
-        assertTrue(result.get(8));
-        assertTrue(result.get(9));
-        assertFalse(result.get(0));
-        assertFalse(result.get(4));
-    }
-
-    @Test
-    public void testAllOf_WithPredicate_Collection() {
-        List<String> list = Arrays.asList("apple", "banana", "apricot", "cherry", "avocado");
-
-        BitSet result = Index.allOf(list, s -> s.startsWith("a"));
-        assertTrue(result.get(0));
+    public void testAllOf_CollectionWithFromIndex() {
+        List<String> list = Arrays.asList("a", "b", "a", "c", "a");
+        java.util.BitSet result = Index.allOf(list, "a", 1);
+        assertEquals(2, result.cardinality());
         assertTrue(result.get(2));
         assertTrue(result.get(4));
-        assertFalse(result.get(1));
-        assertFalse(result.get(3));
+
+        // fromIndex >= size
+        result = Index.allOf(list, "a", 10);
+        assertEquals(0, result.cardinality());
+
+        // null source
+        result = Index.allOf((java.util.Collection<?>) null, "a", 0);
+        assertEquals(0, result.cardinality());
     }
 
     @Test
-    public void testEdgeCases_EmptyArraysAndCollections() {
-        assertEquals(OptionalInt.empty(), Index.of(new int[0], 1));
-        assertEquals(OptionalInt.empty(), Index.last(new int[0], 1));
-        assertTrue(Index.allOf(new int[0], 1).isEmpty());
+    public void testAllOf_Collection_NonRandomAccess_WithFromIndex() {
+        // Non-RandomAccess collection path with fromIndex
+        java.util.LinkedList<String> list = new java.util.LinkedList<>(Arrays.asList("x", "a", "b", "a", "c"));
+        java.util.BitSet result = Index.allOf(list, "a", 0);
+        assertEquals(2, result.cardinality());
 
-        List<String> emptyList = new ArrayList<>();
-        assertEquals(OptionalInt.empty(), Index.of(emptyList, "a"));
-        assertEquals(OptionalInt.empty(), Index.last(emptyList, "a"));
-        assertTrue(Index.allOf(emptyList, "a").isEmpty());
+        // With fromIndex skipping first match
+        result = Index.allOf(list, "a", 2);
+        assertEquals(1, result.cardinality());
     }
 
     @Test
-    public void testOfSubArray_InvalidRange() {
-        int[] source = { 1, 2, 3, 4, 5 };
-        int[] sub = { 2, 3, 4 };
+    public void testAllOf_LongArrayWithFromIndex() {
+        long[] source = { 1L, 2L, 1L, 3L, 1L };
+        java.util.BitSet result = Index.allOf(source, 1L, 1);
+        assertEquals(2, result.cardinality());
+        assertTrue(result.get(2));
+        assertTrue(result.get(4));
 
-        assertThrows(IndexOutOfBoundsException.class, () -> Index.ofSubArray(source, 0, sub, 1, 5));
+        // fromIndex >= len
+        result = Index.allOf(source, 1L, 10);
+        assertEquals(0, result.cardinality());
+
+        // null source
+        result = Index.allOf((long[]) null, 1L, 0);
+        assertEquals(0, result.cardinality());
     }
 
     @Test
-    public void testSpecialValues_NaN() {
-        double[] arr = { 1.0, Double.NaN, 3.0, Double.NaN, 5.0 };
+    public void testAllOf_FloatArrayWithFromIndex() {
+        float[] source = { 1f, 2f, 1f, 3f, 1f };
+        java.util.BitSet result = Index.allOf(source, 1f, 1);
+        assertEquals(2, result.cardinality());
+        assertTrue(result.get(2));
+        assertTrue(result.get(4));
 
-        assertEquals(OptionalInt.of(1), Index.of(arr, Double.NaN));
-        assertEquals(OptionalInt.of(3), Index.last(arr, Double.NaN));
-
-        BitSet result = Index.allOf(arr, Double.NaN);
-        assertTrue(result.get(1));
-        assertTrue(result.get(3));
-        assertFalse(result.get(0));
-        assertFalse(result.get(2));
-        assertFalse(result.get(4));
+        result = Index.allOf(source, 1f, 10);
+        assertEquals(0, result.cardinality());
     }
 
     @Test
-    public void testSpecialValues_InfinityValues() {
-        double[] arr = { 1.0, Double.POSITIVE_INFINITY, 3.0, Double.NEGATIVE_INFINITY, 5.0 };
+    public void testAllOf_DoubleArrayWithTolerance_FromIndex() {
+        double[] source = { 1.0, 2.0, 1.05, 3.0, 0.95 };
+        java.util.BitSet result = Index.allOf(source, 1.0, 0.1, 1);
+        assertEquals(2, result.cardinality());
+        assertTrue(result.get(2));
+        assertTrue(result.get(4));
 
-        assertEquals(OptionalInt.of(1), Index.of(arr, Double.POSITIVE_INFINITY));
-        assertEquals(OptionalInt.of(3), Index.of(arr, Double.NEGATIVE_INFINITY));
+        // fromIndex >= len
+        result = Index.allOf(source, 1.0, 0.1, 10);
+        assertEquals(0, result.cardinality());
     }
 
     @Test
-    public void testOfSubArray_ObjectEmptySubArrayWithFromIndex() {
-        final Object[] source = { "a", "b", "c" };
-        final Object[] empty = {};
+    public void testAllOf_ObjectArrayWithFromIndex() {
+        String[] source = { "a", "b", "a", "c", "a" };
+        java.util.BitSet result = Index.allOf(source, "a", 1);
+        assertEquals(2, result.cardinality());
+        assertTrue(result.get(2));
+        assertTrue(result.get(4));
 
-        assertEquals(OptionalInt.of(0), Index.ofSubArray(source, -1, empty, 0, 0));
-        assertEquals(OptionalInt.of(source.length), Index.ofSubArray(source, 10, empty, 0, 0));
-        assertEquals(OptionalInt.empty(), Index.ofSubArray((Object[]) null, 0, empty, 0, 0));
+        // fromIndex >= len
+        result = Index.allOf(source, "a", 10);
+        assertEquals(0, result.cardinality());
+
+        // null value matching
+        String[] withNulls = { "a", null, "b", null };
+        result = Index.allOf(withNulls, (Object) null, 0);
+        assertEquals(2, result.cardinality());
     }
 
     @Test
-    public void testLastOfSubArray_DoubleEmptySubArrayWithStartIndex() {
-        final double[] source = { 1.0, 2.0, 3.0 };
-        final double[] empty = {};
+    public void testAllOf_ArrayWithPredicateAndFromIndex() {
+        String[] source = { "apple", "banana", "avocado", "cherry", "apricot" };
+        java.util.BitSet result = Index.allOf(source, (java.util.function.Predicate<String>) s -> s.startsWith("a"), 1);
+        assertEquals(2, result.cardinality());
+        assertTrue(result.get(2));
+        assertTrue(result.get(4));
 
-        assertEquals(OptionalInt.of(source.length), Index.lastOfSubArray(source, 10, empty, 0, 0));
-        assertEquals(OptionalInt.of(1), Index.lastOfSubArray(source, 1, empty, 0, 0));
-        assertEquals(OptionalInt.empty(), Index.lastOfSubArray(source, -1, empty, 0, 0));
+        // fromIndex >= len
+        result = Index.allOf(source, (java.util.function.Predicate<String>) s -> s.startsWith("a"), 10);
+        assertEquals(0, result.cardinality());
     }
 
     @Test
-    public void testOfSubArray_SubRangeForAdditionalTypes() {
-        assertEquals(OptionalInt.of(1), Index.ofSubArray(new long[] { 9L, 4L, 5L, 6L }, 0, new long[] { 0L, 4L, 5L, 7L }, 1, 2));
-        assertEquals(OptionalInt.of(1), Index.ofSubArray(new float[] { 9f, 4f, 5f, 6f }, 0, new float[] { 0f, 4f, 5f, 7f }, 1, 2));
-        assertEquals(OptionalInt.of(1), Index.ofSubArray(new double[] { 3d, 7d, 8d, 9d }, 0, new double[] { 0d, 7d, 8d, 1d }, 1, 2));
-        assertEquals(OptionalInt.of(2), Index.ofSubArray(new String[] { "x", "y", "b", "c", "d" }, 1, new String[] { "a", "b", "c", "z" }, 1, 2));
-        assertEquals(OptionalInt.of(3), Index.lastOfSubArray(new String[] { "a", "b", "c", "b", "c" }, 4, new String[] { "x", "b", "c", "y" }, 1, 2));
+    public void testAllOf_CollectionWithPredicateAndFromIndex() {
+        List<String> list = Arrays.asList("apple", "banana", "avocado", "cherry", "apricot");
+        java.util.BitSet result = Index.allOf(list, (java.util.function.Predicate<String>) s -> s.startsWith("a"), 1);
+        assertEquals(2, result.cardinality());
+
+        // fromIndex >= size
+        result = Index.allOf(list, (java.util.function.Predicate<String>) s -> s.startsWith("a"), 10);
+        assertEquals(0, result.cardinality());
+
+        // null source
+        result = Index.allOf((java.util.Collection<String>) null, (java.util.function.Predicate<String>) s -> true, 0);
+        assertEquals(0, result.cardinality());
+    }
+
+    @Test
+    public void test_allOf_Collection_NonRandomAccess_WithFromIndex() {
+        LinkedList<String> list = new LinkedList<>(Arrays.asList("a", "b", "c", "d", "e"));
+        BitSet result = Index.allOf(list, (Predicate<String>) s -> s.compareTo("c") >= 0, 2);
+        assertEquals(3, result.cardinality());
+        assertTrue(result.get(2)); // "c"
+        assertTrue(result.get(3)); // "d"
+        assertTrue(result.get(4)); // "e"
     }
 
 }

@@ -6,12 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ObjDoubleConsumerTest extends TestBase {
 
     @Test
@@ -25,21 +23,6 @@ public class ObjDoubleConsumerTest extends TestBase {
         assertEquals(2, result.size());
         assertEquals("test:5.5", result.get(0));
         assertEquals("value:10.25", result.get(1));
-    }
-
-    @Test
-    public void testAcceptWithLambda() {
-        final double[] doubleResult = new double[1];
-        final String[] stringResult = new String[1];
-        ObjDoubleConsumer<String> consumer = (t, value) -> {
-            doubleResult[0] = value * 2;
-            stringResult[0] = t.toUpperCase();
-        };
-
-        consumer.accept("hello", 7.5);
-
-        assertEquals(15.0, doubleResult[0]);
-        assertEquals("HELLO", stringResult[0]);
     }
 
     @Test
@@ -59,33 +42,30 @@ public class ObjDoubleConsumerTest extends TestBase {
     }
 
     @Test
-    public void testAndThen() {
-        final List<String> result = new ArrayList<>();
-        ObjDoubleConsumer<String> first = (t, value) -> result.add(t + ":" + value);
-        ObjDoubleConsumer<String> second = (t, value) -> result.add(value + ":" + t);
+    public void testSideEffects() {
+        final double[] sum = { 0.0 };
+        ObjDoubleConsumer<String> consumer = (t, value) -> sum[0] += value;
 
-        ObjDoubleConsumer<String> combined = first.andThen(second);
-        combined.accept("test", 5.5);
+        consumer.accept("a", 1.5);
+        consumer.accept("b", 2.5);
+        consumer.accept("c", 3.0);
 
-        assertEquals(2, result.size());
-        assertEquals("test:5.5", result.get(0));
-        assertEquals("5.5:test", result.get(1));
+        assertEquals(7.0, sum[0], 0.001);
     }
 
     @Test
-    public void testAndThenChaining() {
-        final List<String> result = new ArrayList<>();
-        ObjDoubleConsumer<String> first = (t, value) -> result.add("first");
-        ObjDoubleConsumer<String> second = (t, value) -> result.add("second");
-        ObjDoubleConsumer<String> third = (t, value) -> result.add("third");
+    public void testAcceptWithLambda() {
+        final double[] doubleResult = new double[1];
+        final String[] stringResult = new String[1];
+        ObjDoubleConsumer<String> consumer = (t, value) -> {
+            doubleResult[0] = value * 2;
+            stringResult[0] = t.toUpperCase();
+        };
 
-        ObjDoubleConsumer<String> combined = first.andThen(second).andThen(third);
-        combined.accept("test", 5.5);
+        consumer.accept("hello", 7.5);
 
-        assertEquals(3, result.size());
-        assertEquals("first", result.get(0));
-        assertEquals("second", result.get(1));
-        assertEquals("third", result.get(2));
+        assertEquals(15.0, doubleResult[0]);
+        assertEquals("HELLO", stringResult[0]);
     }
 
     @Test
@@ -143,15 +123,33 @@ public class ObjDoubleConsumerTest extends TestBase {
     }
 
     @Test
-    public void testSideEffects() {
-        final double[] sum = { 0.0 };
-        ObjDoubleConsumer<String> consumer = (t, value) -> sum[0] += value;
+    public void testAndThen() {
+        final List<String> result = new ArrayList<>();
+        ObjDoubleConsumer<String> first = (t, value) -> result.add(t + ":" + value);
+        ObjDoubleConsumer<String> second = (t, value) -> result.add(value + ":" + t);
 
-        consumer.accept("a", 1.5);
-        consumer.accept("b", 2.5);
-        consumer.accept("c", 3.0);
+        ObjDoubleConsumer<String> combined = first.andThen(second);
+        combined.accept("test", 5.5);
 
-        assertEquals(7.0, sum[0], 0.001);
+        assertEquals(2, result.size());
+        assertEquals("test:5.5", result.get(0));
+        assertEquals("5.5:test", result.get(1));
+    }
+
+    @Test
+    public void testAndThenChaining() {
+        final List<String> result = new ArrayList<>();
+        ObjDoubleConsumer<String> first = (t, value) -> result.add("first");
+        ObjDoubleConsumer<String> second = (t, value) -> result.add("second");
+        ObjDoubleConsumer<String> third = (t, value) -> result.add("third");
+
+        ObjDoubleConsumer<String> combined = first.andThen(second).andThen(third);
+        combined.accept("test", 5.5);
+
+        assertEquals(3, result.size());
+        assertEquals("first", result.get(0));
+        assertEquals("second", result.get(1));
+        assertEquals("third", result.get(2));
     }
 
     @Test

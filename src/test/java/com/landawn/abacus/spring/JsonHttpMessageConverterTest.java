@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -28,7 +27,6 @@ import org.springframework.http.MediaType;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class JsonHttpMessageConverterTest extends TestBase {
 
     private JsonHttpMessageConverter converter;
@@ -36,6 +34,61 @@ public class JsonHttpMessageConverterTest extends TestBase {
     @BeforeEach
     public void setUp() {
         converter = new JsonHttpMessageConverter();
+    }
+
+    public static class TestPerson {
+        public String name;
+        public int age;
+        public boolean active;
+    }
+
+    public static class TestWrapper {
+        public TestPerson person;
+        public double score;
+    }
+
+    public static class TestGenericWrapper {
+        public List<TestPerson> items;
+        public int count;
+    }
+
+    private static class MockHttpInputMessage implements HttpInputMessage {
+        private final byte[] body;
+        private final org.springframework.http.HttpHeaders headers;
+
+        MockHttpInputMessage(String content) {
+            this.body = content.getBytes(StandardCharsets.UTF_8);
+            this.headers = new org.springframework.http.HttpHeaders();
+        }
+
+        @Override
+        public java.io.InputStream getBody() throws IOException {
+            return new ByteArrayInputStream(body);
+        }
+
+        @Override
+        public org.springframework.http.HttpHeaders getHeaders() {
+            return headers;
+        }
+    }
+
+    private static class MockHttpOutputMessage implements HttpOutputMessage {
+        private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        private final org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+
+        @Override
+        public java.io.OutputStream getBody() throws IOException {
+            return outputStream;
+        }
+
+        @Override
+        public org.springframework.http.HttpHeaders getHeaders() {
+            return headers;
+        }
+
+        String getBodyAsString() {
+            return outputStream.toString(StandardCharsets.UTF_8);
+        }
     }
 
     @Test
@@ -183,6 +236,23 @@ public class JsonHttpMessageConverterTest extends TestBase {
         assertNull(person.name);
         assertEquals(0, person.age);
         assertFalse(person.active);
+    }
+
+    @Test
+    public void testComplexGenericType() throws IOException {
+        String json = "{\"items\":[{\"name\":\"Item1\",\"age\":10,\"active\":true}," + "{\"name\":\"Item2\",\"age\":20,\"active\":false}],\"count\":2}";
+        StringReader reader = new StringReader(json);
+
+        Object result = converter.readInternal(TestGenericWrapper.class, reader);
+
+        assertNotNull(result);
+        assertTrue(result instanceof TestGenericWrapper);
+        TestGenericWrapper wrapper = (TestGenericWrapper) result;
+        assertEquals(2, wrapper.count);
+        assertNotNull(wrapper.items);
+        assertEquals(2, wrapper.items.size());
+        assertEquals("Item1", wrapper.items.get(0).name);
+        assertEquals("Item2", wrapper.items.get(1).name);
     }
 
     @Test
@@ -355,77 +425,5 @@ public class JsonHttpMessageConverterTest extends TestBase {
         assertTrue(json.contains("\"name\": \"David\""));
         assertTrue(json.contains("\"age\": 50"));
         assertTrue(json.contains("\"active\": false"));
-    }
-
-    @Test
-    public void testComplexGenericType() throws IOException {
-        String json = "{\"items\":[{\"name\":\"Item1\",\"age\":10,\"active\":true}," + "{\"name\":\"Item2\",\"age\":20,\"active\":false}],\"count\":2}";
-        StringReader reader = new StringReader(json);
-
-        Object result = converter.readInternal(TestGenericWrapper.class, reader);
-
-        assertNotNull(result);
-        assertTrue(result instanceof TestGenericWrapper);
-        TestGenericWrapper wrapper = (TestGenericWrapper) result;
-        assertEquals(2, wrapper.count);
-        assertNotNull(wrapper.items);
-        assertEquals(2, wrapper.items.size());
-        assertEquals("Item1", wrapper.items.get(0).name);
-        assertEquals("Item2", wrapper.items.get(1).name);
-    }
-
-    public static class TestPerson {
-        public String name;
-        public int age;
-        public boolean active;
-    }
-
-    public static class TestWrapper {
-        public TestPerson person;
-        public double score;
-    }
-
-    public static class TestGenericWrapper {
-        public List<TestPerson> items;
-        public int count;
-    }
-
-    private static class MockHttpInputMessage implements HttpInputMessage {
-        private final byte[] body;
-        private final org.springframework.http.HttpHeaders headers;
-
-        MockHttpInputMessage(String content) {
-            this.body = content.getBytes(StandardCharsets.UTF_8);
-            this.headers = new org.springframework.http.HttpHeaders();
-        }
-
-        @Override
-        public java.io.InputStream getBody() throws IOException {
-            return new ByteArrayInputStream(body);
-        }
-
-        @Override
-        public org.springframework.http.HttpHeaders getHeaders() {
-            return headers;
-        }
-    }
-
-    private static class MockHttpOutputMessage implements HttpOutputMessage {
-        private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        private final org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
-
-        @Override
-        public java.io.OutputStream getBody() throws IOException {
-            return outputStream;
-        }
-
-        @Override
-        public org.springframework.http.HttpHeaders getHeaders() {
-            return headers;
-        }
-
-        String getBodyAsString() {
-            return outputStream.toString(StandardCharsets.UTF_8);
-        }
     }
 }

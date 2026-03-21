@@ -1,5 +1,7 @@
 package com.landawn.abacus.util;
 
+import com.landawn.abacus.TestBase;
+
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.lang.reflect.InvocationHandler;
@@ -8,7 +10,7 @@ import java.lang.reflect.Proxy;
 
 import org.junit.jupiter.api.Test;
 
-class InvocationHandlerTest {
+class InvocationHandlerTest extends TestBase {
 
     @Test
     public void test() {

@@ -7,12 +7,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
 
-@Tag("old-test")
 public class EntityIdTest extends AbstractTest {
 
     //     @Test
@@ -100,6 +98,16 @@ public class EntityIdTest extends AbstractTest {
     }
 
     @Test
+    public void test_nullPropertyValue() {
+        EntityId id = EntityId.of("User.id", null);
+
+        Assertions.assertNotNull(id);
+        Assertions.assertEquals(1, id.size());
+        Assertions.assertNull(id.get("id"));
+        Assertions.assertTrue(id.containsKey("id"));
+    }
+
+    @Test
     public void test_create_fromMap() {
         Map<String, Object> props = new HashMap<>();
         props.put("User.id", 12345);
@@ -137,12 +145,49 @@ public class EntityIdTest extends AbstractTest {
     }
 
     @Test
+    public void test_entityName_extraction() {
+        EntityId id1 = EntityId.of("User.id", 100);
+        Assertions.assertEquals("User", id1.entityName());
+
+        EntityId id2 = EntityId.of("com.example.Customer.customerId", 200);
+        Assertions.assertEquals("com.example.Customer", id2.entityName());
+    }
+
+    @Test
+    public void test_get_withTargetType() {
+        EntityId id = EntityId.of("User.id", 12345);
+
+        Integer value = id.get("id", Integer.class);
+
+        Assertions.assertNotNull(value);
+        Assertions.assertEquals(12345, value);
+    }
+
+    @Test
+    public void test_get_nonExistentProperty() {
+        EntityId id = EntityId.of("User.id", 100);
+
+        Object value = id.get("nonExistent");
+
+        Assertions.assertNull(value);
+    }
+
+    @Test
     public void test_getInt() {
         EntityId id = EntityId.of("Product.quantity", 50);
 
         int qty = id.getInt("quantity");
 
         Assertions.assertEquals(50, qty);
+    }
+
+    @Test
+    public void test_getInt_nonExistentProperty() {
+        EntityId id = EntityId.of("User.name", "John");
+
+        int value = id.getInt("nonExistent");
+
+        Assertions.assertEquals(0, value);
     }
 
     @Test
@@ -155,13 +200,12 @@ public class EntityIdTest extends AbstractTest {
     }
 
     @Test
-    public void test_get_withTargetType() {
-        EntityId id = EntityId.of("User.id", 12345);
+    public void test_getLong_nonExistentProperty() {
+        EntityId id = EntityId.of("User.name", "John");
 
-        Integer value = id.get("id", Integer.class);
+        long value = id.getLong("nonExistent");
 
-        Assertions.assertNotNull(value);
-        Assertions.assertEquals(12345, value);
+        Assertions.assertEquals(0L, value);
     }
 
     @Test
@@ -218,6 +262,16 @@ public class EntityIdTest extends AbstractTest {
     }
 
     @Test
+    public void test_differentPropertyTypes() {
+        EntityId id = EntityId.builder("Test").put("intVal", 123).put("longVal", 123456789L).put("stringVal", "test").put("boolVal", true).build();
+
+        Assertions.assertEquals(123, (Integer) id.get("intVal"));
+        Assertions.assertEquals(123456789L, (Long) id.get("longVal"));
+        Assertions.assertEquals("test", id.get("stringVal"));
+        Assertions.assertEquals(true, id.get("boolVal"));
+    }
+
+    @Test
     public void test_builder_basic() {
         EntityId id = EntityId.builder().put("userId", 100).put("accountId", 200).build();
 
@@ -258,62 +312,6 @@ public class EntityIdTest extends AbstractTest {
         Assertions.assertEquals("2025-01-01", id.get("orderDate"));
         Assertions.assertEquals("PENDING", id.get("status"));
         Assertions.assertEquals(4, id.size());
-    }
-
-    @Test
-    public void test_nullPropertyValue() {
-        EntityId id = EntityId.of("User.id", null);
-
-        Assertions.assertNotNull(id);
-        Assertions.assertEquals(1, id.size());
-        Assertions.assertNull(id.get("id"));
-        Assertions.assertTrue(id.containsKey("id"));
-    }
-
-    @Test
-    public void test_differentPropertyTypes() {
-        EntityId id = EntityId.builder("Test").put("intVal", 123).put("longVal", 123456789L).put("stringVal", "test").put("boolVal", true).build();
-
-        Assertions.assertEquals(123, (Integer) id.get("intVal"));
-        Assertions.assertEquals(123456789L, (Long) id.get("longVal"));
-        Assertions.assertEquals("test", id.get("stringVal"));
-        Assertions.assertEquals(true, id.get("boolVal"));
-    }
-
-    @Test
-    public void test_entityName_extraction() {
-        EntityId id1 = EntityId.of("User.id", 100);
-        Assertions.assertEquals("User", id1.entityName());
-
-        EntityId id2 = EntityId.of("com.example.Customer.customerId", 200);
-        Assertions.assertEquals("com.example.Customer", id2.entityName());
-    }
-
-    @Test
-    public void test_get_nonExistentProperty() {
-        EntityId id = EntityId.of("User.id", 100);
-
-        Object value = id.get("nonExistent");
-
-        Assertions.assertNull(value);
-    }
-
-    @Test
-    public void test_getInt_nonExistentProperty() {
-        EntityId id = EntityId.of("User.name", "John");
-
-        int value = id.getInt("nonExistent");
-
-        Assertions.assertEquals(0, value);
-    }
-
-    @Test
-    public void test_getLong_nonExistentProperty() {
-        EntityId id = EntityId.of("User.name", "John");
-
-        long value = id.getLong("nonExistent");
-
-        Assertions.assertEquals(0L, value);
     }
 
 }

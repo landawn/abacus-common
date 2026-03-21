@@ -5,13 +5,19 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Calendar;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class CalendarFieldTest extends TestBase {
+
+    @Test
+    public void testOfRoundTrip() {
+        for (CalendarField field : CalendarField.values()) {
+            assertEquals(field, CalendarField.of(field.value()));
+        }
+    }
+
     @Test
     public void testOf_withValidValues() {
         assertEquals(CalendarField.MILLISECOND, CalendarField.of(Calendar.MILLISECOND));
@@ -30,6 +36,29 @@ public class CalendarFieldTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> CalendarField.of(-1));
         assertThrows(IllegalArgumentException.class, () -> CalendarField.of(Calendar.HOUR)); // Not supported
         assertThrows(IllegalArgumentException.class, () -> CalendarField.of(Calendar.AM_PM)); // Not supported
+    }
+
+    @Test
+    public void testOf_withDayOfWeek() {
+        assertThrows(IllegalArgumentException.class, () -> CalendarField.of(Calendar.DAY_OF_WEEK));
+    }
+
+    @Test
+    public void testOf_withWeekOfMonth() {
+        assertThrows(IllegalArgumentException.class, () -> CalendarField.of(Calendar.WEEK_OF_MONTH));
+    }
+
+    @Test
+    public void testOf_withEra() {
+        assertThrows(IllegalArgumentException.class, () -> CalendarField.of(Calendar.ERA));
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testValueOfRoundTrip() {
+        for (CalendarField field : CalendarField.values()) {
+            assertEquals(field, CalendarField.valueOf(field.value()));
+        }
     }
 
     @Test
@@ -58,6 +87,34 @@ public class CalendarFieldTest extends TestBase {
     }
 
     @Test
+    public void testValueOf_withInvalidString() {
+        assertThrows(IllegalArgumentException.class, () -> CalendarField.valueOf("INVALID_NAME"));
+    }
+
+    @Test
+    public void testCalendarAddAndGet() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(CalendarField.YEAR.value(), 2024);
+        cal.set(CalendarField.MONTH.value(), Calendar.MARCH);
+        cal.set(CalendarField.DAY_OF_MONTH.value(), 1);
+
+        cal.add(CalendarField.DAY_OF_MONTH.value(), 10);
+        assertEquals(11, cal.get(CalendarField.DAY_OF_MONTH.value()));
+    }
+
+    @Test
+    public void testCalendarRoll() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(CalendarField.YEAR.value(), 2024);
+        cal.set(CalendarField.MONTH.value(), Calendar.DECEMBER);
+
+        cal.roll(CalendarField.MONTH.value(), 1);
+        // Rolling month from December wraps to January without changing year
+        assertEquals(Calendar.JANUARY, cal.get(CalendarField.MONTH.value()));
+        assertEquals(2024, cal.get(CalendarField.YEAR.value()));
+    }
+
+    @Test
     public void testValue() {
         assertEquals(Calendar.MILLISECOND, CalendarField.MILLISECOND.value());
         assertEquals(Calendar.SECOND, CalendarField.SECOND.value());
@@ -67,6 +124,30 @@ public class CalendarFieldTest extends TestBase {
         assertEquals(Calendar.WEEK_OF_YEAR, CalendarField.WEEK_OF_YEAR.value());
         assertEquals(Calendar.MONTH, CalendarField.MONTH.value());
         assertEquals(Calendar.YEAR, CalendarField.YEAR.value());
+    }
+
+    // Additional tests for missing coverage
+
+    @Test
+    public void testDayOfMonthEqualsCalendarDate() {
+        // Calendar.DATE and Calendar.DAY_OF_MONTH have the same value (5)
+        assertEquals(Calendar.DATE, CalendarField.DAY_OF_MONTH.value());
+        assertEquals(Calendar.DAY_OF_MONTH, CalendarField.DAY_OF_MONTH.value());
+    }
+
+    @Test
+    public void testIntegrationWithCalendar() {
+        Calendar cal = Calendar.getInstance();
+
+        // Test that CalendarField values can be used with Calendar methods
+        cal.set(CalendarField.YEAR.value(), 2024);
+        assertEquals(2024, cal.get(CalendarField.YEAR.value()));
+
+        cal.set(CalendarField.MONTH.value(), Calendar.JANUARY);
+        assertEquals(Calendar.JANUARY, cal.get(CalendarField.MONTH.value()));
+
+        cal.set(CalendarField.DAY_OF_MONTH.value(), 15);
+        assertEquals(15, cal.get(CalendarField.DAY_OF_MONTH.value()));
     }
 
     @Test
@@ -102,21 +183,6 @@ public class CalendarFieldTest extends TestBase {
     }
 
     @Test
-    public void testIntegrationWithCalendar() {
-        Calendar cal = Calendar.getInstance();
-
-        // Test that CalendarField values can be used with Calendar methods
-        cal.set(CalendarField.YEAR.value(), 2024);
-        assertEquals(2024, cal.get(CalendarField.YEAR.value()));
-
-        cal.set(CalendarField.MONTH.value(), Calendar.JANUARY);
-        assertEquals(Calendar.JANUARY, cal.get(CalendarField.MONTH.value()));
-
-        cal.set(CalendarField.DAY_OF_MONTH.value(), 15);
-        assertEquals(15, cal.get(CalendarField.DAY_OF_MONTH.value()));
-    }
-
-    @Test
     public void testOrdinal() {
         assertEquals(0, CalendarField.MILLISECOND.ordinal());
         assertEquals(1, CalendarField.SECOND.ordinal());
@@ -126,73 +192,6 @@ public class CalendarFieldTest extends TestBase {
         assertEquals(5, CalendarField.WEEK_OF_YEAR.ordinal());
         assertEquals(6, CalendarField.MONTH.ordinal());
         assertEquals(7, CalendarField.YEAR.ordinal());
-    }
-
-    // Additional tests for missing coverage
-
-    @Test
-    public void testDayOfMonthEqualsCalendarDate() {
-        // Calendar.DATE and Calendar.DAY_OF_MONTH have the same value (5)
-        assertEquals(Calendar.DATE, CalendarField.DAY_OF_MONTH.value());
-        assertEquals(Calendar.DAY_OF_MONTH, CalendarField.DAY_OF_MONTH.value());
-    }
-
-    @Test
-    public void testOfRoundTrip() {
-        for (CalendarField field : CalendarField.values()) {
-            assertEquals(field, CalendarField.of(field.value()));
-        }
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void testValueOfRoundTrip() {
-        for (CalendarField field : CalendarField.values()) {
-            assertEquals(field, CalendarField.valueOf(field.value()));
-        }
-    }
-
-    @Test
-    public void testOf_withDayOfWeek() {
-        assertThrows(IllegalArgumentException.class, () -> CalendarField.of(Calendar.DAY_OF_WEEK));
-    }
-
-    @Test
-    public void testOf_withWeekOfMonth() {
-        assertThrows(IllegalArgumentException.class, () -> CalendarField.of(Calendar.WEEK_OF_MONTH));
-    }
-
-    @Test
-    public void testOf_withEra() {
-        assertThrows(IllegalArgumentException.class, () -> CalendarField.of(Calendar.ERA));
-    }
-
-    @Test
-    public void testValueOf_withInvalidString() {
-        assertThrows(IllegalArgumentException.class, () -> CalendarField.valueOf("INVALID_NAME"));
-    }
-
-    @Test
-    public void testCalendarAddAndGet() {
-        Calendar cal = Calendar.getInstance();
-        cal.set(CalendarField.YEAR.value(), 2024);
-        cal.set(CalendarField.MONTH.value(), Calendar.MARCH);
-        cal.set(CalendarField.DAY_OF_MONTH.value(), 1);
-
-        cal.add(CalendarField.DAY_OF_MONTH.value(), 10);
-        assertEquals(11, cal.get(CalendarField.DAY_OF_MONTH.value()));
-    }
-
-    @Test
-    public void testCalendarRoll() {
-        Calendar cal = Calendar.getInstance();
-        cal.set(CalendarField.YEAR.value(), 2024);
-        cal.set(CalendarField.MONTH.value(), Calendar.DECEMBER);
-
-        cal.roll(CalendarField.MONTH.value(), 1);
-        // Rolling month from December wraps to January without changing year
-        assertEquals(Calendar.JANUARY, cal.get(CalendarField.MONTH.value()));
-        assertEquals(2024, cal.get(CalendarField.YEAR.value()));
     }
 
 }

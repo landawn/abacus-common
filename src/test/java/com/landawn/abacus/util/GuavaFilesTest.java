@@ -35,7 +35,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -53,7 +52,6 @@ import com.google.common.io.RecursiveDeleteOption;
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.guava.Files;
 
-@Tag("new-test")
 public class GuavaFilesTest extends TestBase {
 
     @TempDir

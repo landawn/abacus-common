@@ -11,12 +11,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.apache.avro.Schema;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class AvroDeserConfigTest extends TestBase {
 
     private AvroDeserConfig config;
@@ -62,6 +60,20 @@ public class AvroDeserConfigTest extends TestBase {
 
         config.setSchema(null);
         Assertions.assertNull(config.getSchema());
+    }
+
+    // copy
+    @Test
+    public void testCopy() {
+        Schema schema = new Schema.Parser().parse(TEST_SCHEMA_JSON);
+        config.setSchema(schema);
+        config.setIgnoreUnmatchedProperty(false);
+
+        AvroDeserConfig copy = config.copy();
+        assertNotNull(copy);
+        assertNotSame(config, copy);
+        assertEquals(schema, copy.getSchema());
+        assertFalse(copy.isIgnoreUnmatchedProperty());
     }
 
     // hashCode
@@ -145,6 +157,13 @@ public class AvroDeserConfigTest extends TestBase {
         Assertions.assertTrue(str.contains("ignoreUnmatchedProperty="));
     }
 
+    @Test
+    public void test_ignoreUnmatchedProperty() {
+        AvroDeserConfig config = AvroDeserConfig.create();
+        config.setIgnoreUnmatchedProperty(true);
+        assertTrue(config.isIgnoreUnmatchedProperty());
+    }
+
     // create
     @Test
     public void test_ADC_create() {
@@ -161,33 +180,12 @@ public class AvroDeserConfigTest extends TestBase {
         Assertions.assertTrue(config.isIgnoreUnmatchedProperty());
     }
 
-    // copy
-    @Test
-    public void testCopy() {
-        Schema schema = new Schema.Parser().parse(TEST_SCHEMA_JSON);
-        config.setSchema(schema);
-        config.setIgnoreUnmatchedProperty(false);
-
-        AvroDeserConfig copy = config.copy();
-        assertNotNull(copy);
-        assertNotSame(config, copy);
-        assertEquals(schema, copy.getSchema());
-        assertFalse(copy.isIgnoreUnmatchedProperty());
-    }
-
     // inherited method tests
     @Test
     public void test_setElementType() {
         AvroDeserConfig config = AvroDeserConfig.create();
         config.setElementType(String.class);
         assertNotNull(config.getElementType());
-    }
-
-    @Test
-    public void test_ignoreUnmatchedProperty() {
-        AvroDeserConfig config = AvroDeserConfig.create();
-        config.setIgnoreUnmatchedProperty(true);
-        assertTrue(config.isIgnoreUnmatchedProperty());
     }
 
 }

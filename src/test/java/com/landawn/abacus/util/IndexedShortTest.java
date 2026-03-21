@@ -6,12 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class IndexedShortTest extends TestBase {
 
     @Test
@@ -29,39 +27,25 @@ public class IndexedShortTest extends TestBase {
     }
 
     @Test
-    public void testOfNegativeIntIndex() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            IndexedShort.of((short) 1, -1);
-        });
+    public void testOf_WithIntIndex() {
+        short value = (short) 42;
+        int index = 5;
+
+        IndexedShort indexedShort = IndexedShort.of(value, index);
+
+        assertEquals(value, indexedShort.value());
+        assertEquals(index, indexedShort.index());
     }
 
     @Test
-    public void testValue() {
-        IndexedShort indexed = IndexedShort.of((short) 123, 0);
-        assertEquals((short) 123, indexed.value());
-    }
+    public void testOf_WithLongIndex() {
+        short value = (short) 42;
+        long index = 5000000000L;
 
-    @Test
-    public void testHashCode() {
-        IndexedShort indexed1 = IndexedShort.of((short) 10, 5);
-        IndexedShort indexed2 = IndexedShort.of((short) 10, 5);
-        assertEquals(indexed1.hashCode(), indexed2.hashCode());
-    }
+        IndexedShort indexedShort = IndexedShort.of(value, index);
 
-    @Test
-    public void testEquals() {
-        IndexedShort indexed1 = IndexedShort.of((short) 10, 5);
-        IndexedShort indexed2 = IndexedShort.of((short) 10, 5);
-        IndexedShort indexed3 = IndexedShort.of((short) 20, 5);
-
-        assertTrue(indexed1.equals(indexed2));
-        assertFalse(indexed1.equals(indexed3));
-    }
-
-    @Test
-    public void testToString() {
-        IndexedShort indexed = IndexedShort.of((short) 42, 5);
-        assertEquals("[5]=42", indexed.toString());
+        assertEquals(value, indexedShort.value());
+        assertEquals(index, indexedShort.longIndex());
     }
 
     @Test
@@ -80,17 +64,6 @@ public class IndexedShortTest extends TestBase {
     public void testMinValue() {
         IndexedShort indexed = IndexedShort.of(Short.MIN_VALUE, 0);
         assertEquals(Short.MIN_VALUE, indexed.value());
-    }
-
-    @Test
-    public void testOf_WithIntIndex() {
-        short value = (short) 42;
-        int index = 5;
-
-        IndexedShort indexedShort = IndexedShort.of(value, index);
-
-        assertEquals(value, indexedShort.value());
-        assertEquals(index, indexedShort.index());
     }
 
     @Test
@@ -116,25 +89,6 @@ public class IndexedShortTest extends TestBase {
     }
 
     @Test
-    public void testOf_WithIntIndex_NegativeIndex() {
-        short value = (short) 42;
-        int index = -1;
-
-        assertThrows(IllegalArgumentException.class, () -> IndexedShort.of(value, index));
-    }
-
-    @Test
-    public void testOf_WithLongIndex() {
-        short value = (short) 42;
-        long index = 5000000000L;
-
-        IndexedShort indexedShort = IndexedShort.of(value, index);
-
-        assertEquals(value, indexedShort.value());
-        assertEquals(index, indexedShort.longIndex());
-    }
-
-    @Test
     public void testOf_WithLongIndex_Zero() {
         short value = (short) -100;
         long index = 0L;
@@ -157,11 +111,39 @@ public class IndexedShortTest extends TestBase {
     }
 
     @Test
+    public void testOfNegativeIntIndex() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            IndexedShort.of((short) 1, -1);
+        });
+    }
+
+    @Test
+    public void testOf_WithIntIndex_NegativeIndex() {
+        short value = (short) 42;
+        int index = -1;
+
+        assertThrows(IllegalArgumentException.class, () -> IndexedShort.of(value, index));
+    }
+
+    @Test
     public void testOf_WithLongIndex_NegativeIndex() {
         short value = (short) 42;
         long index = -1L;
 
         assertThrows(IllegalArgumentException.class, () -> IndexedShort.of(value, index));
+    }
+
+    @Test
+    public void testValue() {
+        IndexedShort indexed = IndexedShort.of((short) 123, 0);
+        assertEquals((short) 123, indexed.value());
+    }
+
+    @Test
+    public void testHashCode() {
+        IndexedShort indexed1 = IndexedShort.of((short) 10, 5);
+        IndexedShort indexed2 = IndexedShort.of((short) 10, 5);
+        assertEquals(indexed1.hashCode(), indexed2.hashCode());
     }
 
     @Test
@@ -185,10 +167,13 @@ public class IndexedShortTest extends TestBase {
     }
 
     @Test
-    public void testEquals_SameObject() {
-        IndexedShort indexedShort = IndexedShort.of((short) 42, 5);
+    public void testEquals() {
+        IndexedShort indexed1 = IndexedShort.of((short) 10, 5);
+        IndexedShort indexed2 = IndexedShort.of((short) 10, 5);
+        IndexedShort indexed3 = IndexedShort.of((short) 20, 5);
 
-        assertTrue(indexedShort.equals(indexedShort));
+        assertTrue(indexed1.equals(indexed2));
+        assertFalse(indexed1.equals(indexed3));
     }
 
     @Test
@@ -226,13 +211,6 @@ public class IndexedShortTest extends TestBase {
     }
 
     @Test
-    public void testEquals_Null() {
-        IndexedShort indexedShort = IndexedShort.of((short) 42, 5);
-
-        assertFalse(indexedShort.equals(null));
-    }
-
-    @Test
     public void testEquals_DifferentClass() {
         IndexedShort indexedShort = IndexedShort.of((short) 42, 5);
 
@@ -241,13 +219,23 @@ public class IndexedShortTest extends TestBase {
     }
 
     @Test
-    public void testToString_NegativeValue() {
-        short value = (short) -42;
-        int index = 10;
+    public void testEquals_SameObject() {
+        IndexedShort indexedShort = IndexedShort.of((short) 42, 5);
 
-        IndexedShort indexedShort = IndexedShort.of(value, index);
+        assertTrue(indexedShort.equals(indexedShort));
+    }
 
-        assertEquals("[10]=-42", indexedShort.toString());
+    @Test
+    public void testEquals_Null() {
+        IndexedShort indexedShort = IndexedShort.of((short) 42, 5);
+
+        assertFalse(indexedShort.equals(null));
+    }
+
+    @Test
+    public void testToString() {
+        IndexedShort indexed = IndexedShort.of((short) 42, 5);
+        assertEquals("[5]=42", indexed.toString());
     }
 
     @Test
@@ -258,6 +246,16 @@ public class IndexedShortTest extends TestBase {
         IndexedShort indexedShort = IndexedShort.of(value, index);
 
         assertEquals("[1000000]=100", indexedShort.toString());
+    }
+
+    @Test
+    public void testToString_NegativeValue() {
+        short value = (short) -42;
+        int index = 10;
+
+        IndexedShort indexedShort = IndexedShort.of(value, index);
+
+        assertEquals("[10]=-42", indexedShort.toString());
     }
 
 }

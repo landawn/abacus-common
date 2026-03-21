@@ -11,12 +11,10 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class StopwatchTest extends TestBase {
 
     private static class MockTicker extends Ticker {
@@ -30,6 +28,38 @@ public class StopwatchTest extends TestBase {
         public void advance(long nanosToAdvance) {
             nanos += nanosToAdvance;
         }
+    }
+
+    @Test
+    public void test_createUnstarted_canBeStartedLater() {
+        Stopwatch stopwatch = Stopwatch.createUnstarted();
+        assertFalse(stopwatch.isRunning());
+        stopwatch.start();
+        assertTrue(stopwatch.isRunning());
+    }
+
+    @Test
+    public void test_createUnstarted_withTicker_usesTicker() {
+        MockTicker ticker = new MockTicker();
+        Stopwatch stopwatch = Stopwatch.createUnstarted(ticker);
+        stopwatch.start();
+        ticker.advance(5000000);
+        assertEquals(5, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void testCreateUnstarted() {
+        Stopwatch stopwatch = Stopwatch.createUnstarted();
+        Assertions.assertFalse(stopwatch.isRunning());
+        Assertions.assertEquals(0, stopwatch.elapsed(TimeUnit.NANOSECONDS));
+    }
+
+    @Test
+    public void testCreateUnstartedWithTicker() {
+        MockTicker ticker = new MockTicker();
+        Stopwatch stopwatch = Stopwatch.createUnstarted(ticker);
+        Assertions.assertFalse(stopwatch.isRunning());
+        Assertions.assertEquals(0, stopwatch.elapsed(TimeUnit.NANOSECONDS));
     }
 
     @Test
@@ -50,20 +80,57 @@ public class StopwatchTest extends TestBase {
     }
 
     @Test
-    public void test_createUnstarted_canBeStartedLater() {
-        Stopwatch stopwatch = Stopwatch.createUnstarted();
-        assertFalse(stopwatch.isRunning());
-        stopwatch.start();
-        assertTrue(stopwatch.isRunning());
-    }
-
-    @Test
     public void test_createUnstarted_withTicker_initialState() {
         MockTicker ticker = new MockTicker();
         Stopwatch stopwatch = Stopwatch.createUnstarted(ticker);
         assertNotNull(stopwatch);
         assertFalse(stopwatch.isRunning());
         assertEquals(0, stopwatch.elapsed(TimeUnit.NANOSECONDS));
+    }
+
+    @Test
+    public void test_multipleStartStopCycles() {
+        MockTicker ticker = new MockTicker();
+        Stopwatch stopwatch = Stopwatch.createUnstarted(ticker);
+
+        stopwatch.start();
+        ticker.advance(10000000);
+        stopwatch.stop();
+        assertEquals(10, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+
+        stopwatch.start();
+        ticker.advance(5000000);
+        stopwatch.stop();
+        assertEquals(15, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+
+        stopwatch.start();
+        ticker.advance(7000000);
+        stopwatch.stop();
+        assertEquals(22, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void test_unstartedStopwatchToString() {
+        Stopwatch stopwatch = Stopwatch.createUnstarted();
+        String str = stopwatch.toString();
+        assertNotNull(str);
+        assertTrue(str.length() > 0);
+    }
+
+    @Test
+    public void testMultipleStartStop() {
+        MockTicker ticker = new MockTicker();
+        Stopwatch stopwatch = Stopwatch.createUnstarted(ticker);
+
+        stopwatch.start();
+        ticker.advance(10000000);
+        stopwatch.stop();
+
+        stopwatch.start();
+        ticker.advance(5000000);
+        stopwatch.stop();
+
+        Assertions.assertEquals(15, stopwatch.elapsed(TimeUnit.MILLISECONDS));
     }
 
     @Test
@@ -74,26 +141,15 @@ public class StopwatchTest extends TestBase {
     }
 
     @Test
-    public void test_createUnstarted_withTicker_usesTicker() {
-        MockTicker ticker = new MockTicker();
-        Stopwatch stopwatch = Stopwatch.createUnstarted(ticker);
-        stopwatch.start();
-        ticker.advance(5000000);
-        assertEquals(5, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+    public void testCreateWithNullTicker() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Stopwatch.createUnstarted(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Stopwatch.createStarted(null));
     }
 
     @Test
     public void test_createStarted_isRunning() {
         Stopwatch stopwatch = Stopwatch.createStarted();
         assertTrue(stopwatch.isRunning());
-    }
-
-    @Test
-    public void test_createStarted_elapsedIncreases() throws InterruptedException {
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        Thread.sleep(10);
-        assertTrue(stopwatch.elapsed(TimeUnit.NANOSECONDS) > 0);
-        assertTrue(stopwatch.elapsed(TimeUnit.MILLISECONDS) >= 0);
     }
 
     @Test
@@ -112,10 +168,116 @@ public class StopwatchTest extends TestBase {
     }
 
     @Test
+    public void test_durationAndTimeUnitConsistency() {
+        MockTicker ticker = new MockTicker();
+        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
+
+        ticker.advance(3500000000L);
+
+        Duration duration = stopwatch.elapsed();
+        long millis = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+        long nanos = stopwatch.elapsed(TimeUnit.NANOSECONDS);
+
+        assertEquals(3500, millis);
+        assertEquals(3500000000L, nanos);
+        assertEquals(nanos, duration.toNanos());
+        assertEquals(millis, duration.toMillis());
+    }
+
+    @Test
+    public void test_stoppedStopwatchDoesNotAdvance() {
+        MockTicker ticker = new MockTicker();
+        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
+
+        ticker.advance(10000000);
+        stopwatch.stop();
+
+        long elapsed1 = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+
+        ticker.advance(100000000);
+
+        long elapsed2 = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+
+        assertEquals(elapsed1, elapsed2);
+    }
+
+    @Test
+    public void testCreateStartedWithTicker() {
+        MockTicker ticker = new MockTicker();
+        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
+        Assertions.assertTrue(stopwatch.isRunning());
+
+        ticker.advance(1000000);
+        Assertions.assertEquals(1, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void test_veryLargeElapsedTime() {
+        MockTicker ticker = new MockTicker();
+        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
+
+        ticker.advance(Long.MAX_VALUE / 2);
+        assertTrue(stopwatch.elapsed(TimeUnit.NANOSECONDS) > 0);
+        assertTrue(stopwatch.elapsed(TimeUnit.DAYS) > 0);
+    }
+
+    @Test
+    public void test_zeroElapsedTime() {
+        MockTicker ticker = new MockTicker();
+        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
+
+        assertEquals(0, stopwatch.elapsed(TimeUnit.NANOSECONDS));
+        assertEquals(0, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void test_createStarted_elapsedIncreases() throws InterruptedException {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        Thread.sleep(10);
+        assertTrue(stopwatch.elapsed(TimeUnit.NANOSECONDS) > 0);
+        assertTrue(stopwatch.elapsed(TimeUnit.MILLISECONDS) >= 0);
+    }
+
+    @Test
     public void test_createStarted_withNullTicker_throwsException() {
         assertThrows(IllegalArgumentException.class, () -> {
             Stopwatch.createStarted(null);
         });
+    }
+
+    @Test
+    public void test_realTimeStopwatch() throws InterruptedException {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+
+        Thread.sleep(50);
+        stopwatch.stop();
+
+        long elapsedMillis = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+        assertTrue(elapsedMillis >= 40 && elapsedMillis <= 200, "Expected elapsed time ~50ms but was " + elapsedMillis + "ms");
+    }
+
+    @Test
+    public void testCreateStarted() {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        Assertions.assertTrue(stopwatch.isRunning());
+
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        Assertions.assertTrue(stopwatch.elapsed(TimeUnit.NANOSECONDS) > 0);
+    }
+
+    @Test
+    public void testRealTimeElapsed() throws InterruptedException {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+
+        Thread.sleep(50);
+
+        long elapsedMillis = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+        Assertions.assertTrue(elapsedMillis >= 40 && elapsedMillis <= 200, "Elapsed time should be approximately 50ms but was " + elapsedMillis);
     }
 
     @Test
@@ -129,6 +291,18 @@ public class StopwatchTest extends TestBase {
         Stopwatch stopwatch = Stopwatch.createUnstarted();
         stopwatch.start();
         assertTrue(stopwatch.isRunning());
+    }
+
+    @Test
+    public void testIsRunning() {
+        Stopwatch stopwatch = Stopwatch.createUnstarted();
+        Assertions.assertFalse(stopwatch.isRunning());
+
+        stopwatch.start();
+        Assertions.assertTrue(stopwatch.isRunning());
+
+        stopwatch.stop();
+        Assertions.assertFalse(stopwatch.isRunning());
     }
 
     @Test
@@ -150,14 +324,6 @@ public class StopwatchTest extends TestBase {
     }
 
     @Test
-    public void test_start_setsRunningState() {
-        Stopwatch stopwatch = Stopwatch.createUnstarted();
-        Stopwatch result = stopwatch.start();
-        assertTrue(stopwatch.isRunning());
-        assertSame(stopwatch, result);
-    }
-
-    @Test
     public void test_start_beginsTimeMeasurement() {
         MockTicker ticker = new MockTicker();
         Stopwatch stopwatch = Stopwatch.createUnstarted(ticker);
@@ -165,14 +331,6 @@ public class StopwatchTest extends TestBase {
         stopwatch.start();
         ticker.advance(7000000);
         assertEquals(7, stopwatch.elapsed(TimeUnit.MILLISECONDS));
-    }
-
-    @Test
-    public void test_start_alreadyRunning_throwsException() {
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        assertThrows(IllegalStateException.class, () -> {
-            stopwatch.start();
-        });
     }
 
     @Test
@@ -192,10 +350,44 @@ public class StopwatchTest extends TestBase {
     }
 
     @Test
+    public void testStart() {
+        MockTicker ticker = new MockTicker();
+        Stopwatch stopwatch = Stopwatch.createUnstarted(ticker);
+
+        stopwatch.start();
+        Assertions.assertTrue(stopwatch.isRunning());
+
+        ticker.advance(5000000);
+        Assertions.assertEquals(5, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void test_start_setsRunningState() {
+        Stopwatch stopwatch = Stopwatch.createUnstarted();
+        Stopwatch result = stopwatch.start();
+        assertTrue(stopwatch.isRunning());
+        assertSame(stopwatch, result);
+    }
+
+    @Test
     public void test_start_methodChaining() {
         Stopwatch stopwatch = Stopwatch.createUnstarted();
         Stopwatch same = stopwatch.start();
         assertSame(stopwatch, same);
+    }
+
+    @Test
+    public void test_start_alreadyRunning_throwsException() {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        assertThrows(IllegalStateException.class, () -> {
+            stopwatch.start();
+        });
+    }
+
+    @Test
+    public void testStartAlreadyRunning() {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        Assertions.assertThrows(IllegalStateException.class, () -> stopwatch.start());
     }
 
     @Test
@@ -220,6 +412,43 @@ public class StopwatchTest extends TestBase {
     }
 
     @Test
+    public void test_stop_preservesElapsedTime() {
+        MockTicker ticker = new MockTicker();
+        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
+
+        ticker.advance(15000000);
+        stopwatch.stop();
+
+        long elapsed1 = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+        long elapsed2 = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+
+        assertEquals(15, elapsed1);
+        assertEquals(elapsed1, elapsed2);
+    }
+
+    @Test
+    public void testStop() {
+        MockTicker ticker = new MockTicker();
+        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
+
+        ticker.advance(10000000);
+        stopwatch.stop();
+
+        Assertions.assertFalse(stopwatch.isRunning());
+        Assertions.assertEquals(10, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+
+        ticker.advance(5000000);
+        Assertions.assertEquals(10, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void test_stop_methodChaining() {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        Stopwatch same = stopwatch.stop();
+        assertSame(stopwatch, same);
+    }
+
+    @Test
     public void test_stop_notRunning_throwsException() {
         Stopwatch stopwatch = Stopwatch.createUnstarted();
         assertThrows(IllegalStateException.class, () -> {
@@ -237,25 +466,9 @@ public class StopwatchTest extends TestBase {
     }
 
     @Test
-    public void test_stop_preservesElapsedTime() {
-        MockTicker ticker = new MockTicker();
-        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
-
-        ticker.advance(15000000);
-        stopwatch.stop();
-
-        long elapsed1 = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-        long elapsed2 = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-
-        assertEquals(15, elapsed1);
-        assertEquals(elapsed1, elapsed2);
-    }
-
-    @Test
-    public void test_stop_methodChaining() {
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        Stopwatch same = stopwatch.stop();
-        assertSame(stopwatch, same);
+    public void testStopNotRunning() {
+        Stopwatch stopwatch = Stopwatch.createUnstarted();
+        Assertions.assertThrows(IllegalStateException.class, () -> stopwatch.stop());
     }
 
     @Test
@@ -314,13 +527,6 @@ public class StopwatchTest extends TestBase {
     }
 
     @Test
-    public void test_reset_methodChaining() {
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        Stopwatch same = stopwatch.reset();
-        assertSame(stopwatch, same);
-    }
-
-    @Test
     public void test_reset_methodChaining_startImmediately() {
         MockTicker ticker = new MockTicker();
         Stopwatch stopwatch = Stopwatch.createStarted(ticker);
@@ -330,6 +536,55 @@ public class StopwatchTest extends TestBase {
         ticker.advance(5000000);
 
         assertEquals(5, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void test_resetAndReuse() {
+        MockTicker ticker = new MockTicker();
+        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
+
+        ticker.advance(10000000);
+        stopwatch.stop();
+        assertEquals(10, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+
+        stopwatch.reset();
+        assertEquals(0, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+
+        stopwatch.start();
+        ticker.advance(5000000);
+        assertEquals(5, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void testReset() {
+        MockTicker ticker = new MockTicker();
+        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
+
+        ticker.advance(10000000);
+        stopwatch.stop();
+
+        stopwatch.reset();
+        Assertions.assertFalse(stopwatch.isRunning());
+        Assertions.assertEquals(0, stopwatch.elapsed(TimeUnit.NANOSECONDS));
+    }
+
+    @Test
+    public void testResetWhileRunning() {
+        MockTicker ticker = new MockTicker();
+        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
+
+        ticker.advance(10000000);
+
+        stopwatch.reset();
+        Assertions.assertFalse(stopwatch.isRunning());
+        Assertions.assertEquals(0, stopwatch.elapsed(TimeUnit.NANOSECONDS));
+    }
+
+    @Test
+    public void test_reset_methodChaining() {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        Stopwatch same = stopwatch.reset();
+        assertSame(stopwatch, same);
     }
 
     @Test
@@ -366,15 +621,6 @@ public class StopwatchTest extends TestBase {
 
         ticker.advance(5500000000L);
         assertEquals(5L, stopwatch.elapsed(TimeUnit.SECONDS));
-    }
-
-    @Test
-    public void test_elapsed_timeUnit_minutes() {
-        MockTicker ticker = new MockTicker();
-        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
-
-        ticker.advance(150000000000L);
-        assertEquals(2L, stopwatch.elapsed(TimeUnit.MINUTES));
     }
 
     @Test
@@ -452,29 +698,6 @@ public class StopwatchTest extends TestBase {
     }
 
     @Test
-    public void test_elapsed_duration_returnsCorrectValue() {
-        MockTicker ticker = new MockTicker();
-        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
-
-        ticker.advance(5000000000L);
-        Duration duration = stopwatch.elapsed();
-
-        assertNotNull(duration);
-        assertEquals(5000000000L, duration.toNanos());
-        assertEquals(5000L, duration.toMillis());
-        assertEquals(5L, duration.getSeconds());
-    }
-
-    @Test
-    public void test_elapsed_duration_zero() {
-        Stopwatch stopwatch = Stopwatch.createUnstarted();
-        Duration duration = stopwatch.elapsed();
-
-        assertEquals(0, duration.toNanos());
-        assertEquals(Duration.ZERO, duration);
-    }
-
-    @Test
     public void test_elapsed_duration_preservesPrecision() {
         MockTicker ticker = new MockTicker();
         Stopwatch stopwatch = Stopwatch.createStarted(ticker);
@@ -510,6 +733,79 @@ public class StopwatchTest extends TestBase {
 
         Duration duration = stopwatch.elapsed();
         assertEquals(3L, duration.getSeconds());
+    }
+
+    @Test
+    public void test_elapsedWhileRunningAndStopped() {
+        MockTicker ticker = new MockTicker();
+        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
+
+        ticker.advance(5000000);
+        long elapsedRunning = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+
+        stopwatch.stop();
+        long elapsedStopped = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+
+        assertEquals(5, elapsedRunning);
+        assertEquals(5, elapsedStopped);
+    }
+
+    @Test
+    public void testElapsedDuration() {
+        MockTicker ticker = new MockTicker();
+        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
+
+        ticker.advance(5000000000L);
+
+        Duration duration = stopwatch.elapsed();
+        Assertions.assertEquals(5000000000L, duration.toNanos());
+        Assertions.assertEquals(5L, duration.getSeconds());
+    }
+
+    @Test
+    public void test_elapsed_timeUnit_minutes() {
+        MockTicker ticker = new MockTicker();
+        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
+
+        ticker.advance(150000000000L);
+        assertEquals(2L, stopwatch.elapsed(TimeUnit.MINUTES));
+    }
+
+    @Test
+    public void test_elapsed_duration_returnsCorrectValue() {
+        MockTicker ticker = new MockTicker();
+        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
+
+        ticker.advance(5000000000L);
+        Duration duration = stopwatch.elapsed();
+
+        assertNotNull(duration);
+        assertEquals(5000000000L, duration.toNanos());
+        assertEquals(5000L, duration.toMillis());
+        assertEquals(5L, duration.getSeconds());
+    }
+
+    @Test
+    public void test_elapsed_duration_zero() {
+        Stopwatch stopwatch = Stopwatch.createUnstarted();
+        Duration duration = stopwatch.elapsed();
+
+        assertEquals(0, duration.toNanos());
+        assertEquals(Duration.ZERO, duration);
+    }
+
+    @Test
+    public void testElapsedTimeUnit() {
+        MockTicker ticker = new MockTicker();
+        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
+
+        ticker.advance(1234567890L);
+
+        Assertions.assertEquals(1234567890L, stopwatch.elapsed(TimeUnit.NANOSECONDS));
+        Assertions.assertEquals(1234567L, stopwatch.elapsed(TimeUnit.MICROSECONDS));
+        Assertions.assertEquals(1234L, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+        Assertions.assertEquals(1L, stopwatch.elapsed(TimeUnit.SECONDS));
+        Assertions.assertEquals(0L, stopwatch.elapsed(TimeUnit.MINUTES));
     }
 
     @Test
@@ -555,6 +851,39 @@ public class StopwatchTest extends TestBase {
     }
 
     @Test
+    public void test_toString_days() {
+        MockTicker ticker = new MockTicker();
+        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
+
+        ticker.advance(48L * 60 * 60 * 1000000000L);
+        String str = stopwatch.toString();
+        assertTrue(str.contains("d"));
+    }
+
+    @Test
+    public void test_toString_formatCompact4Digits() {
+        MockTicker ticker = new MockTicker();
+        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
+
+        ticker.advance(1234000000L);
+        String str = stopwatch.toString();
+        assertTrue(str.contains("1.234"));
+    }
+
+    @Test
+    public void test_toStringConsistency() {
+        MockTicker ticker = new MockTicker();
+        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
+
+        ticker.advance(1500000000L);
+
+        String str1 = stopwatch.toString();
+        String str2 = stopwatch.toString();
+
+        assertEquals(str1, str2);
+    }
+
+    @Test
     public void test_toString_minutes() {
         MockTicker ticker = new MockTicker();
         Stopwatch stopwatch = Stopwatch.createStarted(ticker);
@@ -576,386 +905,11 @@ public class StopwatchTest extends TestBase {
     }
 
     @Test
-    public void test_toString_days() {
-        MockTicker ticker = new MockTicker();
-        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
-
-        ticker.advance(48L * 60 * 60 * 1000000000L);
-        String str = stopwatch.toString();
-        assertTrue(str.contains("d"));
-    }
-
-    @Test
     public void test_toString_zero() {
         Stopwatch stopwatch = Stopwatch.createUnstarted();
         String str = stopwatch.toString();
         assertNotNull(str);
         assertTrue(str.contains("0") || str.contains("ns"));
-    }
-
-    @Test
-    public void test_toString_formatCompact4Digits() {
-        MockTicker ticker = new MockTicker();
-        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
-
-        ticker.advance(1234000000L);
-        String str = stopwatch.toString();
-        assertTrue(str.contains("1.234"));
-    }
-
-    @Test
-    public void test_formatCompact4Digits_smallDecimals() {
-        assertEquals("1.234", Stopwatch.formatCompact4Digits(1.234));
-    }
-
-    @Test
-    public void test_formatCompact4Digits_wholeNumbers() {
-        assertEquals("1234", Stopwatch.formatCompact4Digits(1234.0));
-    }
-
-    @Test
-    public void test_formatCompact4Digits_largeNumbers() {
-        assertEquals("1.234e+06", Stopwatch.formatCompact4Digits(1234000.0));
-    }
-
-    @Test
-    public void test_formatCompact4Digits_verySmallNumbers() {
-        assertEquals("0.001234", Stopwatch.formatCompact4Digits(0.001234));
-    }
-
-    @Test
-    public void test_formatCompact4Digits_zero() {
-        assertEquals("0.000", Stopwatch.formatCompact4Digits(0.0));
-    }
-
-    @Test
-    public void test_formatCompact4Digits_negativeNumbers() {
-        assertEquals("-1.234", Stopwatch.formatCompact4Digits(-1.234));
-    }
-
-    @Test
-    public void test_formatCompact4Digits_scientificNotation() {
-        String result = Stopwatch.formatCompact4Digits(1.234e10);
-        assertTrue(result.contains("e+10") || result.contains("1.234e+10"));
-    }
-
-    @Test
-    public void test_formatCompact4Digits_fourSignificantFigures() {
-        assertEquals("12.34", Stopwatch.formatCompact4Digits(12.34));
-        assertEquals("123.4", Stopwatch.formatCompact4Digits(123.4));
-    }
-
-    @Test
-    public void test_multipleStartStopCycles() {
-        MockTicker ticker = new MockTicker();
-        Stopwatch stopwatch = Stopwatch.createUnstarted(ticker);
-
-        stopwatch.start();
-        ticker.advance(10000000);
-        stopwatch.stop();
-        assertEquals(10, stopwatch.elapsed(TimeUnit.MILLISECONDS));
-
-        stopwatch.start();
-        ticker.advance(5000000);
-        stopwatch.stop();
-        assertEquals(15, stopwatch.elapsed(TimeUnit.MILLISECONDS));
-
-        stopwatch.start();
-        ticker.advance(7000000);
-        stopwatch.stop();
-        assertEquals(22, stopwatch.elapsed(TimeUnit.MILLISECONDS));
-    }
-
-    @Test
-    public void test_resetAndReuse() {
-        MockTicker ticker = new MockTicker();
-        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
-
-        ticker.advance(10000000);
-        stopwatch.stop();
-        assertEquals(10, stopwatch.elapsed(TimeUnit.MILLISECONDS));
-
-        stopwatch.reset();
-        assertEquals(0, stopwatch.elapsed(TimeUnit.MILLISECONDS));
-
-        stopwatch.start();
-        ticker.advance(5000000);
-        assertEquals(5, stopwatch.elapsed(TimeUnit.MILLISECONDS));
-    }
-
-    @Test
-    public void test_elapsedWhileRunningAndStopped() {
-        MockTicker ticker = new MockTicker();
-        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
-
-        ticker.advance(5000000);
-        long elapsedRunning = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-
-        stopwatch.stop();
-        long elapsedStopped = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-
-        assertEquals(5, elapsedRunning);
-        assertEquals(5, elapsedStopped);
-    }
-
-    @Test
-    public void test_veryLargeElapsedTime() {
-        MockTicker ticker = new MockTicker();
-        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
-
-        ticker.advance(Long.MAX_VALUE / 2);
-        assertTrue(stopwatch.elapsed(TimeUnit.NANOSECONDS) > 0);
-        assertTrue(stopwatch.elapsed(TimeUnit.DAYS) > 0);
-    }
-
-    @Test
-    public void test_zeroElapsedTime() {
-        MockTicker ticker = new MockTicker();
-        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
-
-        assertEquals(0, stopwatch.elapsed(TimeUnit.NANOSECONDS));
-        assertEquals(0, stopwatch.elapsed(TimeUnit.MILLISECONDS));
-    }
-
-    @Test
-    public void test_methodChainingComplex() {
-        MockTicker ticker = new MockTicker();
-        Stopwatch stopwatch = Stopwatch.createUnstarted(ticker);
-
-        stopwatch.start().stop().reset().start();
-        ticker.advance(5000000);
-
-        assertEquals(5, stopwatch.elapsed(TimeUnit.MILLISECONDS));
-        assertTrue(stopwatch.isRunning());
-    }
-
-    @Test
-    public void test_durationAndTimeUnitConsistency() {
-        MockTicker ticker = new MockTicker();
-        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
-
-        ticker.advance(3500000000L);
-
-        Duration duration = stopwatch.elapsed();
-        long millis = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-        long nanos = stopwatch.elapsed(TimeUnit.NANOSECONDS);
-
-        assertEquals(3500, millis);
-        assertEquals(3500000000L, nanos);
-        assertEquals(nanos, duration.toNanos());
-        assertEquals(millis, duration.toMillis());
-    }
-
-    @Test
-    public void test_realTimeStopwatch() throws InterruptedException {
-        Stopwatch stopwatch = Stopwatch.createStarted();
-
-        Thread.sleep(50);
-        stopwatch.stop();
-
-        long elapsedMillis = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-        assertTrue(elapsedMillis >= 40 && elapsedMillis <= 200, "Expected elapsed time ~50ms but was " + elapsedMillis + "ms");
-    }
-
-    @Test
-    public void test_stoppedStopwatchDoesNotAdvance() {
-        MockTicker ticker = new MockTicker();
-        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
-
-        ticker.advance(10000000);
-        stopwatch.stop();
-
-        long elapsed1 = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-
-        ticker.advance(100000000);
-
-        long elapsed2 = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-
-        assertEquals(elapsed1, elapsed2);
-    }
-
-    @Test
-    public void test_toStringConsistency() {
-        MockTicker ticker = new MockTicker();
-        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
-
-        ticker.advance(1500000000L);
-
-        String str1 = stopwatch.toString();
-        String str2 = stopwatch.toString();
-
-        assertEquals(str1, str2);
-    }
-
-    @Test
-    public void test_unstartedStopwatchToString() {
-        Stopwatch stopwatch = Stopwatch.createUnstarted();
-        String str = stopwatch.toString();
-        assertNotNull(str);
-        assertTrue(str.length() > 0);
-    }
-
-    @Test
-    public void testCreateUnstarted() {
-        Stopwatch stopwatch = Stopwatch.createUnstarted();
-        Assertions.assertFalse(stopwatch.isRunning());
-        Assertions.assertEquals(0, stopwatch.elapsed(TimeUnit.NANOSECONDS));
-    }
-
-    @Test
-    public void testCreateStarted() {
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        Assertions.assertTrue(stopwatch.isRunning());
-
-        try {
-            Thread.sleep(10);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
-        Assertions.assertTrue(stopwatch.elapsed(TimeUnit.NANOSECONDS) > 0);
-    }
-
-    @Test
-    public void testCreateUnstartedWithTicker() {
-        MockTicker ticker = new MockTicker();
-        Stopwatch stopwatch = Stopwatch.createUnstarted(ticker);
-        Assertions.assertFalse(stopwatch.isRunning());
-        Assertions.assertEquals(0, stopwatch.elapsed(TimeUnit.NANOSECONDS));
-    }
-
-    @Test
-    public void testCreateStartedWithTicker() {
-        MockTicker ticker = new MockTicker();
-        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
-        Assertions.assertTrue(stopwatch.isRunning());
-
-        ticker.advance(1000000);
-        Assertions.assertEquals(1, stopwatch.elapsed(TimeUnit.MILLISECONDS));
-    }
-
-    @Test
-    public void testCreateWithNullTicker() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> Stopwatch.createUnstarted(null));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> Stopwatch.createStarted(null));
-    }
-
-    @Test
-    public void testIsRunning() {
-        Stopwatch stopwatch = Stopwatch.createUnstarted();
-        Assertions.assertFalse(stopwatch.isRunning());
-
-        stopwatch.start();
-        Assertions.assertTrue(stopwatch.isRunning());
-
-        stopwatch.stop();
-        Assertions.assertFalse(stopwatch.isRunning());
-    }
-
-    @Test
-    public void testStart() {
-        MockTicker ticker = new MockTicker();
-        Stopwatch stopwatch = Stopwatch.createUnstarted(ticker);
-
-        stopwatch.start();
-        Assertions.assertTrue(stopwatch.isRunning());
-
-        ticker.advance(5000000);
-        Assertions.assertEquals(5, stopwatch.elapsed(TimeUnit.MILLISECONDS));
-    }
-
-    @Test
-    public void testStartAlreadyRunning() {
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        Assertions.assertThrows(IllegalStateException.class, () -> stopwatch.start());
-    }
-
-    @Test
-    public void testStop() {
-        MockTicker ticker = new MockTicker();
-        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
-
-        ticker.advance(10000000);
-        stopwatch.stop();
-
-        Assertions.assertFalse(stopwatch.isRunning());
-        Assertions.assertEquals(10, stopwatch.elapsed(TimeUnit.MILLISECONDS));
-
-        ticker.advance(5000000);
-        Assertions.assertEquals(10, stopwatch.elapsed(TimeUnit.MILLISECONDS));
-    }
-
-    @Test
-    public void testStopNotRunning() {
-        Stopwatch stopwatch = Stopwatch.createUnstarted();
-        Assertions.assertThrows(IllegalStateException.class, () -> stopwatch.stop());
-    }
-
-    @Test
-    public void testReset() {
-        MockTicker ticker = new MockTicker();
-        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
-
-        ticker.advance(10000000);
-        stopwatch.stop();
-
-        stopwatch.reset();
-        Assertions.assertFalse(stopwatch.isRunning());
-        Assertions.assertEquals(0, stopwatch.elapsed(TimeUnit.NANOSECONDS));
-    }
-
-    @Test
-    public void testResetWhileRunning() {
-        MockTicker ticker = new MockTicker();
-        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
-
-        ticker.advance(10000000);
-
-        stopwatch.reset();
-        Assertions.assertFalse(stopwatch.isRunning());
-        Assertions.assertEquals(0, stopwatch.elapsed(TimeUnit.NANOSECONDS));
-    }
-
-    @Test
-    public void testElapsedTimeUnit() {
-        MockTicker ticker = new MockTicker();
-        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
-
-        ticker.advance(1234567890L);
-
-        Assertions.assertEquals(1234567890L, stopwatch.elapsed(TimeUnit.NANOSECONDS));
-        Assertions.assertEquals(1234567L, stopwatch.elapsed(TimeUnit.MICROSECONDS));
-        Assertions.assertEquals(1234L, stopwatch.elapsed(TimeUnit.MILLISECONDS));
-        Assertions.assertEquals(1L, stopwatch.elapsed(TimeUnit.SECONDS));
-        Assertions.assertEquals(0L, stopwatch.elapsed(TimeUnit.MINUTES));
-    }
-
-    @Test
-    public void testElapsedDuration() {
-        MockTicker ticker = new MockTicker();
-        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
-
-        ticker.advance(5000000000L);
-
-        Duration duration = stopwatch.elapsed();
-        Assertions.assertEquals(5000000000L, duration.toNanos());
-        Assertions.assertEquals(5L, duration.getSeconds());
-    }
-
-    @Test
-    public void testMultipleStartStop() {
-        MockTicker ticker = new MockTicker();
-        Stopwatch stopwatch = Stopwatch.createUnstarted(ticker);
-
-        stopwatch.start();
-        ticker.advance(10000000);
-        stopwatch.stop();
-
-        stopwatch.start();
-        ticker.advance(5000000);
-        stopwatch.stop();
-
-        Assertions.assertEquals(15, stopwatch.elapsed(TimeUnit.MILLISECONDS));
     }
 
     @Test
@@ -992,12 +946,66 @@ public class StopwatchTest extends TestBase {
     }
 
     @Test
+    public void test_formatCompact4Digits_smallDecimals() {
+        assertEquals("1.234", Stopwatch.formatCompact4Digits(1.234));
+    }
+
+    @Test
+    public void test_formatCompact4Digits_wholeNumbers() {
+        assertEquals("1234", Stopwatch.formatCompact4Digits(1234.0));
+    }
+
+    @Test
+    public void test_formatCompact4Digits_largeNumbers() {
+        assertEquals("1.234e+06", Stopwatch.formatCompact4Digits(1234000.0));
+    }
+
+    @Test
+    public void test_formatCompact4Digits_verySmallNumbers() {
+        assertEquals("0.001234", Stopwatch.formatCompact4Digits(0.001234));
+    }
+
+    @Test
+    public void test_formatCompact4Digits_scientificNotation() {
+        String result = Stopwatch.formatCompact4Digits(1.234e10);
+        assertTrue(result.contains("e+10") || result.contains("1.234e+10"));
+    }
+
+    @Test
+    public void test_formatCompact4Digits_fourSignificantFigures() {
+        assertEquals("12.34", Stopwatch.formatCompact4Digits(12.34));
+        assertEquals("123.4", Stopwatch.formatCompact4Digits(123.4));
+    }
+
+    @Test
     public void testFormatCompact4Digits() {
         Assertions.assertEquals("1.234", Stopwatch.formatCompact4Digits(1.234));
         Assertions.assertEquals("1234", Stopwatch.formatCompact4Digits(1234.0));
         Assertions.assertEquals("1.234e+06", Stopwatch.formatCompact4Digits(1234000.0));
         Assertions.assertEquals("0.001234", Stopwatch.formatCompact4Digits(0.001234));
         Assertions.assertEquals("0.000", Stopwatch.formatCompact4Digits(0.0));
+    }
+
+    @Test
+    public void test_formatCompact4Digits_zero() {
+        assertEquals("0.000", Stopwatch.formatCompact4Digits(0.0));
+    }
+
+    @Test
+    public void test_formatCompact4Digits_negativeNumbers() {
+        assertEquals("-1.234", Stopwatch.formatCompact4Digits(-1.234));
+    }
+
+    @Test
+    public void test_methodChainingComplex() {
+        MockTicker ticker = new MockTicker();
+        Stopwatch stopwatch = Stopwatch.createUnstarted(ticker);
+
+        stopwatch.start().stop().reset().start();
+        ticker.advance(5000000);
+
+        assertEquals(5, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+        assertTrue(stopwatch.isRunning());
     }
 
     @Test
@@ -1014,16 +1022,6 @@ public class StopwatchTest extends TestBase {
 
         same = stopwatch.reset();
         Assertions.assertSame(stopwatch, same);
-    }
-
-    @Test
-    public void testRealTimeElapsed() throws InterruptedException {
-        Stopwatch stopwatch = Stopwatch.createStarted();
-
-        Thread.sleep(50);
-
-        long elapsedMillis = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-        Assertions.assertTrue(elapsedMillis >= 40 && elapsedMillis <= 200, "Elapsed time should be approximately 50ms but was " + elapsedMillis);
     }
 
 }

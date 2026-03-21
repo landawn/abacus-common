@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.json.JSONObject;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
@@ -20,7 +19,6 @@ import com.landawn.abacus.util.JsonUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-@Tag("old-test")
 public class JsonUtilTest extends AbstractTest {
 
     @Test

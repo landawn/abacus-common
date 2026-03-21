@@ -16,13 +16,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.ThreadMode;
 
-@Tag("2025")
 public class SubscriberTest extends TestBase {
 
     private EventBus eventBus;
@@ -40,9 +38,29 @@ public class SubscriberTest extends TestBase {
         }
     }
 
+    private static class CustomEvent {
+        final String data;
+
+        CustomEvent(String data) {
+            this.data = data;
+        }
+    }
+
     @Test
-    public void testIsFunctionalInterface() {
-        assertTrue(Subscriber.class.isAnnotationPresent(FunctionalInterface.class));
+    public void testOnMethod() {
+        AtomicReference<String> receivedEvent = new AtomicReference<>();
+
+        Subscriber<String> subscriber = new Subscriber<>() {
+            @Override
+            public void on(String event) {
+                receivedEvent.set(event);
+            }
+        };
+
+        eventBus.register(subscriber, "testEvent");
+        eventBus.post("testEvent", "Hello World");
+
+        Assertions.assertEquals("Hello World", receivedEvent.get());
     }
 
     @Test
@@ -51,6 +69,11 @@ public class SubscriberTest extends TestBase {
         assertNotNull(onMethod);
         assertEquals(void.class, onMethod.getReturnType());
         assertEquals(1, onMethod.getParameterCount());
+    }
+
+    @Test
+    public void testIsFunctionalInterface() {
+        assertTrue(Subscriber.class.isAnnotationPresent(FunctionalInterface.class));
     }
 
     @Test
@@ -127,23 +150,6 @@ public class SubscriberTest extends TestBase {
         Method[] methods = Subscriber.class.getDeclaredMethods();
         long abstractMethods = java.util.Arrays.stream(methods).filter(m -> java.lang.reflect.Modifier.isAbstract(m.getModifiers())).count();
         assertEquals(1, abstractMethods);
-    }
-
-    @Test
-    public void testOnMethod() {
-        AtomicReference<String> receivedEvent = new AtomicReference<>();
-
-        Subscriber<String> subscriber = new Subscriber<>() {
-            @Override
-            public void on(String event) {
-                receivedEvent.set(event);
-            }
-        };
-
-        eventBus.register(subscriber, "testEvent");
-        eventBus.post("testEvent", "Hello World");
-
-        Assertions.assertEquals("Hello World", receivedEvent.get());
     }
 
     @Test
@@ -324,14 +330,6 @@ public class SubscriberTest extends TestBase {
         Assertions.assertNotNull(receivedList.get());
         Assertions.assertEquals(3, receivedList.get().size());
         Assertions.assertEquals("Event 2", receivedList.get().get(1).data);
-    }
-
-    private static class CustomEvent {
-        final String data;
-
-        CustomEvent(String data) {
-            this.data = data;
-        }
     }
 
 }

@@ -18,7 +18,6 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -36,7 +35,6 @@ import com.landawn.abacus.util.Suppliers;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalLong;
 
-@Tag("new-test")
 public class AbstractLongStreamTest extends TestBase {
 
     private LongStream stream;
@@ -124,16 +122,16 @@ public class AbstractLongStreamTest extends TestBase {
     }
 
     @Test
-    public void testFlatmapToObj() {
+    public void testFlattMapToObj() {
         stream = createLongStream(new long[] { 1, 2, 3 });
-        List<String> result = stream.flatmapToObj(x -> Arrays.asList(String.valueOf(x), String.valueOf(x * 2))).toList();
+        List<String> result = stream.flatMapArrayToObj(x -> new String[] { String.valueOf(x), String.valueOf(x * 2) }).toList();
         assertEquals(Arrays.asList("1", "2", "2", "4", "3", "6"), result);
     }
 
     @Test
-    public void testFlattMapToObj() {
+    public void testFlatmapToObj() {
         stream = createLongStream(new long[] { 1, 2, 3 });
-        List<String> result = stream.flatMapArrayToObj(x -> new String[] { String.valueOf(x), String.valueOf(x * 2) }).toList();
+        List<String> result = stream.flatmapToObj(x -> Arrays.asList(String.valueOf(x), String.valueOf(x * 2))).toList();
         assertEquals(Arrays.asList("1", "2", "2", "4", "3", "6"), result);
     }
 
@@ -398,6 +396,13 @@ public class AbstractLongStreamTest extends TestBase {
     }
 
     @Test
+    public void testCycled_long() {
+        LongStream stream = LongStream.of(1L, 2L);
+        List<Long> result = stream.cycled(3).collect(ArrayList::new, (list, value) -> list.add(value));
+        assertEquals(Arrays.asList(1L, 2L, 1L, 2L, 1L, 2L), result);
+    }
+
+    @Test
     public void testCycledWithRounds() {
         stream = createLongStream(new long[] { 1, 2, 3 });
         long[] result = stream.cycled(2).toArray();
@@ -434,6 +439,12 @@ public class AbstractLongStreamTest extends TestBase {
         stream = createLongStream(new long[] { 1, 2, 3 });
         List<Long> result = stream.boxed().toList();
         assertEquals(Arrays.asList(1L, 2L, 3L), result);
+    }
+
+    @Test
+    public void testPrependAppend_Stream_Parallel() {
+        long[] result = createLongStream(3L, 4L).parallel().prepend(LongStream.of(1L, 2L)).append(LongStream.of(5L)).toArray();
+        assertArrayEquals(new long[] { 1L, 2L, 3L, 4L, 5L }, result);
     }
 
     @Test
@@ -613,32 +624,6 @@ public class AbstractLongStreamTest extends TestBase {
     }
 
     @Test
-    public void testCollectWithSupplierAccumulator() {
-        stream = createLongStream(new long[] { 1, 2, 3, 4, 5 });
-        LongList result = stream.collect(LongList::new, LongList::add);
-        assertArrayEquals(new long[] { 1, 2, 3, 4, 5 }, result.toArray());
-
-        stream = createLongStream(new long[] { 1, 2, 3 });
-        StringBuilder sb = stream.collect(StringBuilder::new, (builder, value) -> builder.append(value).append(","));
-        assertEquals("1,2,3,", sb.toString());
-
-        Object ret = new Object();
-
-        assertEquals(ret, createLongStream(new long[] { 1 }).collect(() -> ret, (obj, value) -> {
-        }));
-    }
-
-    @Test
-    public void testCollectWithSupplierAccumulatorCombiner() {
-        stream = createLongStream(new long[] { 1, 2, 3, 4, 5 });
-
-        LongList result = stream.collect(Suppliers.ofLongList(), (c, e) -> c.add(e), (LongList a, LongList b) -> {
-            a.addAll(b);
-        });
-        assertArrayEquals(new long[] { 1, 2, 3, 4, 5 }, result.toArray());
-    }
-
-    @Test
     public void testForEachIndexed() throws Exception {
         stream = createLongStream(new long[] { 10, 20, 30 });
         List<String> result = new ArrayList<>();
@@ -656,6 +641,14 @@ public class AbstractLongStreamTest extends TestBase {
         stream = createLongStream(new long[] {});
         result = stream.first();
         assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testFirst_MultipleElements() {
+        LongStream stream = LongStream.of(1L, 2L, 3L);
+        OptionalLong result = stream.first();
+        assertTrue(result.isPresent());
+        assertEquals(1L, result.getAsLong());
     }
 
     @Test
@@ -753,6 +746,32 @@ public class AbstractLongStreamTest extends TestBase {
     }
 
     @Test
+    public void testCollectWithSupplierAccumulator() {
+        stream = createLongStream(new long[] { 1, 2, 3, 4, 5 });
+        LongList result = stream.collect(LongList::new, LongList::add);
+        assertArrayEquals(new long[] { 1, 2, 3, 4, 5 }, result.toArray());
+
+        stream = createLongStream(new long[] { 1, 2, 3 });
+        StringBuilder sb = stream.collect(StringBuilder::new, (builder, value) -> builder.append(value).append(","));
+        assertEquals("1,2,3,", sb.toString());
+
+        Object ret = new Object();
+
+        assertEquals(ret, createLongStream(new long[] { 1 }).collect(() -> ret, (obj, value) -> {
+        }));
+    }
+
+    @Test
+    public void testCollectWithSupplierAccumulatorCombiner() {
+        stream = createLongStream(new long[] { 1, 2, 3, 4, 5 });
+
+        LongList result = stream.collect(Suppliers.ofLongList(), (c, e) -> c.add(e), (LongList a, LongList b) -> {
+            a.addAll(b);
+        });
+        assertArrayEquals(new long[] { 1, 2, 3, 4, 5 }, result.toArray());
+    }
+
+    @Test
     public void testIterator() {
         stream = createLongStream(new long[] { 1, 2, 3 });
         LongIterator iter = stream.iterator();
@@ -764,21 +783,6 @@ public class AbstractLongStreamTest extends TestBase {
         assertTrue(iter.hasNext());
         assertEquals(3, iter.nextLong());
         assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testCycled_long() {
-        LongStream stream = LongStream.of(1L, 2L);
-        List<Long> result = stream.cycled(3).collect(ArrayList::new, (list, value) -> list.add(value));
-        assertEquals(Arrays.asList(1L, 2L, 1L, 2L, 1L, 2L), result);
-    }
-
-    @Test
-    public void testFirst_MultipleElements() {
-        LongStream stream = LongStream.of(1L, 2L, 3L);
-        OptionalLong result = stream.first();
-        assertTrue(result.isPresent());
-        assertEquals(1L, result.getAsLong());
     }
 
 }

@@ -27,7 +27,6 @@ import static org.mockito.Mockito.verify;
 import java.io.IOException;
 import java.io.StringWriter;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -35,7 +34,6 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 
-@Tag("2025")
 public class PrimitiveBooleanArrayTypeTest extends TestBase {
 
     private final PrimitiveBooleanArrayType type = new PrimitiveBooleanArrayType();
@@ -43,11 +41,6 @@ public class PrimitiveBooleanArrayTypeTest extends TestBase {
     @Test
     public void test_clazz() {
         assertEquals(boolean[].class, type.javaType());
-    }
-
-    @Test
-    public void test_isPrimitiveArray() {
-        assertTrue(type.isPrimitiveArray());
     }
 
     @Test
@@ -92,5 +85,10 @@ public class PrimitiveBooleanArrayTypeTest extends TestBase {
         reset(writer);
         type.writeCharacter(writer, null, config);
         verify(writer).write(NULL_CHAR_ARRAY);
+    }
+
+    @Test
+    public void test_isPrimitiveArray() {
+        assertTrue(type.isPrimitiveArray());
     }
 }

@@ -4,12 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class FloatPredicateTest extends TestBase {
 
     @Test
@@ -24,6 +22,21 @@ public class FloatPredicateTest extends TestBase {
         final FloatPredicate predicate = val -> val > 5.0f && val < 10.0f;
         assertTrue(predicate.test(7.5f));
         assertFalse(predicate.test(12.5f));
+    }
+
+    @Test
+    public void testFunctionalInterfaceContract() {
+        final FloatPredicate predicate = val -> true;
+        assertNotNull(predicate);
+        assertTrue(predicate.test(1.0f));
+    }
+
+    @Test
+    public void testOf() {
+        final FloatPredicate predicate = val -> val > 10;
+        final FloatPredicate result = FloatPredicate.of(predicate);
+        assertNotNull(result);
+        assertTrue(result.test(20.5f));
     }
 
     @Test
@@ -57,68 +70,6 @@ public class FloatPredicateTest extends TestBase {
         assertTrue(combined.test(0f));
         assertTrue(combined.test(-5.3f));
         assertFalse(combined.test(5.3f));
-    }
-
-    @Test
-    public void testConstant_ALWAYS_TRUE() {
-        assertTrue(FloatPredicate.ALWAYS_TRUE.test(1.0f));
-        assertTrue(FloatPredicate.ALWAYS_TRUE.test(-1.0f));
-        assertTrue(FloatPredicate.ALWAYS_TRUE.test(0f));
-    }
-
-    @Test
-    public void testConstant_ALWAYS_FALSE() {
-        assertFalse(FloatPredicate.ALWAYS_FALSE.test(1.0f));
-        assertFalse(FloatPredicate.ALWAYS_FALSE.test(-1.0f));
-        assertFalse(FloatPredicate.ALWAYS_FALSE.test(0f));
-    }
-
-    @Test
-    public void testConstant_IS_ZERO() {
-        assertTrue(FloatPredicate.IS_ZERO.test(0f));
-        assertFalse(FloatPredicate.IS_ZERO.test(1.0f));
-    }
-
-    @Test
-    public void testConstant_NOT_ZERO() {
-        assertTrue(FloatPredicate.NOT_ZERO.test(1.0f));
-        assertFalse(FloatPredicate.NOT_ZERO.test(0f));
-    }
-
-    @Test
-    public void testConstant_IS_POSITIVE() {
-        assertTrue(FloatPredicate.IS_POSITIVE.test(1.0f));
-        assertFalse(FloatPredicate.IS_POSITIVE.test(0f));
-        assertFalse(FloatPredicate.IS_POSITIVE.test(-1.0f));
-    }
-
-    @Test
-    public void testConstant_NOT_POSITIVE() {
-        assertTrue(FloatPredicate.NOT_POSITIVE.test(0f));
-        assertTrue(FloatPredicate.NOT_POSITIVE.test(-1.0f));
-        assertFalse(FloatPredicate.NOT_POSITIVE.test(1.0f));
-    }
-
-    @Test
-    public void testConstant_IS_NEGATIVE() {
-        assertTrue(FloatPredicate.IS_NEGATIVE.test(-1.0f));
-        assertFalse(FloatPredicate.IS_NEGATIVE.test(0f));
-        assertFalse(FloatPredicate.IS_NEGATIVE.test(1.0f));
-    }
-
-    @Test
-    public void testConstant_NOT_NEGATIVE() {
-        assertTrue(FloatPredicate.NOT_NEGATIVE.test(0f));
-        assertTrue(FloatPredicate.NOT_NEGATIVE.test(1.0f));
-        assertFalse(FloatPredicate.NOT_NEGATIVE.test(-1.0f));
-    }
-
-    @Test
-    public void testOf() {
-        final FloatPredicate predicate = val -> val > 10;
-        final FloatPredicate result = FloatPredicate.of(predicate);
-        assertNotNull(result);
-        assertTrue(result.test(20.5f));
     }
 
     @Test
@@ -174,9 +125,56 @@ public class FloatPredicateTest extends TestBase {
     }
 
     @Test
-    public void testFunctionalInterfaceContract() {
-        final FloatPredicate predicate = val -> true;
-        assertNotNull(predicate);
-        assertTrue(predicate.test(1.0f));
+    public void testConstant_ALWAYS_TRUE() {
+        assertTrue(FloatPredicate.ALWAYS_TRUE.test(1.0f));
+        assertTrue(FloatPredicate.ALWAYS_TRUE.test(-1.0f));
+        assertTrue(FloatPredicate.ALWAYS_TRUE.test(0f));
+    }
+
+    @Test
+    public void testConstant_ALWAYS_FALSE() {
+        assertFalse(FloatPredicate.ALWAYS_FALSE.test(1.0f));
+        assertFalse(FloatPredicate.ALWAYS_FALSE.test(-1.0f));
+        assertFalse(FloatPredicate.ALWAYS_FALSE.test(0f));
+    }
+
+    @Test
+    public void testConstant_IS_ZERO() {
+        assertTrue(FloatPredicate.IS_ZERO.test(0f));
+        assertFalse(FloatPredicate.IS_ZERO.test(1.0f));
+    }
+
+    @Test
+    public void testConstant_NOT_ZERO() {
+        assertTrue(FloatPredicate.NOT_ZERO.test(1.0f));
+        assertFalse(FloatPredicate.NOT_ZERO.test(0f));
+    }
+
+    @Test
+    public void testConstant_IS_POSITIVE() {
+        assertTrue(FloatPredicate.IS_POSITIVE.test(1.0f));
+        assertFalse(FloatPredicate.IS_POSITIVE.test(0f));
+        assertFalse(FloatPredicate.IS_POSITIVE.test(-1.0f));
+    }
+
+    @Test
+    public void testConstant_NOT_POSITIVE() {
+        assertTrue(FloatPredicate.NOT_POSITIVE.test(0f));
+        assertTrue(FloatPredicate.NOT_POSITIVE.test(-1.0f));
+        assertFalse(FloatPredicate.NOT_POSITIVE.test(1.0f));
+    }
+
+    @Test
+    public void testConstant_IS_NEGATIVE() {
+        assertTrue(FloatPredicate.IS_NEGATIVE.test(-1.0f));
+        assertFalse(FloatPredicate.IS_NEGATIVE.test(0f));
+        assertFalse(FloatPredicate.IS_NEGATIVE.test(1.0f));
+    }
+
+    @Test
+    public void testConstant_NOT_NEGATIVE() {
+        assertTrue(FloatPredicate.NOT_NEGATIVE.test(0f));
+        assertTrue(FloatPredicate.NOT_NEGATIVE.test(1.0f));
+        assertFalse(FloatPredicate.NOT_NEGATIVE.test(-1.0f));
     }
 }

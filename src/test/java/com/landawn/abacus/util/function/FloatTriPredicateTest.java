@@ -4,12 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class FloatTriPredicateTest extends TestBase {
 
     @Test
@@ -17,6 +15,13 @@ public class FloatTriPredicateTest extends TestBase {
         final FloatTriPredicate predicate = (a, b, c) -> a + b + c > 100;
         assertTrue(predicate.test(40.0f, 50.0f, 20.0f));
         assertFalse(predicate.test(10.0f, 20.0f, 30.0f));
+    }
+
+    @Test
+    public void testFunctionalInterfaceContract() {
+        final FloatTriPredicate predicate = (a, b, c) -> true;
+        assertNotNull(predicate);
+        assertTrue(predicate.test(1.0f, 2.0f, 3.0f));
     }
 
     @Test
@@ -58,12 +63,5 @@ public class FloatTriPredicateTest extends TestBase {
     @Test
     public void testConstant_ALWAYS_FALSE() {
         assertFalse(FloatTriPredicate.ALWAYS_FALSE.test(1.0f, 2.0f, 3.0f));
-    }
-
-    @Test
-    public void testFunctionalInterfaceContract() {
-        final FloatTriPredicate predicate = (a, b, c) -> true;
-        assertNotNull(predicate);
-        assertTrue(predicate.test(1.0f, 2.0f, 3.0f));
     }
 }

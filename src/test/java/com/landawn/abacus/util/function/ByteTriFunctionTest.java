@@ -3,13 +3,23 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ByteTriFunctionTest extends TestBase {
+
+    private static class TestObject {
+        final byte a;
+        final byte b;
+        final byte c;
+
+        TestObject(byte a, byte b, byte c) {
+            this.a = a;
+            this.b = b;
+            this.c = c;
+        }
+    }
 
     @Test
     public void testApply() {
@@ -41,6 +51,24 @@ public class ByteTriFunctionTest extends TestBase {
     }
 
     @Test
+    public void testReturningComplexObject() {
+        ByteTriFunction<TestObject> createObject = (a, b, c) -> new TestObject(a, b, c);
+
+        TestObject obj = createObject.apply((byte) 1, (byte) 2, (byte) 3);
+        assertEquals(1, obj.a);
+        assertEquals(2, obj.b);
+        assertEquals(3, obj.c);
+    }
+
+    @Test
+    public void testWithBoundaryValues() {
+        ByteTriFunction<String> toString = (a, b, c) -> a + "," + b + "," + c;
+
+        String result = toString.apply(Byte.MIN_VALUE, (byte) 0, Byte.MAX_VALUE);
+        assertEquals(Byte.MIN_VALUE + ",0," + Byte.MAX_VALUE, result);
+    }
+
+    @Test
     public void testAndThen() {
         ByteTriFunction<Integer> sum = (a, b, c) -> (int) (a + b + c);
         java.util.function.Function<Integer, String> intToString = i -> "Sum: " + i;
@@ -63,37 +91,7 @@ public class ByteTriFunctionTest extends TestBase {
     }
 
     @Test
-    public void testReturningComplexObject() {
-        ByteTriFunction<TestObject> createObject = (a, b, c) -> new TestObject(a, b, c);
-
-        TestObject obj = createObject.apply((byte) 1, (byte) 2, (byte) 3);
-        assertEquals(1, obj.a);
-        assertEquals(2, obj.b);
-        assertEquals(3, obj.c);
-    }
-
-    @Test
-    public void testWithBoundaryValues() {
-        ByteTriFunction<String> toString = (a, b, c) -> a + "," + b + "," + c;
-
-        String result = toString.apply(Byte.MIN_VALUE, (byte) 0, Byte.MAX_VALUE);
-        assertEquals(Byte.MIN_VALUE + ",0," + Byte.MAX_VALUE, result);
-    }
-
-    @Test
     public void testFunctionalInterface() {
         assertNotNull(ByteTriFunction.class.getAnnotation(FunctionalInterface.class));
-    }
-
-    private static class TestObject {
-        final byte a;
-        final byte b;
-        final byte c;
-
-        TestObject(byte a, byte b, byte c) {
-            this.a = a;
-            this.b = b;
-            this.c = c;
-        }
     }
 }

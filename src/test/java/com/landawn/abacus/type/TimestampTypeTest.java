@@ -14,12 +14,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class TimestampTypeTest extends TestBase {
 
     private final TimestampType type = new TimestampType();
@@ -27,11 +25,6 @@ public class TimestampTypeTest extends TestBase {
     @Test
     public void test_clazz() {
         assertEquals(Timestamp.class, type.javaType());
-    }
-
-    @Test
-    public void test_name() {
-        assertEquals("Timestamp", type.name());
     }
 
     @Test
@@ -112,5 +105,10 @@ public class TimestampTypeTest extends TestBase {
 
         type.set(stmt, "param2", null);
         verify(stmt).setTimestamp("param2", null);
+    }
+
+    @Test
+    public void test_name() {
+        assertEquals("Timestamp", type.name());
     }
 }

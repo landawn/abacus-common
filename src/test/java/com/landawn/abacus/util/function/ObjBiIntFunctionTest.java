@@ -4,12 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ObjBiIntFunctionTest extends TestBase {
 
     @Test
@@ -45,26 +43,14 @@ public class ObjBiIntFunctionTest extends TestBase {
     }
 
     @Test
-    public void testAndThen() {
-        ObjBiIntFunction<String, String> function = (t, i, j) -> t.substring(i, j);
-        java.util.function.Function<String, String> after = String::toUpperCase;
+    public void testWithDifferentReturnType() {
+        ObjBiIntFunction<String, Boolean> function = (t, i, j) -> j > i && t.length() >= j;
 
-        ObjBiIntFunction<String, String> combined = function.andThen(after);
-        String result = combined.apply("hello world", 0, 5);
+        Boolean result1 = function.apply("Hello", 0, 3);
+        Boolean result2 = function.apply("Hi", 0, 5);
 
-        assertEquals("HELLO", result);
-    }
-
-    @Test
-    public void testAndThenChaining() {
-        ObjBiIntFunction<String, String> function = (t, i, j) -> t.substring(i, j);
-        java.util.function.Function<String, String> after1 = String::toUpperCase;
-        java.util.function.Function<String, String> after2 = s -> "Result: " + s;
-
-        ObjBiIntFunction<String, String> combined = function.andThen(after1).andThen(after2);
-        String result = combined.apply("hello", 0, 3);
-
-        assertEquals("Result: HEL", result);
+        assertEquals(true, result1);
+        assertEquals(false, result2);
     }
 
     @Test
@@ -113,14 +99,26 @@ public class ObjBiIntFunctionTest extends TestBase {
     }
 
     @Test
-    public void testWithDifferentReturnType() {
-        ObjBiIntFunction<String, Boolean> function = (t, i, j) -> j > i && t.length() >= j;
+    public void testAndThen() {
+        ObjBiIntFunction<String, String> function = (t, i, j) -> t.substring(i, j);
+        java.util.function.Function<String, String> after = String::toUpperCase;
 
-        Boolean result1 = function.apply("Hello", 0, 3);
-        Boolean result2 = function.apply("Hi", 0, 5);
+        ObjBiIntFunction<String, String> combined = function.andThen(after);
+        String result = combined.apply("hello world", 0, 5);
 
-        assertEquals(true, result1);
-        assertEquals(false, result2);
+        assertEquals("HELLO", result);
+    }
+
+    @Test
+    public void testAndThenChaining() {
+        ObjBiIntFunction<String, String> function = (t, i, j) -> t.substring(i, j);
+        java.util.function.Function<String, String> after1 = String::toUpperCase;
+        java.util.function.Function<String, String> after2 = s -> "Result: " + s;
+
+        ObjBiIntFunction<String, String> combined = function.andThen(after1).andThen(after2);
+        String result = combined.apply("hello", 0, 3);
+
+        assertEquals("Result: HEL", result);
     }
 
     @Test

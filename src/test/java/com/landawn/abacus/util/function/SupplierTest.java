@@ -4,12 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class SupplierTest extends TestBase {
 
     @Test
@@ -33,14 +31,6 @@ public class SupplierTest extends TestBase {
     }
 
     @Test
-    public void testGet_MultipleInvocations() {
-        Supplier<String> supplier = () -> "constant";
-        assertEquals("constant", supplier.get());
-        assertEquals("constant", supplier.get());
-        assertEquals("constant", supplier.get());
-    }
-
-    @Test
     public void testGet_WithState() {
         final int[] counter = { 0 };
         Supplier<Integer> supplier = () -> ++counter[0];
@@ -48,6 +38,14 @@ public class SupplierTest extends TestBase {
         assertEquals(1, supplier.get());
         assertEquals(2, supplier.get());
         assertEquals(3, supplier.get());
+    }
+
+    @Test
+    public void testGet_MultipleInvocations() {
+        Supplier<String> supplier = () -> "constant";
+        assertEquals("constant", supplier.get());
+        assertEquals("constant", supplier.get());
+        assertEquals("constant", supplier.get());
     }
 
     @Test

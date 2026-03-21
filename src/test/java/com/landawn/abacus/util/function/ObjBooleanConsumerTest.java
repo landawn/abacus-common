@@ -6,12 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ObjBooleanConsumerTest extends TestBase {
 
     @Test
@@ -25,21 +23,6 @@ public class ObjBooleanConsumerTest extends TestBase {
         assertEquals(2, result.size());
         assertEquals("test:true", result.get(0));
         assertEquals("value:false", result.get(1));
-    }
-
-    @Test
-    public void testAcceptWithLambda() {
-        final boolean[] boolResult = new boolean[1];
-        final String[] stringResult = new String[1];
-        ObjBooleanConsumer<String> consumer = (t, value) -> {
-            boolResult[0] = value;
-            stringResult[0] = t.toUpperCase();
-        };
-
-        consumer.accept("hello", true);
-
-        assertEquals(true, boolResult[0]);
-        assertEquals("HELLO", stringResult[0]);
     }
 
     @Test
@@ -93,17 +76,6 @@ public class ObjBooleanConsumerTest extends TestBase {
     }
 
     @Test
-    public void testWithNullObject() {
-        final List<String> result = new ArrayList<>();
-        ObjBooleanConsumer<String> consumer = (t, value) -> result.add(t + ":" + value);
-
-        consumer.accept(null, true);
-
-        assertEquals(1, result.size());
-        assertEquals("null:true", result.get(0));
-    }
-
-    @Test
     public void testSideEffects() {
         final int[] counter = { 0 };
         ObjBooleanConsumer<String> consumer = (t, value) -> {
@@ -116,6 +88,32 @@ public class ObjBooleanConsumerTest extends TestBase {
         consumer.accept("c", true);
 
         assertEquals(2, counter[0]);
+    }
+
+    @Test
+    public void testAcceptWithLambda() {
+        final boolean[] boolResult = new boolean[1];
+        final String[] stringResult = new String[1];
+        ObjBooleanConsumer<String> consumer = (t, value) -> {
+            boolResult[0] = value;
+            stringResult[0] = t.toUpperCase();
+        };
+
+        consumer.accept("hello", true);
+
+        assertEquals(true, boolResult[0]);
+        assertEquals("HELLO", stringResult[0]);
+    }
+
+    @Test
+    public void testWithNullObject() {
+        final List<String> result = new ArrayList<>();
+        ObjBooleanConsumer<String> consumer = (t, value) -> result.add(t + ":" + value);
+
+        consumer.accept(null, true);
+
+        assertEquals(1, result.size());
+        assertEquals("null:true", result.get(0));
     }
 
     @Test

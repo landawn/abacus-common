@@ -18,7 +18,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -26,7 +25,6 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.u.OptionalByte;
 
-@Tag("new-test")
 public class OptionalByteTypeTest extends TestBase {
 
     private OptionalByteType optionalByteType;
@@ -56,6 +54,12 @@ public class OptionalByteTypeTest extends TestBase {
     }
 
     @Test
+    public void testStringOfWithValue() {
+        OptionalByte opt = OptionalByte.of((byte) 42);
+        assertEquals("42", optionalByteType.stringOf(opt));
+    }
+
+    @Test
     public void testStringOfWithNull() {
         assertNull(optionalByteType.stringOf(null));
     }
@@ -64,12 +68,6 @@ public class OptionalByteTypeTest extends TestBase {
     public void testStringOfWithEmpty() {
         OptionalByte empty = OptionalByte.empty();
         assertNull(optionalByteType.stringOf(empty));
-    }
-
-    @Test
-    public void testStringOfWithValue() {
-        OptionalByte opt = OptionalByte.of((byte) 42);
-        assertEquals("42", optionalByteType.stringOf(opt));
     }
 
     @Test

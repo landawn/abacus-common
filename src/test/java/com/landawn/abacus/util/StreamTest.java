@@ -26,7 +26,6 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collector;
 import java.util.stream.StreamSupport;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
@@ -44,7 +43,6 @@ import com.landawn.abacus.util.stream.Collectors.MoreCollectors;
 import com.landawn.abacus.util.stream.IntStream;
 import com.landawn.abacus.util.stream.Stream;
 
-@Tag("old-test")
 public class StreamTest extends AbstractTest {
 
     @Test

@@ -3,13 +3,34 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class CharTriFunctionTest extends TestBase {
+
+    private static class TestObject {
+        final char a;
+        final char b;
+        final char c;
+
+        TestObject(char a, char b, char c) {
+            this.a = a;
+            this.b = b;
+            this.c = c;
+        }
+    }
+
+    @Test
+    public void testReturningComplexObject() {
+        CharTriFunction<TestObject> createObject = (a, b, c) -> new TestObject(a, b, c);
+
+        TestObject obj = createObject.apply('a', 'b', 'c');
+        assertEquals('a', obj.a);
+        assertEquals('b', obj.b);
+        assertEquals('c', obj.c);
+    }
+
     @Test
     public void testApplyWithAnonymousClass() {
         CharTriFunction<String> toUpper = new CharTriFunction<>() {
@@ -21,6 +42,14 @@ public class CharTriFunctionTest extends TestBase {
 
         assertEquals("ABC", toUpper.apply('a', 'b', 'c'));
         assertEquals("XYZ", toUpper.apply('x', 'y', 'z'));
+    }
+
+    @Test
+    public void testWithBoundaryValues() {
+        CharTriFunction<String> toString = (a, b, c) -> "" + a + "," + b + "," + c;
+
+        String result = toString.apply(Character.MIN_VALUE, 'M', Character.MAX_VALUE);
+        assertEquals(Character.MIN_VALUE + ",M," + Character.MAX_VALUE, result);
     }
 
     @Test
@@ -46,37 +75,7 @@ public class CharTriFunctionTest extends TestBase {
     }
 
     @Test
-    public void testReturningComplexObject() {
-        CharTriFunction<TestObject> createObject = (a, b, c) -> new TestObject(a, b, c);
-
-        TestObject obj = createObject.apply('a', 'b', 'c');
-        assertEquals('a', obj.a);
-        assertEquals('b', obj.b);
-        assertEquals('c', obj.c);
-    }
-
-    @Test
-    public void testWithBoundaryValues() {
-        CharTriFunction<String> toString = (a, b, c) -> "" + a + "," + b + "," + c;
-
-        String result = toString.apply(Character.MIN_VALUE, 'M', Character.MAX_VALUE);
-        assertEquals(Character.MIN_VALUE + ",M," + Character.MAX_VALUE, result);
-    }
-
-    @Test
     public void testFunctionalInterface() {
         assertNotNull(CharTriFunction.class.getAnnotation(FunctionalInterface.class));
-    }
-
-    private static class TestObject {
-        final char a;
-        final char b;
-        final char c;
-
-        TestObject(char a, char b, char c) {
-            this.a = a;
-            this.b = b;
-            this.c = c;
-        }
     }
 }

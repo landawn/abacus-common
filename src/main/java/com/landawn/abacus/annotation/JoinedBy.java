@@ -25,15 +25,15 @@ import java.lang.annotation.Target;
  * Defines join relationships between entities for ORM mapping and data loading.
  * This annotation specifies how entities are connected through foreign key relationships,
  * enabling automatic loading of related data in one-to-one, one-to-many, and many-to-many associations.
- * 
+ *
  * <p><b>Join condition format:</b></p>
- * <p>Each join condition is specified as "sourceField=targetField" where:</p>
+ * <p>Each join condition is specified as {@code "sourceField=targetField"} where:</p>
  * <ul>
- *   <li>sourceField: Field name from the current entity</li>
- *   <li>targetField: Field name from the related entity or join table</li>
- *   <li>For join tables: use "TableName.fieldName" notation</li>
+ *   <li>{@code sourceField}: Field name from the current entity</li>
+ *   <li>{@code targetField}: Field name from the related entity or join table</li>
+ *   <li>For join tables: use {@code "TableName.fieldName"} notation</li>
  * </ul>
- * 
+ *
  * <p><b>Relationship types supported:</b></p>
  * <ul>
  *   <li>One-to-One: Single related entity</li>
@@ -41,19 +41,19 @@ import java.lang.annotation.Target;
  *   <li>Many-to-Many: Collection through intermediate join table</li>
  * </ul>
  *
- * <h2>Usage Examples</h2>
+ * <p><b>Usage Examples:</b></p>
  *
- * <h3>One-to-One Join Example:</h3>
+ * <p><b>One-to-One Join Example:</b></p>
  * <pre>{@code
  * @Entity
  * public class User {
  *     @Id
  *     private Long id;
- *     
+ *
  *     @JoinedBy("id=userId")
  *     private UserProfile profile;  // Single related profile
  * }
- * 
+ *
  * @Entity
  * public class UserProfile {
  *     @Id
@@ -63,7 +63,7 @@ import java.lang.annotation.Target;
  * }
  * }</pre>
  *
- * <h3>One-to-Many Join Example:</h3>
+ * <p><b>One-to-Many Join Example:</b></p>
  * <pre>{@code
  *
  * @Entity
@@ -84,7 +84,7 @@ import java.lang.annotation.Target;
  * }
  * }</pre>
  *
- * <h3>Many-to-Many Join Example:</h3>
+ * <p><b>Many-to-Many Join Example:</b></p>
  * <pre>{@code
  *
  * @Entity
@@ -111,7 +111,7 @@ import java.lang.annotation.Target;
  *     private Date assignedDate;
  * }
  * }</pre>
- * 
+ *
  * @see Entity
  * @see Column
  * @see Id
@@ -123,35 +123,35 @@ public @interface JoinedBy {
 
     /**
      * Specifies the join conditions that define how entities are related.
-     * Each condition is a string in the format "sourceField=targetField".
-     * 
+     * Each condition is a string in the format {@code "sourceField=targetField"}.
+     *
      * <p><b>For simple joins (one-to-one, one-to-many):</b></p>
      * <ul>
-     *   <li>Use a single condition like "id=parentId"</li>
+     *   <li>Use a single condition like {@code "id=parentId"}</li>
      *   <li>Source field is from the current entity</li>
      *   <li>Target field is from the related entity</li>
      * </ul>
-     * 
+     *
      * <p><b>For many-to-many joins:</b></p>
      * <ul>
      *   <li>Use multiple conditions to traverse the join table</li>
      *   <li>First condition: current entity to join table</li>
      *   <li>Second condition: join table to target entity</li>
-     *   <li>Use "TableName.fieldName" for join table references</li>
+     *   <li>Use {@code "TableName.fieldName"} for join table references</li>
      * </ul>
-     * 
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Simple one-to-many
      * @JoinedBy("id=customerId")
      * private List<Order> orders;
-     * 
+     *
      * // Many-to-many with join table
      * @JoinedBy({"id=UserRole.userId", "UserRole.roleId=id"})
      * private List<Role> roles;
      * }</pre>
-     * 
-     * @return array of join condition strings defining the relationship
+     *
+     * @return an array of join condition strings defining the relationship
      */
     String[] value() default {};
 

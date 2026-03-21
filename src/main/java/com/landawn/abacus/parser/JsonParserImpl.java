@@ -157,9 +157,18 @@ final class JsonParserImpl extends AbstractJsonParser {
 
     private static final JsonDeserConfig jdcForPropertiesElement = JsonDeserConfig.create().setElementType(String.class).setMapKeyType(String.class);
 
+    /**
+     * Constructs a new {@code JsonParserImpl} with default configuration.
+     */
     JsonParserImpl() {
     }
 
+    /**
+     * Constructs a new {@code JsonParserImpl} with the specified serialization and deserialization configurations.
+     *
+     * @param jsc the serialization configuration
+     * @param jdc the deserialization configuration
+     */
     JsonParserImpl(final JsonSerConfig jsc, final JsonDeserConfig jdc) {
         super(jsc, jdc);
     }

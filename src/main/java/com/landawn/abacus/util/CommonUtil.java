@@ -1018,10 +1018,17 @@ sealed class CommonUtil permits N {
      * checkArgNotNull(null);    // throws IllegalArgumentException
      * }</pre>
      *
+     * <p><b>When to use:</b> Use this method to validate <em>method arguments</em> at public API boundaries.
+     * Throwing {@code IllegalArgumentException} clearly signals that the <em>caller</em> passed invalid input.
+     * To assert internal state or class invariants (where a {@code null} indicates a programming error inside
+     * this class rather than bad caller input), use {@link #requireNonNull(Object)} instead, which throws
+     * {@code NullPointerException} following the contract of {@link java.util.Objects#requireNonNull(Object)}.</p>
+     *
      * @param <T> the type of the argument
      * @param obj the argument to check
      * @return the {@code non-null} argument
      * @throws IllegalArgumentException if the argument is null
+     * @see #requireNonNull(Object)
      */
     public static <T> T checkArgNotNull(final T obj) throws IllegalArgumentException {
         if (obj == null) {
@@ -1042,11 +1049,16 @@ sealed class CommonUtil permits N {
      * checkArgNotNull(null, "Value must not be null");   // throws IllegalArgumentException: Value must not be null
      * }</pre>
      *
+     * <p><b>When to use:</b> Use this method to validate <em>method arguments</em> at public API boundaries.
+     * Throwing {@code IllegalArgumentException} clearly signals that the <em>caller</em> passed invalid input.
+     * To assert internal state or class invariants, use {@link #requireNonNull(Object, String)} instead.</p>
+     *
      * @param <T> the type of the argument
      * @param obj the argument to check
      * @param errorMessage the error message to use in the exception
      * @return the {@code non-null} argument
      * @throws IllegalArgumentException if the argument is null
+     * @see #requireNonNull(Object, String)
      */
     public static <T> T checkArgNotNull(final T obj, final String errorMessage) throws IllegalArgumentException {
         if (obj == null) {
@@ -3815,10 +3827,18 @@ sealed class CommonUtil permits N {
      * requireNonNull(null);         // throws NullPointerException
      * }</pre>
      *
+     * <p><b>When to use:</b> Use this method for internal state or invariant checks — situations where a
+     * {@code null} value indicates a programming error <em>within</em> this class rather than invalid input
+     * from a caller. The {@code NullPointerException} it throws follows the contract of
+     * {@link java.util.Objects#requireNonNull(Object)}, and is the appropriate signal for violated internal
+     * postconditions or constructor invariants. To validate <em>public method arguments</em> with a more
+     * informative {@code IllegalArgumentException}, use {@link #checkArgNotNull(Object)} instead.</p>
+     *
      * @param <T> the type of the object
      * @param obj the object reference to check for nullity
      * @return the {@code non-null} object reference that was validated
      * @throws NullPointerException if {@code obj} is {@code null}
+     * @see #checkArgNotNull(Object)
      * @see Objects#requireNonNull(Object)
      * @see Objects#requireNonNull(Object, Supplier)
      * @see Objects#requireNonNullElse(Object, Object)
@@ -3841,11 +3861,15 @@ sealed class CommonUtil permits N {
      * requireNonNull(null, "Object cannot be null");   // throws NullPointerException
      * }</pre>
      *
+     * <p><b>When to use:</b> Use this method for internal state or invariant checks, not for validating public
+     * method arguments. To validate method arguments, use {@link #checkArgNotNull(Object, String)} instead.</p>
+     *
      * @param <T> the type of the object
      * @param obj the object reference to check for nullity
      * @param errorMessage the detail message to be used in the event that a {@code NullPointerException} is thrown
      * @return the {@code non-null} object reference that was validated
      * @throws NullPointerException if {@code obj} is {@code null}
+     * @see #checkArgNotNull(Object, String)
      * @see Objects#requireNonNull(Object, String)
      * @see Objects#requireNonNull(Object, Supplier)
      * @see Objects#requireNonNullElse(Object, Object)
@@ -3872,11 +3896,15 @@ sealed class CommonUtil permits N {
      * requireNonNull(null, () -> "Object cannot be null");   // throws NullPointerException
      * }</pre>
      *
+     * <p><b>When to use:</b> Use this method for internal state or invariant checks, not for validating public
+     * method arguments. To validate method arguments, use {@link #checkArgNotNull(Object, String)} instead.</p>
+     *
      * @param <T> the type of the object
      * @param obj the object reference to check for nullity
      * @param errorMessageSupplier the supplier of the detail message to be used in the event that a {@code NullPointerException} is thrown
      * @return the {@code non-null} object reference that was validated
      * @throws NullPointerException if {@code obj} is {@code null}
+     * @see #checkArgNotNull(Object, String)
      * @see Objects#requireNonNull(Object, String)
      * @see Objects#requireNonNull(Object, Supplier)
      * @see Objects#requireNonNullElse(Object, Object)
@@ -16923,6 +16951,11 @@ sealed class CommonUtil permits N {
      * Map<String, String> mapWithNull = N.asMap("key", null);
      * }</pre>
      *
+     * <p><b>Immutability warning:</b> The returned map is fully immutable — any attempt to call
+     * {@link Map#put(Object, Object)}, {@link Map#remove(Object)}, or {@link Map#clear()} will throw
+     * {@code UnsupportedOperationException}. Use {@code new LinkedHashMap<>(N.asMap(k1, v1))} to obtain
+     * a mutable copy.</p>
+     *
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
      * @param k1 the key to be placed in the Map. Can be {@code null}.
@@ -16938,6 +16971,10 @@ sealed class CommonUtil permits N {
      * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
+     *
+     * <p><b>Immutability warning:</b> The returned map is fully immutable — any attempt to mutate it
+     * will throw {@code UnsupportedOperationException}. Use {@code new LinkedHashMap<>(N.asMap(...))}
+     * to obtain a mutable copy.</p>
      *
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
@@ -16956,6 +16993,10 @@ sealed class CommonUtil permits N {
      * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
+     *
+     * <p><b>Immutability warning:</b> The returned map is fully immutable — any attempt to mutate it
+     * will throw {@code UnsupportedOperationException}. Use {@code new LinkedHashMap<>(N.asMap(...))}
+     * to obtain a mutable copy.</p>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -16976,6 +17017,10 @@ sealed class CommonUtil permits N {
      * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
+     *
+     * <p><b>Immutability warning:</b> The returned map is fully immutable — any attempt to mutate it
+     * will throw {@code UnsupportedOperationException}. Use {@code new LinkedHashMap<>(N.asMap(...))}
+     * to obtain a mutable copy.</p>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -16998,6 +17043,10 @@ sealed class CommonUtil permits N {
      * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
+     *
+     * <p><b>Immutability warning:</b> The returned map is fully immutable — any attempt to mutate it
+     * will throw {@code UnsupportedOperationException}. Use {@code new LinkedHashMap<>(N.asMap(...))}
+     * to obtain a mutable copy.</p>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -17023,6 +17072,10 @@ sealed class CommonUtil permits N {
      * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
+     *
+     * <p><b>Immutability warning:</b> The returned map is fully immutable — any attempt to mutate it
+     * will throw {@code UnsupportedOperationException}. Use {@code new LinkedHashMap<>(N.asMap(...))}
+     * to obtain a mutable copy.</p>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -17050,6 +17103,10 @@ sealed class CommonUtil permits N {
      * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
+     *
+     * <p><b>Immutability warning:</b> The returned map is fully immutable — any attempt to mutate it
+     * will throw {@code UnsupportedOperationException}. Use {@code new LinkedHashMap<>(N.asMap(...))}
+     * to obtain a mutable copy.</p>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -17079,6 +17136,10 @@ sealed class CommonUtil permits N {
      * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
+     *
+     * <p><b>Immutability warning:</b> The returned map is fully immutable — any attempt to mutate it
+     * will throw {@code UnsupportedOperationException}. Use {@code new LinkedHashMap<>(N.asMap(...))}
+     * to obtain a mutable copy.</p>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -17110,6 +17171,10 @@ sealed class CommonUtil permits N {
      * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
+     *
+     * <p><b>Immutability warning:</b> The returned map is fully immutable — any attempt to mutate it
+     * will throw {@code UnsupportedOperationException}. Use {@code new LinkedHashMap<>(N.asMap(...))}
+     * to obtain a mutable copy.</p>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -17519,9 +17584,17 @@ sealed class CommonUtil permits N {
      *
      * <p>Unlike {@link List#of(Object)}, this method supports {@code null} elements.</p>
      *
+     * <p><b>Immutability warning:</b> The returned list is fully immutable — unlike
+     * {@link java.util.Arrays#asList(Object[])}, which returns a fixed-size but <em>mutable</em> list,
+     * any attempt to call {@link List#set(int, Object)}, {@link List#add(Object)}, or
+     * {@link List#remove(Object)} on the result will throw {@code UnsupportedOperationException}.
+     * Use {@link #toList(Object[])} to obtain a mutable list.</p>
+     *
      * @param <T> the type of the element
      * @param e the element to be placed in the List. Can be {@code null}.
      * @return an unmodifiable {@code ImmutableList} containing the specified element
+     * @see #toList(Object[])
+     * @see Array#asList(Object...)
      */
     public static <T> ImmutableList<T> asList(final T e) {
         return ImmutableList.of(e);
@@ -17532,10 +17605,17 @@ sealed class CommonUtil permits N {
      *
      * <p>Unlike {@link List#of(Object...)}, this method supports {@code null} elements.</p>
      *
+     * <p><b>Immutability warning:</b> The returned list is fully immutable — unlike
+     * {@link java.util.Arrays#asList(Object[])}, which returns a fixed-size but <em>mutable</em> list,
+     * any attempt to mutate the result will throw {@code UnsupportedOperationException}.
+     * Use {@link #toList(Object[])} to obtain a mutable list.</p>
+     *
      * @param <T> the type of elements in the list
      * @param e1 the first element to be placed in the List. Can be {@code null}.
      * @param e2 the second element to be placed in the List. Can be {@code null}.
      * @return an unmodifiable {@code ImmutableList} containing the specified elements in order
+     * @see #toList(Object[])
+     * @see Array#asList(Object...)
      */
     public static <T> ImmutableList<T> asList(final T e1, final T e2) {
         return ImmutableList.of(e1, e2);
@@ -17546,11 +17626,18 @@ sealed class CommonUtil permits N {
      *
      * <p>Unlike {@link List#of(Object...)}, this method supports {@code null} elements.</p>
      *
+     * <p><b>Immutability warning:</b> The returned list is fully immutable — unlike
+     * {@link java.util.Arrays#asList(Object[])}, which returns a fixed-size but <em>mutable</em> list,
+     * any attempt to mutate the result will throw {@code UnsupportedOperationException}.
+     * Use {@link #toList(Object[])} to obtain a mutable list.</p>
+     *
      * @param <T> the type of elements in the list
      * @param e1 the first element to be placed in the List. Can be {@code null}.
      * @param e2 the second element to be placed in the List. Can be {@code null}.
      * @param e3 the third element to be placed in the List. Can be {@code null}.
      * @return an unmodifiable {@code ImmutableList} containing the specified elements in order
+     * @see #toList(Object[])
+     * @see Array#asList(Object...)
      */
     public static <T> ImmutableList<T> asList(final T e1, final T e2, final T e3) {
         return ImmutableList.of(e1, e2, e3);
@@ -17561,12 +17648,19 @@ sealed class CommonUtil permits N {
      *
      * <p>Unlike {@link List#of(Object...)}, this method supports {@code null} elements.</p>
      *
+     * <p><b>Immutability warning:</b> The returned list is fully immutable — unlike
+     * {@link java.util.Arrays#asList(Object[])}, which returns a fixed-size but <em>mutable</em> list,
+     * any attempt to mutate the result will throw {@code UnsupportedOperationException}.
+     * Use {@link #toList(Object[])} to obtain a mutable list.</p>
+     *
      * @param <T> the type of elements in the list
      * @param e1 the first element to be placed in the List. Can be {@code null}.
      * @param e2 the second element to be placed in the List. Can be {@code null}.
      * @param e3 the third element to be placed in the List. Can be {@code null}.
      * @param e4 the fourth element to be placed in the List. Can be {@code null}.
      * @return an unmodifiable {@code ImmutableList} containing the specified elements in order
+     * @see #toList(Object[])
+     * @see Array#asList(Object...)
      */
     public static <T> ImmutableList<T> asList(final T e1, final T e2, final T e3, final T e4) {
         return ImmutableList.of(e1, e2, e3, e4);
@@ -17577,6 +17671,11 @@ sealed class CommonUtil permits N {
      *
      * <p>Unlike {@link List#of(Object...)}, this method supports {@code null} elements.</p>
      *
+     * <p><b>Immutability warning:</b> The returned list is fully immutable — unlike
+     * {@link java.util.Arrays#asList(Object[])}, which returns a fixed-size but <em>mutable</em> list,
+     * any attempt to mutate the result will throw {@code UnsupportedOperationException}.
+     * Use {@link #toList(Object[])} to obtain a mutable list.</p>
+     *
      * @param <T> the type of elements in the list
      * @param e1 the first element to be placed in the List. Can be {@code null}.
      * @param e2 the second element to be placed in the List. Can be {@code null}.
@@ -17584,6 +17683,8 @@ sealed class CommonUtil permits N {
      * @param e4 the fourth element to be placed in the List. Can be {@code null}.
      * @param e5 the fifth element to be placed in the List. Can be {@code null}.
      * @return an unmodifiable {@code ImmutableList} containing the specified elements in order
+     * @see #toList(Object[])
+     * @see Array#asList(Object...)
      */
     public static <T> ImmutableList<T> asList(final T e1, final T e2, final T e3, final T e4, final T e5) {
         return ImmutableList.of(e1, e2, e3, e4, e5);
@@ -17594,6 +17695,11 @@ sealed class CommonUtil permits N {
      *
      * <p>Unlike {@link List#of(Object...)}, this method supports {@code null} elements.</p>
      *
+     * <p><b>Immutability warning:</b> The returned list is fully immutable — unlike
+     * {@link java.util.Arrays#asList(Object[])}, which returns a fixed-size but <em>mutable</em> list,
+     * any attempt to mutate the result will throw {@code UnsupportedOperationException}.
+     * Use {@link #toList(Object[])} to obtain a mutable list.</p>
+     *
      * @param <T> the type of elements in the list
      * @param e1 the first element to be placed in the List. Can be {@code null}.
      * @param e2 the second element to be placed in the List. Can be {@code null}.
@@ -17602,6 +17708,8 @@ sealed class CommonUtil permits N {
      * @param e5 the fifth element to be placed in the List. Can be {@code null}.
      * @param e6 the sixth element to be placed in the List. Can be {@code null}.
      * @return an unmodifiable {@code ImmutableList} containing the specified elements in order
+     * @see #toList(Object[])
+     * @see Array#asList(Object...)
      */
     public static <T> ImmutableList<T> asList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
         return ImmutableList.of(e1, e2, e3, e4, e5, e6);
@@ -17612,6 +17720,11 @@ sealed class CommonUtil permits N {
      *
      * <p>Unlike {@link List#of(Object...)}, this method supports {@code null} elements.</p>
      *
+     * <p><b>Immutability warning:</b> The returned list is fully immutable — unlike
+     * {@link java.util.Arrays#asList(Object[])}, which returns a fixed-size but <em>mutable</em> list,
+     * any attempt to mutate the result will throw {@code UnsupportedOperationException}.
+     * Use {@link #toList(Object[])} to obtain a mutable list.</p>
+     *
      * @param <T> the type of elements in the list
      * @param e1 the first element to be placed in the List. Can be {@code null}.
      * @param e2 the second element to be placed in the List. Can be {@code null}.
@@ -17621,6 +17734,8 @@ sealed class CommonUtil permits N {
      * @param e6 the sixth element to be placed in the List. Can be {@code null}.
      * @param e7 the seventh element to be placed in the List. Can be {@code null}.
      * @return an unmodifiable {@code ImmutableList} containing the specified elements in order
+     * @see #toList(Object[])
+     * @see Array#asList(Object...)
      */
     public static <T> ImmutableList<T> asList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) {
         return ImmutableList.of(e1, e2, e3, e4, e5, e6, e7);
@@ -17630,6 +17745,11 @@ sealed class CommonUtil permits N {
      * Returns an unmodifiable {@code ImmutableList} with the specified elements.
      *
      * <p>Unlike {@link List#of(Object...)}, this method supports {@code null} elements.</p>
+     *
+     * <p><b>Immutability warning:</b> The returned list is fully immutable — unlike
+     * {@link java.util.Arrays#asList(Object[])}, which returns a fixed-size but <em>mutable</em> list,
+     * any attempt to mutate the result will throw {@code UnsupportedOperationException}.
+     * Use {@link #toList(Object[])} to obtain a mutable list.</p>
      *
      * @param <T> the type of elements in the list
      * @param e1 the first element to be placed in the List. Can be {@code null}.
@@ -17641,6 +17761,8 @@ sealed class CommonUtil permits N {
      * @param e7 the seventh element to be placed in the List. Can be {@code null}.
      * @param e8 the eighth element to be placed in the List. Can be {@code null}.
      * @return an unmodifiable {@code ImmutableList} containing the specified elements in order
+     * @see #toList(Object[])
+     * @see Array#asList(Object...)
      */
     public static <T> ImmutableList<T> asList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8) {
         return ImmutableList.of(e1, e2, e3, e4, e5, e6, e7, e8);
@@ -17650,6 +17772,11 @@ sealed class CommonUtil permits N {
      * Returns an unmodifiable {@code ImmutableList} with the specified elements.
      *
      * <p>Unlike {@link List#of(Object...)}, this method supports {@code null} elements.</p>
+     *
+     * <p><b>Immutability warning:</b> The returned list is fully immutable — unlike
+     * {@link java.util.Arrays#asList(Object[])}, which returns a fixed-size but <em>mutable</em> list,
+     * any attempt to mutate the result will throw {@code UnsupportedOperationException}.
+     * Use {@link #toList(Object[])} to obtain a mutable list.</p>
      *
      * @param <T> the type of elements in the list
      * @param e1 the first element to be placed in the List. Can be {@code null}.
@@ -17662,6 +17789,8 @@ sealed class CommonUtil permits N {
      * @param e8 the eighth element to be placed in the List. Can be {@code null}.
      * @param e9 the ninth element to be placed in the List. Can be {@code null}.
      * @return an unmodifiable {@code ImmutableList} containing the specified elements in order
+     * @see #toList(Object[])
+     * @see Array#asList(Object...)
      */
     public static <T> ImmutableList<T> asList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8, final T e9) {
         return ImmutableList.of(e1, e2, e3, e4, e5, e6, e7, e8, e9);
@@ -17671,6 +17800,11 @@ sealed class CommonUtil permits N {
      * Converts an array of objects to an unmodifiable {@code ImmutableList}, which is NOT backed with the input array.
      *
      * <p>Unlike {@link List#of(Object...)}, this method supports {@code null} elements.</p>
+     *
+     * <p><b>Immutability warning:</b> The returned list is fully immutable — unlike
+     * {@link java.util.Arrays#asList(Object[])}, which returns a fixed-size but <em>mutable</em> list,
+     * any attempt to mutate the result will throw {@code UnsupportedOperationException}.
+     * Use {@link #toList(Object[])} to obtain a mutable list.</p>
      *
      * @param <T> the type of elements in the array
      * @param a the array to be converted
@@ -17881,9 +18015,15 @@ sealed class CommonUtil permits N {
      *
      * <p>Unlike {@link Set#of(Object)}, this method supports {@code null} elements.</p>
      *
+     * <p><b>Immutability warning:</b> The returned set is fully immutable — unlike a set created via
+     * {@code new HashSet<>()}, any attempt to call {@link Set#add(Object)} or {@link Set#remove(Object)}
+     * will throw {@code UnsupportedOperationException}. Use {@link #toSet(Object[])} to obtain a
+     * mutable set.</p>
+     *
      * @param <T> the type of elements in the set
      * @param e the element to be placed in the Set. Can be {@code null}.
      * @return an unmodifiable {@code ImmutableSet} containing the specified element
+     * @see #toSet(Object[])
      */
     public static <T> ImmutableSet<T> asSet(final T e) {
         return ImmutableSet.of(e);
@@ -17895,10 +18035,15 @@ sealed class CommonUtil permits N {
      *
      * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
      *
+     * <p><b>Immutability warning:</b> The returned set is fully immutable — any attempt to call
+     * {@link Set#add(Object)} or {@link Set#remove(Object)} will throw {@code UnsupportedOperationException}.
+     * Use {@link #toSet(Object[])} to obtain a mutable set.</p>
+     *
      * @param <T> the type of elements in the set
      * @param e1 the first element to be placed in the Set. Can be {@code null}.
      * @param e2 the second element to be placed in the Set. Can be {@code null}.
      * @return an unmodifiable {@code ImmutableSet} containing the specified elements
+     * @see #toSet(Object[])
      */
     public static <T> ImmutableSet<T> asSet(final T e1, final T e2) {
         return ImmutableSet.of(e1, e2);
@@ -17910,11 +18055,16 @@ sealed class CommonUtil permits N {
      *
      * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
      *
+     * <p><b>Immutability warning:</b> The returned set is fully immutable — any attempt to call
+     * {@link Set#add(Object)} or {@link Set#remove(Object)} will throw {@code UnsupportedOperationException}.
+     * Use {@link #toSet(Object[])} to obtain a mutable set.</p>
+     *
      * @param <T> the type of elements in the set
      * @param e1 the first element to be placed in the Set. Can be {@code null}.
      * @param e2 the second element to be placed in the Set. Can be {@code null}.
      * @param e3 the third element to be placed in the Set. Can be {@code null}.
      * @return an unmodifiable {@code ImmutableSet} containing the specified elements
+     * @see #toSet(Object[])
      */
     public static <T> ImmutableSet<T> asSet(final T e1, final T e2, final T e3) {
         return ImmutableSet.of(e1, e2, e3);
@@ -17926,12 +18076,17 @@ sealed class CommonUtil permits N {
      *
      * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
      *
+     * <p><b>Immutability warning:</b> The returned set is fully immutable — any attempt to call
+     * {@link Set#add(Object)} or {@link Set#remove(Object)} will throw {@code UnsupportedOperationException}.
+     * Use {@link #toSet(Object[])} to obtain a mutable set.</p>
+     *
      * @param <T> the type of elements in the set
      * @param e1 the first element to be placed in the Set. Can be {@code null}.
      * @param e2 the second element to be placed in the Set. Can be {@code null}.
      * @param e3 the third element to be placed in the Set. Can be {@code null}.
      * @param e4 the fourth element to be placed in the Set. Can be {@code null}.
      * @return an unmodifiable {@code ImmutableSet} containing the specified elements
+     * @see #toSet(Object[])
      */
     public static <T> ImmutableSet<T> asSet(final T e1, final T e2, final T e3, final T e4) {
         return ImmutableSet.of(e1, e2, e3, e4);
@@ -17943,6 +18098,10 @@ sealed class CommonUtil permits N {
      *
      * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
      *
+     * <p><b>Immutability warning:</b> The returned set is fully immutable — any attempt to call
+     * {@link Set#add(Object)} or {@link Set#remove(Object)} will throw {@code UnsupportedOperationException}.
+     * Use {@link #toSet(Object[])} to obtain a mutable set.</p>
+     *
      * @param <T> the type of elements in the set
      * @param e1 the first element to be placed in the Set. Can be {@code null}.
      * @param e2 the second element to be placed in the Set. Can be {@code null}.
@@ -17950,6 +18109,7 @@ sealed class CommonUtil permits N {
      * @param e4 the fourth element to be placed in the Set. Can be {@code null}.
      * @param e5 the fifth element to be placed in the Set. Can be {@code null}.
      * @return an unmodifiable {@code ImmutableSet} containing the specified elements
+     * @see #toSet(Object[])
      */
     public static <T> ImmutableSet<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5) {
         return ImmutableSet.of(e1, e2, e3, e4, e5);
@@ -17961,6 +18121,10 @@ sealed class CommonUtil permits N {
      *
      * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
      *
+     * <p><b>Immutability warning:</b> The returned set is fully immutable — any attempt to call
+     * {@link Set#add(Object)} or {@link Set#remove(Object)} will throw {@code UnsupportedOperationException}.
+     * Use {@link #toSet(Object[])} to obtain a mutable set.</p>
+     *
      * @param <T> the type of elements in the set
      * @param e1 the first element to be placed in the Set. Can be {@code null}.
      * @param e2 the second element to be placed in the Set. Can be {@code null}.
@@ -17969,6 +18133,7 @@ sealed class CommonUtil permits N {
      * @param e5 the fifth element to be placed in the Set. Can be {@code null}.
      * @param e6 the sixth element to be placed in the Set. Can be {@code null}.
      * @return an unmodifiable {@code ImmutableSet} containing the specified elements
+     * @see #toSet(Object[])
      */
     public static <T> ImmutableSet<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
         return ImmutableSet.of(e1, e2, e3, e4, e5, e6);
@@ -17980,6 +18145,10 @@ sealed class CommonUtil permits N {
      *
      * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
      *
+     * <p><b>Immutability warning:</b> The returned set is fully immutable — any attempt to call
+     * {@link Set#add(Object)} or {@link Set#remove(Object)} will throw {@code UnsupportedOperationException}.
+     * Use {@link #toSet(Object[])} to obtain a mutable set.</p>
+     *
      * @param <T> the type of elements in the set
      * @param e1 the first element to be placed in the Set. Can be {@code null}.
      * @param e2 the second element to be placed in the Set. Can be {@code null}.
@@ -17989,6 +18158,7 @@ sealed class CommonUtil permits N {
      * @param e6 the sixth element to be placed in the Set. Can be {@code null}.
      * @param e7 the seventh element to be placed in the Set. Can be {@code null}.
      * @return an unmodifiable {@code ImmutableSet} containing the specified elements
+     * @see #toSet(Object[])
      */
     public static <T> ImmutableSet<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) {
         return ImmutableSet.of(e1, e2, e3, e4, e5, e6, e7);
@@ -18000,6 +18170,10 @@ sealed class CommonUtil permits N {
      *
      * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
      *
+     * <p><b>Immutability warning:</b> The returned set is fully immutable — any attempt to call
+     * {@link Set#add(Object)} or {@link Set#remove(Object)} will throw {@code UnsupportedOperationException}.
+     * Use {@link #toSet(Object[])} to obtain a mutable set.</p>
+     *
      * @param <T> the type of elements in the set
      * @param e1 the first element to be placed in the Set. Can be {@code null}.
      * @param e2 the second element to be placed in the Set. Can be {@code null}.
@@ -18010,6 +18184,7 @@ sealed class CommonUtil permits N {
      * @param e7 the seventh element to be placed in the Set. Can be {@code null}.
      * @param e8 the eighth element to be placed in the Set. Can be {@code null}.
      * @return an unmodifiable {@code ImmutableSet} containing the specified elements
+     * @see #toSet(Object[])
      */
     public static <T> ImmutableSet<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8) {
         return ImmutableSet.of(e1, e2, e3, e4, e5, e6, e7, e8);
@@ -18020,6 +18195,10 @@ sealed class CommonUtil permits N {
      * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
+     *
+     * <p><b>Immutability warning:</b> The returned set is fully immutable — any attempt to call
+     * {@link Set#add(Object)} or {@link Set#remove(Object)} will throw {@code UnsupportedOperationException}.
+     * Use {@link #toSet(Object[])} to obtain a mutable set.</p>
      *
      * @param <T> the type of elements in the set
      * @param e1 the first element to be placed in the Set. Can be {@code null}.
@@ -18032,6 +18211,7 @@ sealed class CommonUtil permits N {
      * @param e8 the eighth element to be placed in the Set. Can be {@code null}.
      * @param e9 the ninth element to be placed in the Set. Can be {@code null}.
      * @return an unmodifiable {@code ImmutableSet} containing the specified elements
+     * @see #toSet(Object[])
      */
     public static <T> ImmutableSet<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8, final T e9) {
         return ImmutableSet.of(e1, e2, e3, e4, e5, e6, e7, e8, e9);
@@ -18042,6 +18222,10 @@ sealed class CommonUtil permits N {
      * <p>The iteration order is guaranteed to match the order of insertion.</p>
      *
      * <p>Unlike {@link Set#of(Object...)}, this method supports {@code null} elements.</p>
+     *
+     * <p><b>Immutability warning:</b> The returned set is fully immutable — any attempt to call
+     * {@link Set#add(Object)} or {@link Set#remove(Object)} will throw {@code UnsupportedOperationException}.
+     * Use {@link #toSet(Object[])} to obtain a mutable set.</p>
      *
      * @param <T> the type of elements in the array
      * @param a the array to be converted

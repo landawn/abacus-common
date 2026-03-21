@@ -18,13 +18,21 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class ShortPredicateTest extends TestBase {
+
+    @Test
+    public void test_test_lambda() {
+        ShortPredicate isEven = value -> value % 2 == 0;
+
+        assertTrue(isEven.test((short) 2));
+        assertTrue(isEven.test((short) 100));
+        assertFalse(isEven.test((short) 3));
+        assertFalse(isEven.test((short) 99));
+    }
 
     @Test
     public void test_ALWAYS_TRUE() {
@@ -103,16 +111,6 @@ public class ShortPredicateTest extends TestBase {
     }
 
     @Test
-    public void test_test_lambda() {
-        ShortPredicate isEven = value -> value % 2 == 0;
-
-        assertTrue(isEven.test((short) 2));
-        assertTrue(isEven.test((short) 100));
-        assertFalse(isEven.test((short) 3));
-        assertFalse(isEven.test((short) 99));
-    }
-
-    @Test
     public void test_test_anonymousClass() {
         ShortPredicate isPositiveEven = new ShortPredicate() {
             @Override
@@ -147,18 +145,6 @@ public class ShortPredicateTest extends TestBase {
     }
 
     @Test
-    public void test_and() {
-        ShortPredicate isPositive = value -> value > 0;
-        ShortPredicate isEven = value -> value % 2 == 0;
-        ShortPredicate isPositiveEven = isPositive.and(isEven);
-
-        assertTrue(isPositiveEven.test((short) 2));
-        assertTrue(isPositiveEven.test((short) 100));
-        assertFalse(isPositiveEven.test((short) 3));
-        assertFalse(isPositiveEven.test((short) -2));
-    }
-
-    @Test
     public void test_and_shortCircuit() {
         final boolean[] secondCalled = { false };
 
@@ -174,16 +160,15 @@ public class ShortPredicateTest extends TestBase {
     }
 
     @Test
-    public void test_or() {
-        ShortPredicate isNegative = value -> value < 0;
+    public void test_and() {
+        ShortPredicate isPositive = value -> value > 0;
         ShortPredicate isEven = value -> value % 2 == 0;
-        ShortPredicate isNegativeOrEven = isNegative.or(isEven);
+        ShortPredicate isPositiveEven = isPositive.and(isEven);
 
-        assertTrue(isNegativeOrEven.test((short) -1));
-        assertTrue(isNegativeOrEven.test((short) 2));
-        assertTrue(isNegativeOrEven.test((short) -2));
-        assertFalse(isNegativeOrEven.test((short) 1));
-        assertFalse(isNegativeOrEven.test((short) 3));
+        assertTrue(isPositiveEven.test((short) 2));
+        assertTrue(isPositiveEven.test((short) 100));
+        assertFalse(isPositiveEven.test((short) 3));
+        assertFalse(isPositiveEven.test((short) -2));
     }
 
     @Test
@@ -199,6 +184,19 @@ public class ShortPredicateTest extends TestBase {
         ShortPredicate combined = alwaysTrue.or(trackCalls);
         assertTrue(combined.test((short) 1));
         assertFalse(secondCalled[0]);
+    }
+
+    @Test
+    public void test_or() {
+        ShortPredicate isNegative = value -> value < 0;
+        ShortPredicate isEven = value -> value % 2 == 0;
+        ShortPredicate isNegativeOrEven = isNegative.or(isEven);
+
+        assertTrue(isNegativeOrEven.test((short) -1));
+        assertTrue(isNegativeOrEven.test((short) 2));
+        assertTrue(isNegativeOrEven.test((short) -2));
+        assertFalse(isNegativeOrEven.test((short) 1));
+        assertFalse(isNegativeOrEven.test((short) 3));
     }
 
     @Test

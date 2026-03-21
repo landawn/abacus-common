@@ -7,12 +7,10 @@ import java.util.Date;
 import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class UtilTest extends TestBase {
 
     public static class TestBean {

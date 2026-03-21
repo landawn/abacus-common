@@ -3,13 +3,19 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class CharFunctionTest extends TestBase {
+
+    private static class TestObject {
+        final char value;
+
+        TestObject(char value) {
+            this.value = value;
+        }
+    }
 
     @Test
     public void testApply() {
@@ -29,6 +35,28 @@ public class CharFunctionTest extends TestBase {
     }
 
     @Test
+    public void testBox() {
+        assertEquals(Character.valueOf('a'), CharFunction.BOX.apply('a'));
+        assertEquals(Character.valueOf('Z'), CharFunction.BOX.apply('Z'));
+        assertEquals(Character.valueOf('\0'), CharFunction.BOX.apply('\0'));
+    }
+
+    @Test
+    public void testMethodReference() {
+        CharFunction<String> toString = String::valueOf;
+
+        assertEquals("x", toString.apply('x'));
+    }
+
+    @Test
+    public void testReturningComplexObject() {
+        CharFunction<TestObject> createObject = c -> new TestObject(c);
+
+        TestObject obj = createObject.apply('A');
+        assertEquals('A', obj.value);
+    }
+
+    @Test
     public void testApplyWithAnonymousClass() {
         CharFunction<String> toUpperCase = new CharFunction<>() {
             @Override
@@ -39,6 +67,14 @@ public class CharFunctionTest extends TestBase {
 
         assertEquals("A", toUpperCase.apply('a'));
         assertEquals("Z", toUpperCase.apply('Z'));
+    }
+
+    @Test
+    public void testWithBoundaryValues() {
+        CharFunction<String> toString = c -> String.valueOf(c);
+
+        assertEquals(String.valueOf(Character.MAX_VALUE), toString.apply(Character.MAX_VALUE));
+        assertEquals(String.valueOf(Character.MIN_VALUE), toString.apply(Character.MIN_VALUE));
     }
 
     @Test
@@ -64,13 +100,6 @@ public class CharFunctionTest extends TestBase {
     }
 
     @Test
-    public void testBox() {
-        assertEquals(Character.valueOf('a'), CharFunction.BOX.apply('a'));
-        assertEquals(Character.valueOf('Z'), CharFunction.BOX.apply('Z'));
-        assertEquals(Character.valueOf('\0'), CharFunction.BOX.apply('\0'));
-    }
-
-    @Test
     public void testIdentity() {
         CharFunction<Character> identity = CharFunction.identity();
 
@@ -80,38 +109,7 @@ public class CharFunctionTest extends TestBase {
     }
 
     @Test
-    public void testWithBoundaryValues() {
-        CharFunction<String> toString = c -> String.valueOf(c);
-
-        assertEquals(String.valueOf(Character.MAX_VALUE), toString.apply(Character.MAX_VALUE));
-        assertEquals(String.valueOf(Character.MIN_VALUE), toString.apply(Character.MIN_VALUE));
-    }
-
-    @Test
-    public void testMethodReference() {
-        CharFunction<String> toString = String::valueOf;
-
-        assertEquals("x", toString.apply('x'));
-    }
-
-    @Test
-    public void testReturningComplexObject() {
-        CharFunction<TestObject> createObject = c -> new TestObject(c);
-
-        TestObject obj = createObject.apply('A');
-        assertEquals('A', obj.value);
-    }
-
-    @Test
     public void testFunctionalInterface() {
         assertNotNull(CharFunction.class.getAnnotation(FunctionalInterface.class));
-    }
-
-    private static class TestObject {
-        final char value;
-
-        TestObject(char value) {
-            this.value = value;
-        }
     }
 }

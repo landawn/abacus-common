@@ -4,12 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BiObjIntPredicateTest extends TestBase {
 
     @Test
@@ -38,12 +36,100 @@ public class BiObjIntPredicateTest extends TestBase {
     }
 
     @Test
+    public void testAnonymousClass() {
+        BiObjIntPredicate<String, String> predicate = new BiObjIntPredicate<>() {
+            @Override
+            public boolean test(String t, String u, int i) {
+                return (t + u).length() > i;
+            }
+        };
+
+        assertTrue(predicate.test("Hello", "World", 5)); // 10 > 5
+        assertFalse(predicate.test("Hi", "!", 10)); // 3 not > 10
+    }
+
+    @Test
+    public void testWithDifferentTypes() {
+        BiObjIntPredicate<Integer, Double> predicate = (t, u, i) -> (t + u) == i;
+
+        assertTrue(predicate.test(10, 5.0, 15));
+        assertFalse(predicate.test(10, 5.5, 15));
+    }
+
+    @Test
+    public void testComplexCombination() {
+        BiObjIntPredicate<String, String> notEmpty = (t, u, i) -> !t.isEmpty() && !u.isEmpty();
+        BiObjIntPredicate<String, String> positiveInt = (t, u, i) -> i > 0;
+        BiObjIntPredicate<String, String> lengthSum = (t, u, i) -> (t.length() + u.length()) >= i;
+
+        BiObjIntPredicate<String, String> complex = notEmpty.and(positiveInt).and(lengthSum);
+
+        assertTrue(complex.test("Hello", "World", 5)); // all conditions true
+        assertFalse(complex.test("", "World", 5)); // first condition false
+        assertFalse(complex.test("Hello", "World", 0)); // second condition false
+        assertFalse(complex.test("Hi", "!", 10)); // third condition false (3 >= 10 is false)
+    }
+
+    @Test
+    public void testWithNullObjects() {
+        BiObjIntPredicate<String, String> predicate = (t, u, i) -> t == null && u == null;
+
+        assertTrue(predicate.test(null, null, 5));
+        assertFalse(predicate.test("test", null, 5));
+        assertFalse(predicate.test(null, "value", 5));
+    }
+
+    @Test
+    public void testWithNegativeInt() {
+        BiObjIntPredicate<String, String> predicate = (t, u, i) -> i < 0;
+
+        assertTrue(predicate.test("test", "value", -5));
+        assertFalse(predicate.test("test", "value", 5));
+    }
+
+    @Test
+    public void testComplexCondition() {
+        BiObjIntPredicate<String, String> predicate = (t, u, i) -> {
+            if (t == null || u == null || (i < 0))
+                return false;
+            int totalLength = t.length() + u.length();
+            return totalLength >= i;
+        };
+
+        assertTrue(predicate.test("Hello", "World", 10)); // 10 >= 10
+        assertTrue(predicate.test("Hello", "World", 5)); // 10 >= 5
+        assertFalse(predicate.test("Hi", "!", 10)); // 3 < 10
+        assertFalse(predicate.test(null, "World", 5)); // null check
+        assertFalse(predicate.test("Hello", "World", -1)); // negative check
+    }
+
+    @Test
+    public void testTestWithException() {
+        BiObjIntPredicate<String, String> predicate = (t, u, i) -> {
+            throw new RuntimeException("Test exception");
+        };
+
+        assertThrows(RuntimeException.class, () -> predicate.test("test", "value", 5));
+    }
+
+    @Test
     public void testNegate() {
         BiObjIntPredicate<String, String> predicate = (t, u, i) -> (t.length() + u.length()) == i;
         BiObjIntPredicate<String, String> negated = predicate.negate();
 
         assertFalse(negated.test("Hello", "World", 10)); // original returns true
         assertTrue(negated.test("Hi", "There", 10)); // original returns false
+    }
+
+    @Test
+    public void testNegateAfterAnd() {
+        BiObjIntPredicate<Integer, Integer> sumEquals = (t, u, i) -> (t + u) == i;
+        BiObjIntPredicate<Integer, Integer> positive = (t, u, i) -> i > 0;
+
+        BiObjIntPredicate<Integer, Integer> combined = sumEquals.and(positive).negate();
+
+        assertFalse(combined.test(10, 20, 30)); // negation of (true && true)
+        assertTrue(combined.test(10, 20, 25)); // negation of (false && ...)
     }
 
     @Test
@@ -92,93 +178,5 @@ public class BiObjIntPredicateTest extends TestBase {
         BiObjIntPredicate<String, String> combined = firstTrue.or(shouldNotExecute);
 
         assertTrue(combined.test("test", "value", 5)); // Should not throw exception
-    }
-
-    @Test
-    public void testComplexCombination() {
-        BiObjIntPredicate<String, String> notEmpty = (t, u, i) -> !t.isEmpty() && !u.isEmpty();
-        BiObjIntPredicate<String, String> positiveInt = (t, u, i) -> i > 0;
-        BiObjIntPredicate<String, String> lengthSum = (t, u, i) -> (t.length() + u.length()) >= i;
-
-        BiObjIntPredicate<String, String> complex = notEmpty.and(positiveInt).and(lengthSum);
-
-        assertTrue(complex.test("Hello", "World", 5)); // all conditions true
-        assertFalse(complex.test("", "World", 5)); // first condition false
-        assertFalse(complex.test("Hello", "World", 0)); // second condition false
-        assertFalse(complex.test("Hi", "!", 10)); // third condition false (3 >= 10 is false)
-    }
-
-    @Test
-    public void testNegateAfterAnd() {
-        BiObjIntPredicate<Integer, Integer> sumEquals = (t, u, i) -> (t + u) == i;
-        BiObjIntPredicate<Integer, Integer> positive = (t, u, i) -> i > 0;
-
-        BiObjIntPredicate<Integer, Integer> combined = sumEquals.and(positive).negate();
-
-        assertFalse(combined.test(10, 20, 30)); // negation of (true && true)
-        assertTrue(combined.test(10, 20, 25)); // negation of (false && ...)
-    }
-
-    @Test
-    public void testTestWithException() {
-        BiObjIntPredicate<String, String> predicate = (t, u, i) -> {
-            throw new RuntimeException("Test exception");
-        };
-
-        assertThrows(RuntimeException.class, () -> predicate.test("test", "value", 5));
-    }
-
-    @Test
-    public void testAnonymousClass() {
-        BiObjIntPredicate<String, String> predicate = new BiObjIntPredicate<>() {
-            @Override
-            public boolean test(String t, String u, int i) {
-                return (t + u).length() > i;
-            }
-        };
-
-        assertTrue(predicate.test("Hello", "World", 5)); // 10 > 5
-        assertFalse(predicate.test("Hi", "!", 10)); // 3 not > 10
-    }
-
-    @Test
-    public void testWithNullObjects() {
-        BiObjIntPredicate<String, String> predicate = (t, u, i) -> t == null && u == null;
-
-        assertTrue(predicate.test(null, null, 5));
-        assertFalse(predicate.test("test", null, 5));
-        assertFalse(predicate.test(null, "value", 5));
-    }
-
-    @Test
-    public void testWithNegativeInt() {
-        BiObjIntPredicate<String, String> predicate = (t, u, i) -> i < 0;
-
-        assertTrue(predicate.test("test", "value", -5));
-        assertFalse(predicate.test("test", "value", 5));
-    }
-
-    @Test
-    public void testComplexCondition() {
-        BiObjIntPredicate<String, String> predicate = (t, u, i) -> {
-            if (t == null || u == null || (i < 0))
-                return false;
-            int totalLength = t.length() + u.length();
-            return totalLength >= i;
-        };
-
-        assertTrue(predicate.test("Hello", "World", 10)); // 10 >= 10
-        assertTrue(predicate.test("Hello", "World", 5)); // 10 >= 5
-        assertFalse(predicate.test("Hi", "!", 10)); // 3 < 10
-        assertFalse(predicate.test(null, "World", 5)); // null check
-        assertFalse(predicate.test("Hello", "World", -1)); // negative check
-    }
-
-    @Test
-    public void testWithDifferentTypes() {
-        BiObjIntPredicate<Integer, Double> predicate = (t, u, i) -> (t + u) == i;
-
-        assertTrue(predicate.test(10, 5.0, 15));
-        assertFalse(predicate.test(10, 5.5, 15));
     }
 }

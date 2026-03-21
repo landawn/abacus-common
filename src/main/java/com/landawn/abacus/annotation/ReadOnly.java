@@ -23,37 +23,36 @@ import java.lang.annotation.Target;
 
 /**
  * Marks a field as read-only for database persistence operations.
- * Fields annotated with @ReadOnly will be excluded from INSERT and UPDATE operations
+ * Fields annotated with {@code @ReadOnly} will be excluded from {@code INSERT} and {@code UPDATE} operations
  * when working with entity objects, ensuring they cannot be modified through standard
  * persistence methods.
- * 
+ *
  * <p><b>Common use cases:</b></p>
  * <ul>
- *   <li>Database-generated values (timestamps, computed columns)</li>
- *   <li>Audit fields populated by triggers or database functions</li>
- *   <li>Derived or calculated fields that should only be read</li>
- *   <li>System-managed metadata that shouldn't be directly modified</li>
- *   <li>Fields populated through database views or joins</li>
+ *   <li>Database-generated values (timestamps, computed columns).</li>
+ *   <li>Audit fields populated by triggers or database functions.</li>
+ *   <li>Derived or calculated fields that should only be read.</li>
+ *   <li>System-managed metadata that shouldn't be directly modified.</li>
+ *   <li>Fields populated through database views or joins.</li>
  * </ul>
- * 
+ *
  * <p><b>Behavior with persistence operations:</b></p>
  * <ul>
- *   <li>INSERT: Field is excluded from insert statements</li>
- *   <li>UPDATE: Field is excluded from update statements</li>
- *   <li>SELECT: Field is included normally (can be read)</li>
- *   <li>The field can still be set programmatically in the Java object</li>
+ *   <li>{@code INSERT}: Field is excluded from insert statements.</li>
+ *   <li>{@code UPDATE}: Field is excluded from update statements.</li>
+ *   <li>{@code SELECT}: Field is included normally (can be read).</li>
+ *   <li>The field can still be set programmatically in the Java object.</li>
  * </ul>
- * 
+ *
  * <p><b>Important notes:</b></p>
  * <ul>
- *   <li>Different from @Transient - read-only fields are still mapped to columns</li>
- *   <li>The annotation only affects persistence operations, not serialization</li>
- *   <li>Database-level constraints (like triggers) can still modify these fields</li>
+ *   <li>Different from {@link Transient} - read-only fields are still mapped to columns.</li>
+ *   <li>The annotation only affects persistence operations, not serialization.</li>
+ *   <li>Database-level constraints (like triggers) can still modify these fields.</li>
  * </ul>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- *
  * @Entity
  * public class Article {
  *     @Id
@@ -78,7 +77,7 @@ import java.lang.annotation.Target;
  *     private Integer viewCount;  // Updated by stored procedure
  * }
  * }</pre>
- * 
+ *
  * @see Transient
  * @see NonUpdatable
  * @see Column

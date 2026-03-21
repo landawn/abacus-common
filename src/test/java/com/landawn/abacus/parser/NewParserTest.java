@@ -1,5 +1,7 @@
 package com.landawn.abacus.parser;
 
+import com.landawn.abacus.TestBase;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
@@ -16,7 +18,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
-public class NewParserTest {
+public class NewParserTest extends TestBase {
 
     @Data
     @Accessors(fluent = true)

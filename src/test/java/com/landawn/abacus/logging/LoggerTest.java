@@ -7,12 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("new-test")
 public class LoggerTest extends TestBase {
 
     private static class MockLogger implements Logger {
@@ -554,16 +552,22 @@ public class LoggerTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test ROOT_LOGGER_NAME constant")
-    public void testRootLoggerNameConstant() {
-        assertEquals("ROOT", Logger.ROOT_LOGGER_NAME);
-    }
-
-    @Test
     @DisplayName("Test getName method")
     public void testGetName() {
         MockLogger logger = new MockLogger("test.logger");
         assertEquals("test.logger", logger.getName());
+    }
+
+    @Test
+    @DisplayName("Test isEnabled methods")
+    public void testIsEnabledMethods() {
+        MockLogger logger = new MockLogger("test");
+
+        assertTrue(logger.isTraceEnabled());
+        assertTrue(logger.isDebugEnabled());
+        assertTrue(logger.isInfoEnabled());
+        assertTrue(logger.isWarnEnabled());
+        assertTrue(logger.isErrorEnabled());
     }
 
     @Test
@@ -629,6 +633,63 @@ public class LoggerTest extends TestBase {
         logger.trace(ex, () -> "Exception and supplier");
         assertEquals(17, logger.traceCount);
         assertSame(ex, logger.lastThrowable);
+    }
+
+    @Test
+    @DisplayName("Test supplier lazy evaluation")
+    public void testSupplierLazyEvaluation() {
+        MockLogger logger = new MockLogger("test");
+
+        boolean[] called = { false };
+        Supplier<String> supplier = () -> {
+            called[0] = true;
+            return "Lazy message";
+        };
+
+        logger.trace(supplier);
+        assertTrue(called[0]);
+        assertEquals("Lazy message", logger.lastMessage);
+
+        called[0] = false;
+        Exception ex = new Exception("Test");
+        logger.debug(ex, supplier);
+        assertTrue(called[0]);
+        assertEquals("Lazy message", logger.lastMessage);
+        assertSame(ex, logger.lastThrowable);
+    }
+
+    @Test
+    @DisplayName("Test deprecated methods")
+    @SuppressWarnings("deprecation")
+    public void testDeprecatedMethods() {
+        MockLogger logger = new MockLogger("test");
+        Exception ex = new Exception("Test");
+
+        logger.trace(() -> "Trace deprecated", ex);
+        assertEquals("Trace deprecated", logger.lastMessage);
+        assertSame(ex, logger.lastThrowable);
+
+        logger.debug(() -> "Debug deprecated", ex);
+        assertEquals("Debug deprecated", logger.lastMessage);
+        assertSame(ex, logger.lastThrowable);
+
+        logger.info(() -> "Info deprecated", ex);
+        assertEquals("Info deprecated", logger.lastMessage);
+        assertSame(ex, logger.lastThrowable);
+
+        logger.warn(() -> "Warn deprecated", ex);
+        assertEquals("Warn deprecated", logger.lastMessage);
+        assertSame(ex, logger.lastThrowable);
+
+        logger.error(() -> "Error deprecated", ex);
+        assertEquals("Error deprecated", logger.lastMessage);
+        assertSame(ex, logger.lastThrowable);
+
+        logger.trace("Trace varargs {}", "arg1", "arg2");
+        logger.debug("Debug varargs {}", "arg1", "arg2");
+        logger.info("Info varargs {}", "arg1", "arg2");
+        logger.warn("Warn varargs {}", "arg1", "arg2");
+        logger.error("Error varargs {}", "arg1", "arg2");
     }
 
     @Test
@@ -757,71 +818,8 @@ public class LoggerTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test isEnabled methods")
-    public void testIsEnabledMethods() {
-        MockLogger logger = new MockLogger("test");
-
-        assertTrue(logger.isTraceEnabled());
-        assertTrue(logger.isDebugEnabled());
-        assertTrue(logger.isInfoEnabled());
-        assertTrue(logger.isWarnEnabled());
-        assertTrue(logger.isErrorEnabled());
-    }
-
-    @Test
-    @DisplayName("Test supplier lazy evaluation")
-    public void testSupplierLazyEvaluation() {
-        MockLogger logger = new MockLogger("test");
-
-        boolean[] called = { false };
-        Supplier<String> supplier = () -> {
-            called[0] = true;
-            return "Lazy message";
-        };
-
-        logger.trace(supplier);
-        assertTrue(called[0]);
-        assertEquals("Lazy message", logger.lastMessage);
-
-        called[0] = false;
-        Exception ex = new Exception("Test");
-        logger.debug(ex, supplier);
-        assertTrue(called[0]);
-        assertEquals("Lazy message", logger.lastMessage);
-        assertSame(ex, logger.lastThrowable);
-    }
-
-    @Test
-    @DisplayName("Test deprecated methods")
-    @SuppressWarnings("deprecation")
-    public void testDeprecatedMethods() {
-        MockLogger logger = new MockLogger("test");
-        Exception ex = new Exception("Test");
-
-        logger.trace(() -> "Trace deprecated", ex);
-        assertEquals("Trace deprecated", logger.lastMessage);
-        assertSame(ex, logger.lastThrowable);
-
-        logger.debug(() -> "Debug deprecated", ex);
-        assertEquals("Debug deprecated", logger.lastMessage);
-        assertSame(ex, logger.lastThrowable);
-
-        logger.info(() -> "Info deprecated", ex);
-        assertEquals("Info deprecated", logger.lastMessage);
-        assertSame(ex, logger.lastThrowable);
-
-        logger.warn(() -> "Warn deprecated", ex);
-        assertEquals("Warn deprecated", logger.lastMessage);
-        assertSame(ex, logger.lastThrowable);
-
-        logger.error(() -> "Error deprecated", ex);
-        assertEquals("Error deprecated", logger.lastMessage);
-        assertSame(ex, logger.lastThrowable);
-
-        logger.trace("Trace varargs {}", "arg1", "arg2");
-        logger.debug("Debug varargs {}", "arg1", "arg2");
-        logger.info("Info varargs {}", "arg1", "arg2");
-        logger.warn("Warn varargs {}", "arg1", "arg2");
-        logger.error("Error varargs {}", "arg1", "arg2");
+    @DisplayName("Test ROOT_LOGGER_NAME constant")
+    public void testRootLoggerNameConstant() {
+        assertEquals("ROOT", Logger.ROOT_LOGGER_NAME);
     }
 }

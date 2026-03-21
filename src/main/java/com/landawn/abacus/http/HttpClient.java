@@ -1545,16 +1545,17 @@ public final class HttpClient {
     }
 
     /**
+     * Internal core method to execute an HTTP request with the specified parameters.
      *
-     * @param httpMethod the HTTP method to use
-     * @param request the request body
-     * @param settings the HTTP settings
-     * @param resultClass the expected response type
-     * @param outputStream the output stream to write response to, or {@code null}
-     * @param outputWriter the writer to write response to, or {@code null}
-     * @param <T> the response type
-     * @return the response parsed as the specified result class
-     * @throws UncheckedIOException if an I/O error occurs
+     * @param httpMethod the HTTP method to use.
+     * @param request the request body.
+     * @param settings the HTTP settings.
+     * @param resultClass the expected response type.
+     * @param outputStream the output stream to write response to, or {@code null}.
+     * @param outputWriter the writer to write response to, or {@code null}.
+     * @param <T> the response type.
+     * @return the response parsed as the specified result class.
+     * @throws UncheckedIOException if an I/O error occurs.
      */
     private <T> T execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final Class<T> resultClass,
             final OutputStream outputStream, final Writer outputWriter) throws UncheckedIOException {

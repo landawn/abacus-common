@@ -1,11 +1,18 @@
 package com.landawn.abacus.util;
 
+import static org.assertj.core.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class FilenameUtilsTestCase extends FileBasedTestCase {
@@ -27,7 +34,7 @@ public class FilenameUtilsTestCase extends FileBasedTestCase {
         testFile2Size = (int) testFile2.length();
     }
 
-    @Override
+    @BeforeEach
     protected void setUp() throws Exception {
         getTestDirectory().mkdirs();
         createFile(testFile1, testFile1Size);
@@ -38,8 +45,8 @@ public class FilenameUtilsTestCase extends FileBasedTestCase {
         createFile(testFile2, testFile2Size);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @AfterEach
+    public void tearDown() throws Exception {
         FileUtils.deleteDirectory(getTestDirectory());
     }
 

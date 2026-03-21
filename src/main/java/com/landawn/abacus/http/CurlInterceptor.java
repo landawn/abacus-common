@@ -36,12 +36,12 @@ import okio.Buffer;
 
 /**
  * An OkHttp interceptor that logs HTTP requests as cURL commands.
- * This interceptor captures the details of outgoing HTTP requests and formats them as 
+ * This interceptor captures the details of outgoing HTTP requests and formats them as
  * executable cURL commands, which can be useful for debugging and reproducing requests.
- * 
+ *
  * <p>The interceptor processes the request headers, method, URL, and body content to generate
  * a complete cURL command that can be executed from the command line.</p>
- * 
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * OkHttpRequest request = WebUtil.createCurlLoggingOkHttpRequest(
@@ -51,7 +51,6 @@ import okio.Buffer;
  *
  * request.get();
  * }</pre>
- * 
  */
 class CurlInterceptor implements Interceptor {
     static final char DEFAULT_QUOTE_CHAR = '\'';
@@ -59,7 +58,7 @@ class CurlInterceptor implements Interceptor {
     private final char quoteChar;
 
     /**
-     * Creates a new CurlInterceptor with the default single quote character for shell escaping.
+     * Creates a new {@code CurlInterceptor} with the default single quote character for shell escaping.
      * This constructor uses {@link #DEFAULT_QUOTE_CHAR} as the quote character.
      *
      * @param logHandler A consumer function that handles the generated cURL command string.
@@ -71,10 +70,10 @@ class CurlInterceptor implements Interceptor {
     }
 
     /**
-     * Creates a new CurlInterceptor with a specified quote character for shell escaping.
+     * Creates a new {@code CurlInterceptor} with a specified quote character for shell escaping.
      *
      * @param quoteChar The character to use for quoting values in the cURL command.
-     *                  Can be either single quote (') or double quote (") depending on shell requirements.
+     *                  Can be either single quote ({@code '}) or double quote ({@code "}) depending on shell requirements.
      * @param logHandler A consumer function that handles the generated cURL command string.
      *                   This is typically used to log or store the command. Must not be {@code null}.
      */
@@ -86,10 +85,10 @@ class CurlInterceptor implements Interceptor {
     /**
      * Intercepts the HTTP request and generates a cURL command representation.
      * This method is called automatically by OkHttp for each request when this interceptor is registered.
-     * 
-     * @param chain The interceptor chain containing the request to be processed
-     * @return The response from the next interceptor in the chain
-     * @throws IOException If an I/O error occurs during request processing
+     *
+     * @param chain The interceptor chain containing the request to be processed.
+     * @return The response from the next interceptor in the chain.
+     * @throws IOException If an I/O error occurs during request processing.
      */
     @Override
     public Response intercept(final Chain chain) throws IOException {
@@ -102,15 +101,17 @@ class CurlInterceptor implements Interceptor {
     /**
      * Builds a cURL command string from the given HTTP request.
      * This method extracts all relevant information from the request including:
-     * - HTTP method (GET, POST, PUT, etc.)
-     * - URL
-     * - Headers
-     * - Request body (if present)
-     * 
-     * The generated cURL command can be directly executed in a terminal to reproduce the request.
-     * 
-     * @param request The HTTP request to convert to a cURL command
-     * @throws IOException If an error occurs while reading the request body
+     * <ul>
+     *   <li>HTTP method (GET, POST, PUT, etc.)</li>
+     *   <li>URL</li>
+     *   <li>Headers</li>
+     *   <li>Request body (if present)</li>
+     * </ul>
+     *
+     * <p>The generated cURL command can be directly executed in a terminal to reproduce the request.</p>
+     *
+     * @param request The HTTP request to convert to a cURL command.
+     * @throws IOException If an error occurs while reading the request body.
      */
     private void buildCurl(final Request request) throws IOException {
         final Headers headers = request.headers();

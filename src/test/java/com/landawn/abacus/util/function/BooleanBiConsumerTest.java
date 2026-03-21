@@ -7,12 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-@Tag("2025")
 public class BooleanBiConsumerTest extends TestBase {
 
     @Test
@@ -56,59 +54,6 @@ public class BooleanBiConsumerTest extends TestBase {
         assertEquals("t=true,u=false", results.get(1));
         assertEquals("t=false,u=true", results.get(2));
         assertEquals("t=false,u=false", results.get(3));
-    }
-
-    @Test
-    public void testAndThen() {
-        List<String> results = new ArrayList<>();
-        BooleanBiConsumer consumer1 = (t, u) -> results.add("first:" + (t && u));
-        BooleanBiConsumer consumer2 = (t, u) -> results.add("second:" + (t || u));
-
-        BooleanBiConsumer chainedConsumer = consumer1.andThen(consumer2);
-        chainedConsumer.accept(true, false);
-
-        assertEquals(2, results.size());
-        assertEquals("first:false", results.get(0));
-        assertEquals("second:true", results.get(1));
-    }
-
-    @Test
-    public void testAndThenMultipleChains() {
-        List<String> results = new ArrayList<>();
-        BooleanBiConsumer consumer1 = (t, u) -> results.add("1:" + t);
-        BooleanBiConsumer consumer2 = (t, u) -> results.add("2:" + u);
-        BooleanBiConsumer consumer3 = (t, u) -> results.add("3:" + (t == u));
-
-        BooleanBiConsumer chainedConsumer = consumer1.andThen(consumer2).andThen(consumer3);
-        chainedConsumer.accept(true, true);
-
-        assertEquals(3, results.size());
-        assertEquals("1:true", results.get(0));
-        assertEquals("2:true", results.get(1));
-        assertEquals("3:true", results.get(2));
-    }
-
-    @Test
-    public void testAndThenWithException() {
-        List<String> results = new ArrayList<>();
-        BooleanBiConsumer consumer1 = (t, u) -> results.add("executed");
-        BooleanBiConsumer consumer2 = (t, u) -> {
-            throw new RuntimeException("Test exception");
-        };
-
-        BooleanBiConsumer chainedConsumer = consumer1.andThen(consumer2);
-
-        assertThrows(RuntimeException.class, () -> chainedConsumer.accept(true, false));
-        assertEquals(1, results.size()); // First consumer should have executed
-    }
-
-    @Test
-    public void testAcceptWithException() {
-        BooleanBiConsumer consumer = (t, u) -> {
-            throw new RuntimeException("Test exception");
-        };
-
-        assertThrows(RuntimeException.class, () -> consumer.accept(true, false));
     }
 
     @Test
@@ -166,5 +111,58 @@ public class BooleanBiConsumerTest extends TestBase {
 
         assertEquals(3, trueCount.get()); // true,true,true from the three calls
         assertEquals(3, falseCount.get()); // false,false,false from the three calls
+    }
+
+    @Test
+    public void testAcceptWithException() {
+        BooleanBiConsumer consumer = (t, u) -> {
+            throw new RuntimeException("Test exception");
+        };
+
+        assertThrows(RuntimeException.class, () -> consumer.accept(true, false));
+    }
+
+    @Test
+    public void testAndThen() {
+        List<String> results = new ArrayList<>();
+        BooleanBiConsumer consumer1 = (t, u) -> results.add("first:" + (t && u));
+        BooleanBiConsumer consumer2 = (t, u) -> results.add("second:" + (t || u));
+
+        BooleanBiConsumer chainedConsumer = consumer1.andThen(consumer2);
+        chainedConsumer.accept(true, false);
+
+        assertEquals(2, results.size());
+        assertEquals("first:false", results.get(0));
+        assertEquals("second:true", results.get(1));
+    }
+
+    @Test
+    public void testAndThenMultipleChains() {
+        List<String> results = new ArrayList<>();
+        BooleanBiConsumer consumer1 = (t, u) -> results.add("1:" + t);
+        BooleanBiConsumer consumer2 = (t, u) -> results.add("2:" + u);
+        BooleanBiConsumer consumer3 = (t, u) -> results.add("3:" + (t == u));
+
+        BooleanBiConsumer chainedConsumer = consumer1.andThen(consumer2).andThen(consumer3);
+        chainedConsumer.accept(true, true);
+
+        assertEquals(3, results.size());
+        assertEquals("1:true", results.get(0));
+        assertEquals("2:true", results.get(1));
+        assertEquals("3:true", results.get(2));
+    }
+
+    @Test
+    public void testAndThenWithException() {
+        List<String> results = new ArrayList<>();
+        BooleanBiConsumer consumer1 = (t, u) -> results.add("executed");
+        BooleanBiConsumer consumer2 = (t, u) -> {
+            throw new RuntimeException("Test exception");
+        };
+
+        BooleanBiConsumer chainedConsumer = consumer1.andThen(consumer2);
+
+        assertThrows(RuntimeException.class, () -> chainedConsumer.accept(true, false));
+        assertEquals(1, results.size()); // First consumer should have executed
     }
 }
